@@ -24,13 +24,13 @@ nix_block_data_arrays(const nix::Block &b)
 template<typename T>
 struct vector_transmogrify {
   static PyObject* convert(const std::vector<T>& vec) {
-    boost::python::list* l = new boost::python::list();
+    boost::python::list l = boost::python::list();
 
     for(auto& item : vec) {
-      l->append(item);
+      l.append(item);
     }
 
-    return l->ptr();
+    return boost::python::incref(l.ptr());
   }
 };
 
