@@ -15,3 +15,7 @@ class TestFile(unittest.TestCase):
         d = b.create_data_array('foo', 'bar')
         assert b
         assert(len(b.data_arrays()) > 0)
+        d.label = "test_label"
+        assert(d.label == "test_label")
+        d.label = None
+        assert(d.label == None)
