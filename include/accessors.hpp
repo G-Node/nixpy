@@ -14,12 +14,12 @@
 
 #define SETTER(type, class, name) static_cast<void(class::*)(const type)>(&class::name)
 
-#define REF_SETTER(type, class, name) static_cast<void(class::*)(const type)>(&class::name)
+#define REF_SETTER(type, class, name) static_cast<void(class::*)(const type&)>(&class::name)
 
 #define OPT_GETTER(type, class, name) static_cast<boost::optional<type>(class::*)()const>(&class::name)
 
 #define DEF_OPT_SETTER(type, class, name, setter_name) \
-    void setter_name(class& obj, const boost::optional<type>& val) { \
+    static void setter_name(class& obj, const boost::optional<type>& val) { \
         if (val == boost::none) \
             obj.name(boost::none); \
         else \
