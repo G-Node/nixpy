@@ -3,65 +3,67 @@
 
 #include <nix.hpp>
 #include <transmorgify.hpp>
+#include <entity.hpp>
 
-static nix::File
-nix_file_open(std::string path)
-{
-  return nix::File::open(path);
+using namespace boost::python;
+using namespace nix;
+using namespace base;
+using namespace nixpy;
+
+static File
+nix_file_open ( std::string path ) {
+    return File::open ( path );
 }
 
-static std::vector<nix::Block>
-nix_file_blocks(const nix::File &f)
-{
-  return f.blocks();
+static std::vector<Block>
+nix_file_blocks ( const File &f ) {
+    return f.blocks();
 }
 
-static std::vector<nix::DataArray>
-nix_block_data_arrays(const nix::Block &b)
-{
-  return b.dataArrays();
+static std::vector<DataArray>
+nix_block_data_arrays ( const Block &b ) {
+    return b.dataArrays();
 }
 
 static void
-nix_data_array_label_setter(nix::DataArray &da, const boost::optional<std::string> &lbl)
-{
-  if (lbl == boost::none) {
-    da.label(boost::none);
-  } else {
-    da.label(*lbl);
-  }
+nix_data_array_label_setter ( DataArray &da, const boost::optional<std::string> &lbl ) {
+    if ( lbl == boost::none ) {
+        da.label ( boost::none );
+    } else {
+        da.label ( *lbl );
+    }
 }
+
 
 BOOST_PYTHON_MODULE(core)
 {
-  using namespace boost::python;
-  using namespace nixpy;
 
-  class_<nix::File>("File")
-    .add_property("version", &nix::File::version)
-    .def("open", nix_file_open)
-    .def("blocks", nix_file_blocks)
-    .def("create_block", &nix::File::createBlock)
-    .def(self == other<nix::File>())
-    .staticmethod("open")
-    ;
+    class_<File>("File")
+        .add_property("version", &File::version)
+        .def("open", nix_file_open)
+        .def("blocks", nix_file_blocks)
+        .def("create_block", &File::createBlock)
+        .def(self == other<File>())
+        .staticmethod("open")
+        ;
 
-  class_<nix::Block>("Block")
-    .def("create_data_array", &nix::Block::createDataArray)
-    .def("data_array_count", &nix::Block::dataArrayCount)
-    .def("data_arrays", nix_block_data_arrays)
-    .def(self == self)
-    ;
+    export_entity<IBlock>("__EntityIBlock");
+    class_<Block, bases<Entity<IBlock>>>("Block")
+        .def("create_data_array", &Block::createDataArray)
+        .def("data_array_count", &Block::dataArrayCount)
+        .def("data_arrays", nix_block_data_arrays)
+        .def(self == self)
+        ;
 
 
-  class_<nix::DataArray>("DataArray")
-    .add_property("label", static_cast<boost::optional<std::string>(nix::DataArray::*)() const>(&nix::DataArray::label),
-                           nix_data_array_label_setter)
-    .def("has_data", &nix::DataArray::hasData)
-    ;
+    class_<DataArray>("DataArray")
+        .add_property("label", static_cast<boost::optional<std::string>(DataArray::*)() const>(&DataArray::label),
+                      nix_data_array_label_setter)
+        .def("has_data", &DataArray::hasData)
+        ;
 
-  to_python_converter<std::vector<nix::Block>, vector_transmogrify<nix::Block>>();
-  to_python_converter<std::vector<nix::DataArray>, vector_transmogrify<nix::DataArray>>();
-  to_python_converter<boost::optional<std::string>, option_transmogrify<std::string>>();
-  option_transmogrify<std::string>::register_from_python();
+    to_python_converter<std::vector<Block>, vector_transmogrify<Block>>();
+    to_python_converter<std::vector<DataArray>, vector_transmogrify<DataArray>>();
+    to_python_converter<boost::optional<std::string>, option_transmogrify<std::string>>();
+    option_transmogrify<std::string>::register_from_python();
 }
