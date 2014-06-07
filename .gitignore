@@ -30,3 +30,9 @@ pip-log.txt
 # hdf5 test files
 *.h5
 
+# kdevelop files
+*.kdev4
+
+# test file
+nixpy.py
+
