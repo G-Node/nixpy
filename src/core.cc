@@ -47,8 +47,8 @@ BOOST_PYTHON_MODULE(core)
         .staticmethod("open")
         ;
 
-    export_entity<IBlock>("__EntityIBlock");
-    class_<Block, bases<Entity<IBlock>>>("Block")
+    export_named_entity<IBlock>("IBlock");
+    class_<Block, bases<NamedEntity<IBlock>>>("Block")
         .def("create_data_array", &Block::createDataArray)
         .def("data_array_count", &Block::dataArrayCount)
         .def("data_arrays", nix_block_data_arrays)
