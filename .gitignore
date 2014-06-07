@@ -18,6 +18,7 @@ pip-log.txt
 # temp files
 *~
 *.log
+*.kate-swp
 
 # idea / pycharm files
 .idea
