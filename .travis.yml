@@ -1,0 +1,16 @@
+language: python
+python:
+  - "2.7"
+
+virtualenv:
+  system_site_packages: true
+
+
+install:
+- sudo add-apt-repository ppa:gnode/pandora -y
+- sudo apt-get update -qq -y
+- sudo apt-get install python-numpy python-dev libboost-python-dev libnix-dev
+
+script:
+- CC=clang CXX=clang++ python setup.py install
+- nosetests
