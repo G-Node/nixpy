@@ -12,7 +12,7 @@ install:
 - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 - sudo add-apt-repository ppa:apokluda/boost1.53 -y
 - sudo apt-get update -q -y
-- sudo apt-get install libboost-dev libboost-python-dev libboost-date-time-dev libboost-regex1.53-dev -y
+- sudo apt-get install libboost-dev libboost-python-dev libboost-date-time-dev libboost1.53-dev libboost-regex1.53-dev -y
 - sudo apt-get install -q gcc-4.8 g++-4.8 libstdc++-4.8-dev libcppunit-dev -y
 - sudo apt-get install libhdf5-serial-dev libhdf5-dev libhdf5-7
 - sudo apt-get install python-numpy python-dev
