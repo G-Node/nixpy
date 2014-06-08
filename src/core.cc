@@ -55,8 +55,8 @@ BOOST_PYTHON_MODULE(core)
 
     class_<Section>("Section");
 
-    named_entity<IBlock>::do_export("IBlock");
-    class_<Block, bases<NamedEntity<IBlock>>>("Block")
+    entity_with_metadata<IBlock>::do_export("IBlock");
+    class_<Block, bases<EntityWithMetadata<IBlock>>>("Block")
         .def("create_data_array", &Block::createDataArray)
         .def("data_array_count", &Block::dataArrayCount)
         .def("data_arrays", nix_block_data_arrays)
@@ -89,8 +89,13 @@ BOOST_PYTHON_MODULE(core)
 
     // TODO enum class LinkType
 
+    to_python_converter<std::vector<Section>, vector_transmogrify<Section>>();
+    to_python_converter<boost::optional<Section>, option_transmogrify<Section>>();
+
     to_python_converter<std::vector<Block>, vector_transmogrify<Block>>();
+
     to_python_converter<std::vector<DataArray>, vector_transmogrify<DataArray>>();
+
     to_python_converter<boost::optional<std::string>, option_transmogrify<std::string>>();
     option_transmogrify<std::string>::register_from_python();
 }

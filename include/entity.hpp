@@ -58,6 +58,25 @@ struct named_entity {
     }
 };
 
+
+template<typename T>
+struct entity_with_metadata {
+
+    DEF_ENT_GETTER(nix::Section, nix::base::EntityWithMetadata<T>, metadata, metadata_getter)
+    DEF_OPT_SETTER(nix::Section, nix::base::EntityWithMetadata<T>, metadata, metadata_setter)
+
+    static void do_export(const std::string& type_name) {
+        using namespace boost::python;
+
+        std::string real_name = "__EntityWithMetadata" + type_name;
+        named_entity<T>::do_export(type_name);
+        class_<nix::base::EntityWithMetadata<T>, bases<nix::base::NamedEntity<T>>>(real_name.c_str(), no_init)
+            .add_property("metadata", &metadata_getter, &metadata_setter);
+    }
+
+};
+
+
 }
 
 #endif
