@@ -8,9 +8,12 @@ virtualenv:
 
 install:
 - sudo add-apt-repository ppa:gnode/pandora -y
-- sudo add-apt-repository ppa:boost-latest/ppa -y
+- sudo add-apt-repository ppa:mapnik/boost -y
+- sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 - sudo apt-get update -q -y
-- sudo apt-get install python-numpy python-dev libboost-python1.55-dev libboost1.55-all-dev libhdf5-serial-dev libhdf5-dev libhdf5-7
+- sudo apt-get install -q gcc-4.8 g++-4.8 libstdc++-4.8-dev libcppunit-dev
+- sudo apt-get install libboost-python-dev libboost-all-dev libhdf5-serial-dev libhdf5-dev libhdf5-7
+- sudo apt-get install python-numpy python-dev
 - wget https://launchpad.net/~gnode/+archive/pandora/+files/libnix-dev_0.9.1-1_amd64.deb
 - wget https://launchpad.net/~gnode/+archive/pandora/+files/libnix1_0.9.1-1_amd64.deb
 - sudo dpkg -i libnix-dev_0.9.1-1_amd64.deb libnix1_0.9.1-1_amd64.deb
