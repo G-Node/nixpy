@@ -3,6 +3,7 @@
 
 #include <nix.hpp>
 #include <transmorgify.hpp>
+#include <accessors.hpp>
 #include <entity.hpp>
 
 using namespace boost::python;
@@ -65,9 +66,11 @@ BOOST_PYTHON_MODULE(core)
 
     class_<Source>("Source");
 
-    class_<DataArray>("DataArray")
-        .add_property("label", static_cast<boost::optional<std::string>(DataArray::*)() const>(&DataArray::label),
-                      nix_data_array_label_setter)
+    entity_with_sources<IDataArray>::do_export("IDataArray");
+    class_<DataArray, bases<EntityWithSources<IDataArray>>>("DataArray")
+        .add_property("label",
+                      OPT_GETTER(std::string, DataArray, label),
+                      &nix_data_array_label_setter)
         .def("has_data", &DataArray::hasData)
         ;
 
