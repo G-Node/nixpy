@@ -8,8 +8,9 @@ virtualenv:
 
 install:
 - sudo add-apt-repository ppa:gnode/pandora -y
-- sudo apt-get update -qq -y
-- sudo apt-get install python-numpy python-dev libboost-python-dev libnix-dev
+- sudo apt-get update -q -y
+- sudo apt-get install python-numpy python-dev libboost-python-dev
+- sudo apt-get install -t saucy libnix-dev -y
 
 script:
 - CC=clang CXX=clang++ python setup.py install
