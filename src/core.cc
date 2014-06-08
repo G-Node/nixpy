@@ -3,6 +3,7 @@
 
 #include <nix.hpp>
 #include <transmorgify.hpp>
+#include <accessors.hpp>
 #include <entity.hpp>
 
 using namespace boost::python;
@@ -47,23 +48,57 @@ BOOST_PYTHON_MODULE(core)
         .staticmethod("open")
         ;
 
-    named_entity<IBlock>::do_export("IBlock");
-    class_<Block, bases<NamedEntity<IBlock>>>("Block")
+    // TODO enum classes for Implementation and FileMode
+
+    class_<Value>("Value");
+
+    class_<Property>("Property");
+
+    class_<Section>("Section");
+
+    entity_with_metadata<IBlock>::do_export("IBlock");
+    class_<Block, bases<EntityWithMetadata<IBlock>>>("Block")
         .def("create_data_array", &Block::createDataArray)
         .def("data_array_count", &Block::dataArrayCount)
         .def("data_arrays", nix_block_data_arrays)
         .def(self == self)
         ;
 
+    class_<Source>("Source");
 
-    class_<DataArray>("DataArray")
-        .add_property("label", static_cast<boost::optional<std::string>(DataArray::*)() const>(&DataArray::label),
-                      nix_data_array_label_setter)
+    entity_with_sources<IDataArray>::do_export("IDataArray");
+    class_<DataArray, bases<EntityWithSources<IDataArray>>>("DataArray")
+        .add_property("label",
+                      OPT_GETTER(std::string, DataArray, label),
+                      &nix_data_array_label_setter)
         .def("has_data", &DataArray::hasData)
         ;
 
+    // TODO enum class DataType
+
+    class_<Dimension>("Dimension");
+
+    class_<SampledDimension>("SampledDimension");
+
+    class_<RangeDimension>("RangeDimension");
+
+    class_<SetDimension>("SetDimension");
+
+    class_<SimpleTag>("SimpleTag");
+
+    class_<DataTag>("DataTag");
+
+    class_<Feature>("Feature");
+
+    // TODO enum class LinkType
+
+    to_python_converter<std::vector<Section>, vector_transmogrify<Section>>();
+    to_python_converter<boost::optional<Section>, option_transmogrify<Section>>();
+
     to_python_converter<std::vector<Block>, vector_transmogrify<Block>>();
+
     to_python_converter<std::vector<DataArray>, vector_transmogrify<DataArray>>();
+
     to_python_converter<boost::optional<std::string>, option_transmogrify<std::string>>();
     option_transmogrify<std::string>::register_from_python();
 }

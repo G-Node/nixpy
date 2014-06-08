@@ -47,16 +47,56 @@ struct named_entity {
         export_entity<T>(type_name);
         class_<nix::base::NamedEntity<T>, bases<nix::base::Entity<T>>>(real_name.c_str(), no_init)
             .add_property("name",
-                        GETTER(std::string, nix::base::NamedEntity<T>, name),
-                        REF_SETTER(std::string, nix::base::NamedEntity<T>, name))
+                          GETTER(std::string, nix::base::NamedEntity<T>, name),
+                          REF_SETTER(std::string, nix::base::NamedEntity<T>, name))
             .add_property("type",
-                        GETTER(std::string, nix::base::NamedEntity<T>, type),
-                        REF_SETTER(std::string, nix::base::NamedEntity<T>, type))
+                          GETTER(std::string, nix::base::NamedEntity<T>, type),
+                          REF_SETTER(std::string, nix::base::NamedEntity<T>, type))
             .add_property("definition",
                           OPT_GETTER(std::string, nix::base::NamedEntity<T>, definition),
                           &definition_setter);
     }
 };
+
+
+template<typename T>
+struct entity_with_metadata {
+
+    DEF_ENT_GETTER(nix::Section, nix::base::EntityWithMetadata<T>, metadata, metadata_getter)
+    DEF_OPT_SETTER(nix::Section, nix::base::EntityWithMetadata<T>, metadata, metadata_setter)
+
+    static void do_export(const std::string& type_name) {
+        using namespace boost::python;
+
+        std::string real_name = "__EntityWithMetadata" + type_name;
+        named_entity<T>::do_export(type_name);
+        class_<nix::base::EntityWithMetadata<T>, bases<nix::base::NamedEntity<T>>>(real_name.c_str(), no_init)
+            .add_property("metadata", &metadata_getter, &metadata_setter);
+    }
+
+};
+
+template<typename T>
+struct entity_with_sources {
+
+    DEF_ENT_GETTER_BY(nix::Source, nix::base::EntityWithSources<T>, getSource, size_t, get_source_by_pos)
+    DEF_ENT_GETTER_BY(nix::Source, nix::base::EntityWithSources<T>, getSource, std::string, get_source_by_id)
+
+    static void do_export(const std::string& type_name) {
+        using namespace boost::python;
+
+        std::string real_name = "__EntityWithSources" + type_name;
+        entity_with_metadata<T>::do_export(type_name);
+        class_<nix::base::EntityWithSources<T>, bases<nix::base::EntityWithMetadata<T>>>(real_name.c_str(), no_init)
+            .def("_source_count", &nix::base::EntityWithSources<T>::sourceCount)
+            .def("_has_source_by_id", CHECKER(std::string, nix::base::EntityWithSources<T>, hasSource))
+            .def("_get_source_by_id", &get_source_by_id)
+            .def("_get_source_by_pos", &get_source_by_pos)
+            .def("_add_source_by_id", REF_SETTER(std::string, nix::base::EntityWithSources<T>, addSource))
+            .def("_remove_source_by_id", REMOVER(std::string, nix::base::EntityWithSources<T>, removeSource));
+    }
+};
+
 
 }
 
