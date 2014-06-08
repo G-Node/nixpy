@@ -47,6 +47,14 @@ BOOST_PYTHON_MODULE(core)
         .staticmethod("open")
         ;
 
+    // TODO enum classes for Implementation and FileMode
+
+    class_<Value>("Value");
+
+    class_<Property>("Property");
+
+    class_<Section>("Section");
+
     named_entity<IBlock>::do_export("IBlock");
     class_<Block, bases<NamedEntity<IBlock>>>("Block")
         .def("create_data_array", &Block::createDataArray)
@@ -55,12 +63,31 @@ BOOST_PYTHON_MODULE(core)
         .def(self == self)
         ;
 
+    class_<Source>("Source");
 
     class_<DataArray>("DataArray")
         .add_property("label", static_cast<boost::optional<std::string>(DataArray::*)() const>(&DataArray::label),
                       nix_data_array_label_setter)
         .def("has_data", &DataArray::hasData)
         ;
+
+    // TODO enum class DataType
+
+    class_<Dimension>("Dimension");
+
+    class_<SampledDimension>("SampledDimension");
+
+    class_<RangeDimension>("RangeDimension");
+
+    class_<SetDimension>("SetDimension");
+
+    class_<SimpleTag>("SimpleTag");
+
+    class_<DataTag>("DataTag");
+
+    class_<Feature>("Feature");
+
+    // TODO enum class LinkType
 
     to_python_converter<std::vector<Block>, vector_transmogrify<Block>>();
     to_python_converter<std::vector<DataArray>, vector_transmogrify<DataArray>>();
