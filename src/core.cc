@@ -4,7 +4,7 @@
 #include <nix.hpp>
 #include <transmorgify.hpp>
 #include <accessors.hpp>
-#include <entity.hpp>
+#include <PyEntity.hpp>
 
 using namespace boost::python;
 using namespace nix;
@@ -56,7 +56,7 @@ BOOST_PYTHON_MODULE(core)
 
     class_<Section>("Section");
 
-    entity_with_metadata<IBlock>::do_export("IBlock");
+    PyEntityWithMetadata<IBlock>::do_export("IBlock");
     class_<Block, bases<EntityWithMetadata<IBlock>>>("Block")
         .def("create_data_array", &Block::createDataArray)
         .def("data_array_count", &Block::dataArrayCount)
@@ -66,7 +66,7 @@ BOOST_PYTHON_MODULE(core)
 
     class_<Source>("Source");
 
-    entity_with_sources<IDataArray>::do_export("IDataArray");
+    PyEntityWithSources<IDataArray>::do_export("IDataArray");
     class_<DataArray, bases<EntityWithSources<IDataArray>>>("DataArray")
         .add_property("label",
                       OPT_GETTER(std::string, DataArray, label),

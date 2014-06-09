@@ -23,20 +23,24 @@ namespace nixpy {
  * @param type_name          Name of the type used for the specialisation.
  */
 template<typename T>
-void export_entity(const std::string& type_name) {
-    using namespace boost::python;
+struct PyEntity {
 
-    std::string real_name = "__Entity" + type_name;
-    class_<nix::base::Entity<T>>(real_name.c_str(), no_init)
-        .add_property("id", &nix::base::Entity<T>::id)
-        .add_property("created_at", &nix::base::Entity<T>::createdAt)
-        .def("force_created_at", &nix::base::Entity<T>::forceCreatedAt)
-        .add_property("updated_at", &nix::base::Entity<T>::updatedAt)
-        .def("force_updated_at", &nix::base::Entity<T>::forceUpdatedAt);
-}
+    static void do_export(const std::string& type_name) {
+        using namespace boost::python;
+
+        std::string real_name = "__Entity" + type_name;
+        class_<nix::base::Entity<T>>(real_name.c_str(), no_init)
+            .add_property("id", &nix::base::Entity<T>::id)
+            .add_property("created_at", &nix::base::Entity<T>::createdAt)
+            .def("force_created_at", &nix::base::Entity<T>::forceCreatedAt)
+            .add_property("updated_at", &nix::base::Entity<T>::updatedAt)
+            .def("force_updated_at", &nix::base::Entity<T>::forceUpdatedAt);
+    }
+
+};
 
 template<typename T>
-struct named_entity {
+struct PyNamedEntity {
 
     DEF_OPT_SETTER(std::string, nix::base::NamedEntity<T>, definition, definition_setter)
 
@@ -44,7 +48,7 @@ struct named_entity {
         using namespace boost::python;
 
         std::string real_name = "__NamedEntity" + type_name;
-        export_entity<T>(type_name);
+        PyEntity<T>::do_export(type_name);
         class_<nix::base::NamedEntity<T>, bases<nix::base::Entity<T>>>(real_name.c_str(), no_init)
             .add_property("name",
                           GETTER(std::string, nix::base::NamedEntity<T>, name),
@@ -60,7 +64,7 @@ struct named_entity {
 
 
 template<typename T>
-struct entity_with_metadata {
+struct PyEntityWithMetadata {
 
     DEF_ENT_GETTER(nix::Section, nix::base::EntityWithMetadata<T>, metadata, metadata_getter)
     DEF_OPT_SETTER(nix::Section, nix::base::EntityWithMetadata<T>, metadata, metadata_setter)
@@ -69,7 +73,7 @@ struct entity_with_metadata {
         using namespace boost::python;
 
         std::string real_name = "__EntityWithMetadata" + type_name;
-        named_entity<T>::do_export(type_name);
+        PyNamedEntity<T>::do_export(type_name);
         class_<nix::base::EntityWithMetadata<T>, bases<nix::base::NamedEntity<T>>>(real_name.c_str(), no_init)
             .add_property("metadata", &metadata_getter, &metadata_setter);
     }
@@ -77,7 +81,7 @@ struct entity_with_metadata {
 };
 
 template<typename T>
-struct entity_with_sources {
+struct PyEntityWithSources {
 
     DEF_ENT_GETTER_BY(nix::Source, nix::base::EntityWithSources<T>, getSource, size_t, get_source_by_pos)
     DEF_ENT_GETTER_BY(nix::Source, nix::base::EntityWithSources<T>, getSource, std::string, get_source_by_id)
@@ -86,7 +90,7 @@ struct entity_with_sources {
         using namespace boost::python;
 
         std::string real_name = "__EntityWithSources" + type_name;
-        entity_with_metadata<T>::do_export(type_name);
+        PyEntityWithMetadata<T>::do_export(type_name);
         class_<nix::base::EntityWithSources<T>, bases<nix::base::EntityWithMetadata<T>>>(real_name.c_str(), no_init)
             .def("_source_count", &nix::base::EntityWithSources<T>::sourceCount)
             .def("_has_source_by_id", CHECKER(std::string, nix::base::EntityWithSources<T>, hasSource))
