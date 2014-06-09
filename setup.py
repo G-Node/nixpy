@@ -25,7 +25,7 @@ native_ext = Extension('nix.core',
                        extra_link_args=[boost_lnk_arg, nix_lnk_arg],
                        sources = ['src/core.cc'],
                        library_dirs = [nix_lib_dir, boost_lib_dir],
-                       include_dirs = [nix_inc_dir, boost_inc_dir, np.get_include(), 'include'],
+                       include_dirs = [nix_inc_dir, boost_inc_dir, np.get_include(), 'src'],
                        runtime_library_dirs = [nix_lib_dir, boost_lib_dir])
 
 setup(name             = 'nix',
