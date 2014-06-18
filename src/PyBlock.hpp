@@ -20,25 +20,7 @@ namespace nixpy {
 
 struct PyBlock {
 
-    static std::vector<nix::DataArray> nix_block_data_arrays (const nix::Block &b) {
-        return b.dataArrays();
-    }
-
-    static void do_export() {
-        using namespace boost::python;
-
-        PyEntityWithMetadata<nix::base::IBlock>::do_export("IBlock");
-        class_<nix::Block, bases<nix::base::EntityWithMetadata<nix::base::IBlock>>>("Block")
-            .def("create_data_array", &nix::Block::createDataArray)
-            .def("data_array_count", &nix::Block::dataArrayCount)
-            .def("data_arrays", nix_block_data_arrays)
-            .def(self == self)
-            ;
-
-        to_python_converter<std::vector<nix::Block>, vector_transmogrify<nix::Block>>();
-        to_python_converter<boost::optional<nix::Block>, option_transmogrify<nix::Block>>();
-
-    }
+    static void do_export();
 
 };
 
