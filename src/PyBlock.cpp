@@ -83,7 +83,7 @@ boost::optional<Source> getSourceByPos(const Block& block, size_t index) {
 }
 
 void PyBlock::do_export() {
-    PyEntityWithMetadata<base::IBlock>::do_export("IBlock");
+    PyEntityWithMetadata<base::IBlock>::do_export("Block");
 
     class_<Block, bases<base::EntityWithMetadata<base::IBlock>>>("Block")
         // DataArray

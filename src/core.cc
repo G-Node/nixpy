@@ -55,9 +55,10 @@ BOOST_PYTHON_MODULE(core)
 
     PyBlock::do_export();
 
-    class_<Source>("Source");
+    PyEntityWithMetadata<ISource>::do_export("Source");
+    class_<Source, bases<EntityWithMetadata<ISource>>>("Source");
 
-    PyEntityWithSources<IDataArray>::do_export("IDataArray");
+    PyEntityWithSources<IDataArray>::do_export("DataArray");
     class_<DataArray, bases<EntityWithSources<IDataArray>>>("DataArray")
         .add_property("label",
                       OPT_GETTER(std::string, DataArray, label),
@@ -85,6 +86,9 @@ BOOST_PYTHON_MODULE(core)
 
     to_python_converter<std::vector<Section>, vector_transmogrify<Section>>();
     to_python_converter<boost::optional<Section>, option_transmogrify<Section>>();
+
+    to_python_converter<std::vector<Source>, vector_transmogrify<Source>>();
+    to_python_converter<boost::optional<Source>, option_transmogrify<Source>>();
 
     to_python_converter<std::vector<DataArray>, vector_transmogrify<DataArray>>();
 
