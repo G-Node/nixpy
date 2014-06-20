@@ -33,6 +33,7 @@ pip-log.txt
 
 # kdevelop files
 *kdev*
+Makefile
 
 # test file
 nixpy.py
