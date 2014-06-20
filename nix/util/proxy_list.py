@@ -62,3 +62,10 @@ class ProxyList(object):
                 return False
         else:
             return False
+
+    def __str__(self):
+        str_list = [str(e) for e in list(self)]
+        return "[" + ", ".join(str_list) + "]"
+
+    def __repr__(self):
+        return str(self)
