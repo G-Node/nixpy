@@ -4,7 +4,9 @@
 #include <nix.hpp>
 #include <transmorgify.hpp>
 #include <accessors.hpp>
-#include <entity.hpp>
+
+#include <PyEntity.hpp>
+#include <PyBlock.hpp>
 
 using namespace boost::python;
 using namespace nix;
@@ -19,11 +21,6 @@ nix_file_open ( std::string path ) {
 static std::vector<Block>
 nix_file_blocks ( const File &f ) {
     return f.blocks();
-}
-
-static std::vector<DataArray>
-nix_block_data_arrays ( const Block &b ) {
-    return b.dataArrays();
 }
 
 static void
@@ -56,17 +53,11 @@ BOOST_PYTHON_MODULE(core)
 
     class_<Section>("Section");
 
-    entity_with_metadata<IBlock>::do_export("IBlock");
-    class_<Block, bases<EntityWithMetadata<IBlock>>>("Block")
-        .def("create_data_array", &Block::createDataArray)
-        .def("data_array_count", &Block::dataArrayCount)
-        .def("data_arrays", nix_block_data_arrays)
-        .def(self == self)
-        ;
+    PyBlock::do_export();
 
     class_<Source>("Source");
 
-    entity_with_sources<IDataArray>::do_export("IDataArray");
+    PyEntityWithSources<IDataArray>::do_export("IDataArray");
     class_<DataArray, bases<EntityWithSources<IDataArray>>>("DataArray")
         .add_property("label",
                       OPT_GETTER(std::string, DataArray, label),
@@ -94,8 +85,6 @@ BOOST_PYTHON_MODULE(core)
 
     to_python_converter<std::vector<Section>, vector_transmogrify<Section>>();
     to_python_converter<boost::optional<Section>, option_transmogrify<Section>>();
-
-    to_python_converter<std::vector<Block>, vector_transmogrify<Block>>();
 
     to_python_converter<std::vector<DataArray>, vector_transmogrify<DataArray>>();
 

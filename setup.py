@@ -15,17 +15,21 @@ nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include')
 nix_lib_dir = os.getenv('NIX_LIBDIR', '/usr/local/lib')
 nix_lnk_arg = '-lnix'
 
+nixpy_sources = [
+    'src/core.cc',
+    'src/PyBlock.cpp'
+]
+
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
 boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
 boost_lnk_arg = '-lboost_python'
 
-
 native_ext = Extension('nix.core',
                        extra_compile_args = ['-std=c++11'],
                        extra_link_args=[boost_lnk_arg, nix_lnk_arg],
-                       sources = ['src/core.cc'],
+                       sources = nixpy_sources,
                        library_dirs = [nix_lib_dir, boost_lib_dir],
-                       include_dirs = [nix_inc_dir, boost_inc_dir, np.get_include(), 'include'],
+                       include_dirs = [nix_inc_dir, boost_inc_dir, np.get_include(), 'src'],
                        runtime_library_dirs = [nix_lib_dir, boost_lib_dir])
 
 setup(name             = 'nix',
