@@ -56,7 +56,10 @@ BOOST_PYTHON_MODULE(core)
     PyBlock::do_export();
 
     PyEntityWithMetadata<ISource>::do_export("Source");
-    class_<Source, bases<EntityWithMetadata<ISource>>>("Source");
+    class_<Source, bases<EntityWithMetadata<ISource>>>("Source")
+        .def("__str__", &toStr<Source>)
+        .def("__repr__", &toStr<Source>)
+        .def(self == self);
 
     PyEntityWithSources<IDataArray>::do_export("DataArray");
     class_<DataArray, bases<EntityWithSources<IDataArray>>>("DataArray")

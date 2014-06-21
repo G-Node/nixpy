@@ -110,6 +110,8 @@ void PyBlock::do_export() {
         .def("_get_source_by_id", &getSourceById)
         .def("_get_source_by_pos", &getSourceByPos)
         .def("_delete_source_by_id", REMOVER(std::string, nix::Block, deleteSource))
+        .def("__str__", &toStr<Block>)
+        .def("__repr__", &toStr<Block>)
         .def(self == self)
         ;
 
