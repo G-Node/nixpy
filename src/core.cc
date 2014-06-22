@@ -48,10 +48,16 @@ BOOST_PYTHON_MODULE(core)
     // TODO enum classes for Implementation and FileMode
 
     class_<Value>("Value");
+    to_python_converter<std::vector<Value>, vector_transmogrify<Value>>();
+    to_python_converter<boost::optional<Value>, option_transmogrify<Value>>();
 
     class_<Property>("Property");
+    to_python_converter<std::vector<Property>, vector_transmogrify<Property>>();
+    to_python_converter<boost::optional<Property>, option_transmogrify<Property>>();
 
     class_<Section>("Section");
+    to_python_converter<std::vector<Section>, vector_transmogrify<Section>>();
+    to_python_converter<boost::optional<Section>, option_transmogrify<Section>>();
 
     PyBlock::do_export();
 
@@ -60,6 +66,8 @@ BOOST_PYTHON_MODULE(core)
         .def("__str__", &toStr<Source>)
         .def("__repr__", &toStr<Source>)
         .def(self == self);
+    to_python_converter<std::vector<Source>, vector_transmogrify<Source>>();
+    to_python_converter<boost::optional<Source>, option_transmogrify<Source>>();
 
     PyEntityWithSources<IDataArray>::do_export("DataArray");
     class_<DataArray, bases<EntityWithSources<IDataArray>>>("DataArray")
@@ -68,6 +76,8 @@ BOOST_PYTHON_MODULE(core)
                       &nix_data_array_label_setter)
         .def("has_data", &DataArray::hasData)
         ;
+    to_python_converter<std::vector<DataArray>, vector_transmogrify<DataArray>>();
+    to_python_converter<boost::optional<DataArray>, option_transmogrify<DataArray>>();
 
     // TODO enum class DataType
 
@@ -79,21 +89,19 @@ BOOST_PYTHON_MODULE(core)
 
     class_<SetDimension>("SetDimension");
 
-    class_<SimpleTag>("SimpleTag");
+    PyEntityWithSources<ISimpleTag>::do_export("SimpleTag");
+    class_<SimpleTag, bases<EntityWithSources<ISimpleTag>>>("SimpleTag");
+    to_python_converter<std::vector<SimpleTag>, vector_transmogrify<SimpleTag>>();
+    to_python_converter<boost::optional<SimpleTag>, option_transmogrify<SimpleTag>>();
 
-    class_<DataTag>("DataTag");
+    PyEntityWithSources<IDataTag>::do_export("DataTag");
+    class_<DataTag, bases<EntityWithSources<IDataTag>>>("DataTag");
+    to_python_converter<std::vector<DataTag>, vector_transmogrify<DataTag>>();
+    to_python_converter<boost::optional<DataTag>, option_transmogrify<DataTag>>();
 
     class_<Feature>("Feature");
 
     // TODO enum class LinkType
-
-    to_python_converter<std::vector<Section>, vector_transmogrify<Section>>();
-    to_python_converter<boost::optional<Section>, option_transmogrify<Section>>();
-
-    to_python_converter<std::vector<Source>, vector_transmogrify<Source>>();
-    to_python_converter<boost::optional<Source>, option_transmogrify<Source>>();
-
-    to_python_converter<std::vector<DataArray>, vector_transmogrify<DataArray>>();
 
     to_python_converter<boost::optional<std::string>, option_transmogrify<std::string>>();
     option_transmogrify<std::string>::register_from_python();
