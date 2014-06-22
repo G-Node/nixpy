@@ -113,7 +113,6 @@ void PyBlock::do_export() {
         // Other
         .def("__str__", &toStr<Block>)
         .def("__repr__", &toStr<Block>)
-        .def(self == self)
         ;
 
     to_python_converter<std::vector<Block>, vector_transmogrify<Block>>();

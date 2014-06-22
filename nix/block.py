@@ -63,3 +63,9 @@ class BlockMixin(Block):
         if not hasattr(self, "_data_arrays"):
             setattr(self, "_data_arrays", DataArrayProxyList(self))
         return self._data_arrays
+
+    def __eq__(self, other):
+        if hasattr(other, "id"):
+            return self.id == other.id
+        else:
+            return False
