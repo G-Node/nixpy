@@ -70,7 +70,6 @@ void PyFile::do_export() {
         .add_property("updated_at", &File::updatedAt)
         .def("force_updated_at", &File::forceUpdatedAt)
         // Block
-        .def("blocks", file_blocks)
         .def("create_block", &File::createBlock)
         .def("_block_count", &File::blockCount)
         .def("_get_block_by_id", &getBlockById)
