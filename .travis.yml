@@ -14,8 +14,8 @@ install:
 - sudo apt-get update -q -y
 - sudo apt-get install libboost-python1.53-dev libboost-date-time1.53-dev libboost1.53-dev libboost-regex1.53-dev cmake -y
 - sudo apt-get install -q gcc-4.8 g++-4.8 libstdc++-4.8-dev libcppunit-dev -y
-- sudo apt-get install libhdf5-serial-dev libhdf5-dev libhdf5-7
-- sudo apt-get install python-numpy python-dev
+- sudo apt-get install libhdf5-serial-dev libhdf5-dev libhdf5-7 -y
+- sudo apt-get install python-numpy python-dev -y
 - git clone git@github.com:G-Node/nix.git
 - mkdir nix/build
 - cd nix/build
