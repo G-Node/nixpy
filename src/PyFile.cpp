@@ -36,12 +36,23 @@ void PyFile::do_export() {
 
     class_<File>("File")
         .add_property("version", &File::version)
-        .def("open", file_open)
+        .add_property("format", &File::format)
+        .add_property("created_at", &File::createdAt)
+        .def("force_created_at", &File::forceCreatedAt)
+        .add_property("updated_at", &File::updatedAt)
+        .def("force_updated_at", &File::forceUpdatedAt)
+        // Block
         .def("blocks", file_blocks)
         .def("create_block", &File::createBlock)
         .def(self == other<File>())
+        // Open and close
+        .def("is_open", &File::isOpen)
+        .def("close", &File::close)
+        .def("open", file_open)
         .staticmethod("open")
         ;
+
+        to_python_converter<boost::optional<File>, option_transmogrify<File>>();
 
 }
 
