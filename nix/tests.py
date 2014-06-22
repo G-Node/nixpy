@@ -11,10 +11,10 @@ class TestFile(unittest.TestCase):
     def basic_test(self):
         b = self.nix_file.create_block('foo', 'bar')
         assert(b)
-        assert(len(self.nix_file.blocks()) > 0)
+        assert(len(self.nix_file.blocks) > 0)
         d = b.create_data_array('foo', 'bar')
         assert b
-        assert(len(b.data_arrays()) > 0)
+        assert(len(b.data_arrays) > 0)
         d.label = "test_label"
         assert(d.label == "test_label")
         d.label = None
