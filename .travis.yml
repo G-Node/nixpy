@@ -21,6 +21,7 @@ install:
 - CC=gcc-4.8 CXX=g++-4.8 cmake .
 - make
 - sudo make install
+- cd ..
 
 
 script:
