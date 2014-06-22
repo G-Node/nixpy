@@ -83,7 +83,7 @@ boost::optional<Source> getSourceByPos(const Block& block, size_t index) {
 }
 
 void PyBlock::do_export() {
-    PyEntityWithMetadata<base::IBlock>::do_export("IBlock");
+    PyEntityWithMetadata<base::IBlock>::do_export("Block");
 
     class_<Block, bases<base::EntityWithMetadata<base::IBlock>>>("Block")
         // DataArray
@@ -110,7 +110,9 @@ void PyBlock::do_export() {
         .def("_get_source_by_id", &getSourceById)
         .def("_get_source_by_pos", &getSourceByPos)
         .def("_delete_source_by_id", REMOVER(std::string, nix::Block, deleteSource))
-        .def(self == self)
+        // Other
+        .def("__str__", &toStr<Block>)
+        .def("__repr__", &toStr<Block>)
         ;
 
     to_python_converter<std::vector<Block>, vector_transmogrify<Block>>();

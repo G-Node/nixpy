@@ -16,6 +16,13 @@
 
 namespace nixpy {
 
+template<typename T>
+std::string toStr(T number) {
+    std::stringstream s;
+    s << number;
+    return s.str();
+}
+
 /**
  * Exports a specialisation of nix::base::Entity wich can be further used
  * as a subclass.
