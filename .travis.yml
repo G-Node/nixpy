@@ -16,7 +16,7 @@ install:
 - sudo apt-get install -q gcc-4.8 g++-4.8 libstdc++-4.8-dev libcppunit-dev -y
 - sudo apt-get install libhdf5-serial-dev libhdf5-dev libhdf5-7 -y
 - sudo apt-get install python-numpy python-dev -y
-- git clone git@github.com:G-Node/nix.git
+- git clone https://github.com/G-Node/nix.git
 - mkdir nix/build
 - cd nix/build
 - CC=gcc-4.8 CXX=g++-4.8 cmake ..
