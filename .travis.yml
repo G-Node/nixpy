@@ -12,15 +12,18 @@ install:
 - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
 - sudo add-apt-repository ppa:apokluda/boost1.53 -y
 - sudo apt-get update -q -y
-- sudo apt-get install libboost-python1.53-dev libboost-date-time1.53-dev libboost1.53-dev libboost-regex1.53-dev -y
+- sudo apt-get install libboost-python1.53-dev libboost-date-time1.53-dev libboost1.53-dev libboost-regex1.53-dev cmake -y
 - sudo apt-get install -q gcc-4.8 g++-4.8 libstdc++-4.8-dev libcppunit-dev -y
 - sudo apt-get install libhdf5-serial-dev libhdf5-dev libhdf5-7
 - sudo apt-get install python-numpy python-dev
-- wget https://launchpad.net/~gnode/+archive/pandora/+files/libnix-dev_0.9.1-1_amd64.deb
-- wget https://launchpad.net/~gnode/+archive/pandora/+files/libnix1_0.9.1-1_amd64.deb
-- sudo dpkg -i libnix-dev_0.9.1-1_amd64.deb libnix1_0.9.1-1_amd64.deb
+- git clone git@github.com:G-Node/nix.git
+- mkdir nix/build
+- cd nix/build
+- CC=gcc-4.8 CXX=g++-4.8 cmake ..
+- make
+- sudo make install
 
 
 script:
-- CC=clang CXX=clang++ python setup.py install
+- CC=gcc-4.8 CXX=g++-4.8 python setup.py install
 - nosetests
