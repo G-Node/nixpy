@@ -7,21 +7,12 @@
 
 #include <PyEntity.hpp>
 #include <PyBlock.hpp>
+#include <PyFile.hpp>
 
 using namespace boost::python;
 using namespace nix;
 using namespace base;
 using namespace nixpy;
-
-static File
-nix_file_open ( std::string path ) {
-    return File::open ( path );
-}
-
-static std::vector<Block>
-nix_file_blocks ( const File &f ) {
-    return f.blocks();
-}
 
 static void
 nix_data_array_label_setter ( DataArray &da, const boost::optional<std::string> &lbl ) {
@@ -35,15 +26,7 @@ nix_data_array_label_setter ( DataArray &da, const boost::optional<std::string> 
 
 BOOST_PYTHON_MODULE(core)
 {
-
-    class_<File>("File")
-        .add_property("version", &File::version)
-        .def("open", nix_file_open)
-        .def("blocks", nix_file_blocks)
-        .def("create_block", &File::createBlock)
-        .def(self == other<File>())
-        .staticmethod("open")
-        ;
+    PyFile::do_export();
 
     // TODO enum classes for Implementation and FileMode
 
