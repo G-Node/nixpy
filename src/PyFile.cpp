@@ -24,12 +24,40 @@ using namespace boost::python;
 namespace nixpy {
 
 
-File file_open ( std::string path ) {
+File open( std::string path ) {
     return File::open ( path );
+}
+
+// getter for Block
+
+boost::optional<Block> getBlockById(const File& file, const std::string& id) {
+    Block bl = file.getBlock(id);
+
+    return bl ? boost::optional<Block>(bl) : boost::none;
+}
+
+boost::optional<Block> getBlockByPos(const File& file, size_t index) {
+    Block bl = file.getBlock(index);
+
+    return bl ? boost::optional<Block>(bl) : boost::none;
 }
 
 std::vector<Block> file_blocks ( const File &f ) {
     return f.blocks();
+}
+
+// getter for Section
+
+boost::optional<Section> getSectionById(const File& file, const std::string& id) {
+    Section sec = file.getSection(id);
+
+    return sec ? boost::optional<Section>(sec) : boost::none;
+}
+
+boost::optional<Section> getSectionByPos(const File& file, size_t index) {
+    Section sec = file.getSection(index);
+
+    return sec ? boost::optional<Section>(sec) : boost::none;
 }
 
 void PyFile::do_export() {
@@ -44,12 +72,23 @@ void PyFile::do_export() {
         // Block
         .def("blocks", file_blocks)
         .def("create_block", &File::createBlock)
-        .def(self == other<File>())
+        .def("_block_count", &File::blockCount)
+        .def("_get_block_by_id", &getBlockById)
+        .def("_get_block_by_pos", &getBlockByPos)
+        .def("_delete_block_by_id", REMOVER(std::string, nix::File, deleteBlock))
+        // Section
+        .def("create_section", &File::createSection)
+        .def("_section_count", &File::sectionCount)
+        .def("_get_section_by_id", &getSectionById)
+        .def("_get_section_by_pos", &getSectionByPos)
+        .def("_delete_section_by_id", REMOVER(std::string, nix::File, deleteSection))
         // Open and close
         .def("is_open", &File::isOpen)
         .def("close", &File::close)
-        .def("open", file_open)
+        .def("open", open)
         .staticmethod("open")
+        // Other
+        .def(self == other<File>())
         ;
 
         to_python_converter<boost::optional<File>, option_transmogrify<File>>();
