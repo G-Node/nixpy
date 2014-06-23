@@ -24,9 +24,11 @@ using namespace boost::python;
 namespace nixpy {
 
 
-File open( std::string path ) {
-    return File::open ( path );
+File open(std::string path, FileMode mode = FileMode::ReadWrite) {
+    return File::open(path, mode);
 }
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(open_overloads, open, 1, 2)
 
 // getter for Block
 
@@ -62,6 +64,12 @@ boost::optional<Section> getSectionByPos(const File& file, size_t index) {
 
 void PyFile::do_export() {
 
+    enum_<FileMode>("FileMode")
+        .value("ReadOnly",  FileMode::ReadOnly)
+        .value("ReadWrite", FileMode::ReadWrite)
+        .value("Overwrite", FileMode::Overwrite)
+        ;
+
     class_<File>("File")
         .add_property("version", &File::version)
         .add_property("format", &File::format)
@@ -84,7 +92,7 @@ void PyFile::do_export() {
         // Open and close
         .def("is_open", &File::isOpen)
         .def("close", &File::close)
-        .def("open", open)
+        .def("open", open, open_overloads())
         .staticmethod("open")
         // Other
         .def(self == other<File>())
