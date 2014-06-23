@@ -28,8 +28,6 @@ BOOST_PYTHON_MODULE(core)
 {
     PyFile::do_export();
 
-    // TODO enum classes for Implementation and FileMode
-
     class_<Value>("Value");
     to_python_converter<std::vector<Value>, vector_transmogrify<Value>>();
     to_python_converter<boost::optional<Value>, option_transmogrify<Value>>();
@@ -38,7 +36,11 @@ BOOST_PYTHON_MODULE(core)
     to_python_converter<std::vector<Property>, vector_transmogrify<Property>>();
     to_python_converter<boost::optional<Property>, option_transmogrify<Property>>();
 
-    class_<Section>("Section");
+    PyNamedEntity<ISection>::do_export("Section");
+    class_<Section, bases<NamedEntity<ISection>>>("Section")
+        .def("__str__", &toStr<Section>)
+        .def("__repr__", &toStr<Section>)
+        .def(self == self);
     to_python_converter<std::vector<Section>, vector_transmogrify<Section>>();
     to_python_converter<boost::optional<Section>, option_transmogrify<Section>>();
 
@@ -59,8 +61,12 @@ BOOST_PYTHON_MODULE(core)
                       &nix_data_array_label_setter)
         .def("has_data", &DataArray::hasData)
         ;
+
+
     to_python_converter<std::vector<DataArray>, vector_transmogrify<DataArray>>();
+    vector_transmogrify<DataArray>::register_from_python();
     to_python_converter<boost::optional<DataArray>, option_transmogrify<DataArray>>();
+
 
     // TODO enum class DataType
 
