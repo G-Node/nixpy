@@ -37,9 +37,6 @@ class BlockMixin(Block):
     class __metaclass__(Inject, Block.__class__):
         pass
 
-    def test(self, what=""):
-        print 'success! ' + what
-
     @property
     def sources(self):
         if not hasattr(self, "_sources"):

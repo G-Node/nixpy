@@ -10,6 +10,8 @@
 #define NIXPY_TRANSMORGIFY_H
 
 #include <boost/python.hpp>
+#include <boost/python/stl_iterator.hpp>
+
 
 namespace nixpy {
 
@@ -25,6 +27,36 @@ struct vector_transmogrify {
         }
 
         return boost::python::incref(l.ptr());
+    }
+
+    typedef boost::python::converter::rvalue_from_python_stage1_data py_s1_data;
+    typedef boost::python::converter::rvalue_from_python_storage<std::vector<T>> py_storage;
+
+    static void register_from_python() {
+        boost::python::converter::registry::push_back(is_convertible,
+                                                      construct,
+                                                      boost::python::type_id<std::vector<T>>());
+    }
+
+    static void* is_convertible(PyObject* obj){
+        return (PySequence_Check(obj) && PyObject_HasAttrString(obj,"__len__")) ? obj : nullptr;
+    }
+
+    static void construct(PyObject* obj, py_s1_data* data) {
+        using namespace boost::python;
+
+        void *raw = static_cast<void *>(reinterpret_cast<py_storage *>(data)->storage.bytes);
+
+        int length = PySequence_Size(obj);
+        new (raw) std::vector<T>(length);
+
+        std::vector<T>* vec= static_cast<std::vector<T> *>(raw);
+
+        for(size_t index = 0; index < length; index++) {
+            vec->push_back(extract<T>(PySequence_GetItem(obj, index)));
+        }
+
+        data->convertible = raw;
     }
 };
 
