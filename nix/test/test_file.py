@@ -1,4 +1,3 @@
-__author__ = 'gicmo'
 import unittest
 import nix.core
 
