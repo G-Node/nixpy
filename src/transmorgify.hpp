@@ -80,19 +80,27 @@ struct option_transmogrify {
     }
 
     static void* is_convertible(PyObject *obj) {
-        return (obj == Py_None || PyString_Check(obj)) ? obj : nullptr;
+        using namespace boost::python;
+
+        bool ok = (obj == Py_None);
+
+        if (!ok) {
+            extract<T> extractor(obj);
+            ok = extractor.check();
+        }
+
+        return ok ? obj : nullptr;
     }
 
     static void construct(PyObject *obj, py_s1_data *data) {
-        using namespace boost::python::converter;
+        using namespace boost::python;
 
         void *raw = static_cast<void *>(reinterpret_cast<py_storage *>(data)->storage.bytes);
+
         if (obj == Py_None) {
             new (raw) boost::optional<T>{};
         } else {
-            std::string value(PyString_AsString(obj));
-            std::cout << value << std::endl;
-            new (raw) boost::optional<T>(value);
+            new (raw) boost::optional<T>(extract<T>(obj));
         }
         data->convertible = raw;
     }
