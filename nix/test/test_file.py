@@ -58,7 +58,6 @@ class TestFile(unittest.TestCase):
 
         assert(len(self.file.sections) == 1)
 
-        # TODO implement __eq__ for Section
         assert(section      in self.file.sections)
         assert(section.id   in self.file.sections)
         assert("notexist" not in self.file.sections)
