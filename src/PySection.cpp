@@ -53,6 +53,27 @@ void setMapping(Section& sec, const boost::optional<std::string>& str) {
         sec.mapping(boost::none);
 }
 
+// Link
+
+void setLink(Section& section, const boost::optional<Section>& link) {
+    if (link && *link)
+        section.link(*link);
+    else
+        section.link(boost::none);
+}
+
+boost::optional<Section> getLink(const Section& sec) {
+    Section link = sec.link();
+    return link ? boost::optional<Section>(link) : boost::none;
+}
+
+// Parent
+
+boost::optional<Section> getParent(const Section& sec) {
+    Section parent = sec.parent();
+    return parent ? boost::optional<Section>(parent) : boost::none;
+}
+
 
 void PySection::do_export() {
 
@@ -65,8 +86,9 @@ void PySection::do_export() {
         .add_property("mapping",
                       OPT_GETTER(std::string, Section, mapping),
                       setMapping)
+        .add_property("link", getLink, setLink)
         // Section
-        .add_property("parent", &Section::parent)
+        .add_property("parent", getParent)
         .def("create_section", &Section::createSection)
         .def("_section_count", &Section::sectionCount)
         .def("_get_section_by_id", &getSectionById)
@@ -80,6 +102,7 @@ void PySection::do_export() {
 
     to_python_converter<std::vector<Section>, vector_transmogrify<Section>>();
     to_python_converter<boost::optional<Section>, option_transmogrify<Section>>();
+    option_transmogrify<Section>::register_from_python();
 }
 
 }
