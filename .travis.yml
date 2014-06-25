@@ -27,7 +27,8 @@ install:
 
 script:
 - CC=gcc-4.8 CXX=g++-4.8 python setup.py install
-- nosetests --verbose
+- coverage run --source=nix setup.py test
+- coverage report -m
 
 after_success:
-- coveralls
+- coveralls --verbose
