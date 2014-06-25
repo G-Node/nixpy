@@ -44,6 +44,16 @@ void setRepository(Section& sec, const boost::optional<std::string>& str) {
         sec.repository(boost::none);
 }
 
+// Mapping
+
+void setMapping(Section& sec, const boost::optional<std::string>& str) {
+    if (str)
+        sec.mapping(*str);
+    else
+        sec.mapping(boost::none);
+}
+
+
 void PySection::do_export() {
 
     PyNamedEntity<base::ISection>::do_export("Section");
@@ -52,6 +62,9 @@ void PySection::do_export() {
         .add_property("repository",
                       OPT_GETTER(std::string, Section, repository),
                       setRepository)
+        .add_property("mapping",
+                      OPT_GETTER(std::string, Section, mapping),
+                      setMapping)
         // Section
         .add_property("parent", &Section::parent)
         .def("create_section", &Section::createSection)
