@@ -8,6 +8,7 @@
 #include <PyEntity.hpp>
 #include <PyBlock.hpp>
 #include <PyFile.hpp>
+#include <PySection.hpp>
 
 using namespace boost::python;
 using namespace nix;
@@ -36,13 +37,7 @@ BOOST_PYTHON_MODULE(core)
     to_python_converter<std::vector<Property>, vector_transmogrify<Property>>();
     to_python_converter<boost::optional<Property>, option_transmogrify<Property>>();
 
-    PyNamedEntity<ISection>::do_export("Section");
-    class_<Section, bases<NamedEntity<ISection>>>("Section")
-        .def("__str__", &toStr<Section>)
-        .def("__repr__", &toStr<Section>)
-        .def(self == self);
-    to_python_converter<std::vector<Section>, vector_transmogrify<Section>>();
-    to_python_converter<boost::optional<Section>, option_transmogrify<Section>>();
+    PySection::do_export();
 
     PyBlock::do_export();
 

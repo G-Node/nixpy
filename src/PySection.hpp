@@ -6,12 +6,13 @@
 // modification, are permitted under the terms of the BSD License. See
 // LICENSE file in the root of the Project.
 
-#ifndef NIXPY_FILE_H
-#define NIXPY_FILE_H
+#ifndef NIXPY_SECTION_H
+#define NIXPY_SECTION_H
+
 
 namespace nixpy {
 
-struct PyFile {
+struct PySection {
 
     static void do_export();
 

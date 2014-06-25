@@ -18,7 +18,8 @@ nix_lnk_arg = '-lnix'
 nixpy_sources = [
     'src/core.cc',
     'src/PyBlock.cpp',
-    'src/PyFile.cpp'
+    'src/PyFile.cpp',
+    'src/PySection.cpp'
 ]
 
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
