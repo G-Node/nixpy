@@ -49,6 +49,12 @@ boost::optional<Property> getPropertyByPos(const Section& section, size_t index)
     return prop ? boost::optional<Property>(prop) : boost::none;
 }
 
+boost::optional<Property> getPropertyWithName(const Section& section, const std::string& name) {
+    Property prop = section.getPropertyByName(name);
+
+    return prop ? boost::optional<Property>(prop) : boost::none;
+}
+
 // Repository
 
 void setRepository(Section& sec, const boost::optional<std::string>& str) {
@@ -110,10 +116,13 @@ void PySection::do_export() {
         .def("_delete_section_by_id", REMOVER(std::string, nix::Section, deleteSection))
         // Property
         .def("create_property", &Section::createProperty)
+        .def("has_property_with_name", &Section::hasPropertyWithName)
+        .def("get_property_with_name", getPropertyWithName)
         .def("_property_count", &Section::propertyCount)
         .def("_get_property_by_id", &getPropertyById)
         .def("_get_property_by_pos", &getPropertyByPos)
         .def("_delete_property_by_id", REMOVER(std::string, nix::Section, deleteProperty))
+        .def("_inherited_properties", &Section::inheritedProperties)
         // Other
         .def("__str__", &toStr<Section>)
         .def("__repr__", &toStr<Section>)

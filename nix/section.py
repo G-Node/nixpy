@@ -19,7 +19,9 @@ class PropertyProxyList(ProxyList):
     def __init__(self, obj):
         super(PropertyProxyList, self).__init__(obj, "_property_count", "_get_property_by_id",
                                                 "_get_property_by_pos", "_delete_property_by_id")
-
+# TODO find and find_related section method
+# TODO proxy list with names
+# TODO proxy list with inherited properties
 class SectionMixin(Section):
 
     class __metaclass__(Inject, Section.__class__):
