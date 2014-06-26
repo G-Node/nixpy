@@ -33,7 +33,11 @@ BOOST_PYTHON_MODULE(core)
     to_python_converter<std::vector<Value>, vector_transmogrify<Value>>();
     to_python_converter<boost::optional<Value>, option_transmogrify<Value>>();
 
-    class_<Property>("Property");
+    PyNamedEntity<base::IProperty>::do_export("Property");
+    class_<Property, bases<base::NamedEntity<base::IProperty>>>("Property")
+        .def("__str__", &toStr<Property>)
+        .def("__repr__", &toStr<Property>)
+        ;
     to_python_converter<std::vector<Property>, vector_transmogrify<Property>>();
     to_python_converter<boost::optional<Property>, option_transmogrify<Property>>();
 
