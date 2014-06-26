@@ -35,6 +35,20 @@ boost::optional<Section> getSectionByPos(const Section& section, size_t index) {
     return sec ? boost::optional<Section>(sec) : boost::none;
 }
 
+// getter for Property
+
+boost::optional<Property> getPropertyById(const Section& section, const std::string& id) {
+    Property prop = section.getProperty(id);
+
+    return prop ? boost::optional<Property>(prop) : boost::none;
+}
+
+boost::optional<Property> getPropertyByPos(const Section& section, size_t index) {
+    Property prop = section.getProperty(index);
+
+    return prop ? boost::optional<Property>(prop) : boost::none;
+}
+
 // Repository
 
 void setRepository(Section& sec, const boost::optional<std::string>& str) {
@@ -94,10 +108,15 @@ void PySection::do_export() {
         .def("_get_section_by_id", &getSectionById)
         .def("_get_section_by_pos", &getSectionByPos)
         .def("_delete_section_by_id", REMOVER(std::string, nix::Section, deleteSection))
+        // Property
+        .def("create_property", &Section::createProperty)
+        .def("_property_count", &Section::propertyCount)
+        .def("_get_property_by_id", &getPropertyById)
+        .def("_get_property_by_pos", &getPropertyByPos)
+        .def("_delete_property_by_id", REMOVER(std::string, nix::Section, deleteProperty))
         // Other
         .def("__str__", &toStr<Section>)
         .def("__repr__", &toStr<Section>)
-        .def(self == self)
         ;
 
     to_python_converter<std::vector<Section>, vector_transmogrify<Section>>();

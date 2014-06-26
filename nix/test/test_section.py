@@ -88,3 +88,22 @@ class TestSection(unittest.TestCase):
         del self.section.sections[0]
 
         assert(len(self.section.sections) == 0)
+
+    def test_section_properties(self):
+        assert(len(self.section.properties) == 0)
+
+        prop = self.section.create_property("test prop", "notype")
+
+        assert(len(self.section.properties) == 1)
+
+        # TODO implement __eq__ for property
+        #assert(prop      in self.section.properties)
+        assert(prop.id   in self.section.properties)
+        assert("notexist" not in self.section.properties)
+
+        assert(prop.id == self.section.properties[0].id)
+        assert(prop.id == self.section.properties[-1].id)
+
+        del self.section.properties[0]
+
+        assert(len(self.section.properties) == 0)
