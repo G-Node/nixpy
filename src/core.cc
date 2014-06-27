@@ -9,6 +9,8 @@
 #include <PyBlock.hpp>
 #include <PyFile.hpp>
 #include <PySection.hpp>
+#include <PyProperty.hpp>
+#include <PyValue.hpp>
 
 using namespace boost::python;
 using namespace nix;
@@ -29,19 +31,9 @@ BOOST_PYTHON_MODULE(core)
 {
     PyFile::do_export();
 
-    class_<Value>("Value");
-    to_python_converter<std::vector<Value>, vector_transmogrify<Value>>();
-    to_python_converter<boost::optional<Value>, option_transmogrify<Value>>();
-
-    PyNamedEntity<base::IProperty>::do_export("Property");
-    class_<Property, bases<base::NamedEntity<base::IProperty>>>("Property")
-        .def("__str__", &toStr<Property>)
-        .def("__repr__", &toStr<Property>)
-        ;
-    to_python_converter<std::vector<Property>, vector_transmogrify<Property>>();
-    to_python_converter<boost::optional<Property>, option_transmogrify<Property>>();
-
     PySection::do_export();
+    PyProperty::do_export();
+    PyValue::do_export();
 
     PyBlock::do_export();
 

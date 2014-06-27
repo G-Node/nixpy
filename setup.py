@@ -25,7 +25,9 @@ nixpy_sources = [
     'src/core.cc',
     'src/PyBlock.cpp',
     'src/PyFile.cpp',
-    'src/PySection.cpp'
+    'src/PySection.cpp',
+    'src/PyProperty.cpp',
+    'src/PyValue.cpp'
 ]
 
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
