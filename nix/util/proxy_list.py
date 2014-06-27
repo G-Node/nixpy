@@ -17,10 +17,16 @@ class ProxyList(object):
 
     def __getitem__(self, key):
         if isinstance(key, basestring):
+            val = None
             try:
-                return self.__getter(key)
+                val = self.__getter(key)
             except:
-                KeyError("The given key does not exist: " + key)
+                pass
+
+            if val is None:
+                raise KeyError("The given key does not exist: " + key)
+
+            return val
         elif isinstance(key, int):
             count = self.__counter()
 
