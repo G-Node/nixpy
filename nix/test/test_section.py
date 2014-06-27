@@ -15,10 +15,17 @@ class TestSection(unittest.TestCase):
     def setUp(self):
         self.file    = File.open("unittest.h5", FileMode.Overwrite)
         self.section = self.file.create_section("test section", "recordingsession")
+        self.other   = self.file.create_section("other section", "recordingsession")
 
     def tearDown(self):
-        del self.file.sections[0]
+        del self.file.sections[self.section.id]
+        del self.file.sections[self.other.id]
         self.file.close()
+
+    def test_section_eq(self):
+        assert(self.section == self.section)
+        assert(not self.section == self.other)
+        assert(not self.section == None)
 
     def test_section_id(self):
         assert(self.section.id is not None)

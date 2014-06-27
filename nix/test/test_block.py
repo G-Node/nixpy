@@ -15,10 +15,17 @@ class TestBlock(unittest.TestCase):
     def setUp(self):
         self.file  = File.open("unittest.h5", FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
+        self.other = self.file.create_block("other block", "recordingsession")
 
     def tearDown(self):
-        del self.file.blocks[0]
+        del self.file.blocks[self.block.id]
+        del self.file.blocks[self.other.id]
         self.file.close()
+
+    def test_block_eq(self):
+        assert(self.block == self.block)
+        assert(not self.block == self.other)
+        assert(not self.block == None)
 
     def test_block_id(self):
         assert(self.block.id is not None)
