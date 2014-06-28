@@ -23,7 +23,12 @@ namespace nixpy {
 
 void PyValue::do_export() {
 
-    class_<Value>("Value");
+    class_<Value>("Value")
+        .def_readwrite("reference", &Value::reference)
+        .def_readwrite("filename", &Value::filename)
+        .def_readwrite("encoder", &Value::encoder)
+        .def_readwrite("checksum", &Value::checksum)
+        ;
 
     to_python_converter<std::vector<Value>, vector_transmogrify<Value>>();
     vector_transmogrify<Value>::register_from_python();
