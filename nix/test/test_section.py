@@ -99,7 +99,7 @@ class TestSection(unittest.TestCase):
     def test_section_properties(self):
         assert(len(self.section.properties) == 0)
 
-        prop = self.section.create_property("test prop", "notype")
+        prop = self.section.create_property("test prop")
 
         assert(len(self.section.properties) == 1)
 

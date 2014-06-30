@@ -21,6 +21,15 @@ using namespace boost::python;
 
 namespace nixpy {
 
+// Definition
+
+void setDefinition(Property& prop, const boost::optional<std::string>& str) {
+    if (str)
+        prop.definition(*str);
+    else
+        prop.definition(boost::none);
+}
+
 // Mapping
 
 void setMapping(Property& prop, const boost::optional<std::string>& str) {
@@ -65,8 +74,14 @@ void PyProperty::do_export() {
     to_python_converter<boost::optional<DataType>, option_transmogrify<DataType>>();
     option_transmogrify<DataType>::register_from_python();
 
-    PyNamedEntity<base::IProperty>::do_export("Property");
-    class_<Property, bases<base::NamedEntity<base::IProperty>>>("Property")
+    PyEntity<base::IProperty>::do_export("Property");
+    class_<Property, bases<base::Entity<base::IProperty>>>("Property")
+        .add_property("name",
+                      GETTER(std::string, Property, name),
+                      REF_SETTER(std::string, Property, name))
+        .add_property("definition",
+                      OPT_GETTER(std::string, Property, definition),
+                      setDefinition)
         .add_property("mapping",
                       OPT_GETTER(std::string, Property, mapping),
                       setMapping)

@@ -15,8 +15,8 @@ class TestProperty(unittest.TestCase):
     def setUp(self):
         self.file    = File.open("unittest.h5", FileMode.Overwrite)
         self.section = self.file.create_section("test section", "recordingsession")
-        self.prop    = self.section.create_property("test property", "notype")
-        self.other   = self.section.create_property("other property", "notype")
+        self.prop    = self.section.create_property("test property")
+        self.other   = self.section.create_property("other property")
 
     def tearDown(self):
         del self.file.sections[self.section.id]
@@ -39,16 +39,6 @@ class TestProperty(unittest.TestCase):
 
         self.prop.name = "foo section"
         assert(self.prop.name == "foo section")
-
-    def test_section_type(self):
-        def set_none():
-            self.prop.type = None
-
-        assert(self.prop.type is not None)
-        self.assertRaises(Exception, set_none)
-
-        self.prop.type = "foo type"
-        assert(self.prop.type == "foo type")
 
     def test_section_definition(self):
         assert(self.prop.definition is None)

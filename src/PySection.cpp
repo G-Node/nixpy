@@ -35,7 +35,16 @@ boost::optional<Section> getSectionByPos(const Section& section, size_t index) {
     return sec ? boost::optional<Section>(sec) : boost::none;
 }
 
-// getter for Property
+// Property
+
+Property createProperty(Section& sec, const std::string& name, const std::vector<Value>& values = std::vector<Value>()) {
+    if (values.size() == 0)
+        return sec.createProperty(name);
+    else
+        return sec.createProperty(name, values);
+}
+
+BOOST_PYTHON_FUNCTION_OVERLOADS(createPropertyOverloads, createProperty, 2, 3)
 
 boost::optional<Property> getPropertyById(const Section& section, const std::string& id) {
     Property prop = section.getProperty(id);
@@ -115,7 +124,7 @@ void PySection::do_export() {
         .def("_get_section_by_pos", &getSectionByPos)
         .def("_delete_section_by_id", REMOVER(std::string, nix::Section, deleteSection))
         // Property
-        .def("create_property", &Section::createProperty)
+        .def("create_property", createProperty, createPropertyOverloads())
         .def("has_property_with_name", &Section::hasPropertyWithName)
         .def("get_property_with_name", getPropertyWithName)
         .def("_property_count", &Section::propertyCount)
