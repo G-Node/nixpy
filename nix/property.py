@@ -8,7 +8,7 @@
 
 from __future__ import absolute_import
 
-from nix.core import Property
+from nix.core import Property, Value
 from nix.util.inject import Inject
 
 class PropertyMixin(Property):
@@ -21,3 +21,14 @@ class PropertyMixin(Property):
             return self.id == other.id
         else:
             return False
+
+class ValueMixin(Value):
+
+    class __metaclass__(Inject, Value.__class__):
+        pass
+
+    def __eq__(self, other):
+        if hasattr(other, "value"):
+            return self.value == other.value
+        else:
+            return self.value == other
