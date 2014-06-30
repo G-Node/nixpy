@@ -22,9 +22,9 @@ using namespace boost::python;
 namespace nixpy {
 
 
-std::shared_ptr<Value> create(PyObject* value) {
+boost::shared_ptr<Value> create(PyObject* value) {
 
-    std::shared_ptr<Value> created = std::make_shared<Value>(new Value());
+    boost::shared_ptr<Value> created = boost::shared_ptr<Value>(new Value());
 
     if (PyBool_Check(value)) {
         bool conv = extract<bool>(value);
@@ -47,7 +47,9 @@ std::shared_ptr<Value> create(PyObject* value) {
 
 void set(Value& ref, PyObject* value) {
 
-    if (PyBool_Check(value)) {
+    if (value == Py_None) {
+        ref.set(boost::none);
+    } else if (PyBool_Check(value)) {
         bool conv = extract<bool>(value);
         ref.set(conv);
     } else if (PyInt_Check(value)) {
@@ -90,6 +92,7 @@ PyObject* get(const Value& ref) {
         case DataType::Date:
         case DataType::DateTime:
             // TODO support for date
+            throw std::runtime_error("Wrong type");
         case DataType::Nothing:
         default:
             Py_RETURN_NONE;
@@ -104,8 +107,8 @@ void PyValue::do_export() {
         .def_readwrite("filename", &Value::filename)
         .def_readwrite("encoder", &Value::encoder)
         .def_readwrite("checksum", &Value::checksum)
-        .def("set", set)
-        .def("get", get)
+        .add_property("value", get, set)
+        .add_property("data_type", &Value::type)
         // Other
         .def("__str__", &toStr<Value>)
         .def("__repr__", &toStr<Value>)
