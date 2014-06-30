@@ -77,6 +77,7 @@ void PyProperty::do_export() {
         .add_property("values",
                       GETTER(std::vector<Value>, Property, values),
                       REF_SETTER(std::vector<Value>, Property, values))
+        .def("delete_values", &Property::deleteValues)
         .def("__str__", &toStr<Property>)
         .def("__repr__", &toStr<Property>)
         ;
