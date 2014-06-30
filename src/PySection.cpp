@@ -12,6 +12,7 @@
 #include <nix.hpp>
 #include <accessors.hpp>
 #include <transmorgify.hpp>
+#include <iostream>
 
 #include <PyEntity.hpp>
 #include <PySection.hpp>
@@ -38,10 +39,11 @@ boost::optional<Section> getSectionByPos(const Section& section, size_t index) {
 // Property
 
 Property createProperty(Section& sec, const std::string& name, const std::vector<Value>& values = std::vector<Value>()) {
-    if (values.size() == 0)
+    if (values.empty()) {
         return sec.createProperty(name);
-    else
+    } else {
         return sec.createProperty(name, values);
+    }
 }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(createPropertyOverloads, createProperty, 2, 3)
