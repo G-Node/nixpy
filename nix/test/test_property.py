@@ -58,4 +58,32 @@ class TestProperty(unittest.TestCase):
         self.prop.mapping = None
         assert(self.prop.mapping is None)
 
-    # TODO test values
+    def test_section_values(self):
+        self.prop.values = [Value(10)]
+        assert(self.prop.data_type == DataType.Int64)
+        assert(len(self.prop.values) == 1)
+
+        assert(self.prop.values[0] == Value(10))
+        assert(Value(10) in self.prop.values)
+        assert(self.prop.values[0] == 10)
+        assert(10 in self.prop.values)
+        assert(self.prop.values[0] != Value(1337))
+        assert(Value(1337) not in self.prop.values)
+        assert(self.prop.values[0] != 42)
+        assert(42 not in self.prop.values)
+
+        self.prop.delete_values()
+        assert(len(self.prop.values) == 0)
+
+        self.prop.values = [Value("foo"), Value("bar")]
+        assert(self.prop.data_type == DataType.String)
+        assert(len(self.prop.values) == 2)
+
+        assert(self.prop.values[0] == Value("foo"))
+        assert(Value("foo") in self.prop.values)
+        assert(self.prop.values[0] == "foo")
+        assert("foo" in self.prop.values)
+        assert(self.prop.values[0] != Value("bla"))
+        assert(Value("bla") not in self.prop.values)
+        assert(self.prop.values[0] != "bla")
+        assert("bla" not in self.prop.values)
