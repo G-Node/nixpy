@@ -15,7 +15,6 @@
 #include <iostream>
 
 #include <PyEntity.hpp>
-#include <PySection.hpp>
 
 using namespace nix;
 using namespace boost::python;

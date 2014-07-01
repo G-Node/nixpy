@@ -15,7 +15,6 @@
 #include <transmorgify.hpp>
 
 #include <PyEntity.hpp>
-#include <PyFile.hpp>
 
 
 using namespace nix;

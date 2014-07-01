@@ -6,11 +6,6 @@
 #include <accessors.hpp>
 
 #include <PyEntity.hpp>
-#include <PyBlock.hpp>
-#include <PyFile.hpp>
-#include <PySection.hpp>
-#include <PyProperty.hpp>
-#include <PyValue.hpp>
 
 using namespace boost::python;
 using namespace nix;

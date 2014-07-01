@@ -14,7 +14,6 @@
 #include <transmorgify.hpp>
 
 #include <PyEntity.hpp>
-#include <PyValue.hpp>
 
 using namespace nix;
 using namespace boost::python;
