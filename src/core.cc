@@ -31,14 +31,7 @@ BOOST_PYTHON_MODULE(core)
     PyValue::do_export();
 
     PyBlock::do_export();
-
-    PyEntityWithMetadata<ISource>::do_export("Source");
-    class_<Source, bases<EntityWithMetadata<ISource>>>("Source")
-        .def("__str__", &toStr<Source>)
-        .def("__repr__", &toStr<Source>)
-        .def(self == self);
-    to_python_converter<std::vector<Source>, vector_transmogrify<Source>>();
-    to_python_converter<boost::optional<Source>, option_transmogrify<Source>>();
+    PySource::do_export();
 
     PyEntityWithSources<IDataArray>::do_export("DataArray");
     class_<DataArray, bases<EntityWithSources<IDataArray>>>("DataArray")
