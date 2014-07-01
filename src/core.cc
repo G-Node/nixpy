@@ -12,14 +12,7 @@ using namespace nix;
 using namespace base;
 using namespace nixpy;
 
-static void
-nix_data_array_label_setter ( DataArray &da, const boost::optional<std::string> &lbl ) {
-    if ( lbl == boost::none ) {
-        da.label ( boost::none );
-    } else {
-        da.label ( *lbl );
-    }
-}
+
 
 
 BOOST_PYTHON_MODULE(core)
@@ -32,19 +25,7 @@ BOOST_PYTHON_MODULE(core)
 
     PyBlock::do_export();
     PySource::do_export();
-
-    PyEntityWithSources<IDataArray>::do_export("DataArray");
-    class_<DataArray, bases<EntityWithSources<IDataArray>>>("DataArray")
-        .add_property("label",
-                      OPT_GETTER(std::string, DataArray, label),
-                      &nix_data_array_label_setter)
-        .def("has_data", &DataArray::hasData)
-        ;
-
-
-    to_python_converter<std::vector<DataArray>, vector_transmogrify<DataArray>>();
-    vector_transmogrify<DataArray>::register_from_python();
-    to_python_converter<boost::optional<DataArray>, option_transmogrify<DataArray>>();
+    PyDataArray::do_export();
 
 
     // TODO enum class DataType

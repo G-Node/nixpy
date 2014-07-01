@@ -138,6 +138,9 @@ struct PySource {
     static void do_export();
 };
 
+struct PyDataArray {
+    static void do_export();
+};
 
 }
 
