@@ -43,10 +43,6 @@ boost::optional<Block> getBlockByPos(const File& file, size_t index) {
     return bl ? boost::optional<Block>(bl) : boost::none;
 }
 
-std::vector<Block> file_blocks ( const File &f ) {
-    return f.blocks();
-}
-
 // getter for Section
 
 boost::optional<Section> getSectionById(const File& file, const std::string& id) {
