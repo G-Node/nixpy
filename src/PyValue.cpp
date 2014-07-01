@@ -107,6 +107,7 @@ void PyValue::do_export() {
         .def_readwrite("filename", &Value::filename)
         .def_readwrite("encoder", &Value::encoder)
         .def_readwrite("checksum", &Value::checksum)
+        .def_readwrite("uncertainty", &Value::uncertainty)
         .add_property("value", get, set)
         .add_property("data_type", &Value::type)
         // Other
