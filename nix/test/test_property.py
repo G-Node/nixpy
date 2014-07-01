@@ -87,3 +87,91 @@ class TestProperty(unittest.TestCase):
         assert(Value("bla") not in self.prop.values)
         assert(self.prop.values[0] != "bla")
         assert("bla" not in self.prop.values)
+
+
+class TestValue(unittest.TestCase):
+
+    def test_value_int(self):
+        value = Value(10)
+        other = Value(11)
+
+        assert(value.data_type == DataType.Int64)
+
+        assert(value == value)
+        assert(value == 10)
+
+        assert(value != other)
+        assert(value != 11)
+
+        value.value = 20
+        assert(value == Value(20))
+        assert(value == 20)
+        assert(value.value == 20)
+
+    def test_value_float(self):
+        value = Value(47.11)
+        other = Value(3.14)
+
+        assert(value.data_type == DataType.Double)
+
+        assert(value == value)
+        assert(value == 47.11)
+
+        assert(value != other)
+        assert(value != 3.14)
+
+        value.value = 66.6
+        assert(value == Value(66.6))
+        assert(value == 66.6)
+        assert(value.value == 66.6)
+
+
+    def test_value_bool(self):
+        value = Value(True)
+        other = Value(False)
+
+        assert(value.data_type == DataType.Bool)
+
+        assert(value == value)
+        assert(value == True)
+
+        assert(value != other)
+        assert(value != False)
+
+        value.value = False
+        assert(value == other)
+
+    def test_value_str(self):
+        value = Value("foo")
+        other = Value("bar")
+
+        assert(value.data_type == DataType.String)
+
+        assert(value == value)
+        assert(value == "foo")
+
+        assert(value != other)
+        assert(value != "bar")
+
+        value.value = "wrtlbrmpft"
+        assert(value == Value("wrtlbrmpft"))
+        assert(value == "wrtlbrmpft")
+        assert(value.value == "wrtlbrmpft")
+
+    def test_value_attrs(self):
+        value = Value(0)
+
+        value.reference = "a"
+        assert(value.reference == "a")
+
+        value.filename = "b"
+        assert(value.filename == "b")
+
+        value.filename = "c"
+        assert(value.filename == "c")
+
+        value.checksum = "d"
+        assert(value.checksum == "d")
+
+        value.uncertainty = 0.5
+        assert(value.uncertainty == 0.5)
