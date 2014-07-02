@@ -22,15 +22,15 @@ class TestProperty(unittest.TestCase):
         del self.file.sections[self.section.id]
         self.file.close()
 
-    def test_section_eq(self):
+    def test_property_eq(self):
         assert(self.prop == self.prop)
         assert(not self.prop == self.other)
         assert(not self.prop == None)
 
-    def test_section_id(self):
+    def test_property_id(self):
         assert(self.prop.id is not None)
 
-    def test_section_name(self):
+    def test_property_name(self):
         def set_none():
             self.prop.name = None
 
@@ -40,7 +40,7 @@ class TestProperty(unittest.TestCase):
         self.prop.name = "foo section"
         assert(self.prop.name == "foo section")
 
-    def test_section_definition(self):
+    def test_property_definition(self):
         assert(self.prop.definition is None)
 
         self.prop.definition = "definition"
@@ -49,7 +49,7 @@ class TestProperty(unittest.TestCase):
         self.prop.definition = None
         assert(self.prop.definition is None)
 
-    def test_section_mapping(self):
+    def test_property_mapping(self):
         assert(self.prop.mapping is None)
 
         self.prop.mapping = "mapping"
@@ -58,7 +58,7 @@ class TestProperty(unittest.TestCase):
         self.prop.mapping = None
         assert(self.prop.mapping is None)
 
-    def test_section_values(self):
+    def test_property_values(self):
         self.prop.values = [Value(10)]
         assert(self.prop.data_type == DataType.Int64)
         assert(len(self.prop.values) == 1)
