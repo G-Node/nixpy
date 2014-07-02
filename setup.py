@@ -11,6 +11,12 @@ import numpy as np
 import sys
 import os
 
+with open("README.md") as f:
+    description_text = f.read()
+
+with open("LICENSE") as f:
+    license_text = f.read()
+
 nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include')
 nix_lib_dir = os.getenv('NIX_LIBDIR', '/usr/local/lib')
 nix_lnk_arg = '-lnix'
@@ -19,7 +25,12 @@ nixpy_sources = [
     'src/core.cc',
     'src/PyBlock.cpp',
     'src/PyFile.cpp',
-    'src/PySection.cpp'
+    'src/PySection.cpp',
+    'src/PyProperty.cpp',
+    'src/PyValue.cpp',
+    'src/PySource.cpp',
+    'src/PyDataArray.cpp',
+    'src/PyDimensions.cpp'
 ]
 
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
@@ -43,4 +54,8 @@ setup(name             = 'nix',
       scripts          = [],
       tests_require    = ['nose'],
       test_suite       = 'nose.collector',
-      setup_requires   = ['numpy'])
+      setup_requires   = ['numpy'],
+      package_data     = {"nix": [license_text, description_text]},
+      include_package_data = True,
+      zip_safe         = False,
+)

@@ -135,8 +135,7 @@ class TestBlock(unittest.TestCase):
 
         assert(len(self.block.sources) == 1)
 
-        # TODO implement __eq__ for Source
-        #assert(source      in self.block.sources)
+        assert(source      in self.block.sources)
         assert(source.id   in self.block.sources)
         assert("notexist" not in self.block.sources)
 

@@ -15,7 +15,6 @@
 #include <transmorgify.hpp>
 
 #include <PyEntity.hpp>
-#include <PyFile.hpp>
 
 
 using namespace nix;
@@ -42,10 +41,6 @@ boost::optional<Block> getBlockByPos(const File& file, size_t index) {
     Block bl = file.getBlock(index);
 
     return bl ? boost::optional<Block>(bl) : boost::none;
-}
-
-std::vector<Block> file_blocks ( const File &f ) {
-    return f.blocks();
 }
 
 // getter for Section

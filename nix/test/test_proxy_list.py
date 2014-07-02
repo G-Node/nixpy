@@ -76,6 +76,7 @@ class TestProxyList(unittest.TestCase):
         assert("notexist" not in self.mock.list)
         assert(WithIdMock("2") in self.mock.list)
         assert(WithIdMock("notexist") not in self.mock.list)
+        assert(42 not in self.mock.list)
 
     def test_proxy_list_iterators(self):
         assert(len(list(self.mock.list)) == 5)

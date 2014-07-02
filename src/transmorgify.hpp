@@ -48,7 +48,7 @@ struct vector_transmogrify {
         void *raw = static_cast<void *>(reinterpret_cast<py_storage *>(data)->storage.bytes);
 
         int length = PySequence_Size(obj);
-        new (raw) std::vector<T>(length);
+        new (raw) std::vector<T>();
 
         std::vector<T>* vec= static_cast<std::vector<T> *>(raw);
 

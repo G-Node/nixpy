@@ -96,6 +96,7 @@ struct PyEntityWithSources {
     static void do_export(const std::string& type_name) {
         using namespace boost::python;
 
+        // TODO create mixin for all bases of EntityWithSources
         std::string real_name = "__EntityWithSources" + type_name;
         PyEntityWithMetadata<T>::do_export(type_name);
         class_<nix::base::EntityWithSources<T>, bases<nix::base::EntityWithMetadata<T>>>(real_name.c_str(), no_init)
@@ -108,6 +109,42 @@ struct PyEntityWithSources {
     }
 };
 
+
+struct PyBlock {
+    static void do_export();
+};
+
+
+struct PyFile {
+    static void do_export();
+};
+
+
+struct PyProperty {
+    static void do_export();
+};
+
+
+struct PySection {
+    static void do_export();
+};
+
+
+struct PyValue {
+    static void do_export();
+};
+
+struct PySource {
+    static void do_export();
+};
+
+struct PyDataArray {
+    static void do_export();
+};
+
+struct PyDimensions {
+    static void do_export();
+};
 
 }
 

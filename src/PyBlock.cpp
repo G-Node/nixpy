@@ -15,7 +15,6 @@
 #include <transmorgify.hpp>
 
 #include <PyEntity.hpp>
-#include <PyBlock.hpp>
 
 using namespace nix;
 using namespace boost::python;
