@@ -142,6 +142,10 @@ struct PyDataArray {
     static void do_export();
 };
 
+struct PyDimensions {
+    static void do_export();
+};
+
 }
 
 #endif
