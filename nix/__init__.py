@@ -7,7 +7,7 @@
 # LICENSE file in the root of the Project.
 
 from nix.core import File, FileMode, Block, DataType, Section, Property, Value, Source, \
-    DataArray
+    DataArray, RangeDimension, SetDimension, SampledDimension, DimensionType
 
 from nix.block import BlockMixin
 from nix.file import FileMixin
@@ -17,6 +17,6 @@ from nix.source import SourceMixin
 from nix.data_array import DataArrayMixin
 
 __all__ = ("File", "FileMode", "Block", "DataType", "Section", "Property", "Value", "Source",
-           "DataArray")
+           "DataArray", "RangeDimension", "SetDimension", "SampledDimension", "DimensionType")
 
 __author__ = "Christian Kellner"

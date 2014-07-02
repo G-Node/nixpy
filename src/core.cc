@@ -26,17 +26,7 @@ BOOST_PYTHON_MODULE(core)
     PyBlock::do_export();
     PySource::do_export();
     PyDataArray::do_export();
-
-
-    // TODO enum class DataType
-
-    class_<Dimension>("Dimension");
-
-    class_<SampledDimension>("SampledDimension");
-
-    class_<RangeDimension>("RangeDimension");
-
-    class_<SetDimension>("SetDimension");
+    PyDimensions::do_export();
 
     PyEntityWithSources<ISimpleTag>::do_export("SimpleTag");
     class_<SimpleTag, bases<EntityWithSources<ISimpleTag>>>("SimpleTag");
@@ -54,4 +44,13 @@ BOOST_PYTHON_MODULE(core)
 
     to_python_converter<boost::optional<std::string>, option_transmogrify<std::string>>();
     option_transmogrify<std::string>::register_from_python();
+
+    to_python_converter<std::vector<std::string>, vector_transmogrify<std::string>>();
+    vector_transmogrify<std::string>::register_from_python();
+
+    to_python_converter<std::vector<double>, vector_transmogrify<double>>();
+    vector_transmogrify<double>::register_from_python();
+
+    to_python_converter<boost::optional<double>, option_transmogrify<double>>();
+    option_transmogrify<double>::register_from_python();
 }
