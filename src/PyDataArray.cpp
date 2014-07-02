@@ -73,6 +73,30 @@ void setData(DataArray& da, const std::vector<double>& data) {
         da.dataExtent(NDSize());
 }
 
+// Dimensions
+
+PyObject* getDimension(const DataArray& da, size_t index) {
+    Dimension dim = da.getDimension(index);
+    SetDimension set;
+    RangeDimension range;
+    SampledDimension sample;
+    DimensionType type = dim.dimensionType();
+
+    switch(type) {
+        case DimensionType::Set:
+            set = dim;
+            return incref(object(set).ptr());
+        case DimensionType::Range:
+            range = dim;
+            return incref(object(range).ptr());
+        case DimensionType::Sample:
+            sample = dim;
+            return incref(object(sample).ptr());
+        default:
+            Py_RETURN_NONE;
+    }
+}
+
 void PyDataArray::do_export() {
 
     PyEntityWithSources<base::IDataArray>::do_export("DataArray");
@@ -94,6 +118,15 @@ void PyDataArray::do_export() {
         .add_property("data", getData, setData)
         .def("has_data", &DataArray::hasData)
         // TODO Dimensions
+        .def("create_set_dimension", &DataArray::createSetDimension)
+        .def("create_sampled_dimension", &DataArray::createSampledDimension)
+        .def("create_reange_dimension", &DataArray::createRangeDimension)
+        .def("append_set_dimension", &DataArray::appendSetDimension)
+        .def("append_sampled_dimension", &DataArray::appendSampledDimension)
+        .def("append_range_dimension", &DataArray::appendRangeDimension)
+        .def("_dimension_count", &DataArray::dimensionCount)
+        .def("_delete_dimension_by_pos", &DataArray::deleteDimension)
+        .def("_get_dimension_by_pos", getDimension)
         // Other
         .def("__str__", &toStr<DataArray>)
         .def("__repr__", &toStr<DataArray>)
@@ -103,11 +136,7 @@ void PyDataArray::do_export() {
     to_python_converter<std::vector<DataArray>, vector_transmogrify<DataArray>>();
     vector_transmogrify<DataArray>::register_from_python();
 
-    to_python_converter<std::vector<double>, vector_transmogrify<double>>();
-    vector_transmogrify<double>::register_from_python();
 
-    to_python_converter<boost::optional<double>, option_transmogrify<double>>();
-    option_transmogrify<double>::register_from_python();
 
     to_python_converter<boost::optional<DataArray>, option_transmogrify<DataArray>>();
 }

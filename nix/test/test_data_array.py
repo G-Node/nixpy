@@ -114,3 +114,32 @@ class TestDataArray(unittest.TestCase):
         assert(self.array.data == data)
 
         # TODO delete does not work
+
+    def test_data_array_dimensions(self):
+        assert(len(self.array.dimensions) == 0)
+
+        setd    = self.array.append_set_dimension()
+        ranged  = self.array.append_range_dimension(range(10))
+        sampled = self.array.append_sampled_dimension(0.1)
+
+        assert(len(self.array.dimensions) == 3)
+
+        self.assertRaises(TypeError, lambda : self.array.dimensions["notexist"])
+        self.assertRaises(KeyError, lambda : self.array.dimensions[-4])
+        self.assertRaises(KeyError, lambda : self.array.dimensions[3])
+
+        assert(isinstance(str(self.array.dimensions), basestring))
+        assert(isinstance(repr(self.array.dimensions), basestring))
+
+        dims   = list(self.array.dimensions)
+        for i in range(3):
+            assert(dims[i].index == self.array.dimensions[i].index)
+            assert(dims[i].dimension_type == self.array.dimensions[i].dimension_type)
+
+            assert(self.array.dimensions[i].index == self.array.dimensions[i - 3].index)
+
+        del self.array.dimensions[2]
+        del self.array.dimensions[1]
+        del self.array.dimensions[0]
+
+        assert(len(self.array.dimensions) == 0)
