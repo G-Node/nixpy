@@ -117,7 +117,7 @@ void PyDataArray::do_export() {
         .add_property("data_type", &DataArray::dataType)
         .add_property("data", getData, setData)
         .def("has_data", &DataArray::hasData)
-        // TODO Dimensions
+        // Dimensions
         .def("create_set_dimension", &DataArray::createSetDimension)
         .def("create_sampled_dimension", &DataArray::createSampledDimension)
         .def("create_reange_dimension", &DataArray::createRangeDimension)
