@@ -7,8 +7,8 @@ class Inject(object):
 
     Usage:
 
-    >>> class Foo(object):
-    >>>     class __metaclass__(Inject, Bar.__class__):
+    >>> class Foo(Bar):
+    >>>     class __metaclass__(Inject):
     >>>          pass
 
     The above code will inject all methods from Foo into Bar as soon as
@@ -23,4 +23,3 @@ class Inject(object):
                 for k,v in dict.items():
                     if k not in excludes:
                         setattr(b,k,v)
-        return type.__init__(self, name, bases, dict)

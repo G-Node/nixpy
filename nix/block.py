@@ -42,7 +42,7 @@ class SimpleTagProxyList(ProxyList):
 
 class BlockMixin(Block):
 
-    class __metaclass__(Inject, Block.__class__):
+    class __metaclass__(Inject):
         pass
 
     @property

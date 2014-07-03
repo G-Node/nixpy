@@ -1,3 +1,13 @@
+# Copyright (c) 2014, German Neuroinformatics Node (G-Node)
+#
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted under the terms of the BSD License. See
+# LICENSE file in the root of the Project.
+
+from __future__ import absolute_import
+
 
 class ProxyList(object):
     """
@@ -5,12 +15,11 @@ class ProxyList(object):
     something that acts like a mix between a list and a map.
     """
 
-    def __init__(self, obj, counter, getter, index_getter, deleter, setter=""):
+    def __init__(self, obj, counter, getter, index_getter, deleter):
         self.__counter = getattr(obj, counter)
         self.__getter  = getattr(obj, getter)
         self.__index_getter = getattr(obj, index_getter)
         self.__deleter = getattr(obj, deleter)
-        self.__setter  = getattr(obj, setter, None)
 
     def __len__(self):
         return self.__counter()
@@ -75,3 +84,19 @@ class ProxyList(object):
 
     def __repr__(self):
         return str(self)
+
+
+class RefProxyList(ProxyList):
+
+    def __init__(self, obj, counter, getter, index_getter, deleter, appender):
+        super(RefProxyList, self).__init__(obj, counter, getter, index_getter, deleter)
+        self.__appender = getattr(obj, appender)
+
+    def append(self, key):
+        if hasattr(key, "id"):
+            key = key.id
+
+        if isinstance(key, basestring):
+            self.__appender(key)
+        else:
+            raise TypeError("The only id strings or entities can be appended")

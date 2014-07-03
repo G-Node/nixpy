@@ -8,13 +8,17 @@
 
 from __future__ import absolute_import
 
-from nix.core import Source
+from nix.core import DataArray, DataTag, SimpleTag
 from nix.util.inject import Inject
-from nix.util.proxy_list import ProxyList
+from nix.util.proxy_list import RefProxyList
 
-from nix.block import SourceProxyList
+class RefSourceProxyList(RefProxyList):
 
-class SourceMixin(Source):
+    def __init__(self, obj):
+        super(RefSourceProxyList, self).__init__(obj, "_source_count", "_get_source_by_id",
+                    "_get_source_by_pos", "_remove_source_by_id", "_add_source_by_id")
+
+class EntityWithSourceMixin(DataArray, DataTag, SimpleTag):
 
     class __metaclass__(Inject):
         pass
@@ -22,11 +26,5 @@ class SourceMixin(Source):
     @property
     def sources(self):
         if not hasattr(self, "_sources"):
-            setattr(self, "_sources", SourceProxyList(self))
+            setattr(self, "_sources", RefSourceProxyList(self))
         return self._sources
-
-    def __eq__(self, other):
-        if hasattr(other, "id"):
-            return self.id == other.id
-        else:
-            return False
