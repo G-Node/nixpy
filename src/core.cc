@@ -17,6 +17,10 @@ using namespace nixpy;
 
 BOOST_PYTHON_MODULE(core)
 {
+    // set options for doc strings
+    // show user defined / show py signatures / don't show cpp signatures
+    docstring_options local_docstring_options(true, true, false);
+
     PyFile::do_export();
 
     PySection::do_export();
