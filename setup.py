@@ -30,7 +30,8 @@ nixpy_sources = [
     'src/PyValue.cpp',
     'src/PySource.cpp',
     'src/PyDataArray.cpp',
-    'src/PyDimensions.cpp'
+    'src/PyDimensions.cpp',
+    'src/PyFeature.cpp',
 ]
 
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
@@ -50,7 +51,7 @@ setup(name             = 'nix',
       author           = 'Christian Kellner',
       author_email     = 'kellner@bio.lmu.de',
       ext_modules      = [native_ext],
-      packages         = ['nix'],
+      packages         = ['nix', 'nix.util'],
       scripts          = [],
       tests_require    = ['nose'],
       test_suite       = 'nose.collector',
