@@ -18,13 +18,33 @@ class RefSourceProxyList(RefProxyList):
         super(RefSourceProxyList, self).__init__(obj, "_source_count", "_get_source_by_id",
                     "_get_source_by_pos", "_remove_source_by_id", "_add_source_by_id")
 
-class EntityWithSourceMixin(DataArray, DataTag, SimpleTag):
+_sources_doc = """
+Getter for sources.
+"""
 
-    class __metaclass__(Inject):
+def _get_sources(self):
+    if not hasattr(self, "_sources"):
+        setattr(self, "_sources", RefSourceProxyList(self))
+    return self._sources
+
+class DataArrySourcesMixin(DataArray):
+
+    class __metaclass__(Inject, DataArray.__class__):
         pass
 
-    @property
-    def sources(self):
-        if not hasattr(self, "_sources"):
-            setattr(self, "_sources", RefSourceProxyList(self))
-        return self._sources
+    sources = property(_get_sources, None, None, _sources_doc)
+
+
+class DataTagSourcesMixin(DataTag):
+
+    class __metaclass__(Inject, DataTag.__class__):
+        pass
+
+    sources = property(_get_sources, None, None, _sources_doc)
+
+class SimpleTagSourcesMixin(SimpleTag):
+
+    class __metaclass__(Inject, SimpleTag.__class__):
+        pass
+
+    sources = property(_get_sources, None, None, _sources_doc)
