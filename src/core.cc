@@ -31,6 +31,7 @@ BOOST_PYTHON_MODULE(core)
     PySource::do_export();
     PyDataArray::do_export();
     PyDimensions::do_export();
+    PyFeature::do_export();
 
     PyEntityWithSources<ISimpleTag>::do_export("SimpleTag");
     class_<SimpleTag, bases<EntityWithSources<ISimpleTag>>>("SimpleTag");
@@ -41,8 +42,6 @@ BOOST_PYTHON_MODULE(core)
     class_<DataTag, bases<EntityWithSources<IDataTag>>>("DataTag");
     to_python_converter<std::vector<DataTag>, vector_transmogrify<DataTag>>();
     to_python_converter<boost::optional<DataTag>, option_transmogrify<DataTag>>();
-
-    class_<Feature>("Feature");
 
     // TODO enum class LinkType
 
