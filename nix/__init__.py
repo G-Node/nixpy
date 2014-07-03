@@ -15,7 +15,7 @@ from nix.section import SectionMixin
 from nix.property import PropertyMixin, ValueMixin
 from nix.source import SourceMixin
 from nix.data_array import DataArrayMixin
-from nix.entity_with_sources import EntityWithSourceMixin
+from nix.entity_with_sources import DataArrySourcesMixin, DataTagSourcesMixin, SimpleTagSourcesMixin
 
 __all__ = ("File", "FileMode", "Block", "DataType", "Section", "Property", "Value", "Source",
            "DataArray", "RangeDimension", "SetDimension", "SampledDimension", "DimensionType")
