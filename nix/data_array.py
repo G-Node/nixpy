@@ -14,7 +14,7 @@ from nix.util.inject import Inject
 
 class DataArrayMixin(DataArray):
 
-    class __metaclass__(Inject, DataArray.__class__):
+    class __metaclass__(Inject):
         pass
 
     @property

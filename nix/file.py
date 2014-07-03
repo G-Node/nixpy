@@ -28,7 +28,7 @@ class SectionProxyList(ProxyList):
 
 class FileMixin(File):
 
-    class __metaclass__(Inject, File.__class__):
+    class __metaclass__(Inject):
         pass
 
     @property
