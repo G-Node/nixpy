@@ -143,3 +143,24 @@ class TestDataArray(unittest.TestCase):
         del self.array.dimensions[0]
 
         assert(len(self.array.dimensions) == 0)
+
+    def test_data_array_sources(self):
+        source1 = self.block.create_source("source1", "channel")
+        source2 = self.block.create_source("source2", "electrode")
+
+        assert(len(self.array.sources) == 0)
+
+        self.array.sources.append(source1)
+        self.array.sources.append(source2)
+
+        self.assertRaises(TypeError, lambda : self.array.sources.append(100))
+
+        assert(len(self.array.sources) == 2)
+        assert(source1 in self.array.sources)
+        assert(source2 in self.array.sources)
+
+        del self.array.sources[source2]
+        assert(self.array.sources[0] == source1)
+
+        del self.array.sources[source1]
+        assert(len(self.array.sources) == 0)
