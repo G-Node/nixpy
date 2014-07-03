@@ -86,25 +86,25 @@ void PyBlock::do_export() {
 
     class_<Block, bases<base::EntityWithMetadata<base::IBlock>>>("Block")
         // DataArray
-        .def("create_data_array", &Block::createDataArray)
+        .def("create_data_array", &Block::createDataArray, doc::block_create_data_array)
         .def("_data_array_count", &Block::dataArrayCount)
         .def("_get_data_array_by_id", &getDataArrayById)
         .def("_get_data_array_by_pos", &getDataArrayByPos)
         .def("_delete_data_array_by_id", REMOVER(std::string, nix::Block, deleteDataArray))
         // DataTag
-        .def("create_data_tag", &Block::createDataTag)
+        .def("create_data_tag", &Block::createDataTag, doc::block_create_data_tag)
         .def("_data_tag_count", &Block::dataTagCount)
         .def("_get_data_tag_by_id", &getDataTagById)
         .def("_get_data_tag_by_pos", &getDataTagByPos)
         .def("_delete_data_tag_by_id", REMOVER(std::string, nix::Block, deleteDataTag))
         // SimpleTag
-        .def("create_simple_tag", &Block::createSimpleTag)
+        .def("create_simple_tag", &Block::createSimpleTag, doc::block_create_simple_tag)
         .def("_simple_tag_count", &Block::simpleTagCount)
         .def("_get_simple_tag_by_id", &getSimpleTagById)
         .def("_get_simple_tag_by_pos", &getSimpleTagByPos)
         .def("_delete_simple_tag_by_id", REMOVER(std::string, nix::Block, deleteSimpleTag))
         // Source
-        .def("create_source", &Block::createSource)
+        .def("create_source", &Block::createSource, doc::block_create_source)
         .def("_source_count", &Block::sourceCount)
         .def("_get_source_by_id", &getSourceById)
         .def("_get_source_by_pos", &getSourceByPos)
