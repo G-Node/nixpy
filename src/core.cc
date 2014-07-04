@@ -57,4 +57,6 @@ BOOST_PYTHON_MODULE(core)
 
     to_python_converter<boost::optional<double>, option_transmogrify<double>>();
     option_transmogrify<double>::register_from_python();
+
+    to_python_converter<NDSize, ndsize_transmogrify>();
 }
