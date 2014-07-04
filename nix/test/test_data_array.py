@@ -112,6 +112,7 @@ class TestDataArray(unittest.TestCase):
         self.array.data = data
         assert(self.array.has_data())
         assert(self.array.data == data)
+        assert(self.array.data_extent == (100, ))
 
         # TODO delete does not work
 
