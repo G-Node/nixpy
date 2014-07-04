@@ -85,6 +85,68 @@ static const char* entity_metadata = R"(
     :type: Section
 )";
 
+// PyFile
+
+static const char* file_version = R"(
+    The file format version.
+
+    :type: str
+    )";
+
+static const char* file_format = R"(
+    The format of the file. This read only property should have
+    always the value 'nix'.
+
+    :type: str
+    )";
+
+static const char* file_create_block = R"(
+    Create a new block inside the file.
+
+    :param name: The name of the block to create.
+    :type name: str
+    :param type: The type of the block.
+    :type type: str
+
+    :returns: The newly created block.
+    :rtype: Block
+    )";
+
+static const char* file_create_section = R"(
+    Create a new metadata section inside the file.
+
+    :param name: The name of the section to create.
+    :type name: str
+    :param type: The type of the section.
+    :type type: str
+
+    :returns: The newly created section.
+    :rtype: Section
+    )";
+
+static const char* file_is_open = R"(
+    Checks whether a file is open or closed.
+
+    :returns: True if the file is open, False otherwise.
+    :rtype: bool
+    )";
+
+static const char* file_close = R"(
+    Closes an open file.
+    )";
+
+static const char* file_open = R"(
+    Static method for opening a file.
+
+    :param name: The path to the file to open.
+    :type name: str
+    :param open_mode: The open mode (default FileMode.ReadWrite)
+    :type open_mode: FileMode
+
+    :returns: The open file.
+    :rtype: File
+    )";
+
 // PyBlock
 
 static const char* block_create_data_array = R"(

@@ -66,27 +66,27 @@ void PyFile::do_export() {
         ;
 
     class_<File>("File")
-        .add_property("version", &File::version)
-        .add_property("format", &File::format)
-        .add_property("created_at", &File::createdAt)
-        .def("force_created_at", &File::forceCreatedAt)
-        .add_property("updated_at", &File::updatedAt)
-        .def("force_updated_at", &File::forceUpdatedAt)
+        .add_property("version", &File::version, doc::file_version)
+        .add_property("format", &File::format, doc::file_format)
+        .add_property("created_at", &File::createdAt, doc::entity_crated_at)
+        .def("force_created_at", &File::forceCreatedAt, doc::entity_force_created_at)
+        .add_property("updated_at", &File::updatedAt, doc::entity_updated_at)
+        .def("force_updated_at", &File::forceUpdatedAt, doc::entity_force_updated_at)
         // Block
-        .def("create_block", &File::createBlock)
+        .def("create_block", &File::createBlock, doc::file_create_block)
         .def("_block_count", &File::blockCount)
         .def("_get_block_by_id", &getBlockById)
         .def("_get_block_by_pos", &getBlockByPos)
         .def("_delete_block_by_id", REMOVER(std::string, nix::File, deleteBlock))
         // Section
-        .def("create_section", &File::createSection)
+        .def("create_section", &File::createSection, doc::file_create_section)
         .def("_section_count", &File::sectionCount)
         .def("_get_section_by_id", &getSectionById)
         .def("_get_section_by_pos", &getSectionByPos)
         .def("_delete_section_by_id", REMOVER(std::string, nix::File, deleteSection))
         // Open and close
-        .def("is_open", &File::isOpen)
-        .def("close", &File::close)
+        .def("is_open", &File::isOpen, doc::file_is_open)
+        .def("close", &File::close, doc::file_close)
         .def("open", open, open_overloads())
         .staticmethod("open")
         // Other
