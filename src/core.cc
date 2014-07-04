@@ -28,18 +28,12 @@ BOOST_PYTHON_MODULE(core)
     PyDataArray::do_export();
     PyDimensions::do_export();
     PyFeature::do_export();
-
-    PyEntityWithSources<ISimpleTag>::do_export("SimpleTag");
-    class_<SimpleTag, bases<EntityWithSources<ISimpleTag>>>("SimpleTag");
-    to_python_converter<std::vector<SimpleTag>, vector_transmogrify<SimpleTag>>();
-    to_python_converter<boost::optional<SimpleTag>, option_transmogrify<SimpleTag>>();
+    PySimpleTag::do_export();
 
     PyEntityWithSources<IDataTag>::do_export("DataTag");
     class_<DataTag, bases<EntityWithSources<IDataTag>>>("DataTag");
     to_python_converter<std::vector<DataTag>, vector_transmogrify<DataTag>>();
     to_python_converter<boost::optional<DataTag>, option_transmogrify<DataTag>>();
-
-    // TODO enum class LinkType
 
     to_python_converter<boost::optional<std::string>, option_transmogrify<std::string>>();
     option_transmogrify<std::string>::register_from_python();

@@ -8,7 +8,7 @@
 
 from nix.core import File, FileMode, Block, DataType, Section, Property, Value, Source, \
     DataArray, RangeDimension, SetDimension, SampledDimension, DimensionType, \
-    Feature
+    Feature, SimpleTag
 
 from nix.block import BlockMixin
 from nix.file import FileMixin
@@ -16,10 +16,11 @@ from nix.section import SectionMixin
 from nix.property import PropertyMixin, ValueMixin
 from nix.source import SourceMixin
 from nix.data_array import DataArrayMixin
+from nix.simple_tag import SimpleTagMixin
 from nix.entity_with_sources import EntityWithSourceMixin
 
 __all__ = ("File", "FileMode", "Block", "DataType", "Section", "Property",
            "Value", "Source", "DataArray", "RangeDimension", "SetDimension",
-           "SampledDimension", "DimensionType", "Feature")
+           "SampledDimension", "DimensionType", "Feature", "SimpleTag")
 
 __author__ = "Christian Kellner"
