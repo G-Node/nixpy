@@ -16,7 +16,7 @@ from nix.block import SourceProxyList
 
 class SourceMixin(Source):
 
-    class __metaclass__(Inject):
+    class __metaclass__(Inject, Source.__class__):
         pass
 
     @property

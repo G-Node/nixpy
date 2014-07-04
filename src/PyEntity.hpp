@@ -13,6 +13,7 @@
 
 #include <nix.hpp>
 #include <accessors.hpp>
+#include <docstrings.hpp>
 
 namespace nixpy {
 
@@ -37,11 +38,11 @@ struct PyEntity {
 
         std::string real_name = "__Entity" + type_name;
         class_<nix::base::Entity<T>>(real_name.c_str(), no_init)
-            .add_property("id", &nix::base::Entity<T>::id)
-            .add_property("created_at", &nix::base::Entity<T>::createdAt)
-            .def("force_created_at", &nix::base::Entity<T>::forceCreatedAt)
-            .add_property("updated_at", &nix::base::Entity<T>::updatedAt)
-            .def("force_updated_at", &nix::base::Entity<T>::forceUpdatedAt);
+            .add_property("id", &nix::base::Entity<T>::id, doc::entity_id)
+            .add_property("created_at", &nix::base::Entity<T>::createdAt, doc::entity_crated_at)
+            .def("force_created_at", &nix::base::Entity<T>::forceCreatedAt, doc::entity_force_created_at)
+            .add_property("updated_at", &nix::base::Entity<T>::updatedAt, doc::entity_updated_at)
+            .def("force_updated_at", &nix::base::Entity<T>::forceUpdatedAt, doc::entity_force_updated_at);
     }
 
 };
@@ -59,13 +60,16 @@ struct PyNamedEntity {
         class_<nix::base::NamedEntity<T>, bases<nix::base::Entity<T>>>(real_name.c_str(), no_init)
             .add_property("name",
                           GETTER(std::string, nix::base::NamedEntity<T>, name),
-                          REF_SETTER(std::string, nix::base::NamedEntity<T>, name))
+                          REF_SETTER(std::string, nix::base::NamedEntity<T>, name),
+                          doc::entity_name)
             .add_property("type",
                           GETTER(std::string, nix::base::NamedEntity<T>, type),
-                          REF_SETTER(std::string, nix::base::NamedEntity<T>, type))
+                          REF_SETTER(std::string, nix::base::NamedEntity<T>, type),
+                          doc::entity_type)
             .add_property("definition",
                           OPT_GETTER(std::string, nix::base::NamedEntity<T>, definition),
-                          &definition_setter);
+                          &definition_setter,
+                          doc::entity_definition);
     }
 };
 
@@ -82,7 +86,7 @@ struct PyEntityWithMetadata {
         std::string real_name = "__EntityWithMetadata" + type_name;
         PyNamedEntity<T>::do_export(type_name);
         class_<nix::base::EntityWithMetadata<T>, bases<nix::base::NamedEntity<T>>>(real_name.c_str(), no_init)
-            .add_property("metadata", &metadata_getter, &metadata_setter);
+            .add_property("metadata", &metadata_getter, &metadata_setter, doc::entity_metadata);
     }
 
 };

@@ -13,7 +13,7 @@ from nix.util.inject import Inject
 
 class PropertyMixin(Property):
 
-    class __metaclass__(Inject):
+    class __metaclass__(Inject, Property.__class__):
         pass
 
     def __eq__(self, other):
@@ -24,7 +24,7 @@ class PropertyMixin(Property):
 
 class ValueMixin(Value):
 
-    class __metaclass__(Inject):
+    class __metaclass__(Inject, Value.__class__):
         pass
 
     def __eq__(self, other):

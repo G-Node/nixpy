@@ -1,4 +1,4 @@
-class Inject(object):
+class Inject(type):
     """
     Class that can be used as a metaclass in order to ease monkey patching.
 
@@ -15,11 +15,13 @@ class Inject(object):
     Foo is imported.
     """
 
-    def __init__(self, name, bases, dict):
+    def __init__(self, name, bases, dct):
         excludes = ("__module__", "__metaclass__")
 
         for b in bases:
             if type(b) not in (self, type):
-                for k,v in dict.items():
+                for k,v in dct.items():
                     if k not in excludes:
                         setattr(b,k,v)
+
+        super(Inject, self).__init__(name, bases, dct)

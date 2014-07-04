@@ -24,7 +24,7 @@ class PropertyProxyList(ProxyList):
 # TODO proxy list with inherited properties
 class SectionMixin(Section):
 
-    class __metaclass__(Inject):
+    class __metaclass__(Inject, Section.__class__):
         pass
 
     @property
