@@ -116,8 +116,7 @@ class TestBlock(unittest.TestCase):
 
         assert(len(self.block.simple_tags) == 1)
 
-        # TODO implement __eq__ for SimpleTag
-        #assert(simple_tag      in self.block.simple_tags)
+        assert(simple_tag      in self.block.simple_tags)
         assert(simple_tag.id   in self.block.simple_tags)
         assert("notexist" not in self.block.simple_tags)
 
