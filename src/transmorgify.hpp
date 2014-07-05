@@ -12,6 +12,8 @@
 #include <boost/python.hpp>
 #include <boost/python/stl_iterator.hpp>
 
+#include <algorithm>
+#include <limits>
 
 namespace nixpy {
 
@@ -102,6 +104,82 @@ struct option_transmogrify {
         } else {
             new (raw) boost::optional<T>(extract<T>(obj));
         }
+        data->convertible = raw;
+    }
+};
+
+template<typename U, typename T = long>
+PyObject* transmorgify_integer(const U value, const U max_val)
+{
+    //maybe we should max_val a boost::optional with a default parameter
+    //of boost::none, so we can call it with just value
+    const bool can_downgrade = max_val < std::numeric_limits<T>::max();
+    if (can_downgrade) {
+        return PyInt_FromLong(static_cast<T>(value));
+    } else if (std::numeric_limits<U>::is_signed) {
+        return PyLong_FromLongLong(value);
+    } else {
+        return PyLong_FromUnsignedLongLong(value);
+    }
+}
+
+struct ndsize_transmogrify {
+
+    typedef nix::NDSize::value_type value_type;
+
+    typedef boost::python::converter::rvalue_from_python_stage1_data py_s1_data;
+    typedef boost::python::converter::rvalue_from_python_storage<nix::NDSize> py_storage;
+
+    // nix::NDSize -> PyObject*
+    static PyObject* convert(const nix::NDSize& size) {
+        namespace bp = boost::python;
+
+        PyObject *tuple = PyTuple_New(size.size());
+
+        auto max_elm = std::max_element(std::begin(size), std::end(size));
+        value_type max_val = max_elm != std::end(size) ? *max_elm : 0;
+
+        Py_ssize_t i = 0;
+        for (const auto& item : size) {
+            PyTuple_SET_ITEM(tuple, i++, transmorgify_integer(item, max_val));
+        }
+
+        return tuple;
+    }
+
+    // PyObject* -> nix::NDSize
+    static void register_from_python() {
+        boost::python::converter::registry::push_back(is_convertible,
+                                                      construct,
+                                                      boost::python::type_id<nix::NDSize>());
+    }
+
+    static void* is_convertible(PyObject *obj) {
+        namespace bp = boost::python;
+
+        const bp::extract<bp::tuple> extractor(obj);
+        return extractor.check() ? obj : nullptr;
+    }
+
+    static void construct(PyObject *obj, py_s1_data *data) {
+        namespace bp = boost::python;
+
+        void *raw = static_cast<void *>(reinterpret_cast<py_storage *>(data)->storage.bytes);
+
+        const bp::tuple size_py = bp::extract<bp::tuple>(obj);
+
+        ssize_t n_signed = bp::len(size_py);
+        if (n_signed < 0) {
+            n_signed = 0;
+        }
+        size_t n = static_cast<size_t>(n_signed);
+
+        nix::NDSize * const size_cc = new (raw) nix::NDSize(n);
+
+        for (size_t i = 0; i < n; i++) {
+            (*size_cc)[i] = bp::extract<value_type>(size_py[i]);
+        }
+
         data->convertible = raw;
     }
 };

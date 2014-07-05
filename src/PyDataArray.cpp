@@ -113,6 +113,9 @@ void PyDataArray::do_export() {
         .add_property("polynom_coefficients",
                       GETTER(std::vector<double>, DataArray, polynomCoefficients),
                       setPolynomCoefficients)
+        .add_property("data_extent",
+                      GETTER(NDSize, DataArray, dataExtent),
+                      SETTER(NDSize&, DataArray, dataExtent))
         // Data
         .add_property("data_type", &DataArray::dataType)
         .add_property("data", getData, setData)
