@@ -105,13 +105,37 @@ Block API
 DataArray
 =========
 
-Data Types
-----------
+The DataArray is the core entity of the NIX data model, its purpose is to
+store arbitrary n-dimensional data. In addition to the common fields id,
+name, type, and definition the DataArray stores sufficient information to
+understand the physical nature of the stored data.
 
-.. autoclass:: nix.DataType
-    :members:
-    :undoc-members:
-    :exclude-members: names, values
+A guiding principle of the data model is provides enough information to create a
+plot of the stored data. In order to do so, the DataArray defines a property
+dataType which provides the physical type of the stored data (for example
+16 bit integer or double precision IEEE floatingpoint number).
+The property unit specifies the SI unit of the values stored in the
+DataArray whereas the label defines what is given in this units.
+Together, both specify what corresponds to the the y-axis of a plot.
+
+In some cases it is much more efficient or convenient to store data not as
+floating point numbers but rather as (16 bit) integer values as, for example
+read from a data acquisition board. In order to convert such data to the
+correct values, we follow the approach taken by the comedi data-acquisition
+library (http://www.comedi.org) and provide polynomCoefficients and an
+expansionOrigin.
+
+Create and delete a DataArray
+-----------------------------
+
+A DataArray can only be created at an existing block. Do not use the
+DataArrays constructors for this purpose.
+
+.. code-block:: python
+   :linenos:
+
+   data_array = block.crate_data_array("matrix", "data");
+   del block.data_arrays[data_array]
 
 
 DataArray API
