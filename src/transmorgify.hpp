@@ -124,13 +124,20 @@ PyObject* transmorgify_integer(const U value, const U max_val)
 }
 
 struct ndsize_transmogrify {
+
+    typedef nix::NDSize::value_type value_type;
+
+    typedef boost::python::converter::rvalue_from_python_stage1_data py_s1_data;
+    typedef boost::python::converter::rvalue_from_python_storage<nix::NDSize> py_storage;
+
+    // nix::NDSize -> PyObject*
     static PyObject* convert(const nix::NDSize& size) {
         namespace bp = boost::python;
 
         PyObject *tuple = PyTuple_New(size.size());
 
         auto max_elm = std::max_element(std::begin(size), std::end(size));
-        nix::NDSize::value_type max_val = max_elm != std::end(size) ? *max_elm : 0;
+        value_type max_val = max_elm != std::end(size) ? *max_elm : 0;
 
         Py_ssize_t i = 0;
         for (const auto& item : size) {
@@ -138,6 +145,42 @@ struct ndsize_transmogrify {
         }
 
         return tuple;
+    }
+
+    // PyObject* -> nix::NDSize
+    static void register_from_python() {
+        boost::python::converter::registry::push_back(is_convertible,
+                                                      construct,
+                                                      boost::python::type_id<nix::NDSize>());
+    }
+
+    static void* is_convertible(PyObject *obj) {
+        namespace bp = boost::python;
+
+        const bp::extract<bp::tuple> extractor(obj);
+        return extractor.check() ? obj : nullptr;
+    }
+
+    static void construct(PyObject *obj, py_s1_data *data) {
+        namespace bp = boost::python;
+
+        void *raw = static_cast<void *>(reinterpret_cast<py_storage *>(data)->storage.bytes);
+
+        const bp::tuple size_py = bp::extract<bp::tuple>(obj);
+
+        ssize_t n_signed = bp::len(size_py);
+        if (n_signed < 0) {
+            n_signed = 0;
+        }
+        size_t n = static_cast<size_t>(n_signed);
+
+        nix::NDSize * const size_cc = new (raw) nix::NDSize(n);
+
+        for (size_t i = 0; i < n; i++) {
+            (*size_cc)[i] = bp::extract<value_type>(size_py[i]);
+        }
+
+        data->convertible = raw;
     }
 };
 
