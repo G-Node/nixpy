@@ -10,15 +10,16 @@ from __future__ import absolute_import
 
 from nix.core import SimpleTag
 from nix.util.inject import Inject
-from nix.util.proxy_list import ProxyList
+from nix.util.proxy_list import ProxyList, RefProxyList
 
 
-class ReferenceProxyList(ProxyList):
+class ReferenceProxyList(RefProxyList):
 
     def __init__(self, obj):
         super(ReferenceProxyList, self).__init__(
             obj, "_reference_count", "_get_reference_by_id",
-            "_get_reference_by_pos", "_delete_reference_by_id"
+            "_get_reference_by_pos", "_delete_reference_by_id",
+            "_add_reference_by_id"
         )
 
 

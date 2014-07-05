@@ -22,23 +22,23 @@ namespace nixpy {
 
 // Units
 
-void setUnits(SimpleTag& st, const boost::optional<std::vector<std::string>> &units) {
-    if (units)
-        st.units(*units);
+void setUnits(SimpleTag& st, const std::vector<std::string>& units) {
+    if (!units.empty())
+        st.units(units);
     else
         st.units(boost::none);
 }
 
-void setPosition(SimpleTag& st, const boost::optional<std::vector<double>> &pos) {
-    if (pos)
-        st.position(*pos);
+void setPosition(SimpleTag& st, const std::vector<double>& pos) {
+    if (!pos.empty())
+        st.position(pos);
     else
         st.position(boost::none);
 }
 
-void setExtent(SimpleTag& st, const boost::optional<std::vector<double>> &iextent) {
-    if (iextent)
-        st.extent(*iextent);
+void setExtent(SimpleTag& st, const std::vector<double>& iextent) {
+    if (!iextent.empty())
+        st.extent(iextent);
     else
         st.extent(boost::none);
 }
@@ -82,6 +82,9 @@ void PySimpleTag::do_export() {
     PyEntityWithSources<base::ISimpleTag>::do_export("SimpleTag");
 
     class_<SimpleTag, bases<base::EntityWithSources<base::ISimpleTag>>>("SimpleTag")
+
+        // TODO make tuples for simple vectors like units, position, extent
+
         .add_property("units",
                       GETTER(std::vector<std::string>, SimpleTag, units),
                       setUnits)
@@ -92,7 +95,7 @@ void PySimpleTag::do_export() {
                       GETTER(std::vector<double>, SimpleTag, extent),
                       setExtent)
         // References
-        .def("add_reference", REF_SETTER(DataArray, SimpleTag, addReference))
+        .def("_add_reference_by_id", REF_SETTER(std::string, SimpleTag, addReference))
         .def("_has_reference_by_id", CHECKER(std::string, SimpleTag, hasReference))
         .def("_reference_count", &SimpleTag::referenceCount)
         .def("_get_reference_by_id", &getReferenceById)
