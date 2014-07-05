@@ -150,6 +150,14 @@ struct PyDimensions {
     static void do_export();
 };
 
+struct PyFeature {
+    static void do_export();
+};
+
+struct PySimpleTag {
+    static void do_export();
+};
+
 }
 
 #endif
