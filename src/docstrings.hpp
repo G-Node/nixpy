@@ -63,6 +63,37 @@ extern const char* block_create_simple_tag;
 extern const char* block_create_data_tag;
 
 extern const char* block_create_source;
+
+// PyDataArray
+
+extern const char* data_array_label;
+
+extern const char* data_array_unit;
+
+extern const char* data_array_expansion_origin;
+
+extern const char* data_array_polynom_coefficients;
+
+extern const char* data_array_data_extent;
+
+extern const char* data_array_data_type;
+
+extern const char* data_array_data;
+
+extern const char* data_array_has_data;
+
+extern const char* data_array_create_set_dimension;
+
+extern const char* data_array_create_sampled_dimension;
+
+extern const char* data_array_create_range_dimension;
+
+extern const char* data_array_append_set_dimension;
+
+extern const char* data_array_append_sampled_dimension;
+
+extern const char* data_array_append_range_dimension;
+
 }
 }
 

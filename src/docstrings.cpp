@@ -198,5 +198,36 @@ const char* block_create_source = R"(
     :returns: The newly created source.
     :rtype: Source
     )";
+
+// PyDataArray
+
+const char* data_array_label = R"()";
+
+const char* data_array_unit = R"()";
+
+const char* data_array_expansion_origin = R"()";
+
+const char* data_array_polynom_coefficients = R"()";
+
+const char* data_array_data_extent = R"()";
+
+const char* data_array_data_type = R"()";
+
+const char* data_array_data = R"()";
+
+const char* data_array_has_data = R"()";
+
+const char* data_array_create_set_dimension = R"()";
+
+const char* data_array_create_sampled_dimension = R"()";
+
+const char* data_array_create_range_dimension = R"()";
+
+const char* data_array_append_set_dimension = R"()";
+
+const char* data_array_append_sampled_dimension = R"()";
+
+const char* data_array_append_range_dimension = R"()";
+
 }
 }
