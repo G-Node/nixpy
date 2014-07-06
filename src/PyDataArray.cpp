@@ -14,7 +14,15 @@
 #include <accessors.hpp>
 #include <transmorgify.hpp>
 
+//we want only the newest and freshest API
+#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
+
+#include <numpy/arrayobject.h>
+#include <numpy/ndarrayobject.h>
+
 #include <PyEntity.hpp>
+
+#include <stdexcept>
 
 using namespace nix;
 using namespace boost::python;
@@ -73,6 +81,94 @@ void setData(DataArray& da, const std::vector<double>& data) {
         da.dataExtent(NDSize());
 }
 
+static nix::DataType py_dtype_to_nix_dtype(const PyArray_Descr *dtype)
+{
+    if (dtype == nullptr) {
+        return nix::DataType::Nothing;
+    }
+
+    if (dtype->byteorder != '=' && dtype->byteorder != '|') {
+        //TODO: Handle case where specified byteorder *is*
+        //the native byteorder (via BOOST_BIG_ENDIAN macros)
+        return nix::DataType::Nothing;
+    }
+
+    switch (dtype->kind) {
+
+    case 'u':
+        switch (dtype->elsize) {
+        case 1: return nix::DataType::UInt8;
+        case 2: return nix::DataType::UInt16;
+        case 4: return nix::DataType::UInt32;
+        case 8: return nix::DataType::UInt64;
+        }
+        break;
+
+    case 'i':
+        switch (dtype->elsize) {
+        case 1: return nix::DataType::Int8;
+        case 2: return nix::DataType::Int16;
+        case 4: return nix::DataType::Int32;
+        case 8: return nix::DataType::Int64;
+        }
+        break;
+
+    case 'f':
+        switch (dtype->elsize) {
+        case 4: return nix::DataType::Float;
+        case 8: return nix::DataType::Double;
+        }
+        break;
+
+    default:
+        break;
+    }
+    return nix::DataType::Nothing;
+}
+
+
+static void createData(DataArray& da, const NDSize &shape, PyObject *dtype_obj, PyObject *data) {
+    PyArray_Descr* py_dtype = nullptr;
+
+    if (! PyArray_DescrConverter(dtype_obj, &py_dtype)) {
+        throw std::invalid_argument("Invalid dtype");
+    }
+
+    nix::DataType nix_dtype = py_dtype_to_nix_dtype(py_dtype);
+    if (nix_dtype == nix::DataType::Nothing) {
+        throw std::invalid_argument("Unsupported dtype");
+    }
+
+    da.createData(nix_dtype, shape);
+
+    if (data != Py_None && PyArray_Check(data)) {
+        PyArrayObject *array = reinterpret_cast<PyArrayObject *>(data);
+
+        nix_dtype =  py_dtype_to_nix_dtype(PyArray_DESCR(array));
+        if (nix_dtype == nix::DataType::Nothing) {
+            throw std::invalid_argument("Unsupported dtype for data");
+        }
+
+        if (! PyArray_CHKFLAGS(array, NPY_ARRAY_CARRAY_RO)) {
+            throw std::invalid_argument("data must be c-contiguous and aligned");
+        }
+
+        int array_rank = PyArray_NDIM(array);
+        npy_intp *array_shape = PyArray_SHAPE(array);
+
+        nix::NDSize data_shape(array_rank);
+        for (int i = 0; i < array_rank; i++) {
+            data_shape[i] = array_shape[i];
+        }
+
+        nix::NDSize offset(array_rank, 0);
+
+        da.setData(nix_dtype, PyArray_DATA(array), data_shape, offset);
+    }
+
+    Py_DECREF(py_dtype);
+}
+
 // Dimensions
 
 PyObject* getDimension(const DataArray& da, size_t index) {
@@ -98,6 +194,9 @@ PyObject* getDimension(const DataArray& da, size_t index) {
 }
 
 void PyDataArray::do_export() {
+
+    // For numpy to work
+    import_array();
 
     PyEntityWithSources<base::IDataArray>::do_export("DataArray");
     class_<DataArray, bases<base::EntityWithSources<base::IDataArray>>>("DataArray")
@@ -128,6 +227,8 @@ void PyDataArray::do_export() {
                       doc::data_array_data)
         .def("has_data", &DataArray::hasData,
                       doc::data_array_has_data)
+
+        .def("_create_data", createData)
         // Dimensions
         .def("create_set_dimension", &DataArray::createSetDimension,
              doc::data_array_create_set_dimension)
