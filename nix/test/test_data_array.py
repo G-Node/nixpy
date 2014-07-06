@@ -105,6 +105,8 @@ class TestDataArray(unittest.TestCase):
         # TODO delete does not work
 
     def test_data_array_data(self):
+        import numpy as np
+
         assert(self.array.polynom_coefficients == [])
         assert(not self.array.has_data())
 
@@ -117,6 +119,20 @@ class TestDataArray(unittest.TestCase):
         assert(self.array.data_extent == (200, ))
 
         # TODO delete does not work
+        a1 = self.block.create_data_array("double array", "signal")
+        self.assertRaises(ValueError, a1.create_data)
+        a1.create_data((123, 123))
+        assert(a1.data_extent == (123, 123))
+
+        data = np.eye(123)
+        a2 = self.block.create_data_array("identity array", "signal")
+        a2.create_data(data=data)
+        assert(a2.data_extent == (123, 123))
+
+        a3 = self.block.create_data_array("int identity array", "signal")
+        a3.create_data(dtype='i4', data=data)
+        assert(a3.data_extent == (123, 123))
+
 
     def test_data_array_dimensions(self):
         assert(len(self.array.dimensions) == 0)
