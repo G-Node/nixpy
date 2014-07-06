@@ -15,191 +15,54 @@ namespace doc {
 
 // PyEntity
 
-static const char* entity_id = R"(
-    A property providing the ID of the Entity. The id is generated automatically,
-    therefore the property is read-only.
+extern const char* entity_id;
 
-    :type: str
-    )";
-
-static const char* entity_crated_at = R"(
-    The creation time of the entity. This is a read-only property. Use :py:meth:force_created_at in order to
-    change the creation time.
-
-    :type: int
-    )";
+extern const char* entity_crated_at;
 
 
-static const char* entity_force_created_at = R"(
-    Sets the creation time created_at to the given time.
+extern const char* entity_force_created_at;
 
-    :param time: The time to set
-    :type time: int
+extern const char* entity_updated_at;
 
-    :rtype: None
-    )";
-
-static const char* entity_updated_at = R"(
-    The time of the last update of the entity. This is a read-only property. Use force_updated_at in order
-    to change the update time.
-
-    :type: int
-    )";
-
-static const char* entity_force_updated_at = R"(
-    Sets the update time updated_at to the current time.
-
-    :rtype: None
-    )";
+extern const char* entity_force_updated_at;
 
 // PyNamedEntity
 
-static const char* entity_name = R"(
-    The name of an entity. The name serves as a human readable identifier.
-    This is a read-write property, but it can't be set to None.
+extern const char* entity_name;
 
-    :type: str
-    )";
+extern const char* entity_type;
 
-static const char* entity_type = R"(
-    The type of the entity. The type is used in order to add semantic meaning to the entity.
-    This is a read-write property, but it can't be set to None.
-
-    :type: str
-    )";
-
-static const char* entity_definition = R"(
-    The definition of the entity. The definition can contain a textual description of the
-    entity. This is an optional read-write property, and can be None if no definition is available.
-
-    :type: str
-    )";
+extern const char* entity_definition;
 
 // PyEntityWithMetadata
 
-static const char* entity_metadata = R"(
-    Associated metadata of the entity. Sections attached to the entity via this attribute can
-    provide additional annotations. This is an optional read-write property, and can be None if
-    no metadata is available.
-
-    :type: Section
-)";
+extern const char* entity_metadata;
 
 // PyFile
 
-static const char* file_version = R"(
-    The file format version.
+extern const char* file_version;
 
-    :type: str
-    )";
+extern const char* file_format;
 
-static const char* file_format = R"(
-    The format of the file. This read only property should have
-    always the value 'nix'.
+extern const char* file_create_block;
 
-    :type: str
-    )";
+extern const char* file_create_section;
 
-static const char* file_create_block = R"(
-    Create a new block inside the file.
+extern const char* file_is_open;
 
-    :param name: The name of the block to create.
-    :type name: str
-    :param type: The type of the block.
-    :type type: str
+extern const char* file_close;
 
-    :returns: The newly created block.
-    :rtype: Block
-    )";
-
-static const char* file_create_section = R"(
-    Create a new metadata section inside the file.
-
-    :param name: The name of the section to create.
-    :type name: str
-    :param type: The type of the section.
-    :type type: str
-
-    :returns: The newly created section.
-    :rtype: Section
-    )";
-
-static const char* file_is_open = R"(
-    Checks whether a file is open or closed.
-
-    :returns: True if the file is open, False otherwise.
-    :rtype: bool
-    )";
-
-static const char* file_close = R"(
-    Closes an open file.
-    )";
-
-static const char* file_open = R"(
-    Static method for opening a file.
-
-    :param name: The path to the file to open.
-    :type name: str
-    :param open_mode: The open mode (default FileMode.ReadWrite)
-    :type open_mode: FileMode
-
-    :returns: The open file.
-    :rtype: File
-    )";
+extern const char* file_open;
 
 // PyBlock
 
-static const char* block_create_data_array = R"(
-    Create a new data array for this block.
+extern const char* block_create_data_array;
 
-    :param name: The name of the data array to create.
-    :type name: str
-    :param type: The type of the data array.
-    :type type: str
+extern const char* block_create_simple_tag;
 
-    :returns: The newly created data array.
-    :rtype: DataArray
-    )";
+extern const char* block_create_data_tag;
 
-static const char* block_create_simple_tag = R"(
-    Create a new simple tag for this block.
-
-    :param name: The name of the tag to create.
-    :type name: str
-    :param type: The type of tag.
-    :type type: str
-    :param references: All referenced data arrays.
-    :type references: list
-
-    :returns: The newly created tag.
-    :rtype: SimpleTag
-    )";
-
-static const char* block_create_data_tag = R"(
-    Create a new simple tag for this block.
-
-    :param name: The name of the tag to create.
-    :type name: str
-    :param type: The type of tag.
-    :type type: str
-    :param positions: A data array defining all positions of the tag.
-    :type positions: DataArray
-
-    :returns: The newly created tag.
-    :rtype: DataTag
-    )";
-
-static const char* block_create_source = R"(
-    Create a new source on this block.
-
-    :param name: The name of the source to create.
-    :type name: str
-    :param type: The type of the source.
-    :type type: str
-
-    :returns: The newly created source.
-    :rtype: Source
-    )";
+extern const char* block_create_source;
 }
 }
 

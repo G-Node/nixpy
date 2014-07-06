@@ -23,6 +23,7 @@ nix_lnk_arg = '-lnix'
 
 nixpy_sources = [
     'src/core.cc',
+    'src/docstrings.cpp',
     'src/PyBlock.cpp',
     'src/PyFile.cpp',
     'src/PySection.cpp',
