@@ -11,7 +11,7 @@ import unittest
 from nix import *
 
 
-class TestProperty(unittest.TestCase):
+class TestSimpleTag(unittest.TestCase):
 
     def setUp(self):
         self.file     = File.open("unittest.h5", FileMode.Overwrite)
