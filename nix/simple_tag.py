@@ -35,6 +35,7 @@ class FeatureProxyList(ProxyList):
 class SimpleTagMixin(SimpleTag):
 
     class __metaclass__(Inject, SimpleTag.__class__):
+        pass
 
     @property
     def references(self):
