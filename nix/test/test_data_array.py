@@ -126,6 +126,7 @@ class TestDataArray(unittest.TestCase):
 
         data = np.eye(123)
         a2 = self.block.create_data_array("identity array", "signal")
+        self.assertRaises(ValueError, lambda : a1.create_data(data=data, shape=(1,1)))
         a2.create_data(data=data)
         assert(a2.data_extent == (123, 123))
 
