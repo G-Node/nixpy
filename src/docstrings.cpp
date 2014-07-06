@@ -201,33 +201,131 @@ const char* block_create_source = R"(
 
 // PyDataArray
 
-const char* data_array_label = R"()";
+const char* data_array_label = R"(
+    The label of the DataArray. The label corresponds to the label of the
+    x-axis of a plot. This is a read-write property and can be set to None.
 
-const char* data_array_unit = R"()";
+    :type: str
+    )";
 
-const char* data_array_expansion_origin = R"()";
+const char* data_array_unit = R"(
+    The unit of the values stored in the DataArray. This is a read-write property
+    and can be set to None.
 
-const char* data_array_polynom_coefficients = R"()";
+    :type: str
+    )";
 
-const char* data_array_data_extent = R"()";
+const char* data_array_expansion_origin = R"(
+    The expansion origin of the calibration polynom. This is a read-write
+    property and can be set to None. The default value is 0.
 
-const char* data_array_data_type = R"()";
+    :type: float)";
 
-const char* data_array_data = R"()";
+const char* data_array_polynom_coefficients = R"(
+    The polynom coefficients for the calibration. By default this is set
+    to a {0.0, 1.0} for a linear calibration with zero offset. This is a
+    read-write property and can be set to None
 
-const char* data_array_has_data = R"()";
+    :type: list of float
+    )";
 
-const char* data_array_create_set_dimension = R"()";
+const char* data_array_data_extent = R"(
+    The size of the data.
 
-const char* data_array_create_sampled_dimension = R"()";
+    :type: set of int
+    )";
 
-const char* data_array_create_range_dimension = R"()";
+const char* data_array_data_type = R"(
+    The data type of the data stored in the DataArray. This is a read only
+    property.
 
-const char* data_array_append_set_dimension = R"()";
+    :type: DataType
+    )";
 
-const char* data_array_append_sampled_dimension = R"()";
+const char* data_array_data = R"(
+    Get the data stored in the DataArray
 
-const char* data_array_append_range_dimension = R"()";
+    :type: numpy.array
+    )";
+
+const char* data_array_has_data = R"(
+    True if the DataArray has some data, false otherwise, This is a read-only
+    property.
+
+    :type: bool
+    )";
+
+const char* data_array_create_set_dimension = R"(
+    Create a new SetDimension at a specified dimension index. This adds a new
+    dimension descriptor of the type SetDimension that describes the dimension
+    of the data at the specified index.
+
+    :param index: The index of the dimension. Must be a value > 0 and <=
+                  len(dimensions) + 1.
+    :type index: int
+
+    :returns: The created dimension descriptor.
+    :rtype: SetDimension
+    )";
+
+const char* data_array_create_sampled_dimension = R"(
+    Create a new SampledDimension at a specified dimension index. This adds a
+    new dimension descriptor of the type SampledDimension that describes the
+    dimension of the data at the specified index.
+
+    :param index: The index of the dimension. Must be a value > 0 and <=
+                  len(dimensions) + 1.
+    :type index: int
+    :param sampling_interval:  The sampling interval of the dimension.
+    :type sampling_interval: float
+
+    :returns: The created dimension descriptor.
+    :rtype: SampledDimension
+    )";
+
+const char* data_array_create_range_dimension = R"(
+    Create a new RangeDimension at a specified dimension index. This adds a
+    new dimension descriptor of the type RangeDimension that describes the
+    dimension of the data at the specified index.
+
+    :param index: The index of the dimension. Must be a value > 0 and <=
+                  len(dimensions) + 1.
+    :type index: int
+    :param ticks: The ticks of the RangeDimension.
+    :type ticks: list of float
+
+    :returns: The created dimension descriptor.
+    :rtype: RangeDimension
+    )";
+
+const char* data_array_append_set_dimension = R"(
+    Append a new SetDimension to the list of existing dimension descriptors.
+
+    :returns: The newly created SetDimension.
+    :rtype: SetDimension
+    )";
+
+const char* data_array_append_sampled_dimension = R"(
+    Append a new SampledDimension to the list of existing dimension
+    descriptors.
+
+    :param sampling_interval: The sampling interval of the SetDimension
+                              to create.
+    :type sampling_interval: float
+
+    :returns: The newly created SampledDimension.
+    :rtype: SampledDimension
+    )";
+
+const char* data_array_append_range_dimension = R"(
+    Append a new RangeDimension to the list of existing dimension descriptors.
+
+    :param ticks: The ticks of the RangeDimension to create.
+    :type ticks: list of float
+
+    :returns: The newly created RangeDimension.
+    :rtype: RangeDimension
+    )";
 
 }
 }

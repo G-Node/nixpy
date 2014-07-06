@@ -19,6 +19,14 @@ class DataArrayMixin(DataArray):
 
     @property
     def dimensions(self):
+        """
+        A property containing all dimensions of a DataArray. Dimensions can be
+        obtained via their index. Dimensions can be deleted from the list. Adding
+        sources is done using the respective create and append methods for
+        dimension descriptors. This is a read only attribute.
+
+        :type: ProxyList of dimension descriptors.
+        """
         if not hasattr(self, "_dimensions"):
             setattr(self, "_dimensions", DimensionProxyList(self))
         return self._dimensions
