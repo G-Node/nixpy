@@ -15,129 +15,85 @@ namespace doc {
 
 // PyEntity
 
-static const char* entity_id = R"(
-    A property providing the ID of the Entity. The id is generated automatically,
-    therefore the property is read-only.
+extern const char* entity_id;
 
-    :type: str
-    )";
-
-static const char* entity_crated_at = R"(
-    The creation time of the entity. This is a read-only property. Use :py:meth:force_created_at in order to
-    change the creation time.
-
-    :type: int
-    )";
+extern const char* entity_crated_at;
 
 
-static const char* entity_force_created_at = R"(
-    Sets the creation time created_at to the given time.
+extern const char* entity_force_created_at;
 
-    :param time: The time to set
-    :type time: int
+extern const char* entity_updated_at;
 
-    :rtype: None
-    )";
-
-static const char* entity_updated_at = R"(
-    The time of the last update of the entity. This is a read-only property. Use force_updated_at in order
-    to change the update time.
-
-    :type: int
-    )";
-
-static const char* entity_force_updated_at = R"(
-    Sets the update time updated_at to the current time.
-
-    :rtype: None
-    )";
+extern const char* entity_force_updated_at;
 
 // PyNamedEntity
 
-static const char* entity_name = R"(
-    The name of an entity. The name serves as a human readable identifier.
-    This is a read-write property, but it can't be set to None.
+extern const char* entity_name;
 
-    :type: str
-    )";
+extern const char* entity_type;
 
-static const char* entity_type = R"(
-    The type of the entity. The type is used in order to add semantic meaning to the entity.
-    This is a read-write property, but it can't be set to None.
-
-    :type: str
-    )";
-
-static const char* entity_definition = R"(
-    The definition of the entity. The definition can contain a textual description of the
-    entity. This is an optional read-write property, and can be None if no definition is available.
-
-    :type: str
-    )";
+extern const char* entity_definition;
 
 // PyEntityWithMetadata
 
-static const char* entity_metadata = R"(
-    Associated metadata of the entity. Sections attached to the entity via this attribute can
-    provide additional annotations. This is an optional read-write property, and can be None if
-    no metadata is available.
+extern const char* entity_metadata;
 
-    :type: Section
-)";
+// PyFile
+
+extern const char* file_version;
+
+extern const char* file_format;
+
+extern const char* file_create_block;
+
+extern const char* file_create_section;
+
+extern const char* file_is_open;
+
+extern const char* file_close;
+
+extern const char* file_open;
 
 // PyBlock
 
-static const char* block_create_data_array = R"(
-    Create a new data array for this block.
+extern const char* block_create_data_array;
 
-    :param name: The name of the data array to create.
-    :type name: str
-    :param type: The type of the data array.
-    :type type: str
+extern const char* block_create_simple_tag;
 
-    :returns: The newly created data array.
-    :rtype: DataArray
-    )";
+extern const char* block_create_data_tag;
 
-static const char* block_create_simple_tag = R"(
-    Create a new simple tag for this block.
+extern const char* block_create_source;
 
-    :param name: The name of the tag to create.
-    :type name: str
-    :param type: The type of tag.
-    :type type: str
-    :param references: All referenced data arrays.
-    :type references: list
+// PyDataArray
 
-    :returns: The newly created tag.
-    :rtype: SimpleTag
-    )";
+extern const char* data_array_label;
 
-static const char* block_create_data_tag = R"(
-    Create a new simple tag for this block.
+extern const char* data_array_unit;
 
-    :param name: The name of the tag to create.
-    :type name: str
-    :param type: The type of tag.
-    :type type: str
-    :param positions: A data array defining all positions of the tag.
-    :type positions: DataArray
+extern const char* data_array_expansion_origin;
 
-    :returns: The newly created tag.
-    :rtype: DataTag
-    )";
+extern const char* data_array_polynom_coefficients;
 
-static const char* block_create_source = R"(
-    Create a new source on this block.
+extern const char* data_array_data_extent;
 
-    :param name: The name of the source to create.
-    :type name: str
-    :param type: The type of the source.
-    :type type: str
+extern const char* data_array_data_type;
 
-    :returns: The newly created source.
-    :rtype: Source
-    )";
+extern const char* data_array_data;
+
+extern const char* data_array_has_data;
+
+extern const char* data_array_create_set_dimension;
+
+extern const char* data_array_create_sampled_dimension;
+
+extern const char* data_array_create_range_dimension;
+
+extern const char* data_array_append_set_dimension;
+
+extern const char* data_array_append_sampled_dimension;
+
+extern const char* data_array_append_range_dimension;
+
 }
 }
 

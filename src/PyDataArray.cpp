@@ -103,30 +103,44 @@ void PyDataArray::do_export() {
     class_<DataArray, bases<base::EntityWithSources<base::IDataArray>>>("DataArray")
         .add_property("label",
                       OPT_GETTER(std::string, DataArray, label),
-                      setLabel)
+                      setLabel,
+                      doc::data_array_label)
         .add_property("unit",
                       OPT_GETTER(std::string, DataArray, unit),
-                      setUnit)
+                      setUnit,
+                      doc::data_array_unit)
         .add_property("expansion_origin",
                       OPT_GETTER(double, DataArray, expansionOrigin),
-                      setExpansionOrigin)
+                      setExpansionOrigin,
+                      doc::data_array_expansion_origin)
         .add_property("polynom_coefficients",
                       GETTER(std::vector<double>, DataArray, polynomCoefficients),
-                      setPolynomCoefficients)
+                      setPolynomCoefficients,
+                      doc::data_array_polynom_coefficients)
         .add_property("data_extent",
                       GETTER(NDSize, DataArray, dataExtent),
-                      SETTER(NDSize&, DataArray, dataExtent))
+                      SETTER(NDSize&, DataArray, dataExtent),
+                      doc::data_array_data_extent)
         // Data
-        .add_property("data_type", &DataArray::dataType)
-        .add_property("data", getData, setData)
-        .def("has_data", &DataArray::hasData)
+        .add_property("data_type", &DataArray::dataType,
+                      doc::data_array_data_type)
+        .add_property("data", getData, setData,
+                      doc::data_array_data)
+        .def("has_data", &DataArray::hasData,
+                      doc::data_array_has_data)
         // Dimensions
-        .def("create_set_dimension", &DataArray::createSetDimension)
-        .def("create_sampled_dimension", &DataArray::createSampledDimension)
-        .def("create_reange_dimension", &DataArray::createRangeDimension)
-        .def("append_set_dimension", &DataArray::appendSetDimension)
-        .def("append_sampled_dimension", &DataArray::appendSampledDimension)
-        .def("append_range_dimension", &DataArray::appendRangeDimension)
+        .def("create_set_dimension", &DataArray::createSetDimension,
+             doc::data_array_create_set_dimension)
+        .def("create_sampled_dimension", &DataArray::createSampledDimension,
+             doc::data_array_create_sampled_dimension)
+        .def("create_reange_dimension", &DataArray::createRangeDimension,
+             doc::data_array_create_range_dimension)
+        .def("append_set_dimension", &DataArray::appendSetDimension,
+             doc::data_array_append_set_dimension)
+        .def("append_sampled_dimension", &DataArray::appendSampledDimension,
+             doc::data_array_append_sampled_dimension)
+        .def("append_range_dimension", &DataArray::appendRangeDimension,
+             doc::data_array_append_range_dimension)
         .def("_dimension_count", &DataArray::dimensionCount)
         .def("_delete_dimension_by_pos", &DataArray::deleteDimension)
         .def("_get_dimension_by_pos", getDimension)

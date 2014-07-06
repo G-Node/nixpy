@@ -33,12 +33,29 @@ class FileMixin(File):
 
     @property
     def blocks(self):
+        """
+        A property containing all blocks of a file. Blocks can be obtained by their id or their
+        index. Blocks can be deleted from the list, when a block is deleted all its content
+        (data arrays, tags and sources) will be also deleted from the file.
+        Adding new Block is done via the crate_block method of File. This is a read-only attribute.
+
+        :type: ProxyList of Block entities.
+        """
         if not hasattr(self, "_blocks"):
             setattr(self, "_blocks", BlockProxyList(self))
         return self._blocks
 
     @property
     def sections(self):
+        """
+        A property containing all root sections of a file. Specific root sections can be obtained
+        by their id or their index. Sections can be deleted from this list. Notice: when a section
+        is deleted all its child section and properties will be removed too.
+        Adding a new Section is done via the crate_section method of File. This is a read-only
+        property.
+
+        :type: ProxyList of Section entities.
+        """
         if not hasattr(self, "_sections"):
             setattr(self, "_sections", SectionProxyList(self))
         return self._sections
