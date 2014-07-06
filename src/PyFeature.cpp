@@ -24,10 +24,19 @@ void PyFeature::do_export() {
 
     PyEntity<base::IFeature>::do_export("Feature");
 
+    enum_<LinkType>("LinkType")
+        .value("Tagged",  LinkType::Tagged)
+        .value("Untagged", LinkType::Untagged)
+        .value("Indexed", LinkType::Indexed)
+        ;
+
     class_<Feature, bases<base::Entity<base::IFeature>>>("Feature")
         .add_property("link_type",
                       GETTER(LinkType, Feature, linkType),
                       SETTER(LinkType, Feature, linkType))
+        .add_property("data",
+                      GETTER(DataArray, Feature, data),
+                      REF_SETTER(DataArray, Feature, data))
         ;
 
     to_python_converter<std::vector<Feature>, vector_transmogrify<Feature>>();

@@ -33,6 +33,7 @@ nixpy_sources = [
     'src/PyDataArray.cpp',
     'src/PyDimensions.cpp',
     'src/PyFeature.cpp',
+    'src/PySimpleTag.cpp',
 ]
 
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
