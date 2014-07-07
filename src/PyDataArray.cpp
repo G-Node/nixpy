@@ -126,6 +126,16 @@ static nix::DataType py_dtype_to_nix_dtype(const PyArray_Descr *dtype)
     return nix::DataType::Nothing;
 }
 
+static nix::DataType array_desc_as_dtype(PyArrayObject *array) {
+    nix::DataType nix_dtype = py_dtype_to_nix_dtype(PyArray_DESCR(array));
+
+    if (nix_dtype == nix::DataType::Nothing) {
+        throw std::invalid_argument("Unsupported dtype for data");
+    }
+
+    return nix_dtype;
+}
+
 static PyArrayObject *make_array(PyObject *data, int requirements) {
     if (! PyArray_Check(data)) {
         throw std::invalid_argument("Data not a NumPy array");
@@ -157,11 +167,7 @@ static void readData(DataArray& da, PyObject *data) {
 
     PyArrayObject *array = make_array(data, NPY_ARRAY_CARRAY);
 
-    nix::DataType nix_dtype =  py_dtype_to_nix_dtype(PyArray_DESCR(array));
-    if (nix_dtype == nix::DataType::Nothing) {
-        throw std::invalid_argument("Unsupported dtype for data");
-    }
-
+    nix::DataType nix_dtype = array_desc_as_dtype(array);
     nix::NDSize data_shape = array_shape_as_ndsize(array);
     nix::NDSize offset(data_shape.size(), 0);
 
@@ -173,11 +179,7 @@ static void writeData(DataArray& da, PyObject *data) {
 
     PyArrayObject *array = make_array(data, NPY_ARRAY_CARRAY_RO);
 
-    nix::DataType nix_dtype =  py_dtype_to_nix_dtype(PyArray_DESCR(array));
-    if (nix_dtype == nix::DataType::Nothing) {
-        throw std::invalid_argument("Unsupported dtype for data");
-    }
-
+    nix::DataType nix_dtype = array_desc_as_dtype(array);
     nix::NDSize data_shape = array_shape_as_ndsize(array);
     nix::NDSize offset(data_shape.size(), 0);
 
