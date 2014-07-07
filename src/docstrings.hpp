@@ -94,6 +94,17 @@ extern const char* data_array_append_sampled_dimension;
 
 extern const char* data_array_append_range_dimension;
 
+// PySimpleTag
+
+extern const char* simple_tag_units;
+
+extern const char* simple_tag_position;
+
+extern const char* simple_tag_extent;
+
+extern const char* simple_tag_create_feature;
+
+
 }
 }
 

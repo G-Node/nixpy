@@ -146,6 +146,36 @@ DataArray API
     :inherited-members:
     :undoc-members:
 
+Tags
+====
+
+Besides the DataArray the tag entities can be considered as the other
+core entities of the data model.
+They are meant to attach annotations directly to the data and to establish meaningful
+links between different kinds of stored data.
+Most importantly tags allow the definition of points or regions of interest in data
+that is stored in other DataArray entities. The data array entities the
+tag applies to are defined by its property references.
+
+Further the referenced data is defined by an origin vector called position
+and an optional extent vector that defines its size.
+Therefore position and extent of a tag, together with the references field
+defines a group of points or regions of interest collected from a subset of all
+available DataArray entities.
+
+Further tags have a field called features which makes it possible to associate
+other data with the tag.  Semantically a feature of a tag is some additional data that
+contains additional information about the points of hyperslabs defined by the tag.
+This could be for example data that represents a stimulus (e.g. an image or a
+signal) that was applied in a certain interval during the recording.
+
+SimpleTag API
+-------------
+
+.. autoclass:: nix.SimpleTag
+    :members:
+    :inherited-members:
+    :undoc-members:
 
 Source
 ======
