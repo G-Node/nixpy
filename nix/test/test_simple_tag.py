@@ -79,37 +79,37 @@ class TestSimpleTag(unittest.TestCase):
         assert(self.my_tag.created_at == 1403530068)
 
     def test_simple_tag_units(self):
-        assert(self.my_tag.units == [])
+        assert(self.my_tag.units == ())
 
         self.my_tag.units = ["mV", "ms"]
-        assert(self.my_tag.units == ["mV", "ms"])
+        assert(self.my_tag.units == ("mV", "ms"))
 
         # TODO append / remove does not work, make tuple?
 
         self.my_tag.units = []
-        assert(self.my_tag.units == [])
+        assert(self.my_tag.units == ())
 
     def test_simple_tag_position(self):
-        assert(self.my_tag.position == [])
+        assert(self.my_tag.position == ())
 
-        self.my_tag.position = [1.0, 2.0, 3.0]
-        assert(self.my_tag.position == [1.0, 2.0, 3.0])
+        self.my_tag.position = (1.0, 2.0, 3.0)
+        assert(self.my_tag.position == (1.0, 2.0, 3.0))
 
         # TODO append / remove does not work, make tuple?
 
         self.my_tag.position = []
-        assert(self.my_tag.position == [])
+        assert(self.my_tag.position == ())
 
     def test_simple_tag_extent(self):
-        assert(self.my_tag.extent == [])
+        assert(self.my_tag.extent == ())
 
-        self.my_tag.extent = [1.0, 2.0, 3.0]
-        assert(self.my_tag.extent == [1.0, 2.0, 3.0])
+        self.my_tag.extent = (1.0, 2.0, 3.0)
+        assert(self.my_tag.extent == (1.0, 2.0, 3.0))
 
         # TODO append / remove does not work, make tuple?
 
         self.my_tag.extent = []
-        assert(self.my_tag.extent == [])
+        assert(self.my_tag.extent == ())
 
     def test_simple_tag_references(self):
         assert(len(self.my_tag.references) == 1)

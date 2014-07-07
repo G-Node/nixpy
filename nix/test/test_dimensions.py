@@ -10,10 +10,10 @@ import unittest
 
 from nix import *
 
-test_range  = [float(i) for i in range(10)]
+test_range  = tuple([float(i) for i in range(10)])
 test_sampl  = 0.1
 test_label  = "test label"
-test_labels = [str(i) + "_label" for i in range(10)]
+test_labels = tuple([str(i) + "_label" for i in range(10)])
 
 class TestDimensions(unittest.TestCase):
 
@@ -34,7 +34,7 @@ class TestDimensions(unittest.TestCase):
         assert(self.set_dim.index == 1)
         assert(self.set_dim.dimension_type == DimensionType.Set)
 
-        assert(self.set_dim.labels == [])
+        assert(self.set_dim.labels == ())
         self.set_dim.labels = test_labels
         assert(self.set_dim.labels == test_labels)
 
@@ -81,7 +81,7 @@ class TestDimensions(unittest.TestCase):
         assert(self.range_dim.unit is None)
 
         assert(self.range_dim.ticks == test_range)
-        other = [i*3.14 for i in range(10)]
+        other = tuple([i*3.14 for i in range(10)])
         self.range_dim.ticks = other
         assert(self.range_dim.ticks == other)
 
