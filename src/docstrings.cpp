@@ -327,5 +327,38 @@ const char* data_array_append_range_dimension = R"(
     :rtype: RangeDimension
     )";
 
+
+const char* simple_tag_units = R"(
+    Property containing the units of the tag. The tag must provide a unit for each
+    dimension of the position or extent vector. This is a read-write property.
+
+    :type: list of str
+    )";
+
+const char* simple_tag_position = R"(
+    The position defined by the tag. This is a read-write property.
+
+    :type: list of float
+    )";
+
+const char* simple_tag_extent = R"(
+    The extent defined by the tag. This is an optional read-write property and may be set
+    to None.
+
+    :type: list of float
+    )";
+
+const char* simple_tag_create_feature = R"(
+    Create a new feature.
+
+    :param data: The data array of this feature.
+    :type data: DataArray
+    :param link_type: The link type of thes feature.
+    :type link_type: LinkType
+
+    :returns: The created feature object.
+    :rtype: Feature
+    )";
+
 }
 }
