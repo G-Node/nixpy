@@ -127,6 +127,36 @@ static nix::DataType py_dtype_to_nix_dtype(const PyArray_Descr *dtype)
 }
 
 
+static void writeData(DataArray& da, PyObject *data) {
+    if (! PyArray_Check(data)) {
+        throw std::invalid_argument("Data not a NumPy array");
+    }
+
+    PyArrayObject *array = reinterpret_cast<PyArrayObject *>(data);
+
+    nix::DataType nix_dtype =  py_dtype_to_nix_dtype(PyArray_DESCR(array));
+    if (nix_dtype == nix::DataType::Nothing) {
+        throw std::invalid_argument("Unsupported dtype for data");
+    }
+
+    if (! PyArray_CHKFLAGS(array, NPY_ARRAY_CARRAY_RO)) {
+        throw std::invalid_argument("data must be c-contiguous and aligned");
+    }
+
+    int array_rank = PyArray_NDIM(array);
+    npy_intp *array_shape = PyArray_SHAPE(array);
+
+    nix::NDSize data_shape(array_rank);
+    for (int i = 0; i < array_rank; i++) {
+        data_shape[i] = array_shape[i];
+    }
+
+    nix::NDSize offset(array_rank, 0);
+
+    da.setData(nix_dtype, PyArray_DATA(array), data_shape, offset);
+}
+
+
 static void createData(DataArray& da, const NDSize &shape, PyObject *dtype_obj, PyObject *data) {
     PyArray_Descr* py_dtype = nullptr;
 
@@ -141,29 +171,8 @@ static void createData(DataArray& da, const NDSize &shape, PyObject *dtype_obj, 
 
     da.createData(nix_dtype, shape);
 
-    if (data != Py_None && PyArray_Check(data)) {
-        PyArrayObject *array = reinterpret_cast<PyArrayObject *>(data);
-
-        nix_dtype =  py_dtype_to_nix_dtype(PyArray_DESCR(array));
-        if (nix_dtype == nix::DataType::Nothing) {
-            throw std::invalid_argument("Unsupported dtype for data");
-        }
-
-        if (! PyArray_CHKFLAGS(array, NPY_ARRAY_CARRAY_RO)) {
-            throw std::invalid_argument("data must be c-contiguous and aligned");
-        }
-
-        int array_rank = PyArray_NDIM(array);
-        npy_intp *array_shape = PyArray_SHAPE(array);
-
-        nix::NDSize data_shape(array_rank);
-        for (int i = 0; i < array_rank; i++) {
-            data_shape[i] = array_shape[i];
-        }
-
-        nix::NDSize offset(array_rank, 0);
-
-        da.setData(nix_dtype, PyArray_DATA(array), data_shape, offset);
+    if (data != Py_None) {
+        writeData(da, data);
     }
 
     Py_DECREF(py_dtype);
