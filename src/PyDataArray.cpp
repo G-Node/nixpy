@@ -140,6 +140,19 @@ static PyArrayObject *make_array(PyObject *data, int requirements) {
      return array;
 }
 
+static NDSize array_shape_as_ndsize(PyArrayObject *array) {
+    int array_rank = PyArray_NDIM(array);
+    npy_intp *array_shape = PyArray_SHAPE(array);
+
+    nix::NDSize data_shape(array_rank);
+    for (int i = 0; i < array_rank; i++) {
+        data_shape[i] = array_shape[i];
+    }
+
+    return data_shape;
+}
+
+
 static void readData(DataArray& da, PyObject *data) {
 
     PyArrayObject *array = make_array(data, NPY_ARRAY_CARRAY);
@@ -149,15 +162,8 @@ static void readData(DataArray& da, PyObject *data) {
         throw std::invalid_argument("Unsupported dtype for data");
     }
 
-    int array_rank = PyArray_NDIM(array);
-    npy_intp *array_shape = PyArray_SHAPE(array);
-
-    nix::NDSize data_shape(array_rank);
-    for (int i = 0; i < array_rank; i++) {
-        data_shape[i] = array_shape[i];
-    }
-
-    nix::NDSize offset(array_rank, 0);
+    nix::NDSize data_shape = array_shape_as_ndsize(array);
+    nix::NDSize offset(data_shape.size(), 0);
 
     da.getData(nix_dtype, PyArray_DATA(array), data_shape, offset);
 }
@@ -172,15 +178,8 @@ static void writeData(DataArray& da, PyObject *data) {
         throw std::invalid_argument("Unsupported dtype for data");
     }
 
-    int array_rank = PyArray_NDIM(array);
-    npy_intp *array_shape = PyArray_SHAPE(array);
-
-    nix::NDSize data_shape(array_rank);
-    for (int i = 0; i < array_rank; i++) {
-        data_shape[i] = array_shape[i];
-    }
-
-    nix::NDSize offset(array_rank, 0);
+    nix::NDSize data_shape = array_shape_as_ndsize(array);
+    nix::NDSize offset(data_shape.size(), 0);
 
     da.setData(nix_dtype, PyArray_DATA(array), data_shape, offset);
 }
