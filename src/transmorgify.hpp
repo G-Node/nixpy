@@ -22,13 +22,15 @@ namespace nixpy {
 template<typename T>
 struct vector_transmogrify {
     static PyObject* convert(const std::vector<T>& vec) {
-        boost::python::list l = boost::python::list();
+        namespace bp = boost::python;
+
+        bp::list l = bp::list();
 
         for(auto& item : vec) {
             l.append(item);
         }
 
-        return boost::python::incref(l.ptr());
+        return bp::incref(bp::tuple(l).ptr());
     }
 
     typedef boost::python::converter::rvalue_from_python_stage1_data py_s1_data;

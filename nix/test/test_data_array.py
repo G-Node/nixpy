@@ -97,20 +97,20 @@ class TestDataArray(unittest.TestCase):
         assert(self.array.expansion_origin is None)
 
     def test_data_array_coefficients(self):
-        assert(self.array.polynom_coefficients == [])
+        assert(self.array.polynom_coefficients == ())
 
-        self.array.polynom_coefficients = [1.1, 2.2]
-        assert(self.array.polynom_coefficients == [1.1, 2.2])
+        self.array.polynom_coefficients = (1.1, 2.2)
+        assert(self.array.polynom_coefficients == (1.1, 2.2))
 
         # TODO delete does not work
 
     def test_data_array_data(self):
         import numpy as np
 
-        assert(self.array.polynom_coefficients == [])
+        assert(self.array.polynom_coefficients == ())
         assert(not self.array.has_data())
 
-        data = [float(i) for i in range(100)]
+        data = tuple([float(i) for i in range(100)])
         self.array.data = data
         assert(self.array.has_data())
         assert(self.array.data == data)
