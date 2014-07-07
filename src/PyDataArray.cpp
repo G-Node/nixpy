@@ -238,6 +238,7 @@ void PyDataArray::do_export() {
                       doc::data_array_has_data)
 
         .def("_create_data", createData)
+        .def("_write_data", writeData)
         // Dimensions
         .def("create_set_dimension", &DataArray::createSetDimension,
              doc::data_array_create_set_dimension)
