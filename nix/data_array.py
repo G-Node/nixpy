@@ -33,6 +33,7 @@ class DataArrayMixin(DataArray):
                 shape = data.shape
 
         self._create_data(shape, dtype, data)
+        return DataSet(self)
 
     @property
     def dimensions(self):
@@ -94,3 +95,17 @@ class DimensionProxyList(object):
 
     def __repr__(self):
         return str(self)
+
+
+class DataSet(object):
+    """
+    Data IO object for DataArray.
+    """
+    def __init__(self, obj):
+        self.__obj = obj
+
+    def write_direct(self, data):
+        self.__obj._write_data(data)
+
+    def read_direct(self, data):
+        self.__obj._read_data(data)
