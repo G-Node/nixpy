@@ -119,16 +119,23 @@ class TestDataArray(unittest.TestCase):
         assert(self.array.data_extent == (200, ))
 
         # TODO delete does not work
+        data = np.eye(123)
         a1 = self.block.create_data_array("double array", "signal")
         self.assertRaises(ValueError, a1.create_data)
-        a1.create_data((123, 123))
+        dset = a1.create_data((123, 123))
         assert(a1.data_extent == (123, 123))
+        dset.write_direct(data)
+        dout = np.empty_like(data)
+        dset.read_direct(dout)
+        assert(np.array_equal(data, dout))
 
-        data = np.eye(123)
         a2 = self.block.create_data_array("identity array", "signal")
         self.assertRaises(ValueError, lambda : a1.create_data(data=data, shape=(1,1)))
         a2.create_data(data=data)
         assert(a2.data_extent == (123, 123))
+        dout = np.empty_like(data)
+        dset.read_direct(dout)
+        assert(np.array_equal(data, dout))
 
         a3 = self.block.create_data_array("int identity array", "signal")
         a3.create_data(dtype='i4', data=data)
