@@ -109,12 +109,18 @@ class TestDataArray(unittest.TestCase):
 
         assert(self.array.polynom_coefficients == ())
         assert(not self.array.has_data())
+        assert(self.array.data is None)
 
-        data = tuple([float(i) for i in range(100)])
-        self.array.data = data
+        data = np.array([float(i) for i in range(100)])
+        dout = np.empty_like(data)
+        self.array.create_data(data=data)
         assert(self.array.has_data())
-        assert(self.array.data == data)
-        assert(self.array.data_extent == (100, ))
+        self.array.data.read_direct(dout)
+        assert(np.array_equal(data, dout))
+        dout = np.array(self.array.data)
+        assert(np.array_equal(data, dout))
+        assert(self.array.data_extent == data.shape)
+        assert(self.array.data_extent == self.array.data.shape)
         self.array.data_extent = (200, )
         assert(self.array.data_extent == (200, ))
 

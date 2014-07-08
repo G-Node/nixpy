@@ -318,12 +318,6 @@ const char* data_array_data_type = R"(
     :type: DataType
     )";
 
-const char* data_array_data = R"(
-    Get the data stored in the DataArray
-
-    :type: numpy.array
-    )";
-
 const char* data_array_has_data = R"(
     True if the DataArray has some data, false otherwise, This is a read-only
     property.

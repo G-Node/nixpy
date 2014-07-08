@@ -11,6 +11,7 @@ from __future__ import absolute_import
 from nix.core import DataArray
 from nix.util.inject import Inject
 
+import numpy as np
 
 class DataArrayMixin(DataArray):
 
@@ -33,7 +34,22 @@ class DataArrayMixin(DataArray):
                 shape = data.shape
 
         self._create_data(shape, dtype, data)
-        return DataSet(self)
+        return self.data
+
+    @property
+    def data(self):
+        """
+        A property that will give access to the DataArray's data via a DataSet
+        object.
+
+        :type: DataSet
+        """
+        if not self.has_data():
+            return None
+
+        if not hasattr(self, "_data"):
+            setattr(self, "_data", DataSet(self))
+        return self._data
 
     @property
     def dimensions(self):
@@ -103,6 +119,18 @@ class DataSet(object):
     """
     def __init__(self, obj):
         self.__obj = obj
+
+    def __array__(self):
+        raw = np.empty(self.shape)
+        self.read_direct(raw)
+        return raw
+
+    @property
+    def shape(self):
+        """
+        :type: tupe of data array dimensions.
+        """
+        return self.__obj.data_extent
 
     def write_direct(self, data):
         self.__obj._write_data(data)

@@ -96,8 +96,6 @@ extern const char* data_array_data_extent;
 
 extern const char* data_array_data_type;
 
-extern const char* data_array_data;
-
 extern const char* data_array_has_data;
 
 extern const char* data_array_create_set_dimension;
