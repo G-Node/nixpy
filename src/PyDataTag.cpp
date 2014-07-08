@@ -71,13 +71,16 @@ void PyDataTag::do_export() {
 
         .add_property("positions",
                       GETTER(DataArray, DataTag, positions),
-                      REF_SETTER(DataArray, DataTag, positions))
+                      REF_SETTER(DataArray, DataTag, positions),
+                      doc::data_tag_positions)
         .add_property("extents",
                       GETTER(DataArray, DataTag, extents),
-                      REF_SETTER(DataArray, DataTag, extents))
+                      REF_SETTER(DataArray, DataTag, extents),
+                      doc::data_tag_extents)
         .add_property("units",
                       GETTER(std::vector<std::string>, DataTag, units),
-                      setUnits)
+                      setUnits,
+                      doc::data_tag_units)
 
         // References
         .def("_add_reference_by_id", REF_SETTER(std::string, DataTag, addReference))
@@ -88,7 +91,7 @@ void PyDataTag::do_export() {
         .def("_delete_reference_by_id", REMOVER(std::string, DataTag, removeReference))
 
         // Features
-        .def("create_feature", &createNewFeature)
+        .def("create_feature", &createNewFeature, doc::data_tag_create_feature)
         .def("_has_feature_by_id", CHECKER(std::string, DataTag, hasFeature))
         .def("_feature_count", &DataTag::featureCount)
         .def("_get_feature_by_id", &getFeatureById)
