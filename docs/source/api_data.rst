@@ -188,6 +188,14 @@ SimpleTag API
     :inherited-members:
     :undoc-members:
 
+SimpleTag API
+-------------
+
+.. autoclass:: nix.DataTag
+    :members:
+    :inherited-members:
+    :undoc-members:
+
 Source
 ======
 

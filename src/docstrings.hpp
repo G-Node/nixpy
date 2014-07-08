@@ -120,6 +120,15 @@ extern const char* simple_tag_extent;
 
 extern const char* simple_tag_create_feature;
 
+// PyDataTag
+
+extern const char* data_tag_units;
+
+extern const char* data_tag_positions;
+
+extern const char* data_tag_extents;
+
+extern const char* data_tag_create_feature;
 
 }
 }
