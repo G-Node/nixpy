@@ -33,11 +33,7 @@ BOOST_PYTHON_MODULE(core)
     PyDimensions::do_export();
     PyFeature::do_export();
     PySimpleTag::do_export();
-
-    PyEntityWithSources<IDataTag>::do_export("DataTag");
-    class_<DataTag, bases<EntityWithSources<IDataTag>>>("DataTag");
-    to_python_converter<std::vector<DataTag>, vector_transmogrify<DataTag>>();
-    to_python_converter<boost::optional<DataTag>, option_transmogrify<DataTag>>();
+    PyDataTag::do_export();
 
     to_python_converter<boost::optional<std::string>, option_transmogrify<std::string>>();
     option_transmogrify<std::string>::register_from_python();

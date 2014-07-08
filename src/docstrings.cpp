@@ -423,7 +423,39 @@ const char* simple_tag_create_feature = R"(
 
     :param data: The data array of this feature.
     :type data: DataArray
-    :param link_type: The link type of thes feature.
+    :param link_type: The link type of this feature.
+    :type link_type: LinkType
+
+    :returns: The created feature object.
+    :rtype: Feature
+    )";
+
+const char* data_tag_units = R"(
+    Property containing the units of the tag. The tag must provide a unit for each
+    dimension of the positions or extents vector. This is a read-write property.
+
+    :type: list of str
+    )";
+
+const char* data_tag_positions = R"(
+    The positions defined by the tag. This is a read-write property.
+
+    :type: DataArray
+    )";
+
+const char* data_tag_extents = R"(
+    The extents defined by the tag. This is an optional read-write property and may be set
+    to None.
+
+    :type: DataArray or None
+    )";
+
+const char* data_tag_create_feature = R"(
+    Create a new feature.
+
+    :param data: The data array of this feature.
+    :type data: DataArray
+    :param link_type: The link type of this feature.
     :type link_type: LinkType
 
     :returns: The created feature object.

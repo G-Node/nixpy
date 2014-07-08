@@ -158,6 +158,10 @@ struct PySimpleTag {
     static void do_export();
 };
 
+struct PyDataTag {
+    static void do_export();
+};
+
 }
 
 #endif
