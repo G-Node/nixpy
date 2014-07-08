@@ -29,12 +29,28 @@ class SectionMixin(Section):
 
     @property
     def sections(self):
+        """
+        A property providing all child sections of a section. Child sections can be accessed by
+        index or by their id. Sections can also be deleted: if a section is deleted, all its
+        properties and child sections are removed from the file too.
+        Adding new sections is achieved using the create_section method. This is a read-only
+        attribute.
+
+        :type: ProxyList of Section
+        """
         if not hasattr(self, "_sections"):
             setattr(self, "_sections", SectionProxyList(self))
         return self._sections
 
     @property
     def properties(self):
+        """
+        A property containing all Property entities associated with the section. Properties can
+        be accessed by index of via their id. Properties can be deleted from the list. Adding
+        new properties is done using the create_property method. This is a read-only attribute.
+
+        :type: ProxyList of Property
+        """
         if not hasattr(self, "_properties"):
             setattr(self, "_properties", PropertyProxyList(self))
         return self._properties

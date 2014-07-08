@@ -64,6 +64,24 @@ extern const char* block_create_data_tag;
 
 extern const char* block_create_source;
 
+// PySection
+
+extern const char* section_repository;
+
+extern const char* section_mapping;
+
+extern const char* section_link;
+
+extern const char* section_parent;
+
+extern const char* section_create_section;
+
+extern const char* section_create_property;
+
+extern const char* section_has_property_with_name;
+
+extern const char* section_get_property_with_name;
+
 // PyDataArray
 
 extern const char* data_array_label;

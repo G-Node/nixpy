@@ -145,6 +145,82 @@ const char* file_open = R"(
     :rtype: File
     )";
 
+// PySection
+
+const char* section_repository = R"(
+    URL to the terminology repository the section is associated with.
+    This is an optional read-write property and may be set to None.
+
+    :type: str
+    )";
+
+const char* section_mapping = R"(
+    The mapping information of the section.
+    This is an optional read-write property and may be set to None.
+
+    :type: str
+    )";
+
+const char* section_link = R"(
+    Link to another section. If a section is linked to another section, the
+    linking section inherits all properties from the target section.
+    This is an optional read-write property and may be set to None.
+
+    :type: Section
+    )";
+
+const char* section_parent = R"(
+    The parent section. This is a read-only property. For root sections
+    this property is always None.
+
+    :type: Section
+    )";
+
+const char* section_create_section = R"(
+    Creates a new subsection that is a child of this section entity.
+
+    :param name: The name of the section to create.
+    :type name: str
+    :param type: The type of the section.
+    :type type: str
+
+    :returns: The newly created section.
+    :rtype: Section
+    )";
+
+const char* section_create_property = R"(
+    Add a new property to the section.
+
+    :param name: The name of the property to create.
+    :type name: str
+    :param values: The values of the property.
+    :type values: list of Value
+
+    :returns: The newly created property.
+    :rtype: Property
+    )";
+
+const char* section_has_property_with_name = R"(
+    Checks whether a section has a property with a certain name.
+
+    :param name: The name to check.
+    :type name: str
+
+    :returns: True if the section has a property with the given name,
+              False otherwise.
+    :rtype: bool
+    )";
+
+const char* section_get_property_with_name = R"(
+    Get a property by its name.
+
+    :param name: The name to check.
+    :type name: str
+
+    :returns: The property with the given name.
+    :rtype: Property
+    )";
+
 // PyBlock
 
 const char* block_create_data_array = R"(
