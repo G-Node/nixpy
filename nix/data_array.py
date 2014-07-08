@@ -36,6 +36,21 @@ class DataArrayMixin(DataArray):
         return DataSet(self)
 
     @property
+    def data(self):
+        """
+        A property that will give access to the DataArray's data via a DataSet
+        object.
+
+        :type: DataSet
+        """
+        if not self.has_data():
+            return None
+
+        if not hasattr(self, "_data"):
+            setattr(self, "_data", DataSet(self))
+        return self._data
+
+    @property
     def dimensions(self):
         """
         A property containing all dimensions of a DataArray. Dimensions can be
