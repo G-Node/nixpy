@@ -146,6 +146,17 @@ DataArray API
     :inherited-members:
     :undoc-members:
 
+DataSet
+=======
+
+The DataSet object is used for data input/output to the underlying storage.
+
+.. autoclass:: nix.data_array.DataSet
+    :members:
+    :inherited-members:
+    :undoc-members:
+
+
 Tags
 ====
 
