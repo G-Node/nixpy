@@ -87,13 +87,16 @@ void PySimpleTag::do_export() {
 
         .add_property("units",
                       GETTER(std::vector<std::string>, SimpleTag, units),
-                      setUnits)
+                      setUnits,
+                      doc::simple_tag_units)
         .add_property("position",
                       GETTER(std::vector<double>, SimpleTag, position),
-                      setPosition)
+                      setPosition,
+                      doc::simple_tag_position)
         .add_property("extent",
                       GETTER(std::vector<double>, SimpleTag, extent),
-                      setExtent)
+                      setExtent,
+                      doc::simple_tag_extent)
         // References
         .def("_add_reference_by_id", REF_SETTER(std::string, SimpleTag, addReference))
         .def("_has_reference_by_id", CHECKER(std::string, SimpleTag, hasReference))
@@ -102,7 +105,7 @@ void PySimpleTag::do_export() {
         .def("_get_reference_by_pos", &getReferenceByPos)
         .def("_delete_reference_by_id", REMOVER(std::string, SimpleTag, removeReference))
         // Features
-        .def("create_feature", &createNewFeature)
+        .def("create_feature", &createNewFeature, doc::simple_tag_create_feature)
         .def("_has_feature_by_id", CHECKER(std::string, SimpleTag, hasFeature))
         .def("_feature_count", &SimpleTag::featureCount)
         .def("_get_feature_by_id", &getFeatureById)

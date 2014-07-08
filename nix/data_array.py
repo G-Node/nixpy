@@ -17,6 +17,24 @@ class DataArrayMixin(DataArray):
     class __metaclass__(Inject, DataArray.__class__):
         pass
 
+    def create_data(self, shape=None, dtype=None, data=None):
+        if data is None:
+            if shape is None:
+                raise ValueError("Either shape and or data must not be None")
+            if dtype is None:
+                dtype = 'f8'
+        else:
+            if dtype is None:
+                dtype = data.dtype
+            if shape is not None:
+                if shape != data.shape:
+                    raise ValueError("Shape must equal data.shape")
+            else:
+                shape = data.shape
+
+        self._create_data(shape, dtype, data)
+        return DataSet(self)
+
     @property
     def dimensions(self):
         """
@@ -77,3 +95,17 @@ class DimensionProxyList(object):
 
     def __repr__(self):
         return str(self)
+
+
+class DataSet(object):
+    """
+    Data IO object for DataArray.
+    """
+    def __init__(self, obj):
+        self.__obj = obj
+
+    def write_direct(self, data):
+        self.__obj._write_data(data)
+
+    def read_direct(self, data):
+        self.__obj._read_data(data)
