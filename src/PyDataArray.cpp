@@ -292,13 +292,11 @@ void PyDataArray::do_export() {
         .def("__repr__", &toStr<DataArray>)
         ;
 
-
     to_python_converter<std::vector<DataArray>, vector_transmogrify<DataArray>>();
     vector_transmogrify<DataArray>::register_from_python();
 
-
-
     to_python_converter<boost::optional<DataArray>, option_transmogrify<DataArray>>();
+    option_transmogrify<DataArray>::register_from_python();
 }
 
 }

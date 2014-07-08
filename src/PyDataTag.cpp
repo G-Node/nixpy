@@ -22,11 +22,28 @@ namespace nixpy {
 
 // Units
 
-void setUnits(DataTag& st, const std::vector<std::string>& units) {
+void setUnits(DataTag& dt, const std::vector<std::string>& units) {
     if (!units.empty())
-        st.units(units);
+        dt.units(units);
     else
-        st.units(boost::none);
+        dt.units(boost::none);
+}
+
+// Extents
+
+boost::optional<DataArray> getExtents(DataTag& dt) {
+     DataArray da = dt.extents();
+     if (da)
+         return boost::optional<DataArray>(da);
+     else
+         return boost::none;
+}
+
+void setExtents(DataTag& dt, const boost::optional<DataArray>& data) {
+    if (data)
+        dt.extents(*data);
+    else
+        dt.extents(boost::none);
 }
 
 // getter for Reference
@@ -45,8 +62,8 @@ boost::optional<DataArray> getReferenceByPos(const DataTag& st, size_t index) {
 
 // operations for Feature
 
-Feature createNewFeature(DataTag& st, const DataArray &data, LinkType link_type) {
-    Feature f = st.createFeature(data, link_type);
+Feature createNewFeature(DataTag& dt, const DataArray &data, LinkType link_type) {
+    Feature f = dt.createFeature(data, link_type);
 
     return f;
 }
@@ -74,8 +91,8 @@ void PyDataTag::do_export() {
                       REF_SETTER(DataArray, DataTag, positions),
                       doc::data_tag_positions)
         .add_property("extents",
-                      GETTER(DataArray, DataTag, extents),
-                      REF_SETTER(DataArray, DataTag, extents),
+                      getExtents,
+                      setExtents,
                       doc::data_tag_extents)
         .add_property("units",
                       GETTER(std::vector<std::string>, DataTag, units),

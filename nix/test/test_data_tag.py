@@ -96,14 +96,14 @@ class TestDataTag(unittest.TestCase):
 
         new_positions = self.block.create_data_array("pos", "position")
         self.my_tag.positions = new_positions
-        assert(self.my_tag.position == new_positions)
+        assert(self.my_tag.positions == new_positions)
 
         self.assertRaises(TypeError, set_none)
 
-        self.my_tag.position = old_positions
+        self.my_tag.positions = old_positions
         assert(self.my_tag.positions == old_positions)
 
-    def test_data_tag_extent(self):
+    def test_data_tag_extents(self):
         assert(self.my_tag.extents is None)
 
         new_extents = self.block.create_data_array("ext", "extent")
@@ -114,7 +114,7 @@ class TestDataTag(unittest.TestCase):
         assert(self.my_tag.extents is None)
 
     def test_data_tag_references(self):
-        assert(len(self.my_tag.references) == 1)
+        assert(len(self.my_tag.references) == 0)
 
         self.assertRaises(TypeError, lambda _: self.my_tag.references.append(100))
 
@@ -124,23 +124,21 @@ class TestDataTag(unittest.TestCase):
         self.my_tag.references.append(reference1)
         self.my_tag.references.append(reference2)
 
-        assert(len(self.my_tag.references) == 3)
+        assert(len(self.my_tag.references) == 2)
         assert(reference1 in self.my_tag.references)
         assert(reference2 in self.my_tag.references)
 
         del self.my_tag.references[reference2]
-        assert(self.my_tag.references[0] == self.my_array)
-        assert(self.my_tag.references[1] == reference1)
+        assert(self.my_tag.references[0] == reference1)
 
         del self.my_tag.references[reference1]
-        assert(len(self.my_tag.references) == 1)
+        assert(len(self.my_tag.references) == 0)
 
     def test_data_tag_features(self):
         assert(len(self.my_tag.features) == 0)
 
         data_array = self.block.create_data_array("feature", "stimuli")
         feature = self.my_tag.create_feature(data_array, LinkType.Untagged)
-
         assert(len(self.my_tag.features) == 1)
 
         assert(feature      in self.my_tag.features)

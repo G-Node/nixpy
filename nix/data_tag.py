@@ -13,7 +13,7 @@ from nix.util.inject import Inject
 from nix.simple_tag import ReferenceProxyList, FeatureProxyList
 
 
-class SimpleTagMixin(DataTag):
+class DataTagMixin(DataTag):
 
     class __metaclass__(Inject, DataTag.__class__):
         pass

@@ -108,9 +108,9 @@ extern const char* simple_tag_create_feature;
 
 extern const char* data_tag_units;
 
-extern const char* data_tag_position;
+extern const char* data_tag_positions;
 
-extern const char* data_tag_extent;
+extern const char* data_tag_extents;
 
 extern const char* data_tag_create_feature;
 
