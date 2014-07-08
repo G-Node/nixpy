@@ -119,6 +119,13 @@ class DataSet(object):
     def __init__(self, obj):
         self.__obj = obj
 
+    @property
+    def shape(self):
+        """
+        :type: tupe of data array dimensions.
+        """
+        return self.__obj.data_extent
+
     def write_direct(self, data):
         self.__obj._write_data(data)
 
