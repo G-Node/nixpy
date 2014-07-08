@@ -117,6 +117,8 @@ class TestDataArray(unittest.TestCase):
         assert(self.array.has_data())
         self.array.data.read_direct(dout)
         assert(np.array_equal(data, dout))
+        dout = np.array(self.array.data)
+        assert(np.array_equal(data, dout))
         assert(self.array.data_extent == data.shape)
         assert(self.array.data_extent == self.array.data.shape)
         self.array.data_extent = (200, )
