@@ -33,7 +33,7 @@ class DataArrayMixin(DataArray):
                 shape = data.shape
 
         self._create_data(shape, dtype, data)
-        return DataSet(self)
+        return self.data
 
     @property
     def data(self):
