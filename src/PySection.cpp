@@ -112,22 +112,27 @@ void PySection::do_export() {
         // Properties
         .add_property("repository",
                       OPT_GETTER(std::string, Section, repository),
-                      setRepository)
+                      setRepository,
+                      doc::section_repository)
         .add_property("mapping",
                       OPT_GETTER(std::string, Section, mapping),
-                      setMapping)
-        .add_property("link", getLink, setLink)
+                      setMapping,
+                      doc::section_mapping)
+        .add_property("link", getLink, setLink, doc::section_link)
         // Section
-        .add_property("parent", getParent)
-        .def("create_section", &Section::createSection)
+        .add_property("parent", getParent, doc::section_parent)
+        .def("create_section", &Section::createSection,
+             doc::section_create_section)
         .def("_section_count", &Section::sectionCount)
         .def("_get_section_by_id", &getSectionById)
         .def("_get_section_by_pos", &getSectionByPos)
         .def("_delete_section_by_id", REMOVER(std::string, nix::Section, deleteSection))
         // Property
         .def("create_property", createProperty, createPropertyOverloads())
-        .def("has_property_with_name", &Section::hasPropertyWithName)
-        .def("get_property_with_name", getPropertyWithName)
+        .def("has_property_with_name", &Section::hasPropertyWithName,
+             doc::section_has_property_with_name)
+        .def("get_property_with_name", getPropertyWithName,
+             doc::section_get_property_with_name)
         .def("_property_count", &Section::propertyCount)
         .def("_get_property_by_id", &getPropertyById)
         .def("_get_property_by_pos", &getPropertyByPos)
