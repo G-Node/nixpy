@@ -11,6 +11,7 @@ from __future__ import absolute_import
 from nix.core import DataArray
 from nix.util.inject import Inject
 
+import numpy as np
 
 class DataArrayMixin(DataArray):
 
@@ -118,6 +119,11 @@ class DataSet(object):
     """
     def __init__(self, obj):
         self.__obj = obj
+
+    def __array__(self):
+        raw = np.empty(self.shape)
+        self.read_direct(raw)
+        return raw
 
     @property
     def shape(self):
