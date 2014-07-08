@@ -67,20 +67,6 @@ void setPolynomCoefficients(DataArray& da, const std::vector<double>& pc) {
 
 // Data
 
-std::vector<double> getData(DataArray& da) {
-    std::vector<double> data;
-    da.getData(data);
-    return data;
-}
-
-void setData(DataArray& da, const std::vector<double>& data) {
-    if (!data.empty())
-        da.setData(data);
-    else
-        // TODO How do I remove data?
-        da.dataExtent(NDSize());
-}
-
 static nix::DataType py_dtype_to_nix_dtype(const PyArray_Descr *dtype)
 {
     if (dtype == nullptr) {
@@ -262,8 +248,6 @@ void PyDataArray::do_export() {
         // Data
         .add_property("data_type", &DataArray::dataType,
                       doc::data_array_data_type)
-        .add_property("data", getData, setData,
-                      doc::data_array_data)
         .def("has_data", &DataArray::hasData,
                       doc::data_array_has_data)
 
