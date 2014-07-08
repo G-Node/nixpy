@@ -188,7 +188,7 @@ SimpleTag API
     :inherited-members:
     :undoc-members:
 
-SimpleTag API
+DataTag API
 -------------
 
 .. autoclass:: nix.DataTag
