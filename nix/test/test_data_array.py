@@ -115,6 +115,7 @@ class TestDataArray(unittest.TestCase):
         dout = np.empty_like(data)
         self.array.create_data(data=data)
         assert(self.array.has_data())
+        assert(self.array.data.dtype == np.dtype(float))
         self.array.data.read_direct(dout)
         assert(np.array_equal(data, dout))
         dout = np.array(self.array.data)
@@ -146,6 +147,7 @@ class TestDataArray(unittest.TestCase):
         a3 = self.block.create_data_array("int identity array", "signal")
         a3.create_data(dtype='i4', data=data)
         assert(a3.data_extent == (123, 123))
+        assert(a3.data.dtype == np.dtype('i4'))
 
 
     def test_data_array_dimensions(self):
