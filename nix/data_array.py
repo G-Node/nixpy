@@ -121,7 +121,7 @@ class DataSet(object):
         self.__obj = obj
 
     def __array__(self):
-        raw = np.empty(self.shape)
+        raw = np.empty(self.shape, dtype=self.dtype)
         self.read_direct(raw)
         return raw
 
