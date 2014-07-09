@@ -112,6 +112,23 @@ static nix::DataType py_dtype_to_nix_dtype(const PyArray_Descr *dtype)
     return nix::DataType::Nothing;
 }
 
+static std::string nix_dtype_to_py_dtype_str(nix::DataType nix_dtype)
+{
+    switch (nix_dtype) {
+    case nix::DataType::UInt8:  return "<u1";
+    case nix::DataType::UInt16: return "<u2";
+    case nix::DataType::UInt32: return "<u4";
+    case nix::DataType::UInt64: return "<u8";
+    case nix::DataType::Int8:   return "<i1";
+    case nix::DataType::Int16:  return "<i2";
+    case nix::DataType::Int32:  return "<i4";
+    case nix::DataType::Int64:  return "<i8";
+    case nix::DataType::Float:  return "<f4";
+    case nix::DataType::Double: return "<f8";
+    default:                    return "";
+    }
+}
+
 static nix::DataType array_desc_as_dtype(PyArrayObject *array) {
     nix::DataType nix_dtype = py_dtype_to_nix_dtype(PyArray_DESCR(array));
 
