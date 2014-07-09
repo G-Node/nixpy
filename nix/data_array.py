@@ -132,6 +132,13 @@ class DataSet(object):
         """
         return self.__obj.data_extent
 
+    @property
+    def dtype(self):
+        """
+        :type: numpy.dtype object of the data stored in the DataArray.
+        """
+        return np.dtype(self.__obj._get_dtype())
+
     def write_direct(self, data):
         self.__obj._write_data(data)
 
