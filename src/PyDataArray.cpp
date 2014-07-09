@@ -211,6 +211,12 @@ static void createData(DataArray& da, const NDSize &shape, PyObject *dtype_obj, 
     Py_DECREF(py_dtype);
 }
 
+static std::string getDataType(const DataArray& da)
+{
+    nix::DataType nix_dtype = da.dataType();
+    return nix_dtype_to_py_dtype_str(nix_dtype);
+}
+
 // Dimensions
 
 PyObject* getDimension(const DataArray& da, size_t index) {
@@ -271,6 +277,7 @@ void PyDataArray::do_export() {
         .def("_create_data", createData)
         .def("_write_data", writeData)
         .def("_read_data", readData)
+        .def("_get_dtype", getDataType)
 
         // Dimensions
         .def("create_set_dimension", &DataArray::createSetDimension,
