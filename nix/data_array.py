@@ -132,6 +132,8 @@ class DataSet(object):
             offset =  tuple(0 for _ in count)
             self.__obj._read_data(raw, (1,) + count, (index, ) + offset)
             return raw
+        elif index is Ellipsis:
+            return np.array(self)
         else:
             raise ValueError("Unsupported index")
 
