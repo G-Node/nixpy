@@ -125,6 +125,9 @@ class TestDataArray(unittest.TestCase):
         self.array.data_extent = (200, )
         assert(self.array.data_extent == (200, ))
 
+        dout = np.array([self.array.data[i] for i in range(100)])
+        assert(np.array_equal(data, dout))
+
         # TODO delete does not work
         data = np.eye(123)
         a1 = self.block.create_data_array("double array", "signal")
@@ -135,6 +138,10 @@ class TestDataArray(unittest.TestCase):
         dout = np.empty_like(data)
         dset.read_direct(dout)
         assert(np.array_equal(data, dout))
+
+        dout = dset[12]
+        assert(dout.shape == data[12].shape)
+        assert(np.array_equal(dout, data[12]))
 
         a2 = self.block.create_data_array("identity array", "signal")
         self.assertRaises(ValueError, lambda : a1.create_data(data=data, shape=(1,1)))
