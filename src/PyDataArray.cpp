@@ -166,7 +166,7 @@ static NDSize array_shape_as_ndsize(PyArrayObject *array) {
 }
 
 
-static void readData(DataArray& da, PyObject *data, nix::NDSize count) {
+static void readData(DataArray& da, PyObject *data, nix::NDSize count, nix::NDSize offset) {
 
     PyArrayObject *array = make_array(data, NPY_ARRAY_CARRAY);
 
@@ -176,7 +176,9 @@ static void readData(DataArray& da, PyObject *data, nix::NDSize count) {
         count = array_shape_as_ndsize(array);
     }
 
-    nix::NDSize offset(count.size(), 0);
+    if (! offset) {
+        offset = nix::NDSize(count.size(), 0);
+    }
 
     da.getData(nix_dtype, PyArray_DATA(array), count, offset);
 }

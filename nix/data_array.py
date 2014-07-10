@@ -143,4 +143,4 @@ class DataSet(object):
         self.__obj._write_data(data)
 
     def read_direct(self, data):
-        self.__obj._read_data(data, ())
+        self.__obj._read_data(data, (), ())
