@@ -166,27 +166,39 @@ static NDSize array_shape_as_ndsize(PyArrayObject *array) {
 }
 
 
-static void readData(DataArray& da, PyObject *data) {
+static void array_ensure_shape_and_count(PyArrayObject *array,
+                                         nix::NDSize    count,
+                                         nix::NDSize    offset) {
+
+    if (! count) {
+        count = array_shape_as_ndsize(array);
+    }
+
+    if (! offset) {
+        offset = nix::NDSize(count.size(), 0);
+    }
+}
+
+
+static void readData(DataArray& da, PyObject *data, nix::NDSize count, nix::NDSize offset) {
 
     PyArrayObject *array = make_array(data, NPY_ARRAY_CARRAY);
 
     nix::DataType nix_dtype = array_desc_as_dtype(array);
-    nix::NDSize data_shape = array_shape_as_ndsize(array);
-    nix::NDSize offset(data_shape.size(), 0);
 
-    da.getData(nix_dtype, PyArray_DATA(array), data_shape, offset);
+    array_ensure_shape_and_count(array, count, offset);
+    da.getData(nix_dtype, PyArray_DATA(array), count, offset);
 }
 
 
-static void writeData(DataArray& da, PyObject *data) {
+static void writeData(DataArray& da, PyObject *data, nix::NDSize count, nix::NDSize offset) {
 
     PyArrayObject *array = make_array(data, NPY_ARRAY_CARRAY_RO);
 
     nix::DataType nix_dtype = array_desc_as_dtype(array);
-    nix::NDSize data_shape = array_shape_as_ndsize(array);
-    nix::NDSize offset(data_shape.size(), 0);
 
-    da.setData(nix_dtype, PyArray_DATA(array), data_shape, offset);
+    array_ensure_shape_and_count(array, count, offset);
+    da.setData(nix_dtype, PyArray_DATA(array), count, offset);
 }
 
 
@@ -205,7 +217,7 @@ static void createData(DataArray& da, const NDSize &shape, PyObject *dtype_obj, 
     da.createData(nix_dtype, shape);
 
     if (data != Py_None) {
-        writeData(da, data);
+        writeData(da, data, shape, {});
     }
 
     Py_DECREF(py_dtype);

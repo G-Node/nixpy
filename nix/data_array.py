@@ -125,6 +125,18 @@ class DataSet(object):
         self.read_direct(raw)
         return raw
 
+    def __getitem__(self, index):
+        if type(index) == int:
+            count = self.shape[1:]
+            raw = np.empty(count)
+            offset =  tuple(0 for _ in count)
+            self.__obj._read_data(raw, (1,) + count, (index, ) + offset)
+            return raw
+        elif index is Ellipsis:
+            return np.array(self)
+        else:
+            raise ValueError("Unsupported index")
+
     @property
     def shape(self):
         """
@@ -140,7 +152,7 @@ class DataSet(object):
         return np.dtype(self.__obj._get_dtype())
 
     def write_direct(self, data):
-        self.__obj._write_data(data)
+        self.__obj._write_data(data, (), ())
 
     def read_direct(self, data):
-        self.__obj._read_data(data)
+        self.__obj._read_data(data, (), ())

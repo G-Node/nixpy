@@ -122,6 +122,17 @@ class TestDataArray(unittest.TestCase):
         assert(np.array_equal(data, dout))
         assert(self.array.data_extent == data.shape)
         assert(self.array.data_extent == self.array.data.shape)
+
+        #indexing support in 1-d arrays
+        self.assertRaises(ValueError, lambda : self.array.data[1:4:5])
+
+        dout = np.array([self.array.data[i] for i in range(100)])
+        assert(np.array_equal(data, dout))
+
+        dout = self.array.data[...]
+        assert(np.array_equal(data, dout))
+
+        #changing shape via data_extent property
         self.array.data_extent = (200, )
         assert(self.array.data_extent == (200, ))
 
@@ -135,6 +146,13 @@ class TestDataArray(unittest.TestCase):
         dout = np.empty_like(data)
         dset.read_direct(dout)
         assert(np.array_equal(data, dout))
+
+        #indexing support in 2-d arrays
+        dout = dset[12]
+        assert(dout.shape == data[12].shape)
+        assert(np.array_equal(dout, data[12]))
+        dout = dset[...]
+        assert(np.array_equal(dout, data))
 
         a2 = self.block.create_data_array("identity array", "signal")
         self.assertRaises(ValueError, lambda : a1.create_data(data=data, shape=(1,1)))
