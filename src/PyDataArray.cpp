@@ -166,15 +166,19 @@ static NDSize array_shape_as_ndsize(PyArrayObject *array) {
 }
 
 
-static void readData(DataArray& da, PyObject *data) {
+static void readData(DataArray& da, PyObject *data, nix::NDSize count) {
 
     PyArrayObject *array = make_array(data, NPY_ARRAY_CARRAY);
 
     nix::DataType nix_dtype = array_desc_as_dtype(array);
-    nix::NDSize data_shape = array_shape_as_ndsize(array);
-    nix::NDSize offset(data_shape.size(), 0);
 
-    da.getData(nix_dtype, PyArray_DATA(array), data_shape, offset);
+    if (! count) {
+        count = array_shape_as_ndsize(array);
+    }
+
+    nix::NDSize offset(count.size(), 0);
+
+    da.getData(nix_dtype, PyArray_DATA(array), count, offset);
 }
 
 
