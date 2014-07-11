@@ -135,7 +135,7 @@ class DataSet(object):
         elif index is Ellipsis:
             return np.array(self)
         else:
-            raise ValueError("Unsupported index")
+            raise IndexError("Unsupported index")
 
     @property
     def shape(self):

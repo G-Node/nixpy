@@ -124,7 +124,7 @@ class TestDataArray(unittest.TestCase):
         assert(self.array.data_extent == self.array.data.shape)
 
         #indexing support in 1-d arrays
-        self.assertRaises(ValueError, lambda : self.array.data[1:4:5])
+        self.assertRaises(IndexError, lambda : self.array.data[1:4:5])
 
         dout = np.array([self.array.data[i] for i in range(100)])
         assert(np.array_equal(data, dout))
