@@ -40,11 +40,7 @@ def _find_sources(with_sources, filtr, limit):
     while len(fifo) > 0:
         c = fifo.pop(0)
 
-        level = c.level
-        if level > limit:
-            break
-
-        level += 1
+        level = c.level + 1
         if level <= limit:
             fifo += [_cont(e, level) for e in c.elem.sources]
 
@@ -72,11 +68,7 @@ def _find_sections(with_sections, filtr, limit):
     while len(fifo) > 0:
         c = fifo.pop(0)
 
-        level = c.level
-        if level > limit:
-            break
-
-        level += 1
+        level = c.level + 1
         if level <= limit:
             fifo += [_cont(e, level) for e in c.elem.sections]
 
