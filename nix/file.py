@@ -10,7 +10,7 @@ from __future__ import absolute_import
 
 import sys
 
-import nix.find as finders
+import nix.util.find as finders
 from nix.core import File
 from nix.util.inject import Inject
 from nix.util.proxy_list import ProxyList
