@@ -86,3 +86,14 @@ class TestSource(unittest.TestCase):
         del self.source.sources[0]
 
         assert(len(self.source.sources) == 0)
+
+    def test_source_find_sources(self):
+        for i in range(2): self.source.create_source("level1-p0-s" + str(i), "dummy")
+        for i in range(2): self.source.sources[0].create_source("level2-p1-s" + str(i), "dummy")
+        for i in range(2): self.source.sources[1].create_source("level2-p2-s" + str(i), "dummy")
+        for i in range(2): self.source.sources[0].sources[0].create_source("level3-p1-s" + str(i), "dummy")
+
+        assert(len(self.source.find_sources()) == 9)
+        assert(len(self.source.find_sources(limit=1)) == 3)
+        assert(len(self.source.find_sources(filtr=lambda x : "level2-p1-s" in x.name)) == 2)
+        assert(len(self.source.find_sources(filtr=lambda x : "level2-p1-s" in x.name, limit=1)) == 0)
