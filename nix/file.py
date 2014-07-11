@@ -8,6 +8,9 @@
 
 from __future__ import absolute_import
 
+import sys
+
+import nix.find as finders
 from nix.core import File
 from nix.util.inject import Inject
 from nix.util.proxy_list import ProxyList
@@ -44,6 +47,9 @@ class FileMixin(File):
         if not hasattr(self, "_blocks"):
             setattr(self, "_blocks", BlockProxyList(self))
         return self._blocks
+
+    def find_sections(self, filtr=lambda _ : True, limit=sys.maxint):
+        return finders._find_sections(self, filtr, limit)
 
     @property
     def sections(self):
