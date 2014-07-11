@@ -34,6 +34,7 @@ def _find_sources(with_sources, filtr, limit):
     if isinstance(with_sources, nix.Source):
         fifo.append(_cont(with_sources, level))
     else:
+        level += 1
         fifo += [_cont(e, level) for e in with_sources.sources]
 
     while len(fifo) > 0:
@@ -65,6 +66,7 @@ def _find_sections(with_sections, filtr, limit):
     if isinstance(with_sections, nix.Source):
         fifo.append(_cont(with_sections, level))
     else:
+        level += 1
         fifo += [_cont(e, level) for e in with_sections.sections]
 
     while len(fifo) > 0:
