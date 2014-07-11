@@ -96,6 +96,21 @@ class TestSection(unittest.TestCase):
 
         assert(len(self.section.sections) == 0)
 
+    def test_section_find_sections(self):
+        for i in range(2): self.section.create_section("level1-p0-s" + str(i), "dummy")
+        for i in range(2): self.section.sections[0].create_section("level2-p1-s" + str(i), "dummy")
+        for i in range(2): self.section.sections[1].create_section("level2-p2-s" + str(i), "dummy")
+        for i in range(2): self.section.sections[0].sections[0].create_section("level3-p1-s" + str(i), "dummy")
+
+        assert(len(self.section.find_sections()) == 9)
+        assert(len(self.section.find_sections(limit=1)) == 3)
+        assert(len(self.section.find_sections(filtr=lambda x : "level2-p1-s" in x.name)) == 2)
+        assert(len(self.section.find_sections(filtr=lambda x : "level2-p1-s" in x.name, limit=1)) == 0)
+
+        assert(len(self.section.find_related()) == 3)
+        assert(len(self.section.sections[0].find_related()) == 5)
+
+
     def test_section_properties(self):
         assert(len(self.section.properties) == 0)
 

@@ -8,6 +8,9 @@
 
 from __future__ import absolute_import
 
+import sys
+
+import nix.util.find as finders
 from nix.core import Section
 from nix.util.inject import Inject
 from nix.util.proxy_list import ProxyList
@@ -19,13 +22,25 @@ class PropertyProxyList(ProxyList):
     def __init__(self, obj):
         super(PropertyProxyList, self).__init__(obj, "_property_count", "_get_property_by_id",
                                                 "_get_property_by_pos", "_delete_property_by_id")
-# TODO find and find_related section method
+
 # TODO proxy list with names
 # TODO proxy list with inherited properties
 class SectionMixin(Section):
 
     class __metaclass__(Inject, Section.__class__):
         pass
+
+    def find_sections(self, filtr=lambda _ : True, limit=sys.maxint):
+        return finders._find_sections(self, filtr, limit)
+
+    def find_related(self, filtr=lambda _ : True):
+        result = []
+        if self.parent is not None:
+            result = finders._find_sections(self.parent, filtr, 1)
+        if self in result:
+            del result[result.index(self)]
+        result += finders._find_sections(self, filtr, 1)
+        return result
 
     @property
     def sections(self):

@@ -8,6 +8,9 @@
 
 from __future__ import absolute_import
 
+import sys
+
+import nix.util.find as finders
 from nix.core import Source
 from nix.util.inject import Inject
 from nix.util.proxy_list import ProxyList
@@ -18,6 +21,9 @@ class SourceMixin(Source):
 
     class __metaclass__(Inject, Source.__class__):
         pass
+
+    def find_sources(self, filtr=lambda _ : True, limit=sys.maxint):
+        return finders._find_sources(self, filtr, limit)
 
     @property
     def sources(self):

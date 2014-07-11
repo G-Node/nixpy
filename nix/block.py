@@ -8,6 +8,9 @@
 
 from __future__ import absolute_import
 
+import sys
+
+import nix.util.find as finders
 from nix.core import Block
 from nix.util.inject import Inject
 from nix.util.proxy_list import ProxyList
@@ -45,6 +48,9 @@ class BlockMixin(Block):
     class __metaclass__(Inject, Block.__class__):
         # this injects all members and the doc into nix.core.Block
         pass
+
+    def find_sources(self, filtr=lambda _ : True, limit=sys.maxint):
+        return finders._find_sources(self, filtr, limit)
 
     @property
     def sources(self):
