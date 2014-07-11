@@ -125,6 +125,7 @@ class TestDataArray(unittest.TestCase):
 
         #indexing support in 1-d arrays
         self.assertRaises(IndexError, lambda : self.array.data[1:4:5])
+        self.assertRaises(IndexError, lambda : self.array.data[[1,3,]])
 
         dout = np.array([self.array.data[i] for i in range(100)])
         assert(np.array_equal(data, dout))
@@ -148,11 +149,18 @@ class TestDataArray(unittest.TestCase):
         assert(np.array_equal(data, dout))
 
         #indexing support in 2-d arrays
+        self.assertRaises(IndexError, lambda : self.array.data[[], [1,2]])
+
         dout = dset[12]
         assert(dout.shape == data[12].shape)
         assert(np.array_equal(dout, data[12]))
-        dout = dset[...]
-        assert(np.array_equal(dout, data))
+        assert(np.array_equal(dset[()], data))
+        assert(np.array_equal(dset[...], data))
+        assert(np.array_equal(dset[12, ...], data[12, ...]))
+        assert(np.array_equal(dset[..., 12], data[..., 12]))
+        assert(np.array_equal(dset[1:], data[1:]))
+        assert(np.array_equal(dset[:1], data[:1]))
+        assert(np.array_equal(dset[1:10, 1:10], data[1:10, 1:10]))
 
         a2 = self.block.create_data_array("identity array", "signal")
         self.assertRaises(ValueError, lambda : a1.create_data(data=data, shape=(1,1)))
@@ -167,6 +175,14 @@ class TestDataArray(unittest.TestCase):
         assert(a3.data_extent == (123, 123))
         assert(a3.data.dtype == np.dtype('i4'))
 
+        data = np.random.rand(3, 4, 5)
+        a4 = self.block.create_data_array("3d array", "signal")
+        dset = a4.create_data(data=data)
+        assert(dset.shape == data.shape)
+        assert(np.array_equal(dset[2, ...], data[2, ...]))
+        assert(np.array_equal(dset[..., 3], data[..., 3]))
+        assert(np.array_equal(dset[2, ..., 3], data[2, ..., 3]))
+        assert(np.array_equal(dset[1:2, ..., 3:5], data[1:2, ..., 3:5]))
 
     def test_data_array_dimensions(self):
         assert(len(self.array.dimensions) == 0)
