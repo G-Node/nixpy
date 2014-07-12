@@ -123,6 +123,7 @@ class TestDataArray(unittest.TestCase):
         assert(np.array_equal(data, dout))
         assert(self.array.data_extent == data.shape)
         assert(self.array.data_extent == self.array.data.shape)
+        assert(self.array.data.size == data.size)
 
         assert(len(self.array.data) == len(data))
 
@@ -194,6 +195,7 @@ class TestDataArray(unittest.TestCase):
         dset = a4.create_data(data=data)
         assert(dset.shape == data.shape)
         assert(len(dset) == len(data))
+        assert(dset.size == data.size)
         assert(np.array_equal(dset[2, ...], data[2, ...]))
         assert(np.array_equal(dset[..., 3], data[..., 3]))
         assert(np.array_equal(dset[2, ..., 3], data[2, ..., 3]))
