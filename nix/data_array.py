@@ -8,6 +8,8 @@
 
 from __future__ import absolute_import
 
+import sys
+
 from nix.core import DataArray
 from nix.util.inject import Inject
 
@@ -150,6 +152,28 @@ class DataSet(object):
         # already in c-contiguous form
         raw = np.ascontiguousarray(value)
         self.__obj._write_data(raw, count, offset)
+
+    def __len__(self):
+        s = self.len()
+
+        # PyObject_Size returns a Py_ssize_t, which is the same as the
+        # systems size_t type but signed, i.e. ssize_t. (cf. PEP 0353)
+        # The maximum positive integer that Py_ssize_t can hold is
+        # exposed via sys.maxsize.
+        # Since self.shape can contain longs we need to check for that
+        if s > sys.maxsize:
+            estr = ("DataSet's shape[0] is too big for Python's __len__. "
+                    "Use DataSet.len() instead")
+            raise OverflowError(estr)
+        return s
+
+    def len(self):
+        """
+        Length of the first dimension. Equivalent to DataSet.shape[0]
+
+        :type: int or long
+        """
+        return self.shape[0]
 
     @property
     def shape(self):
