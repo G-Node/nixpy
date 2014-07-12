@@ -160,14 +160,14 @@ class DataSet(object):
 
     @staticmethod
     def __index_to_tuple(index):
-        if index is Ellipsis:
-            return ()
-
         tidx = type(index)
+
         if tidx == tuple:
             return index
         elif tidx == int or tidx == slice:
             return (index, )
+        elif tidx == type(Ellipsis):
+            return ()
         else:
             raise IndexError("Unsupported index")
 
