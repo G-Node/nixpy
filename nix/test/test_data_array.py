@@ -133,6 +133,17 @@ class TestDataArray(unittest.TestCase):
         dout = self.array.data[...]
         assert(np.array_equal(data, dout))
 
+        #indexed writing (1-d)
+        data = np.array([float(-i) for i in range(100)])
+        self.array.data[()] = data
+        assert(np.array_equal(self.array.data[...], data))
+
+        self.array.data[...] = [float(-i) for i in range(100)]
+        assert(np.array_equal(self.array.data[()], data))
+
+        self.array.data[0] = 42
+        assert(self.array.data[0] == 42.0)
+
         #changing shape via data_extent property
         self.array.data_extent = (200, )
         assert(self.array.data_extent == (200, ))
@@ -183,6 +194,11 @@ class TestDataArray(unittest.TestCase):
         assert(np.array_equal(dset[..., 3], data[..., 3]))
         assert(np.array_equal(dset[2, ..., 3], data[2, ..., 3]))
         assert(np.array_equal(dset[1:2, ..., 3:5], data[1:2, ..., 3:5]))
+
+        #indexed writing (n-d)
+        d2 = np.random.rand(2,2)
+        dset[1, 0:2, 0:2] = d2
+        assert(np.array_equal(dset[1, 0:2, 0:2], d2))
 
     def test_data_array_dimensions(self):
         assert(len(self.array.dimensions) == 0)
