@@ -126,17 +126,10 @@ class DataSet(object):
         return raw
 
     def __getitem__(self, index):
-        if index is Ellipsis:
-            return np.array(self)
+        index = self.__index_to_tuple(index)
 
-        tidx = type(index)
-        if tidx == tuple:
-            if len(index) < 1:
-                return np.array(self)
-        elif tidx == int or tidx == slice:
-            index = (index, )
-        else:
-            raise IndexError("Unsupported index")
+        if len(index) < 1:
+            return np.array(self)
 
         # if we got to here we have a tuple with len >= 1
         count, offset, shape = self.__tuple_to_count_offset_shape(index)
@@ -164,6 +157,19 @@ class DataSet(object):
 
     def read_direct(self, data):
         self.__obj._read_data(data, (), ())
+
+    @staticmethod
+    def __index_to_tuple(index):
+        if index is Ellipsis:
+            return ()
+
+        tidx = type(index)
+        if tidx == tuple:
+            return index
+        elif tidx == int or tidx == slice:
+            return (index, )
+        else:
+            raise IndexError("Unsupported index")
 
     @staticmethod
     def __complete_slices(shape, index):
