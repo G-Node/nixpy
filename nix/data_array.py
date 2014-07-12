@@ -183,6 +183,16 @@ class DataSet(object):
         return self.__obj.data_extent
 
     @property
+    def size(self):
+        """
+        Number of elements in the DataSet, i.e. the product of the
+        elements in DataSet.shape.
+
+        :type: int
+        """
+        return np.prod(self.shape)
+
+    @property
     def dtype(self):
         """
         :type: numpy.dtype object of the data stored in the DataArray.
