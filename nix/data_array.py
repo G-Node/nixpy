@@ -138,6 +138,19 @@ class DataSet(object):
         self.__obj._read_data(raw, count, offset)
         return raw
 
+    def __setitem__(self, index, value):
+        index = self.__index_to_tuple(index)
+        if len(index) < 1:
+            shape = self.shape
+            count, offset = shape, tuple([0]*len(shape))
+        else:
+            count, offset, _ = self.__tuple_to_count_offset_shape(index)
+
+        # NB: np.ascontiguousarray does not copy the array if it is
+        # already in c-contiguous form
+        raw = np.ascontiguousarray(value)
+        self.__obj._write_data(raw, count, offset)
+
     @property
     def shape(self):
         """
