@@ -169,7 +169,7 @@ class DataSet(object):
 
     def len(self):
         """
-        Length of the first dimension. Equivalent to DataSet.shape[0]
+        Length of the first dimension. Equivalent to DataSet.shape[0].
 
         :type: int or long
         """

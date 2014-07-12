@@ -7,6 +7,7 @@
 # LICENSE file in the root of the Project.
 
 import unittest
+import sys
 
 from nix import *
 
@@ -123,6 +124,8 @@ class TestDataArray(unittest.TestCase):
         assert(self.array.data_extent == data.shape)
         assert(self.array.data_extent == self.array.data.shape)
 
+        assert(len(self.array.data) == len(data))
+
         #indexing support in 1-d arrays
         self.assertRaises(IndexError, lambda : self.array.data[1:4:5])
         self.assertRaises(IndexError, lambda : self.array.data[[1,3,]])
@@ -190,6 +193,7 @@ class TestDataArray(unittest.TestCase):
         a4 = self.block.create_data_array("3d array", "signal")
         dset = a4.create_data(data=data)
         assert(dset.shape == data.shape)
+        assert(len(dset) == len(data))
         assert(np.array_equal(dset[2, ...], data[2, ...]))
         assert(np.array_equal(dset[..., 3], data[..., 3]))
         assert(np.array_equal(dset[2, ..., 3], data[2, ..., 3]))
@@ -199,6 +203,13 @@ class TestDataArray(unittest.TestCase):
         d2 = np.random.rand(2,2)
         dset[1, 0:2, 0:2] = d2
         assert(np.array_equal(dset[1, 0:2, 0:2], d2))
+
+        # test for the size check in DataSet.__len__
+        # by simulating a system with a really smal int
+        savemaxsize = sys.maxsize
+        sys.maxsize = len(dset) - 1
+        self.assertRaises(OverflowError, lambda : len(dset))
+        sys.maxsize = savemaxsize
 
     def test_data_array_dimensions(self):
         assert(len(self.array.dimensions) == 0)
