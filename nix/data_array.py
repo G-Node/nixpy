@@ -39,6 +39,8 @@ class DataArrayMixin(DataArray):
             if dtype is None:
                 dtype = 'f8'
         else:
+            data = np.ascontiguousarray(data)
+
             if dtype is None:
                 dtype = data.dtype
             if shape is not None:
