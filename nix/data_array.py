@@ -21,6 +21,18 @@ class DataArrayMixin(DataArray):
         pass
 
     def create_data(self, shape=None, dtype=None, data=None):
+        """
+        Create data storage for this :class:`~nix.DataArray`. Either ``shape``
+        or ``data`` must be given. If both are given their shape must agree.
+        If ``dtype`` is not specified it will default to 64-bit floating points.
+
+        :param shape: Layout (dimensionality and extent)
+        :type shape: tuple of int or long
+        :param dtype: Which data-type to use for storage
+        :type dtype:  :class:`numpy.dtype`
+        :param data: Data to write after storage has been created
+        :type data: array-like data
+        """
         if data is None:
             if shape is None:
                 raise ValueError("Either shape and or data must not be None")
@@ -41,10 +53,10 @@ class DataArrayMixin(DataArray):
     @property
     def data(self):
         """
-        A property that will give access to the DataArray's data via a DataSet
-        object.
+        A property that will give access to the DataArray's data via a
+        :class:`~nix.data_array.DataSet` object.
 
-        :type: DataSet
+        :type: :class:`~nix.data_array.DataSet`
         """
         if not self.has_data():
             return None
@@ -169,7 +181,7 @@ class DataSet(object):
 
     def len(self):
         """
-        Length of the first dimension. Equivalent to DataSet.shape[0].
+        Length of the first dimension. Equivalent to `DataSet.shape[0]`.
 
         :type: int or long
         """
@@ -178,7 +190,7 @@ class DataSet(object):
     @property
     def shape(self):
         """
-        :type: tupe of data array dimensions.
+        :type: tuple of data array dimensions.
         """
         return self.__obj.data_extent
 
@@ -186,7 +198,7 @@ class DataSet(object):
     def size(self):
         """
         Number of elements in the DataSet, i.e. the product of the
-        elements in DataSet.shape.
+        elements in :attr:`~nix.data_array.DataSet.shape`.
 
         :type: int
         """
@@ -195,14 +207,36 @@ class DataSet(object):
     @property
     def dtype(self):
         """
-        :type: numpy.dtype object of the data stored in the DataArray.
+        :type: :class:`numpy.dtype` object holding type infromation about
+               the data stored in the DataSet.
         """
         return np.dtype(self.__obj._get_dtype())
 
     def write_direct(self, data):
+        """
+        Directly write all of ``data`` to the :class:`~nix.data_array.DataSet`.
+        The supplied data must be a :class:`numpy.ndarray` that matches the
+        DataSet's shape and must have C-style contiguous memory layout (see
+        :attr:`numpy.ndarray.flags` and :class:`~numpy.ndarray` for more
+        information).
+
+        :param data: The array which contents is being written
+        :type data: :class:`numpy.ndarray`
+        """
         self.__obj._write_data(data, (), ())
 
     def read_direct(self, data):
+        """
+        Directly read all data stored in the :class:`~nix.data_array.DataSet`
+        into ``data``. The supplied data must be a :class:`numpy.ndarray` that
+        matches the DataSet's shape, must have C-style contiguous memory layout
+        and must be writeable (see :attr:`numpy.ndarray.flags` and
+        :class:`~numpy.ndarray` for more information).
+
+        :param data: The array where data is being read into
+        :type data: :class:`numpy.ndarray`
+        """
+
         self.__obj._read_data(data, (), ())
 
     @staticmethod
