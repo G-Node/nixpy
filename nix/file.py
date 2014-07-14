@@ -49,6 +49,23 @@ class FileMixin(File):
         return self._blocks
 
     def find_sections(self, filtr=lambda _ : True, limit=sys.maxint):
+        """
+        Get all sections and their child sections recursively.
+
+        This method traverses the trees of all sections. The traversal
+        is accomplished via breadth first and can be limited in depth. On each node or
+        section a filter is applied. If the filter returns true the respective section
+        will be added to the result list.
+        By default a filter is used that accepts all sections.
+
+        :param filtr: A filter function
+        :type filtr:  function
+        :param limit: The maximum depth of traversal
+        :type limit:  int
+
+        :returns: A list containing the matching sections.
+        :rtype: list of Section
+        """
         return finders._find_sections(self, filtr, limit)
 
     @property

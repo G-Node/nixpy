@@ -23,6 +23,23 @@ class SourceMixin(Source):
         pass
 
     def find_sources(self, filtr=lambda _ : True, limit=sys.maxint):
+        """
+        Get all child sources of this source recursively.
+
+        This method traverses the tree of all sources. The traversal
+        is accomplished via breadth first and can be limited in depth. On each node or
+        source a filter is applied. If the filter returns true the respective source
+        will be added to the result list.
+        By default a filter is used that accepts all sources.
+
+        :param filtr: A filter function
+        :type filtr:  function
+        :param limit: The maximum depth of traversal
+        :type limit:  int
+
+        :returns: A list containing the matching sources.
+        :rtype: list of Source
+        """
         return finders._find_sources(self, filtr, limit)
 
     @property
