@@ -7,7 +7,7 @@
 # LICENSE file in the root of the Project.
 
 # general config
-extensions = ['sphinx.ext.autodoc']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx']
 source_suffix = '.rst'
 master_doc = 'index'
 project = 'NIX Python bindings'
@@ -18,3 +18,9 @@ pygments_style = 'sphinx'
 # html options
 html_theme = 'default'
 htmlhelp_basename = 'nix'
+
+# intersphinx configuration
+intersphinx_mapping = {
+    'http://docs.python.org/2.7' : None,
+    'http://docs.scipy.org/doc/numpy': None
+}
