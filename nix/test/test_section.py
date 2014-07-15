@@ -112,28 +112,30 @@ class TestSection(unittest.TestCase):
 
 
     def test_section_properties(self):
-        assert(len(self.section.properties) == 0)
+        assert(len(self.section) == 0)
 
         prop = self.section.create_property("test prop")
 
-        assert(len(self.section.properties) == 1)
+        assert(len(self.section) == 1)
 
         assert(self.section.has_property_with_name("test prop"))
         assert(not self.section.has_property_with_name("notexist"))
         assert(self.section.get_property_with_name("test prop") is not None)
         assert(self.section.get_property_with_name("notexist") is None)
 
-        # TODO better test when proxy is implemented
-        assert(len(self.section._inherited_properties()) == 1)
+        assert(len(self.section.inherited_properties()) == 1)
 
-        # TODO implement __eq__ for property
-        #assert(prop      in self.section.properties)
-        assert(prop.id   in self.section.properties)
-        assert("notexist" not in self.section.properties)
+        assert(prop in self.section)
+        assert(prop.id in self.section)
+        assert(prop.name in self.section)
+        assert("notexist" not in self.section)
 
-        assert(prop.id == self.section.properties[0].id)
-        assert(prop.id == self.section.properties[-1].id)
+        props = dict(self.section.items())
+        assert(props["test prop"] == prop)
 
-        del self.section.properties[0]
+        assert(prop.id == self.section[0].id)
+        assert(prop.id == self.section[-1].id)
 
-        assert(len(self.section.properties) == 0)
+        del self.section[0]
+
+        assert(len(self.section) == 0)

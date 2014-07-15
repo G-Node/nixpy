@@ -137,7 +137,7 @@ void PySection::do_export() {
         .def("_get_property_by_id", &getPropertyById)
         .def("_get_property_by_pos", &getPropertyByPos)
         .def("_delete_property_by_id", REMOVER(std::string, nix::Section, deleteProperty))
-        .def("_inherited_properties", &Section::inheritedProperties)
+        .def("inherited_properties", &Section::inheritedProperties)
         // Other
         .def("__str__", &toStr<Section>)
         .def("__repr__", &toStr<Section>)
