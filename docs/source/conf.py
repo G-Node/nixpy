@@ -24,6 +24,20 @@ try:
     extensions += ['alabaster']
     html_theme = 'alabaster'
 
+    html_sidebars = {
+        '**': [
+            'about.html', 'navigation.html', 'searchbox.html',
+            ]
+    }
+
+    html_theme_options = {
+        'github_user': 'G-Node',
+        'github_repo': 'nixpy',
+        'github_button': True,
+        'github_count': False,
+        'travis_button': True
+    }
+
 except ImportError:
     html_theme = 'default'
 
