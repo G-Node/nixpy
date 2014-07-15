@@ -35,7 +35,8 @@ try:
         'github_repo': 'nixpy',
         'github_button': True,
         'github_count': False,
-        'travis_button': True
+        'travis_button': True,
+        'link': '#456BA8'
     }
 
 except ImportError:
