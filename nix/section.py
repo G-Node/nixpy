@@ -20,11 +20,9 @@ from nix.file import SectionProxyList
 class PropertyProxyList(ProxyList):
 
     def __init__(self, obj):
-        super(PropertyProxyList, self).__init__(obj, "_property_count", "_get_property_by_id",
+        super(PropertyProxyList, self).__init__(obj, "_property_count", "_get_property_by_id_or_name",
                                                 "_get_property_by_pos", "_delete_property_by_id")
 
-# TODO proxy list with names
-# TODO proxy list with inherited properties
 class SectionMixin(Section):
 
     class __metaclass__(Inject, Section.__class__):
@@ -105,3 +103,9 @@ class SectionMixin(Section):
             return self.id == other.id
         else:
             return False
+
+    def _get_property_by_id_or_name(self, ident):
+        p = self._get_property_by_id(ident)
+        if p is None and self.has_property_with_name(ident):
+            p = self.get_property_with_name(ident)
+        return p
