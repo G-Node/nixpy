@@ -16,8 +16,16 @@ exclude_patterns = []
 pygments_style = 'sphinx'
 
 # html options
-html_theme = 'default'
 htmlhelp_basename = 'nix'
+try:
+    import alabaster
+
+    html_theme_path = [alabaster.get_path()]
+    extensions += ['alabaster']
+    html_theme = 'alabaster'
+
+except ImportError:
+    html_theme = 'default'
 
 # intersphinx configuration
 intersphinx_mapping = {
