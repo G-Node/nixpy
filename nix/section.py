@@ -20,11 +20,9 @@ from nix.file import SectionProxyList
 class PropertyProxyList(ProxyList):
 
     def __init__(self, obj):
-        super(PropertyProxyList, self).__init__(obj, "_property_count", "_get_property_by_id",
+        super(PropertyProxyList, self).__init__(obj, "_property_count", "_get_property_by_id_or_name",
                                                 "_get_property_by_pos", "_delete_property_by_id")
 
-# TODO proxy list with names
-# TODO proxy list with inherited properties
 class SectionMixin(Section):
 
     class __metaclass__(Inject, Section.__class__):
@@ -87,8 +85,34 @@ class SectionMixin(Section):
             setattr(self, "_sections", SectionProxyList(self))
         return self._sections
 
+    def __eq__(self, other):
+        if hasattr(other, "id"):
+            return self.id == other.id
+        else:
+            return False
+
+    def __len__(self):
+        return len(self._properties)
+
+    def __getitem__(self, key):
+        return self._properties[key]
+
+    def __delitem__(self, key):
+        del self._properties[key]
+
+    def __iter__(self):
+        for p in self._properties:
+            yield p
+
+    def items(self):
+        for p in self._properties:
+            yield (p.name, p)
+
+    def __contains__(self, key):
+        return key in self._properties
+
     @property
-    def properties(self):
+    def _properties(self):
         """
         A property containing all Property entities associated with the section. Properties can
         be accessed by index of via their id. Properties can be deleted from the list. Adding
@@ -96,12 +120,15 @@ class SectionMixin(Section):
 
         :type: ProxyList of Property
         """
-        if not hasattr(self, "_properties"):
-            setattr(self, "_properties", PropertyProxyList(self))
-        return self._properties
+        if not hasattr(self, "_properties_proxy"):
+            setattr(self, "_properties_proxy", PropertyProxyList(self))
+        return self._properties_proxy
 
-    def __eq__(self, other):
-        if hasattr(other, "id"):
-            return self.id == other.id
-        else:
-            return False
+    def _get_property_by_id_or_name(self, ident):
+        """
+        Helper method that gets a property by id or name
+        """
+        p = self._get_property_by_id(ident)
+        if p is None and self.has_property_with_name(ident):
+            p = self.get_property_with_name(ident)
+        return p

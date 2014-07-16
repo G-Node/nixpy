@@ -20,7 +20,8 @@ htmlhelp_basename = 'nix'
 try:
     import alabaster
 
-    html_theme_path = [alabaster.get_path()]
+    html_theme_path  = [alabaster.get_path()]
+    html_static_path = ['_static']
     extensions += ['alabaster']
     html_theme = 'alabaster'
 
@@ -31,6 +32,7 @@ try:
     }
 
     html_theme_options = {
+        'logo': 'logo.png',
         'github_user': 'G-Node',
         'github_repo': 'nixpy',
         'github_button': True,
