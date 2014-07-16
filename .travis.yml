@@ -19,7 +19,7 @@ install:
 - sudo pip install coveralls numpy
 - git clone https://github.com/G-Node/nix.git nix-build
 - cd nix-build
-- CC=gcc-4.8 CXX=g++-4.8 cmake .
+- CC=gcc-4.8 CXX=g++-4.8 cmake -DBUILD_TESTING=OFF .
 - make
 - sudo make install
 - cd ..
