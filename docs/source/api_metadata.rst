@@ -17,11 +17,41 @@ Section
 
 Metadata stored in a NIX file can be accessed directly from an open file.
 
-Working with Sections
----------------------
+Create and delete sub sections
+------------------------------
 
-TODO some examples for working with sections
+.. code-block:: python
+   :linenos:
 
+   sub = section.create_section("a name", "type")
+   del section.sections[sub]
+
+Add and remove properties
+-------------------------
+
+Properties  can be created using the create_property method. Existing properties can be accessed and deleted
+directly from the respective section.
+
+.. code-block:: python
+   :linenos:
+
+   section.create_property("one", [Value(1)])
+   section.create_property("two", [Value(2)])
+
+   # iterate over properties
+   for p in section:
+      print p
+
+   # access by name
+   one = section["one"]
+
+   # convert properties into a dict
+   dct = dict(section.items())
+
+   # delete properties
+   del section["one"]
+   del section["two"]
+   
 Section API
 -----------
 
