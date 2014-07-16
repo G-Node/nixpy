@@ -16,8 +16,31 @@ exclude_patterns = []
 pygments_style = 'sphinx'
 
 # html options
-html_theme = 'default'
 htmlhelp_basename = 'nix'
+try:
+    import alabaster
+
+    html_theme_path = [alabaster.get_path()]
+    extensions += ['alabaster']
+    html_theme = 'alabaster'
+
+    html_sidebars = {
+        '**': [
+            'about.html', 'navigation.html', 'searchbox.html',
+            ]
+    }
+
+    html_theme_options = {
+        'github_user': 'G-Node',
+        'github_repo': 'nixpy',
+        'github_button': True,
+        'github_count': False,
+        'travis_button': True,
+        'link': '#456BA8'
+    }
+
+except ImportError:
+    html_theme = 'default'
 
 # intersphinx configuration
 intersphinx_mapping = {
