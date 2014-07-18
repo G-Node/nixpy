@@ -7,7 +7,8 @@ Build-Depends:
     python-all-dev (>= 2.6.6-3),
     debhelper (>= 9),
     dh-python,
-    python-numpy,
+    python-numpy (>= 1:1.8.0),
+    python-numpy-abi9,
     python-sphinx,
     libnix-dev (>= 0.9.2),
     libboost-dev (>=1.49),
@@ -23,7 +24,8 @@ Depends:
     ${python:Depends},
     ${shlibs:Depends},
     libnix1,
-    python-numpy
+    python-numpy (>= 1:1.8.0),
+    python-numpy-abi9,
 Section: python
 Description: Python bindings for NIX
     nixpy
