@@ -1,0 +1,46 @@
+Source: python-nix
+Maintainer: G-Node Debian Team <debian-team@g-node.org>
+Section: science
+Priority: extra
+Build-Depends:
+    python-setuptools (>= 0.6b3),
+    python-all-dev (>= 2.6.6-3),
+    debhelper (>= 9),
+    dh-python,
+    python-numpy,
+    python-sphinx,
+    libnix-dev (>= 0.9.2),
+    libboost-dev (>=1.49),
+    libboost-python-dev (>=1.49)
+X-Python-Version: >= 2.6
+Standards-Version: 3.9.4
+Homepage: https://github.com/G-Node/nixpy
+
+Package: python-nix
+Architecture: any
+Depends:
+    ${misc:Depends},
+    ${python:Depends},
+    ${shlibs:Depends},
+    libnix1,
+    python-numpy
+Section: python
+Description: Python bindings for NIX
+    nixpy
+    =====
+    .
+    Python bindings for NIX. Experimental and an moving target right now.
+    Use at your own risk, but by all means use it. ;-)
+
+Package: python-nix-doc
+Architecture: all
+Depends:
+    ${sphinxdoc:Depends},
+    ${misc:Depends}
+Section: doc
+Description: Python bindings for NIX
+    nixpy
+    =====
+    .
+    Python bindings for NIX. Experimental and an moving target right now.
+    Use at your own risk, but by all means use it. ;-)
