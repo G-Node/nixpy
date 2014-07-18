@@ -10,7 +10,7 @@ Build-Depends:
     python-numpy (>= 1:1.8.0),
     python-numpy-abi9,
     python-sphinx,
-    libnix-dev (>= 0.9.2),
+    libnix-dev (>= 0.9.3),
     libboost-dev (>=1.49),
     libboost-python-dev (>=1.49)
 X-Python-Version: >= 2.6
@@ -23,7 +23,7 @@ Depends:
     ${misc:Depends},
     ${python:Depends},
     ${shlibs:Depends},
-    libnix1,
+    libnix1 (>= 0.9.3),
     python-numpy (>= 1:1.8.0),
     python-numpy-abi9,
 Section: python
