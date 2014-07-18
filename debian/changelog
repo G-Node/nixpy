@@ -1,3 +1,10 @@
+python-nix (0.9.5-1) trusty; urgency=medium
+
+  * Failsafe setup.py
+  * Update to version 0.9.5 
+
+ -- Adrian Stoewer <adrian.stoewer@rz.ifi.lmu.de>  Fri, 18 Jul 2014 15:32:26 +0200
+
 python-nix (0.9.4-1) trusty; urgency=medium
 
   * Update to version 0.9.4
