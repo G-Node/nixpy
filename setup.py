@@ -10,12 +10,52 @@ import commands
 import numpy as np
 import sys
 import os
+import re
 
-with open("README.md") as f:
+with open('README.md') as f:
     description_text = f.read()
 
-with open("LICENSE") as f:
+with open('LICENSE') as f:
     license_text = f.read()
+
+with open('nix/info.py') as f:
+    info = f.read()
+
+VERSION         = re.search(r"VERSION\s*=\s*'([^']*)'", info).group(1)
+AUTHOR          = re.search(r"AUTHOR\s*=\s*'([^']*)'", info).group(1)
+CONTACT         = re.search(r"CONTACT\s*=\s*'([^']*)'", info).group(1)
+BRIEF           = re.search(r"BRIEF\s*=\s*'([^']*)'", info).group(1)
+HOMEPAGE        = re.search(r"HOMEPAGE\s*=\s*'([^']*)'", info).group(1)
+
+class PackageNotFoundError(StandardError):
+    pass
+
+def pkg_config(*packages, **kw):
+    flag_map = {'-I': 'include_dirs', '-L': 'library_dirs', '-l': 'libraries'}
+
+    ignore_error = 'ignore_error' in kw
+    if ignore_error:
+        del kw['ignore_error']
+
+    pkg_string = ' '.join(packages)
+    status, out = commands.getstatusoutput("pkg-config --libs --cflags " + pkg_string)
+    if status != 0:
+        err_str = 'Some packages were not found: %s [%s]' % (pkg_string, out)
+        if ignore_error:
+            sys.stderr.write('WARNING: ' + err_str)
+            out = ''
+        else:
+            raise PackageNotFoundError(err_str)
+
+    for token in out.split():
+        kw.setdefault(flag_map.get(token[:2]), []).append(token[2:])
+
+    # remove duplicated
+    for k, v in kw.iteritems():
+        del kw[k]
+        kw[k] = list(set(v))
+
+    return kw
 
 nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include')
 nix_lib_dir = os.getenv('NIX_LIBDIR', '/usr/local/lib')
@@ -41,25 +81,44 @@ boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
 boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
 boost_lnk_arg = '-lboost_python'
 
-native_ext = Extension('nix.core',
-                       extra_compile_args = ['-std=c++11'],
-                       extra_link_args=[boost_lnk_arg, nix_lnk_arg],
-                       sources = nixpy_sources,
-                       library_dirs = [nix_lib_dir, boost_lib_dir],
-                       include_dirs = [nix_inc_dir, boost_inc_dir, np.get_include(), 'src'],
-                       runtime_library_dirs = [nix_lib_dir, boost_lib_dir])
+classifiers   = [
+                    'Development Status :: 3 - Alpha',
+                    'Programming Language :: Python',
+                    'Programming Language :: Python :: 2.6',
+                    'Programming Language :: Python :: 2.7',
+                    'Topic :: Scientific/Engineering'
+]
+
+native_ext    = Extension(
+                    'nix.core',
+                    extra_compile_args = ['-std=c++11'],
+                    extra_link_args=[boost_lnk_arg, nix_lnk_arg],
+                    sources = nixpy_sources,
+                    runtime_library_dirs = [nix_lib_dir, boost_lib_dir],
+                    **pkg_config(
+                        "nix",
+                        library_dirs=[boost_lib_dir],
+                        include_dirs=[boost_inc_dir, np.get_include(), 'src'],
+                        ignore_error=True
+                    )
+                )
 
 setup(name             = 'nix',
-      version          = 0.1,
-      author           = 'Christian Kellner',
-      author_email     = 'kellner@bio.lmu.de',
+      version          = VERSION,
+      author           = AUTHOR,
+      author_email     = CONTACT,
+      url              = HOMEPAGE,
+      description      = BRIEF,
+      long_description = description_text,
+      classifiers      = classifiers,
+      license          = 'BSD',
       ext_modules      = [native_ext],
       packages         = ['nix', 'nix.util'],
       scripts          = [],
       tests_require    = ['nose'],
       test_suite       = 'nose.collector',
-      setup_requires   = ['numpy', 'sphinx', 'alabaster'],
-      package_data     = {"nix": [license_text, description_text]},
+      setup_requires   = ['numpy', 'sphinx'],
+      package_data     = {'nix': [license_text, description_text]},
       include_package_data = True,
       zip_safe         = False,
 )
