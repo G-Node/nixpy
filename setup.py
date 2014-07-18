@@ -33,13 +33,16 @@ class PackageNotFoundError(StandardError):
 def pkg_config(*packages, **kw):
     flag_map = {'-I': 'include_dirs', '-L': 'library_dirs', '-l': 'libraries'}
 
+    ignore_error = 'ignore_error' in kw
+    if ignore_error:
+        del kw['ignore_error']
+
     pkg_string = ' '.join(packages)
     status, out = commands.getstatusoutput("pkg-config --libs --cflags " + pkg_string)
     if status != 0:
         err_str = 'Some packages were not found: %s [%s]' % (pkg_string, out)
-        if 'ignore_error' in kw:
+        if ignore_error:
             sys.stderr.write('WARNING: ' + err_str)
-            del kw['ignore_error']
             out = ''
         else:
             raise PackageNotFoundError(err_str)
@@ -114,7 +117,7 @@ setup(name             = 'nix',
       scripts          = [],
       tests_require    = ['nose'],
       test_suite       = 'nose.collector',
-      setup_requires   = ['numpy', 'sphinx', 'alabaster'],
+      setup_requires   = ['numpy', 'sphinx'],
       package_data     = {'nix': [license_text, description_text]},
       include_package_data = True,
       zip_safe         = False,
