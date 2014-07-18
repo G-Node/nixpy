@@ -11,7 +11,7 @@ import numpy as np
 import sys
 import os
 
-VERSION         = '0.1'
+VERSION         = '0.9.2'
 AUTHOR          = 'Christian Kellner, Adrian Stoewer, Andrey Sobolev'
 CONTACT         = 'kellner@bio.lmu.de'
 BRIEF           = 'Python bindings for NIX'
