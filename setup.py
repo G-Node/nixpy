@@ -10,18 +10,22 @@ import commands
 import numpy as np
 import sys
 import os
-
-VERSION         = '0.9.2'
-AUTHOR          = 'Christian Kellner, Adrian Stoewer, Andrey Sobolev'
-CONTACT         = 'kellner@bio.lmu.de'
-BRIEF           = 'Python bindings for NIX'
-HOMEPAGE        = 'https://github.com/G-Node/nixpy'
+import re
 
 with open('README.md') as f:
     description_text = f.read()
 
 with open('LICENSE') as f:
     license_text = f.read()
+
+with open('nix/info.py') as f:
+    info = f.read()
+
+VERSION         = re.search(r"VERSION\s*=\s*'([^']*)'", info).group(1)
+AUTHOR          = re.search(r"AUTHOR\s*=\s*'([^']*)'", info).group(1)
+CONTACT         = re.search(r"CONTACT\s*=\s*'([^']*)'", info).group(1)
+BRIEF           = re.search(r"BRIEF\s*=\s*'([^']*)'", info).group(1)
+HOMEPAGE        = re.search(r"HOMEPAGE\s*=\s*'([^']*)'", info).group(1)
 
 def pkg_config(*packages, **kw):
     flag_map = {'-I': 'include_dirs', '-L': 'library_dirs', '-l': 'libraries'}
