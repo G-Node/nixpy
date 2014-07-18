@@ -29,15 +29,18 @@ HOMEPAGE        = re.search(r"HOMEPAGE\s*=\s*'([^']*)'", info).group(1)
 
 def pkg_config(*packages, **kw):
     flag_map = {'-I': 'include_dirs', '-L': 'library_dirs', '-l': 'libraries'}
-    for token in commands.getoutput("pkg-config --libs --cflags %s" % ' '.join(packages)).split():
-        kw.setdefault(flag_map.get(token[:2]), []).append(token[2:])
+    try:
+        for token in commands.getoutput("pkg-config --libs --cflags %s" % ' '.join(packages)).split():
+            kw.setdefault(flag_map.get(token[:2]), []).append(token[2:])
 
-    # remove duplicated
-    for k, v in kw.iteritems():
-        del kw[k]
-        kw[k] = list(set(v))
+        # remove duplicated
+        for k, v in kw.iteritems():
+            del kw[k]
+            kw[k] = list(set(v))
 
-    return kw
+        return kw
+    except:
+        return {}
 
 nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include')
 nix_lib_dir = os.getenv('NIX_LIBDIR', '/usr/local/lib')
