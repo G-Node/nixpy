@@ -1,3 +1,9 @@
+python-nix (0.9.4-1) trusty; urgency=medium
+
+  * Update to version 0.9.4
+
+ -- Adrian Stoewer <adrian.stoewer@rz.ifi.lmu.de>  Fri, 18 Jul 2014 14:08:29 +0200
+
 python-nix (0.9.3-2) trusty; urgency=medium
 
   * Depend on libnix (0.9.3) 
