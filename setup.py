@@ -11,13 +11,29 @@ import numpy as np
 import sys
 import os
 
-from nix.info import VERSION, AUTHOR, CONTACT, BRIEF, HOMEPAGE
+VERSION         = '0.1'
+AUTHOR          = 'Christian Kellner, Adrian Stoewer, Andrey Sobolev'
+CONTACT         = 'kellner@bio.lmu.de'
+BRIEF           = 'Python bindings for NIX'
+HOMEPAGE        = 'https://github.com/G-Node/nixpy'
 
 with open('README.md') as f:
     description_text = f.read()
 
 with open('LICENSE') as f:
     license_text = f.read()
+
+def pkg_config(*packages, **kw):
+    flag_map = {'-I': 'include_dirs', '-L': 'library_dirs', '-l': 'libraries'}
+    for token in commands.getoutput("pkg-config --libs --cflags %s" % ' '.join(packages)).split():
+        kw.setdefault(flag_map.get(token[:2]), []).append(token[2:])
+
+    # remove duplicated
+    for k, v in kw.iteritems():
+        del kw[k]
+        kw[k] = list(set(v))
+
+    return kw
 
 nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include')
 nix_lib_dir = os.getenv('NIX_LIBDIR', '/usr/local/lib')
@@ -51,13 +67,18 @@ classifiers   = [
                     'Topic :: Scientific/Engineering'
 ]
 
-native_ext    = Extension('nix.core',
+native_ext    = Extension(
+                    'nix.core',
                     extra_compile_args = ['-std=c++11'],
                     extra_link_args=[boost_lnk_arg, nix_lnk_arg],
                     sources = nixpy_sources,
-                    library_dirs = [nix_lib_dir, boost_lib_dir],
-                    include_dirs = [nix_inc_dir, boost_inc_dir, np.get_include(), 'src'],
-                    runtime_library_dirs = [nix_lib_dir, boost_lib_dir])
+                    runtime_library_dirs = [nix_lib_dir, boost_lib_dir],
+                    **pkg_config(
+                        "nix",
+                        library_dirs=[boost_lib_dir],
+                        include_dirs=[boost_inc_dir, np.get_include(), 'src']
+                    )
+                )
 
 setup(name             = 'nix',
       version          = VERSION,
