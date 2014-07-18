@@ -1,6 +1,6 @@
 Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: nixpy
-Upstream-Contact: Christian Kellner <kellner@biologie.uni-muenchen.de>
+Upstream-Contact: G-Node Debian Team <debian-team@g-node.org>
 Source: https://github.com/G-Node/nixpy
 
 
