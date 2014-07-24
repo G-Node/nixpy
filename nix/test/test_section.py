@@ -114,9 +114,12 @@ class TestSection(unittest.TestCase):
     def test_section_properties(self):
         assert(len(self.section) == 0)
 
-        prop = self.section.create_property("test prop")
+        prop = self.section.create_property("test prop", DataType.String)
 
         assert(len(self.section) == 1)
+
+        for p in self.section:
+            assert(p in self.section)
 
         assert(self.section.has_property_with_name("test prop"))
         assert(not self.section.has_property_with_name("notexist"))

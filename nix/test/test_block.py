@@ -72,7 +72,7 @@ class TestBlock(unittest.TestCase):
     def test_block_data_arrays(self):
         assert(len(self.block.data_arrays) == 0)
 
-        data_array = self.block.create_data_array("test data_array", "recordingsession")
+        data_array = self.block.create_data_array("test data_array", "recordingsession", DataType.Int32, (0, ))
 
         assert(len(self.block.data_arrays) == 1)
 
@@ -91,7 +91,7 @@ class TestBlock(unittest.TestCase):
     def test_block_data_tags(self):
         assert(len(self.block.data_tags) == 0)
 
-        data_array = self.block.create_data_array("test array", "recording")
+        data_array = self.block.create_data_array("test array", "recording", DataType.Int32, (0, ))
         data_tag = self.block.create_data_tag("test data_tag", "recordingsession", data_array)
 
         assert(len(self.block.data_tags) == 1)
@@ -111,7 +111,7 @@ class TestBlock(unittest.TestCase):
     def test_block_simple_tags(self):
         assert(len(self.block.simple_tags) == 0)
 
-        data_array = self.block.create_data_array("test array", "recording")
+        data_array = self.block.create_data_array("test array", "recording", DataType.Int32, (0, ))
         simple_tag = self.block.create_simple_tag("test simple_tag", "recordingsession", [data_array])
 
         assert(len(self.block.simple_tags) == 1)

@@ -16,8 +16,8 @@ class TestDataArray(unittest.TestCase):
     def setUp(self):
         self.file  = File.open("unittest.h5", FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
-        self.array = self.block.create_data_array("test array", "signal")
-        self.other = self.block.create_data_array("other array", "signal")
+        self.array = self.block.create_data_array("test array", "signal", DataType.Double, (100, ))
+        self.other = self.block.create_data_array("other array", "signal", DataType.Double, (100, ))
 
     def tearDown(self):
         del self.file.blocks[self.block.id]
@@ -109,13 +109,10 @@ class TestDataArray(unittest.TestCase):
         import numpy as np
 
         assert(self.array.polynom_coefficients == ())
-        assert(not self.array.has_data())
-        assert(self.array.data is None)
 
         data = np.array([float(i) for i in range(100)])
         dout = np.empty_like(data)
-        self.array.create_data(data=data)
-        assert(self.array.has_data())
+        self.array.data.write_direct(data)
         assert(self.array.data.dtype == np.dtype(float))
         self.array.data.read_direct(dout)
         assert(np.array_equal(data, dout))
@@ -154,10 +151,8 @@ class TestDataArray(unittest.TestCase):
 
         # TODO delete does not work
         data = np.eye(123)
-        a1 = self.block.create_data_array("double array", "signal")
-        self.assertRaises(ValueError, a1.create_data)
-        dset = a1.create_data((123, 123))
-        assert(a1.data_extent == (123, 123))
+        a1 = self.block.create_data_array("double array", "signal", DataType.Double, (123, 123))
+        dset = a1.data
         dset.write_direct(data)
         dout = np.empty_like(data)
         dset.read_direct(dout)
@@ -177,22 +172,14 @@ class TestDataArray(unittest.TestCase):
         assert(np.array_equal(dset[:1], data[:1]))
         assert(np.array_equal(dset[1:10, 1:10], data[1:10, 1:10]))
 
-        a2 = self.block.create_data_array("identity array", "signal")
-        self.assertRaises(ValueError, lambda : a1.create_data(data=data, shape=(1,1)))
-        a2.create_data(data=data)
-        assert(a2.data_extent == (123, 123))
-        dout = np.empty_like(data)
-        dset.read_direct(dout)
-        assert(np.array_equal(data, dout))
-
-        a3 = self.block.create_data_array("int identity array", "signal")
-        a3.create_data(dtype='i4', data=data)
+        a3 = self.block.create_data_array("int identity array", "signal", DataType.Int32, (123, 123))
         assert(a3.data_extent == (123, 123))
         assert(a3.data.dtype == np.dtype('i4'))
 
         data = np.random.rand(3, 4, 5)
-        a4 = self.block.create_data_array("3d array", "signal")
-        dset = a4.create_data(data=data)
+        a4 = self.block.create_data_array("3d array", "signal", DataType.Double, (3, 4, 5))
+        dset = a4.data
+        dset.write_direct(data)
         assert(dset.shape == data.shape)
         assert(len(dset) == len(data))
         assert(dset.size == data.size)
