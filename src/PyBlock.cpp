@@ -39,6 +39,11 @@ boost::optional<DataArray> getDataArrayByPos(const Block& block, size_t index) {
     return da ? boost::optional<DataArray>(da) : boost::none;
 }
 
+DataArray createDataArray(Block& block, const std::string &name, const std::string &type,
+                          DataType data_type, const NDSize &shape) {
+    return block.createDataArray(name, type, data_type, shape);
+}
+
 // getter for DataTag
 
 boost::optional<DataTag> getDataTagById(const Block& block, const std::string& id) {
@@ -86,7 +91,7 @@ void PyBlock::do_export() {
 
     class_<Block, bases<base::EntityWithMetadata<base::IBlock>>>("Block")
         // DataArray
-        .def("create_data_array", &Block::createDataArray, doc::block_create_data_array)
+        .def("create_data_array", createDataArray, doc::block_create_data_array)
         .def("_data_array_count", &Block::dataArrayCount)
         .def("_get_data_array_by_id", &getDataArrayById)
         .def("_get_data_array_by_pos", &getDataArrayByPos)
