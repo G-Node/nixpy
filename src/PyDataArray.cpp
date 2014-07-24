@@ -202,27 +202,6 @@ static void writeData(DataArray& da, PyObject *data, nix::NDSize count, nix::NDS
 }
 
 
-static void createData(DataArray& da, const NDSize &shape, PyObject *dtype_obj, PyObject *data) {
-    PyArray_Descr* py_dtype = nullptr;
-
-    if (! PyArray_DescrConverter(dtype_obj, &py_dtype)) {
-        throw std::invalid_argument("Invalid dtype");
-    }
-
-    nix::DataType nix_dtype = pyDtypeToNixDtype(py_dtype);
-    if (nix_dtype == nix::DataType::Nothing) {
-        throw std::invalid_argument("Unsupported dtype");
-    }
-
-    da.createData(nix_dtype, shape);
-
-    if (data != Py_None) {
-        writeData(da, data, shape, {});
-    }
-
-    Py_DECREF(py_dtype);
-}
-
 static std::string getDataType(const DataArray& da)
 {
     nix::DataType nix_dtype = da.dataType();
@@ -283,10 +262,6 @@ void PyDataArray::do_export() {
         // Data
         .add_property("data_type", &DataArray::dataType,
                       doc::data_array_data_type)
-        .def("has_data", &DataArray::hasData,
-                      doc::data_array_has_data)
-
-        .def("_create_data", createData)
         .def("_write_data", writeData)
         .def("_read_data", readData)
         .def("_get_dtype", getDataType)
