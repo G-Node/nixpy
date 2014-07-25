@@ -17,12 +17,12 @@ class TestDataTag(unittest.TestCase):
         self.file     = File.open("unittest.h5", FileMode.Overwrite)
         self.block    = self.file.create_block("test block", "recordingsession")
 
-        self.my_array = self.block.create_data_array("my array", "test")
+        self.my_array = self.block.create_data_array("my array", "test", DataType.Int16, (0, 0))
         self.my_tag   = self.block.create_data_tag(
             "my tag", "tag", self.my_array
         )
 
-        self.your_array = self.block.create_data_array("your array", "test")
+        self.your_array = self.block.create_data_array("your array", "test", DataType.Int16, (0, 0))
         self.your_tag = self.block.create_data_tag(
             "your tag", "tag", self.your_array
         )
@@ -94,7 +94,7 @@ class TestDataTag(unittest.TestCase):
         assert(self.my_tag.positions is not None)
         old_positions = self.my_tag.positions
 
-        new_positions = self.block.create_data_array("pos", "position")
+        new_positions = self.block.create_data_array("pos", "position", DataType.Int16, (0, 0))
         self.my_tag.positions = new_positions
         assert(self.my_tag.positions == new_positions)
 
@@ -106,7 +106,7 @@ class TestDataTag(unittest.TestCase):
     def test_data_tag_extents(self):
         assert(self.my_tag.extents is None)
 
-        new_extents = self.block.create_data_array("ext", "extent")
+        new_extents = self.block.create_data_array("ext", "extent", DataType.Int16, (0, 0))
         self.my_tag.extents = new_extents
         assert(self.my_tag.extents == new_extents)
 
@@ -118,8 +118,8 @@ class TestDataTag(unittest.TestCase):
 
         self.assertRaises(TypeError, lambda _: self.my_tag.references.append(100))
 
-        reference1 = self.block.create_data_array("reference1", "stimuli")
-        reference2 = self.block.create_data_array("reference2", "stimuli")
+        reference1 = self.block.create_data_array("reference1", "stimuli", DataType.Int16, (0, ))
+        reference2 = self.block.create_data_array("reference2", "stimuli", DataType.Int16, (0, ))
 
         self.my_tag.references.append(reference1)
         self.my_tag.references.append(reference2)
@@ -137,7 +137,7 @@ class TestDataTag(unittest.TestCase):
     def test_data_tag_features(self):
         assert(len(self.my_tag.features) == 0)
 
-        data_array = self.block.create_data_array("feature", "stimuli")
+        data_array = self.block.create_data_array("feature", "stimuli", DataType.Int16, (0, ))
         feature = self.my_tag.create_feature(data_array, LinkType.Untagged)
         assert(len(self.my_tag.features) == 1)
 

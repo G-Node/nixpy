@@ -17,12 +17,12 @@ class TestSimpleTag(unittest.TestCase):
         self.file     = File.open("unittest.h5", FileMode.Overwrite)
         self.block    = self.file.create_block("test block", "recordingsession")
 
-        self.my_array = self.block.create_data_array("my array", "test")
+        self.my_array = self.block.create_data_array("my array", "test", DataType.Int16, (1, ))
         self.my_tag   = self.block.create_simple_tag(
             "my tag", "tag", [self.my_array]
         )
 
-        self.your_array = self.block.create_data_array("your array", "test")
+        self.your_array = self.block.create_data_array("your array", "test", DataType.Int16, (1, ))
         self.your_tag = self.block.create_simple_tag(
             "your tag", "tag", [self.your_array]
         )
@@ -110,8 +110,8 @@ class TestSimpleTag(unittest.TestCase):
 
         self.assertRaises(TypeError, lambda _: self.my_tag.references.append(100))
 
-        reference1 = self.block.create_data_array("reference1", "stimuli")
-        reference2 = self.block.create_data_array("reference2", "stimuli")
+        reference1 = self.block.create_data_array("reference1", "stimuli", DataType.Int16, (1, ))
+        reference2 = self.block.create_data_array("reference2", "stimuli", DataType.Int16, (1, ))
 
         self.my_tag.references.append(reference1)
         self.my_tag.references.append(reference2)
@@ -130,7 +130,7 @@ class TestSimpleTag(unittest.TestCase):
     def test_simple_tag_features(self):
         assert(len(self.my_tag.features) == 0)
 
-        data_array = self.block.create_data_array("feature", "stimuli")
+        data_array = self.block.create_data_array("feature", "stimuli", DataType.Int16, (1, ))
         feature = self.my_tag.create_feature(data_array, LinkType.Untagged)
 
         assert(len(self.my_tag.features) == 1)

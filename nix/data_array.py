@@ -20,38 +20,6 @@ class DataArrayMixin(DataArray):
     class __metaclass__(Inject, DataArray.__class__):
         pass
 
-    def create_data(self, shape=None, dtype=None, data=None):
-        """
-        Create data storage for this :class:`~nix.DataArray`. Either ``shape``
-        or ``data`` must be given. If both are given their shape must agree.
-        If ``dtype`` is not specified it will default to 64-bit floating points.
-
-        :param shape: Layout (dimensionality and extent)
-        :type shape: tuple of int or long
-        :param dtype: Which data-type to use for storage
-        :type dtype:  :class:`numpy.dtype`
-        :param data: Data to write after storage has been created
-        :type data: array-like data
-        """
-        if data is None:
-            if shape is None:
-                raise ValueError("Either shape and or data must not be None")
-            if dtype is None:
-                dtype = 'f8'
-        else:
-            data = np.ascontiguousarray(data)
-
-            if dtype is None:
-                dtype = data.dtype
-            if shape is not None:
-                if shape != data.shape:
-                    raise ValueError("Shape must equal data.shape")
-            else:
-                shape = data.shape
-
-        self._create_data(shape, dtype, data)
-        return self.data
-
     @property
     def data(self):
         """
@@ -60,9 +28,6 @@ class DataArrayMixin(DataArray):
 
         :type: :class:`~nix.data_array.DataSet`
         """
-        if not self.has_data():
-            return None
-
         if not hasattr(self, "_data"):
             setattr(self, "_data", DataSet(self))
         return self._data

@@ -15,8 +15,9 @@ class TestProperty(unittest.TestCase):
     def setUp(self):
         self.file    = File.open("unittest.h5", FileMode.Overwrite)
         self.section = self.file.create_section("test section", "recordingsession")
-        self.prop    = self.section.create_property("test property")
-        self.other   = self.section.create_property("other property")
+        self.prop    = self.section.create_property("test property", Value(0))
+        self.prop_s  = self.section.create_property("test str", DataType.String)
+        self.other   = self.section.create_property("other property", DataType.Int64)
 
     def tearDown(self):
         del self.file.sections[self.section.id]
@@ -75,18 +76,18 @@ class TestProperty(unittest.TestCase):
         self.prop.delete_values()
         assert(len(self.prop.values) == 0)
 
-        self.prop.values = [Value("foo"), Value("bar")]
-        assert(self.prop.data_type == DataType.String)
-        assert(len(self.prop.values) == 2)
+        self.prop_s.values = [Value("foo"), Value("bar")]
+        assert(self.prop_s.data_type == DataType.String)
+        assert(len(self.prop_s.values) == 2)
 
-        assert(self.prop.values[0] == Value("foo"))
-        assert(Value("foo") in self.prop.values)
-        assert(self.prop.values[0] == "foo")
-        assert("foo" in self.prop.values)
-        assert(self.prop.values[0] != Value("bla"))
-        assert(Value("bla") not in self.prop.values)
-        assert(self.prop.values[0] != "bla")
-        assert("bla" not in self.prop.values)
+        assert(self.prop_s.values[0] == Value("foo"))
+        assert(Value("foo") in self.prop_s.values)
+        assert(self.prop_s.values[0] == "foo")
+        assert("foo" in self.prop_s.values)
+        assert(self.prop_s.values[0] != Value("bla"))
+        assert(Value("bla") not in self.prop_s.values)
+        assert(self.prop_s.values[0] != "bla")
+        assert("bla" not in self.prop_s.values)
 
 
 class TestValue(unittest.TestCase):

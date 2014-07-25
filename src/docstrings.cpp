@@ -318,13 +318,6 @@ const char* data_array_data_type = R"(
     :type: DataType
     )";
 
-const char* data_array_has_data = R"(
-    True if the DataArray has some data, false otherwise, This is a read-only
-    property.
-
-    :type: bool
-    )";
-
 const char* data_array_create_set_dimension = R"(
     Create a new SetDimension at a specified dimension index. This adds a new
     dimension descriptor of the type SetDimension that describes the dimension
