@@ -271,7 +271,7 @@ void PyDataArray::do_export() {
              doc::data_array_create_set_dimension)
         .def("create_sampled_dimension", &DataArray::createSampledDimension,
              doc::data_array_create_sampled_dimension)
-        .def("create_reange_dimension", &DataArray::createRangeDimension,
+        .def("create_range_dimension", &DataArray::createRangeDimension,
              doc::data_array_create_range_dimension)
         .def("append_set_dimension", &DataArray::appendSetDimension,
              doc::data_array_append_set_dimension)
