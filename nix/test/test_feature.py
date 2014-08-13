@@ -19,8 +19,9 @@ class TestFeature(unittest.TestCase):
 
         self.signal = self.block.create_data_array("output", "analogsignal", DataType.Float, (0, ))
         self.stimuli_tag   = self.block.create_simple_tag(
-            "stimuli used", "tag", [self.signal]
+            "stimuli used", "tag", [0]
         )
+        self.stimuli_tag.references.append(self.signal)
 
         self.movie1 = self.block.create_data_array("stimulus movie 1", "movie", DataType.Float, (0, ))
         self.feature_1 = self.stimuli_tag.create_feature(
