@@ -21,7 +21,7 @@ class TestFile(unittest.TestCase):
 
     def test_file_format(self):
         assert(self.file.format == "nix")
-        assert(self.file.version == "1.0")
+        assert(self.file.version == (1, 0, 0))
 
     def test_file_timestamps(self):
         created_at = self.file.created_at
