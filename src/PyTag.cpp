@@ -22,7 +22,7 @@ namespace nixpy {
 
 // Units
 
-void setUnits(SimpleTag& st, const std::vector<std::string>& units) {
+void setUnits(Tag& st, const std::vector<std::string>& units) {
     if (!units.empty())
         st.units(units);
     else
