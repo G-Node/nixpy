@@ -22,7 +22,7 @@ namespace nixpy {
 
 // Units
 
-void setUnits(DataTag& dt, const std::vector<std::string>& units) {
+void setUnits(MultiTag& dt, const std::vector<std::string>& units) {
     if (!units.empty())
         dt.units(units);
     else
@@ -31,7 +31,7 @@ void setUnits(DataTag& dt, const std::vector<std::string>& units) {
 
 // Extents
 
-boost::optional<DataArray> getExtents(DataTag& dt) {
+boost::optional<DataArray> getExtents(MultiTag& dt) {
      DataArray da = dt.extents();
      if (da)
          return boost::optional<DataArray>(da);
@@ -39,7 +39,7 @@ boost::optional<DataArray> getExtents(DataTag& dt) {
          return boost::none;
 }
 
-void setExtents(DataTag& dt, const boost::optional<DataArray>& data) {
+void setExtents(MultiTag& dt, const boost::optional<DataArray>& data) {
     if (data)
         dt.extents(*data);
     else
@@ -48,13 +48,13 @@ void setExtents(DataTag& dt, const boost::optional<DataArray>& data) {
 
 // getter for Reference
 
-boost::optional<DataArray> getReferenceById(const DataTag& st, const std::string& id) {
+boost::optional<DataArray> getReferenceById(const MultiTag& st, const std::string& id) {
     DataArray da = st.getReference(id);
 
     return da ? boost::optional<DataArray>(da) : boost::none;
 }
 
-boost::optional<DataArray> getReferenceByPos(const DataTag& st, size_t index) {
+boost::optional<DataArray> getReferenceByPos(const MultiTag& st, size_t index) {
     DataArray da = st.getReference(index);
 
     return da ? boost::optional<DataArray>(da) : boost::none;
@@ -62,66 +62,66 @@ boost::optional<DataArray> getReferenceByPos(const DataTag& st, size_t index) {
 
 // operations for Feature
 
-Feature createNewFeature(DataTag& dt, const DataArray &data, LinkType link_type) {
+Feature createNewFeature(MultiTag& dt, const DataArray &data, LinkType link_type) {
     Feature f = dt.createFeature(data, link_type);
 
     return f;
 }
 
-boost::optional<Feature> getFeatureById(const DataTag& st, const std::string& id) {
+boost::optional<Feature> getFeatureById(const MultiTag& st, const std::string& id) {
     Feature f = st.getFeature(id);
 
     return f ? boost::optional<Feature>(f) : boost::none;
 }
 
-boost::optional<Feature> getFeatureByPos(const DataTag& st, size_t index) {
+boost::optional<Feature> getFeatureByPos(const MultiTag& st, size_t index) {
     Feature f = st.getFeature(index);
 
     return f ? boost::optional<Feature>(f) : boost::none;
 }
 
-void PyDataTag::do_export() {
+void PyMultiTag::do_export() {
 
-    PyEntityWithSources<base::IDataTag>::do_export("DataTag");
+    PyEntityWithSources<base::IMultiTag>::do_export("MultiTag");
 
-    class_<DataTag, bases<base::EntityWithSources<base::IDataTag>>>("DataTag")
+    class_<MultiTag, bases<base::EntityWithSources<base::IMultiTag>>>("MultiTag")
 
         .add_property("positions",
-                      GETTER(DataArray, DataTag, positions),
-                      REF_SETTER(DataArray, DataTag, positions),
-                      doc::data_tag_positions)
+                      GETTER(DataArray, MultiTag, positions),
+                      REF_SETTER(DataArray, MultiTag, positions),
+                      doc::multi_tag_positions)
         .add_property("extents",
                       getExtents,
                       setExtents,
-                      doc::data_tag_extents)
+                      doc::multi_tag_extents)
         .add_property("units",
-                      GETTER(std::vector<std::string>, DataTag, units),
+                      GETTER(std::vector<std::string>, MultiTag, units),
                       setUnits,
-                      doc::data_tag_units)
+                      doc::multi_tag_units)
 
         // References
-        .def("_add_reference_by_id", REF_SETTER(std::string, DataTag, addReference))
-        .def("_has_reference_by_id", CHECKER(std::string, DataTag, hasReference))
-        .def("_reference_count", &DataTag::referenceCount)
+        .def("_add_reference_by_id", REF_SETTER(std::string, MultiTag, addReference))
+        .def("_has_reference_by_id", CHECKER(std::string, MultiTag, hasReference))
+        .def("_reference_count", &MultiTag::referenceCount)
         .def("_get_reference_by_id", &getReferenceById)
         .def("_get_reference_by_pos", &getReferenceByPos)
-        .def("_delete_reference_by_id", REMOVER(std::string, DataTag, removeReference))
+        .def("_delete_reference_by_id", REMOVER(std::string, MultiTag, removeReference))
 
         // Features
-        .def("create_feature", &createNewFeature, doc::data_tag_create_feature)
-        .def("_has_feature_by_id", CHECKER(std::string, DataTag, hasFeature))
-        .def("_feature_count", &DataTag::featureCount)
+        .def("create_feature", &createNewFeature, doc::multi_tag_create_feature)
+        .def("_has_feature_by_id", CHECKER(std::string, MultiTag, hasFeature))
+        .def("_feature_count", &MultiTag::featureCount)
         .def("_get_feature_by_id", &getFeatureById)
         .def("_get_feature_by_pos", &getFeatureByPos)
-        .def("_delete_feature_by_id", REMOVER(std::string, DataTag, deleteFeature))
+        .def("_delete_feature_by_id", REMOVER(std::string, MultiTag, deleteFeature))
 
         // Other
-        .def("__str__", &toStr<DataTag>)
-        .def("__repr__", &toStr<DataTag>)
+        .def("__str__", &toStr<MultiTag>)
+        .def("__repr__", &toStr<MultiTag>)
         ;
 
-    to_python_converter<std::vector<DataTag>, vector_transmogrify<DataTag>>();
-    to_python_converter<boost::optional<DataTag>, option_transmogrify<DataTag>>();
+    to_python_converter<std::vector<MultiTag>, vector_transmogrify<MultiTag>>();
+    to_python_converter<boost::optional<MultiTag>, option_transmogrify<MultiTag>>();
 }
 
 }

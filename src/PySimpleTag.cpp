@@ -30,7 +30,7 @@ void setUnits(SimpleTag& st, const std::vector<std::string>& units) {
 }
 
 
-void setExtent(SimpleTag& st, const std::vector<double>& iextent) {
+void setExtent(Tag& st, const std::vector<double>& iextent) {
     if (!iextent.empty())
         st.extent(iextent);
     else
@@ -39,13 +39,13 @@ void setExtent(SimpleTag& st, const std::vector<double>& iextent) {
 
 // getter for Reference
 
-boost::optional<DataArray> getReferenceById(const SimpleTag& st, const std::string& id) {
+boost::optional<DataArray> getReferenceById(const Tag& st, const std::string& id) {
     DataArray da = st.getReference(id);
 
     return da ? boost::optional<DataArray>(da) : boost::none;
 }
 
-boost::optional<DataArray> getReferenceByPos(const SimpleTag& st, size_t index) {
+boost::optional<DataArray> getReferenceByPos(const Tag& st, size_t index) {
     DataArray da = st.getReference(index);
 
     return da ? boost::optional<DataArray>(da) : boost::none;
@@ -53,65 +53,65 @@ boost::optional<DataArray> getReferenceByPos(const SimpleTag& st, size_t index) 
 
 // operations for Feature
 
-Feature createNewFeature(SimpleTag& st, const DataArray &data, LinkType link_type) {
+Feature createNewFeature(Tag& st, const DataArray &data, LinkType link_type) {
     Feature f = st.createFeature(data, link_type);
 
     return f;
 }
 
-boost::optional<Feature> getFeatureById(const SimpleTag& st, const std::string& id) {
+boost::optional<Feature> getFeatureById(const Tag& st, const std::string& id) {
     Feature f = st.getFeature(id);
 
     return f ? boost::optional<Feature>(f) : boost::none;
 }
 
-boost::optional<Feature> getFeatureByPos(const SimpleTag& st, size_t index) {
+boost::optional<Feature> getFeatureByPos(const Tag& st, size_t index) {
     Feature f = st.getFeature(index);
 
     return f ? boost::optional<Feature>(f) : boost::none;
 }
 
-void PySimpleTag::do_export() {
+void PyTag::do_export() {
 
-    PyEntityWithSources<base::ISimpleTag>::do_export("SimpleTag");
+    PyEntityWithSources<base::ITag>::do_export("Tag");
 
-    class_<SimpleTag, bases<base::EntityWithSources<base::ISimpleTag>>>("SimpleTag")
+    class_<Tag, bases<base::EntityWithSources<base::ITag>>>("Tag")
 
         // TODO make tuples for simple vectors like units, position, extent
 
         .add_property("units",
-                      GETTER(std::vector<std::string>, SimpleTag, units),
+                      GETTER(std::vector<std::string>, Tag, units),
                       setUnits,
-                      doc::simple_tag_units)
+                      doc::tag_units)
         .add_property("position",
-                      GETTER(std::vector<double>, SimpleTag, position),
-                      SETTER(std::vector<double> &, SimpleTag, position),
-                      doc::simple_tag_position)
+                      GETTER(std::vector<double>, Tag, position),
+                      SETTER(std::vector<double> &, Tag, position),
+                      doc::tag_position)
         .add_property("extent",
-                      GETTER(std::vector<double>, SimpleTag, extent),
+                      GETTER(std::vector<double>, Tag, extent),
                       setExtent,
-                      doc::simple_tag_extent)
+                      doc::tag_extent)
         // References
-        .def("_add_reference_by_id", REF_SETTER(std::string, SimpleTag, addReference))
-        .def("_has_reference_by_id", CHECKER(std::string, SimpleTag, hasReference))
-        .def("_reference_count", &SimpleTag::referenceCount)
+        .def("_add_reference_by_id", REF_SETTER(std::string, Tag, addReference))
+        .def("_has_reference_by_id", CHECKER(std::string, Tag, hasReference))
+        .def("_reference_count", &Tag::referenceCount)
         .def("_get_reference_by_id", &getReferenceById)
         .def("_get_reference_by_pos", &getReferenceByPos)
-        .def("_delete_reference_by_id", REMOVER(std::string, SimpleTag, removeReference))
+        .def("_delete_reference_by_id", REMOVER(std::string, Tag, removeReference))
         // Features
-        .def("create_feature", &createNewFeature, doc::simple_tag_create_feature)
-        .def("_has_feature_by_id", CHECKER(std::string, SimpleTag, hasFeature))
-        .def("_feature_count", &SimpleTag::featureCount)
+        .def("create_feature", &createNewFeature, doc::tag_create_feature)
+        .def("_has_feature_by_id", CHECKER(std::string, Tag, hasFeature))
+        .def("_feature_count", &Tag::featureCount)
         .def("_get_feature_by_id", &getFeatureById)
         .def("_get_feature_by_pos", &getFeatureByPos)
-        .def("_delete_feature_by_id", REMOVER(std::string, SimpleTag, deleteFeature))
+        .def("_delete_feature_by_id", REMOVER(std::string, Tag, deleteFeature))
         // Other
-        .def("__str__", &toStr<SimpleTag>)
-        .def("__repr__", &toStr<SimpleTag>)
+        .def("__str__", &toStr<Tag>)
+        .def("__repr__", &toStr<Tag>)
         ;
 
-    to_python_converter<std::vector<SimpleTag>, vector_transmogrify<SimpleTag>>();
-    to_python_converter<boost::optional<SimpleTag>, option_transmogrify<SimpleTag>>();
+    to_python_converter<std::vector<Tag>, vector_transmogrify<Tag>>();
+    to_python_converter<boost::optional<Tag>, option_transmogrify<Tag>>();
 }
 
 }

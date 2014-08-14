@@ -154,11 +154,11 @@ struct PyFeature {
     static void do_export();
 };
 
-struct PySimpleTag {
+struct PyTag {
     static void do_export();
 };
 
-struct PyDataTag {
+struct PyMultiTag {
     static void do_export();
 };
 
