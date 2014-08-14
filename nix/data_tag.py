@@ -8,14 +8,14 @@
 
 from __future__ import absolute_import
 
-from nix.core import DataTag
+from nix.core import MultiTag
 from nix.util.inject import Inject
-from nix.simple_tag import ReferenceProxyList, FeatureProxyList
+from nix.tag import ReferenceProxyList, FeatureProxyList
 
 
-class DataTagMixin(DataTag):
+class MultiTagMixin(MultiTag):
 
-    class __metaclass__(Inject, DataTag.__class__):
+    class __metaclass__(Inject, MultiTag.__class__):
         pass
 
     @property

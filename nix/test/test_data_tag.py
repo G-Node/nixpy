@@ -11,19 +11,19 @@ import unittest
 from nix import *
 
 
-class TestDataTag(unittest.TestCase):
+class TestMultiTag(unittest.TestCase):
 
     def setUp(self):
         self.file     = File.open("unittest.h5", FileMode.Overwrite)
         self.block    = self.file.create_block("test block", "recordingsession")
 
         self.my_array = self.block.create_data_array("my array", "test", DataType.Int16, (0, 0))
-        self.my_tag   = self.block.create_data_tag(
+        self.my_tag   = self.block.create_multi_tag(
             "my tag", "tag", self.my_array
         )
 
         self.your_array = self.block.create_data_array("your array", "test", DataType.Int16, (0, 0))
-        self.your_tag = self.block.create_data_tag(
+        self.your_tag = self.block.create_multi_tag(
             "your tag", "tag", self.your_array
         )
 
@@ -31,15 +31,15 @@ class TestDataTag(unittest.TestCase):
         del self.file.blocks[self.block.id]
         self.file.close()
 
-    def test_data_tag_eq(self):
+    def test_multi_tag_eq(self):
         assert(self.my_tag == self.my_tag)
         assert(not self.my_tag == self.your_tag)
         assert(not self.my_tag is None)
 
-    def test_data_tag_id(self):
+    def test_multi_tag_id(self):
         assert(self.my_tag.id is not None)
 
-    def test_data_tag_name(self):
+    def test_multi_tag_name(self):
         def set_none():
             self.my_tag.name = None
 
@@ -49,7 +49,7 @@ class TestDataTag(unittest.TestCase):
         self.my_tag.name = "foo my_tag"
         assert(self.my_tag.name == "foo my_tag")
 
-    def test_data_tag_type(self):
+    def test_multi_tag_type(self):
         def set_none():
             self.my_tag.type = None
 
@@ -59,7 +59,7 @@ class TestDataTag(unittest.TestCase):
         self.my_tag.type = "foo type"
         assert(self.my_tag.type == "foo type")
 
-    def test_data_tag_definition(self):
+    def test_multi_tag_definition(self):
         assert(self.my_tag.definition is None)
 
         self.my_tag.definition = "definition"
@@ -68,7 +68,7 @@ class TestDataTag(unittest.TestCase):
         self.my_tag.definition = None
         assert(self.my_tag.definition is None)
 
-    def test_data_tag_timestamps(self):
+    def test_multi_tag_timestamps(self):
         created_at = self.my_tag.created_at
         assert(created_at > 0)
 
@@ -78,7 +78,7 @@ class TestDataTag(unittest.TestCase):
         self.my_tag.force_created_at(1403530068)
         assert(self.my_tag.created_at == 1403530068)
 
-    def test_data_tag_units(self):
+    def test_multi_tag_units(self):
         assert(self.my_tag.units == ())
 
         self.my_tag.units = ["mV", "ms"]
@@ -87,7 +87,7 @@ class TestDataTag(unittest.TestCase):
         self.my_tag.units = []  # () also works!
         assert(self.my_tag.units == ())
 
-    def test_data_tag_positions(self):
+    def test_multi_tag_positions(self):
         def set_none():
             self.my_tag.positions = None
 
@@ -103,7 +103,7 @@ class TestDataTag(unittest.TestCase):
         self.my_tag.positions = old_positions
         assert(self.my_tag.positions == old_positions)
 
-    def test_data_tag_extents(self):
+    def test_multi_tag_extents(self):
         assert(self.my_tag.extents is None)
 
         new_extents = self.block.create_data_array("ext", "extent", DataType.Int16, (0, 0))
@@ -113,7 +113,7 @@ class TestDataTag(unittest.TestCase):
         self.my_tag.extents = None
         assert(self.my_tag.extents is None)
 
-    def test_data_tag_references(self):
+    def test_multi_tag_references(self):
         assert(len(self.my_tag.references) == 0)
 
         self.assertRaises(TypeError, lambda _: self.my_tag.references.append(100))
@@ -134,7 +134,7 @@ class TestDataTag(unittest.TestCase):
         del self.my_tag.references[reference1]
         assert(len(self.my_tag.references) == 0)
 
-    def test_data_tag_features(self):
+    def test_multi_tag_features(self):
         assert(len(self.my_tag.features) == 0)
 
         data_array = self.block.create_data_array("feature", "stimuli", DataType.Int16, (0, ))
