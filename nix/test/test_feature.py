@@ -18,7 +18,7 @@ class TestFeature(unittest.TestCase):
         self.block    = self.file.create_block("test block", "recordingsession")
 
         self.signal = self.block.create_data_array("output", "analogsignal", DataType.Float, (0, ))
-        self.stimuli_tag   = self.block.create_simple_tag(
+        self.stimuli_tag   = self.block.create_tag(
             "stimuli used", "tag", [0]
         )
         self.stimuli_tag.references.append(self.signal)

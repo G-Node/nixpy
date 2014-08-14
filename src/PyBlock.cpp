@@ -44,32 +44,32 @@ DataArray createDataArray(Block& block, const std::string &name, const std::stri
     return block.createDataArray(name, type, data_type, shape);
 }
 
-// getter for DataTag
+// getter for MultiTag
 
-boost::optional<DataTag> getDataTagById(const Block& block, const std::string& id) {
-    DataTag da = block.getDataTag(id);
+boost::optional<MultiTag> getMultiTagById(const Block& block, const std::string& id) {
+    MultiTag da = block.getMultiTag(id);
 
-    return da ? boost::optional<DataTag>(da) : boost::none;
+    return da ? boost::optional<MultiTag>(da) : boost::none;
 }
 
-boost::optional<DataTag> getDataTagByPos(const Block& block, size_t index) {
-    DataTag da = block.getDataTag(index);
+boost::optional<MultiTag> getMultiTagByPos(const Block& block, size_t index) {
+    MultiTag da = block.getMultiTag(index);
 
-    return da ? boost::optional<DataTag>(da) : boost::none;
+    return da ? boost::optional<MultiTag>(da) : boost::none;
 }
 
-// getter for SimpleTag
+// getter for Tag
 
-boost::optional<SimpleTag> getSimpleTagById(const Block& block, const std::string& id) {
-    SimpleTag da = block.getSimpleTag(id);
+boost::optional<Tag> getTagById(const Block& block, const std::string& id) {
+    Tag da = block.getTag(id);
 
-    return da ? boost::optional<SimpleTag>(da) : boost::none;
+    return da ? boost::optional<Tag>(da) : boost::none;
 }
 
-boost::optional<SimpleTag> getSimpleTagByPos(const Block& block, size_t index) {
-    SimpleTag da = block.getSimpleTag(index);
+boost::optional<Tag> getTagByPos(const Block& block, size_t index) {
+    Tag da = block.getTag(index);
 
-    return da ? boost::optional<SimpleTag>(da) : boost::none;
+    return da ? boost::optional<Tag>(da) : boost::none;
 }
 
 // getter for Source
@@ -96,18 +96,18 @@ void PyBlock::do_export() {
         .def("_get_data_array_by_id", &getDataArrayById)
         .def("_get_data_array_by_pos", &getDataArrayByPos)
         .def("_delete_data_array_by_id", REMOVER(std::string, nix::Block, deleteDataArray))
-        // DataTag
-        .def("create_data_tag", &Block::createDataTag, doc::block_create_data_tag)
-        .def("_data_tag_count", &Block::dataTagCount)
-        .def("_get_data_tag_by_id", &getDataTagById)
-        .def("_get_data_tag_by_pos", &getDataTagByPos)
-        .def("_delete_data_tag_by_id", REMOVER(std::string, nix::Block, deleteDataTag))
-        // SimpleTag
-        .def("create_simple_tag", &Block::createSimpleTag, doc::block_create_simple_tag)
-        .def("_simple_tag_count", &Block::simpleTagCount)
-        .def("_get_simple_tag_by_id", &getSimpleTagById)
-        .def("_get_simple_tag_by_pos", &getSimpleTagByPos)
-        .def("_delete_simple_tag_by_id", REMOVER(std::string, nix::Block, deleteSimpleTag))
+        // MultiTag
+        .def("create_multi_tag", &Block::createMultiTag, doc::block_create_multi_tag)
+        .def("_multi_tag_count", &Block::multiTagCount)
+        .def("_get_multi_tag_by_id", &getMultiTagById)
+        .def("_get_multi_tag_by_pos", &getMultiTagByPos)
+        .def("_delete_multi_tag_by_id", REMOVER(std::string, nix::Block, deleteMultiTag))
+        // Tag
+        .def("create_tag", &Block::createTag, doc::block_create_tag)
+        .def("_tag_count", &Block::tagCount)
+        .def("_get_tag_by_id", &getTagById)
+        .def("_get_tag_by_pos", &getTagByPos)
+        .def("_delete_tag_by_id", REMOVER(std::string, nix::Block, deleteTag))
         // Source
         .def("create_source", &Block::createSource, doc::block_create_source)
         .def("_source_count", &Block::sourceCount)

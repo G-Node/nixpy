@@ -235,8 +235,8 @@ const char* block_create_data_array = R"(
     :rtype: DataArray
     )";
 
-const char* block_create_simple_tag = R"(
-    Create a new simple tag for this block.
+const char* block_create_tag = R"(
+    Create a new tag for this block.
 
     :param name: The name of the tag to create.
     :type name: str
@@ -246,11 +246,11 @@ const char* block_create_simple_tag = R"(
     :type references: list
 
     :returns: The newly created tag.
-    :rtype: SimpleTag
+    :rtype: Tag
     )";
 
-const char* block_create_data_tag = R"(
-    Create a new simple tag for this block.
+const char* block_create_multi_tag = R"(
+    Create a new multi tag for this block.
 
     :param name: The name of the tag to create.
     :type name: str
@@ -260,7 +260,7 @@ const char* block_create_data_tag = R"(
     :type positions: DataArray
 
     :returns: The newly created tag.
-    :rtype: DataTag
+    :rtype: MultiTag
     )";
 
 const char* block_create_source = R"(
@@ -391,27 +391,27 @@ const char* data_array_append_range_dimension = R"(
     )";
 
 
-const char* simple_tag_units = R"(
+const char* tag_units = R"(
     Property containing the units of the tag. The tag must provide a unit for each
     dimension of the position or extent vector. This is a read-write property.
 
     :type: list of str
     )";
 
-const char* simple_tag_position = R"(
+const char* tag_position = R"(
     The position defined by the tag. This is a read-write property.
 
     :type: list of float
     )";
 
-const char* simple_tag_extent = R"(
+const char* tag_extent = R"(
     The extent defined by the tag. This is an optional read-write property and may be set
     to None.
 
     :type: list of float
     )";
 
-const char* simple_tag_create_feature = R"(
+const char* tag_create_feature = R"(
     Create a new feature.
 
     :param data: The data array of this feature.
@@ -423,27 +423,27 @@ const char* simple_tag_create_feature = R"(
     :rtype: Feature
     )";
 
-const char* data_tag_units = R"(
+const char* multi_tag_units = R"(
     Property containing the units of the tag. The tag must provide a unit for each
     dimension of the positions or extents vector. This is a read-write property.
 
     :type: list of str
     )";
 
-const char* data_tag_positions = R"(
+const char* multi_tag_positions = R"(
     The positions defined by the tag. This is a read-write property.
 
     :type: DataArray
     )";
 
-const char* data_tag_extents = R"(
+const char* multi_tag_extents = R"(
     The extents defined by the tag. This is an optional read-write property and may be set
     to None.
 
     :type: DataArray or None
     )";
 
-const char* data_tag_create_feature = R"(
+const char* multi_tag_create_feature = R"(
     Create a new feature.
 
     :param data: The data array of this feature.

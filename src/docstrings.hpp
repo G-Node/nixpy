@@ -58,9 +58,9 @@ extern const char* file_open;
 
 extern const char* block_create_data_array;
 
-extern const char* block_create_simple_tag;
+extern const char* block_create_tag;
 
-extern const char* block_create_data_tag;
+extern const char* block_create_multi_tag;
 
 extern const char* block_create_source;
 
@@ -108,25 +108,25 @@ extern const char* data_array_append_sampled_dimension;
 
 extern const char* data_array_append_range_dimension;
 
-// PySimpleTag
+// PyTag
 
-extern const char* simple_tag_units;
+extern const char* tag_units;
 
-extern const char* simple_tag_position;
+extern const char* tag_position;
 
-extern const char* simple_tag_extent;
+extern const char* tag_extent;
 
-extern const char* simple_tag_create_feature;
+extern const char* tag_create_feature;
 
-// PyDataTag
+// PyMultiTag
 
-extern const char* data_tag_units;
+extern const char* multi_tag_units;
 
-extern const char* data_tag_positions;
+extern const char* multi_tag_positions;
 
-extern const char* data_tag_extents;
+extern const char* multi_tag_extents;
 
-extern const char* data_tag_create_feature;
+extern const char* multi_tag_create_feature;
 
 }
 }
