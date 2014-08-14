@@ -19,13 +19,15 @@ class TestSimpleTag(unittest.TestCase):
 
         self.my_array = self.block.create_data_array("my array", "test", DataType.Int16, (1, ))
         self.my_tag   = self.block.create_simple_tag(
-            "my tag", "tag", [self.my_array]
+            "my tag", "tag", [0]
         )
+        self.my_tag.references.append(self.my_array)
 
         self.your_array = self.block.create_data_array("your array", "test", DataType.Int16, (1, ))
         self.your_tag = self.block.create_simple_tag(
-            "your tag", "tag", [self.your_array]
+            "your tag", "tag", [0]
         )
+        self.your_tag.references.append(self.your_array)
 
     def tearDown(self):
         del self.file.blocks[self.block.id]
@@ -88,13 +90,10 @@ class TestSimpleTag(unittest.TestCase):
         assert(self.my_tag.units == ())
 
     def test_simple_tag_position(self):
-        assert(self.my_tag.position == ())
+        assert(self.my_tag.position == (0, ))
 
         self.my_tag.position = (1.0, 2.0, 3.0)
         assert(self.my_tag.position == (1.0, 2.0, 3.0))
-
-        self.my_tag.position = []
-        assert(self.my_tag.position == ())
 
     def test_simple_tag_extent(self):
         assert(self.my_tag.extent == ())
@@ -121,8 +120,8 @@ class TestSimpleTag(unittest.TestCase):
         assert(reference2 in self.my_tag.references)
 
         del self.my_tag.references[reference2]
-        assert(self.my_tag.references[0] == self.my_array)
-        assert(self.my_tag.references[1] == reference1)
+        assert(self.my_array in self.my_tag.references)
+        assert(reference1 in self.my_tag.references)
 
         del self.my_tag.references[reference1]
         assert(len(self.my_tag.references) == 1)

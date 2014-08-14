@@ -97,8 +97,8 @@ native_ext    = Extension(
                     runtime_library_dirs = [nix_lib_dir, boost_lib_dir],
                     **pkg_config(
                         "nix",
-                        library_dirs=[boost_lib_dir],
-                        include_dirs=[boost_inc_dir, np.get_include(), 'src'],
+                        library_dirs=[boost_lib_dir, nix_lib_dir],
+                        include_dirs=[boost_inc_dir, nix_inc_dir, np.get_include(), 'src'],
                         ignore_error=True
                     )
                 )

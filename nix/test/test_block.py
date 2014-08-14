@@ -111,9 +111,8 @@ class TestBlock(unittest.TestCase):
     def test_block_simple_tags(self):
         assert(len(self.block.simple_tags) == 0)
 
-        data_array = self.block.create_data_array("test array", "recording", DataType.Int32, (0, ))
-        simple_tag = self.block.create_simple_tag("test simple_tag", "recordingsession", [data_array])
-
+        simple_tag = self.block.create_simple_tag("test simple_tag", "recordingsession", [0])
+        
         assert(len(self.block.simple_tags) == 1)
 
         assert(simple_tag      in self.block.simple_tags)

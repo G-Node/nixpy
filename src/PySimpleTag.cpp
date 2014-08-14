@@ -29,12 +29,6 @@ void setUnits(SimpleTag& st, const std::vector<std::string>& units) {
         st.units(boost::none);
 }
 
-void setPosition(SimpleTag& st, const std::vector<double>& pos) {
-    if (!pos.empty())
-        st.position(pos);
-    else
-        st.position(boost::none);
-}
 
 void setExtent(SimpleTag& st, const std::vector<double>& iextent) {
     if (!iextent.empty())
@@ -91,7 +85,7 @@ void PySimpleTag::do_export() {
                       doc::simple_tag_units)
         .add_property("position",
                       GETTER(std::vector<double>, SimpleTag, position),
-                      setPosition,
+                      SETTER(std::vector<double> &, SimpleTag, position),
                       doc::simple_tag_position)
         .add_property("extent",
                       GETTER(std::vector<double>, SimpleTag, extent),
