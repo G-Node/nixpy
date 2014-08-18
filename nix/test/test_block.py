@@ -31,14 +31,7 @@ class TestBlock(unittest.TestCase):
         assert(self.block.id is not None)
 
     def test_block_name(self):
-        def set_none():
-            self.block.name = None
-
         assert(self.block.name is not None)
-        self.assertRaises(Exception, set_none)
-
-        self.block.name = "foo block"
-        assert(self.block.name == "foo block")
 
     def test_block_type(self):
         def set_none():
@@ -112,7 +105,7 @@ class TestBlock(unittest.TestCase):
         assert(len(self.block.tags) == 0)
 
         tag = self.block.create_tag("test tag", "recordingsession", [0])
-        
+
         assert(len(self.block.tags) == 1)
 
         assert(tag      in self.block.tags)

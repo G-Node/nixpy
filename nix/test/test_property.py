@@ -32,14 +32,7 @@ class TestProperty(unittest.TestCase):
         assert(self.prop.id is not None)
 
     def test_property_name(self):
-        def set_none():
-            self.prop.name = None
-
         assert(self.prop.name is not None)
-        self.assertRaises(Exception, set_none)
-
-        self.prop.name = "foo section"
-        assert(self.prop.name == "foo section")
 
     def test_property_definition(self):
         assert(self.prop.definition is None)

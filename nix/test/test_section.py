@@ -31,14 +31,7 @@ class TestSection(unittest.TestCase):
         assert(self.section.id is not None)
 
     def test_section_name(self):
-        def set_none():
-            self.section.name = None
-
         assert(self.section.name is not None)
-        self.assertRaises(Exception, set_none)
-
-        self.section.name = "foo section"
-        assert(self.section.name == "foo section")
 
     def test_section_type(self):
         def set_none():

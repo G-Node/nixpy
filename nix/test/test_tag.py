@@ -42,14 +42,7 @@ class TestTag(unittest.TestCase):
         assert(self.my_tag.id is not None)
 
     def test_tag_name(self):
-        def set_none():
-            self.my_tag.name = None
-
         assert(self.my_tag.name is not None)
-        self.assertRaises(Exception, set_none)
-
-        self.my_tag.name = "foo my_tag"
-        assert(self.my_tag.name == "foo my_tag")
 
     def test_tag_type(self):
         def set_none():

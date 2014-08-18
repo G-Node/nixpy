@@ -32,14 +32,7 @@ class TestDataArray(unittest.TestCase):
         assert(self.array.id is not None)
 
     def test_data_array_name(self):
-        def set_none():
-            self.array.name = None
-
         assert(self.array.name is not None)
-        self.assertRaises(Exception, set_none)
-
-        self.array.name = "foo array"
-        assert(self.array.name == "foo array")
 
     def test_data_array_type(self):
         def set_none():
