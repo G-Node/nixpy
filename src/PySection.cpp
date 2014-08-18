@@ -68,7 +68,7 @@ boost::optional<Property> getPropertyByPos(const Section& section, size_t index)
     return prop ? boost::optional<Property>(prop) : boost::none;
 }
 
-boost::optional<Property> getPropertyWithName(const Section& section, const std::string& name) {
+boost::optional<Property> getPropertyByName(const Section& section, const std::string& name) {
     Property prop = section.getPropertyByName(name);
 
     return prop ? boost::optional<Property>(prop) : boost::none;
@@ -138,10 +138,10 @@ void PySection::do_export() {
         .def("_delete_section_by_id", REMOVER(std::string, nix::Section, deleteSection))
         // Property
         .def("create_property", createProperty)
-        .def("has_property_with_name", &Section::hasPropertyWithName,
-             doc::section_has_property_with_name)
-        .def("get_property_with_name", getPropertyWithName,
-             doc::section_get_property_with_name)
+        .def("has_property_by_name", &Section::hasPropertyByName,
+             doc::section_has_property_by_name)
+        .def("get_property_by_name", getPropertyByName,
+             doc::section_get_property_by_name)
         .def("_property_count", &Section::propertyCount)
         .def("_get_property_by_id", &getPropertyById)
         .def("_get_property_by_pos", &getPropertyByPos)

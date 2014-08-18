@@ -200,7 +200,7 @@ const char* section_create_property = R"(
     :rtype: Property
     )";
 
-const char* section_has_property_with_name = R"(
+const char* section_has_property_by_name = R"(
     Checks whether a section has a property with a certain name.
 
     :param name: The name to check.
@@ -211,7 +211,7 @@ const char* section_has_property_with_name = R"(
     :rtype: bool
     )";
 
-const char* section_get_property_with_name = R"(
+const char* section_get_property_by_name = R"(
     Get a property by its name.
 
     :param name: The name to check.
