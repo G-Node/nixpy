@@ -31,14 +31,7 @@ class TestSection(unittest.TestCase):
         assert(self.section.id is not None)
 
     def test_section_name(self):
-        def set_none():
-            self.section.name = None
-
         assert(self.section.name is not None)
-        self.assertRaises(Exception, set_none)
-
-        self.section.name = "foo section"
-        assert(self.section.name == "foo section")
 
     def test_section_type(self):
         def set_none():
@@ -121,10 +114,10 @@ class TestSection(unittest.TestCase):
         for p in self.section:
             assert(p in self.section)
 
-        assert(self.section.has_property_with_name("test prop"))
-        assert(not self.section.has_property_with_name("notexist"))
-        assert(self.section.get_property_with_name("test prop") is not None)
-        assert(self.section.get_property_with_name("notexist") is None)
+        assert(self.section.has_property_by_name("test prop"))
+        assert(not self.section.has_property_by_name("notexist"))
+        assert(self.section.get_property_by_name("test prop") is not None)
+        assert(self.section.get_property_by_name("notexist") is None)
 
         assert(len(self.section.inherited_properties()) == 1)
 

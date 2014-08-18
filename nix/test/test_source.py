@@ -31,14 +31,7 @@ class TestSource(unittest.TestCase):
         assert(self.source.id is not None)
 
     def test_source_name(self):
-        def set_none():
-            self.source.name = None
-
         assert(self.source.name is not None)
-        self.assertRaises(Exception, set_none)
-
-        self.source.name = "foo source"
-        assert(self.source.name == "foo source")
 
     def test_source_type(self):
         def set_none():

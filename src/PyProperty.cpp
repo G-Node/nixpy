@@ -12,6 +12,7 @@
 #include <nix.hpp>
 #include <accessors.hpp>
 #include <transmorgify.hpp>
+#include <docstrings.hpp>
 
 #include <PyEntity.hpp>
 
@@ -77,10 +78,11 @@ void PyProperty::do_export() {
     class_<Property, bases<base::Entity<base::IProperty>>>("Property")
         .add_property("name",
                       GETTER(std::string, Property, name),
-                      REF_SETTER(std::string, Property, name))
+                      doc::entity_name)
         .add_property("definition",
                       OPT_GETTER(std::string, Property, definition),
-                      setDefinition)
+                      setDefinition,
+                      doc::entity_definition)
         .add_property("mapping",
                       OPT_GETTER(std::string, Property, mapping),
                       setMapping)
