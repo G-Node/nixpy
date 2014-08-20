@@ -78,9 +78,9 @@ extern const char* section_create_section;
 
 extern const char* section_create_property;
 
-extern const char* section_has_property_with_name;
+extern const char* section_has_property_by_name;
 
-extern const char* section_get_property_with_name;
+extern const char* section_get_property_by_name;
 
 // PyDataArray
 

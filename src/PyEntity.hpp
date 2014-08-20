@@ -60,7 +60,6 @@ struct PyNamedEntity {
         class_<nix::base::NamedEntity<T>, bases<nix::base::Entity<T>>>(real_name.c_str(), no_init)
             .add_property("name",
                           GETTER(std::string, nix::base::NamedEntity<T>, name),
-                          REF_SETTER(std::string, nix::base::NamedEntity<T>, name),
                           doc::entity_name)
             .add_property("type",
                           GETTER(std::string, nix::base::NamedEntity<T>, type),
