@@ -85,7 +85,7 @@ PyObject* get(const Value& ref) {
         case DataType::UInt16:
         case DataType::UInt32:
         case DataType::UInt64:
-            return incref(object(ref.get<u_int64_t>()).ptr());
+            return incref(object(ref.get<uint64_t>()).ptr());
         case DataType::String:
             return incref(object(ref.get<std::string>()).ptr());
         case DataType::Date:
