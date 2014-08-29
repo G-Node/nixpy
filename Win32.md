@@ -9,7 +9,7 @@ Dependencies
 0) Required prior to python build
    - Navigate to the instructions for building nix on windows and follow the steps there to set up all necessary win build tools.
 
-2) **Nix for windows**
+1) **Nix for windows**
    - Install nix for windows using the installer provided on github (https://github.com/G-Node/nix/releases)
 
 2) **Python2.7**
@@ -41,7 +41,7 @@ Dependencies
    - `VS120COMNTOOLS = <VSPATH>\Common7\Tools` where `<VSPATH>` is the path where you installed visual studio. (e.g. "C:\Program Files (x86)\Microsoft Visual Studio 12.0") Make sure `<VSPATH>` is added to PATH too!
 
 6) **vcvarsall.bat**:
-   Execute ones manually `vcvarsall.bat x86_amd64` from the cmd line.
+   Execute once manually `vcvarsall.bat x86_amd64` from the cmd line.
 
 7) **vcvarsall.bat**:
    Now build via:
