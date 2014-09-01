@@ -44,8 +44,8 @@ Block
 
 The Block entity is a top-level, summarizing element that allows to
 group the other data entities belonging for example to the same recording session.
-All data entities such as Source, DataArray, SimpleTag and
-DataTag have to be associated with one Block.
+All data entities such as Source, DataArray, Tag and
+MultiTag have to be associated with one Block.
 
 Create a new Block
 ------------------
@@ -62,7 +62,7 @@ Working with blocks
 -------------------
 
 After a block was created it can be used to create further entities. See the documentation of
-Source, DataArray, SimpleTag and DataTag for more information. The next example shows how some
+Source, DataArray, Tag and MultiTag for more information. The next example shows how some
 properties of a block can be accessed.
 
 .. code-block:: python
@@ -180,18 +180,18 @@ contains additional information about the points of hyperslabs defined by the ta
 This could be for example data that represents a stimulus (e.g. an image or a
 signal) that was applied in a certain interval during the recording.
 
-SimpleTag API
+Tag API
 -------------
 
-.. autoclass:: nix.SimpleTag
+.. autoclass:: nix.Tag
     :members:
     :inherited-members:
     :undoc-members:
 
-DataTag API
+MultiTag API
 -------------
 
-.. autoclass:: nix.DataTag
+.. autoclass:: nix.MultiTag
     :members:
     :inherited-members:
     :undoc-members:

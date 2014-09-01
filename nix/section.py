@@ -129,6 +129,6 @@ class SectionMixin(Section):
         Helper method that gets a property by id or name
         """
         p = self._get_property_by_id(ident)
-        if p is None and self.has_property_with_name(ident):
-            p = self.get_property_with_name(ident)
+        if p is None and self.has_property_by_name(ident):
+            p = self.get_property_by_name(ident)
         return p

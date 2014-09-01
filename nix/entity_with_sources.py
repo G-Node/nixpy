@@ -8,7 +8,7 @@
 
 from __future__ import absolute_import
 
-from nix.core import DataArray, DataTag, SimpleTag
+from nix.core import DataArray, MultiTag, Tag
 from nix.util.inject import Inject
 from nix.util.proxy_list import RefProxyList
 
@@ -35,16 +35,16 @@ class DataArrySourcesMixin(DataArray):
     sources = property(_get_sources, None, None, _sources_doc)
 
 
-class DataTagSourcesMixin(DataTag):
+class MultiTagSourcesMixin(MultiTag):
 
-    class __metaclass__(Inject, DataTag.__class__):
+    class __metaclass__(Inject, MultiTag.__class__):
         pass
 
     sources = property(_get_sources, None, None, _sources_doc)
 
-class SimpleTagSourcesMixin(SimpleTag):
+class TagSourcesMixin(Tag):
 
-    class __metaclass__(Inject, SimpleTag.__class__):
+    class __metaclass__(Inject, Tag.__class__):
         pass
 
     sources = property(_get_sources, None, None, _sources_doc)

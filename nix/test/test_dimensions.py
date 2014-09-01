@@ -20,7 +20,7 @@ class TestDimensions(unittest.TestCase):
     def setUp(self):
         self.file  = File.open("unittest.h5", FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
-        self.array = self.block.create_data_array("test array", "signal")
+        self.array = self.block.create_data_array("test array", "signal", DataType.Float, (0, ))
 
         self.set_dim    = self.array.append_set_dimension()
         self.sample_dim = self.array.append_sampled_dimension(test_sampl)

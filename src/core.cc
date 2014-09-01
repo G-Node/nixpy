@@ -32,8 +32,8 @@ BOOST_PYTHON_MODULE(core)
     PyDataArray::do_export();
     PyDimensions::do_export();
     PyFeature::do_export();
-    PySimpleTag::do_export();
-    PyDataTag::do_export();
+    PyTag::do_export();
+    PyMultiTag::do_export();
 
     to_python_converter<boost::optional<std::string>, option_transmogrify<std::string>>();
     option_transmogrify<std::string>::register_from_python();
@@ -43,6 +43,9 @@ BOOST_PYTHON_MODULE(core)
 
     to_python_converter<std::vector<double>, vector_transmogrify<double>>();
     vector_transmogrify<double>::register_from_python();
+
+    to_python_converter<std::vector<int>, vector_transmogrify<int>>();
+    vector_transmogrify<int>::register_from_python();
 
     to_python_converter<boost::optional<double>, option_transmogrify<double>>();
     option_transmogrify<double>::register_from_python();

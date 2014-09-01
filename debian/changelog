@@ -1,3 +1,10 @@
+python-nix (0.10.4-1) trusty; urgency=medium
+
+  * Update to beta 0.10.4
+  * Fix setup.py
+
+ -- Balint Morvai <balint@morvai.de>  Fri, 28 Aug 2014 16:06:36 +0200
+
 python-nix (0.9.6-1) trusty; urgency=medium
 
   * Update to version 0.9.6
