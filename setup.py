@@ -11,6 +11,15 @@ import numpy as np
 import sys
 import os
 import re
+import fnmatch
+
+def find(pattern, path):
+    result = []
+    for root, dirs, files in os.walk(path):
+        for name in files:
+            if fnmatch.fnmatch(name, pattern):
+                result.append(os.path.join(root, name))
+    return result
 
 with open('README.md') as f:
     description_text = f.read()
@@ -59,7 +68,10 @@ def pkg_config(*packages, **kw):
 
 nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include')
 nix_lib_dir = os.getenv('NIX_LIBDIR', '/usr/local/lib')
-nix_lnk_arg = '-lnix'
+if os.name != 'nt':
+    nix_lnk_arg = ['-lnix']
+else:
+    nix_lnk_arg = ['/LIBPATH:'+nix_lib_dir, '/DEFAULTLIB:nix.lib']
 
 nixpy_sources = [
     'src/core.cc',
@@ -73,13 +85,17 @@ nixpy_sources = [
     'src/PyDataArray.cpp',
     'src/PyDimensions.cpp',
     'src/PyFeature.cpp',
-    'src/PySimpleTag.cpp',
-    'src/PyDataTag.cpp',
+    'src/PyTag.cpp',
+    'src/PyMultiTag.cpp',
 ]
 
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
 boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
-boost_lnk_arg = '-lboost_python'
+if os.name != 'nt':
+    boost_lnk_arg = ['-lboost_python']
+else:
+    boostlib = find('boost_python*.lib', boost_lib_dir)
+    boost_lnk_arg = ['/LIBPATH:'+boost_lib_dir, '/DEFAULTLIB:'+boostlib[0]]
 
 classifiers   = [
                     'Development Status :: 3 - Alpha',
@@ -92,13 +108,13 @@ classifiers   = [
 native_ext    = Extension(
                     'nix.core',
                     extra_compile_args = ['-std=c++11'],
-                    extra_link_args=[boost_lnk_arg, nix_lnk_arg],
+                    extra_link_args=boost_lnk_arg + nix_lnk_arg,
                     sources = nixpy_sources,
-                    runtime_library_dirs = [nix_lib_dir, boost_lib_dir],
+                    runtime_library_dirs = [nix_lib_dir, boost_lib_dir] if os.name!='nt' else None,
                     **pkg_config(
                         "nix",
-                        library_dirs=[boost_lib_dir],
-                        include_dirs=[boost_inc_dir, np.get_include(), 'src'],
+                        library_dirs=[boost_lib_dir, nix_lib_dir],
+                        include_dirs=[boost_inc_dir, nix_inc_dir, np.get_include(), 'src'],
                         ignore_error=True
                     )
                 )

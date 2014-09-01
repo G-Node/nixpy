@@ -29,18 +29,18 @@ class DataArrayProxyList(ProxyList):
                                                  "_get_data_array_by_pos", "_delete_data_array_by_id")
 
 
-class DataTagProxyList(ProxyList):
+class MultiTagProxyList(ProxyList):
 
     def __init__(self, obj):
-        super(DataTagProxyList, self).__init__(obj, "_data_tag_count", "_get_data_tag_by_id",
-                                               "_get_data_tag_by_pos", "_delete_data_tag_by_id")
+        super(MultiTagProxyList, self).__init__(obj, "_multi_tag_count", "_get_multi_tag_by_id",
+                                               "_get_multi_tag_by_pos", "_delete_multi_tag_by_id")
 
 
-class SimpleTagProxyList(ProxyList):
+class TagProxyList(ProxyList):
 
     def __init__(self, obj):
-        super(SimpleTagProxyList, self).__init__(obj, "_simple_tag_count", "_get_simple_tag_by_id",
-                                                 "_get_simple_tag_by_pos", "_delete_simple_tag_by_id")
+        super(TagProxyList, self).__init__(obj, "_tag_count", "_get_tag_by_id",
+                                                 "_get_tag_by_pos", "_delete_tag_by_id")
 
 
 class BlockMixin(Block):
@@ -83,30 +83,30 @@ class BlockMixin(Block):
         return self._sources
 
     @property
-    def data_tags(self):
+    def multi_tags(self):
         """
-        A property containing all data tags of a block. DataTag entities can be obtained via their index or by their id.
-        Tags can be deleted from the list. Adding tags is done using the Blocks create_data_tag method.
+        A property containing all multi tags of a block. MultiTag entities can be obtained via their index or by their id.
+        Tags can be deleted from the list. Adding tags is done using the Blocks create_multi_tag method.
         This is a read only attribute.
 
-        :type: ProxyList of DataTag entities.
+        :type: ProxyList of MultiTag entities.
         """
-        if not hasattr(self, "_data_tags"):
-            setattr(self, "_data_tags", DataTagProxyList(self))
-        return self._data_tags
+        if not hasattr(self, "_multi_tags"):
+            setattr(self, "_multi_tags", MultiTagProxyList(self))
+        return self._multi_tags
 
     @property
-    def simple_tags(self):
+    def tags(self):
         """
-        A property containing all simple tags of a block. SimpleTag entities can be obtained via their index or by their id.
-        Tags can be deleted from the list. Adding tags is done using the Blocks create_simple_tag method.
+        A property containing all tags of a block. Tag entities can be obtained via their index or by their id.
+        Tags can be deleted from the list. Adding tags is done using the Blocks create_tag method.
         This is a read only attribute.
 
-        :type: ProxyList of SimpleTag entities.
+        :type: ProxyList of Tag entities.
         """
-        if not hasattr(self, "_simple_tags"):
-            setattr(self, "_simple_tags", SimpleTagProxyList(self))
-        return self._simple_tags
+        if not hasattr(self, "_tags"):
+            setattr(self, "_tags", TagProxyList(self))
+        return self._tags
 
     @property
     def data_arrays(self):

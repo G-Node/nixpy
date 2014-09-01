@@ -31,14 +31,7 @@ class TestBlock(unittest.TestCase):
         assert(self.block.id is not None)
 
     def test_block_name(self):
-        def set_none():
-            self.block.name = None
-
         assert(self.block.name is not None)
-        self.assertRaises(Exception, set_none)
-
-        self.block.name = "foo block"
-        assert(self.block.name == "foo block")
 
     def test_block_type(self):
         def set_none():
@@ -72,7 +65,7 @@ class TestBlock(unittest.TestCase):
     def test_block_data_arrays(self):
         assert(len(self.block.data_arrays) == 0)
 
-        data_array = self.block.create_data_array("test data_array", "recordingsession")
+        data_array = self.block.create_data_array("test data_array", "recordingsession", DataType.Int32, (0, ))
 
         assert(len(self.block.data_arrays) == 1)
 
@@ -88,44 +81,43 @@ class TestBlock(unittest.TestCase):
 
         assert(len(self.block.data_arrays) == 0)
 
-    def test_block_data_tags(self):
-        assert(len(self.block.data_tags) == 0)
+    def test_block_multi_tags(self):
+        assert(len(self.block.multi_tags) == 0)
 
-        data_array = self.block.create_data_array("test array", "recording")
-        data_tag = self.block.create_data_tag("test data_tag", "recordingsession", data_array)
+        data_array = self.block.create_data_array("test array", "recording", DataType.Int32, (0, ))
+        multi_tag = self.block.create_multi_tag("test multi_tag", "recordingsession", data_array)
 
-        assert(len(self.block.data_tags) == 1)
+        assert(len(self.block.multi_tags) == 1)
 
-        # TODO implement __eq__ for DataTag
-        #assert(data_tag      in self.block.data_tags)
-        assert(data_tag.id   in self.block.data_tags)
-        assert("notexist" not in self.block.data_tags)
+        # TODO implement __eq__ for MultiTag
+        #assert(multi_tag      in self.block.multi_tags)
+        assert(multi_tag.id   in self.block.multi_tags)
+        assert("notexist" not in self.block.multi_tags)
 
-        assert(data_tag.id == self.block.data_tags[0].id)
-        assert(data_tag.id == self.block.data_tags[-1].id)
+        assert(multi_tag.id == self.block.multi_tags[0].id)
+        assert(multi_tag.id == self.block.multi_tags[-1].id)
 
-        del self.block.data_tags[0]
+        del self.block.multi_tags[0]
 
-        assert(len(self.block.data_tags) == 0)
+        assert(len(self.block.multi_tags) == 0)
 
-    def test_block_simple_tags(self):
-        assert(len(self.block.simple_tags) == 0)
+    def test_block_tags(self):
+        assert(len(self.block.tags) == 0)
 
-        data_array = self.block.create_data_array("test array", "recording")
-        simple_tag = self.block.create_simple_tag("test simple_tag", "recordingsession", [data_array])
+        tag = self.block.create_tag("test tag", "recordingsession", [0])
 
-        assert(len(self.block.simple_tags) == 1)
+        assert(len(self.block.tags) == 1)
 
-        assert(simple_tag      in self.block.simple_tags)
-        assert(simple_tag.id   in self.block.simple_tags)
-        assert("notexist" not in self.block.simple_tags)
+        assert(tag      in self.block.tags)
+        assert(tag.id   in self.block.tags)
+        assert("notexist" not in self.block.tags)
 
-        assert(simple_tag.id == self.block.simple_tags[0].id)
-        assert(simple_tag.id == self.block.simple_tags[-1].id)
+        assert(tag.id == self.block.tags[0].id)
+        assert(tag.id == self.block.tags[-1].id)
 
-        del self.block.simple_tags[0]
+        del self.block.tags[0]
 
-        assert(len(self.block.simple_tags) == 0)
+        assert(len(self.block.tags) == 0)
 
     def test_block_sources(self):
         assert(len(self.block.sources) == 0)

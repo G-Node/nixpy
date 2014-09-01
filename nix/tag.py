@@ -8,7 +8,7 @@
 
 from __future__ import absolute_import
 
-from nix.core import SimpleTag
+from nix.core import Tag
 from nix.util.inject import Inject
 from nix.util.proxy_list import ProxyList, RefProxyList
 
@@ -32,9 +32,9 @@ class FeatureProxyList(ProxyList):
         )
 
 
-class SimpleTagMixin(SimpleTag):
+class TagMixin(Tag):
 
-    class __metaclass__(Inject, SimpleTag.__class__):
+    class __metaclass__(Inject, Tag.__class__):
         pass
 
     @property

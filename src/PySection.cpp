@@ -37,15 +37,24 @@ boost::optional<Section> getSectionByPos(const Section& section, size_t index) {
 
 // Property
 
-Property createProperty(Section& sec, const std::string& name, const std::vector<Value>& values = std::vector<Value>()) {
-    if (values.empty()) {
-        return sec.createProperty(name);
-    } else {
-        return sec.createProperty(name, values);
+Property createProperty(Section& sec, const std::string& name, PyObject* obj) {
+    extract<DataType> ext_type(obj);
+    if (ext_type.check()) {
+        return sec.createProperty(name, ext_type());
     }
-}
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(createPropertyOverloads, createProperty, 2, 3)
+    extract<Value> ext_val(obj);
+    if (ext_val.check()) {
+        return sec.createProperty(name, ext_val());
+    }
+
+    extract<std::vector<Value>> ext_vec(obj);
+    if (ext_vec.check()) {
+        return sec.createProperty(name, ext_vec());
+    }
+
+    throw new std::runtime_error("Second parameter must be a Value, list of Value or DataType");
+}
 
 boost::optional<Property> getPropertyById(const Section& section, const std::string& id) {
     Property prop = section.getProperty(id);
@@ -59,7 +68,7 @@ boost::optional<Property> getPropertyByPos(const Section& section, size_t index)
     return prop ? boost::optional<Property>(prop) : boost::none;
 }
 
-boost::optional<Property> getPropertyWithName(const Section& section, const std::string& name) {
+boost::optional<Property> getPropertyByName(const Section& section, const std::string& name) {
     Property prop = section.getPropertyByName(name);
 
     return prop ? boost::optional<Property>(prop) : boost::none;
@@ -128,11 +137,11 @@ void PySection::do_export() {
         .def("_get_section_by_pos", &getSectionByPos)
         .def("_delete_section_by_id", REMOVER(std::string, nix::Section, deleteSection))
         // Property
-        .def("create_property", createProperty, createPropertyOverloads())
-        .def("has_property_with_name", &Section::hasPropertyWithName,
-             doc::section_has_property_with_name)
-        .def("get_property_with_name", getPropertyWithName,
-             doc::section_get_property_with_name)
+        .def("create_property", createProperty)
+        .def("has_property_by_name", &Section::hasPropertyByName,
+             doc::section_has_property_by_name)
+        .def("get_property_by_name", getPropertyByName,
+             doc::section_get_property_by_name)
         .def("_property_count", &Section::propertyCount)
         .def("_get_property_by_id", &getPropertyById)
         .def("_get_property_by_pos", &getPropertyByPos)

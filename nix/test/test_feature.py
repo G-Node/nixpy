@@ -17,16 +17,17 @@ class TestFeature(unittest.TestCase):
         self.file     = File.open("unittest.h5", FileMode.Overwrite)
         self.block    = self.file.create_block("test block", "recordingsession")
 
-        self.signal = self.block.create_data_array("output", "analogsignal")
-        self.stimuli_tag   = self.block.create_simple_tag(
-            "stimuli used", "tag", [self.signal]
+        self.signal = self.block.create_data_array("output", "analogsignal", DataType.Float, (0, ))
+        self.stimuli_tag   = self.block.create_tag(
+            "stimuli used", "tag", [0]
         )
+        self.stimuli_tag.references.append(self.signal)
 
-        self.movie1 = self.block.create_data_array("stimulus movie 1", "movie")
+        self.movie1 = self.block.create_data_array("stimulus movie 1", "movie", DataType.Float, (0, ))
         self.feature_1 = self.stimuli_tag.create_feature(
             self.movie1, LinkType.Tagged
         )
-        self.movie2 = self.block.create_data_array("stimulus movie 2", "movie")
+        self.movie2 = self.block.create_data_array("stimulus movie 2", "movie", DataType.Float, (0, ))
         self.feature_2 = self.stimuli_tag.create_feature(
             self.movie2, LinkType.Tagged
         )
@@ -60,6 +61,6 @@ class TestFeature(unittest.TestCase):
         assert(self.feature_1.data is not None)
         self.assertRaises(Exception, set_none)
 
-        new_data_ref = self.block.create_data_array("test", "current")
+        new_data_ref = self.block.create_data_array("test", "current", DataType.Float, (0, ))
         self.feature_1.data = new_data_ref
         assert(self.feature_1.data == new_data_ref)
