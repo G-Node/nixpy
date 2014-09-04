@@ -62,8 +62,9 @@ Dependencies
   - If the PATH seems to be wrong (e.g. `python>>> import nix` fails with missing DLL) be sure to restart the Command Prompt _and_ restart Visual Studio before launching any Command Prompt from there
   - If you get a python error from "msvc9compiler.py", "query_vcvarsall" saying "ValueError: [u'path']" this means that "vcvarsall.bat" is not being found. Check the environmental vars and execute `vcvarsall.bat x86_amd64` manually.
   - If you get linker errors either the "boost_python" lib or the "nix" lib are not being found. Check the environmental vars and check whether "nix.lib" is in `<NIXPATH>\lib` and whether "boost_python-vc120-mt-1_55.lib" (with your version numbers) is in `<BOOSTPATH>\lib`
-  - If you find steps 7. & 8. complicated grab this code, put it in a batch file and run it whenever you are about to build nixpy:<br>
-  :three::two:
+  - If you find steps 7. & 8. complicated grab this code, put it in a batch file and run it whenever you are about to build nixpy:
+
+:three::two:
   ```
   set NIX_LIBDIR=C:\opt\nix\lib
   set NIX_INCDIR=C:\opt\nix\include
