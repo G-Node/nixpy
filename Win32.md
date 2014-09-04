@@ -10,17 +10,17 @@ Dependencies
    - Navigate to the instructions for building nix on windows and follow the steps there to set up all necessary win build tools.
 
 2. **Nix for windows**
-   - Install nix for windows using the installer provided on github (https://github.com/G-Node/nix/releases), make sure to get the correct version (:three::two: or :six::four:)
+   - Install nix for windows using the installer provided on github (https://github.com/G-Node/nix/releases), get the correct version (:three::two: or :six::four:)
 
 3. **Python2.7**
-   - Obtain python2.7.8 64-bit for windows, make sure to get the correct version (:three::two: or :six::four:)
+   - Obtain python2.7.8 64-bit for windows, get the correct version (:three::two: or :six::four:)
 
 4. **NumPy**:
    - :three::two: Get the 32-bit version of numpy from: http://sourceforge.net/projects/numpy/files/NumPy/
    - :six::four: Get the 64-bit version of numpy from: http://www.lfd.uci.edu/~gohlke/pythonlibs/#numpy
 
 5. **Pip**:
-   - Obtain "pip" for python2.7 (https://pip.pypa.io/en/latest/installing.html), make sure to get the correct version (:three::two: or :six::four:)
+   - Obtain "pip" for python2.7 (https://pip.pypa.io/en/latest/installing.html), get the correct version (:three::two: or :six::four:)
    - Add the pip directory to the windows PATH, it should e.g. be "C:\Python27\Scripts"
 
 6. **Boost**:<br>
@@ -30,6 +30,10 @@ Dependencies
   :three::two:
     ```
      > .\b2 install -j4 -a --prefix=C:\opt\boost toolset=msvc architecture=x86 address-model=32 threading=multi variant=release link=static runtime-link=shared --with-python
+    ```<br>
+  :three::two:
+    ```
+     > .\b2 install -j4 -a --prefix=C:\opt\boost toolset=msvc architecture=x86 address-model=64 threading=multi variant=release link=static runtime-link=shared --with-python
     ```<br>
 7. **Environment variables**:<br>
    Set the following environment variables using `set VAR=value` and `setx VAR "value" /m`. For the latter you will need to start a cmd window with admin rights. (right click the cmd icon and run as admin) Check if an environmental variable is set using `echo %VAR%`. If a variable should not seem to work try adding its' value to PATH too!
