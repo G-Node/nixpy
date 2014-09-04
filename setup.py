@@ -12,6 +12,7 @@ import sys
 import os
 import re
 import fnmatch
+import distutils
 
 def find(pattern, path):
     result = []
@@ -94,11 +95,11 @@ boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
 if os.name != 'nt':
     boost_lnk_arg = ['-lboost_python']
 else:
-    boostlib = find('boost_python*.lib', boost_lib_dir)
+    boostlib = find('libboost_python*.lib', boost_lib_dir)
     boost_lnk_arg = ['/LIBPATH:'+boost_lib_dir, '/DEFAULTLIB:'+boostlib[0]]
 
 classifiers   = [
-                    'Development Status :: 3 - Alpha',
+                    'Development Status :: 4 - Beta',
                     'Programming Language :: Python',
                     'Programming Language :: Python :: 2.6',
                     'Programming Language :: Python :: 2.7',
@@ -107,7 +108,7 @@ classifiers   = [
 
 native_ext    = Extension(
                     'nix.core',
-                    extra_compile_args = ['-std=c++11'],
+                    extra_compile_args = ['-std=c++11'] if os.name!='nt' else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
                     extra_link_args=boost_lnk_arg + nix_lnk_arg,
                     sources = nixpy_sources,
                     runtime_library_dirs = [nix_lib_dir, boost_lib_dir] if os.name!='nt' else None,
