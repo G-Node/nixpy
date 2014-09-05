@@ -232,6 +232,49 @@ PyObject* getDimension(const DataArray& da, size_t index) {
     }
 }
 
+//
+
+struct dtype_transmogrify {
+    typedef boost::python::converter::rvalue_from_python_stage1_data py_s1_data;
+    typedef boost::python::converter::rvalue_from_python_storage<nix::DataType> py_storage;
+
+       // PyObject* -> nix::DataType
+    static void register_from_python() {
+        boost::python::converter::registry::push_back(is_convertible,
+                                                      construct,
+                                                      boost::python::type_id<nix::DataType>());
+    }
+
+    static void* is_convertible(PyObject *obj) {
+        namespace bp = boost::python;
+
+        PyArray_Descr* py_dtype = nullptr;
+
+        if (! PyArray_DescrConverter(obj, &py_dtype)) {
+            return nullptr;
+        }
+
+        Py_DECREF(py_dtype);
+        return obj;
+    }
+
+    static void construct(PyObject *obj, py_s1_data *data) {
+        namespace bp = boost::python;
+
+        void *raw = static_cast<void *>(reinterpret_cast<py_storage *>(data)->storage.bytes);
+
+        PyArray_Descr* py_dtype = nullptr;
+        //should work, because we checked with is_convertible
+        PyArray_DescrConverter(obj, &py_dtype);
+
+        nix::DataType * const dtype_ptr = static_cast<nix::DataType *>(raw);
+        *dtype_ptr = pyDtypeToNixDtype(py_dtype);
+        data->convertible = raw;
+    }
+
+};
+
+
 void PyDataArray::do_export() {
 
     // For numpy to work
@@ -292,6 +335,8 @@ void PyDataArray::do_export() {
 
     to_python_converter<boost::optional<DataArray>, option_transmogrify<DataArray>>();
     option_transmogrify<DataArray>::register_from_python();
+
+    dtype_transmogrify::register_from_python();
 }
 
 }
