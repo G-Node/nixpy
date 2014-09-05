@@ -8,6 +8,7 @@
 
 import unittest
 import sys
+import numpy as np
 
 from nix import *
 
@@ -99,7 +100,6 @@ class TestDataArray(unittest.TestCase):
         # TODO delete does not work
 
     def test_data_array_data(self):
-        import numpy as np
 
         assert(self.array.polynom_coefficients == ())
 
@@ -192,6 +192,21 @@ class TestDataArray(unittest.TestCase):
         sys.maxsize = len(dset) - 1
         self.assertRaises(OverflowError, lambda : len(dset))
         sys.maxsize = savemaxsize
+
+    def test_data_array_dtype(self):
+        da = self.block.create_data_array('dtype_f8', 'b', 'f8', (10, 10))
+        assert(da.data.dtype == np.dtype('f8'))
+
+        da = self.block.create_data_array('dtype_i16', 'b', np.int16, (10, 10))
+        assert(da.data.dtype == np.int16)
+
+        da = self.block.create_data_array('dtype_int', 'b', int, (10, 10))
+        assert(da.data.dtype == np.dtype(int))
+
+        da = self.block.create_data_array('dtype_ndouble', 'b', DataType.Double, (10, 10))
+        assert(da.data.dtype == np.dtype('f8'))
+
+
 
     def test_data_array_dimensions(self):
         assert(len(self.array.dimensions) == 0)
