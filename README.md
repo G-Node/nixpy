@@ -35,12 +35,13 @@ In order to build the NIXPY library a compiler is needed (gcc, clang). Further n
 
 - Boost (version 1.56 or higher)
 - NIX (version 0.10.5 or higher)
+- Python (version = 2.7.x) + python-setuptools + python-numpy (version >= 1.8.0)
 
 _Instructions_
 
 ```bash
 # install dependencies
-sudo apt-get install libboost-python-dev build-essential python-dev
+sudo apt-get install libboost-python-dev build-essential python-dev python-setuptools
 
 # clone NIX
 git clone https://github.com/G-Node/nixpy
@@ -53,7 +54,7 @@ python setup.py build
 python setup.py test
 
 # install
-python setup.py install
+sudo python setup.py install
 ```
 
 Getting Started (Windows)
