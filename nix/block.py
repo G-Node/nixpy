@@ -14,6 +14,8 @@ import nix.util.find as finders
 from nix.core import Block
 from nix.util.inject import Inject
 from nix.util.proxy_list import ProxyList
+import numpy as np
+
 
 class SourceProxyList(ProxyList):
 
@@ -49,12 +51,25 @@ class BlockMixin(Block):
         # this injects all members and the doc into nix.core.Block
         pass
 
-    def create_data_array(self, name, array_type, dtype=None, shape=None):
-        if shape is None:
-            raise ValueError("Either shape and or data must not be None")
-        if dtype is None:
-            dtype = 'f8'
-        return self._create_data_array(name, array_type, dtype, shape)
+    def create_data_array(self, name, array_type, dtype=None, shape=None, data=None):
+        if data is None:
+            if shape is None:
+                raise ValueError("Either shape and or data must not be None")
+            if dtype is None:
+                dtype = 'f8'
+        else:
+            data = np.ascontiguousarray(data)
+            if dtype is None:
+                dtype = data.dtype
+            if shape is not None:
+                if shape != data.shape:
+                    raise ValueError("Shape must equal data.shape")
+            else:
+                shape = data.shape
+        da = self._create_data_array(name, array_type, dtype, shape)
+        if data is not None:
+            da.data.write_direct(data)
+        return da
 
     def find_sources(self, filtr=lambda _ : True, limit=sys.maxint):
         """
