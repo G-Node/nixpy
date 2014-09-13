@@ -223,18 +223,6 @@ const char* section_get_property_by_name = R"(
 
 // PyBlock
 
-const char* block_create_data_array = R"(
-    Create a new data array for this block.
-
-    :param name: The name of the data array to create.
-    :type name: str
-    :param type: The type of the data array.
-    :type type: str
-
-    :returns: The newly created data array.
-    :rtype: DataArray
-    )";
-
 const char* block_create_tag = R"(
     Create a new tag for this block.
 
