@@ -49,6 +49,9 @@ class BlockMixin(Block):
         # this injects all members and the doc into nix.core.Block
         pass
 
+    def create_data_array(self, name, array_type, dtype, shape):
+        return self._create_data_array(name, array_type, dtype, shape)
+
     def find_sources(self, filtr=lambda _ : True, limit=sys.maxint):
         """
         Get all sources in this block recursively.

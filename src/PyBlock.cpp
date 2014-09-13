@@ -91,7 +91,7 @@ void PyBlock::do_export() {
 
     class_<Block, bases<base::EntityWithMetadata<base::IBlock>>>("Block")
         // DataArray
-        .def("create_data_array", createDataArray, doc::block_create_data_array)
+        .def("_create_data_array", createDataArray, doc::block_create_data_array)
         .def("_data_array_count", &Block::dataArrayCount)
         .def("_get_data_array_by_id", &getDataArrayById)
         .def("_get_data_array_by_pos", &getDataArrayByPos)
