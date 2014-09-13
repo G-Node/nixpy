@@ -52,6 +52,26 @@ class BlockMixin(Block):
         pass
 
     def create_data_array(self, name, array_type, dtype=None, shape=None, data=None):
+        """
+        Create a new data array for this block. Either ``shape``
+        or ``data`` must be given. If both are given their shape must agree.
+        If ``dtype`` is not specified it will default to 64-bit floating points.
+
+        :param name: The name of the data array to create.
+        :type name: str
+        :param array_type: The type of the data array.
+        :type array_type: str
+        :param dtype: Which data-type to use for storage
+        :type dtype:  :class:`numpy.dtype`
+        :param shape: Layout (dimensionality and extent)
+        :type shape: tuple of int or long
+        :param data: Data to write after storage has been created
+        :type data: array-like data
+
+        :returns: The newly created data array.
+        :rtype: :class:`~nix.DataArray`
+        """
+
         if data is None:
             if shape is None:
                 raise ValueError("Either shape and or data must not be None")
