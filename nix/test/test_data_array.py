@@ -193,6 +193,12 @@ class TestDataArray(unittest.TestCase):
         self.assertRaises(OverflowError, lambda : len(dset))
         sys.maxsize = savemaxsize
 
+        # test inferring shape & dtype from data, and writing the data
+        test_data = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 0], dtype=int)
+        da = self.block.create_data_array('created_from_data', 'b', data=test_data)
+        assert(da.data.shape == test_data.shape)
+        assert(np.array_equal(test_data, da.data[:]))
+
     def test_data_array_dtype(self):
         da = self.block.create_data_array('dtype_f8', 'b', 'f8', (10, 10))
         assert(da.data.dtype == np.dtype('f8'))
@@ -206,7 +212,12 @@ class TestDataArray(unittest.TestCase):
         da = self.block.create_data_array('dtype_ndouble', 'b', DataType.Double, (10, 10))
         assert(da.data.dtype == np.dtype('f8'))
 
+        da = self.block.create_data_array('dtype_auto', 'b', None, (10, 10))
+        assert(da.data.dtype == np.dtype('f8'))
 
+        test_data = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 0], dtype=int)
+        da = self.block.create_data_array('dtype_int_from_data', 'b', data=test_data)
+        assert(da.data.dtype == test_data.dtype)
 
     def test_data_array_dimensions(self):
         assert(len(self.array.dimensions) == 0)

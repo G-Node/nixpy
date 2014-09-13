@@ -14,6 +14,8 @@ import nix.util.find as finders
 from nix.core import Block
 from nix.util.inject import Inject
 from nix.util.proxy_list import ProxyList
+import numpy as np
+
 
 class SourceProxyList(ProxyList):
 
@@ -48,6 +50,46 @@ class BlockMixin(Block):
     class __metaclass__(Inject, Block.__class__):
         # this injects all members and the doc into nix.core.Block
         pass
+
+    def create_data_array(self, name, array_type, dtype=None, shape=None, data=None):
+        """
+        Create a new data array for this block. Either ``shape``
+        or ``data`` must be given. If both are given their shape must agree.
+        If ``dtype`` is not specified it will default to 64-bit floating points.
+
+        :param name: The name of the data array to create.
+        :type name: str
+        :param array_type: The type of the data array.
+        :type array_type: str
+        :param dtype: Which data-type to use for storage
+        :type dtype:  :class:`numpy.dtype`
+        :param shape: Layout (dimensionality and extent)
+        :type shape: tuple of int or long
+        :param data: Data to write after storage has been created
+        :type data: array-like data
+
+        :returns: The newly created data array.
+        :rtype: :class:`~nix.DataArray`
+        """
+
+        if data is None:
+            if shape is None:
+                raise ValueError("Either shape and or data must not be None")
+            if dtype is None:
+                dtype = 'f8'
+        else:
+            data = np.ascontiguousarray(data)
+            if dtype is None:
+                dtype = data.dtype
+            if shape is not None:
+                if shape != data.shape:
+                    raise ValueError("Shape must equal data.shape")
+            else:
+                shape = data.shape
+        da = self._create_data_array(name, array_type, dtype, shape)
+        if data is not None:
+            da.data.write_direct(data)
+        return da
 
     def find_sources(self, filtr=lambda _ : True, limit=sys.maxint):
         """
