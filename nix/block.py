@@ -49,7 +49,11 @@ class BlockMixin(Block):
         # this injects all members and the doc into nix.core.Block
         pass
 
-    def create_data_array(self, name, array_type, dtype, shape):
+    def create_data_array(self, name, array_type, dtype=None, shape=None):
+        if shape is None:
+            raise ValueError("Either shape and or data must not be None")
+        if dtype is None:
+            dtype = 'f8'
         return self._create_data_array(name, array_type, dtype, shape)
 
     def find_sources(self, filtr=lambda _ : True, limit=sys.maxint):
