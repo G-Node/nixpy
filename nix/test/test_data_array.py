@@ -206,7 +206,8 @@ class TestDataArray(unittest.TestCase):
         da = self.block.create_data_array('dtype_ndouble', 'b', DataType.Double, (10, 10))
         assert(da.data.dtype == np.dtype('f8'))
 
-
+        da = self.block.create_data_array('dtype_auto', 'b', None, (10, 10))
+        assert(da.data.dtype == np.dtype('f8'))
 
     def test_data_array_dimensions(self):
         assert(len(self.array.dimensions) == 0)
