@@ -221,6 +221,11 @@ class TestDataArray(unittest.TestCase):
         da = self.block.create_data_array('dtype_int_from_data', 'b', data=test_data)
         assert(da.data.dtype == test_data.dtype)
 
+        void_data = np.array(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'], dtype='V1')
+        da = self.block.create_data_array('dtype_opaque', 'b', data=void_data)
+        assert(da.data.dtype == np.dtype('V1'))
+        assert(np.array_equal(void_data, da.data[:]))
+
     def test_data_array_dimensions(self):
         assert(len(self.array.dimensions) == 0)
 
