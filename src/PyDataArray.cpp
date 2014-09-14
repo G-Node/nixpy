@@ -106,6 +106,13 @@ static nix::DataType pyDtypeToNixDtype(const PyArray_Descr *dtype)
         }
         break;
 
+    case 'V':
+        return nix::DataType::Opaque;
+        //we are ignoring the size information here
+        //since we only support NATIVE_OPAQUE in H5
+        //maybe we should throw an exception instead
+        break;
+
     default:
         break;
     }
@@ -125,6 +132,7 @@ static std::string nixDtypeToPyDtypeStr(nix::DataType nix_dtype)
     case nix::DataType::Int64:  return "<i8";
     case nix::DataType::Float:  return "<f4";
     case nix::DataType::Double: return "<f8";
+    case nix::DataType::Opaque: return "|V1";
     default:                    return "";
     }
 }
