@@ -115,7 +115,7 @@ class DataSet(object):
         # if we got to here we have a tuple with len >= 1
         count, offset, shape = self.__tuple_to_count_offset_shape(index)
 
-        raw = np.empty(shape)
+        raw = np.empty(shape, dtype=self.dtype)
         self.__obj._read_data(raw, count, offset)
         return raw
 
