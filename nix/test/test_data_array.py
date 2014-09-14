@@ -204,7 +204,9 @@ class TestDataArray(unittest.TestCase):
         assert(da.data.dtype == np.dtype('f8'))
 
         da = self.block.create_data_array('dtype_i16', 'b', np.int16, (10, 10))
+        data = da.data[:]
         assert(da.data.dtype == np.int16)
+        assert(data.dtype == np.int16)
 
         da = self.block.create_data_array('dtype_int', 'b', int, (10, 10))
         assert(da.data.dtype == np.dtype(int))
