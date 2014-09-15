@@ -153,9 +153,19 @@ static PyArrayObject *makeArray(PyObject *data, int requirements) {
     }
 
     PyArrayObject *array = reinterpret_cast<PyArrayObject *>(data);
+    PyArray_Descr *descr = PyArray_DESCR(array);
+
+    if (requirements & NPY_ARRAY_ALIGNED && descr->kind == 'V') {
+       //workaround a strange behaviour of numpy 1.9 to return
+       //is_aligned == FALSE for void datatypes with an alignment
+       //requirement == 1
+       if (descr->alignment == 1) {
+          requirements &= ~NPY_ARRAY_ALIGNED;
+       }
+    }
 
      if (! PyArray_CHKFLAGS(array, requirements)) {
-        throw std::invalid_argument("data must be c-contiguous and aligned");
+        throw std::invalid_argument("array does not meet requirements");
     }
 
      return array;
