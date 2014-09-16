@@ -204,7 +204,9 @@ class TestDataArray(unittest.TestCase):
         assert(da.data.dtype == np.dtype('f8'))
 
         da = self.block.create_data_array('dtype_i16', 'b', np.int16, (10, 10))
+        data = da.data[:]
         assert(da.data.dtype == np.int16)
+        assert(data.dtype == np.int16)
 
         da = self.block.create_data_array('dtype_int', 'b', int, (10, 10))
         assert(da.data.dtype == np.dtype(int))
@@ -218,6 +220,11 @@ class TestDataArray(unittest.TestCase):
         test_data = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 0], dtype=int)
         da = self.block.create_data_array('dtype_int_from_data', 'b', data=test_data)
         assert(da.data.dtype == test_data.dtype)
+
+        void_data = np.array(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'], dtype='V1')
+        da = self.block.create_data_array('dtype_opaque', 'b', data=void_data)
+        assert(da.data.dtype == np.dtype('V1'))
+        assert(np.array_equal(void_data, da.data[:]))
 
     def test_data_array_dimensions(self):
         assert(len(self.array.dimensions) == 0)
