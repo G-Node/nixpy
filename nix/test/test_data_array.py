@@ -199,6 +199,10 @@ class TestDataArray(unittest.TestCase):
         assert(da.data.shape == test_data.shape)
         assert(np.array_equal(test_data, da.data[:]))
 
+        #test for exceptions
+        self.assertRaises(ValueError, lambda: self.block.create_data_array('x', 'y'))
+        self.assertRaises(ValueError, lambda: self.block.create_data_array('x', 'y', data=test_data, shape=(1, 1, 1)))
+
     def test_data_array_dtype(self):
         da = self.block.create_data_array('dtype_f8', 'b', 'f8', (10, 10))
         assert(da.data.dtype == np.dtype('f8'))
