@@ -43,7 +43,7 @@ Property createProperty(Section& sec, const std::string& name, PyObject* obj) {
         return sec.createProperty(name, ext_type());
     }
 
-    extract<Value> ext_val(obj);
+    extract<Value&> ext_val(obj);
     if (ext_val.check()) {
         return sec.createProperty(name, ext_val());
     }
