@@ -269,6 +269,9 @@ struct dtype_transmogrify {
         PyArray_Descr* py_dtype = nullptr;
 
         if (! PyArray_DescrConverter(obj, &py_dtype)) {
+            // PyArray_DescrConverter will have set an TypeError
+            // exception if this occurs, clear it
+            PyErr_Clear();
             return nullptr;
         }
 
