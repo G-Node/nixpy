@@ -206,6 +206,24 @@ class DataSet(object):
 
         self.__obj._read_data(data, (), ())
 
+    def append(self, data, axis=0):
+        """
+        Append ``data`` to the DataSet along the ``axis`` specified.
+        :param data: The data to append. Shape must agree except for the specified axis
+        :param axis: Along which axis to append the data to
+        """
+        data = np.ascontiguousarray(data)
+
+        if len(self.shape) != len(data.shape):
+            raise ValueError("Data and DataArray must have the same dimensionality")
+        #TODO: also check shape agreement
+
+        offset = tuple(0 if i != axis else x for i, x in enumerate(self.shape))
+        count = data.shape
+        enlarge = tuple(self.shape[i] + (0 if i != axis else x) for i, x in enumerate(data.shape))
+        self.__obj.data_extent = enlarge
+        self.__obj._write_data(data, count, offset)
+
     @staticmethod
     def __index_to_tuple(index):
         tidx = type(index)
