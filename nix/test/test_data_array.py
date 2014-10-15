@@ -203,6 +203,22 @@ class TestDataArray(unittest.TestCase):
         self.assertRaises(ValueError, lambda: self.block.create_data_array('x', 'y'))
         self.assertRaises(ValueError, lambda: self.block.create_data_array('x', 'y', data=test_data, shape=(1, 1, 1)))
 
+        #test appending
+        data = np.zeros((10, 5))
+        da = self.block.create_data_array('append', 'double', data=data)
+        to_append = np.zeros((2, 5))
+
+        da.data.append(to_append)
+        assert(da.data.shape == (12, 5))
+
+        to_append = np.zeros((12, 2))
+        da.data.append(to_append, axis=1)
+        assert(da.data.shape == (12, 7))
+
+        self.assertRaises(ValueError, lambda: da.data.append(np.zeros((3, 3, 3))))
+        self.assertRaises(ValueError, lambda: da.data.append(np.zeros((5, 5))))
+
+
     def test_data_array_dtype(self):
         da = self.block.create_data_array('dtype_f8', 'b', 'f8', (10, 10))
         assert(da.data.dtype == np.dtype('f8'))
