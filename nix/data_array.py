@@ -216,7 +216,9 @@ class DataSet(object):
 
         if len(self.shape) != len(data.shape):
             raise ValueError("Data and DataArray must have the same dimensionality")
-        #TODO: also check shape agreement
+
+        if any([s != ds for i, (s, ds) in enumerate(zip(self.shape, data.shape)) if i != axis]):
+            raise ValueError("Shape of data and shape of DataArray must match in all dimension but axis!")
 
         offset = tuple(0 if i != axis else x for i, x in enumerate(self.shape))
         count = data.shape
