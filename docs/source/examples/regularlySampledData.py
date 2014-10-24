@@ -52,13 +52,3 @@ if __name__ == "__main__":
     # let's plot the data from the stored information
     plot_data(data)
     file.close()
-    
-
-
-
-
-
-
-    # close file
-    file.close()
-
