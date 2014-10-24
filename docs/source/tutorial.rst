@@ -41,18 +41,38 @@ Regularly sampled data
 """""""""""""""""""""" 
 
 Regularly sampled data is everything which is sampled in regular
-intervals in space, time, or something else. The following code
-illustrates how this is stored in nix files.
+intervals in space, time, or something else. Let's consider a signal
+that has been digitized usind an AD-Converter at a fixed sampling
+rate. In this case the axis representing time has to be described
+using a **SampledDimension**. This dimension descriptor contains as
+mandatory element the *sampling_interval*. The *sampling_interval* has
+to be given because it also applies e.g. to spatial sampling, it is
+the more general term than the sampling rate which may appear
+appropriate for time discretization. Further, the *unit* in which this
+number has to be interpreted and a *label* for the axis can be
+specidfied. The following code illustrates how this is stored in nix
+files.
 
 .. literalinclude:: examples/regularlySampledData.py
 
+.. image:: examples/regular_sampled.png
+	   :width: 120
 
 .. _irregularly_sampled_data:
 
 Irregularly sampled data
 """"""""""""""""""""""""
 
-TODO
+Irregularly sampled data is sampled at irregular intervals. The
+dimension which is sampled in this way has to be described using a
+**RangeDimension**. This dimension descriptor stores besides the
+*unit* and *label* of the axis the ticks, e.g. timestamps of the
+instances at which the samples were taken.
+
+.. literalinclude:: examples/irregularlySampledData.py
+
+.. image:: examples/irregular.png
+	   :width: 120
 
 Series of signals
 """""""""""""""""
