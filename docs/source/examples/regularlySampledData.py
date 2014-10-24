@@ -21,6 +21,8 @@ def plot_data(data_array):
     plt.xlabel(x_axis.label + " [" + x_axis.unit + "]")
     plt.ylabel(data_array.label + " [" + data_array.unit + "]")
     plt.title(data_array.name)
+    plt.xlim(0, np.max(x))
+    plt.ylim((1.1 * np.min(y), 1.1 * np.max(y)))
     plt.show()
 
 
