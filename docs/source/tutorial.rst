@@ -11,7 +11,7 @@ Tutorials
 * :ref:`regularly_sampled_data`
 * :ref:`irregularly_sampled_data`
 * :ref:`multiple_signals`
-* Image data
+* :ref:`image_data`
 
 
 Design Principles
@@ -98,14 +98,27 @@ this dimension of the data.
 
 .. literalinclude:: examples/multipleTimeSeries.py
 
-.. image:: examples/multiple_time_series.ong
+.. image:: examples/multiple_time_series.png
 	   :width: 120
 
+
+.. _image_data:
 
 Image data
 """"""""""""
 
-TODO
+Color images can be stored as 3-D data in a *DataArray*. The first two
+dimensions represent *width* and *height* of the image while the 3rd
+dimension represents the color channels. Accordingly, we need three
+dimension descriptors. The first two are *SampledDimensions* since the
+pixels of the image are regularly sampled in space. The third
+dimension is a *SetDimension* with labels for each of the channels.
+In this tutorial the "Lenna" image is used. Please see the author
+attribution in the code.
+
+.. literalinclude:: examples/imageData.py
+
+
 
 Tagging regions
 ===============
