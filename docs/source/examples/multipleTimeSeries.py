@@ -19,7 +19,7 @@
 import nix
 import numpy as np
 import matplotlib.pylab as plt
-from IPython import embed
+
 
 def create_data(duration=1, freq=10, stepsize=0.01):
     x = np.arange(0, duration*2*np.pi, stepsize)
