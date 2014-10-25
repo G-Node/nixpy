@@ -1,5 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+"""
+ Copyright © 2014 German Neuroinformatics Node (G-Node)
+
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted under the terms of the BSD License. See
+ LICENSE file in the root of the Project.
+
+ Author: Jan Grewe <jan.grewe@g-node.org>
+
+ This tutorial shows how regulary sampled data is stored in nix-files.
+ See https://github.com/G-node/nix/wiki for more information.
+"""
 
 import nix
 import numpy as np
