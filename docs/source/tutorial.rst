@@ -10,8 +10,8 @@ Tutorials
 """""""""
 * :ref:`regularly_sampled_data`
 * :ref:`irregularly_sampled_data`
-* Series of regularly sampled data 
-* Image stacks
+* :ref:`multiple_signals`
+* Image data
 
 
 Design Principles
@@ -58,6 +58,7 @@ files.
 .. image:: examples/regular_sampled.png
 	   :width: 120
 
+
 .. _irregularly_sampled_data:
 
 Irregularly sampled data
@@ -78,17 +79,30 @@ instances at which the samples were taken.
 Event data
 """"""""""""""""""
 
-
-
 TODO
 
+
+.. _multiple_signals:
 
 Series of signals
 """""""""""""""""
 
-TODO
+It is possible to store multiple signals that have the same shape and
+logically belong together in the same *DataArray* object. In this
+case, the data is two-dimensional and two dimension-descriptors are
+needed. Depending on the layout of the data one dimension represents
+time and is described with a *SampledDimension* while the other
+represents the various signals. This is described with a
+*SetDimension*. A *SetDimension* can have labels for each entry along
+this dimension of the data.
 
-Image stacks
+.. literalinclude:: examples/multipleTimeSeries.py
+
+.. image:: examples/multiple_time_series.ong
+	   :width: 120
+
+
+Image data
 """"""""""""
 
 TODO
