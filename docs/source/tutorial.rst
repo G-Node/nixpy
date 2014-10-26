@@ -130,7 +130,7 @@ attribution in the code.
 .. literalinclude:: examples/imageData.py
 
 .. image:: examples/lenna.png
-
+	   :width: 240
 
 Tagging regions
 ===============
@@ -160,6 +160,8 @@ data. The same Tag can be applied to many references as long as
 
 .. literalinclude:: examples/singleROI.py
 
+.. image:: examples/single_roi.png
+	   :width: 240
 
 .. _multiple_rois:
 

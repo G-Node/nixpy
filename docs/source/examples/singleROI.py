@@ -28,7 +28,7 @@
 import nix
 import numpy as np
 import Image as img
-from IPython import embed
+
 
 def load_image():
     image = img.open('lenna.png')
@@ -36,13 +36,12 @@ def load_image():
     channels = list(image.mode)
     return pix, channels
 
+
 def draw_rect(img_data, position, extent):
     img_data[position[0]:position[0] + extent[0], position[1], :] = 255
     img_data[position[0]:position[0] + extent[0], position[1]+extent[1], :] = 255
     img_data[position[0], position[1]:position[1] + extent[1], :] = 255
     img_data[position[0] + extent[0], position[1]:position[1] + extent[1], :] = 255
-
-    pass
 
 
 def plot_data(tag):
