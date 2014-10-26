@@ -8,16 +8,26 @@ folder.
 
 Tutorials
 """""""""
+
+Basic data structures
+^^^^^^^^^^^^^^^^^^^^^^
 * :ref:`regularly_sampled_data`
 * :ref:`irregularly_sampled_data`
+* :ref:`event_data`
 * :ref:`multiple_signals`
 * :ref:`image_data`
 
+Tagging points and regions-of-interest
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* :ref:`single_roi`
+* :ref:`multiple_rois`
 
 Design Principles
 =================
 
 TODO write something
+
 
 Working with Files
 ==================
@@ -27,8 +37,8 @@ re-open them with different access rights (examples/fileCreate.py).
 
 .. literalinclude:: examples/fileCreate.py
 
-Storing data
-============
+Basic data structures
+=====================
 
 In this section we will show how different kinds of data are stored in
 nix files. We will start with simple regularly and irregularly sampled
@@ -56,7 +66,7 @@ files.
 .. literalinclude:: examples/regularlySampledData.py
 
 .. image:: examples/regular_sampled.png
-	   :width: 120
+	   :width: 240
 
 
 .. _irregularly_sampled_data:
@@ -73,8 +83,9 @@ instances at which the samples were taken.
 .. literalinclude:: examples/irregularlySampledData.py
 
 .. image:: examples/irregular.png
-	   :width: 120
+	   :width: 240
 
+.. _event_data:
 
 Event data
 """"""""""""""""""
@@ -99,7 +110,7 @@ this dimension of the data.
 .. literalinclude:: examples/multipleTimeSeries.py
 
 .. image:: examples/multiple_time_series.png
-	   :width: 120
+	   :width: 240
 
 
 .. _image_data:
@@ -118,12 +129,13 @@ attribution in the code.
 
 .. literalinclude:: examples/imageData.py
 
+.. image:: examples/lenna.png
 
 
 Tagging regions
 ===============
 
-One key feature of the nix-model is its ability to annotate, or *tag*,
+One key feature of the nix-model is its ability to annotate, or "tag",
 points or regions-of-interest in the stored data. This feature can be
 used to state the occurrence of events during the recording, to state
 the intervals of a certain condition, e.g. a stimulus presentation, or
@@ -132,11 +144,24 @@ two types of Tags are discriminated. (1) the **Tag** for single points
 or regions, and (2) the **MultiTag** to annotate multiple points or
 regions using the same entity.
 
-Single Point or region
+.. _single_roi:
+
+Single point or region
 """"""""""""""""""""""
 
- TODO
+Single points of regions-of-interest are annotated using a **Tag**
+object. The Tag contains the start *position* and, optional, the
+*extent* of the point or region. The link to the data is established
+by adding the **DataArray** that contains the data to the list of
+references. It is important to note that *position* and *extent* are
+arrays with the length matching the dimensionality of the referenced
+data. The same Tag can be applied to many references as long as
+*position* and *extent* can be applied to these.
 
+.. literalinclude:: examples/singleROI.py
+
+
+.. _multiple_rois:
 
 Multiple points or regions
 """"""""""""""""""""""""""
