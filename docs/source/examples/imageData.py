@@ -58,10 +58,10 @@ if __name__ == '__main__':
     # create a 'DataArray' to take the sinewave, add some information about the signal
     data = block.create_data_array("lenna", "nix.image.rgb", data=img_data)
     # add descriptors for width, height and channels
-    width_dim = data.append_sampled_dimension(1)
-    width_dim.label = "width"
     height_dim = data.append_sampled_dimension(1)
     height_dim.label = "height"
+    width_dim = data.append_sampled_dimension(1)
+    width_dim.label = "width"
     color_dim = data.append_set_dimension()
     color_dim.labels = channels
     
