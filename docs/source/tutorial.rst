@@ -6,11 +6,13 @@ In the following you will find some tutorials showing how to use nixpy
 to read and write nix-files. All code can be found in the examples
 folder.
 
-Tutorials
-"""""""""
+.. _toc:
+
+Table of contents
+=================
 
 Basic data structures
-^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""
 * :ref:`regularly_sampled_data`
 * :ref:`irregularly_sampled_data`
 * :ref:`event_data`
@@ -18,7 +20,7 @@ Basic data structures
 * :ref:`image_data`
 
 Tagging points and regions-of-interest
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""""""
 
 * :ref:`single_roi`
 * :ref:`multiple_rois`
@@ -36,6 +38,8 @@ The following code shows how to create a new nix-file, close it and
 re-open them with different access rights (examples/fileCreate.py).
 
 .. literalinclude:: examples/fileCreate.py
+
+:ref:`toc`
 
 Basic data structures
 =====================
@@ -68,6 +72,7 @@ files.
 .. image:: examples/regular_sampled.png
 	   :width: 240
 
+:ref:`toc`
 
 .. _irregularly_sampled_data:
 
@@ -84,6 +89,8 @@ instances at which the samples were taken.
 
 .. image:: examples/irregular.png
 	   :width: 240
+
+:ref:`toc`
 
 .. _event_data:
 
@@ -113,10 +120,12 @@ this dimension of the data.
 	   :width: 240
 
 
+:ref:`toc`
+
 .. _image_data:
 
 Image data
-""""""""""""
+""""""""""
 
 Color images can be stored as 3-D data in a *DataArray*. The first two
 dimensions represent *width* and *height* of the image while the 3rd
@@ -163,15 +172,106 @@ data. The same Tag can be applied to many references as long as
 .. image:: examples/single_roi.png
 	   :width: 240
 
+
+
+.. _image_data:
+
+Image data
+""""""""""
+
+Color images can be stored as 3-D data in a *DataArray*. The first two
+dimensions represent *width* and *height* of the image while the 3rd
+dimension represents the color channels. Accordingly, we need three
+dimension descriptors. The first two are *SampledDimensions* since the
+pixels of the image are regularly sampled in space. The third
+dimension is a *SetDimension* with labels for each of the channels.
+In this tutorial the "Lenna" image is used. Please see the author
+attribution in the code.
+
+.. literalinclude:: examples/imageData.py
+
+if the image is not shown install *imagemagick* or *xv* tools (Linux)
+
+.. image:: examples/lenna.png
+	   :width: 240
+
+Tagging regions
+===============
+
+One key feature of the nix-model is its ability to annotate, or "tag",
+points or regions-of-interest in the stored data. This feature can be
+used to state the occurrence of events during the recording, to state
+the intervals of a certain condition, e.g. a stimulus presentation, or
+to mark the regions of interests in image data. In the nix data-model
+two types of Tags are discriminated. (1) the **Tag** for single points
+or regions, and (2) the **MultiTag** to annotate multiple points or
+regions using the same entity.
+
+.. _single_roi:
+
+Single point or region
+""""""""""""""""""""""
+
+Single points of regions-of-interest are annotated using a **Tag**
+object. The Tag contains the start *position* and, optional, the
+*extent* of the point or region. The link to the data is established
+by adding the **DataArray** that contains the data to the list of
+references. It is important to note that *position* and *extent* are
+arrays with the length matching the dimensionality of the referenced
+data. The same Tag can be applied to many references as long as
+*position* and *extent* can be applied to these.
+
+.. literalinclude:: examples/singleROI.py
+
+.. image:: examples/single_roi.png
+	   :width: 240
+
+:ref:`toc`
+
 .. _multiple_rois:
 
 Multiple points or regions
 """"""""""""""""""""""""""
 
- TODO
+For tagging multiple regions of interest in the same data the
+**MultiTag** object is used. Unlike the simple **Tag** from the
+previous example, the multiple *positions* and *extents* can be
+given. These are stored in **DataArray** objects. The tagged dataset
+is linked via the references.  There are some restrictions regarding
+the **DataArray**s storing positions and extents. The data stored in
+them **must** be 2-dimensional. Both dimensions are **SetDimension**s
+representing the individual positions and the positions in the
+referenced data, respectively. Thus, the second dimension has as many
+entries as the referenced data has dimensions.
 
-Use of Features in tags
+In the following example we will declare multiple ROIs in a image. The
+image as a spatial extent and three color channels, is hence 3-D. The
+same mechanism can, of course, be used to tag other event in different
+kinds of data. For example in the neuroscience context: the detection
+of action potentials in a recorded membrane potential.
+
+.. literalinclude:: examples/multipleROIs.py
+
+.. image:: examples/multi_roi.png
+	   :width: 240
+
+:ref:`toc`
+
+
+Retrieving tagged regions
+"""""""""""""""""""""""""
+
+TODO
+
+
+Unit support in tagging
 """""""""""""""""""""""
+
+TODO
+
+
+Using Features
+""""""""""""""
 
 TODO
 
