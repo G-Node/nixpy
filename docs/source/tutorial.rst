@@ -141,59 +141,9 @@ attribution in the code.
 .. image:: examples/lenna.png
 	   :width: 240
 
-Tagging regions
-===============
-
-One key feature of the nix-model is its ability to annotate, or "tag",
-points or regions-of-interest in the stored data. This feature can be
-used to state the occurrence of events during the recording, to state
-the intervals of a certain condition, e.g. a stimulus presentation, or
-to mark the regions of interests in image data. In the nix data-model
-two types of Tags are discriminated. (1) the **Tag** for single points
-or regions, and (2) the **MultiTag** to annotate multiple points or
-regions using the same entity.
-
-.. _single_roi:
-
-Single point or region
-""""""""""""""""""""""
-
-Single points of regions-of-interest are annotated using a **Tag**
-object. The Tag contains the start *position* and, optional, the
-*extent* of the point or region. The link to the data is established
-by adding the **DataArray** that contains the data to the list of
-references. It is important to note that *position* and *extent* are
-arrays with the length matching the dimensionality of the referenced
-data. The same Tag can be applied to many references as long as
-*position* and *extent* can be applied to these.
-
-.. literalinclude:: examples/singleROI.py
-
-.. image:: examples/single_roi.png
-	   :width: 240
-
-
-
-.. _image_data:
-
-Image data
-""""""""""
-
-Color images can be stored as 3-D data in a *DataArray*. The first two
-dimensions represent *width* and *height* of the image while the 3rd
-dimension represents the color channels. Accordingly, we need three
-dimension descriptors. The first two are *SampledDimensions* since the
-pixels of the image are regularly sampled in space. The third
-dimension is a *SetDimension* with labels for each of the channels.
-In this tutorial the "Lenna" image is used. Please see the author
-attribution in the code.
-
-.. literalinclude:: examples/imageData.py
-
 if the image is not shown install *imagemagick* or *xv* tools (Linux)
 
-.. image:: examples/lenna.png
-	   :width: 240
+:ref:`toc`
 
 Tagging regions
 ===============
@@ -238,8 +188,8 @@ For tagging multiple regions of interest in the same data the
 previous example, the multiple *positions* and *extents* can be
 given. These are stored in **DataArray** objects. The tagged dataset
 is linked via the references.  There are some restrictions regarding
-the **DataArray**s storing positions and extents. The data stored in
-them **must** be 2-dimensional. Both dimensions are **SetDimension**s
+the **DataArrays** storing positions and extents. The data stored in
+them **must** be 2-dimensional. Both dimensions are **SetDimensions**
 representing the individual positions and the positions in the
 referenced data, respectively. Thus, the second dimension has as many
 entries as the referenced data has dimensions.
@@ -263,11 +213,15 @@ Retrieving tagged regions
 
 TODO
 
+:ref:`toc`
+
 
 Unit support in tagging
 """""""""""""""""""""""
 
 TODO
+
+:ref:`toc`
 
 
 Using Features
@@ -275,18 +229,27 @@ Using Features
 
 TODO
 
+:ref:`toc`
+
 
 Storing the origin of data
 ==========================
 
 TODO adding Sources and nesting them
 
+:ref:`toc`
+
 Working with Data
 =================
 
 TODO write something
 
+:ref:`toc`
+
+
 Working with Metadata
 =====================
 
 TODO write something
+
+:ref:`toc`
