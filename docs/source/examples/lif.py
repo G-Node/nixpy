@@ -30,7 +30,7 @@ class lif:
         self.spike_times = []
 
 
-    def reset(self):
+    def _reset(self):
         self.i_a = 0.0
         self.v = self.v_reset
         self.t = 0.0
@@ -38,7 +38,7 @@ class lif:
         self.spike_times = []
     
 
-    def lif(self, stimulus, noise):
+    def _lif(self, stimulus, noise):
         """
         euler solution of the membrane equation with adaptation current and noise
         """
@@ -47,12 +47,12 @@ class lif:
         self.membrane_voltage.append(self.v)
 
 
-    def next(self, stimulus):
+    def _next(self, stimulus):
         """
         working horse which delegates to the euler and gets the spike times
         """
         noise = self.D * (float(np.random.randn() % 10000) - 5000.0)/10000
-        self.lif(stimulus, noise)
+        self._lif(stimulus, noise)
         self.t += self.stepsize
         if self.v > self.v_threshold and len(self.membrane_voltage) > 1:
             self.v = self.v_reset
@@ -65,9 +65,9 @@ class lif:
         """
         lif simulation with constant stimulus.
         """
-        self.reset()
+        self._reset()
         for i in range(steps):
-            self.next(stimulus);
+            self._next(stimulus);
         time = np.arange(len(self.membrane_voltage))*self.stepsize
         return time, np.array(self.membrane_voltage), np.array(self.spike_times)
 
@@ -76,8 +76,24 @@ class lif:
         """
         lif simulation with a predefined stimulus trace.
         """
-        self.reset()
+        self._reset()
         for s in stimulus:
-            self.next(s);
+            self._next(s);
         time = np.arange(len(self.membrane_voltage))*self.stepsize
         return time, np.array(self.membrane_voltage), np.array(self.spike_times)
+
+
+    def __str__(self):
+        out = '\n'.join(["stepsize: \t" + str(self.stepsize),
+                         "offset:\t\t" + str(self.offset),
+                         "tau_m:\t\t" + str(self.tau_m),
+                         "tau_a:\t\t" + str(self.tau_a),
+                         "da:\t\t" + str(self.da),
+                         "D:\t\t" + str(self.D),
+                         "v_threshold:\t" + str(self.v_threshold),
+                         "v_reset:\t" + str(self.v_reset)])
+        return out
+
+
+    def __repr__(self):
+        return self.__str__()
