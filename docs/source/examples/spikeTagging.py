@@ -11,17 +11,10 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- This tutorial shows how to store image data in nix-files.
- See https://github.com/G-node/nix/wiki for more information.
- 
- We use the "Lenna" image in this tutorial.  
+ This tutorial shows how to store a voltage trace and marks in this
+ voltage trace innix-files.
 
- "Lenna" by Original full portrait: "Playmate of the Month". Playboy
- Magazine. November 1972, photographed by Dwight Hooker.This 512x512
- electronic/mechanical scan of a section of the full portrait:
- Alexander Sawchuk and two others[1] - The USC-SIPI image
- database. Via Wikipedia -
- http://en.wikipedia.org/wiki/File:Lenna.png#mediaviewer/File:Lenna.png
+ See https://github.com/G-node/nix/wiki for more information.
 
 """
 
@@ -51,8 +44,8 @@ def plot_data(tag):
 
     plt.plot(time, voltage, color='dodgerblue', label=data_array.name)
     plt.scatter(spike_times, np.ones(spike_times.shape)*np.max(voltage), color='red', label=tag.name)
-    plt.xlabel(x_axis.label + " [" + x_axis.unit + "]")
-    plt.ylabel(data_array.label + " [" + data_array.unit + "]")
+    plt.xlabel(x_axis.label + ((" [" + x_axis.unit + "]") if x_axis.unit else ""))
+    plt.ylabel(data_array.label + ((" [" + data_array.unit + "]") if data_array.unit else ""))
     plt.title(data_array.name)
     plt.xlim(0, np.max(time))
     plt.ylim((1.2 * np.min(voltage), 1.2 * np.max(voltage)))
@@ -73,8 +66,7 @@ if __name__ == '__main__':
 
     # create a 'DataArray' to take the membrane voltage
     data = block.create_data_array("membrane voltage", "nix.regular_sampled.time_series", data=voltage)
-    data.unit = "V"
-    data.label = "voltage"
+    data.label = "membrane voltage"
     # add descriptors for time axis
     time_dim = data.append_sampled_dimension(time[1]-time[0])
     time_dim.label = "time"
