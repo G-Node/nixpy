@@ -24,6 +24,7 @@ Tagging points and regions-of-interest
 
 * :ref:`single_roi`
 * :ref:`multiple_rois`
+* :ref:`spike_tagging`
 
 Design Principles
 =================
@@ -207,6 +208,21 @@ of action potentials in a recorded membrane potential.
 
 :ref:`toc`
 
+.. _spike_tagging:
+
+Tagging spikes in membrane potential
+""""""""""""""""""""""""""""""""""""
+
+Neuroscience example. The same construct as above is used to mark the
+times at which action potentials were detected in the recording of a
+neuron's membrane potential.
+
+.. literalinclude:: examples/spikeTagging.py
+
+.. image:: examples/spike_tagging.png
+	   :width: 240
+
+:ref:`toc` 
 
 Retrieving tagged regions
 """""""""""""""""""""""""
