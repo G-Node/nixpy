@@ -11,8 +11,8 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- This tutorial shows how to store a voltage trace and marks in this
- voltage trace innix-files.
+ This tutorial shows how to store a voltage trace and mark in this
+ the occurence of action potentials.
 
  See https://github.com/G-node/nix/wiki for more information.
 
