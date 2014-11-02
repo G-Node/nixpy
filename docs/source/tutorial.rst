@@ -13,6 +13,7 @@ Table of contents
 
 Basic data structures
 """""""""""""""""""""
+
 * :ref:`regularly_sampled_data`
 * :ref:`irregularly_sampled_data`
 * :ref:`event_data`
@@ -25,6 +26,12 @@ Tagging points and regions-of-interest
 * :ref:`single_roi`
 * :ref:`multiple_rois`
 * :ref:`spike_tagging`
+
+Features
+""""""""
+
+* :ref:`tagged_feature`
+* :ref:`indexed_feature`
 
 Design Principles
 =================
@@ -242,13 +249,49 @@ TODO
 .. _features:
 
 Features
-""""""""""""""
+========
 
-The following code shows how to use the Features of den
+The following code shows how to use the **Features** of the
 Nix-model. Suppose that we have the recording of a signal in which a
 set of events is detected. No each event may have certain
 characteristics one wants to store. These are stored as **Features**
 of the events.
+
+
+.. _untagged_feature:
+
+Untagged Feature
+""""""""""""""""
+
+TODO
+
+
+.. _tagged_feature:
+
+Tagged Feature
+""""""""""""""
+
+Tagged **Features** are used in cases in which the positions and
+extents of a tag also apply to another linked dataset. In the
+following example the spike times should also be applied to the
+stimulus that led to the responses. The stimulus is saved in an
+additional **DataArray** and is linked to the spike times as a
+**Feature** setting the **LinkType** to *tagged*.
+
+.. literalinclude:: examples/taggedFeature.py
+
+.. image:: examples/tagged_feature.png
+	   :width: 240
+
+:ref:`toc`
+
+
+
+
+.. _indexed_feature:
+
+Indexed Feature
+"""""""""""""""
 
 In the example, the signal is the membrane potential of a (model)
 neuron which was stimulated with some stimulus. The events are again
