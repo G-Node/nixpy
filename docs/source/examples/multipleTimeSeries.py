@@ -64,7 +64,7 @@ if __name__ == "__main__":
     block = file.create_block("block name", "nix.session")
     # create a 'DataArray' to take the data, add some information about the signal
     y = np.vstack((sine, cosine))
-    data = block.create_data_array("waveforms", "nix.regular_sampled", data=y)
+    data = block.create_data_array("waveforms", "nix.regular_sampled.multiple_series", data=y)
     data.unit = "mV"
     data.label = "voltage"
     # descriptor for first dimension is a set

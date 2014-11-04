@@ -239,13 +239,38 @@ TODO
 
 :ref:`toc`
 
+.. _features:
 
-Using Features
+Features
 """"""""""""""
 
-TODO
+The following code shows how to use the Features of den
+Nix-model. Suppose that we have the recording of a signal in which a
+set of events is detected. No each event may have certain
+characteristics one wants to store. These are stored as **Features**
+of the events.
+
+In the example, the signal is the membrane potential of a (model)
+neuron which was stimulated with some stimulus. The events are again
+the action potentials (or spikes) fired by that neuron. A typical
+analysis performed on such data is the Spike triggered average which
+represent the average stimulus that led to a spike. For each spike, a
+snippet of the respective stimulus is cut out and later averaged. In
+this example we store these stimulus snippets and link them to the
+events by adding a **Feature** to the **MultiTag**. There are three
+different flags that define how this link has to be interpreted. In
+this case there is one snippet for each spike. The index of each
+position has to be used as an index in the first dimension of the
+Feature data. The **LinkType** has to be set to *indexed*.
+
+.. literalinclude:: examples/spikeFeatures.py
+
+.. image:: examples/spike_feature.png
+	   :width: 240
 
 :ref:`toc`
+
+
 
 
 Storing the origin of data
