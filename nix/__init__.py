@@ -15,6 +15,7 @@ from nix.file import FileMixin
 from nix.section import SectionMixin
 from nix.property import PropertyMixin, ValueMixin
 from nix.source import SourceMixin
+from nix.data_array import DataSetMixin
 from nix.data_array import DataArrayMixin
 from nix.tag import TagMixin
 from nix.multi_tag import MultiTagMixin
