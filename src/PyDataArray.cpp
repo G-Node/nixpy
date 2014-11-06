@@ -198,7 +198,7 @@ static void arrayEnsureShapeAndCount(PyArrayObject *array,
 }
 
 
-static void readData(DataArray& da, PyObject *data, nix::NDSize count, nix::NDSize offset) {
+static void readData(DataSet& da, PyObject *data, nix::NDSize count, nix::NDSize offset) {
 
     PyArrayObject *array = makeArray(data, NPY_ARRAY_CARRAY);
 
@@ -209,7 +209,7 @@ static void readData(DataArray& da, PyObject *data, nix::NDSize count, nix::NDSi
 }
 
 
-static void writeData(DataArray& da, PyObject *data, nix::NDSize count, nix::NDSize offset) {
+static void writeData(DataSet& da, PyObject *data, nix::NDSize count, nix::NDSize offset) {
 
     PyArrayObject *array = makeArray(data, NPY_ARRAY_CARRAY_RO);
 
@@ -220,7 +220,7 @@ static void writeData(DataArray& da, PyObject *data, nix::NDSize count, nix::NDS
 }
 
 
-static std::string getDataType(const DataArray& da)
+static std::string getDataType(const DataSet& da)
 {
     nix::DataType nix_dtype = da.dataType();
     return nixDtypeToPyDtypeStr(nix_dtype);
@@ -295,14 +295,46 @@ struct dtype_transmogrify {
 
 };
 
+struct DataSetWrapper : public DataSet, public boost::python::wrapper<DataSet> {
+
+    void ioRead(DataType dtype,
+                        void *data,
+                        const NDSize &count,
+                        const NDSize &offset) const override {
+        this->get_override("ioRead")(dtype, data, count, offset);
+    }
+
+     void ioWrite(DataType dtype,
+                         const void *data,
+                         const NDSize &count,
+                         const NDSize &offset) override {
+        this->get_override("ioWrite")(dtype, data, count, offset);
+     }
+     virtual void dataExtent(const NDSize &extent) override {
+        this->get_override("dataExtent")(extent);
+     }
+
+     virtual NDSize dataExtent() const override {
+        return this->get_override("dataExtent")();
+     };
+
+     virtual DataType dataType() const override {
+        return this->get_override("dataType")();
+     }
+};
 
 void PyDataArray::do_export() {
 
     // For numpy to work
     import_array();
 
+    class_<DataSetWrapper, boost::noncopyable>("DataSet")
+        .def("_write_data", writeData)
+        .def("_read_data", readData)
+        .def("_get_dtype", getDataType);
+
     PyEntityWithSources<base::IDataArray>::do_export("DataArray");
-    class_<DataArray, bases<base::EntityWithSources<base::IDataArray>>>("DataArray")
+    class_<DataArray, bases<base::EntityWithSources<base::IDataArray>, DataSet>>("DataArray")
         .add_property("label",
                       OPT_GETTER(std::string, DataArray, label),
                       setLabel,
@@ -326,9 +358,6 @@ void PyDataArray::do_export() {
         // Data
         .add_property("data_type", &DataArray::dataType,
                       doc::data_array_data_type)
-        .def("_write_data", writeData)
-        .def("_read_data", readData)
-        .def("_get_dtype", getDataType)
 
         // Dimensions
         .def("create_set_dimension", &DataArray::createSetDimension,
