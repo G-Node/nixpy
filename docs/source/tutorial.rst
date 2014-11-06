@@ -47,6 +47,11 @@ re-open them with different access rights (examples/fileCreate.py).
 
 .. literalinclude:: examples/fileCreate.py
 
+
+Source code of this example: `fileCreate.py`_.
+
+.. _fileCreate.py: examples/fileCreate.py
+
 :ref:`toc`
 
 Basic data structures
@@ -55,7 +60,6 @@ Basic data structures
 In this section we will show how different kinds of data are stored in
 nix files. We will start with simple regularly and irregularly sampled
 signals, turn to series of such signals and end with images stacks.
-
 
 .. _regularly_sampled_data:
 
@@ -76,9 +80,14 @@ specified. The following code illustrates how this is stored in nix
 files.
 
 .. literalinclude:: examples/regularlySampledData.py
+		    :lines: 53-66    
 
 .. image:: examples/regular_sampled.png
 	   :width: 240
+
+Source code for this example: `regularlySampledData.py`_.
+
+.. _regularlySampledData.py: examples/regularlySampledData.py
 
 :ref:`toc`
 
@@ -94,9 +103,15 @@ dimension which is sampled in this way has to be described using a
 instances at which the samples were taken.
 
 .. literalinclude:: examples/irregularlySampledData.py
+		    :lines: 57-63 
+
 
 .. image:: examples/irregular.png
 	   :width: 240
+
+Source code for this example: `irregularlySampledData.py`_.
+
+.. _irregularlySampledData.py: examples/irregularlySampledData.py
 
 :ref:`toc`
 
