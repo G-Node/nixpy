@@ -29,7 +29,7 @@ class DataArrayMixin(DataArray):
         :type: :class:`~nix.data_array.DataSet`
         """
         if not hasattr(self, "_data"):
-            setattr(self, "_data", DataSet(self))
+            setattr(self, "_data", DataSetProxy(self))
         return self._data
 
     @property
@@ -94,7 +94,7 @@ class DimensionProxyList(object):
         return str(self)
 
 
-class DataSet(object):
+class DataSetProxy(object):
     """
     Data IO object for DataArray.
     """
