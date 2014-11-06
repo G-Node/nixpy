@@ -26,4 +26,7 @@ __all__ = ("File", "FileMode", "Block", "DataType", "Section", "Property",
            "SampledDimension", "DimensionType", "Feature", "LinkType",
            "Tag", "MultiTag")
 
-__author__ = "Christian Kellner"
+del BlockMixin, FileMixin, SectionMixin, PropertyMixin, ValueMixin, SourceMixin, DataArrayMixin, TagMixin
+del MultiTagMixin, DataArrySourcesMixin, MultiTagSourcesMixin, TagSourcesMixin
+
+__author__ = 'Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, Balint Morvai'
