@@ -331,7 +331,11 @@ void PyDataArray::do_export() {
     class_<DataSetWrapper, boost::noncopyable>("DataSet")
         .def("_write_data", writeData)
         .def("_read_data", readData)
-        .def("_get_dtype", getDataType);
+        .def("_get_dtype", getDataType)
+        .add_property("data_extent",
+                      GETTER(NDSize, DataSet, dataExtent),
+                      SETTER(NDSize&, DataSet, dataExtent),
+                      doc::data_array_data_extent);
 
     PyEntityWithSources<base::IDataArray>::do_export("DataArray");
     class_<DataArray, bases<base::EntityWithSources<base::IDataArray>, DataSet>>("DataArray")
@@ -351,10 +355,7 @@ void PyDataArray::do_export() {
                       GETTER(std::vector<double>, DataArray, polynomCoefficients),
                       setPolynomCoefficients,
                       doc::data_array_polynom_coefficients)
-        .add_property("data_extent",
-                      GETTER(NDSize, DataArray, dataExtent),
-                      SETTER(NDSize&, DataArray, dataExtent),
-                      doc::data_array_data_extent)
+
         // Data
         .add_property("data_type", &DataArray::dataType,
                       doc::data_array_data_type)
