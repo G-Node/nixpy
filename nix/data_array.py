@@ -11,6 +11,7 @@ from __future__ import absolute_import
 import sys
 
 from nix.core import DataArray
+from nix.core import DataSet
 from nix.util.inject import Inject
 
 import numpy as np
@@ -23,14 +24,14 @@ class DataArrayMixin(DataArray):
     @property
     def data(self):
         """
-        A property that will give access to the DataArray's data via a
-        :class:`~nix.data_array.DataSet` object.
+        DEPRECATED DO NOT USE ANYMORE! Returns self
 
-        :type: :class:`~nix.data_array.DataSet`
+        :type: :class:`~nix.data_array.DataArray`
         """
-        if not hasattr(self, "_data"):
-            setattr(self, "_data", DataSet(self))
-        return self._data
+        import warnings
+        warnings.warn("Call to deprecated property DataArray.data",
+                      category=DeprecationWarning)
+        return self
 
     @property
     def dimensions(self):
@@ -94,12 +95,13 @@ class DimensionProxyList(object):
         return str(self)
 
 
-class DataSet(object):
+class DataSetMixin(DataSet):
     """
     Data IO object for DataArray.
     """
-    def __init__(self, obj):
-        self.__obj = obj
+
+    class __metaclass__(Inject, DataSet.__class__):
+        pass
 
     def __array__(self):
         raw = np.empty(self.shape, dtype=self.dtype)
@@ -116,7 +118,7 @@ class DataSet(object):
         count, offset, shape = self.__tuple_to_count_offset_shape(index)
 
         raw = np.empty(shape, dtype=self.dtype)
-        self.__obj._read_data(raw, count, offset)
+        self._read_data(raw, count, offset)
         return raw
 
     def __setitem__(self, index, value):
@@ -130,7 +132,7 @@ class DataSet(object):
         # NB: np.ascontiguousarray does not copy the array if it is
         # already in c-contiguous form
         raw = np.ascontiguousarray(value)
-        self.__obj._write_data(raw, count, offset)
+        self._write_data(raw, count, offset)
 
     def __len__(self):
         s = self.len()
@@ -159,7 +161,7 @@ class DataSet(object):
         """
         :type: tuple of data array dimensions.
         """
-        return self.__obj.data_extent
+        return self.data_extent
 
     @property
     def size(self):
@@ -177,7 +179,7 @@ class DataSet(object):
         :type: :class:`numpy.dtype` object holding type infromation about
                the data stored in the DataSet.
         """
-        return np.dtype(self.__obj._get_dtype())
+        return np.dtype(self._get_dtype())
 
     def write_direct(self, data):
         """
@@ -190,7 +192,7 @@ class DataSet(object):
         :param data: The array which contents is being written
         :type data: :class:`numpy.ndarray`
         """
-        self.__obj._write_data(data, (), ())
+        self._write_data(data, (), ())
 
     def read_direct(self, data):
         """
@@ -204,7 +206,7 @@ class DataSet(object):
         :type data: :class:`numpy.ndarray`
         """
 
-        self.__obj._read_data(data, (), ())
+        self._read_data(data, (), ())
 
     def append(self, data, axis=0):
         """
@@ -223,8 +225,8 @@ class DataSet(object):
         offset = tuple(0 if i != axis else x for i, x in enumerate(self.shape))
         count = data.shape
         enlarge = tuple(self.shape[i] + (0 if i != axis else x) for i, x in enumerate(data.shape))
-        self.__obj.data_extent = enlarge
-        self.__obj._write_data(data, count, offset)
+        self.data_extent = enlarge
+        self._write_data(data, count, offset)
 
     @staticmethod
     def __index_to_tuple(index):
