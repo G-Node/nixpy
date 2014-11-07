@@ -2,14 +2,63 @@
 NIXPy Tutorial
 ============== 
 
-In the following you will find some tutorials showing how to use nixpy
-to read and write nix-files. All code can be found in the examples
-folder.
+In the following you will find tutorials showing how to use nixpy to
+read and write nix-files. We will first introduce the design
+principles of the nix Data Model. Further down this page, you will
+find example programs showing how to store different data types in the
+data model how to establish links between entities, add metadata etc..
 
 .. _toc:
 
-Table of contents
+
+Design Principles
 =================
+
+The design of the data model tries to draw on similarities of
+different data types and structures and and come up with *entities*
+that are as generic and versatile as meaningful. At the same time we
+aim for clearly established links between differen entities to keep the
+model as expressive as possible.
+
+Creating a file
+"""""""""""""""
+
+So far we have implemented the nix model only for the HDF5 file
+format. In order to store data in a file we need to create one.
+
+.. code-block:: python
+		
+		import nix
+		
+		nix_file = nix.File.open('example.h5', nix.FileMode.Overwrite)
+
+The **File** entity is the root of this document and it has only two
+children the *data* and *metadata* nodes. You may want to use the
+hdfview tool to open the file and look at it. Of course you can access
+both parts using the **File** API.
+
+All information directly related to a chunk of data is stored in the
+*data* node as children of a top-level entity called **Block**. A
+**Block** is a grouping element that can represent many things. For
+example it can take up everything that was recorded in the same
+*session*. Therefore, the **Block** has a *name* and a *type*.
+
+.. code-block:: python
+
+		block = nix_file.create_block("Test block", "nix.session")
+
+Names can be freely chosen. Duplication of names on the same
+hierarchy-level is not allowed. In this example creating a second
+**Block** with the very same name leads to an error. Names must not
+contain '/' characters since they are path separators in the HDF5
+file. To avoid collisions across files every created entity has an
+unique id (UUID).
+
+.. code-block:: python
+
+		block.id
+		'017d7764-173b-4716-a6c2-45f6d37ddb52'
+
 
 Basic data structures
 """""""""""""""""""""
