@@ -115,6 +115,9 @@ void PyMultiTag::do_export() {
         .def("_get_feature_by_pos", &getFeatureByPos)
         .def("_delete_feature_by_id", REMOVER(std::string, MultiTag, deleteFeature))
 
+        // Data
+        .def("retrieve_data", &MultiTag::retrieveData)
+
         // Other
         .def("__str__", &toStr<MultiTag>)
         .def("__repr__", &toStr<MultiTag>)
