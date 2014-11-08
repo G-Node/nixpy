@@ -337,6 +337,8 @@ void PyDataArray::do_export() {
                       SETTER(NDSize&, DataSet, dataExtent),
                       doc::data_array_data_extent);
 
+    class_<DataView, bases<DataSet>>("DataView", boost::python::no_init);
+
     PyEntityWithSources<base::IDataArray>::do_export("DataArray");
     class_<DataArray, bases<base::EntityWithSources<base::IDataArray>, DataSet>>("DataArray")
         .add_property("label",
