@@ -84,6 +84,7 @@ nixpy_sources = [
     'src/PyValue.cpp',
     'src/PySource.cpp',
     'src/PyDataArray.cpp',
+    'src/PyDataSet.cpp',
     'src/PyDimensions.cpp',
     'src/PyFeature.cpp',
     'src/PyTag.cpp',

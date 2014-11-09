@@ -145,6 +145,10 @@ struct PyDataArray {
     static void do_export();
 };
 
+struct PyDataSet {
+    static void do_export();
+};
+
 struct PyDimensions {
     static void do_export();
 };
