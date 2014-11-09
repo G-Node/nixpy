@@ -335,7 +335,9 @@ void PyDataArray::do_export() {
         .add_property("data_extent",
                       GETTER(NDSize, DataSet, dataExtent),
                       SETTER(NDSize&, DataSet, dataExtent),
-                      doc::data_array_data_extent);
+                      doc::data_array_data_extent)
+        .add_property("data_type", &DataSet::dataType,
+                      doc::data_array_data_type);
 
     class_<DataView, bases<DataSet>>("DataView", boost::python::no_init);
 
@@ -357,10 +359,6 @@ void PyDataArray::do_export() {
                       GETTER(std::vector<double>, DataArray, polynomCoefficients),
                       setPolynomCoefficients,
                       doc::data_array_polynom_coefficients)
-
-        // Data
-        .add_property("data_type", &DataArray::dataType,
-                      doc::data_array_data_type)
 
         // Dimensions
         .def("create_set_dimension", &DataArray::createSetDimension,
