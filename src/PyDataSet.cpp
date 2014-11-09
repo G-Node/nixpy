@@ -146,8 +146,8 @@ static nix::NDSize arrayShapeAsNDSize(PyArrayObject *array) {
 
 
 static void arrayEnsureShapeAndCount(PyArrayObject *array,
-                                         nix::NDSize    count,
-                                         nix::NDSize    offset) {
+                                     nix::NDSize    &count,
+                                     nix::NDSize    &offset) {
 
     if (! count) {
         count = arrayShapeAsNDSize(array);
