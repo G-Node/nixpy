@@ -95,7 +95,33 @@ Adding further information
 TODO
 
 
+Tutorials:
+==========
+* Working with files
 
+  * :ref:`working_with_files`
+
+* Basic data structures
+
+  * :ref:`regularly_sampled_data`
+  * :ref:`irregularly_sampled_data`
+  * :ref:`event_data`
+  * :ref:`multiple_signals`
+  * :ref:`image_data`
+
+* Tagging points and regions-of-interest
+
+  * :ref:`single_roi`
+  * :ref:`multiple_rois`
+  * :ref:`spike_tagging`
+
+* Features
+
+  * :ref:`tagged_feature`
+  * :ref:`indexed_feature`
+
+
+.. _working_with_files:
 
 Working with Files
 ==================
