@@ -60,32 +60,41 @@ unique id (UUID).
 		'017d7764-173b-4716-a6c2-45f6d37ddb52'
 
 
-Basic data structures
-"""""""""""""""""""""
+Storing data
+"""""""""""" 
 
-* :ref:`regularly_sampled_data`
-* :ref:`irregularly_sampled_data`
-* :ref:`event_data`
-* :ref:`multiple_signals`
-* :ref:`image_data`
+The heart of our data model is an entity called **DataArray**. This is
+the entity that actually stores all data. It can take n-dimensional
+arrays and provides sufficient information to create a basic plot of
+the data. To achieve this, one essential parts is to define what kind
+of data is stored. Hence, every dimension of the stored data **must**
+be defined using the available Dimension descriptors (below). The
+following code snippets show how to create an **DataArray** and how to
+store data in it.
 
-Tagging points and regions-of-interest
-""""""""""""""""""""""""""""""""""""""
 
-* :ref:`single_roi`
-* :ref:`multiple_rois`
-* :ref:`spike_tagging`
+.. code-block:: python
+		
+		# create a DataArray and store data in it
+		data = block.create_data_array("my data", "nix.sampled", data=some_numpy_array)
 
-Features
-""""""""
+Using this call will create a **DataArray**, set name and type, set
+the *dataType* according to the dtype of the passed data, and store
+the data in the file.
 
-* :ref:`tagged_feature`
-* :ref:`indexed_feature`
 
-Design Principles
-=================
 
-TODO write something
+Annotate regions in the data
+""""""""""""""""""""""""""""
+
+TOTO
+
+Adding further information
+""""""""""""""""""""""""""
+
+TODO
+
+
 
 
 Working with Files
