@@ -245,10 +245,14 @@ represents the various signals. This is described with a
 this dimension of the data.
 
 .. literalinclude:: examples/multipleTimeSeries.py
+		    :lines: 66-76
 
 .. image:: examples/multiple_time_series.png
 	   :width: 240
 
+Source code for this example: `multipleTimeSeries.py`_.
+
+.. _multipleTimeSeries.py: examples/irregularlySampledData.py
 
 :ref:`toc`
 
@@ -267,11 +271,15 @@ In this tutorial the "Lenna" image is used. Please see the author
 attribution in the code.
 
 .. literalinclude:: examples/imageData.py
+		    :lines: 59-66
 
 .. image:: examples/lenna.png
 	   :width: 240
 
 if the image is not shown install *imagemagick* or *xv* tools (Linux)
+Source code for this example: `imageData.py`_.
+
+.. _imageData.py: examples/imageData.py
 
 :ref:`toc`
 
@@ -302,9 +310,14 @@ data. The same Tag can be applied to many references as long as
 *position* and *extent* can be applied to these.
 
 .. literalinclude:: examples/singleROI.py
+		    :lines: 80-84
 
 .. image:: examples/single_roi.png
 	   :width: 240
+
+Source code for this example: `singleROI.py`_.
+
+.. _singleROI.py: examples/singleROI.py
 
 :ref:`toc`
 
@@ -331,9 +344,14 @@ kinds of data. For example in the neuroscience context: the detection
 of action potentials in a recorded membrane potential.
 
 .. literalinclude:: examples/multipleROIs.py
+		    :lines: 94-107
 
 .. image:: examples/multi_roi.png
 	   :width: 240
+
+Source code for this example: `multipleROIs.py`_.
+
+.. _multipleROIs.py: examples/multipleROIs.py
 
 :ref:`toc`
 
@@ -347,9 +365,14 @@ times at which action potentials were detected in the recording of a
 neuron's membrane potential.
 
 .. literalinclude:: examples/spikeTagging.py
+		    :lines: 67-82
 
 .. image:: examples/spike_tagging.png
 	   :width: 240
+
+Source code for this example: `spikeTagging.py`_.
+
+.. _spikeTagging.py: examples/spikeTagging.py
 
 :ref:`toc` 
 
@@ -401,9 +424,23 @@ additional **DataArray** and is linked to the spike times as a
 **Feature** setting the **LinkType** to *tagged*.
 
 .. literalinclude:: examples/taggedFeature.py
+		    :lines: 108-122
 
 .. image:: examples/tagged_feature.png
 	   :width: 240
+
+Source code for this example: `taggedFeature.py`_.
+
+.. _taggedFeature.py: examples/taggedFeature.py
+
+:ref:`toc` 
+
+Retrieving tagged regions
+"""""""""""""""""""""""""
+
+TODO
+
+:ref:`toc`
 
 :ref:`toc`
 
@@ -429,9 +466,15 @@ position has to be used as an index in the first dimension of the
 Feature data. The **LinkType** has to be set to *indexed*.
 
 .. literalinclude:: examples/spikeFeatures.py
+		    :lines: 135-147
 
 .. image:: examples/spike_feature.png
 	   :width: 240
+
+Source code for this example: `indexedFeatures.py`_.
+
+.. _indexedFeatures.py: examples/indexedFeatures.py
+
 
 :ref:`toc`
 
