@@ -8,8 +8,6 @@ principles of the nix Data Model. Further down this page, you will
 find example programs showing how to store different data types in the
 data model how to establish links between entities, add metadata etc..
 
-.. _toc:
-
 
 Design Principles
 =================
@@ -80,8 +78,32 @@ store data in it.
 
 Using this call will create a **DataArray**, set name and type, set
 the *dataType* according to the dtype of the passed data, and store
-the data in the file.
+the data in the file. You can also create empty **DataArrays** to take
+up data-to-be-recorded. In this case you have to provide the space
+that will be needed in advance. 
 
+.. code-block:: python
+		
+		# create an empty DataArray to store 2x1000 values
+		data = block.create_data_array("my data", "nix.sampled", dtype=nix.dtype.Double, shape=(2,1000))
+		some_numpy_array = np.random.randn(2, 1000)
+		data = some_numpy_array
+
+
+If you do not know the size of the data in advance, you can append
+data to an already existing **DataArray**. **Beware:** Though it is
+possible to extend the data, it is not possible to change the
+dimensionality (rank) of the data afterwards.
+
+.. code-block:: python
+		
+		# create an empty DataArray to store 2x1000 values
+		data = block.create_data_array("my data", "nix.sampled", dtype=nix.dtype.Double, shape=(2,1000))
+		some_numpy_array = np.random.randn(2, 1000)
+		data[:, :] = some_numpy_array
+		some_more_data = np.random.randn(2,10)
+		data.data_extent((2,1010))
+		data[:, 1000:] = some_more_data
 
 
 Annotate regions in the data
@@ -94,6 +116,7 @@ Adding further information
 
 TODO
 
+.. _toc:
 
 Tutorials:
 ==========
