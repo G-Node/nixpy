@@ -118,7 +118,7 @@ TODO
 
 .. _toc:
 
-Tutorials:
+List of Tutorials
 ==========
 * Working with files
 
