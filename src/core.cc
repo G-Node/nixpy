@@ -29,6 +29,7 @@ BOOST_PYTHON_MODULE(core)
 
     PyBlock::do_export();
     PySource::do_export();
+    PyDataSet::do_export();
     PyDataArray::do_export();
     PyDimensions::do_export();
     PyFeature::do_export();

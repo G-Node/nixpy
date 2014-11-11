@@ -144,3 +144,33 @@ class TestMultiTag(unittest.TestCase):
         del self.my_tag.features[0]
 
         assert(len(self.my_tag.features) == 0)
+
+    def test_multi_tag_retrieve_data(self):
+        import numpy as np
+
+        sample_iv = 0.001
+        x = np.arange(0, 10, sample_iv)
+        y = np.sin(2*np.pi*x)
+
+        block = self.block
+        da = block.create_data_array("sin", "data", data=y)
+        da.unit = 'dB'
+        dim = da.append_sampled_dimension(sample_iv)
+        dim.unit = 's'
+
+        pos = block.create_data_array('pos1', 'positions', data=np.array([0.]).reshape((1, 1)))
+        pos.append_set_dimension()
+        pos.append_set_dimension()
+        pos.unit = 'ms'
+        ext = block.create_data_array('ext1', 'extents', data=np.array([2000.]).reshape((1, 1)))
+        ext.append_set_dimension()
+        ext.append_set_dimension()
+        ext.unit = 'ms'
+
+        tag = block.create_multi_tag("sin1", "tag", pos)
+        tag.extents = ext
+        tag.units = ['ms']
+        tag.references.append(da)
+
+        assert(tag.retrieve_data(0, 0).shape == (2001,))
+        assert(np.array_equal(y[:2001], tag.retrieve_data(0, 0)[:]))
