@@ -7,7 +7,7 @@
 # LICENSE file in the root of the Project.
 
 import unittest
-
+import numpy as np
 from nix import *
 
 
@@ -28,7 +28,7 @@ class TestTag(unittest.TestCase):
             "your tag", "tag", [0]
         )
         self.your_tag.references.append(self.your_array)
-
+       
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
@@ -137,3 +137,40 @@ class TestTag(unittest.TestCase):
         del self.my_tag.features[0]
 
         assert(len(self.my_tag.features) == 0)
+
+    def test_tag_retrieve_feature_data(self):
+        number_feat = self.block.create_data_array("number feature", "test", data=10.)
+        ramp_data = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+        ramp_feat = self.block.create_data_array("ramp feature", "test", data=np.asarray(ramp_data))
+        ramp_feat.label = "voltage"
+        ramp_feat.unit = "mV"
+        dim = ramp_feat.append_sampled_dimension(1.0)
+        dim.unit = "ms"
+
+
+        pos_tag = self.block.create_tag("feature test", "test", [5.0])
+        pos_tag.units = ["ms"]
+        
+        f1 = pos_tag.create_feature(number_feat, LinkType.Untagged)
+        f2 = pos_tag.create_feature(ramp_feat, LinkType.Tagged)
+        f3 = pos_tag.create_feature(ramp_feat, LinkType.Untagged)
+        assert(len(pos_tag.features) == 3)
+
+        data1 = pos_tag.retrieve_feature_data(0)
+        data2 = pos_tag.retrieve_feature_data(1)
+        data3 = pos_tag.retrieve_feature_data(2)
+        
+        assert(data1.size == 1) 
+        assert(data2.size == 1) 
+        assert(data3.size == len(ramp_data))
+        
+        # make the tag pointing to a slice
+        pos_tag.extent = [2.0]
+        data1 = pos_tag.retrieve_feature_data(0)
+        data2 = pos_tag.retrieve_feature_data(1)
+        data3 = pos_tag.retrieve_feature_data(2)
+        
+        assert(data1.size == 1) 
+        assert(data2.size == 3) 
+        assert(data3.size == len(ramp_data))
+        
