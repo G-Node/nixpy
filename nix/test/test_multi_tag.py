@@ -9,7 +9,7 @@
 import unittest
 
 from nix import *
-
+import numpy as np
 
 class TestMultiTag(unittest.TestCase):
 
@@ -26,6 +26,55 @@ class TestMultiTag(unittest.TestCase):
         self.your_tag = self.block.create_multi_tag(
             "your tag", "tag", self.your_array
         )
+
+        self.data_array = self.block.create_data_array("featureTest", "test", DataType.Double,(0, 0, 0))
+        ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
+        unit = "ms"
+
+        data = np.zeros((2,10,5))
+        value = 0.
+        for i in range(2):
+            value = 0;
+            for j in range(10):
+                for k in range(5):
+                    value += 1
+                    data[i, j, k] = value
+    
+        self.data_array[:,:,:] = data
+
+        event_positions = np.zeros((2, 3))
+        event_positions[0, 0] = 0.0
+        event_positions[0, 1] = 3.0
+        event_positions[0, 2] = 3.4
+        
+        event_positions[1, 0] = 0.0
+        event_positions[1, 1] = 8.0
+        event_positions[1, 2] = 2.3
+
+        event_extents = np.zeros((2, 3))
+        event_extents[0, 0] = 0.0;
+        event_extents[0, 1] = 6.0;
+        event_extents[0, 2] = 2.3;
+        
+        event_extents[1, 0] = 0.0;
+        event_extents[1, 1] = 3.0;
+        event_extents[1, 2] = 2.0;
+
+        event_labels = ["event 1", "event 2"]
+        dim_labels = ["dim 0", "dim 1", "dim 2"]
+
+        self.event_array = self.block.create_data_array("positions", "test", data=event_positions)
+        
+        self.extent_array = self.block.create_data_array("extents", "test", data=event_extents)
+        extent_set_dim = self.extent_array.append_set_dimension()
+        extent_set_dim.labels = event_labels
+        extent_set_dim = self.extent_array.append_set_dimension()
+        extent_set_dim.labels = dim_labels
+
+        self.feature_tag = self.block.create_multi_tag("feature_tag", "events", self.event_array)
+        self.feature_tag.extents = self.extent_array
+        self.feature_tag.references.append(self.data_array)
+        
 
     def tearDown(self):
         del self.file.blocks[self.block.id]
@@ -146,7 +195,6 @@ class TestMultiTag(unittest.TestCase):
         assert(len(self.my_tag.features) == 0)
 
     def test_multi_tag_retrieve_data(self):
-        import numpy as np
 
         sample_iv = 0.001
         x = np.arange(0, 10, sample_iv)
@@ -174,3 +222,78 @@ class TestMultiTag(unittest.TestCase):
 
         assert(tag.retrieve_data(0, 0).shape == (2001,))
         assert(np.array_equal(y[:2001], tag.retrieve_data(0, 0)[:]))
+
+        
+    def test_multi_tag_feature_data(self):
+        index_data = self.block.create_data_array("indexed feature data", "test", dtype=DataType.Double, shape=(10, 10))
+        dim1 = index_data.append_sampled_dimension(1.0)
+        dim1.unit = "ms"
+        dim2 = index_data.append_sampled_dimension(1.0)
+        dim2.unit = "ms"
+        
+        data1 = np.zeros((10, 10))
+        value = 0.0
+        total = 0.0
+        for i in range(10):
+            value = 100 * i
+            for j in range(10):
+                value += 1
+                data1[i,j] = value
+                total += data1[i,j]
+                
+        index_data[:, :] = data1
+
+        tagged_data = self.block.create_data_array("tagged feature data", "test", dtype=DataType.Double, shape=(10, 20, 10))
+        dim1 = tagged_data.append_sampled_dimension(1.0)
+        dim1.unit = "ms"
+        dim2 = tagged_data.append_sampled_dimension(1.0)
+        dim2.unit = "ms"
+        dim3 = tagged_data.append_sampled_dimension(1.0)
+        dim3.unit = "ms"
+        
+        data2 = np.zeros((10, 20, 10))
+        for i in range(10):
+            value = 100 * i;
+            for j in range(20):
+                for k in range(10):
+                    value += 1
+                    data2[i,j,k] = value
+                        
+        tagged_data[:,:,:] = data2
+        
+        index_feature = self.feature_tag.create_feature(index_data, LinkType.Indexed)
+        tagged_feature = self.feature_tag.create_feature(tagged_data, LinkType.Tagged)
+        untagged_feature = self.feature_tag.create_feature(index_data, LinkType.Untagged)
+        
+        # preparations done, actually test 
+        print self.feature_tag.features
+        assert(len(self.feature_tag.features) == 3)
+        
+        # indexed feature
+        feat_data = self.feature_tag.retrieve_feature_data(0, 0)
+        assert(len(feat_data.shape) == 2)
+        assert(feat_data.size == 10)
+        assert(np.sum(feat_data) == 55)
+
+        data_view = self.feature_tag.retrieve_feature_data(9, 0)
+        assert(np.sum(data_view[:,:]) == 9055)
+        
+        # untagged feature
+        data_view = self.feature_tag.retrieve_feature_data(0, 2)
+        assert(data_view.size == 100)
+            
+        data_view = self.feature_tag.retrieve_feature_data(0, 2)
+        assert(data_view.size == 100);
+        assert(np.sum(data_view) == total) 
+        
+        # tagged feature
+        data_view = self.feature_tag.retrieve_feature_data(0, 1)
+        assert(len(data_view.shape) == 3)
+
+        data_view = self.feature_tag.retrieve_feature_data(1, 1)
+        assert(len(data_view.shape) == 3)
+
+        def out_of_bounds():
+            self.feature_tag.retrieve_feature_data(2, 1)
+
+        self.assertRaises(IndexError,  out_of_bounds)
