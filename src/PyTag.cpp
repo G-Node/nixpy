@@ -105,6 +105,9 @@ void PyTag::do_export() {
         .def("_get_feature_by_id", &getFeatureById)
         .def("_get_feature_by_pos", &getFeatureByPos)
         .def("_delete_feature_by_id", REMOVER(std::string, Tag, deleteFeature))
+        // Data access
+        .def("retrieve_data", &Tag::retrieveData)
+        .def("retrieve_feature_data", &Tag::retrieveFeatureData)
         // Other
         .def("__str__", &toStr<Tag>)
         .def("__repr__", &toStr<Tag>)
