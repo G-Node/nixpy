@@ -106,6 +106,63 @@ dimensionality (rank) of the data afterwards.
 		data[:, 1000:] = some_more_data
 
 
+Dimension descriptors
+"""""""""""""""""""""
+
+In the above examples we have created **DataArray** entities that are
+used to store the data. Goal of our model design is that the data
+containing structures carry enough information to create a basic
+plot. Let's assume a time-series of data needs to be stored: The data
+is just a vector of measurements (e.g. voltages). The data would be
+plotted as a line-plot. We thus need to define the x- and the y-axis
+of the plot. The y- or value axis is defined by setting the label and
+the unit properties of the **DataArray**, the x-axis needs a dimension
+descriptor. In the nix model three different dimension descriptors are
+defined. **SampledDimension**, **RangeDimension**, and
+**SetDimension** which are used for (i) data that has been sampled in
+space or time in regular intervals, (ii) data that has been sampled in
+irregular intervals, and (iii) data that belongs to categories.
+
+.. code-block:: python
+
+		sample_interval = 0.001 # s
+		sinewave = np.sin(np.arange(0, 1.0, sample_interval) * 2 * np.pi)
+		data = block.create_data_array("sinewave","nix.regular_sampled",data=sinewave)
+		data.label = "voltage"
+		data.unit = "mV"
+		# define the time dimension of the data
+		dim = data.append_sampled_dimension(sample_interval)
+		dim.label = "time"
+		dim.unit = "s"
+
+The **SampledDimension** can also be used to desribe space dimensions,
+e.g. in case of images. 
+
+If the data was sampled at irregular intervals the sample points of
+the x-axis are defined using the *ticks* property of a
+**RangeDimension**.
+
+.. code-block:: python
+		
+		sample_times = [1.0, 3.0, 4.2, 4.7, 9.6]
+		dim = data.append_range_dimension(sample_times)
+		dim.label = "time"
+		dim.unit = "s"
+
+Finally, some data belongs into categroies which do not necessarly
+have a natural order. In these cases a **SetDimension** is used. This
+descriptor can store for each category an optional label.
+
+.. code-block:: python
+		
+		observations = [0, 0, 5, 20, 45, 40, 28, 12, 2, 0, 1, 0]
+		categories = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+		              'Jul', 'Aug','Sep','Oct','Nov', 'Dec']
+		data = block.create_data_array("observations", "nix.histogram", data=observations)
+		dim = data.append_set_dimension()
+		dim.labels = categories
+
+
 Annotate regions in the data
 """"""""""""""""""""""""""""
 
@@ -118,8 +175,8 @@ TODO
 
 .. _toc:
 
-Tutorials:
-==========
+List of Tutorials
+=================
 * Working with files
 
   * :ref:`working_with_files`
@@ -442,10 +499,6 @@ TODO
 
 :ref:`toc`
 
-:ref:`toc`
-
-
-
 
 .. _indexed_feature:
 
@@ -471,9 +524,9 @@ Feature data. The **LinkType** has to be set to *indexed*.
 .. image:: examples/spike_feature.png
 	   :width: 240
 
-Source code for this example: `indexedFeatures.py`_.
+Source code for this example: `spikeFeatures.py`_.
 
-.. _indexedFeatures.py: examples/indexedFeatures.py
+.. _spikeFeatures.py: examples/spikeFeatures.py
 
 
 :ref:`toc`
