@@ -123,7 +123,7 @@ defined. **SampledDimension**, **RangeDimension**, and
 space or time in regular intervals, (ii) data that has been sampled in
 irregular intervals, and (iii) data that belongs to categories.
 
-.. code_block:: python
+.. code-block:: python
 
 		sample_interval = 0.001 # s
 		sinewave = np.sin(np.arange(0, 1.0, sample_interval) * 2 * np.pi)
@@ -142,7 +142,7 @@ If the data was sampled at irregular intervals the sample points of
 the x-axis are defined using the *ticks* property of a
 **RangeDimension**.
 
-.. code_block:: python
+.. code-block:: python
 		
 		sample_times = [1.0, 3.0, 4.2, 4.7, 9.6]
 		dim = data.append_range_dimension(sample_times)
@@ -153,7 +153,7 @@ Finally, some data belongs into categroies which do not necessarly
 have a natural order. In these cases a **SetDimension** is used. This
 descriptor can store for each category an optional label.
 
-.. code_block:: python
+.. code-block:: python
 		
 		observations = [0, 0, 5, 20, 45, 40, 28, 12, 2, 0, 1, 0]
 		categories = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -224,7 +224,7 @@ TODO
 .. _toc:
 
 List of Tutorials
-==========
+=================
 * Working with files
 
   * :ref:`working_with_files`

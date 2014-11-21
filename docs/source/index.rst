@@ -12,7 +12,7 @@ NIXPy Overview
 The following sections should help you getting started with nixpy. 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    install
    tutorial
