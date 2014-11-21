@@ -166,10 +166,58 @@ descriptor can store for each category an optional label.
 Annotate regions in the data
 """"""""""""""""""""""""""""
 
-TOTO
+Annotating points of regions of interest is one of the key features of
+the nix data-model. There are two entities for this purpose: (i) the
+**Tag** is used for single points or regions while the (ii)
+**MultiTag** is used to mark multiple of these. Tags have one or many
+*positions* and *extents* which define the point or the region in the
+*referenced* DataArray. Further they can have **Features** to store
+additional information about the positions (see tutorials below).
+
+
+Tag
+---
+
+The tag is a relatively simple structure directly storing the
+*position* the tag points and the, optional, *extent* of this
+region. Each of these are vectors of a length matching the
+dimensionality of the referenced data.
+
+.. code_block:: python
+		
+		position = [10, 10]
+		extent = [5, 20]
+		tag = block.create_tag('interesting part', 'nix.roi', position)
+		tag.extent = extent
+		# finally, add the referenced data to this tag
+		tag.references.add(data)
+
+
+MuliTag
+-------
+
+**MultiTags** are made to tag multiple points (regions) at once. The
+main difference to the **Tag** is that position and extent are stored
+in **DataArray** entities. These entities **must** be 2-D. Both
+dimensions are *SetDimensions*. The first dimension represents the
+individual positions, the second dimension takes the coordinates in
+the referenced n-dimensional **DataArray**.
+
+.. code_block:: python
+
+		# fake data
+		frame = np.random.randn((100,100))
+		data = block.create_data_array('random image', 'nix.image', data=frame)
+		# positions array
+		p = np.zeros()
+		positions = block.create_data_array('special points', 'nix.positions', data=p)
+
+
 
 Adding further information
 """"""""""""""""""""""""""
+
+The tags establish links between datasets. But how do we link to non-data things?
 
 TODO
 
@@ -492,13 +540,6 @@ Source code for this example: `taggedFeature.py`_.
 
 :ref:`toc` 
 
-Retrieving tagged regions
-"""""""""""""""""""""""""
-
-TODO
-
-:ref:`toc`
-
 
 .. _indexed_feature:
 
@@ -531,6 +572,13 @@ Source code for this example: `spikeFeatures.py`_.
 
 :ref:`toc`
 
+
+Retrieving data of tagged regions
+"""""""""""""""""""""""""""""""""
+
+TODO
+
+:ref:`toc`
 
 
 
