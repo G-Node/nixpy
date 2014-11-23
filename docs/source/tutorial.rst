@@ -310,8 +310,41 @@ same brain region of the same animal. To represent this hierarchy,
 		cell_b = brain_region.create_source('Cell 2', 'nix.experimental_subject')
 			
 
+Arbitrary metadata
+"""""""""""""""""""
 
-TODO
+The entities discussed so far carry just enough information to get a
+basic understanding of the stored data. Often much more information
+than that is required. Storing additional metadata is a central part
+of the NIX concept. We use a slightly modified version of the *odML*
+data model for metadata to store additional information. In brief: the
+model consists of **Sections** that contain **Properties** which in
+turn contain one or more **Values**. Again, **Sections** can be nested
+to represent logical dependencies in the hierarchy of a tree. While
+all data entities discussed above are children of **Block** entities,
+the metadata lives parallel to the **Blocks**. The idea behind this is
+that several blocks may refer to the same metadata, or, the other way
+round the metadata applies to data entities in several blocks. The
+*types* used for the **Sections** in the following example are defined
+in the `odml terminologies
+<https://gthub.com/G-Node/odml-terminologies>`_
+
+Most of the data entities can link to metadata sections.
+
+.. code_block:: python
+
+		sec = nix_file.create_section('recording session', 'odml.recording')
+		sec.create_property('experimenter', nix.Value('John Doe'))
+		sec.create_property('recording date', nix_Value('2014-01-01'))
+		subject = sec.create_section('subject', 'odml.subject')
+		subject.create_property('id', nix.Value('mouse xyz'))
+		cell = subject.create_section('cell', 'odml.cell')
+		v = nix.Value(-64.5)
+		v.uncertainty = 2.25
+		p = cell.create_property('resting potential', v)
+		p.unit = 'mV'
+		# set the recording block metadata
+		block.metadata = sec
 
 .. _toc:
 
