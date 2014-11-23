@@ -16,7 +16,19 @@ The design of the data model tries to draw on similarities of
 different data types and structures and and come up with *entities*
 that are as generic and versatile as meaningful. At the same time we
 aim for clearly established links between differen entities to keep the
-model as expressive as possible.
+model as expressive as possible. 
+
+Most entities of the NIX-model have a *name* and a *type* field which
+are meant to provide information about the entity. While the name can
+be freely chose, the type is meant to provide semantic information
+about the entity and we aim at definitions of different types. Via the
+type, the generic entities can become domain specific.
+
+For the electrophysiology disicplines of the neurosciences, an INCF
+working groups has set out to define such data types. For more
+information see `here
+<http://crcns.org/files/data/nwb/ephys_requirements_v0_72.pdf>`_
+
 
 Creating a file
 """""""""""""""
