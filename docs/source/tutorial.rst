@@ -281,6 +281,35 @@ positions defined in the tag. In this case the feature is *untagged*
 		tag.create_feature(common_feature, nix.LinkType.Untagged)
 
 
+Defining the Source of the data
+"""""""""""""""""""""""""""""""
+
+In cases in which we want to store where the data originates
+**Source** entities can be used. Almost all entities of the NIX-model
+can have **Sources**. For example, if the recorded data originates
+from experiments done with one specific experimental
+subject. **Sources** have a name and a type and can have some
+definition.
+
+.. code_block:: python
+
+		subject = block.create_source('subject A', 'nix.experimental_subject')
+		subject.definition = 'The experimental subject used in this experiment'
+		data.sources.append(subject)
+		
+**Sources** may depend on other **Sources**. For example, in an
+electrophysiological experiment we record from different cells in the
+same brain region of the same animal. To represent this hierarchy,
+**Sources** can be nested, create a tree-like structure.
+
+.. code_block:: python
+
+		subject.block.create_source('subject A', 'nix.experimental_subject')
+		brain_region = subject.create_source('hippocampus', 'nix.experimental_subject')
+		cell_a = brain_region.create_source('Cell 1', 'nix.experimental_subject')
+		cell_b = brain_region.create_source('Cell 2', 'nix.experimental_subject')
+			
+
 
 TODO
 
