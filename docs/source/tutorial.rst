@@ -220,11 +220,22 @@ the referenced n-dimensional **DataArray**.
 		# fake data
 		frame = np.random.randn((100,100))
 		data = block.create_data_array('random image', 'nix.image', data=frame)
-		# positions array
-		p = np.zeros()
+		dim_x = data.append_sampled_dimension(1.0)
+		dim_x.label = 'x'
+		dim_y = data.append_sampled_dimension(1.0)
+		dim_y.label = 'y'
+		# positions array must be 2D
+		p = np.zeros(3,2) # 1st dim, represents the positions, 2nd the coordinates
+		p[1,:] = [10,10]
+		p[2,:] = [20,10]
 		positions = block.create_data_array('special points', 'nix.positions', data=p)
-
-
+		positions.append_set_dimension()
+		dim = positions.append_set_dimension()
+		dim.labels = ['x', 'y']
+		# create a multi tag
+		tag = block.create_multi_tag('interesting points', 'nix.multiple_roi', positions)
+		tag.references.append(data)
+		
 
 Adding further information
 """"""""""""""""""""""""""
