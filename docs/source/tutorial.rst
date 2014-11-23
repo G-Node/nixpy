@@ -240,7 +240,47 @@ the referenced n-dimensional **DataArray**.
 Adding further information
 """"""""""""""""""""""""""
 
-The tags establish links between datasets. But how do we link to non-data things?
+The tags establish links between datasets. If one needs to attach
+further information to each of the regions defined by the tag, one can
+add **Features** to them. A **Feature** references a **DataArray** as
+its *data* and specifies how it is linked by the *link_type*.  The
+*link_type* can either be *tagged*, *indexed*, or *untagged*
+indicating that the tag should be applied also to the feature data
+(*tagged*), for each position given in the tag, a slice of the feature
+data (ith index along the first dimension) is the feature (*indexed*),
+or all feature data applies for all positions (*untagged*).
+
+Let's say we want to give each  point a name, we can create a feature like this:
+
+.. code_block:: python
+
+		spot_names = block.create_data_array('spot ids', 'nix.feature', data=['a', 'b'])
+		spot_names.append_set_dimension()
+		feature = tag.create_feature(spot_names, nix.LinkType.Indexed)
+
+We could also say that each point in the tagged data (e.g. a matrix of
+measurements) has a corresponding point in an input matrix.
+
+.. code_block:: python
+		
+		input_matrix = np.random.randn(data.shape)
+		input_data = block.create_data_array('input matrix', 'nix.feature', data=input_matrix)
+		dim_x = input_data.append_sampled_dimension(1.0)
+		dim_x.label = 'x'
+		dim_y = input_data.append_sampled_dimension(1.0)
+		dim_y.label = 'y'
+		tag.create_feature(input_data, nix.LinkType.Tagged)
+
+
+Finally, one could need to attach the same information to all
+positions defined in the tag. In this case the feature is *untagged*
+
+.. code_block:: python
+		
+		common_feature = block.create_data_array('common feature', 'nix.feature', data=some_common_data)
+		tag.create_feature(common_feature, nix.LinkType.Untagged)
+
+
 
 TODO
 
