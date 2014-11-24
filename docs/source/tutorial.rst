@@ -195,7 +195,7 @@ The tag is a relatively simple structure directly storing the
 region. Each of these are vectors of a length matching the
 dimensionality of the referenced data.
 
-.. code_block:: python
+.. code-block:: python
 		
 		position = [10, 10]
 		extent = [5, 20]
@@ -215,7 +215,7 @@ dimensions are *SetDimensions*. The first dimension represents the
 individual positions, the second dimension takes the coordinates in
 the referenced n-dimensional **DataArray**.
 
-.. code_block:: python
+.. code-block:: python
 
 		# fake data
 		frame = np.random.randn((100,100))
@@ -252,7 +252,7 @@ or all feature data applies for all positions (*untagged*).
 
 Let's say we want to give each  point a name, we can create a feature like this:
 
-.. code_block:: python
+.. code-block:: python
 
 		spot_names = block.create_data_array('spot ids', 'nix.feature', data=['a', 'b'])
 		spot_names.append_set_dimension()
@@ -261,7 +261,7 @@ Let's say we want to give each  point a name, we can create a feature like this:
 We could also say that each point in the tagged data (e.g. a matrix of
 measurements) has a corresponding point in an input matrix.
 
-.. code_block:: python
+.. code-block:: python
 		
 		input_matrix = np.random.randn(data.shape)
 		input_data = block.create_data_array('input matrix', 'nix.feature', data=input_matrix)
@@ -275,7 +275,7 @@ measurements) has a corresponding point in an input matrix.
 Finally, one could need to attach the same information to all
 positions defined in the tag. In this case the feature is *untagged*
 
-.. code_block:: python
+.. code-block:: python
 		
 		common_feature = block.create_data_array('common feature', 'nix.feature', data=some_common_data)
 		tag.create_feature(common_feature, nix.LinkType.Untagged)
@@ -291,7 +291,7 @@ from experiments done with one specific experimental
 subject. **Sources** have a name and a type and can have some
 definition.
 
-.. code_block:: python
+.. code-block:: python
 
 		subject = block.create_source('subject A', 'nix.experimental_subject')
 		subject.definition = 'The experimental subject used in this experiment'
@@ -302,7 +302,7 @@ electrophysiological experiment we record from different cells in the
 same brain region of the same animal. To represent this hierarchy,
 **Sources** can be nested, create a tree-like structure.
 
-.. code_block:: python
+.. code-block:: python
 
 		subject.block.create_source('subject A', 'nix.experimental_subject')
 		brain_region = subject.create_source('hippocampus', 'nix.experimental_subject')
@@ -327,11 +327,11 @@ that several blocks may refer to the same metadata, or, the other way
 round the metadata applies to data entities in several blocks. The
 *types* used for the **Sections** in the following example are defined
 in the `odml terminologies
-<https://gthub.com/G-Node/odml-terminologies>`_
+<https://github.com/G-Node/odml-terminologies>`_
 
 Most of the data entities can link to metadata sections.
 
-.. code_block:: python
+.. code-block:: python
 
 		sec = nix_file.create_section('recording session', 'odml.recording')
 		sec.create_property('experimenter', nix.Value('John Doe'))
