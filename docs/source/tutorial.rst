@@ -16,7 +16,19 @@ The design of the data model tries to draw on similarities of
 different data types and structures and and come up with *entities*
 that are as generic and versatile as meaningful. At the same time we
 aim for clearly established links between differen entities to keep the
-model as expressive as possible.
+model as expressive as possible. 
+
+Most entities of the NIX-model have a *name* and a *type* field which
+are meant to provide information about the entity. While the name can
+be freely chose, the type is meant to provide semantic information
+about the entity and we aim at definitions of different types. Via the
+type, the generic entities can become domain specific.
+
+For the electrophysiology disicplines of the neurosciences, an INCF
+working groups has set out to define such data types. For more
+information see `here
+<http://crcns.org/files/data/nwb/ephys_requirements_v0_72.pdf>`_
+
 
 Creating a file
 """""""""""""""
@@ -166,12 +178,173 @@ descriptor can store for each category an optional label.
 Annotate regions in the data
 """"""""""""""""""""""""""""
 
-TOTO
+Annotating points of regions of interest is one of the key features of
+the nix data-model. There are two entities for this purpose: (i) the
+**Tag** is used for single points or regions while the (ii)
+**MultiTag** is used to mark multiple of these. Tags have one or many
+*positions* and *extents* which define the point or the region in the
+*referenced* DataArray. Further they can have **Features** to store
+additional information about the positions (see tutorials below).
+
+
+Tag
+---
+
+The tag is a relatively simple structure directly storing the
+*position* the tag points and the, optional, *extent* of this
+region. Each of these are vectors of a length matching the
+dimensionality of the referenced data.
+
+.. code-block:: python
+		
+		position = [10, 10]
+		extent = [5, 20]
+		tag = block.create_tag('interesting part', 'nix.roi', position)
+		tag.extent = extent
+		# finally, add the referenced data to this tag
+		tag.references.add(data)
+
+
+MuliTag
+-------
+
+**MultiTags** are made to tag multiple points (regions) at once. The
+main difference to the **Tag** is that position and extent are stored
+in **DataArray** entities. These entities **must** be 2-D. Both
+dimensions are *SetDimensions*. The first dimension represents the
+individual positions, the second dimension takes the coordinates in
+the referenced n-dimensional **DataArray**.
+
+.. code-block:: python
+
+		# fake data
+		frame = np.random.randn((100,100))
+		data = block.create_data_array('random image', 'nix.image', data=frame)
+		dim_x = data.append_sampled_dimension(1.0)
+		dim_x.label = 'x'
+		dim_y = data.append_sampled_dimension(1.0)
+		dim_y.label = 'y'
+		# positions array must be 2D
+		p = np.zeros(3,2) # 1st dim, represents the positions, 2nd the coordinates
+		p[1,:] = [10,10]
+		p[2,:] = [20,10]
+		positions = block.create_data_array('special points', 'nix.positions', data=p)
+		positions.append_set_dimension()
+		dim = positions.append_set_dimension()
+		dim.labels = ['x', 'y']
+		# create a multi tag
+		tag = block.create_multi_tag('interesting points', 'nix.multiple_roi', positions)
+		tag.references.append(data)
+		
 
 Adding further information
 """"""""""""""""""""""""""
 
-TODO
+The tags establish links between datasets. If one needs to attach
+further information to each of the regions defined by the tag, one can
+add **Features** to them. A **Feature** references a **DataArray** as
+its *data* and specifies how it is linked by the *link_type*.  The
+*link_type* can either be *tagged*, *indexed*, or *untagged*
+indicating that the tag should be applied also to the feature data
+(*tagged*), for each position given in the tag, a slice of the feature
+data (ith index along the first dimension) is the feature (*indexed*),
+or all feature data applies for all positions (*untagged*).
+
+Let's say we want to give each  point a name, we can create a feature like this:
+
+.. code-block:: python
+
+		spot_names = block.create_data_array('spot ids', 'nix.feature', data=['a', 'b'])
+		spot_names.append_set_dimension()
+		feature = tag.create_feature(spot_names, nix.LinkType.Indexed)
+
+We could also say that each point in the tagged data (e.g. a matrix of
+measurements) has a corresponding point in an input matrix.
+
+.. code-block:: python
+		
+		input_matrix = np.random.randn(data.shape)
+		input_data = block.create_data_array('input matrix', 'nix.feature', data=input_matrix)
+		dim_x = input_data.append_sampled_dimension(1.0)
+		dim_x.label = 'x'
+		dim_y = input_data.append_sampled_dimension(1.0)
+		dim_y.label = 'y'
+		tag.create_feature(input_data, nix.LinkType.Tagged)
+
+
+Finally, one could need to attach the same information to all
+positions defined in the tag. In this case the feature is *untagged*
+
+.. code-block:: python
+		
+		common_feature = block.create_data_array('common feature', 'nix.feature', data=some_common_data)
+		tag.create_feature(common_feature, nix.LinkType.Untagged)
+
+
+Defining the Source of the data
+"""""""""""""""""""""""""""""""
+
+In cases in which we want to store where the data originates
+**Source** entities can be used. Almost all entities of the NIX-model
+can have **Sources**. For example, if the recorded data originates
+from experiments done with one specific experimental
+subject. **Sources** have a name and a type and can have some
+definition.
+
+.. code-block:: python
+
+		subject = block.create_source('subject A', 'nix.experimental_subject')
+		subject.definition = 'The experimental subject used in this experiment'
+		data.sources.append(subject)
+		
+**Sources** may depend on other **Sources**. For example, in an
+electrophysiological experiment we record from different cells in the
+same brain region of the same animal. To represent this hierarchy,
+**Sources** can be nested, create a tree-like structure.
+
+.. code-block:: python
+
+		subject.block.create_source('subject A', 'nix.experimental_subject')
+		brain_region = subject.create_source('hippocampus', 'nix.experimental_subject')
+		cell_a = brain_region.create_source('Cell 1', 'nix.experimental_subject')
+		cell_b = brain_region.create_source('Cell 2', 'nix.experimental_subject')
+			
+
+Arbitrary metadata
+"""""""""""""""""""
+
+The entities discussed so far carry just enough information to get a
+basic understanding of the stored data. Often much more information
+than that is required. Storing additional metadata is a central part
+of the NIX concept. We use a slightly modified version of the *odML*
+data model for metadata to store additional information. In brief: the
+model consists of **Sections** that contain **Properties** which in
+turn contain one or more **Values**. Again, **Sections** can be nested
+to represent logical dependencies in the hierarchy of a tree. While
+all data entities discussed above are children of **Block** entities,
+the metadata lives parallel to the **Blocks**. The idea behind this is
+that several blocks may refer to the same metadata, or, the other way
+round the metadata applies to data entities in several blocks. The
+*types* used for the **Sections** in the following example are defined
+in the `odml terminologies
+<https://github.com/G-Node/odml-terminologies>`_
+
+Most of the data entities can link to metadata sections.
+
+.. code-block:: python
+
+		sec = nix_file.create_section('recording session', 'odml.recording')
+		sec.create_property('experimenter', nix.Value('John Doe'))
+		sec.create_property('recording date', nix_Value('2014-01-01'))
+		subject = sec.create_section('subject', 'odml.subject')
+		subject.create_property('id', nix.Value('mouse xyz'))
+		cell = subject.create_section('cell', 'odml.cell')
+		v = nix.Value(-64.5)
+		v.uncertainty = 2.25
+		p = cell.create_property('resting potential', v)
+		p.unit = 'mV'
+		# set the recording block metadata
+		block.metadata = sec
 
 .. _toc:
 
@@ -492,13 +665,6 @@ Source code for this example: `taggedFeature.py`_.
 
 :ref:`toc` 
 
-Retrieving tagged regions
-"""""""""""""""""""""""""
-
-TODO
-
-:ref:`toc`
-
 
 .. _indexed_feature:
 
@@ -531,6 +697,13 @@ Source code for this example: `spikeFeatures.py`_.
 
 :ref:`toc`
 
+
+Retrieving data of tagged regions
+"""""""""""""""""""""""""""""""""
+
+TODO
+
+:ref:`toc`
 
 
 
