@@ -646,8 +646,24 @@ The following examples show how this works.
 Untagged Feature
 """"""""""""""""
 
-TODO
+Let's say we record the activity of a neuron and at a certain epoch of
+that recording a stimulus was presented. This time interval is
+annotated using a **Tag**. This inidicates the time in which the
+stimulus was on but we may also want to link the stimulus trace to
+it. The stimulus is also stored as a **DataArray** in the file and can
+be linked to the stimulus interval as an *untagged* **Feature** of it.
 
+.. literalinclude:: examples/untaggedFeature.py
+		    :lines: 119-126
+
+.. image:: examples/untagged_feature.png
+	   :width: 240
+
+Source code for this example: `untaggedFeature.py`_.
+
+.. _untaggedFeature.py: examples/untaggedFeature.py
+
+:ref:`toc` 
 
 .. _tagged_feature:
 
