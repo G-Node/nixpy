@@ -628,10 +628,18 @@ Features
 
 The following code shows how to use the **Features** of the
 Nix-model. Suppose that we have the recording of a signal in which a
-set of events is detected. No each event may have certain
-characteristics one wants to store. These are stored as **Features**
-of the events.
+set of events is detected. Each event may have certain characteristics
+one wants to store. These are stored as **Features** of the
+events. There are three different link-types between the features and
+the events stored in the tag. *nix.LinkType.Untagged* indicates that
+the whole data stored in the **Feature** applies to the points defined
+in the tag. *nix.LinkType.Tagged* on the other side implies that the
+*position* and *extent* have to be applied also to the data stored in
+the **Feature**. Finaly, the *nix.LinkType.Indexed* indicates that
+there is one point (or slice) in the **Feature** data that is related
+to each position in the Tag.
 
+The following examples show how this works.
 
 .. _untagged_feature:
 
