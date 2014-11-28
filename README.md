@@ -47,7 +47,7 @@ _Instructions_
 
 ```bash
 # install dependencies
-sudo apt-get install libboost-python-dev build-essential python-dev python-setuptools
+sudo apt-get install libboost-python-dev build-essential python-dev python-setuptools python-numpy
 
 # clone NIX
 git clone https://github.com/G-Node/nixpy
