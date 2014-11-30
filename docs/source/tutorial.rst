@@ -374,6 +374,10 @@ List of Tutorials
   * :ref:`tagged_feature`
   * :ref:`indexed_feature`
 
+* Retrieve data 
+ 
+  * :ref:`retrieve_tagged_data`
+  * :ref:`retrieve_feature_data`
 
 .. _working_with_files:
 
@@ -607,10 +611,31 @@ Source code for this example: `spikeTagging.py`_.
 
 :ref:`toc` 
 
+
+.. _retrieve_tagged_data:
+
 Retrieving tagged regions
 """""""""""""""""""""""""
 
-TODO
+Tagging regions of interest in one thing but retrieving the tagged
+data slice is another. The **Tag** and **MultiTag** entities offer a
+function for this. Consider the imgage example from above:
+
+.. image:: examples/multi_roi.png
+	   :width: 240
+
+Three regions were tagged. To retrieve the respective data the
+following code has to be executed:
+
+.. literalinclude:: examples/multipleROIs.py
+		    :lines: 62-64
+
+.. image:: examples/retrieved_rois.png
+
+Source code for this example: `multipleROIs.py`_.
+
+.. _multipleROIs.py: examples/multipleROIs.py
+		
 
 :ref:`toc`
 
@@ -723,8 +748,10 @@ Source code for this example: `spikeFeatures.py`_.
 :ref:`toc`
 
 
-Retrieving data of tagged regions
-"""""""""""""""""""""""""""""""""
+.. _retrieve_feature_data:
+
+Retrieving feature data
+"""""""""""""""""""""""
 
 TODO
 
