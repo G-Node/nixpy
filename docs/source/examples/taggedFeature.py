@@ -23,7 +23,7 @@ import lif
 import numpy as np
 import scipy.signal as signal
 import matplotlib.pylab as plt
-from IPython import embed
+
 
 def fake_neuron(stepsize=0.001, offset=.8):
     stimulus = np.random.randn(100000) * 2.5
