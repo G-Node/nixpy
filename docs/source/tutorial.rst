@@ -370,6 +370,7 @@ List of Tutorials
 
 * Features
 
+  * :ref:`untagged_feature`
   * :ref:`tagged_feature`
   * :ref:`indexed_feature`
 
