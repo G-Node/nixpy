@@ -28,6 +28,7 @@
 import nix
 import numpy as np
 import Image as img
+import matplotlib.pyplot as plt
 
 
 def load_image():
@@ -47,18 +48,26 @@ def draw_rect(img_data, position, extent):
 
 def plot_data(tag):
     data_array = tag.references[0]
-    img_data = np.zeros(data_array.data.shape)
-    data_array.data.read_direct(img_data)
+    img_data = data_array[:]
     img_data = np.array(img_data, dtype='uint8')
-    positions_data = np.zeros(tag.positions.data_extent)
-    tag.positions.data.read_direct(positions_data)
-    extents_data = np.zeros(tag.extents.data_extent)
-    tag.extents.data.read_direct(extents_data)
+    positions_data = tag.positions[:]
+    extents_data = tag.extents[:]
     for i in range(positions.data_extent[0]):
         img_data = draw_rect(img_data, positions_data[i,:], extents_data[i,:])
     new_img = img.fromarray(img_data)
     new_img.show()
         
+
+def plot_roi_data(tag):
+    position_count = tag.positions.shape[0] 
+    for p in range(position_count):
+        roi_data = tag.retrieve_data(p, 0)[:]
+        roi_data = np.array(roi_data, dtype='uint8')
+        ax = plt.gcf().add_subplot(position_count,1,p)
+        image = img.fromarray(roi_data)  
+        ax.imshow(image)
+    plt.savefig('retrieved_rois.png')
+    plt.show()
 
 if __name__ == '__main__':
     img_data, channels = load_image()
@@ -108,4 +117,5 @@ if __name__ == '__main__':
 
     # let's plot the data from the stored information
     plot_data(multi_tag)
+    plot_roi_data(multi_tag)
     file.close()
