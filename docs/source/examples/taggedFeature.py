@@ -23,7 +23,7 @@ import lif
 import numpy as np
 import scipy.signal as signal
 import matplotlib.pylab as plt
-
+from IPython import embed
 
 def fake_neuron(stepsize=0.001, offset=.8):
     stimulus = np.random.randn(100000) * 2.5
@@ -36,19 +36,16 @@ def fake_neuron(stepsize=0.001, offset=.8):
     
 def plot_data(tag):
     data_array = tag.references[0]
-    voltage = np.zeros(data_array.data.shape)
-    data_array.data.read_direct(voltage)
+    voltage = data_array[:]
     
     x_axis = data_array.dimensions[0]
     time = np.arange(0, data_array.data_extent[0])
     time = time * x_axis.sampling_interval + (x_axis.offset if x_axis.offset else 0.0)
 
-    spike_times = np.zeros(tag.positions.data_extent)
-    tag.positions.data.read_direct(spike_times)
+    spike_times = tag.positions[:]
 
     feature_data_array = tag.features[0].data
-    stimulus = np.zeros(feature_data_array.data_extent)
-    feature_data_array.data.read_direct(stimulus)
+    stimulus = feature_data_array[:]
   
     stim_time_dim = feature_data_array.dimensions[0]
     stimulus_time = np.arange(0, feature_data_array.data_extent[0])
@@ -76,7 +73,7 @@ def plot_data(tag):
     stimulus_axis.legend()
     
     plt.subplots_adjust(left=0.15, top=0.875, bottom=0.1, right=0.98, hspace=0.45, wspace=0.25)
-    plt.savefig('taggedFeature.png')
+    # plt.savefig('taggedFeature.png')
     plt.show()
 
 

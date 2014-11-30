@@ -49,8 +49,8 @@ def plot_data(tag):
     stimulus_onset = tag.position
     stimulus_duration = tag.extent
 
+    stimulus = tag.retrieve_feature_data(0)
     stimulus_array = tag.features[0].data
-    stimulus = stimulus_array[:]
     
     stim_time_dim = stimulus_array.dimensions[0]
     stimulus_time = np.arange(0, stimulus_array.data_extent[0])
