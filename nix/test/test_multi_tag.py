@@ -220,8 +220,8 @@ class TestMultiTag(unittest.TestCase):
         tag.units = ['ms']
         tag.references.append(da)
 
-        assert(tag.retrieve_data(0, 0).shape == (2001,))
-        assert(np.array_equal(y[:2001], tag.retrieve_data(0, 0)[:]))
+        assert(tag.retrieve_data(0, 0).shape == (2000,))
+        assert(np.array_equal(y[:2000], tag.retrieve_data(0, 0)[:]))
 
         
     def test_multi_tag_feature_data(self):
