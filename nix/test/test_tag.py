@@ -147,7 +147,6 @@ class TestTag(unittest.TestCase):
         dim = ramp_feat.append_sampled_dimension(1.0)
         dim.unit = "ms"
 
-
         pos_tag = self.block.create_tag("feature test", "test", [5.0])
         pos_tag.units = ["ms"]
         
@@ -171,6 +170,6 @@ class TestTag(unittest.TestCase):
         data3 = pos_tag.retrieve_feature_data(2)
         
         assert(data1.size == 1) 
-        assert(data2.size == 3) 
+        assert(data2.size == 2) 
         assert(data3.size == len(ramp_data))
         

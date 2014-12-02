@@ -6,15 +6,16 @@ The nixpy module contains the python binding to the nix c++ library. In order
 to use it you also have to have the nix library installed. 
 
 
-NIXPy Overview
-==============
+NIXPy Getting started
+=====================
 
 The following sections should help you getting started with nixpy. 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    install
+   overview
    tutorial
 
 API Documentation
