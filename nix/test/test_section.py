@@ -132,6 +132,24 @@ class TestSection(unittest.TestCase):
         assert(prop.id == self.section[0].id)
         assert(prop.id == self.section[-1].id)
 
-        del self.section[0]
+        #easy prop creation
+        self.section['ep_str'] = 'str'
+        self.section['ep_int'] = 23
+        self.section['ep_float'] = 42.0
+        self.section['ep_list'] = [1, 2, 3]
+        self.section['ep_val'] = Value(1.0)
+
+        self.section['ep_val'] = 2.0
+
+        res = [x in self.section for x in ['ep_str', 'ep_int', 'ep_float']]
+        assert(all(res))
+
+        def create_hetero_section():
+            self.section['ep_ex'] = [1, 1.0]
+        self.assertRaises(ValueError, create_hetero_section)
+
+        sections = [x.id for x in self.section]
+        for x in sections:
+            del self.section[x]
 
         assert(len(self.section) == 0)

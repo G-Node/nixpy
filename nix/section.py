@@ -14,6 +14,7 @@ import nix.util.find as finders
 from nix.core import Section
 from nix.util.inject import Inject
 from nix.util.proxy_list import ProxyList
+from nix.property import Value
 
 from nix.file import SectionProxyList
 
@@ -99,6 +100,21 @@ class SectionMixin(Section):
 
     def __delitem__(self, key):
         del self._properties[key]
+
+    def __setitem__(self, key, data):
+        if not isinstance(data, list):
+            data = [data]
+
+        val = map(lambda x: x if isinstance(x, Value) else Value(x), data)
+        dtypes = reduce(lambda x, y: x if y.data_type in x else x + [y.data_type], val, [val[0].data_type])
+        if len(dtypes) > 1:
+            raise ValueError('Not all input values are of the same type')
+
+        if key not in self._properties:
+            prop = self.create_property(key, dtypes[0])
+        else:
+            prop = self._properties[key]
+        prop.values = val
 
     def __iter__(self):
         for p in self._properties:
