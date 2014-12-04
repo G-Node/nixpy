@@ -93,13 +93,13 @@ class SectionMixin(Section):
             return False
 
     def __len__(self):
-        return len(self._properties)
+        return len(self.props)
 
     def __getitem__(self, key):
-        return self._properties[key]
+        return self.props[key]
 
     def __delitem__(self, key):
-        del self._properties[key]
+        del self.props[key]
 
     def __setitem__(self, key, data):
         if not isinstance(data, list):
@@ -110,25 +110,25 @@ class SectionMixin(Section):
         if len(dtypes) > 1:
             raise ValueError('Not all input values are of the same type')
 
-        if key not in self._properties:
+        if key not in self.props:
             prop = self.create_property(key, dtypes[0])
         else:
-            prop = self._properties[key]
+            prop = self.props[key]
         prop.values = val
 
     def __iter__(self):
-        for p in self._properties:
+        for p in self.props:
             yield p
 
     def items(self):
-        for p in self._properties:
+        for p in self.props:
             yield (p.name, p)
 
     def __contains__(self, key):
-        return key in self._properties
+        return key in self.props
 
     @property
-    def _properties(self):
+    def props(self):
         """
         A property containing all Property entities associated with the section. Properties can
         be accessed by index of via their id. Properties can be deleted from the list. Adding
