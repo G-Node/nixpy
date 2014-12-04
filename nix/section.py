@@ -103,6 +103,10 @@ class SectionMixin(Section):
         return len(self.props)
 
     def __getitem__(self, key):
+
+        if key not in self.props and key in self.sections:
+            return self.sections[key]
+
         prop = self.props[key]
         values = map(attrgetter('value'), prop.values)
         if len(values) == 1:
