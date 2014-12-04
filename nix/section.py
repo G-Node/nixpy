@@ -115,7 +115,7 @@ class SectionMixin(Section):
     def __setitem__(self, key, data):
 
         if isinstance(data, S):
-            self.create_section(key, str(S.section_type))
+            self.create_section(key, data.section_type)
             return
 
         if not isinstance(data, list):
