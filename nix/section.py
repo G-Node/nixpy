@@ -143,6 +143,8 @@ class SectionMixin(Section):
     def items(self):
         for p in self.props:
             yield (p.name, p)
+        for s in self.sections:
+            yield (s.name, s)
 
     def __contains__(self, key):
         return key in self.props
