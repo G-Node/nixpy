@@ -22,6 +22,8 @@ from nix.multi_tag import MultiTagMixin
 from nix.entity_with_sources import DataArrySourcesMixin, MultiTagSourcesMixin, \
     TagSourcesMixin
 
+from nix.section import S
+
 __all__ = ("File", "FileMode", "Block", "DataType", "Section", "Property",
            "Value", "Source", "DataArray", "RangeDimension", "SetDimension",
            "SampledDimension", "DimensionType", "Feature", "LinkType",
