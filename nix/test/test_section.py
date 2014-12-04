@@ -93,6 +93,9 @@ class TestSection(unittest.TestCase):
 
         self.section['easy subsection'] = nix.S('electrode')
         assert('easy subsection' in [v.name for k, v in self.section.sections.items()])
+        assert('easy subsection' in self.section.sections)
+        assert(self.section['easy subsection'].name == 'easy subsection')
+        #assert('easy subsection' in self.section)
 
     def test_section_find_sections(self):
         for i in range(2): self.section.create_section("level1-p0-s" + str(i), "dummy")
