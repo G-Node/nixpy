@@ -147,7 +147,7 @@ class SectionMixin(Section):
             yield (s.name, s)
 
     def __contains__(self, key):
-        return key in self.props
+        return key in self.props or key in self.sections
 
     @property
     def props(self):
