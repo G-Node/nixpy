@@ -129,8 +129,8 @@ class TestSection(unittest.TestCase):
         props = dict(self.section.items())
         assert(props["test prop"] == prop)
 
-        assert(prop.id == self.section[0].id)
-        assert(prop.id == self.section[-1].id)
+        assert(prop.id == self.section.props[0].id)
+        assert(prop.id == self.section.props[-1].id)
 
         #easy prop creation
         self.section['ep_str'] = 'str'
