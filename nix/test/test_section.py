@@ -9,6 +9,8 @@
 import unittest
 
 from nix import *
+import nix
+
 
 class TestSection(unittest.TestCase):
 
@@ -88,6 +90,9 @@ class TestSection(unittest.TestCase):
         del self.section.sections[0]
 
         assert(len(self.section.sections) == 0)
+
+        self.section['easy subsection'] = nix.S('electrode')
+        assert('easy subsection' in [v.name for k, v in self.section.sections.items()])
 
     def test_section_find_sections(self):
         for i in range(2): self.section.create_section("level1-p0-s" + str(i), "dummy")

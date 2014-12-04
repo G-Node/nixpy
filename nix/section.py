@@ -19,6 +19,10 @@ from nix.property import Value
 from nix.file import SectionProxyList
 
 from operator import attrgetter
+import collections
+
+
+S = collections.namedtuple('S', 'section_type')
 
 
 class PropertyProxyList(ProxyList):
@@ -109,6 +113,11 @@ class SectionMixin(Section):
         del self.props[key]
 
     def __setitem__(self, key, data):
+
+        if isinstance(data, S):
+            self.create_section(key, str(S.section_type))
+            return
+
         if not isinstance(data, list):
             data = [data]
 
