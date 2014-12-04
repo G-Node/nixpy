@@ -137,8 +137,8 @@ class SectionMixin(Section):
         prop.values = val
 
     def __iter__(self):
-        for p in self.props:
-            yield p
+        for name, item in self.items():
+            yield item
 
     def items(self):
         for p in self.props:
