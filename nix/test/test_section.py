@@ -129,8 +129,8 @@ class TestSection(unittest.TestCase):
         props = dict(self.section.items())
         assert(props["test prop"] == prop)
 
-        assert(prop.id == self.section[0].id)
-        assert(prop.id == self.section[-1].id)
+        assert(prop.id == self.section.props[0].id)
+        assert(prop.id == self.section.props[-1].id)
 
         #easy prop creation
         self.section['ep_str'] = 'str'
@@ -141,8 +141,14 @@ class TestSection(unittest.TestCase):
 
         self.section['ep_val'] = 2.0
 
+
         res = [x in self.section for x in ['ep_str', 'ep_int', 'ep_float']]
         assert(all(res))
+
+        assert(self.section['ep_str'] == 'str')
+        assert(self.section['ep_int'] == 23)
+        assert(self.section['ep_float'] == 42.0)
+        assert(self.section['ep_list'] == [1, 2, 3])
 
         def create_hetero_section():
             self.section['ep_ex'] = [1, 1.0]
