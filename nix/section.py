@@ -18,6 +18,9 @@ from nix.property import Value
 
 from nix.file import SectionProxyList
 
+from operator import attrgetter
+
+
 class PropertyProxyList(ProxyList):
 
     def __init__(self, obj):
@@ -96,7 +99,11 @@ class SectionMixin(Section):
         return len(self.props)
 
     def __getitem__(self, key):
-        return self.props[key]
+        prop = self.props[key]
+        values = map(attrgetter('value'), prop.values)
+        if len(values) == 1:
+            values = values[0]
+        return values
 
     def __delitem__(self, key):
         del self.props[key]
