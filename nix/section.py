@@ -103,6 +103,10 @@ class SectionMixin(Section):
         return len(self.props)
 
     def __getitem__(self, key):
+
+        if key not in self.props and key in self.sections:
+            return self.sections[key]
+
         prop = self.props[key]
         values = map(attrgetter('value'), prop.values)
         if len(values) == 1:
@@ -133,15 +137,17 @@ class SectionMixin(Section):
         prop.values = val
 
     def __iter__(self):
-        for p in self.props:
-            yield p
+        for name, item in self.items():
+            yield item
 
     def items(self):
         for p in self.props:
             yield (p.name, p)
+        for s in self.sections:
+            yield (s.name, s)
 
     def __contains__(self, key):
-        return key in self.props
+        return key in self.props or key in self.sections
 
     @property
     def props(self):
