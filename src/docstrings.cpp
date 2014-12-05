@@ -230,7 +230,7 @@ const char* block_create_tag = R"(
     :type name: str
     :param type: The type of tag.
     :type type: str
-    :param position: Coordinates of the start position 
+    :param position: Coordinates of the start position
                      in units of the respective data dimension.
     :type references: list
 
@@ -443,6 +443,60 @@ const char* multi_tag_create_feature = R"(
     :returns: The created feature object.
     :rtype: Feature
     )";
+
+
+// PyResult
+
+const char* mesage_id = R"(
+    The id of the element that caused the message.
+    This is a read only property.
+
+    :type: str
+    )";
+
+const char* message_msg = R"(
+    The actual error or warning message.
+    This is a read only property.
+
+    :type: str
+    )";
+
+const char* result_errors = R"(
+    A list of all error messages in this validation result.
+    This is a read only property.
+
+    :type: tuple of str
+    )";
+
+const char* result_warnings = R"(
+    A list of all warning messages in this validation result.
+    This is a read only property.
+
+    :type: tuple of str
+    )";
+
+const char* result_is_ok = R"(
+    The status of the validation result.
+
+    :returns: True if the result contains no warnings or errors,
+              False otherwise.
+    :rtype: bool
+    )";
+
+const char* result_has_warnings = R"(
+    The warning status of the validation result.
+
+    :returns: True if the result contains warnings, False otherwise.
+    :rtype: bool
+    )";
+
+const char* result_has_errors = R"(
+    The error status of the validation result.
+
+    :returns: True if the result contains warnings, False otherwise.
+    :rtype: bool
+    )";
+
 
 }
 }

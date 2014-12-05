@@ -128,6 +128,22 @@ extern const char* multi_tag_extents;
 
 extern const char* multi_tag_create_feature;
 
+// PyResult
+
+extern const char* mesage_id;
+
+extern const char* message_msg;
+
+extern const char* result_errors;
+
+extern const char* result_warnings;
+
+extern const char* result_is_ok;
+
+extern const char* result_has_warnings;
+
+extern const char* result_has_errors;
+
 }
 }
 

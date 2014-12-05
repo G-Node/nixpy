@@ -90,6 +90,7 @@ void PyFile::do_export() {
         .def("open", open, open_overloads())
         .staticmethod("open")
         // Other
+        .def("validate", &File::validate)
         .def(self == other<File>())
         ;
 

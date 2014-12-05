@@ -21,6 +21,7 @@ BOOST_PYTHON_MODULE(core)
     // show user defined / show py signatures / don't show cpp signatures
     docstring_options local_docstring_options(true, true, false);
 
+    PyResult::do_export();
     PyFile::do_export();
 
     PySection::do_export();
