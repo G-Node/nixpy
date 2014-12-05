@@ -89,6 +89,7 @@ nixpy_sources = [
     'src/PyFeature.cpp',
     'src/PyTag.cpp',
     'src/PyMultiTag.cpp',
+    'src/PyResult.cpp'
 ]
 
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
