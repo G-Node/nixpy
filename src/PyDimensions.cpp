@@ -69,6 +69,15 @@ void setSampledDimensionOffset(SampledDimension& dim, const boost::optional<doub
         dim.offset(boost::none);
 }
 
+std::vector<double> getSampledDimensionAxis1(SampledDimension& dim, const size_t count) {
+  return dim.axis(count);
+}
+
+std::vector<double> getSampledDimensionAxis2(SampledDimension& dim, const size_t count,
+					    const size_t start_index) {
+    return dim.axis(count, start_index);
+}
+
 
 void PyDimensions::do_export() {
 
@@ -93,6 +102,10 @@ void PyDimensions::do_export() {
         .add_property("offset",
                       OPT_GETTER(double, SampledDimension, offset),
                       setSampledDimensionOffset)
+        .def("position_at", &SampledDimension::positionAt)
+        .def("index_of", &SampledDimension::positionAt)
+        .def("axis", getSampledDimensionAxis1)
+        .def("axis", getSampledDimensionAxis2)
         ;
 
     class_<RangeDimension>("RangeDimension")
