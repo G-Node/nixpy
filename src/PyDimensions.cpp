@@ -21,6 +21,7 @@ using namespace boost::python;
 
 namespace nixpy {
 
+
 // Label
 
 void setSampledDimensionLabel(SampledDimension& dim, const boost::optional<std::string>& label) {
@@ -70,7 +71,7 @@ void setSampledDimensionOffset(SampledDimension& dim, const boost::optional<doub
 }
 
 std::vector<double> getSampledDimensionAxis1(SampledDimension& dim, const size_t count) {
-  return dim.axis(count);
+    return dim.axis(count);
 }
 
 std::vector<double> getSampledDimensionAxis2(SampledDimension& dim, const size_t count,
@@ -102,10 +103,10 @@ void PyDimensions::do_export() {
         .add_property("offset",
                       OPT_GETTER(double, SampledDimension, offset),
                       setSampledDimensionOffset)
-        .def("position_at", &SampledDimension::positionAt)
-        .def("index_of", &SampledDimension::positionAt)
-        .def("axis", getSampledDimensionAxis1)
-        .def("axis", getSampledDimensionAxis2)
+        .def("position_at", &SampledDimension::positionAt, doc::sampled_dimension_position_at)
+        .def("index_of", &SampledDimension::positionAt, doc::sampled_dimension_index_of)
+        .def("axis", getSampledDimensionAxis1, doc::sampled_dimension_axis)
+        .def("axis", getSampledDimensionAxis2, doc::sampled_dimension_axis)
         ;
 
     class_<RangeDimension>("RangeDimension")

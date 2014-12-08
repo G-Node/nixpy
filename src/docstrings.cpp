@@ -444,6 +444,37 @@ const char* multi_tag_create_feature = R"(
     :rtype: Feature
     )";
 
+// PyDimension
+
+const char* sampled_dimension_axis = R"(
+    Get an axis as defined by this sampled dimension.
+
+    :param count: A positive integer specifying the length of the axis
+    (no of samples).
+    :param start: positive integert, indicates the starting sample.
+
+    :returns: The created axis
+    :rtype: list
+    )";
+
+const char* sampled_dimension_index_of = R"( 
+    Returns the index of a certain position in the dimension.
+
+    :param position: The position. 
+
+    :returns: The nearest index.
+    :rtype: int
+    )";
+
+
+const char* sampled_dimension_position_at = R"(
+    Returns the position corresponding to a given index.
+
+    :param index: A positive integer.
+
+    :returns: The position matching to the index.
+    :rtype: float
+    )";
 
 // PyResult
 
