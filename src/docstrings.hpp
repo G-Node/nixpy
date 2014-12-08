@@ -128,6 +128,14 @@ extern const char* multi_tag_extents;
 
 extern const char* multi_tag_create_feature;
 
+// PyDimension
+
+extern const char* sampled_dimension_axis;
+
+extern const char* sampled_dimension_position_at;
+
+extern const char* sampled_dimension_index_of;
+
 // PyResult
 
 extern const char* mesage_id;

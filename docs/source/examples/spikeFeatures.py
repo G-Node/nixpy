@@ -53,8 +53,7 @@ def plot_data(tag):
     data_array.data.read_direct(voltage)
     
     x_axis = data_array.dimensions[0]
-    time = np.arange(0, data_array.data_extent[0])
-    time = time * x_axis.sampling_interval + (x_axis.offset if x_axis.offset else 0.0)
+    time = x_axis.axis(data_array.data_extent[0])
 
     spike_times = np.zeros(tag.positions.data_extent)
     tag.positions.data.read_direct(spike_times)
@@ -64,8 +63,7 @@ def plot_data(tag):
     feature_data_array.data.read_direct(snippets)
   
     snippet_time_dim = feature_data_array.dimensions[1]
-    snippet_time = np.arange(0, feature_data_array.data_extent[1])
-    snippet_time = snippet_time * snippet_time_dim.sampling_interval + (snippet_time_dim.offset if snippet_time_dim.offset else 0.0)
+    snippet_time = snippet_time_dim.axis(feature_data_array.data_extent[1])
    
     response_axis = plt.subplot2grid((2, 2), (0, 0), rowspan=1, colspan=2)
     single_snippet_axis = plt.subplot2grid((2, 2), (1, 0), rowspan=1, colspan=1)

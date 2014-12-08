@@ -36,8 +36,7 @@ def plot_data(tag):
     data_array.data.read_direct(voltage)
     
     x_axis = data_array.dimensions[0]
-    time = np.arange(0, data_array.data.shape[0])
-    time = time * x_axis.sampling_interval + (x_axis.offset if x_axis.offset else 0.0)
+    time = x_axis.axis(data_array.data.shape[0])
 
     spike_times = np.zeros(tag.positions.data_extent)
     tag.positions.data.read_direct(spike_times)

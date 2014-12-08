@@ -39,8 +39,7 @@ def plot_data(tag):
     voltage = data_array[:]
     
     x_axis = data_array.dimensions[0]
-    time = np.arange(0, data_array.data_extent[0])
-    time = time * x_axis.sampling_interval + (x_axis.offset if x_axis.offset else 0.0)
+    time = x_axis.axis(data_array.data_extent[0])
 
     spike_times = tag.positions[:]
 
@@ -48,8 +47,7 @@ def plot_data(tag):
     stimulus = feature_data_array[:]
   
     stim_time_dim = feature_data_array.dimensions[0]
-    stimulus_time = np.arange(0, feature_data_array.data_extent[0])
-    stimulus_time = stimulus_time * stim_time_dim.sampling_interval + (stim_time_dim.offset if stim_time_dim.offset else 0.0)
+    stimulus_time = stim_time_dim.axis(feature_data_array.data_extent[0])
    
     response_axis = plt.subplot2grid((2, 2), (0, 0), rowspan=1, colspan=2)
     stimulus_axis = plt.subplot2grid((2, 2), (1, 0), rowspan=1, colspan=2, sharex=response_axis)
