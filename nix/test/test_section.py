@@ -92,6 +92,10 @@ class TestSection(unittest.TestCase):
         assert(len(self.section.sections) == 0)
 
         self.section['easy subsection'] = nix.S('electrode')
+        subject = self.section['subject'] = nix.S('subject')
+        
+        assert(self.section['subject'] == subject)
+        assert(self.section['subject'].id == subject.id)
         assert('easy subsection' in [v.name for k, v in self.section.sections.items()])
         assert('easy subsection' in self.section.sections)
         assert(self.section['easy subsection'].name == 'easy subsection')
