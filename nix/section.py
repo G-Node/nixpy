@@ -22,7 +22,25 @@ from operator import attrgetter
 import collections
 
 
-S = collections.namedtuple('S', 'section_type')
+class S(object):
+    def __init__(self, section_type, section=None):
+        self.section_type = section_type
+        self.section = section
+
+    def __setitem__(self, key, value):
+        self.section[key] = value
+
+    def __setattr__(self, key, value):
+        if key in ['section_type', 'section']:
+            object.__setattr__(self, key, value)
+        else:
+            setattr(self.section, key, value)
+
+    def __getattribute__(self, item):
+        if item in ['section_type', 'section']:
+            return object.__getattribute__(self, item)
+        else:
+            return getattr(self.section, item)
 
 
 class PropertyProxyList(ProxyList):
@@ -119,7 +137,7 @@ class SectionMixin(Section):
     def __setitem__(self, key, data):
 
         if isinstance(data, S):
-            self.create_section(key, data.section_type)
+            data.section = self.create_section(key, data.section_type)
             return
 
         if not isinstance(data, list):
