@@ -104,7 +104,7 @@ void PyDimensions::do_export() {
                       OPT_GETTER(double, SampledDimension, offset),
                       setSampledDimensionOffset)
         .def("position_at", &SampledDimension::positionAt, doc::sampled_dimension_position_at)
-        .def("index_of", &SampledDimension::positionAt, doc::sampled_dimension_index_of)
+        .def("index_of", &SampledDimension::indexOf, doc::sampled_dimension_index_of)
         .def("axis", getSampledDimensionAxis1, doc::sampled_dimension_axis)
         .def("axis", getSampledDimensionAxis2, doc::sampled_dimension_axis)
         ;
