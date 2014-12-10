@@ -55,13 +55,12 @@ def plot_data(tag):
     x_axis = data_array.dimensions[0]
     time = x_axis.axis(data_array.data_extent[0])
 
-    spike_times = np.zeros(tag.positions.data_extent)
-    tag.positions.data.read_direct(spike_times)
+    spike_times = tag.positions[:]
 
     feature_data_array = tag.features[0].data
-    snippets = np.zeros(feature_data_array.data_extent)
-    feature_data_array.data.read_direct(snippets)
-  
+    snippets = tag.features[0].data[:]
+    single_snippet = tag.retrieve_feature_data(3, 0)[:]
+
     snippet_time_dim = feature_data_array.dimensions[1]
     snippet_time = snippet_time_dim.axis(feature_data_array.data_extent[1])
    
@@ -78,7 +77,7 @@ def plot_data(tag):
     response_axis.set_ylim((1.2 * np.min(voltage), 1.2 * np.max(voltage)))
     response_axis.legend()
 
-    single_snippet_axis.plot(snippet_time, snippets[3,:], color="red", label=("snippet No 4"))
+    single_snippet_axis.plot(snippet_time, single_snippet.T, color="red", label=("snippet No 4"))
     single_snippet_axis.set_xlabel(snippet_time_dim.label + ((" [" + snippet_time_dim.unit + "]") if snippet_time_dim.unit else ""))
     single_snippet_axis.set_ylabel(feature_data_array.label + ((" [" + feature_data_array.unit + "]") if feature_data_array.unit else ""))
     single_snippet_axis.set_title("single stimulus snippet")
