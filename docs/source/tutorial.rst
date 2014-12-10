@@ -415,7 +415,25 @@ Source code for this example: `spikeFeatures.py`_.
 Retrieving feature data
 """""""""""""""""""""""
 
-TODO
+The above sections have shown how to attach features to tagged
+regions. To get the feature data back there are two ways. (i) You can
+access the data via the selected feature as it is shown in the
+`spikeFeatures.py`_. example (line 61).
+
+.. literalinclude:: examples/spikeFeatures.py
+		    :lines: 61
+
+With this line of code you get all the data stored in the Feature as
+one numpy array.  If you want to get the feature data that is related
+to a singe point (or region) one can call (line 62):
+
+.. literalinclude:: examples/spikeFeatures.py
+		    :lines: 62
+
+with the first argument being the index of the position and the second
+one that of the feature. In case of **Tag** entities, there is only
+one argument that is the index of the feature you want the data from.
+
 
 :ref:`toc`
 
