@@ -64,6 +64,19 @@ class TestDimensions(unittest.TestCase):
         self.sample_dim.offset = None
         assert(self.sample_dim.offset is None)
 
+        self.sample_dim.sampling_interval = 2.
+        self.sample_dim.offset = 3.
+
+        assert(self.sample_dim.index_of(3.14) == 0)
+        assert(self.sample_dim.index_of(23.) == 10)
+
+        assert(self.sample_dim.position_at(0) == 3.)
+        assert(self.sample_dim.position_at(200) == 200*2.+3.)
+
+        assert(len(self.sample_dim.axis(10)) == 10)
+        assert(self.sample_dim.axis(10)[0] == 3.)
+        assert(self.sample_dim.axis(10)[-1] == 9*2.+3.)
+
     def test_range_dimension(self):
         assert(self.range_dim.index == 3)
         assert(self.range_dim.dimension_type == DimensionType.Range)
