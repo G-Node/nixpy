@@ -45,20 +45,17 @@ def plot_data(data_array):
     new_img.show()
         
 
-def add_image_information(block):
-    source = block.create_source('Photo source','nix.image_source')
-    sec = f.create_section('Photo', 'image_source')
-    sec['Original name'] = 'Lenna'
-    sec['Journal'] = "Playboy Magazine'
-    sec['Year'] = 1972
-    sec['Month'] = 'November'
-    sec['Author'] = "Dwight Hooker"
-    sec['Source'] = "http://en.wikipedia.org/wiki/File:Lenna.png#mediaviewer/File:Lenna.png"
-    sec['Comment'] =  "512x512 electronic/mechanical scan of a section of the full portrait: Alexander Sawchuk and two others[1] - The USC-SIPI image database."
-    sec['Model'] = "Lena Soederberg"
-    
-    source.metadata = sec
-    return source
+def add_image_information(nix_file):
+    section = nix_file.create_section('Lenna image', 'image_source')
+    section['Original name'] = 'Lenna'
+    section['Journal'] = "Playboy Magazine'
+    section['Year'] = 1972
+    section['Month'] = 'November'
+    section['Author'] = "Dwight Hooker"
+    section['Source'] = "http://en.wikipedia.org/wiki/File:Lenna.png#mediaviewer/File:Lenna.png"
+    section['Comment'] =  "512x512 electronic/mechanical scan of a section of the full portrait: Alexander Sawchuk and two others[1] - The USC-SIPI image database."
+    section['Model'] = "Lena Soederberg"
+    return section
 
 
 if __name__ == '__main__':
@@ -80,8 +77,8 @@ _    # it gets a name and a type
     width_dim.label = "width"
     color_dim = data.append_set_dimension()
     color_dim.labels = channels
-    source = add_image_information(block)
-    data.sources.append(source)
+    section = add_image_information(file)
+    data.metadata = section
     # let's plot the data from the stored information
     plot_data(data)
     file.close()
