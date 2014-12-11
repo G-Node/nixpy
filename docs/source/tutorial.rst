@@ -455,6 +455,7 @@ example One may record data from different neurons in the same brain
 region of the same animal.
 
 .. code-block:: python
+
 		# create some source entities
 		subject.block.create_source('mouese A', 'nix.experimental_subject')
 		brain_region = subject.create_source('hippocampus', 'nix.experimental_subject')
