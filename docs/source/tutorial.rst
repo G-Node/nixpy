@@ -492,4 +492,7 @@ Source code for this example: `imageWithMetadata.py`_.
 
 .. _imageWithMetadata.py: examples/imageWithMetadata.py
 
+.. image:: examples/image_with_metadata.png
+	   :width: 240
+
 :ref:`toc`
