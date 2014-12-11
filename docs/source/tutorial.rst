@@ -1,6 +1,6 @@
-===============
-NIXPy Tutorials
-===============
+=========
+Tutorials
+=========
 
 The following tutorials show how to work with NIX files, to store
 different kinds of data, tag points or regions of interest and add
