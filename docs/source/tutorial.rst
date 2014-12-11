@@ -437,19 +437,32 @@ one argument that is the index of the feature you want the data from.
 
 :ref:`toc`
 
-
+.. _sources:
 
 Storing the origin of data
 ==========================
 
-TODO adding Sources and nesting them
+Let's assume we want to note the origin of the data. For example they
+have been obtained from a certain experiment or an experimental
+subject. For this purpose **Source** entities are used.  Sources can
+be nested to reflect dependencies between different sources. For
+example One may record data from different neurons in the same brain
+region of the same animal.
 
-:ref:`toc`
+.. code-block:: python
+		# create some source entities
+		subject.block.create_source('mouese A', 'nix.experimental_subject')
+		brain_region = subject.create_source('hippocampus', 'nix.experimental_subject')
+		cell_1 = brain_region.create_source('CA1 1', 'nix.experimental_subject')
+		cell_2 = brain_region.create_source('CA1 2', 'nix.experimental_subject')
+		# add them to the data.
+		da1 = block.create_data_array("cell1 response", "nix.regular_sampled", data=response_1)
+		da1.sources.append(cell_1)
+		da2 = block.create_data_array("cell2 response", "nix.regular_sampled", data=response_2)
+		da2.sources.append(cell_2)
 
-Working with Data
-=================
-
-TODO write something
+The **Sources** can be used to indicate links between data that cannot
+be reflected by the data itself.
 
 :ref:`toc`
 
