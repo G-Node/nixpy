@@ -43,7 +43,8 @@ List of Tutorials
 * Additional information
 
   * :ref:`sources`
- 
+  * :ref:`metadata`
+
 .. _working_with_files:
 
 Working with Files
@@ -470,10 +471,24 @@ be reflected by the data itself.
 
 :ref:`toc`
 
+.. _metadata:
 
-Working with Metadata
-=====================
+Adding arbitrary metadata
+=========================
 
-TODO write something
+Almost all entities allow to attach arbitray metadata. The basic
+concept of the metadata model is that **Properties** are oragnized in
+**Sections** which in turn can be nested to represent hierarchical
+structures. The **Sections** basically act like python
+dictionaries. How to create sections and properties is demonstrated by
+attaching information about the 'Lenna' image used above.
+
+.. literalinclude:: examples/imageWithMetadata.py
+		    :lines: 48-58, 82
+
+
+Source code for this example: `imageWithMetadata.py`_.
+
+.. _imageWithMetadata.py: examples/imageWithMetadata.py
 
 :ref:`toc`
