@@ -40,6 +40,10 @@ List of Tutorials
   * :ref:`retrieve_tagged_data`
   * :ref:`retrieve_feature_data`
 
+* Additional information
+
+  * :ref:`sources`
+ 
 .. _working_with_files:
 
 Working with Files
