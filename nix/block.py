@@ -175,6 +175,6 @@ class BlockMixin(Block):
     def __hash__(self):
         """
         overwriting method __eq__ blocks inheritance of __hash__ in Python 3
-        hash has to be either explicitly inherited or escaped
+        hash has to be either explicitly inherited from parent class or escaped
         """
-        raise TypeError("unhashable object")
+        __hash__ = Block.__hash__
