@@ -1,6 +1,6 @@
-============== 
-NIXPy Overview
-============== 
+======== 
+Overview
+======== 
 
 Design Principles
 =================

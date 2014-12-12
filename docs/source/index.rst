@@ -6,7 +6,7 @@ The nixpy module contains the python binding to the nix c++ library. In order
 to use it you also have to have the nix library installed. 
 
 
-NIXPy Getting started
+Getting started
 =====================
 
 The following sections should help you getting started with nixpy. 
