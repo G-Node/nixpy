@@ -171,3 +171,10 @@ class BlockMixin(Block):
             return self.id == other.id
         else:
             return False
+
+    def __hash__(self):
+        """
+        overwriting method __eq__ blocks inheritance of __hash__ in Python 3
+        hash has to be either explicitly inherited or escaped
+        """
+        raise TypeError("unhashable object")

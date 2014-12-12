@@ -6,7 +6,12 @@ try:
 except:
     from distutils.core import setup, Extension
 
-import commands
+# python version depenedent import of getstatusoutput
+try:
+	from commands import getstatusoutput
+except:
+	from subprocess import getstatusoutput
+
 import numpy as np
 import sys
 import os
@@ -48,7 +53,7 @@ def pkg_config(*packages, **kw):
         del kw['ignore_error']
 
     pkg_string = ' '.join(packages)
-    status, out = commands.getstatusoutput("pkg-config --libs --cflags " + pkg_string)
+    status, out = getstatusoutput("pkg-config --libs --cflags " + pkg_string)
     if status != 0:
         err_str = 'Some packages were not found: %s [%s]' % (pkg_string, out)
         if ignore_error:
