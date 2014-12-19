@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+
 __author__ = 'gicmo'
 
 try:
@@ -6,7 +9,12 @@ try:
 except:
     from distutils.core import setup, Extension
 
-import commands
+# python version dependent import of getstatusoutput
+try:
+	from commands import getstatusoutput
+except:
+	from subprocess import getstatusoutput
+
 import numpy as np
 import sys
 import os
@@ -37,7 +45,8 @@ CONTACT         = re.search(r"CONTACT\s*=\s*'([^']*)'", info).group(1)
 BRIEF           = re.search(r"BRIEF\s*=\s*'([^']*)'", info).group(1)
 HOMEPAGE        = re.search(r"HOMEPAGE\s*=\s*'([^']*)'", info).group(1)
 
-class PackageNotFoundError(StandardError):
+# Replaced StandardError with Exception since StandardError is removed in Py3.x
+class PackageNotFoundError(Exception):
     pass
 
 def pkg_config(*packages, **kw):
@@ -48,7 +57,7 @@ def pkg_config(*packages, **kw):
         del kw['ignore_error']
 
     pkg_string = ' '.join(packages)
-    status, out = commands.getstatusoutput("pkg-config --libs --cflags " + pkg_string)
+    status, out = getstatusoutput("pkg-config --libs --cflags " + pkg_string)
     if status != 0:
         err_str = 'Some packages were not found: %s [%s]' % (pkg_string, out)
         if ignore_error:
@@ -61,7 +70,9 @@ def pkg_config(*packages, **kw):
         kw.setdefault(flag_map.get(token[:2]), []).append(token[2:])
 
     # remove duplicated
-    for k, v in kw.iteritems():
+    # replaced .iteritems() with .items, since .iteritems() is not available in Py3.x
+    # could lead to increased memory usage and computation time.
+    for k, v in kw.items():
         del kw[k]
         kw[k] = list(set(v))
 

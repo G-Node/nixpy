@@ -6,6 +6,8 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
+from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+
 from nix.core import File, FileMode, Block, DataType, Section, Property, Value, \
     Source, DataArray, RangeDimension, SetDimension, SampledDimension, \
     DimensionType, Feature, LinkType, Tag, MultiTag

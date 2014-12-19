@@ -6,6 +6,10 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
+from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+
+from __future__ import print_function
+
 import unittest
 
 from nix import *
@@ -266,7 +270,7 @@ class TestMultiTag(unittest.TestCase):
         untagged_feature = self.feature_tag.create_feature(index_data, LinkType.Untagged)
         
         # preparations done, actually test 
-        print self.feature_tag.features
+        print(self.feature_tag.features)
         assert(len(self.feature_tag.features) == 3)
         
         # indexed feature

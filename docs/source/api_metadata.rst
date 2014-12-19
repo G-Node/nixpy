@@ -40,7 +40,7 @@ directly from the respective section.
 
    # iterate over properties
    for p in section:
-      print p
+      print(p)
 
    # access by name
    one = section["one"]
