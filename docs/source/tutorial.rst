@@ -1,6 +1,6 @@
-===============
-NIXPy Tutorials
-===============
+=========
+Tutorials
+=========
 
 The following tutorials show how to work with NIX files, to store
 different kinds of data, tag points or regions of interest and add
@@ -39,6 +39,11 @@ List of Tutorials
  
   * :ref:`retrieve_tagged_data`
   * :ref:`retrieve_feature_data`
+
+* Additional information
+
+  * :ref:`sources`
+  * :ref:`metadata`
 
 .. _working_with_files:
 
@@ -415,30 +420,79 @@ Source code for this example: `spikeFeatures.py`_.
 Retrieving feature data
 """""""""""""""""""""""
 
-TODO
+The above sections have shown how to attach features to tagged
+regions. To get the feature data back there are two ways. (i) You can
+access the data via the selected feature as it is shown in the
+`spikeFeatures.py`_. example (line 61).
+
+.. literalinclude:: examples/spikeFeatures.py
+		    :lines: 61
+
+With this line of code you get all the data stored in the Feature as
+one numpy array.  If you want to get the feature data that is related
+to a singe point (or region) one can call (line 62):
+
+.. literalinclude:: examples/spikeFeatures.py
+		    :lines: 62
+
+with the first argument being the index of the position and the second
+one that of the feature. In case of **Tag** entities, there is only
+one argument that is the index of the feature you want the data from.
+
 
 :ref:`toc`
 
-
+.. _sources:
 
 Storing the origin of data
 ==========================
 
-TODO adding Sources and nesting them
+Let's assume we want to note the origin of the data. For example they
+have been obtained from a certain experiment or an experimental
+subject. For this purpose **Source** entities are used.  Sources can
+be nested to reflect dependencies between different sources. For
+example One may record data from different neurons in the same brain
+region of the same animal.
+
+.. code-block:: python
+
+		# create some source entities
+		subject.block.create_source('mouese A', 'nix.experimental_subject')
+		brain_region = subject.create_source('hippocampus', 'nix.experimental_subject')
+		cell_1 = brain_region.create_source('CA1 1', 'nix.experimental_subject')
+		cell_2 = brain_region.create_source('CA1 2', 'nix.experimental_subject')
+		# add them to the data.
+		da1 = block.create_data_array("cell1 response", "nix.regular_sampled", data=response_1)
+		da1.sources.append(cell_1)
+		da2 = block.create_data_array("cell2 response", "nix.regular_sampled", data=response_2)
+		da2.sources.append(cell_2)
+
+The **Sources** can be used to indicate links between data that cannot
+be reflected by the data itself.
 
 :ref:`toc`
 
-Working with Data
-=================
+.. _metadata:
 
-TODO write something
+Adding arbitrary metadata
+=========================
 
-:ref:`toc`
+Almost all entities allow to attach arbitray metadata. The basic
+concept of the metadata model is that **Properties** are oragnized in
+**Sections** which in turn can be nested to represent hierarchical
+structures. The **Sections** basically act like python
+dictionaries. How to create sections and properties is demonstrated by
+attaching information about the 'Lenna' image used above.
+
+.. literalinclude:: examples/imageWithMetadata.py
+		    :lines: 48-58, 82
 
 
-Working with Metadata
-=====================
+Source code for this example: `imageWithMetadata.py`_.
 
-TODO write something
+.. _imageWithMetadata.py: examples/imageWithMetadata.py
+
+.. image:: examples/image_with_metadata.png
+	   :width: 240
 
 :ref:`toc`
