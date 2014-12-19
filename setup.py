@@ -42,7 +42,8 @@ CONTACT         = re.search(r"CONTACT\s*=\s*'([^']*)'", info).group(1)
 BRIEF           = re.search(r"BRIEF\s*=\s*'([^']*)'", info).group(1)
 HOMEPAGE        = re.search(r"HOMEPAGE\s*=\s*'([^']*)'", info).group(1)
 
-class PackageNotFoundError(StandardError):
+# Replaced StandardError with Exception since StandardError is removed in Py3
+class PackageNotFoundError(Exception):
     pass
 
 def pkg_config(*packages, **kw):
