@@ -27,9 +27,9 @@ class WithIdMock(object):
     def __hash__(self):
         """
         overwriting method __eq__ blocks inheritance of __hash__ in Python 3
-        hash has to be either explicitly inherited from parent class or escaped
+        hash has to be either explicitly inherited from parent class, implemented or escaped
         """
-        __hash__ = object.__hash__
+        return hash(self.id)
 
 
 class WithListMock(object):
