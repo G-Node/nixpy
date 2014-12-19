@@ -1,3 +1,5 @@
+from __future__ import (absolute_import, division, print_function, unicode_literals)
+
 class Inject(type):
     """
     Class that can be used as a metaclass in order to ease monkey patching.

@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+
 __author__ = 'gicmo'
 
 try:
@@ -6,7 +9,7 @@ try:
 except:
     from distutils.core import setup, Extension
 
-# python version depenedent import of getstatusoutput
+# python version dependent import of getstatusoutput
 try:
 	from commands import getstatusoutput
 except:
