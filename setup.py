@@ -42,7 +42,7 @@ CONTACT         = re.search(r"CONTACT\s*=\s*'([^']*)'", info).group(1)
 BRIEF           = re.search(r"BRIEF\s*=\s*'([^']*)'", info).group(1)
 HOMEPAGE        = re.search(r"HOMEPAGE\s*=\s*'([^']*)'", info).group(1)
 
-# Replaced StandardError with Exception since StandardError is removed in Py3
+# Replaced StandardError with Exception since StandardError is removed in Py3.x
 class PackageNotFoundError(Exception):
     pass
 
@@ -67,7 +67,9 @@ def pkg_config(*packages, **kw):
         kw.setdefault(flag_map.get(token[:2]), []).append(token[2:])
 
     # remove duplicated
-    for k, v in kw.iteritems():
+    # replaced .iteritems() with .items, since .iteritems() is not available in Py3.x
+    # could lead to increased memory usage and computation time.
+    for k, v in kw.items():
         del kw[k]
         kw[k] = list(set(v))
 
