@@ -99,3 +99,9 @@ class RefProxyList(ProxyList):
             self.__appender(key)
         else:
             raise TypeError("The only id strings or entities can be appended")
+
+    def extend(self, keys):
+        if hasattr(keys, '__iter__'):
+            map(self.append, keys)
+        else:
+            self.append(keys)
