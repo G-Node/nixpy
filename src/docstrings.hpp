@@ -138,6 +138,8 @@ extern const char* sampled_dimension_index_of;
 
 extern const char* range_dimension_index_of;
 
+extern const char* range_dimension_tick_at;
+
 // PyResult
 
 extern const char* mesage_id;

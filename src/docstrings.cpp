@@ -486,6 +486,16 @@ const char* range_dimension_index_of = R"(
     :rtype: int
     )";
 
+
+const char* range_dimension_tick_at = R"(
+    Returns the tick at the given index. Will throw an Exception if the index is out of bounds.
+
+    :param index: The index.
+
+    :returns: The corresponding position.
+    :rtype: double
+    )";
+
 // PyResult
 
 const char* mesage_id = R"(
