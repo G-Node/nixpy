@@ -121,6 +121,7 @@ void PyDimensions::do_export() {
         .add_property("ticks",
                       GETTER(std::vector<double>, RangeDimension, ticks),
                       REF_SETTER(std::vector<double>, RangeDimension, ticks))
+        .def("index_of", &RangeDimension::indexOf, doc::range_dimension_index_of)
         ;
 
     class_<SetDimension>("SetDimension")

@@ -476,6 +476,16 @@ const char* sampled_dimension_position_at = R"(
     :rtype: float
     )";
 
+
+const char* range_dimension_index_of = R"(
+    Returns the index of a certain position in the dimension.
+
+    :param position: The position.
+
+    :returns: The nearest index.
+    :rtype: int
+    )";
+
 // PyResult
 
 const char* mesage_id = R"(
