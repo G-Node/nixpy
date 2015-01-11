@@ -140,6 +140,8 @@ extern const char* range_dimension_index_of;
 
 extern const char* range_dimension_tick_at;
 
+extern const char* range_dimension_axis;
+
 // PyResult
 
 extern const char* mesage_id;

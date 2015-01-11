@@ -451,7 +451,7 @@ const char* sampled_dimension_axis = R"(
 
     :param count: A positive integer specifying the length of the axis
     (no of samples).
-    :param start: positive integert, indicates the starting sample.
+    :param start: positive integer, indicates the starting sample.
 
     :returns: The created axis
     :rtype: list
@@ -495,6 +495,19 @@ const char* range_dimension_tick_at = R"(
     :returns: The corresponding position.
     :rtype: double
     )";
+
+
+const char* range_dimension_axis = R"(
+    Get an axis as defined by this range dimension.
+
+    :param count: A positive integer specifying the length of the axis
+    (no of points).
+    :param start: positive integer, indicates the starting tick.
+
+    :returns: The created axis
+    :rtype: list
+    )";
+
 
 // PyResult
 

@@ -79,6 +79,14 @@ std::vector<double> getSampledDimensionAxis2(SampledDimension& dim, const size_t
     return dim.axis(count, start_index);
 }
 
+std::vector<double> getRangeDimensionAxis1(RangeDimension& dim, const size_t count) {
+    return dim.axis(count);
+}
+
+std::vector<double> getRangeDimensionAxis2(RangeDimension& dim, const size_t count,
+					    const size_t start_index) {
+    return dim.axis(count, start_index);
+}
 
 void PyDimensions::do_export() {
 
@@ -123,6 +131,8 @@ void PyDimensions::do_export() {
                       REF_SETTER(std::vector<double>, RangeDimension, ticks))
         .def("index_of", &RangeDimension::indexOf, doc::range_dimension_index_of)
         .def("tick_at", &RangeDimension::tickAt, doc::range_dimension_tick_at)
+        .def("axis", getRangeDimensionAxis1, doc::range_dimension_axis)
+        .def("axis", getRangeDimensionAxis2, doc::range_dimension_axis)
         ;
 
     class_<SetDimension>("SetDimension")
