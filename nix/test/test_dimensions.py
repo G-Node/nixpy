@@ -100,3 +100,19 @@ class TestDimensions(unittest.TestCase):
         self.range_dim.ticks = other
         assert(self.range_dim.ticks == other)
 
+        assert(self.range_dim.index_of(0.) == 0)
+        assert(self.range_dim.index_of(10.) == (round(10./3.14)))
+        assert(self.range_dim.index_of(100.) == 9)
+        assert(self.range_dim.index_of(-100.) == 0)
+
+        assert(self.range_dim.tick_at(0) == 0)
+        assert(self.range_dim.tick_at(9) == other[-1])
+        with self.assertRaises(IndexError):
+            self.range_dim.tick_at(100)
+
+        assert(self.range_dim.axis(10) == other)
+        assert(self.range_dim.axis(2) == other[:2])
+        assert(self.range_dim.axis(2, 2) == other[2:4])
+        with self.assertRaises(IndexError):
+            self.range_dim.axis(10, 2)
+            self.range_dim.axis(100)
