@@ -37,6 +37,8 @@ BOOST_PYTHON_MODULE(core)
     PyTag::do_export();
     PyMultiTag::do_export();
 
+    PyException::do_export();
+
     to_python_converter<boost::optional<std::string>, option_transmogrify<std::string>>();
     option_transmogrify<std::string>::register_from_python();
 
