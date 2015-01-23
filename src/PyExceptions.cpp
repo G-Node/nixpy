@@ -25,20 +25,28 @@ using namespace boost::python;
 namespace nixpy {
 
 static bool emptyMessage(const char* message) {
-  return std::strlen(message) == 0;
+    return std::strlen(message) == 0;
 }
 
 static void translateOutOfBounds(const nix::OutOfBounds &e) {
-    PyErr_SetString(PyExc_RuntimeError, e.what());
+    if (emptyMessage(e.what())) {
+        PyErr_SetString(PyExc_IndexError, "Attempt to access data with an index that is out of bounds!");
+    } else {
+        PyErr_SetString(PyExc_IndexError, e.what());
+    }
 }
 
 static void translateDuplicateName(const nix::DuplicateName &e) {
-    PyErr_SetString(PyExc_RuntimeError, e.what());
+    if (emptyMessage(e.what())) {
+        PyErr_SetString(PyExc_RuntimeError, "Duplicate name given - names have to be unique for a given entity type & parent.");
+    } else {
+        PyErr_SetString(PyExc_RuntimeError, e.what());
+    }
 }
 
 void PyException::do_export() {
-  register_exception_translator<nix::OutOfBounds>(&translateOutOfBounds);
-  register_exception_translator<nix::DuplicateName>(&translateDuplicateName);
+    register_exception_translator<nix::OutOfBounds>(&translateOutOfBounds);
+    register_exception_translator<nix::DuplicateName>(&translateDuplicateName);
 }
 
 }
