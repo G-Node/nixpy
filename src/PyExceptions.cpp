@@ -24,6 +24,10 @@ using namespace boost::python;
 
 namespace nixpy {
 
+static bool emptyMessage(const char* message) {
+  return std::strlen(message) == 0;
+}
+
 static void translateOutOfBounds(const nix::OutOfBounds &e) {
     PyErr_SetString(PyExc_RuntimeError, e.what());
 }
