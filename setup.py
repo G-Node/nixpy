@@ -88,6 +88,7 @@ else:
 nixpy_sources = [
     'src/core.cc',
     'src/docstrings.cpp',
+    'src/PyExceptions.cpp',
     'src/PyBlock.cpp',
     'src/PyFile.cpp',
     'src/PySection.cpp',
