@@ -6,6 +6,7 @@
 #include <accessors.hpp>
 
 #include <PyEntity.hpp>
+#include <PyUtil.hpp>
 
 using namespace boost::python;
 using namespace nix;
@@ -38,6 +39,8 @@ BOOST_PYTHON_MODULE(core)
     PyMultiTag::do_export();
 
     PyException::do_export();
+
+    //PyUtil::do_export();
 
     to_python_converter<boost::optional<std::string>, option_transmogrify<std::string>>();
     option_transmogrify<std::string>::register_from_python();

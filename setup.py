@@ -104,6 +104,11 @@ nixpy_sources = [
     'src/PyResult.cpp'
 ]
 
+nixpy_xtra_sources = [
+    'src/util.cc',
+    'src/PyUtil.cpp'
+]
+
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
 boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
 if os.name != 'nt':
@@ -134,6 +139,20 @@ native_ext    = Extension(
                     )
                 )
 
+native_ext2    = Extension(
+                    'nix.xtra',
+                    extra_compile_args = ['-std=c++11'] if os.name!='nt' else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
+                    extra_link_args=boost_lnk_arg + nix_lnk_arg,
+                    sources = nixpy_xtra_sources,
+                    runtime_library_dirs = [nix_lib_dir, boost_lib_dir] if os.name!='nt' else None,
+                    **pkg_config(
+                        "nix",
+                        library_dirs=[boost_lib_dir, nix_lib_dir],
+                        include_dirs=[boost_inc_dir, nix_inc_dir, np.get_include(), 'src'],
+                        ignore_error=True
+                    )
+                )
+
 setup(name             = 'nix',
       version          = VERSION,
       author           = AUTHOR,
@@ -143,8 +162,8 @@ setup(name             = 'nix',
       long_description = description_text,
       classifiers      = classifiers,
       license          = 'BSD',
-      ext_modules      = [native_ext],
-      packages         = ['nix', 'nix.util'],
+      ext_modules      = [native_ext, native_ext2],
+      packages         = ['nix', 'nix.xtra', 'nix.util'],
       scripts          = [],
       tests_require    = ['nose'],
       test_suite       = 'nose.collector',
