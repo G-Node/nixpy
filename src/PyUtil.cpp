@@ -22,6 +22,8 @@ using namespace boost::python;
 
 namespace nixpy {
 
+struct UnitWrap {};
+
 bool isScalableSingleUnit(const std::string &unitA, const std::string &unitB) {
     return util::isScalable(unitA, unitB);
 }
@@ -30,16 +32,24 @@ bool isScalableMultiUnits(const std::vector<std::string> &unitsA, const std::vec
     return util::isScalable(unitsA, unitsB);
 }
 
+struct NameWrap {};
+
+
 void PyUtil::do_export() {
-  def("name_sanitizer", util::nameSanitizer);
-  def("name_check", util::nameCheck);
-  def("create_id", util::createId);
-  def("unit_sanitizer", util::unitSanitizer);
-  def("is_si_unit", util::isSIUnit);
-  def("is_atomic_unit", util::isAtomicSIUnit);
-  def("is_compound_unit", util::isCompoundSIUnit);
-  def("is_scalable", &isScalableSingleUnit);
-  def("is_scalable", &isScalableMultiUnits);
+  class_<UnitWrap> ("unit_helper")
+  .def("unit_sanitizer", util::unitSanitizer).staticmethod("unit_sanitizer")
+  .def("is_si_unit", util::isSIUnit).staticmethod("is_si_unit")
+  .def("is_atomic_unit", util::isAtomicSIUnit).staticmethod("is_atomic_unit")
+  .def("is_compound_unit", util::isCompoundSIUnit).staticmethod("is_compound_unit")
+  .def("is_scalable", &isScalableMultiUnits).staticmethod("is_scalable")
+  .def("scaling", util::getSIScaling).staticmethod("scaling")
+  ;
+
+  class_<NameWrap> ("name_helper")
+  .def("name_sanitizer", util::nameSanitizer).staticmethod("name_sanitizer")
+  .def("name_check", util::nameCheck).staticmethod("name_check")
+  .def("create_id", util::createId).staticmethod("create_id")
+  ;
 }
 
 }
