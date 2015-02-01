@@ -40,7 +40,7 @@ BOOST_PYTHON_MODULE(core)
 
     PyException::do_export();
 
-    //PyUtil::do_export();
+    PyUtil::do_export();
 
     to_python_converter<boost::optional<std::string>, option_transmogrify<std::string>>();
     option_transmogrify<std::string>::register_from_python();
