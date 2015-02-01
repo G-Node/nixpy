@@ -23,8 +23,15 @@ using namespace boost::python;
 namespace nixpy {
 
 void PyUtil::do_export() {
-  def("name_sanitizer", util::nameSanitizer);
 
+  def("name_sanitizer", util::nameSanitizer);
+  def("name_check", util::nameCheck);
+  def("create_id", util::createId);
+  def("unit_sanitizer",util::unitSanitizer);
+  def("is_si_unit", util::isSIUnit);
+  def("is_atomic_unit", util::isAtomicSIUnit);
+  def("is_compound_unit", util::isCompoundSIUnit)
+  ;
 }
 
 }
