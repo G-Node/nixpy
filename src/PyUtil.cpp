@@ -22,8 +22,15 @@ using namespace boost::python;
 
 namespace nixpy {
 
-void PyUtil::do_export() {
+bool isScalableSingleUnit(const std::string &unitA, const std::string &unitB) {
+    return util::isScalable(unitA, unitB);
+}
 
+bool isScalableMultiUnits(const std::vector<std::string> &unitsA, const std::vector<std::string> &unitsB) {
+    return util::isScalable(unitsA, unitsB);
+}
+
+void PyUtil::do_export() {
   def("name_sanitizer", util::nameSanitizer);
   def("name_check", util::nameCheck);
   def("create_id", util::createId);
@@ -32,6 +39,8 @@ void PyUtil::do_export() {
   def("is_atomic_unit", util::isAtomicSIUnit);
   def("is_compound_unit", util::isCompoundSIUnit)
   ;
+  def("is_scalable", &isScalableSingleUnit);
+  def("is_scalable", &isScalableMultiUnits);
 }
 
 }
