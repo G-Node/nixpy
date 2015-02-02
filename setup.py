@@ -86,6 +86,7 @@ else:
     nix_lnk_arg = ['/LIBPATH:'+nix_lib_dir, '/DEFAULTLIB:nix.lib']
 
 nixpy_sources = [
+    'src/PyUtil.cpp',
     'src/core.cc',
     'src/docstrings.cpp',
     'src/PyExceptions.cpp',
