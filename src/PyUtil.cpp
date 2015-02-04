@@ -36,18 +36,18 @@ struct NameWrap {};
 
 
 void PyUtil::do_export() {
-  class_<UnitWrap> ("unit_helper")
-  .def("unit_sanitizer", util::unitSanitizer).staticmethod("unit_sanitizer")
-  .def("is_si_unit", util::isSIUnit).staticmethod("is_si_unit")
-  .def("is_atomic_unit", util::isAtomicSIUnit).staticmethod("is_atomic_unit")
-  .def("is_compound_unit", util::isCompoundSIUnit).staticmethod("is_compound_unit")
-  .def("is_scalable", &isScalableMultiUnits).staticmethod("is_scalable")
+  class_<UnitWrap> ("units")
+  .def("sanitizer", util::unitSanitizer).staticmethod("sanitizer")
+  .def("is_si", util::isSIUnit).staticmethod("is_si")
+  .def("is_atomic", util::isAtomicSIUnit).staticmethod("is_atomic")
+  .def("is_compound", util::isCompoundSIUnit).staticmethod("is_compound")
+  .def("scalable", &isScalableMultiUnits).staticmethod("scalable")
   .def("scaling", util::getSIScaling).staticmethod("scaling")
   ;
 
-  class_<NameWrap> ("name_helper")
-  .def("name_sanitizer", util::nameSanitizer).staticmethod("name_sanitizer")
-  .def("name_check", util::nameCheck).staticmethod("name_check")
+  class_<NameWrap> ("names")
+  .def("sanitizer", util::nameSanitizer).staticmethod("sanitizer")
+  .def("check", util::nameCheck).staticmethod("check")
   .def("create_id", util::createId).staticmethod("create_id")
   ;
 }
