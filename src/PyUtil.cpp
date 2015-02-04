@@ -32,6 +32,24 @@ bool isScalableMultiUnits(const std::vector<std::string> &unitsA, const std::vec
     return util::isScalable(unitsA, unitsB);
 }
 
+std::string baseUnit(const std::string &unit) {
+    std::string si, prefix, power;
+    util::splitUnit(unit, prefix, si, power);
+    return si;
+}
+
+std::string prefix(const std::string &unit) {
+    std::string si, prefix, power;
+    util::splitUnit(unit, prefix, si, power);
+    return prefix;
+}
+
+std::string power(const std::string &unit) {
+    std::string si, prefix, power;
+    util::splitUnit(unit, prefix, si, power);
+    return power;
+}
+
 std::vector<std::string> splitCompound(const std::string &unit) {
    std::vector<std::string> parts;
    util::splitCompoundUnit(unit, parts);
@@ -49,6 +67,9 @@ void PyUtil::do_export() {
   .def("is_compound", util::isCompoundSIUnit).staticmethod("is_compound")
   .def("scalable", &isScalableMultiUnits).staticmethod("scalable")
   .def("scaling", util::getSIScaling).staticmethod("scaling")
+  .def("base_unit", &baseUnit).staticmethod("base_unit")
+  .def("prefix", &prefix).staticmethod("prefix")
+  .def("power", &power).staticmethod("power")
   .def("split_compound", &splitCompound).staticmethod("split_compound")
   ;
 
