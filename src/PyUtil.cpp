@@ -32,6 +32,12 @@ bool isScalableMultiUnits(const std::vector<std::string> &unitsA, const std::vec
     return util::isScalable(unitsA, unitsB);
 }
 
+std::vector<std::string> splitCompound(const std::string &unit) {
+   std::vector<std::string> parts;
+   util::splitCompoundUnit(unit, parts);
+   return parts;
+}
+
 struct NameWrap {};
 
 
@@ -43,6 +49,7 @@ void PyUtil::do_export() {
   .def("is_compound", util::isCompoundSIUnit).staticmethod("is_compound")
   .def("scalable", &isScalableMultiUnits).staticmethod("scalable")
   .def("scaling", util::getSIScaling).staticmethod("scaling")
+  .def("split_compound", &splitCompound).staticmethod("split_compound")
   ;
 
   class_<NameWrap> ("names")
