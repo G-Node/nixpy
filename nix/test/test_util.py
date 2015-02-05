@@ -50,3 +50,21 @@ class TestUtil(unittest.TestCase):
         assert(units.is_atomic('mV'))
         assert(units.is_atomic('mV^2'))
         assert(not units.is_atomic('mV^2/Hz'))
+
+    def test_unit_is_compound(self):
+        assert(units.is_compound('mV^2/Hz'))
+        assert(not units.is_compound('mV'))
+
+    def test_unit_split_compound(self):
+        unit_1 = "mV^2/Hz"
+        unit_2 = "mV^2 * Hz^-1"
+
+        assert(len(units.split_compound('mV')) == 1)
+
+        atomics = units.split_compound(unit_1)
+        assert(len(atomics) == 2)
+        assert(atomics[0] == "mV^2" and atomics[1] == "Hz") #FIXME this is not correct, needs to be fixed in nix!
+
+        atomics = units.split_compound(unit_2)
+        assert(len(atomics) == 2)
+        assert(atomics[0] == "mV^2" and atomics[1] == "Hz^-1")
