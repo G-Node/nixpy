@@ -81,3 +81,11 @@ class TestUtil(unittest.TestCase):
         assert(not units.scalable([base_unit], [inscalable]))
         assert(units.scalable([base_unit, scalable_1], [base_unit, scalable_2]))
 
+    def test_unit_scaling(self):
+        base_unit = 'V'
+        scalable_1 = 'kV'
+        scalable_2 = 'uV'
+
+        assert(units.scaling(base_unit, scalable_1) == 1e-03)
+        assert(units.scaling(base_unit, scalable_2) == 1e06)
+
