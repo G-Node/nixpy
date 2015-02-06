@@ -12,9 +12,9 @@
 from __future__ import (absolute_import, division, print_function)#, unicode_literals)
 
 import unittest
-import numpy as np
 from nix.core import names
 from nix.core import units
+
 
 class TestUtil(unittest.TestCase):
 
@@ -68,3 +68,16 @@ class TestUtil(unittest.TestCase):
         atomics = units.split_compound(unit_2)
         assert(len(atomics) == 2)
         assert(atomics[0] == "mV^2" and atomics[1] == "Hz^-1")
+
+    def test_unit_scalable(self):
+        base_unit = 'V'
+        scalable_1 = 'kV'
+        scalable_2 = 'uV'
+        inscalable = 'g'
+
+        assert(units.scalable([base_unit], [scalable_1]))
+        assert(units.scalable([base_unit], [scalable_2]))
+        assert(units.scalable([base_unit], [base_unit]))
+        assert(not units.scalable([base_unit], [inscalable]))
+        assert(units.scalable([base_unit, scalable_1], [base_unit, scalable_2]))
+
