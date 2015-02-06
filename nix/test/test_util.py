@@ -63,7 +63,8 @@ class TestUtil(unittest.TestCase):
 
         atomics = units.split_compound(unit_1)
         assert(len(atomics) == 2)
-        assert(atomics[0] == "mV^2" and atomics[1] == "Hz") #FIXME this is not correct, needs to be fixed in nix!
+        # FIXME the following is not entirely correct should be Hz^-1, needs to be fixed in nix!
+        assert(atomics[0] == "mV^2" and atomics[1] == "Hz")
 
         atomics = units.split_compound(unit_2)
         assert(len(atomics) == 2)
