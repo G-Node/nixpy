@@ -90,3 +90,17 @@ class TestUtil(unittest.TestCase):
         assert(units.scaling(base_unit, scalable_1) == 1e-03)
         assert(units.scaling(base_unit, scalable_2) == 1e06)
 
+    def test_unit_split(self):
+        unit_1 = 'kV'
+        unit_2 = 'mV^2'
+        unit_3 = 'Hz^-1'
+
+        p, u, po = units.split(unit_1)
+        assert(p == 'k' and u == 'V' and po == '')
+
+        p, u, po = units.split(unit_2)
+        assert(p == 'm' and u == 'V' and po == '2')
+
+        p, u, po = units.split(unit_3)
+        assert(p == '' and u == 'Hz' and po == '-1')
+
