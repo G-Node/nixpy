@@ -175,6 +175,13 @@ extern const char* unit_compound_split;
 extern const char* unit_scalable;
 
 extern const char* unit_scaling;
+
+extern const char* name_sanitizer;
+
+extern const char* name_check;
+
+extern const char* create_id;
+
 }
 }
 

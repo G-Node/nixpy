@@ -640,6 +640,31 @@ const char* unit_scaling = R"(
     :rtype: double
     )";
 
+const char* name_sanitizer = R"(
+    Sanitizes a string supposed to be an entity name. That is,
+    invalid characters like slashes are substituted with underscores.
+
+    :param name: A string representing the name.
+
+    :returns: The sanitized name.
+    :rtype: str
+    )";
+
+const char* name_check = R"(
+    Checks a string whether is needs to be sanitized.
+
+    :param name: The name.
+
+    :returns: True if the name is valid, false otherwise.
+    :rtype: bool
+    )";
+
+const char* create_id = R"(
+    Creates an ID as used for nix entities.
+
+    :returns: The ID.
+    :rtype: str
+    )";
 
 }
 }
