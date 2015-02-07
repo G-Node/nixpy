@@ -561,6 +561,85 @@ const char* result_has_errors = R"(
     :rtype: bool
     )";
 
+// PyUtil
+
+const char* unit_is_si = R"(
+    Determines whether a unit is a recognized SI unit.
+
+    :param unit: The unit that needs to be checked.
+
+    :returns: True if the unit is an SI unit, false otherwise.
+    :rtype: bool
+    )";
+
+const char* unit_sanitizer = R"(
+    Sanitizes a unit string. That is, it is de-blanked, and mu and µ symbols are changed
+    to u for micro.
+
+    :param unit: The unit that needs to be sanitized.
+
+    :returns: the sanitized unit.
+    :rtype: str
+    )";
+
+const char* unit_is_atomic = R"(
+    Checked whether a unit string represents an atomic si unit, i.e. not a
+    combination.
+
+    :param unit: The unit to be checked.
+
+    :returns: True if unit is atomic, False otherwise.
+    :rtype: bool
+    )";
+
+const char* unit_is_compound = R"(
+    Checks whether a unit string represents a combination of SI units.
+
+    :param unit: The unit string.
+
+    :returns: True if the unit string represents a combination of SI units, False otherwise.
+    :rtype: bool
+    )";
+
+const char* unit_split = R"(
+    Splits a unit string into magnitude prefix, the base unit, and the power.
+
+    :param unit: The unit string.
+
+    :returns: A tuple of prefix, base unit, and power.
+    :rtype: tuple
+    )";
+
+const char* unit_compound_split = R"(
+    Splits a compound unit (like mV/Hz) into the atomic units.
+
+    :param unit: The unit string.
+
+    :returns: A tuple containing the atomic units.
+    :rtype: tuple
+    )";
+
+const char* unit_scalable = R"(
+    Checks whether units are scalable versions of the same SI unit. Method works on two lists and
+    compares the corresponding units in both lists.
+
+    :param units_1: List of unit strings.
+    :param units_2: List of unit strings.
+
+    :returns: True if all corresponding units are scalable.
+    :rtype: bool
+    )";
+
+const char* unit_scaling = R"(
+    Returns the scaling factor to convert from unit_1 to unit_2.
+
+    :param unit_1: The unit string.
+    :param unit_2: The unit string.
+
+    :returns: The scaling factor.
+    :rtype: double
+    )";
+
 
 }
 }

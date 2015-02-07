@@ -158,6 +158,23 @@ extern const char* result_has_warnings;
 
 extern const char* result_has_errors;
 
+// PyUtil
+
+extern const char* unit_sanitizer;
+
+extern const char* unit_is_si;
+
+extern const char* unit_is_atomic;
+
+extern const char* unit_is_compound;
+
+extern const char* unit_split;
+
+extern const char* unit_compound_split;
+
+extern const char* unit_scalable;
+
+extern const char* unit_scaling;
 }
 }
 
