@@ -61,9 +61,9 @@ void PyUtil::do_export() {
   ;
 
   class_<NameWrap> ("names")
-  .def("sanitizer", util::nameSanitizer).staticmethod("sanitizer")
-  .def("check", util::nameCheck).staticmethod("check")
-  .def("create_id", util::createId).staticmethod("create_id")
+  .def("sanitizer", util::nameSanitizer, doc::name_sanitizer).staticmethod("sanitizer")
+  .def("check", util::nameCheck, doc::name_check).staticmethod("check")
+  .def("create_id", util::createId, doc::create_id).staticmethod("create_id")
   ;
 }
 
