@@ -14,6 +14,7 @@
 
 #include <accessors.hpp>
 #include <transmorgify.hpp>
+#include <docstrings.hpp>
 
 #include <PyUtil.hpp>
 
@@ -49,14 +50,14 @@ struct NameWrap {};
 
 void PyUtil::do_export() {
   class_<UnitWrap> ("units")
-  .def("sanitizer", util::unitSanitizer).staticmethod("sanitizer")
-  .def("is_si", util::isSIUnit).staticmethod("is_si")
-  .def("is_atomic", util::isAtomicSIUnit).staticmethod("is_atomic")
-  .def("is_compound", util::isCompoundSIUnit).staticmethod("is_compound")
-  .def("scalable", &isScalableMultiUnits).staticmethod("scalable")
-  .def("scaling", util::getSIScaling).staticmethod("scaling")
-  .def("split", &splitUnit).staticmethod("split")
-  .def("split_compound", &splitCompound).staticmethod("split_compound")
+  .def("sanitizer", util::unitSanitizer, doc::unit_sanitizer).staticmethod("sanitizer")
+  .def("is_si", util::isSIUnit, doc::unit_is_si).staticmethod("is_si")
+  .def("is_atomic", util::isAtomicSIUnit, doc::unit_is_atomic).staticmethod("is_atomic")
+  .def("is_compound", util::isCompoundSIUnit, doc::unit_is_compound).staticmethod("is_compound")
+  .def("scalable", &isScalableMultiUnits, doc::unit_scalable).staticmethod("scalable")
+  .def("scaling", util::getSIScaling, doc::unit_scaling).staticmethod("scaling")
+  .def("split", &splitUnit, doc::unit_split).staticmethod("split")
+  .def("split_compound", &splitCompound, doc::unit_compound_split).staticmethod("split_compound")
   ;
 
   class_<NameWrap> ("names")
