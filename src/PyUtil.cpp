@@ -14,6 +14,7 @@
 
 #include <accessors.hpp>
 #include <transmorgify.hpp>
+#include <docstrings.hpp>
 
 #include <PyUtil.hpp>
 
@@ -32,23 +33,37 @@ bool isScalableMultiUnits(const std::vector<std::string> &unitsA, const std::vec
     return util::isScalable(unitsA, unitsB);
 }
 
+std::vector<std::string> splitUnit(const std::string &unit) {
+    std::string si, prefix, power;
+    util::splitUnit(unit, prefix, si, power);
+    return std::vector<std::string>{prefix, si, power};
+}
+
+std::vector<std::string> splitCompound(const std::string &unit) {
+   std::vector<std::string> parts;
+   util::splitCompoundUnit(unit, parts);
+   return parts;
+}
+
 struct NameWrap {};
 
 
 void PyUtil::do_export() {
-  class_<UnitWrap> ("unit_helper")
-  .def("unit_sanitizer", util::unitSanitizer).staticmethod("unit_sanitizer")
-  .def("is_si_unit", util::isSIUnit).staticmethod("is_si_unit")
-  .def("is_atomic_unit", util::isAtomicSIUnit).staticmethod("is_atomic_unit")
-  .def("is_compound_unit", util::isCompoundSIUnit).staticmethod("is_compound_unit")
-  .def("is_scalable", &isScalableMultiUnits).staticmethod("is_scalable")
-  .def("scaling", util::getSIScaling).staticmethod("scaling")
+  class_<UnitWrap> ("units")
+  .def("sanitizer", util::unitSanitizer, doc::unit_sanitizer).staticmethod("sanitizer")
+  .def("is_si", util::isSIUnit, doc::unit_is_si).staticmethod("is_si")
+  .def("is_atomic", util::isAtomicSIUnit, doc::unit_is_atomic).staticmethod("is_atomic")
+  .def("is_compound", util::isCompoundSIUnit, doc::unit_is_compound).staticmethod("is_compound")
+  .def("scalable", &isScalableMultiUnits, doc::unit_scalable).staticmethod("scalable")
+  .def("scaling", util::getSIScaling, doc::unit_scaling).staticmethod("scaling")
+  .def("split", &splitUnit, doc::unit_split).staticmethod("split")
+  .def("split_compound", &splitCompound, doc::unit_compound_split).staticmethod("split_compound")
   ;
 
-  class_<NameWrap> ("name_helper")
-  .def("name_sanitizer", util::nameSanitizer).staticmethod("name_sanitizer")
-  .def("name_check", util::nameCheck).staticmethod("name_check")
-  .def("create_id", util::createId).staticmethod("create_id")
+  class_<NameWrap> ("names")
+  .def("sanitizer", util::nameSanitizer, doc::name_sanitizer).staticmethod("sanitizer")
+  .def("check", util::nameCheck, doc::name_check).staticmethod("check")
+  .def("create_id", util::createId, doc::create_id).staticmethod("create_id")
   ;
 }
 
