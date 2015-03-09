@@ -114,7 +114,7 @@ else:
     boost_lnk_arg = ['/LIBPATH:'+boost_lib_dir, '/DEFAULTLIB:'+boostlib[0]]
 
 classifiers   = [
-                    'Development Status :: 4 - Beta',
+                    'Development Status :: 5 - Production/Stable',
                     'Programming Language :: Python',
                     'Programming Language :: Python :: 2.6',
                     'Programming Language :: Python :: 2.7',
