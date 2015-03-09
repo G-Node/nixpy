@@ -15,7 +15,7 @@ Build-Depends:
     libboost-dev (>=1.49),
     libboost-python-dev (>=1.49)
 X-Python-Version: >= 2.6
-Standards-Version: 3.9.4
+Standards-Version: 3.9.5
 Homepage: https://github.com/G-Node/nixpy
 
 Package: python-nix
@@ -29,8 +29,5 @@ Depends:
     python-numpy-abi9,
 Section: python
 Description: Python bindings for NIX
-    nixpy
-    =====
-    .
-    Python bindings for NIX. Experimental and an moving target right now.
-    Use at your own risk, but by all means use it. ;-)
+ Neuroscience information exchange - data model for annotated (neuroscience)
+ data. For more information visit https://github.com/G-Node/nixpy
