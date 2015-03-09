@@ -6,11 +6,12 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import sys
 
 from nix.core import DataArray
+from nix.core import DataSet
 from nix.util.inject import Inject
 
 import numpy as np
@@ -23,14 +24,14 @@ class DataArrayMixin(DataArray):
     @property
     def data(self):
         """
-        A property that will give access to the DataArray's data via a
-        :class:`~nix.data_array.DataSet` object.
+        DEPRECATED DO NOT USE ANYMORE! Returns self
 
-        :type: :class:`~nix.data_array.DataSet`
+        :type: :class:`~nix.data_array.DataArray`
         """
-        if not hasattr(self, "_data"):
-            setattr(self, "_data", DataSet(self))
-        return self._data
+        import warnings
+        warnings.warn("Call to deprecated property DataArray.data",
+                      category=DeprecationWarning)
+        return self
 
     @property
     def dimensions(self):
@@ -51,6 +52,13 @@ class DataArrayMixin(DataArray):
             return self.id == other.id
         else:
             return False
+
+    def __hash__(self):
+        """
+        overwriting method __eq__ blocks inheritance of __hash__ in Python 3
+        hash has to be either explicitly inherited from parent class, implemented or escaped
+        """
+        return hash(self.id)
 
 
 class DimensionProxyList(object):
@@ -94,12 +102,13 @@ class DimensionProxyList(object):
         return str(self)
 
 
-class DataSet(object):
+class DataSetMixin(DataSet):
     """
     Data IO object for DataArray.
     """
-    def __init__(self, obj):
-        self.__obj = obj
+
+    class __metaclass__(Inject, DataSet.__class__):
+        pass
 
     def __array__(self):
         raw = np.empty(self.shape, dtype=self.dtype)
@@ -115,8 +124,8 @@ class DataSet(object):
         # if we got to here we have a tuple with len >= 1
         count, offset, shape = self.__tuple_to_count_offset_shape(index)
 
-        raw = np.empty(shape)
-        self.__obj._read_data(raw, count, offset)
+        raw = np.empty(shape, dtype=self.dtype)
+        self._read_data(raw, count, offset)
         return raw
 
     def __setitem__(self, index, value):
@@ -130,7 +139,7 @@ class DataSet(object):
         # NB: np.ascontiguousarray does not copy the array if it is
         # already in c-contiguous form
         raw = np.ascontiguousarray(value)
-        self.__obj._write_data(raw, count, offset)
+        self._write_data(raw, count, offset)
 
     def __len__(self):
         s = self.len()
@@ -159,7 +168,7 @@ class DataSet(object):
         """
         :type: tuple of data array dimensions.
         """
-        return self.__obj.data_extent
+        return self.data_extent
 
     @property
     def size(self):
@@ -177,7 +186,7 @@ class DataSet(object):
         :type: :class:`numpy.dtype` object holding type infromation about
                the data stored in the DataSet.
         """
-        return np.dtype(self.__obj._get_dtype())
+        return np.dtype(self._get_dtype())
 
     def write_direct(self, data):
         """
@@ -190,7 +199,7 @@ class DataSet(object):
         :param data: The array which contents is being written
         :type data: :class:`numpy.ndarray`
         """
-        self.__obj._write_data(data, (), ())
+        self._write_data(data, (), ())
 
     def read_direct(self, data):
         """
@@ -204,7 +213,27 @@ class DataSet(object):
         :type data: :class:`numpy.ndarray`
         """
 
-        self.__obj._read_data(data, (), ())
+        self._read_data(data, (), ())
+
+    def append(self, data, axis=0):
+        """
+        Append ``data`` to the DataSet along the ``axis`` specified.
+        :param data: The data to append. Shape must agree except for the specified axis
+        :param axis: Along which axis to append the data to
+        """
+        data = np.ascontiguousarray(data)
+
+        if len(self.shape) != len(data.shape):
+            raise ValueError("Data and DataArray must have the same dimensionality")
+
+        if any([s != ds for i, (s, ds) in enumerate(zip(self.shape, data.shape)) if i != axis]):
+            raise ValueError("Shape of data and shape of DataArray must match in all dimension but axis!")
+
+        offset = tuple(0 if i != axis else x for i, x in enumerate(self.shape))
+        count = data.shape
+        enlarge = tuple(self.shape[i] + (0 if i != axis else x) for i, x in enumerate(data.shape))
+        self.data_extent = enlarge
+        self._write_data(data, count, offset)
 
     @staticmethod
     def __index_to_tuple(index):

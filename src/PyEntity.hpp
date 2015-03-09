@@ -112,26 +112,25 @@ struct PyEntityWithSources {
     }
 };
 
+struct PyResult {
+    static void do_export();
+};
 
 struct PyBlock {
     static void do_export();
 };
 
-
 struct PyFile {
     static void do_export();
 };
-
 
 struct PyProperty {
     static void do_export();
 };
 
-
 struct PySection {
     static void do_export();
 };
-
 
 struct PyValue {
     static void do_export();
@@ -142,6 +141,10 @@ struct PySource {
 };
 
 struct PyDataArray {
+    static void do_export();
+};
+
+struct PyDataSet {
     static void do_export();
 };
 
@@ -161,6 +164,9 @@ struct PyMultiTag {
     static void do_export();
 };
 
+struct PyException {
+    static void do_export();
+};
 }
 
 #endif

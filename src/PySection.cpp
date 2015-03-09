@@ -43,7 +43,7 @@ Property createProperty(Section& sec, const std::string& name, PyObject* obj) {
         return sec.createProperty(name, ext_type());
     }
 
-    extract<Value> ext_val(obj);
+    extract<Value&> ext_val(obj);
     if (ext_val.check()) {
         return sec.createProperty(name, ext_val());
     }
@@ -69,11 +69,14 @@ boost::optional<Property> getPropertyByPos(const Section& section, size_t index)
 }
 
 boost::optional<Property> getPropertyByName(const Section& section, const std::string& name) {
-    Property prop = section.getPropertyByName(name);
+    Property prop = section.getProperty(name);
 
     return prop ? boost::optional<Property>(prop) : boost::none;
 }
 
+bool hasPropertyByName(const Section& section, const std::string& name) {
+  return section.hasProperty(name);
+}
 // Repository
 
 void setRepository(Section& sec, const boost::optional<std::string>& str) {
@@ -138,7 +141,7 @@ void PySection::do_export() {
         .def("_delete_section_by_id", REMOVER(std::string, nix::Section, deleteSection))
         // Property
         .def("create_property", createProperty)
-        .def("has_property_by_name", &Section::hasPropertyByName,
+        .def("has_property_by_name", hasPropertyByName,
              doc::section_has_property_by_name)
         .def("get_property_by_name", getPropertyByName,
              doc::section_get_property_by_name)

@@ -6,6 +6,8 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
+from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+
 import unittest
 
 from nix import *
@@ -17,6 +19,8 @@ class TestSource(unittest.TestCase):
         self.block  = self.file.create_block("test block", "recordingsession")
         self.source = self.block.create_source("test source", "recordingchannel")
         self.other  = self.block.create_source("other source", "sometype")
+        self.third  = self.block.create_source("third source", "sometype")
+        self.array  = self.block.create_data_array("test array", "test type", dtype=DataType.Double, shape=(1,1))
 
     def tearDown(self):
         del self.file.blocks[self.block.id]
@@ -90,3 +94,10 @@ class TestSource(unittest.TestCase):
         assert(len(self.source.find_sources(limit=1)) == 3)
         assert(len(self.source.find_sources(filtr=lambda x : "level2-p1-s" in x.name)) == 2)
         assert(len(self.source.find_sources(filtr=lambda x : "level2-p1-s" in x.name, limit=1)) == 0)
+
+    def test_sources_extend(self):
+        assert(len(self.array.sources) == 0)
+        self.array.sources.extend([self.source, self.other])
+        assert(len(self.array.sources) == 2)
+        self.array.sources.extend(self.third)
+        assert(len(self.array.sources) == 3)

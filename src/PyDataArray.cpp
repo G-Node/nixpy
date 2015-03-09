@@ -14,12 +14,6 @@
 #include <accessors.hpp>
 #include <transmorgify.hpp>
 
-//we want only the newest and freshest API
-#define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
-
-#include <numpy/arrayobject.h>
-#include <numpy/ndarrayobject.h>
-
 #include <PyEntity.hpp>
 
 #include <stdexcept>
@@ -65,148 +59,6 @@ void setPolynomCoefficients(DataArray& da, const std::vector<double>& pc) {
         da.polynomCoefficients(boost::none);
 }
 
-// Data
-
-static nix::DataType pyDtypeToNixDtype(const PyArray_Descr *dtype)
-{
-    if (dtype == nullptr) {
-        return nix::DataType::Nothing;
-    }
-
-    if (dtype->byteorder != '=' && dtype->byteorder != '|') {
-        //TODO: Handle case where specified byteorder *is*
-        //the native byteorder (via BOOST_BIG_ENDIAN macros)
-        return nix::DataType::Nothing;
-    }
-
-    switch (dtype->kind) {
-
-    case 'u':
-        switch (dtype->elsize) {
-        case 1: return nix::DataType::UInt8;
-        case 2: return nix::DataType::UInt16;
-        case 4: return nix::DataType::UInt32;
-        case 8: return nix::DataType::UInt64;
-        }
-        break;
-
-    case 'i':
-        switch (dtype->elsize) {
-        case 1: return nix::DataType::Int8;
-        case 2: return nix::DataType::Int16;
-        case 4: return nix::DataType::Int32;
-        case 8: return nix::DataType::Int64;
-        }
-        break;
-
-    case 'f':
-        switch (dtype->elsize) {
-        case 4: return nix::DataType::Float;
-        case 8: return nix::DataType::Double;
-        }
-        break;
-
-    default:
-        break;
-    }
-    return nix::DataType::Nothing;
-}
-
-static std::string nixDtypeToPyDtypeStr(nix::DataType nix_dtype)
-{
-    switch (nix_dtype) {
-    case nix::DataType::UInt8:  return "<u1";
-    case nix::DataType::UInt16: return "<u2";
-    case nix::DataType::UInt32: return "<u4";
-    case nix::DataType::UInt64: return "<u8";
-    case nix::DataType::Int8:   return "<i1";
-    case nix::DataType::Int16:  return "<i2";
-    case nix::DataType::Int32:  return "<i4";
-    case nix::DataType::Int64:  return "<i8";
-    case nix::DataType::Float:  return "<f4";
-    case nix::DataType::Double: return "<f8";
-    default:                    return "";
-    }
-}
-
-static nix::DataType arrayDescAsDtype(PyArrayObject *array) {
-    nix::DataType nix_dtype = pyDtypeToNixDtype(PyArray_DESCR(array));
-
-    if (nix_dtype == nix::DataType::Nothing) {
-        throw std::invalid_argument("Unsupported dtype for data");
-    }
-
-    return nix_dtype;
-}
-
-static PyArrayObject *makeArray(PyObject *data, int requirements) {
-    if (! PyArray_Check(data)) {
-        throw std::invalid_argument("Data not a NumPy array");
-    }
-
-    PyArrayObject *array = reinterpret_cast<PyArrayObject *>(data);
-
-     if (! PyArray_CHKFLAGS(array, requirements)) {
-        throw std::invalid_argument("data must be c-contiguous and aligned");
-    }
-
-     return array;
-}
-
-static NDSize arrayShapeAsNDSize(PyArrayObject *array) {
-    int array_rank = PyArray_NDIM(array);
-    npy_intp *array_shape = PyArray_SHAPE(array);
-
-    nix::NDSize data_shape(array_rank);
-    for (int i = 0; i < array_rank; i++) {
-        data_shape[i] = array_shape[i];
-    }
-
-    return data_shape;
-}
-
-
-static void arrayEnsureShapeAndCount(PyArrayObject *array,
-                                         nix::NDSize    count,
-                                         nix::NDSize    offset) {
-
-    if (! count) {
-        count = arrayShapeAsNDSize(array);
-    }
-
-    if (! offset) {
-        offset = nix::NDSize(count.size(), 0);
-    }
-}
-
-
-static void readData(DataArray& da, PyObject *data, nix::NDSize count, nix::NDSize offset) {
-
-    PyArrayObject *array = makeArray(data, NPY_ARRAY_CARRAY);
-
-    nix::DataType nix_dtype = arrayDescAsDtype(array);
-
-    arrayEnsureShapeAndCount(array, count, offset);
-    da.getData(nix_dtype, PyArray_DATA(array), count, offset);
-}
-
-
-static void writeData(DataArray& da, PyObject *data, nix::NDSize count, nix::NDSize offset) {
-
-    PyArrayObject *array = makeArray(data, NPY_ARRAY_CARRAY_RO);
-
-    nix::DataType nix_dtype = arrayDescAsDtype(array);
-
-    arrayEnsureShapeAndCount(array, count, offset);
-    da.setData(nix_dtype, PyArray_DATA(array), count, offset);
-}
-
-
-static std::string getDataType(const DataArray& da)
-{
-    nix::DataType nix_dtype = da.dataType();
-    return nixDtypeToPyDtypeStr(nix_dtype);
-}
 
 // Dimensions
 
@@ -232,13 +84,14 @@ PyObject* getDimension(const DataArray& da, size_t index) {
     }
 }
 
+
+
 void PyDataArray::do_export() {
 
-    // For numpy to work
-    import_array();
+
 
     PyEntityWithSources<base::IDataArray>::do_export("DataArray");
-    class_<DataArray, bases<base::EntityWithSources<base::IDataArray>>>("DataArray")
+    class_<DataArray, bases<base::EntityWithSources<base::IDataArray>, DataSet>>("DataArray")
         .add_property("label",
                       OPT_GETTER(std::string, DataArray, label),
                       setLabel,
@@ -255,16 +108,6 @@ void PyDataArray::do_export() {
                       GETTER(std::vector<double>, DataArray, polynomCoefficients),
                       setPolynomCoefficients,
                       doc::data_array_polynom_coefficients)
-        .add_property("data_extent",
-                      GETTER(NDSize, DataArray, dataExtent),
-                      SETTER(NDSize&, DataArray, dataExtent),
-                      doc::data_array_data_extent)
-        // Data
-        .add_property("data_type", &DataArray::dataType,
-                      doc::data_array_data_type)
-        .def("_write_data", writeData)
-        .def("_read_data", readData)
-        .def("_get_dtype", getDataType)
 
         // Dimensions
         .def("create_set_dimension", &DataArray::createSetDimension,

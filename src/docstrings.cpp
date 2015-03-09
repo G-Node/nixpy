@@ -223,18 +223,6 @@ const char* section_get_property_by_name = R"(
 
 // PyBlock
 
-const char* block_create_data_array = R"(
-    Create a new data array for this block.
-
-    :param name: The name of the data array to create.
-    :type name: str
-    :param type: The type of the data array.
-    :type type: str
-
-    :returns: The newly created data array.
-    :rtype: DataArray
-    )";
-
 const char* block_create_tag = R"(
     Create a new tag for this block.
 
@@ -242,7 +230,8 @@ const char* block_create_tag = R"(
     :type name: str
     :param type: The type of tag.
     :type type: str
-    :param references: All referenced data arrays.
+    :param position: Coordinates of the start position
+                     in units of the respective data dimension.
     :type references: list
 
     :returns: The newly created tag.
@@ -453,6 +442,228 @@ const char* multi_tag_create_feature = R"(
 
     :returns: The created feature object.
     :rtype: Feature
+    )";
+
+// PyDimension
+
+const char* sampled_dimension_axis = R"(
+    Get an axis as defined by this sampled dimension.
+
+    :param count: A positive integer specifying the length of the axis
+    (no of samples).
+    :param start: positive integer, indicates the starting sample.
+
+    :returns: The created axis
+    :rtype: list
+    )";
+
+const char* sampled_dimension_index_of = R"( 
+    Returns the index of a certain position in the dimension.
+
+    :param position: The position. 
+
+    :returns: The nearest index.
+    :rtype: int
+    )";
+
+
+const char* sampled_dimension_position_at = R"(
+    Returns the position corresponding to a given index.
+
+    :param index: A positive integer.
+
+    :returns: The position matching to the index.
+    :rtype: float
+    )";
+
+
+const char* range_dimension_index_of = R"(
+    Returns the index of a certain position in the dimension.
+
+    :param position: The position.
+
+    :returns: The nearest index.
+    :rtype: int
+    )";
+
+
+const char* range_dimension_tick_at = R"(
+    Returns the tick at the given index. Will throw an Exception if the index is out of bounds.
+
+    :param index: The index.
+
+    :returns: The corresponding position.
+    :rtype: double
+    )";
+
+
+const char* range_dimension_axis = R"(
+    Get an axis as defined by this range dimension.
+
+    :param count: A positive integer specifying the length of the axis
+    (no of points).
+    :param start: positive integer, indicates the starting tick.
+
+    :returns: The created axis
+    :rtype: list
+    )";
+
+
+// PyResult
+
+const char* mesage_id = R"(
+    The id of the element that caused the message.
+    This is a read only property.
+
+    :type: str
+    )";
+
+const char* message_msg = R"(
+    The actual error or warning message.
+    This is a read only property.
+
+    :type: str
+    )";
+
+const char* result_errors = R"(
+    A list of all error messages in this validation result.
+    This is a read only property.
+
+    :type: tuple of str
+    )";
+
+const char* result_warnings = R"(
+    A list of all warning messages in this validation result.
+    This is a read only property.
+
+    :type: tuple of str
+    )";
+
+const char* result_is_ok = R"(
+    The status of the validation result.
+
+    :returns: True if the result contains no warnings or errors,
+              False otherwise.
+    :rtype: bool
+    )";
+
+const char* result_has_warnings = R"(
+    The warning status of the validation result.
+
+    :returns: True if the result contains warnings, False otherwise.
+    :rtype: bool
+    )";
+
+const char* result_has_errors = R"(
+    The error status of the validation result.
+
+    :returns: True if the result contains warnings, False otherwise.
+    :rtype: bool
+    )";
+
+// PyUtil
+
+const char* unit_is_si = R"(
+    Determines whether a unit is a recognized SI unit.
+
+    :param unit: The unit that needs to be checked.
+
+    :returns: True if the unit is an SI unit, false otherwise.
+    :rtype: bool
+    )";
+
+const char* unit_sanitizer = R"(
+    Sanitizes a unit string. That is, it is de-blanked, and mu and µ symbols are changed
+    to u for micro.
+
+    :param unit: The unit that needs to be sanitized.
+
+    :returns: the sanitized unit.
+    :rtype: str
+    )";
+
+const char* unit_is_atomic = R"(
+    Checked whether a unit string represents an atomic si unit, i.e. not a
+    combination.
+
+    :param unit: The unit to be checked.
+
+    :returns: True if unit is atomic, False otherwise.
+    :rtype: bool
+    )";
+
+const char* unit_is_compound = R"(
+    Checks whether a unit string represents a combination of SI units.
+
+    :param unit: The unit string.
+
+    :returns: True if the unit string represents a combination of SI units, False otherwise.
+    :rtype: bool
+    )";
+
+const char* unit_split = R"(
+    Splits a unit string into magnitude prefix, the base unit, and the power.
+
+    :param unit: The unit string.
+
+    :returns: A tuple of prefix, base unit, and power.
+    :rtype: tuple
+    )";
+
+const char* unit_compound_split = R"(
+    Splits a compound unit (like mV/Hz) into the atomic units.
+
+    :param unit: The unit string.
+
+    :returns: A tuple containing the atomic units.
+    :rtype: tuple
+    )";
+
+const char* unit_scalable = R"(
+    Checks whether units are scalable versions of the same SI unit. Method works on two lists and
+    compares the corresponding units in both lists.
+
+    :param units_1: List of unit strings.
+    :param units_2: List of unit strings.
+
+    :returns: True if all corresponding units are scalable.
+    :rtype: bool
+    )";
+
+const char* unit_scaling = R"(
+    Returns the scaling factor to convert from unit_1 to unit_2.
+
+    :param unit_1: The unit string.
+    :param unit_2: The unit string.
+
+    :returns: The scaling factor.
+    :rtype: double
+    )";
+
+const char* name_sanitizer = R"(
+    Sanitizes a string supposed to be an entity name. That is,
+    invalid characters like slashes are substituted with underscores.
+
+    :param name: A string representing the name.
+
+    :returns: The sanitized name.
+    :rtype: str
+    )";
+
+const char* name_check = R"(
+    Checks a string whether is needs to be sanitized.
+
+    :param name: The name.
+
+    :returns: True if the name is valid, false otherwise.
+    :rtype: bool
+    )";
+
+const char* create_id = R"(
+    Creates an ID as used for nix entities.
+
+    :returns: The ID.
+    :rtype: str
     )";
 
 }

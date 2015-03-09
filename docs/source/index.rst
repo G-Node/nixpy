@@ -2,17 +2,20 @@
 NIX Python Binding Documentation
 ================================
 
-TODO write something
+The nixpy module contains the python binding to the nix c++ library. In order
+to use it you also have to have the nix library installed. 
 
-NIXPy Overview
-==============
 
-TODO write something
+Getting started
+=====================
+
+The following sections should help you getting started with nixpy. 
 
 .. toctree::
    :maxdepth: 2
 
    install
+   overview
    tutorial
 
 API Documentation

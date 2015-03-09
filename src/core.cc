@@ -6,6 +6,7 @@
 #include <accessors.hpp>
 
 #include <PyEntity.hpp>
+#include <PyUtil.hpp>
 
 using namespace boost::python;
 using namespace nix;
@@ -21,6 +22,7 @@ BOOST_PYTHON_MODULE(core)
     // show user defined / show py signatures / don't show cpp signatures
     docstring_options local_docstring_options(true, true, false);
 
+    PyResult::do_export();
     PyFile::do_export();
 
     PySection::do_export();
@@ -29,11 +31,16 @@ BOOST_PYTHON_MODULE(core)
 
     PyBlock::do_export();
     PySource::do_export();
+    PyDataSet::do_export();
     PyDataArray::do_export();
     PyDimensions::do_export();
     PyFeature::do_export();
     PyTag::do_export();
     PyMultiTag::do_export();
+
+    PyException::do_export();
+
+    PyUtil::do_export();
 
     to_python_converter<boost::optional<std::string>, option_transmogrify<std::string>>();
     option_transmogrify<std::string>::register_from_python();

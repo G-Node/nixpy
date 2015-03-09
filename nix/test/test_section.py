@@ -6,9 +6,13 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
+from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+
 import unittest
 
 from nix import *
+import nix
+
 
 class TestSection(unittest.TestCase):
 
@@ -89,6 +93,16 @@ class TestSection(unittest.TestCase):
 
         assert(len(self.section.sections) == 0)
 
+        self.section['easy subsection'] = nix.S('electrode')
+        subject = self.section['subject'] = nix.S('subject')
+        
+        assert(self.section['subject'] == subject)
+        assert(self.section['subject'].id == subject.id)
+        assert('easy subsection' in [v.name for k, v in self.section.sections.items()])
+        assert('easy subsection' in self.section.sections)
+        assert(self.section['easy subsection'].name == 'easy subsection')
+        #assert('easy subsection' in self.section)
+
     def test_section_find_sections(self):
         for i in range(2): self.section.create_section("level1-p0-s" + str(i), "dummy")
         for i in range(2): self.section.sections[0].create_section("level2-p1-s" + str(i), "dummy")
@@ -129,9 +143,33 @@ class TestSection(unittest.TestCase):
         props = dict(self.section.items())
         assert(props["test prop"] == prop)
 
-        assert(prop.id == self.section[0].id)
-        assert(prop.id == self.section[-1].id)
+        assert(prop.id == self.section.props[0].id)
+        assert(prop.id == self.section.props[-1].id)
 
-        del self.section[0]
+        #easy prop creation
+        self.section['ep_str'] = 'str'
+        self.section['ep_int'] = 23
+        self.section['ep_float'] = 42.0
+        self.section['ep_list'] = [1, 2, 3]
+        self.section['ep_val'] = Value(1.0)
+
+        self.section['ep_val'] = 2.0
+
+
+        res = [x in self.section for x in ['ep_str', 'ep_int', 'ep_float']]
+        assert(all(res))
+
+        assert(self.section['ep_str'] == 'str')
+        assert(self.section['ep_int'] == 23)
+        assert(self.section['ep_float'] == 42.0)
+        assert(self.section['ep_list'] == [1, 2, 3])
+
+        def create_hetero_section():
+            self.section['ep_ex'] = [1, 1.0]
+        self.assertRaises(ValueError, create_hetero_section)
+
+        sections = [x.id for x in self.section]
+        for x in sections:
+            del self.section[x]
 
         assert(len(self.section) == 0)

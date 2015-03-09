@@ -6,6 +6,8 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
+from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+
 import unittest
 
 from nix import *
@@ -13,7 +15,10 @@ from nix import *
 class TestBlock(unittest.TestCase):
 
     def setUp(self):
-        self.file  = File.open("unittest.h5", FileMode.Overwrite)
+        # TODO "unittest.h5 is a unicode string and is handed over to a c++ function expecting a string"
+        # this leads to an error. if "unittest.h5".encode("utf-8") or b'unittest.h5' is used, the c++ function can handle the string
+        # but is not able to create the file any longer. Should this somehow be adressed on the c++ side of the code?
+        self.file  = File.open('unittest.h5', FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         self.other = self.file.create_block("other block", "recordingsession")
 

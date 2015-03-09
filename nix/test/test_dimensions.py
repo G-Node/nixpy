@@ -6,6 +6,8 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
+from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+
 import unittest
 
 from nix import *
@@ -64,6 +66,19 @@ class TestDimensions(unittest.TestCase):
         self.sample_dim.offset = None
         assert(self.sample_dim.offset is None)
 
+        self.sample_dim.sampling_interval = 2.
+        self.sample_dim.offset = 3.
+
+        assert(self.sample_dim.index_of(3.14) == 0)
+        assert(self.sample_dim.index_of(23.) == 10)
+
+        assert(self.sample_dim.position_at(0) == 3.)
+        assert(self.sample_dim.position_at(200) == 200*2.+3.)
+
+        assert(len(self.sample_dim.axis(10)) == 10)
+        assert(self.sample_dim.axis(10)[0] == 3.)
+        assert(self.sample_dim.axis(10)[-1] == 9*2.+3.)
+
     def test_range_dimension(self):
         assert(self.range_dim.index == 3)
         assert(self.range_dim.dimension_type == DimensionType.Range)
@@ -85,3 +100,19 @@ class TestDimensions(unittest.TestCase):
         self.range_dim.ticks = other
         assert(self.range_dim.ticks == other)
 
+        assert(self.range_dim.index_of(0.) == 0)
+        assert(self.range_dim.index_of(10.) == (round(10./3.14)))
+        assert(self.range_dim.index_of(100.) == 9)
+        assert(self.range_dim.index_of(-100.) == 0)
+
+        assert(self.range_dim.tick_at(0) == 0)
+        assert(self.range_dim.tick_at(9) == other[-1])
+        with self.assertRaises(IndexError):
+            self.range_dim.tick_at(100)
+
+        assert(self.range_dim.axis(10) == other)
+        assert(self.range_dim.axis(2) == other[:2])
+        assert(self.range_dim.axis(2, 2) == other[2:4])
+        with self.assertRaises(IndexError):
+            self.range_dim.axis(10, 2)
+            self.range_dim.axis(100)

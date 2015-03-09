@@ -6,7 +6,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from nix.core import Property, Value
 from nix.util.inject import Inject
@@ -22,6 +22,14 @@ class PropertyMixin(Property):
         else:
             return False
 
+    def __hash__(self):
+        """
+        overwriting method __eq__ blocks inheritance of __hash__ in Python 3
+        hash has to be either explicitly inherited from parent class, implemented or escaped
+        """
+        return hash(self.id)
+
+
 class ValueMixin(Value):
 
     class __metaclass__(Inject, Value.__class__):
@@ -32,3 +40,10 @@ class ValueMixin(Value):
             return self.value == other.value
         else:
             return self.value == other
+
+    def __hash__(self):
+        """
+        overwriting method __eq__ blocks inheritance of __hash__ in Python 3
+        hash has to be either explicitly inherited from parent class, implemented or escaped
+        """
+        return hash(self.id)

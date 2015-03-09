@@ -128,6 +128,60 @@ extern const char* multi_tag_extents;
 
 extern const char* multi_tag_create_feature;
 
+// PyDimension
+
+extern const char* sampled_dimension_axis;
+
+extern const char* sampled_dimension_position_at;
+
+extern const char* sampled_dimension_index_of;
+
+extern const char* range_dimension_index_of;
+
+extern const char* range_dimension_tick_at;
+
+extern const char* range_dimension_axis;
+
+// PyResult
+
+extern const char* mesage_id;
+
+extern const char* message_msg;
+
+extern const char* result_errors;
+
+extern const char* result_warnings;
+
+extern const char* result_is_ok;
+
+extern const char* result_has_warnings;
+
+extern const char* result_has_errors;
+
+// PyUtil
+
+extern const char* unit_sanitizer;
+
+extern const char* unit_is_si;
+
+extern const char* unit_is_atomic;
+
+extern const char* unit_is_compound;
+
+extern const char* unit_split;
+
+extern const char* unit_compound_split;
+
+extern const char* unit_scalable;
+
+extern const char* unit_scaling;
+
+extern const char* name_sanitizer;
+
+extern const char* name_check;
+
+extern const char* create_id;
+
 }
 }
 

@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+
 __author__ = 'gicmo'
 
 try:
@@ -6,12 +9,18 @@ try:
 except:
     from distutils.core import setup, Extension
 
-import commands
+# python version dependent import of getstatusoutput
+try:
+	from commands import getstatusoutput
+except:
+	from subprocess import getstatusoutput
+
 import numpy as np
 import sys
 import os
 import re
 import fnmatch
+import distutils
 
 def find(pattern, path):
     result = []
@@ -36,7 +45,8 @@ CONTACT         = re.search(r"CONTACT\s*=\s*'([^']*)'", info).group(1)
 BRIEF           = re.search(r"BRIEF\s*=\s*'([^']*)'", info).group(1)
 HOMEPAGE        = re.search(r"HOMEPAGE\s*=\s*'([^']*)'", info).group(1)
 
-class PackageNotFoundError(StandardError):
+# Replaced StandardError with Exception since StandardError is removed in Py3.x
+class PackageNotFoundError(Exception):
     pass
 
 def pkg_config(*packages, **kw):
@@ -47,7 +57,7 @@ def pkg_config(*packages, **kw):
         del kw['ignore_error']
 
     pkg_string = ' '.join(packages)
-    status, out = commands.getstatusoutput("pkg-config --libs --cflags " + pkg_string)
+    status, out = getstatusoutput("pkg-config --libs --cflags " + pkg_string)
     if status != 0:
         err_str = 'Some packages were not found: %s [%s]' % (pkg_string, out)
         if ignore_error:
@@ -60,7 +70,9 @@ def pkg_config(*packages, **kw):
         kw.setdefault(flag_map.get(token[:2]), []).append(token[2:])
 
     # remove duplicated
-    for k, v in kw.iteritems():
+    # replaced .iteritems() with .items, since .iteritems() is not available in Py3.x
+    # could lead to increased memory usage and computation time.
+    for k, v in kw.items():
         del kw[k]
         kw[k] = list(set(v))
 
@@ -74,8 +86,10 @@ else:
     nix_lnk_arg = ['/LIBPATH:'+nix_lib_dir, '/DEFAULTLIB:nix.lib']
 
 nixpy_sources = [
+    'src/PyUtil.cpp',
     'src/core.cc',
     'src/docstrings.cpp',
+    'src/PyExceptions.cpp',
     'src/PyBlock.cpp',
     'src/PyFile.cpp',
     'src/PySection.cpp',
@@ -83,10 +97,12 @@ nixpy_sources = [
     'src/PyValue.cpp',
     'src/PySource.cpp',
     'src/PyDataArray.cpp',
+    'src/PyDataSet.cpp',
     'src/PyDimensions.cpp',
     'src/PyFeature.cpp',
     'src/PyTag.cpp',
     'src/PyMultiTag.cpp',
+    'src/PyResult.cpp'
 ]
 
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
@@ -94,11 +110,11 @@ boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
 if os.name != 'nt':
     boost_lnk_arg = ['-lboost_python']
 else:
-    boostlib = find('boost_python*.lib', boost_lib_dir)
+    boostlib = find('libboost_python*.lib', boost_lib_dir)
     boost_lnk_arg = ['/LIBPATH:'+boost_lib_dir, '/DEFAULTLIB:'+boostlib[0]]
 
 classifiers   = [
-                    'Development Status :: 3 - Alpha',
+                    'Development Status :: 4 - Beta',
                     'Programming Language :: Python',
                     'Programming Language :: Python :: 2.6',
                     'Programming Language :: Python :: 2.7',
@@ -107,7 +123,7 @@ classifiers   = [
 
 native_ext    = Extension(
                     'nix.core',
-                    extra_compile_args = ['-std=c++11'],
+                    extra_compile_args = ['-std=c++11'] if os.name!='nt' else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
                     extra_link_args=boost_lnk_arg + nix_lnk_arg,
                     sources = nixpy_sources,
                     runtime_library_dirs = [nix_lib_dir, boost_lib_dir] if os.name!='nt' else None,

@@ -3,6 +3,10 @@
 *.pyo
 *.egg
 *.egg-info
+docs/source/*.html
+docs/source/*.h5
+docs/source/images
+docs/source/_*
 dist
 build
 eggs

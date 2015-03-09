@@ -6,8 +6,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import absolute_import
-
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 class ProxyList(object):
     """
@@ -100,3 +99,9 @@ class RefProxyList(ProxyList):
             self.__appender(key)
         else:
             raise TypeError("The only id strings or entities can be appended")
+
+    def extend(self, keys):
+        if hasattr(keys, '__iter__'):
+            map(self.append, keys)
+        else:
+            self.append(keys)

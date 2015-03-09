@@ -6,7 +6,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import sys
 
@@ -14,8 +14,34 @@ import nix.util.find as finders
 from nix.core import Section
 from nix.util.inject import Inject
 from nix.util.proxy_list import ProxyList
+from nix.property import Value
 
 from nix.file import SectionProxyList
+
+from operator import attrgetter
+import collections
+
+
+class S(object):
+    def __init__(self, section_type, section=None):
+        self.section_type = section_type
+        self.section = section
+
+    def __setitem__(self, key, value):
+        self.section[key] = value
+
+    def __setattr__(self, key, value):
+        if key in ['section_type', 'section']:
+            object.__setattr__(self, key, value)
+        else:
+            setattr(self.section, key, value)
+
+    def __getattribute__(self, item):
+        if item in ['section_type', 'section']:
+            return object.__getattribute__(self, item)
+        else:
+            return getattr(self.section, item)
+
 
 class PropertyProxyList(ProxyList):
 
@@ -91,28 +117,65 @@ class SectionMixin(Section):
         else:
             return False
 
+    def __hash__(self):
+        """
+        overwriting method __eq__ blocks inheritance of __hash__ in Python 3
+        hash has to be either explicitly inherited from parent class, implemented or escaped
+        """
+        return hash(self.id)
+
     def __len__(self):
-        return len(self._properties)
+        return len(self.props)
 
     def __getitem__(self, key):
-        return self._properties[key]
+
+        if key not in self.props and key in self.sections:
+            return self.sections[key]
+
+        prop = self.props[key]
+        values = map(attrgetter('value'), prop.values)
+        if len(values) == 1:
+            values = values[0]
+        return values
 
     def __delitem__(self, key):
-        del self._properties[key]
+        del self.props[key]
+
+    def __setitem__(self, key, data):
+
+        if isinstance(data, S):
+            data.section = self.create_section(key, data.section_type)
+            return
+
+        if not isinstance(data, list):
+            data = [data]
+
+        val = map(lambda x: x if isinstance(x, Value) else Value(x), data)
+        dtypes = reduce(lambda x, y: x if y.data_type in x else x + [y.data_type], val, [val[0].data_type])
+        if len(dtypes) > 1:
+            raise ValueError('Not all input values are of the same type')
+
+        if key not in self.props:
+            prop = self.create_property(key, dtypes[0])
+        else:
+            prop = self.props[key]
+        prop.values = val
 
     def __iter__(self):
-        for p in self._properties:
-            yield p
+        for name, item in self.items():
+            yield item
 
     def items(self):
-        for p in self._properties:
+        for p in self.props:
             yield (p.name, p)
+        for s in self.sections:
+            yield (s.name, s)
 
     def __contains__(self, key):
-        return key in self._properties
+        return key in self.props or key in self.sections
 
     @property
-    def _properties(self):
+    def props(self):
         """
         A property containing all Property entities associated with the section. Properties can
         be accessed by index of via their id. Properties can be deleted from the list. Adding
