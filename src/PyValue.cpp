@@ -28,13 +28,21 @@ boost::shared_ptr<Value> create(PyObject* value) {
     if (PyBool_Check(value)) {
         bool conv = extract<bool>(value);
         created->set(conv);
+#if PY_MAJOR_VERSION >= 3
+    } else if (PyLong_Check(value)) {
+#else
     } else if (PyInt_Check(value)) {
+#endif
         int64_t conv = extract<int64_t>(value);
         created->set(conv);
     } else if (PyFloat_Check(value)) {
         double conv = extract<double>(value);
         created->set(conv);
+#if PY_MAJOR_VERSION >= 3
+    } else if (PyUnicode_Check(value)) {
+#else
     } else if (PyString_Check(value)) {
+#endif
         std::string conv = extract<std::string>(value);
         created->set(conv);
     } else {
@@ -51,13 +59,21 @@ void set(Value& ref, PyObject* value) {
     } else if (PyBool_Check(value)) {
         bool conv = extract<bool>(value);
         ref.set(conv);
+#if PY_MAJOR_VERSION >= 3
+    } else if (PyLong_Check(value)) {
+#else
     } else if (PyInt_Check(value)) {
+#endif
         int64_t conv = extract<int64_t>(value);
         ref.set(conv);
     } else if (PyFloat_Check(value)) {
         double conv = extract<double>(value);
         ref.set(conv);
+#if PY_MAJOR_VERSION >= 3
+    } else if (PyUnicode_Check(value)) {
+#else
     } else if (PyString_Check(value)) {
+#endif
         std::string conv = extract<std::string>(value);
         ref.set(conv);
     } else {
