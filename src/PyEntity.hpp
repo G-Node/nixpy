@@ -112,6 +112,12 @@ struct PyEntityWithSources {
     }
 };
 
+#if PY_VERSION_HEX >= 0x03000000
+#define NIXPY_DO_EXPORT_RETVAL void *
+#else
+#define NIXPY_DO_EXPORT_RETVAL void
+#endif
+
 struct PyResult {
     static void do_export();
 };
@@ -145,7 +151,7 @@ struct PyDataArray {
 };
 
 struct PyDataSet {
-    static void do_export();
+    static NIXPY_DO_EXPORT_RETVAL do_export();
 };
 
 struct PyDimensions {
