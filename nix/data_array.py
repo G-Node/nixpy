@@ -117,9 +117,10 @@ class DataSetMixin(DataSet):
 
         # if we got to here we have a tuple with len >= 1
         count, offset, shape = self.__tuple_to_count_offset_shape(index)
-
         raw = np.empty(shape, dtype=self.dtype)
+
         self._read_data(raw, count, offset)
+
         return raw
 
     def __setitem__(self, index, value):
@@ -283,17 +284,17 @@ class DataSetMixin(DataSet):
         if pos > -1:
             index = index[:pos] + fill_none(shape, index) + index[pos+1:]
 
-        completed = map(self.__complete_slices, shape, index)
-        combined = map(lambda s: (s.start, s.stop), completed)
+        completed = list(map(self.__complete_slices, shape, index))
+        combined = list(map(lambda s: (s.start, s.stop), completed))
         count = tuple(x[1] - x[0] for x in combined)
-        offset = zip(*combined)[0]
+        offset = [x for x in zip(*combined)][0]
 
         # drop all indices from count that came from single ints
         # NB: special case when we only have ints, e.g. (int, ) then
         # we get back the empty tuple and this is what we want,
         # because it indicates a scalar result
         squeezed = map(lambda i, c: c if type(i) != int else None, index, count)
-        shape = filter(lambda x: x is not None, squeezed)
+        shape = list(filter(lambda x: x is not None, squeezed))
 
         return count, offset, shape
 

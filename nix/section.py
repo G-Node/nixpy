@@ -9,6 +9,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import sys
+import functools
 
 import nix.util.find as finders
 from nix.core import Section
@@ -135,7 +136,7 @@ class SectionMixin(Section):
             return self.sections[key]
 
         prop = self.props[key]
-        values = map(attrgetter('value'), prop.values)
+        values = list(map(attrgetter('value'), prop.values))
         if len(values) == 1:
             values = values[0]
         return values
@@ -152,8 +153,8 @@ class SectionMixin(Section):
         if not isinstance(data, list):
             data = [data]
 
-        val = map(lambda x: x if isinstance(x, Value) else Value(x), data)
-        dtypes = reduce(lambda x, y: x if y.data_type in x else x + [y.data_type], val, [val[0].data_type])
+        val = list(map(lambda x: x if isinstance(x, Value) else Value(x), data))
+        dtypes = functools.reduce(lambda x, y: x if y.data_type in x else x + [y.data_type], val, [val[0].data_type])
         if len(dtypes) > 1:
             raise ValueError('Not all input values are of the same type')
 
