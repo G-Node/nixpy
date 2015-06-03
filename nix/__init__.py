@@ -21,7 +21,7 @@ from nix.data_array import DataSetMixin
 from nix.data_array import DataArrayMixin
 from nix.tag import TagMixin
 from nix.multi_tag import MultiTagMixin
-from nix.entity_with_sources import DataArrySourcesMixin, MultiTagSourcesMixin, \
+from nix.entity_with_sources import DataArraySourcesMixin, MultiTagSourcesMixin, \
     TagSourcesMixin
 
 from nix.section import S
@@ -32,6 +32,6 @@ __all__ = ("File", "FileMode", "Block", "DataType", "Section", "Property",
            "Tag", "MultiTag")
 
 del BlockMixin, FileMixin, SectionMixin, PropertyMixin, ValueMixin, SourceMixin, DataArrayMixin, TagMixin
-del MultiTagMixin, DataArrySourcesMixin, MultiTagSourcesMixin, TagSourcesMixin
+del MultiTagMixin, DataArraySourcesMixin, MultiTagSourcesMixin, TagSourcesMixin
 
 __author__ = 'Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, Balint Morvai'

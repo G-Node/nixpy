@@ -12,9 +12,14 @@ import sys
 
 import nix.util.find as finders
 from nix.core import Block
-from nix.util.inject import Inject
+from nix.util.inject import inject
 from nix.util.proxy_list import ProxyList
 import numpy as np
+
+try:
+    from sys import maxint
+except:
+    from sys import maxsize as maxint
 
 
 class SourceProxyList(ProxyList):
@@ -46,10 +51,6 @@ class TagProxyList(ProxyList):
 
 
 class BlockMixin(Block):
-
-    class __metaclass__(Inject, Block.__class__):
-        # this injects all members and the doc into nix.core.Block
-        pass
 
     def create_data_array(self, name, array_type, dtype=None, shape=None, data=None):
         """
@@ -91,7 +92,7 @@ class BlockMixin(Block):
             da.data.write_direct(data)
         return da
 
-    def find_sources(self, filtr=lambda _ : True, limit=sys.maxint):
+    def find_sources(self, filtr=lambda _ : True, limit=maxint):
         """
         Get all sources in this block recursively.
 
@@ -178,3 +179,6 @@ class BlockMixin(Block):
         hash has to be either explicitly inherited from parent class, implemented or escaped
         """
         return hash(self.id)
+
+
+inject((Block,), dict(BlockMixin.__dict__))

@@ -12,17 +12,20 @@ import sys
 
 import nix.util.find as finders
 from nix.core import Source
-from nix.util.inject import Inject
+from nix.util.inject import inject
 from nix.util.proxy_list import ProxyList
 
 from nix.block import SourceProxyList
 
+try:
+    from sys import maxint
+except:
+    from sys import maxsize as maxint
+
+
 class SourceMixin(Source):
 
-    class __metaclass__(Inject, Source.__class__):
-        pass
-
-    def find_sources(self, filtr=lambda _ : True, limit=sys.maxint):
+    def find_sources(self, filtr=lambda _ : True, limit=maxint):
         """
         Get all child sources of this source recursively.
 
@@ -60,3 +63,6 @@ class SourceMixin(Source):
         hash has to be either explicitly inherited from parent class, implemented or escaped
         """
         return hash(self.id)
+
+
+inject((Source,), dict(SourceMixin.__dict__))

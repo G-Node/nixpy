@@ -1,29 +1,15 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-class Inject(type):
-    """
-    Class that can be used as a metaclass in order to ease monkey patching.
 
-    Using Inject as metaclass has the effect, that all methods from the
-    class where it was uses will be added (monkey patched) to its base classes.
+excludes = ("__module__", "__metaclass__")
 
-    Usage:
+""" 
+Does monkey patching to the classes in 'bases' by adding
+methods from the given dict 'dct'.
+"""
+def inject(bases, dct):
+    for base in bases:
+        for k,v in dct.items():
+            if k not in excludes:
+                setattr(base,k,v)
 
-    >>> class Foo(Bar):
-    >>>     class __metaclass__(Inject):
-    >>>          pass
-
-    The above code will inject all methods from Foo into Bar as soon as
-    Foo is imported.
-    """
-
-    def __init__(self, name, bases, dct):
-        excludes = ("__module__", "__metaclass__")
-
-        for b in bases:
-            if type(b) not in (self, type):
-                for k,v in dct.items():
-                    if k not in excludes:
-                        setattr(b,k,v)
-
-        super(Inject, self).__init__(name, bases, dct)

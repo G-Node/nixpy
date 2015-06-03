@@ -9,7 +9,7 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from nix.core import Tag
-from nix.util.inject import Inject
+from nix.util.inject import inject
 from nix.util.proxy_list import ProxyList, RefProxyList
 
 
@@ -33,9 +33,6 @@ class FeatureProxyList(ProxyList):
 
 
 class TagMixin(Tag):
-
-    class __metaclass__(Inject, Tag.__class__):
-        pass
 
     @property
     def references(self):
@@ -65,3 +62,6 @@ class TagMixin(Tag):
         if not hasattr(self, "_features"):
             setattr(self, "_features", FeatureProxyList(self))
         return self._features
+
+
+inject((Tag,), dict(TagMixin.__dict__))

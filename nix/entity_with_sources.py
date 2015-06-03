@@ -9,8 +9,9 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from nix.core import DataArray, MultiTag, Tag
-from nix.util.inject import Inject
+from nix.util.inject import inject
 from nix.util.proxy_list import RefProxyList
+
 
 class RefSourceProxyList(RefProxyList):
 
@@ -27,24 +28,22 @@ def _get_sources(self):
         setattr(self, "_sources", RefSourceProxyList(self))
     return self._sources
 
-class DataArrySourcesMixin(DataArray):
 
-    class __metaclass__(Inject, DataArray.__class__):
-        pass
+class DataArraySourcesMixin(DataArray):
 
     sources = property(_get_sources, None, None, _sources_doc)
 
 
 class MultiTagSourcesMixin(MultiTag):
 
-    class __metaclass__(Inject, MultiTag.__class__):
-        pass
-
     sources = property(_get_sources, None, None, _sources_doc)
+
 
 class TagSourcesMixin(Tag):
 
-    class __metaclass__(Inject, Tag.__class__):
-        pass
-
     sources = property(_get_sources, None, None, _sources_doc)
+
+
+inject((DataArray,), dict(DataArraySourcesMixin.__dict__))
+inject((MultiTag,), dict(MultiTagSourcesMixin.__dict__))
+inject((Tag,), dict(TagSourcesMixin.__dict__))

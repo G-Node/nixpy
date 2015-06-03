@@ -12,14 +12,11 @@ import sys
 
 from nix.core import DataArray
 from nix.core import DataSet
-from nix.util.inject import Inject
+from nix.util.inject import inject
 
 import numpy as np
 
 class DataArrayMixin(DataArray):
-
-    class __metaclass__(Inject, DataArray.__class__):
-        pass
 
     @property
     def data(self):
@@ -106,9 +103,6 @@ class DataSetMixin(DataSet):
     """
     Data IO object for DataArray.
     """
-
-    class __metaclass__(Inject, DataSet.__class__):
-        pass
 
     def __array__(self):
         raw = np.empty(self.shape, dtype=self.dtype)
@@ -302,3 +296,7 @@ class DataSetMixin(DataSet):
         shape = filter(lambda x: x is not None, squeezed)
 
         return count, offset, shape
+
+
+inject((DataArray,), dict(DataArrayMixin.__dict__))
+inject((DataSet,), dict(DataSetMixin.__dict__))
