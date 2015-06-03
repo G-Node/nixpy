@@ -14,6 +14,12 @@ import numpy as np
 
 from nix import *
 
+try:
+    basestring = basestring
+except NameError:  # 'basestring' is undefined, must be Python 3
+    basestring = (str,bytes)
+
+
 class TestDataArray(unittest.TestCase):
 
     def setUp(self):

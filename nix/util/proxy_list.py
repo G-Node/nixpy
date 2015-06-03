@@ -8,6 +8,12 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
+try:
+    basestring = basestring
+except NameError:  # 'basestring' is undefined, must be Python 3
+    basestring = (str,bytes)
+
+
 class ProxyList(object):
     """
     Object that turns getters, setters etc of a NIX entity into
@@ -102,6 +108,6 @@ class RefProxyList(ProxyList):
 
     def extend(self, keys):
         if hasattr(keys, '__iter__'):
-            map(self.append, keys)
+            [self.append(key) for key in keys]
         else:
             self.append(keys)
