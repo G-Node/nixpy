@@ -136,6 +136,8 @@ class TestDataArray(unittest.TestCase):
 
         self.array[...] = [float(-i) for i in range(100)]
         assert(np.array_equal(self.array[()], data))
+        assert(np.array_equal(self.array[0:-10], data[0:-10]))
+        assert(np.array_equal(self.array[-10], data[-10]))
 
         self.array[0] = 42
         assert(self.array[0] == 42.0)
@@ -164,8 +166,11 @@ class TestDataArray(unittest.TestCase):
         assert(np.array_equal(dset[12, ...], data[12, ...]))
         assert(np.array_equal(dset[..., 12], data[..., 12]))
         assert(np.array_equal(dset[1:], data[1:]))
+        assert(np.array_equal(dset[-20:, -20:], data[123-20:, 123-20:]))
         assert(np.array_equal(dset[:1], data[:1]))
+        assert(np.array_equal(dset[:-1, :-1], data[1:123, 1:123]))
         assert(np.array_equal(dset[1:10, 1:10], data[1:10, 1:10]))
+        assert(np.array_equal(dset[1:-2, 1:-2], data[1:121, 1:121]))
 
         a3 = self.block.create_data_array("int identity array", "signal", DataType.Int32, (123, 123))
         assert(a3.shape == (123, 123))
@@ -179,9 +184,13 @@ class TestDataArray(unittest.TestCase):
         assert(len(dset) == len(data))
         assert(dset.size == data.size)
         assert(np.array_equal(dset[2, ...], data[2, ...]))
+        assert(np.array_equal(dset[-1, ...], data[2, ...]))
         assert(np.array_equal(dset[..., 3], data[..., 3]))
+        assert(np.array_equal(dset[..., -2], data[..., 3]))
         assert(np.array_equal(dset[2, ..., 3], data[2, ..., 3]))
+        assert(np.array_equal(dset[2, ..., -2], data[2, ..., 3]))
         assert(np.array_equal(dset[1:2, ..., 3:5], data[1:2, ..., 3:5]))
+        assert(np.array_equal(dset[1:2, ..., 3:-1], data[1:2, ..., 3:4]))
 
         #indexed writing (n-d)
         d2 = np.random.rand(2,2)
