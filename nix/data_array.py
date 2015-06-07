@@ -117,10 +117,8 @@ class DataSetMixin(DataSet):
 
     def __getitem__(self, index):
         index = self.__index_to_tuple(index)
-
         if len(index) < 1:
             return np.array(self)
-
         # if we got to here we have a tuple with len >= 1
         count, offset, shape = self.__tuple_to_count_offset_shape(index)
 
@@ -253,12 +251,23 @@ class DataSetMixin(DataSet):
         if type(index) is slice:
             if index.step is not None:
                 raise IndexError('Invalid index, stepping unsupported')
-            if index.start is None:
-                index = slice(0, index.stop)
-            if index.stop is None:
-                index = slice(index.start, shape)
+            start = index.start
+            stop = index.stop
+            if start is None:
+                start = 0
+            elif start < 0:
+                start = shape + start
+            if stop is None:
+                stop = shape
+            elif stop < 0:
+                stop = shape + stop
+            index = slice(start, stop, index.step)
         elif type(index) is int:
-            index = slice(index, index+1)
+            if index < 0:
+                index = shape + index
+                index = slice(index, index+1)
+            else:
+                index = slice(index, index+1)
         elif index is None:
             index = slice(0, shape)
         else:
