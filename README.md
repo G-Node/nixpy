@@ -68,7 +68,7 @@ Getting Started (Windows)
 
 **Windows Installer**
 
-You can get a windows installer for both, 32- and 64-bit: [nixpy - Beta 1](https://github.com/G-Node/nixpy/releases)
+You can get a [windows installer](https://github.com/G-Node/nixpy/releases) for both, 32- and 64-bit.
 
 **Build NIXPY under Windows**
 
