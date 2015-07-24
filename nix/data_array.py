@@ -293,6 +293,11 @@ class DataSetMixin(DataSet):
         if pos > -1:
             index = index[:pos] + fill_none(shape, index) + index[pos+1:]
 
+        # in python3 map does not work with None therefore if
+        # len(shape) != len(index) we wont get the expected
+        # result. We therefore need to fill up the missing values
+        index = index + fill_none(shape, index, to_replace=0)
+
         completed = list(map(self.__complete_slices, shape, index))
         combined = list(map(lambda s: (s.start, s.stop), completed))
         count = tuple(x[1] - x[0] for x in combined)
