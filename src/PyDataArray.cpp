@@ -116,12 +116,16 @@ void PyDataArray::do_export() {
              doc::data_array_create_sampled_dimension)
         .def("create_range_dimension", &DataArray::createRangeDimension,
              doc::data_array_create_range_dimension)
+        .def("create_alias_range_dimension", &DataArray::createAliasRangeDimension,
+             doc::data_array_create_alias_range_dimension)
         .def("append_set_dimension", &DataArray::appendSetDimension,
              doc::data_array_append_set_dimension)
         .def("append_sampled_dimension", &DataArray::appendSampledDimension,
              doc::data_array_append_sampled_dimension)
         .def("append_range_dimension", &DataArray::appendRangeDimension,
              doc::data_array_append_range_dimension)
+        .def("append_alias_range_dimension", &DataArray::appendAliasRangeDimension,
+             doc::data_array_append_alias_range_dimension)
         .def("_dimension_count", &DataArray::dimensionCount)
         .def("_delete_dimension_by_pos", &DataArray::deleteDimension)
         .def("_get_dimension_by_pos", getDimension)
