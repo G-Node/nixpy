@@ -102,12 +102,15 @@ extern const char* data_array_create_sampled_dimension;
 
 extern const char* data_array_create_range_dimension;
 
+extern const char* data_array_create_alias_range_dimension;
+
 extern const char* data_array_append_set_dimension;
 
 extern const char* data_array_append_sampled_dimension;
 
 extern const char* data_array_append_range_dimension;
 
+extern const char* data_array_append_alias_range_dimension;
 // PyTag
 
 extern const char* tag_units;
