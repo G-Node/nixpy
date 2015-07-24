@@ -261,8 +261,8 @@ class DataSetMixin(DataSet):
         return index
 
     @staticmethod
-    def __fill_none(shape, index):
-        size = len(shape) - len(index) + 1
+    def __fill_none(shape, index, to_replace=1):
+        size = len(shape) - len(index) + to_replace
         return tuple([None] * size)
 
     def __tuple_to_count_offset_shape(self, index):
