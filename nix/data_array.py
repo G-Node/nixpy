@@ -261,8 +261,8 @@ class DataSetMixin(DataSet):
         return index
 
     @staticmethod
-    def __fill_none(shape, index):
-        size = len(shape) - len(index) + 1
+    def __fill_none(shape, index, to_replace=1):
+        size = len(shape) - len(index) + to_replace
         return tuple([None] * size)
 
     def __tuple_to_count_offset_shape(self, index):
@@ -283,6 +283,11 @@ class DataSetMixin(DataSet):
         pos = index.index(Ellipsis) if Ellipsis in index else -1
         if pos > -1:
             index = index[:pos] + fill_none(shape, index) + index[pos+1:]
+
+        # in python3 map does not work with None therefore if
+        # len(shape) != len(index) we wont get the expected
+        # result. We therefore need to fill up the missing values
+        index = index + fill_none(shape, index, to_replace=0)
 
         completed = list(map(self.__complete_slices, shape, index))
         combined = list(map(lambda s: (s.start, s.stop), completed))
