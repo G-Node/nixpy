@@ -14,6 +14,12 @@ import numpy as np
 
 from nix import *
 
+try:
+    basestring = basestring
+except NameError:  # 'basestring' is undefined, must be Python 3
+    basestring = (str,bytes)
+
+
 class TestDataArray(unittest.TestCase):
 
     def setUp(self):
@@ -252,7 +258,11 @@ class TestDataArray(unittest.TestCase):
         da = self.block.create_data_array('dtype_int_from_data', 'b', data=test_data)
         assert(da.dtype == test_data.dtype)
 
-        void_data = np.array(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'], dtype='V1')
+        bdata = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+        if sys.version_info[0] == 3:
+            bdata = [bytes(x, 'UTF-8') for x in bdata]
+
+        void_data = np.array(bdata, dtype='V1')
         da = self.block.create_data_array('dtype_opaque', 'b', data=void_data)
         assert(da.dtype == np.dtype('V1'))
         assert(np.array_equal(void_data, da[:]))

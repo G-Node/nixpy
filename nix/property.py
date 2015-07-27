@@ -9,12 +9,10 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from nix.core import Property, Value
-from nix.util.inject import Inject
+from nix.util.inject import inject
+
 
 class PropertyMixin(Property):
-
-    class __metaclass__(Inject, Property.__class__):
-        pass
 
     def __eq__(self, other):
         if hasattr(other, "id"):
@@ -32,9 +30,6 @@ class PropertyMixin(Property):
 
 class ValueMixin(Value):
 
-    class __metaclass__(Inject, Value.__class__):
-        pass
-
     def __eq__(self, other):
         if hasattr(other, "value"):
             return self.value == other.value
@@ -47,3 +42,7 @@ class ValueMixin(Value):
         hash has to be either explicitly inherited from parent class, implemented or escaped
         """
         return hash(self.id)
+
+
+inject((Property,), dict(PropertyMixin.__dict__))
+inject((Value,), dict(ValueMixin.__dict__))

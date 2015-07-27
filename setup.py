@@ -21,6 +21,7 @@ import os
 import re
 import fnmatch
 import distutils
+import platform
 
 def find(pattern, path):
     result = []
@@ -107,9 +108,18 @@ nixpy_sources = [
 
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
 boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
+
 if os.name != 'nt':
     boost_lnk_arg = ['-lboost_python']
-else:
+
+    if sys.version_info[0] == 3:  # python 3
+        if platform.system().lower() == 'linux':
+            boost_lnk_arg = ['-lboost_python-py34']
+
+        elif platform.system().lower() == 'darwin':
+            boost_lnk_arg = ['-lboost_python3']
+
+else:  # windows
     boostlib = find('libboost_python*.lib', boost_lib_dir)
     boost_lnk_arg = ['/LIBPATH:'+boost_lib_dir, '/DEFAULTLIB:'+boostlib[0]]
 
@@ -118,6 +128,7 @@ classifiers   = [
                     'Programming Language :: Python',
                     'Programming Language :: Python :: 2.6',
                     'Programming Language :: Python :: 2.7',
+                    'Programming Language :: Python :: 3.4',
                     'Topic :: Scientific/Engineering'
 ]
 

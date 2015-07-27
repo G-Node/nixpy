@@ -261,7 +261,7 @@ struct DataSetWrapper : public nix::DataSet, public boost::python::wrapper<nix::
      }
 };
 
-void PyDataSet::do_export() {
+NIXPY_DO_EXPORT_RETVAL PyDataSet::do_export() {
     using namespace boost::python;
 
     // For numpy to work

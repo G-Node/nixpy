@@ -9,10 +9,11 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 import sys
+import functools
 
 import nix.util.find as finders
 from nix.core import Section
-from nix.util.inject import Inject
+from nix.util.inject import inject
 from nix.util.proxy_list import ProxyList
 from nix.property import Value
 
@@ -20,6 +21,11 @@ from nix.file import SectionProxyList
 
 from operator import attrgetter
 import collections
+
+try:
+    from sys import maxint
+except:
+    from sys import maxsize as maxint
 
 
 class S(object):
@@ -51,10 +57,7 @@ class PropertyProxyList(ProxyList):
 
 class SectionMixin(Section):
 
-    class __metaclass__(Inject, Section.__class__):
-        pass
-
-    def find_sections(self, filtr=lambda _ : True, limit=sys.maxint):
+    def find_sections(self, filtr=lambda _ : True, limit=maxint):
         """
         Get all child sections recursively.
 
@@ -133,7 +136,7 @@ class SectionMixin(Section):
             return self.sections[key]
 
         prop = self.props[key]
-        values = map(attrgetter('value'), prop.values)
+        values = list(map(attrgetter('value'), prop.values))
         if len(values) == 1:
             values = values[0]
         return values
@@ -150,8 +153,8 @@ class SectionMixin(Section):
         if not isinstance(data, list):
             data = [data]
 
-        val = map(lambda x: x if isinstance(x, Value) else Value(x), data)
-        dtypes = reduce(lambda x, y: x if y.data_type in x else x + [y.data_type], val, [val[0].data_type])
+        val = list(map(lambda x: x if isinstance(x, Value) else Value(x), data))
+        dtypes = functools.reduce(lambda x, y: x if y.data_type in x else x + [y.data_type], val, [val[0].data_type])
         if len(dtypes) > 1:
             raise ValueError('Not all input values are of the same type')
 
@@ -195,3 +198,6 @@ class SectionMixin(Section):
         if p is None and self.has_property_by_name(ident):
             p = self.get_property_by_name(ident)
         return p
+
+
+inject((Section,), dict(SectionMixin.__dict__))

@@ -9,14 +9,11 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 from nix.core import MultiTag
-from nix.util.inject import Inject
+from nix.util.inject import inject
 from nix.tag import ReferenceProxyList, FeatureProxyList
 
 
 class MultiTagMixin(MultiTag):
-
-    class __metaclass__(Inject, MultiTag.__class__):
-        pass
 
     @property
     def references(self):
@@ -46,3 +43,6 @@ class MultiTagMixin(MultiTag):
         if not hasattr(self, "_features"):
             setattr(self, "_features", FeatureProxyList(self))
         return self._features
+
+
+inject((MultiTag,), dict(MultiTagMixin.__dict__))
