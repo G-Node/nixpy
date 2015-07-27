@@ -261,7 +261,7 @@ struct DataSetWrapper : public nix::DataSet, public boost::python::wrapper<nix::
      }
 };
 
-NIXPY_DO_EXPORT_RETVAL PyDataSet::do_export() {
+NIXPY_DO_EXPORT_RETTYPE PyDataSet::do_export() {
     using namespace boost::python;
 
     // For numpy to work
@@ -282,6 +282,8 @@ NIXPY_DO_EXPORT_RETVAL PyDataSet::do_export() {
     class_<nix::DataView, bases<nix::DataSet>>("DataView", boost::python::no_init);
 
     dtype_transmogrify::register_from_python();
+    
+    return NIXPY_DO_EXPORT_RETVAL;
 }
 
 } // nixpy::
