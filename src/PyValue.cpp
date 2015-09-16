@@ -104,10 +104,6 @@ PyObject* get(const Value& ref) {
             return incref(object(ref.get<uint64_t>()).ptr());
         case DataType::String:
             return incref(object(ref.get<std::string>()).ptr());
-        case DataType::Date:
-        case DataType::DateTime:
-            // TODO support for date
-            throw std::runtime_error("Wrong type");
         case DataType::Nothing:
         default:
             Py_RETURN_NONE;
