@@ -29,7 +29,7 @@ from nix.section import S
 __all__ = ("File", "FileMode", "Block", "DataType", "Section", "Property",
            "Value", "Source", "DataArray", "RangeDimension", "SetDimension",
            "SampledDimension", "DimensionType", "Feature", "LinkType",
-           "Tag", "MultiTag")
+           "Tag", "MultiTag", "Group")
 
 del BlockMixin, FileMixin, SectionMixin, PropertyMixin, ValueMixin, SourceMixin, DataArrayMixin, TagMixin
 del MultiTagMixin, DataArraySourcesMixin, MultiTagSourcesMixin, TagSourcesMixin

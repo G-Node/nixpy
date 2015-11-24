@@ -11,9 +11,9 @@ except:
 
 # python version dependent import of getstatusoutput
 try:
-	from commands import getstatusoutput
+    from commands import getstatusoutput
 except:
-	from subprocess import getstatusoutput
+    from subprocess import getstatusoutput
 
 import numpy as np
 import sys
@@ -103,7 +103,8 @@ nixpy_sources = [
     'src/PyFeature.cpp',
     'src/PyTag.cpp',
     'src/PyMultiTag.cpp',
-    'src/PyResult.cpp'
+    'src/PyResult.cpp',
+    'src/PyGroup.cpp'
 ]
 
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')

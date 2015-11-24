@@ -175,6 +175,10 @@ struct PyMultiTag {
 struct PyException {
     static void do_export();
 };
+
+struct PyGroup {
+    static void do_export();
+};
 }
 
 #endif
