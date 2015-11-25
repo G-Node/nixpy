@@ -86,6 +86,20 @@ boost::optional<Source> getSourceByPos(const Block& block, size_t index) {
     return da ? boost::optional<Source>(da) : boost::none;
 }
 
+// getter for Group
+
+boost::optional<Group> getGroupById(const Block& block, const std::string& id) {
+    Group g = block.getGroup(id);
+
+    return g ? boost::optional<Group>(g) : boost::none;
+}
+
+boost::optional<Group> getGroupByPos(const Block& block, size_t index) {
+    Group g = block.getGroup(index);
+
+    return g ? boost::optional<Group>(g) : boost::none;
+}
+
 void PyBlock::do_export() {
     PyEntityWithMetadata<base::IBlock>::do_export("Block");
 
@@ -114,6 +128,12 @@ void PyBlock::do_export() {
         .def("_get_source_by_id", &getSourceById)
         .def("_get_source_by_pos", &getSourceByPos)
         .def("_delete_source_by_id", REMOVER(std::string, nix::Block, deleteSource))
+        // Group
+        .def("create_group", &Block::createGroup, doc::block_create_group)
+        .def("_group_count", &Block::groupCount)
+        .def("_get_group_by_id", &getGroupById)
+        .def("_get_group_by_pos", &getGroupByPos)
+        .def("_delete_group_by_id", REMOVER(std::string, nix::Block, deleteGroup))
         // Other
         .def("__str__", &toStr<Block>)
         .def("__repr__", &toStr<Block>)
