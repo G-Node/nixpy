@@ -59,12 +59,12 @@ void PyGroup::do_export() {
         .def("retrieve_feature_data", &Tag::retrieveFeatureData)
         */
         // Other
-        .def("__str__", &toStr<Tag>)
-        .def("__repr__", &toStr<Tag>)
+        .def("__str__", &toStr<Group>)
+        .def("__repr__", &toStr<Group>)
         ;
 
-    to_python_converter<std::vector<Tag>, vector_transmogrify<Tag>>();
-    to_python_converter<boost::optional<Tag>, option_transmogrify<Tag>>();
+    to_python_converter<std::vector<Group>, vector_transmogrify<Group>>();
+    to_python_converter<boost::optional<Group>, option_transmogrify<Group>>();
 }
 
 }

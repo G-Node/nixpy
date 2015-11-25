@@ -14,25 +14,6 @@ from nix.util.proxy_list import ProxyList, RefProxyList
 from nix.block import DataArrayProxyList
 
 
-class ReferenceProxyList(RefProxyList):
-
-    def __init__(self, obj):
-        super(ReferenceProxyList, self).__init__(
-            obj, "_reference_count", "_get_reference_by_id",
-            "_get_reference_by_pos", "_delete_reference_by_id",
-            "_add_reference_by_id"
-        )
-
-
-class FeatureProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(FeatureProxyList, self).__init__(
-            obj, "_feature_count", "_get_feature_by_id",
-            "_get_feature_by_pos", "_delete_feature_by_id"
-        )
-
-
 class GroupMixin(Group):
 
     @property
@@ -52,15 +33,14 @@ class GroupMixin(Group):
     """
     @property
     def features(self):
-        """
+
         A property containing all features of the tag. Features can be
         obtained via their index or their id. Features can be deleted from the list.
         Adding new features to the tag is done using the create_feature method.
         This is a read only attribute.
 
         :type: ProxyList of Feature.
-        """
-        if not hasattr(self, "_features"):
+                if not hasattr(self, "_features"):
             setattr(self, "_features", FeatureProxyList(self))
         return self._features
     """
