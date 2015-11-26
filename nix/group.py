@@ -10,8 +10,27 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 from nix.core import Group
 from nix.util.inject import inject
-from nix.util.proxy_list import ProxyList, RefProxyList
-from nix.block import DataArrayProxyList
+from nix.util.proxy_list import RefProxyList
+
+
+class DataArrayProxyList(RefProxyList):
+
+    def __init__(self, obj):
+        super(DataArrayProxyList, self).__init__(
+            obj, "_data_array_count", "_get_data_array_by_id",
+            "_get_data_array_by_pos", "_delete_data_array_by_id",
+            "_add_data_array_by_id"
+        )
+
+
+class TagProxyList(RefProxyList):
+
+    def __init__(self, obj):
+        super(TagProxyList, self).__init__(
+            obj, "_tag_count", "_get_tag_by_id",
+            "_get_tag_by_pos", "_delete_tag_by_id",
+            "_add_tag_by_id"
+        )
 
 
 class GroupMixin(Group):
@@ -19,30 +38,32 @@ class GroupMixin(Group):
     @property
     def data_arrays(self):
         """
-        A property containing all data arrays referenced by the tag. Referenced data arrays
+        A property containing all data arrays referenced by the group. Referenced data arrays
         can be obtained by index or their id. References can be removed from the list, removing
         a referenced DataArray will not remove it from the file. New references can be added using
         the append method of the list.
         This is a read only attribute.
 
-        :type: RefProxyList of DataArray
+        :type: DataArrayProxyList of DataArray
         """
         if not hasattr(self, "_data_arrays"):
             setattr(self, "_data_arrays", DataArrayProxyList(self))
         return self._data_arrays
-    """
-    @property
-    def features(self):
 
-        A property containing all features of the tag. Features can be
-        obtained via their index or their id. Features can be deleted from the list.
-        Adding new features to the tag is done using the create_feature method.
+    @property
+    def tags(self):
+        """
+        A property containing all tags referenced by the group. Tags
+        can be obtained by index or their id. Tags can be removed from the list, removing
+        a referenced Tag will not remove it from the file. New Tags can be added using
+        the append method of the list.
         This is a read only attribute.
 
-        :type: ProxyList of Feature.
-                if not hasattr(self, "_features"):
-            setattr(self, "_features", FeatureProxyList(self))
-        return self._features
-    """
+        :type: TagProxyList of Tags
+        """
+        if not hasattr(self, "_tags"):
+            setattr(self, "_tags", TagProxyList(self))
+        return self._tags
+
 
 inject((Group,), dict(GroupMixin.__dict__))
