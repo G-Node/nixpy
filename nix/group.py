@@ -33,6 +33,16 @@ class TagProxyList(RefProxyList):
         )
 
 
+class MultiTagProxyList(RefProxyList):
+
+    def __init__(self, obj):
+        super(MultiTagProxyList, self).__init__(
+            obj, "_multi_tag_count", "_get_multi_tag_by_id",
+            "_get_multi_tag_by_pos", "_delete_multi_tag_by_id",
+            "_add_multi_tag_by_id"
+        )
+
+
 class GroupMixin(Group):
 
     @property
@@ -65,5 +75,19 @@ class GroupMixin(Group):
             setattr(self, "_tags", TagProxyList(self))
         return self._tags
 
+    @property
+    def multi_tags(self):
+        """
+        A property containing all MultiTags referenced by the group. MultiTags
+        can be obtained by index or their id. Tags can be removed from the list, removing
+        a referenced MultiTag will not remove it from the file. New MultiTags can be added using
+        the append method of the list.
+        This is a read only attribute.
+
+        :type: MultiTagProxyList of MultiTags
+        """
+        if not hasattr(self, "_multi_tags"):
+            setattr(self, "_multi_tags", MultiTagProxyList(self))
+        return self._multi_tags
 
 inject((Group,), dict(GroupMixin.__dict__))

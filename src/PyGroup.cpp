@@ -46,6 +46,19 @@ boost::optional<Tag> getTagByPos(const Group& g, size_t index) {
     return t ? boost::optional<Tag>(t) : boost::none;
 }
 
+// getter for MultiTags
+boost::optional<MultiTag> getMultiTagById(const Group& g, const std::string& id) {
+    MultiTag t = g.getMultiTag(id);
+
+    return t? boost::optional<MultiTag>(t) : boost::none;
+}
+
+boost::optional<MultiTag> getMultiTagByPos(const Group& g, size_t index) {
+    MultiTag t = g.getMultiTag(index);
+
+    return t ? boost::optional<MultiTag>(t) : boost::none;
+}
+
 void PyGroup::do_export() {
 
     PyEntityWithSources<base::IGroup>::do_export("Group");
@@ -66,18 +79,13 @@ void PyGroup::do_export() {
         .def("_get_tag_by_id", &getTagById)
         .def("_get_tag_by_pos", &getTagByPos)
         .def("_delete_tag_by_id", REMOVER(std::string, Group, removeTag))
-
-        /*
-        .def("create_feature", &createNewFeature, doc::tag_create_feature)
-        .def("_has_feature_by_id", CHECKER(std::string, Tag, hasFeature))
-        .def("_feature_count", &Tag::featureCount)
-        .def("_get_feature_by_id", &getFeatureById)
-        .def("_get_feature_by_pos", &getFeatureByPos)
-        .def("_delete_feature_by_id", REMOVER(std::string, Tag, deleteFeature))
-        // Data access
-        .def("retrieve_data", &Tag::retrieveData)
-        .def("retrieve_feature_data", &Tag::retrieveFeatureData)
-        */
+        // MultiTags
+        .def("_add_multi_tag_by_id", REF_SETTER(std::string, Group, addMultiTag))
+        .def("_has_multi_tag_by_id", CHECKER(std::string, Group, hasMultiTag))
+        .def("_multi_tag_count", &Group::multiTagCount)
+        .def("_get_multi_tag_by_id", &getMultiTagById)
+        .def("_get_multi_tag_by_pos", &getMultiTagByPos)
+        .def("_delete_multi_tag_by_id", REMOVER(std::string, Group, removeMultiTag))
         // Other
         .def("__str__", &toStr<Group>)
         .def("__repr__", &toStr<Group>)
