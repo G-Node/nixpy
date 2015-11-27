@@ -21,13 +21,15 @@ class TestGroup(unittest.TestCase):
         self.my_array = self.block.create_data_array("my array", "test", DataType.Int16, (1, ))
         self.my_tag   = self.block.create_tag("my tag", "test", [0.25])
         self.my_group = self.block.create_group("my group", "group")
+        self.my_multiTag = self.block.create_multi_tag("my_mt", "test", self.my_array)
+
         self.my_group.data_arrays.append(self.my_array)
         self.my_group.tags.append(self.my_tag)
+        self.my_group.multi_tags.append(self.my_multiTag)
 
         self.your_array = self.block.create_data_array("your array", "test", DataType.Int16, (1, ))
         self.your_group = self.block.create_group("your group", "group")
         self.your_group.data_arrays.append(self.your_array)
-
 
     def tearDown(self):
         del self.file.blocks[self.block.id]
@@ -119,3 +121,28 @@ class TestGroup(unittest.TestCase):
 
         self.my_group.tags.extend([t1, t2])
         assert(len(self.my_group.tags) == 3)
+
+    def test_group_multi_tags(self):
+        assert(len(self.my_group.multi_tags) == 1)
+
+        self.assertRaises(TypeError, lambda _: self.my_group.multi_tags.append(100))
+
+        mt1 = self.block.create_multi_tag("mtag1", "stimuli", self.my_array)
+        mt2 = self.block.create_multi_tag("mtag2", "stimuli", self.my_array)
+
+        self.my_group.multi_tags.append(mt1)
+        self.my_group.multi_tags.append(mt2)
+
+        assert(len(self.my_group.multi_tags) == 3)
+        assert(mt1 in self.my_group.multi_tags)
+        assert(mt2 in self.my_group.multi_tags)
+
+        del self.my_group.multi_tags[mt2]
+        assert(self.my_multiTag in self.my_group.multi_tags)
+        assert(mt1 in self.my_group.multi_tags)
+
+        del self.my_group.multi_tags[mt1]
+        assert(len(self.my_group.multi_tags) == 1)
+
+        self.my_group.multi_tags.extend([mt1, mt2])
+        assert(len(self.my_group.multi_tags) == 3)
