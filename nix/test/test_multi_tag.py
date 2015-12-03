@@ -31,20 +31,20 @@ class TestMultiTag(unittest.TestCase):
             "your tag", "tag", self.your_array
         )
 
-        self.data_array = self.block.create_data_array("featureTest", "test", DataType.Double,(0, 0, 0))
+        self.data_array = self.block.create_data_array("featureTest", "test", DataType.Double, (2, 10, 5))
         ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
         unit = "ms"
 
-        data = np.zeros((2,10,5))
+        data = np.zeros((2, 10, 5))
         value = 0.
         for i in range(2):
-            value = 0;
+            value = 0
             for j in range(10):
                 for k in range(5):
                     value += 1
                     data[i, j, k] = value
     
-        self.data_array[:,:,:] = data
+        self.data_array[:, :, :] = data
 
         event_positions = np.zeros((2, 3))
         event_positions[0, 0] = 0.0
@@ -56,13 +56,13 @@ class TestMultiTag(unittest.TestCase):
         event_positions[1, 2] = 2.3
 
         event_extents = np.zeros((2, 3))
-        event_extents[0, 0] = 0.0;
-        event_extents[0, 1] = 6.0;
-        event_extents[0, 2] = 2.3;
+        event_extents[0, 0] = 0.0
+        event_extents[0, 1] = 6.0
+        event_extents[0, 2] = 2.3
         
-        event_extents[1, 0] = 0.0;
-        event_extents[1, 1] = 3.0;
-        event_extents[1, 2] = 2.0;
+        event_extents[1, 0] = 0.0
+        event_extents[1, 1] = 3.0
+        event_extents[1, 2] = 2.0
 
         event_labels = ["event 1", "event 2"]
         dim_labels = ["dim 0", "dim 1", "dim 2"]
