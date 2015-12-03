@@ -23,7 +23,7 @@ Afterwards you can use apt to install the NIX package::
 
     sudo apt-get install libnix-dev
 
-If you want to use NIX on other distributions you have to compile and install NIX from source.
+If you want to use NIX on other distributions you have to compile and install NIX from source (:ref:`see below <build-nix-from-source>`).
 
 .. _PPA: https://launchpad.net/~gnode/+archive/ubuntu/nix
 
@@ -34,6 +34,8 @@ To install NIX under Windows it is recommended to use the latest installer.
 The installer can be downloaded from the `nix releases`_ on GitHub.
 
 .. _nix releases: https://github.com/G-Node/nix/releases
+
+.. _build-nix-from-source:
 
 Build NIX from Source
 ---------------------
@@ -74,7 +76,7 @@ Once the PPA was added NIXPy can be installed via apt-get::
 
     sudo apt-get install python-nix
 
-If you want to use NIXPy on other distributions, pleas follow the instructions for building NIXPy from source.
+If you want to use NIXPy on other distributions, pleas follow the instructions for building NIXPy from source (:ref:`see below <build-nixpy-from-source>`).
 
 Windows
 -------
@@ -84,6 +86,8 @@ Download the installer with the same version as your NIX installation from the `
 In addition NIXPy requires numpy to be installed.
 
 .. _NIXPy releases: https://github.com/G-Node/nixpy/releases
+
+.. _build-nixpy-from-source:
 
 Build NIXPy from Source
 -----------------------
