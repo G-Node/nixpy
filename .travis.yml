@@ -35,7 +35,7 @@ install:
 
 
 script:
-- CC=gcc-4.8 CXX=g++-4.8 NIXLIBDIR=./inst/lib NIXINC_DIR=./inst/include python setup.py install
+- CC=gcc-4.8 CXX=g++-4.8 NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include python setup.py install
 - coverage run --source=nix setup.py test
 - coverage report -m
 
