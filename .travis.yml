@@ -1,7 +1,11 @@
 language: python
-python:
-  - "2.7_with_system_site_packages"
-  - "3.4"
+
+matrix:
+  include:
+    - python: "2.7_with_system_site_packages"
+      env: LIBBOOST_PYTHON=libboost-python1.55-dev
+    - python: "3.4"
+      env: LIBBOOST_PYTHON=libboost-python-dev
 
 sudo: false
 
@@ -19,7 +23,7 @@ addons:
     packages:
       - libcppunit-dev
       - libboost1.55-all-dev
-      - libboost-python1.55-dev
+      - $LIBBOOST_PYTHON
       - libhdf5-serial-dev
       - cmake
       - g++-4.8
