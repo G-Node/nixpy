@@ -76,7 +76,7 @@ Once the PPA was added NIXPy can be installed via apt-get::
 
     sudo apt-get install python-nix
 
-If you want to use NIXPy on other distributions, pleas follow the instructions for building NIXPy from source (:ref:`see below <build-nixpy-from-source>`).
+If you want to use NIXPy on other distributions, please follow the instructions for building NIXPy from source (:ref:`see below <build-nixpy-from-source>`).
 
 Windows
 -------
