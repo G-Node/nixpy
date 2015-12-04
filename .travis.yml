@@ -16,11 +16,6 @@ matrix:
     - python: "3.2"
       env: COVERALLS=0
 
-branches:
-  only:
-  - master
-  - updateTravisTest
-
 addons:
   apt:
     sources:
