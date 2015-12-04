@@ -3,9 +3,7 @@ language: python
 matrix:
   include:
     - python: "2.7_with_system_site_packages"
-      env: LIBBOOST_PYTHON=libboost-python1.55-dev
     - python: "3.4"
-      env: LIBBOOST_PYTHON=libboost-python-dev
 
 sudo: false
 
@@ -23,7 +21,6 @@ addons:
     packages:
       - libcppunit-dev
       - libboost1.55-all-dev
-      - $LIBBOOST_PYTHON
       - libhdf5-serial-dev
       - cmake
       - g++-4.8
@@ -32,15 +29,16 @@ install:
 - pip install coveralls numpy
 - git clone https://github.com/G-Node/nix.git nix-build
 - cd nix-build
-- CC=gcc-4.8 CXX=g++-4.8 cmake -DCMAKE_INSTALL_PREFIX=./inst -DBUILD_TESTING=OFF .
+- CC=gcc-4.8 CXX=g++-4.8 cmake -DCMAKE_INSTALL_PREFIX=./inst .
 - make
+- ctest
 - make install
 - cd ..
 
 
 script:
-- CC=gcc-4.8 CXX=g++-4.8 NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include python setup.py install
-- coverage run --source=nix setup.py test
+- CC=gcc-4.8 CXX=g++-4.8 NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include python setup.py build
+- coverage run --source=nix NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include setup.py test
 - coverage report -m
 
 after_success:
