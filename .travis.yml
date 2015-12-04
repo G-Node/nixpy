@@ -3,10 +3,11 @@ sudo: false
 language: python
 
 env:
-  - CC=gcc-4.8
-  - CXX=g++-4.8
-  - NIX_LIBDIR=./nix-build/inst/lib
-  - NIX_INCDIR=./nix-build/inst/include
+  global:
+    - CC=gcc-4.8
+    - CXX=g++-4.8
+    - NIX_LIBDIR=./nix-build/inst/lib
+    - NIX_INCDIR=./nix-build/inst/include
 
 matrix:
   include:
