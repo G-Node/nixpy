@@ -33,9 +33,6 @@ addons:
       - g++-4.8
 
 install:
-- ldconfig -p | grep boost_python
-- echo $LDLIBRARY_PATH
-- echo $LD_LIBRARY_PATH
 - pip install coveralls numpy
 - git clone https://github.com/G-Node/nix.git nix-build
 - cd nix-build
