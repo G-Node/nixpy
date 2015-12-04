@@ -152,3 +152,21 @@ class TestBlock(unittest.TestCase):
         assert(len(self.block.find_sources(limit=1)) == 2)
         assert(len(self.block.find_sources(filtr=lambda x : "level2-p1-s" in x.name)) == 2)
         assert(len(self.block.find_sources(filtr=lambda x : "level2-p1-s" in x.name, limit=1)) == 0)
+
+    def test_block_groups(self):
+        assert(len(self.block.groups) == 0)
+
+        group = self.block.create_group("test group", "RecordingChannelGroup")
+
+        assert(len(self.block.groups) == 1)
+
+        assert(group      in self.block.groups)
+        assert(group.id   in self.block.groups)
+        assert("notexist" not in self.block.groups)
+
+        assert(group.id == self.block.groups[0].id)
+        assert(group.id == self.block.groups[-1].id)
+
+        del self.block.groups[0]
+
+        assert(len(self.block.groups) == 0)

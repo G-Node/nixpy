@@ -64,6 +64,8 @@ extern const char* block_create_multi_tag;
 
 extern const char* block_create_source;
 
+extern const char* block_create_group;
+
 // PySection
 
 extern const char* section_repository;

@@ -203,3 +203,38 @@ Source
     :members:
     :inherited-members:
     :undoc-members:
+
+
+Group
+=====
+
+Groups establish a simple way of grouping entities that in some way
+belong together. The Group exists inside a Block and can contain
+(link) DataArrays, Tags, and MultiTags. As any other nix-entity, the
+Groups is named, has a type, and a definition property. Additionally,
+it contains data_arrays, tags, and multi_tags lists. As indicated
+before, the group does only link the entities. Thus, deleting elements
+from the lists does not remove them from file, it merely removes the
+link from the group.
+
+.. code-block:: python
+   :linenos:
+
+   data_array = block.crate_data_array("matrix", "data");
+   tag = block.create_tag("a tag", "event", [0.0, 1.0])
+   group = block.create_group("things that belong together", "group")
+   group.tags.append(tag)
+   group.data_arrays.append(data_array)
+
+   del group.data_arrays[data_array]
+   del group.tags[tag]
+
+
+Group API
+---------
+
+.. autoclass:: nix.Group
+    :members:
+    :inherited-members:
+    :undoc-members:
+
