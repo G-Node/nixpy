@@ -12,7 +12,7 @@ env:
 matrix:
   include:
     - python: "2.7_with_system_site_packages"
-    - python: "3.4"
+    - python: "3.2"
 
 branches:
   only:
