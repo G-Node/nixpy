@@ -111,14 +111,10 @@ boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
 boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
 
 if os.name != 'nt':
-    boost_lnk_arg = ['-lboost_python']
+    boost_lnk_arg = ['-lboost_python-py%s%s' % sys.version_info[0:2]]
 
-    if sys.version_info[0] == 3:  # python 3
-        if platform.system().lower() == 'linux':
-            boost_lnk_arg = ['-lboost_python-py34']
-
-        elif platform.system().lower() == 'darwin':
-            boost_lnk_arg = ['-lboost_python3']
+    if sys.version_info[0] == 3 and platform.system().lower() == 'darwin':  # python 3
+        boost_lnk_arg = ['-lboost_python3']
 
 else:  # windows
     boostlib = find('libboost_python*.lib', boost_lib_dir)
@@ -161,7 +157,7 @@ setup(name             = 'nix',
       scripts          = [],
       tests_require    = ['nose'],
       test_suite       = 'nose.collector',
-      setup_requires   = ['numpy', 'sphinx'],
+      setup_requires   = ['numpy'],
       package_data     = {'nix': [license_text, description_text]},
       include_package_data = True,
       zip_safe         = False,
