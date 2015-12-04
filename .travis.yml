@@ -12,7 +12,9 @@ env:
 matrix:
   include:
     - python: "2.7_with_system_site_packages"
+      env: COVERALLS=1
     - python: "3.2"
+      env: COVERALLS=0
 
 branches:
   only:
@@ -43,8 +45,12 @@ install:
 
 script:
 - python setup.py build
-- coverage run --source=nix setup.py test
-- coverage report -m
+- if [ $COVERALLS = 1 ]; then
+    coverage run --source=nix setup.py test;
+    coverage report -m;
+  else
+    python setup.py test;
+  fi;
 
 after_success:
-- coveralls
+- if [ $COVERALLS = 1 ]; then coveralls; fi;
