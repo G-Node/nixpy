@@ -50,6 +50,13 @@ class TagProxyList(ProxyList):
                                                  "_get_tag_by_pos", "_delete_tag_by_id")
 
 
+class GroupProxyList(ProxyList):
+
+    def __init__(self, obj):
+        super(GroupProxyList, self).__init__(obj, "_group_count", "_get_group_by_id",
+                                                 "_get_group_by_pos", "_delete_group_by_id")
+
+
 class BlockMixin(Block):
 
     def create_data_array(self, name, array_type, dtype=None, shape=None, data=None):
@@ -163,6 +170,19 @@ class BlockMixin(Block):
         if not hasattr(self, "_data_arrays"):
             setattr(self, "_data_arrays", DataArrayProxyList(self))
         return self._data_arrays
+
+    @property
+    def groups(self):
+        """
+        A property containing all groups of a block. Group entities can be obtained via their index or by their id.
+        Groups can be deleted from the list. Adding a Group is done using the Blocks create_group method.
+        This is a read only attribute.
+
+        :type: ProxyList of Group entities.
+        """
+        if not hasattr(self, "_groups"):
+            setattr(self, "_groups", GroupProxyList(self))
+        return self._groups
 
     def __eq__(self, other):
         """

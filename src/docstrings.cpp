@@ -264,6 +264,18 @@ const char* block_create_source = R"(
     :rtype: Source
     )";
 
+const char* block_create_group = R"(
+    Create a new group on this block.
+
+    :param name: The name of the group to create.
+    :type name: str
+    :param type: The type of the group.
+    :type type: str
+
+    :returns: The newly created group.
+    :rtype: Group
+    )";
+
 // PyDataArray
 
 const char* data_array_label = R"(

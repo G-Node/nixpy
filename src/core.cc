@@ -37,6 +37,7 @@ BOOST_PYTHON_MODULE(core)
     PyFeature::do_export();
     PyTag::do_export();
     PyMultiTag::do_export();
+    PyGroup::do_export();
 
     PyException::do_export();
 
