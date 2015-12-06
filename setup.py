@@ -111,11 +111,12 @@ boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
 boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
 
 if os.name != 'nt':
-    boost_lnk_arg = ['-lboost_python-py%s%s' % sys.version_info[0:2]]
-
-    if sys.version_info[0] == 3 and platform.system().lower() == 'darwin':  # python 3
-        boost_lnk_arg = ['-lboost_python3']
-
+    is_darwin = platform.system().lower() == 'darwin'
+    is_py3 = sys.version_info[0] == 3
+    if is_darwin:
+        boost_lnk_arg = ['-lboost_python' + ('3' if is_py3 else '')]
+    else:
+        boost_lnk_arg = ['-lboost_python-py%s%s' % sys.version_info[0:2]] # NB: the latter is returning a tuple
 else:  # windows
     boostlib = find('libboost_python*.lib', boost_lib_dir)
     boost_lnk_arg = ['/LIBPATH:'+boost_lib_dir, '/DEFAULTLIB:'+boostlib[0]]
