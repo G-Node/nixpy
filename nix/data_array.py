@@ -145,7 +145,7 @@ class DataSetMixin(DataSet):
             if len(shape) != len(self.shape):
                 shape = shape + self.__fill_none(index, shape, to_replace=0)
             count, offset = self.__index_to_count_offset(index, shape)
-            shape = map(lambda c, o: c - o, count, offset)
+            shape = list(map(lambda c, o: c - o, count, offset))
 
         current_shape = self.shape
         shape = shape or raw.shape # for single value reads
