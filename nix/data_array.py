@@ -113,8 +113,18 @@ class DataSetMixin(DataSet):
         index = self.__index_to_tuple(index)
         if len(index) < 1:
             return np.array(self)
+
         # if we got to here we have a tuple with len >= 1
-        count, offset, shape = self.__tuple_to_count_offset_shape(index)
+        index = self.__complete_index(index, self.shape)
+        count, offset = self.__index_to_count_offset(index, self.shape)
+
+        # drop all indices from count that came from single ints
+        # NB: special case when we only have ints, e.g. (int, ) then
+        # we get back the empty tuple and this is what we want,
+        # because it indicates a scalar result
+        squeezed = map(lambda i, c: c if type(i) != int else None, index, count)
+        shape = list(filter(lambda x: x is not None, squeezed))
+
         raw = np.empty(shape, dtype=self.dtype)
 
         self._read_data(raw, count, offset)
@@ -122,16 +132,27 @@ class DataSetMixin(DataSet):
         return raw
 
     def __setitem__(self, index, value):
-        index = self.__index_to_tuple(index)
-        if len(index) < 1:
-            shape = self.shape
-            count, offset = shape, tuple([0]*len(shape))
-        else:
-            count, offset, _ = self.__tuple_to_count_offset_shape(index)
-
         # NB: np.ascontiguousarray does not copy the array if it is
         # already in c-contiguous form
         raw = np.ascontiguousarray(value)
+        shape = raw.shape
+
+        index = self.__index_to_tuple(index)
+        if len(index) < 1:
+            count, offset = shape, tuple([0]*len(shape))
+        else:
+            index = self.__complete_index(index, shape)
+            if len(shape) != len(self.shape):
+                shape = shape + self.__fill_none(index, shape, to_replace=0)
+            count, offset = self.__index_to_count_offset(index, shape)
+            shape = list(map(lambda c, o: c - o, count, offset))
+
+        current_shape = self.shape
+        shape = shape or raw.shape # for single value reads
+        union_shape = map(max, current_shape, shape)
+        if sum(map(lambda c, n: max(n - c, 0), current_shape, union_shape)) > 0:
+            self.data_extent = union_shape
+
         self._write_data(raw, count, offset)
 
     def __len__(self):
@@ -274,10 +295,10 @@ class DataSetMixin(DataSet):
         size = len(shape) - len(index) + to_replace
         return tuple([None] * size)
 
-    def __tuple_to_count_offset_shape(self, index):
+    @classmethod
+    def __complete_index(cls, index, shape):
         # precondition: type(index) == tuple and len(index) >= 1
-        fill_none = self.__fill_none
-        shape = self.shape
+        fill_none = cls.__fill_none
 
         if index[0] is Ellipsis:
             index = fill_none(shape, index) + index[1:]
@@ -296,21 +317,15 @@ class DataSetMixin(DataSet):
         # in python3 map does not work with None therefore if
         # len(shape) != len(index) we wont get the expected
         # result. We therefore need to fill up the missing values
-        index = index + fill_none(shape, index, to_replace=0)
+        return index + fill_none(shape, index, to_replace=0)
 
-        completed = list(map(self.__complete_slices, shape, index))
+    @classmethod
+    def __index_to_count_offset(cls, index, shape):
+        completed = list(map(cls.__complete_slices, shape, index))
         combined = list(map(lambda s: (s.start, s.stop), completed))
         count = tuple(x[1] - x[0] for x in combined)
         offset = [x for x in zip(*combined)][0]
-
-        # drop all indices from count that came from single ints
-        # NB: special case when we only have ints, e.g. (int, ) then
-        # we get back the empty tuple and this is what we want,
-        # because it indicates a scalar result
-        squeezed = map(lambda i, c: c if type(i) != int else None, index, count)
-        shape = list(filter(lambda x: x is not None, squeezed))
-
-        return count, offset, shape
+        return count, offset
 
 
 inject((DataArray,), dict(DataArrayMixin.__dict__))
