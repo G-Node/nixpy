@@ -238,15 +238,17 @@ struct DataSetWrapper : public nix::DataSet, public boost::python::wrapper<nix::
     void ioRead(nix::DataType dtype,
                 void *data,
                 const nix::NDSize &count,
-                const nix::NDSize &offset) const override {
-        this->get_override("ioRead")(dtype, data, count, offset);
+                const nix::NDSize &offset) const {
+        const boost::python::override fn = this->get_override("ioRead");
+        fn(dtype, static_cast<char*>(data), std::ref(count), std::ref(offset));
     }
 
      void ioWrite(nix::DataType dtype,
                   const void *data,
                   const nix::NDSize &count,
-                  const nix::NDSize &offset) override {
-        this->get_override("ioWrite")(dtype, data, count, offset);
+                  const nix::NDSize &offset) {
+        const boost::python::override fn = this->get_override("ioWrite");
+        fn(dtype, static_cast<const char*>(data), std::ref(count), std::ref(offset));
      }
      virtual void dataExtent(const nix::NDSize &extent) override {
         this->get_override("dataExtent")(extent);
