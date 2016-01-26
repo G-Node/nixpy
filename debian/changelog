@@ -1,3 +1,15 @@
+python-nix (1.1.0-2) trusty; urgency=medium
+  * 2nd upload
+  
+ -- Jan Grewe <jan.grewe@g-node.org>  Tue, 26 Jan 2016 20:19:00 +0100
+
+python-nix (1.1.0-1) trusty; urgency=medium
+  * Update to version 1.1.0
+  * Release for ubuntu 14.04 
+
+ -- Jan Grewe <jan.grewe@g-node.org>  Tue, 26 Jan 2016 19:34:38 +0100
+
+
 python-nix (1.0.0-2) utopic; urgency=medium
 
   * Release for ubuntu 14.10 
