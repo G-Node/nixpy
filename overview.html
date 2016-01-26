@@ -1,0 +1,436 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Overview &mdash; Python bindings for NIX 1.1.0 Release documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1.0 Release',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Python bindings for NIX 1.1.0 Release documentation" href="index.html" />
+    <link rel="next" title="Tutorials" href="tutorial.html" />
+    <link rel="prev" title="Installation Guidelines" href="install.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorials"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="install.html" title="Installation Guidelines"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Python bindings for NIX 1.1.0 Release documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="overview">
+<h1>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="design-principles">
+<h2>Design Principles<a class="headerlink" href="#design-principles" title="Permalink to this headline">¶</a></h2>
+<p>The design of the data model tries to draw on similarities of
+different data types and structures and and come up with <em>entities</em>
+that are as generic and versatile as meaningful. At the same time we
+aim for clearly established links between differen entities to keep the
+model as expressive as possible.</p>
+<p>Most entities of the NIX-model have a <em>name</em> and a <em>type</em> field which
+are meant to provide information about the entity. While the name can
+be freely chose, the type is meant to provide semantic information
+about the entity and we aim at definitions of different types. Via the
+type, the generic entities can become domain specific.</p>
+<p>For the electrophysiology disicplines of the neurosciences, an INCF
+working groups has set out to define such data types. For more
+information see <a class="reference external" href="http://crcns.org/files/data/nwb/ephys_requirements_v0_72.pdf">here</a></p>
+<div class="section" id="creating-a-file">
+<h3>Creating a file<a class="headerlink" href="#creating-a-file" title="Permalink to this headline">¶</a></h3>
+<p>So far we have implemented the nix model only for the HDF5 file
+format. In order to store data in a file we need to create one.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">import</span> <span class="nn">nix</span>
+
+<span class="n">nix_file</span> <span class="o">=</span> <span class="n">nix</span><span class="o">.</span><span class="n">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s">&#39;example.h5&#39;</span><span class="p">,</span> <span class="n">nix</span><span class="o">.</span><span class="n">FileMode</span><span class="o">.</span><span class="n">Overwrite</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <strong>File</strong> entity is the root of this document and it has only two
+children the <em>data</em> and <em>metadata</em> nodes. You may want to use the
+hdfview tool to open the file and look at it. Of course you can access
+both parts using the <strong>File</strong> API.</p>
+<p>All information directly related to a chunk of data is stored in the
+<em>data</em> node as children of a top-level entity called <strong>Block</strong>. A
+<strong>Block</strong> is a grouping element that can represent many things. For
+example it can take up everything that was recorded in the same
+<em>session</em>. Therefore, the <strong>Block</strong> has a <em>name</em> and a <em>type</em>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">block</span> <span class="o">=</span> <span class="n">nix_file</span><span class="o">.</span><span class="n">create_block</span><span class="p">(</span><span class="s">&quot;Test block&quot;</span><span class="p">,</span> <span class="s">&quot;nix.session&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Names can be freely chosen. Duplication of names on the same
+hierarchy-level is not allowed. In this example creating a second
+<strong>Block</strong> with the very same name leads to an error. Names must not
+contain &#8216;/&#8217; characters since they are path separators in the HDF5
+file. To avoid collisions across files every created entity has an
+unique id (UUID).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">block</span><span class="o">.</span><span class="n">id</span>
+<span class="s">&#39;017d7764-173b-4716-a6c2-45f6d37ddb52&#39;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="storing-data">
+<h3>Storing data<a class="headerlink" href="#storing-data" title="Permalink to this headline">¶</a></h3>
+<p>The heart of our data model is an entity called <strong>DataArray</strong>. This is
+the entity that actually stores all data. It can take n-dimensional
+arrays and provides sufficient information to create a basic plot of
+the data. To achieve this, one essential parts is to define what kind
+of data is stored. Hence, every dimension of the stored data <strong>must</strong>
+be defined using the available Dimension descriptors (below). The
+following code snippets show how to create an <strong>DataArray</strong> and how to
+store data in it.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># create a DataArray and store data in it</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&quot;my data&quot;</span><span class="p">,</span> <span class="s">&quot;nix.sampled&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">some_numpy_array</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Using this call will create a <strong>DataArray</strong>, set name and type, set
+the <em>dataType</em> according to the dtype of the passed data, and store
+the data in the file. You can also create empty <strong>DataArrays</strong> to take
+up data-to-be-recorded. In this case you have to provide the space
+that will be needed in advance.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># create an empty DataArray to store 2x1000 values</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&quot;my data&quot;</span><span class="p">,</span> <span class="s">&quot;nix.sampled&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">nix</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">Double</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1000</span><span class="p">))</span>
+<span class="n">some_numpy_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">some_numpy_array</span>
+</pre></div>
+</div>
+<p>If you do not know the size of the data in advance, you can append
+data to an already existing <strong>DataArray</strong>. <strong>Beware:</strong> Though it is
+possible to extend the data, it is not possible to change the
+dimensionality (rank) of the data afterwards.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># create an empty DataArray to store 2x1000 values</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&quot;my data&quot;</span><span class="p">,</span> <span class="s">&quot;nix.sampled&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">nix</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">Double</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">1000</span><span class="p">))</span>
+<span class="n">some_numpy_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="n">data</span><span class="p">[:,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">some_numpy_array</span>
+<span class="n">some_more_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">data_extent</span><span class="p">((</span><span class="mi">2</span><span class="p">,</span><span class="mi">1010</span><span class="p">))</span>
+<span class="n">data</span><span class="p">[:,</span> <span class="mi">1000</span><span class="p">:]</span> <span class="o">=</span> <span class="n">some_more_data</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dimension-descriptors">
+<h3>Dimension descriptors<a class="headerlink" href="#dimension-descriptors" title="Permalink to this headline">¶</a></h3>
+<p>In the above examples we have created <strong>DataArray</strong> entities that are
+used to store the data. Goal of our model design is that the data
+containing structures carry enough information to create a basic
+plot. Let&#8217;s assume a time-series of data needs to be stored: The data
+is just a vector of measurements (e.g. voltages). The data would be
+plotted as a line-plot. We thus need to define the x- and the y-axis
+of the plot. The y- or value axis is defined by setting the label and
+the unit properties of the <strong>DataArray</strong>, the x-axis needs a dimension
+descriptor. In the nix model three different dimension descriptors are
+defined. <strong>SampledDimension</strong>, <strong>RangeDimension</strong>, and
+<strong>SetDimension</strong> which are used for (i) data that has been sampled in
+space or time in regular intervals, (ii) data that has been sampled in
+irregular intervals, and (iii) data that belongs to categories.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sample_interval</span> <span class="o">=</span> <span class="mf">0.001</span> <span class="c"># s</span>
+<span class="n">sinewave</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="n">sample_interval</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&quot;sinewave&quot;</span><span class="p">,</span><span class="s">&quot;nix.regular_sampled&quot;</span><span class="p">,</span><span class="n">data</span><span class="o">=</span><span class="n">sinewave</span><span class="p">)</span>
+<span class="n">data</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;voltage&quot;</span>
+<span class="n">data</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s">&quot;mV&quot;</span>
+<span class="c"># define the time dimension of the data</span>
+<span class="n">dim</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">append_sampled_dimension</span><span class="p">(</span><span class="n">sample_interval</span><span class="p">)</span>
+<span class="n">dim</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;time&quot;</span>
+<span class="n">dim</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s">&quot;s&quot;</span>
+</pre></div>
+</div>
+<p>The <strong>SampledDimension</strong> can also be used to desribe space dimensions,
+e.g. in case of images.</p>
+<p>If the data was sampled at irregular intervals the sample points of
+the x-axis are defined using the <em>ticks</em> property of a
+<strong>RangeDimension</strong>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sample_times</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">,</span> <span class="mf">4.2</span><span class="p">,</span> <span class="mf">4.7</span><span class="p">,</span> <span class="mf">9.6</span><span class="p">]</span>
+<span class="n">dim</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">append_range_dimension</span><span class="p">(</span><span class="n">sample_times</span><span class="p">)</span>
+<span class="n">dim</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;time&quot;</span>
+<span class="n">dim</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s">&quot;s&quot;</span>
+</pre></div>
+</div>
+<p>Finally, some data belongs into categroies which do not necessarly
+have a natural order. In these cases a <strong>SetDimension</strong> is used. This
+descriptor can store for each category an optional label.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">observations</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">28</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">categories</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Jan&#39;</span><span class="p">,</span> <span class="s">&#39;Feb&#39;</span><span class="p">,</span> <span class="s">&#39;Mar&#39;</span><span class="p">,</span> <span class="s">&#39;Apr&#39;</span><span class="p">,</span> <span class="s">&#39;May&#39;</span><span class="p">,</span> <span class="s">&#39;Jun&#39;</span><span class="p">,</span>
+              <span class="s">&#39;Jul&#39;</span><span class="p">,</span> <span class="s">&#39;Aug&#39;</span><span class="p">,</span><span class="s">&#39;Sep&#39;</span><span class="p">,</span><span class="s">&#39;Oct&#39;</span><span class="p">,</span><span class="s">&#39;Nov&#39;</span><span class="p">,</span> <span class="s">&#39;Dec&#39;</span><span class="p">]</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&quot;observations&quot;</span><span class="p">,</span> <span class="s">&quot;nix.histogram&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">observations</span><span class="p">)</span>
+<span class="n">dim</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">append_set_dimension</span><span class="p">()</span>
+<span class="n">dim</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">categories</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="annotate-regions-in-the-data">
+<h3>Annotate regions in the data<a class="headerlink" href="#annotate-regions-in-the-data" title="Permalink to this headline">¶</a></h3>
+<p>Annotating points of regions of interest is one of the key features of
+the nix data-model. There are two entities for this purpose: (i) the
+<strong>Tag</strong> is used for single points or regions while the (ii)
+<strong>MultiTag</strong> is used to mark multiple of these. Tags have one or many
+<em>positions</em> and <em>extents</em> which define the point or the region in the
+<em>referenced</em> DataArray. Further they can have <strong>Features</strong> to store
+additional information about the positions (see tutorials below).</p>
+<div class="section" id="tag">
+<h4>Tag<a class="headerlink" href="#tag" title="Permalink to this headline">¶</a></h4>
+<p>The tag is a relatively simple structure directly storing the
+<em>position</em> the tag points and the, optional, <em>extent</em> of this
+region. Each of these are vectors of a length matching the
+dimensionality of the referenced data.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">position</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+<span class="n">extent</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
+<span class="n">tag</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_tag</span><span class="p">(</span><span class="s">&#39;interesting part&#39;</span><span class="p">,</span> <span class="s">&#39;nix.roi&#39;</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+<span class="n">tag</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">extent</span>
+<span class="c"># finally, add the referenced data to this tag</span>
+<span class="n">tag</span><span class="o">.</span><span class="n">references</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mulitag">
+<h4>MuliTag<a class="headerlink" href="#mulitag" title="Permalink to this headline">¶</a></h4>
+<p><strong>MultiTags</strong> are made to tag multiple points (regions) at once. The
+main difference to the <strong>Tag</strong> is that position and extent are stored
+in <strong>DataArray</strong> entities. These entities <strong>must</strong> be 2-D. Both
+dimensions are <em>SetDimensions</em>. The first dimension represents the
+individual positions, the second dimension takes the coordinates in
+the referenced n-dimensional <strong>DataArray</strong>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># fake data</span>
+<span class="n">frame</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">((</span><span class="mi">100</span><span class="p">,</span><span class="mi">100</span><span class="p">))</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&#39;random image&#39;</span><span class="p">,</span> <span class="s">&#39;nix.image&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">frame</span><span class="p">)</span>
+<span class="n">dim_x</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">append_sampled_dimension</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">dim_x</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&#39;x&#39;</span>
+<span class="n">dim_y</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">append_sampled_dimension</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">dim_y</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&#39;y&#39;</span>
+<span class="c"># positions array must be 2D</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="c"># 1st dim, represents the positions, 2nd the coordinates</span>
+<span class="n">p</span><span class="p">[</span><span class="mi">1</span><span class="p">,:]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">]</span>
+<span class="n">p</span><span class="p">[</span><span class="mi">2</span><span class="p">,:]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span><span class="mi">10</span><span class="p">]</span>
+<span class="n">positions</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&#39;special points&#39;</span><span class="p">,</span> <span class="s">&#39;nix.positions&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">p</span><span class="p">)</span>
+<span class="n">positions</span><span class="o">.</span><span class="n">append_set_dimension</span><span class="p">()</span>
+<span class="n">dim</span> <span class="o">=</span> <span class="n">positions</span><span class="o">.</span><span class="n">append_set_dimension</span><span class="p">()</span>
+<span class="n">dim</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">,</span> <span class="s">&#39;y&#39;</span><span class="p">]</span>
+<span class="c"># create a multi tag</span>
+<span class="n">tag</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_multi_tag</span><span class="p">(</span><span class="s">&#39;interesting points&#39;</span><span class="p">,</span> <span class="s">&#39;nix.multiple_roi&#39;</span><span class="p">,</span> <span class="n">positions</span><span class="p">)</span>
+<span class="n">tag</span><span class="o">.</span><span class="n">references</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="adding-further-information">
+<h3>Adding further information<a class="headerlink" href="#adding-further-information" title="Permalink to this headline">¶</a></h3>
+<p>The tags establish links between datasets. If one needs to attach
+further information to each of the regions defined by the tag, one can
+add <strong>Features</strong> to them. A <strong>Feature</strong> references a <strong>DataArray</strong> as
+its <em>data</em> and specifies with the <em>link_type</em> how the link has to be
+interpreted.  The <em>link_type</em> can either be <em>tagged</em>, <em>indexed</em>, or
+<em>untagged</em> indicating that the tag should be applied also to the
+feature data (<em>tagged</em>), for each position given in the tag, a slice
+of the feature data (ith index along the first dimension) is the
+feature (<em>indexed</em>), or all feature data applies for all positions
+(<em>untagged</em>).</p>
+<p>Let&#8217;s say we want to give each  point a name, we can create a feature like this:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">spot_names</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&#39;spot ids&#39;</span><span class="p">,</span> <span class="s">&#39;nix.feature&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">])</span>
+<span class="n">spot_names</span><span class="o">.</span><span class="n">append_set_dimension</span><span class="p">()</span>
+<span class="n">feature</span> <span class="o">=</span> <span class="n">tag</span><span class="o">.</span><span class="n">create_feature</span><span class="p">(</span><span class="n">spot_names</span><span class="p">,</span> <span class="n">nix</span><span class="o">.</span><span class="n">LinkType</span><span class="o">.</span><span class="n">Indexed</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We could also say that each point in the tagged data (e.g. a matrix of
+measurements) has a corresponding point in an input matrix.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">input_matrix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="n">input_data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&#39;input matrix&#39;</span><span class="p">,</span> <span class="s">&#39;nix.feature&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">input_matrix</span><span class="p">)</span>
+<span class="n">dim_x</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">append_sampled_dimension</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">dim_x</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&#39;x&#39;</span>
+<span class="n">dim_y</span> <span class="o">=</span> <span class="n">input_data</span><span class="o">.</span><span class="n">append_sampled_dimension</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+<span class="n">dim_y</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&#39;y&#39;</span>
+<span class="n">tag</span><span class="o">.</span><span class="n">create_feature</span><span class="p">(</span><span class="n">input_data</span><span class="p">,</span> <span class="n">nix</span><span class="o">.</span><span class="n">LinkType</span><span class="o">.</span><span class="n">Tagged</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Finally, one could need to attach the same information to all
+positions defined in the tag. In this case the feature is <em>untagged</em></p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">common_feature</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&#39;common feature&#39;</span><span class="p">,</span> <span class="s">&#39;nix.feature&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">some_common_data</span><span class="p">)</span>
+<span class="n">tag</span><span class="o">.</span><span class="n">create_feature</span><span class="p">(</span><span class="n">common_feature</span><span class="p">,</span> <span class="n">nix</span><span class="o">.</span><span class="n">LinkType</span><span class="o">.</span><span class="n">Untagged</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="defining-the-source-of-the-data">
+<h3>Defining the Source of the data<a class="headerlink" href="#defining-the-source-of-the-data" title="Permalink to this headline">¶</a></h3>
+<p>In cases in which we want to store where the data originates
+<strong>Source</strong> entities can be used. Almost all entities of the NIX-model
+can have <strong>Sources</strong>. For example, if the recorded data originates
+from experiments done with one specific experimental
+subject. <strong>Sources</strong> have a name and a type and can have some
+definition.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">subject</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_source</span><span class="p">(</span><span class="s">&#39;subject A&#39;</span><span class="p">,</span> <span class="s">&#39;nix.experimental_subject&#39;</span><span class="p">)</span>
+<span class="n">subject</span><span class="o">.</span><span class="n">definition</span> <span class="o">=</span> <span class="s">&#39;The experimental subject used in this experiment&#39;</span>
+<span class="n">data</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subject</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>Sources</strong> may depend on other <strong>Sources</strong>. For example, in an
+electrophysiological experiment we record from different cells in the
+same brain region of the same animal. To represent this hierarchy,
+<strong>Sources</strong> can be nested, create a tree-like structure.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">subject</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">create_source</span><span class="p">(</span><span class="s">&#39;subject A&#39;</span><span class="p">,</span> <span class="s">&#39;nix.experimental_subject&#39;</span><span class="p">)</span>
+<span class="n">brain_region</span> <span class="o">=</span> <span class="n">subject</span><span class="o">.</span><span class="n">create_source</span><span class="p">(</span><span class="s">&#39;hippocampus&#39;</span><span class="p">,</span> <span class="s">&#39;nix.experimental_subject&#39;</span><span class="p">)</span>
+<span class="n">cell_a</span> <span class="o">=</span> <span class="n">brain_region</span><span class="o">.</span><span class="n">create_source</span><span class="p">(</span><span class="s">&#39;Cell 1&#39;</span><span class="p">,</span> <span class="s">&#39;nix.experimental_subject&#39;</span><span class="p">)</span>
+<span class="n">cell_b</span> <span class="o">=</span> <span class="n">brain_region</span><span class="o">.</span><span class="n">create_source</span><span class="p">(</span><span class="s">&#39;Cell 2&#39;</span><span class="p">,</span> <span class="s">&#39;nix.experimental_subject&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="arbitrary-metadata">
+<h3>Arbitrary metadata<a class="headerlink" href="#arbitrary-metadata" title="Permalink to this headline">¶</a></h3>
+<p>The entities discussed so far carry just enough information to get a
+basic understanding of the stored data. Often much more information
+than that is required. Storing additional metadata is a central part
+of the NIX concept. We use a slightly modified version of the <em>odML</em>
+data model for metadata to store additional information. In brief: the
+model consists of <strong>Sections</strong> that contain <strong>Properties</strong> which in
+turn contain one or more <strong>Values</strong>. Again, <strong>Sections</strong> can be nested
+to represent logical dependencies in the hierarchy of a tree. While
+all data entities discussed above are children of <strong>Block</strong> entities,
+the metadata lives parallel to the <strong>Blocks</strong>. The idea behind this is
+that several blocks may refer to the same metadata, or, the other way
+round the metadata applies to data entities in several blocks. The
+<em>types</em> used for the <strong>Sections</strong> in the following example are defined
+in the <a class="reference external" href="https://github.com/G-Node/odml-terminologies">odml terminologies</a></p>
+<p>Most of the data entities can link to metadata sections.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">sec</span> <span class="o">=</span> <span class="n">nix_file</span><span class="o">.</span><span class="n">create_section</span><span class="p">(</span><span class="s">&#39;recording session&#39;</span><span class="p">,</span> <span class="s">&#39;odml.recording&#39;</span><span class="p">)</span>
+<span class="n">sec</span><span class="o">.</span><span class="n">create_property</span><span class="p">(</span><span class="s">&#39;experimenter&#39;</span><span class="p">,</span> <span class="n">nix</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s">&#39;John Doe&#39;</span><span class="p">))</span>
+<span class="n">sec</span><span class="o">.</span><span class="n">create_property</span><span class="p">(</span><span class="s">&#39;recording date&#39;</span><span class="p">,</span> <span class="n">nix_Value</span><span class="p">(</span><span class="s">&#39;2014-01-01&#39;</span><span class="p">))</span>
+<span class="n">subject</span> <span class="o">=</span> <span class="n">sec</span><span class="o">.</span><span class="n">create_section</span><span class="p">(</span><span class="s">&#39;subject&#39;</span><span class="p">,</span> <span class="s">&#39;odml.subject&#39;</span><span class="p">)</span>
+<span class="n">subject</span><span class="o">.</span><span class="n">create_property</span><span class="p">(</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="n">nix</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="s">&#39;mouse xyz&#39;</span><span class="p">))</span>
+<span class="n">cell</span> <span class="o">=</span> <span class="n">subject</span><span class="o">.</span><span class="n">create_section</span><span class="p">(</span><span class="s">&#39;cell&#39;</span><span class="p">,</span> <span class="s">&#39;odml.cell&#39;</span><span class="p">)</span>
+<span class="n">v</span> <span class="o">=</span> <span class="n">nix</span><span class="o">.</span><span class="n">Value</span><span class="p">(</span><span class="o">-</span><span class="mf">64.5</span><span class="p">)</span>
+<span class="n">v</span><span class="o">.</span><span class="n">uncertainty</span> <span class="o">=</span> <span class="mf">2.25</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">create_property</span><span class="p">(</span><span class="s">&#39;resting potential&#39;</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s">&#39;mV&#39;</span>
+<span class="c"># set the recording block metadata</span>
+<span class="n">block</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">sec</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="units">
+<h3>Units<a class="headerlink" href="#units" title="Permalink to this headline">¶</a></h3>
+<p>In NIX we accept only SI units (plus dB, %) wherever units can be
+given. We also accept compound units like <em>mV/cm</em>. Units are most of
+the times handled transparently. That is, when you tag a region of
+data that has been specified with a time axis in seconds and use
+e.g. the <em>tag.retrieve_data</em> method to get this data slice, the API
+will handle unit scaling. The correct data will be returned even if
+the tag&#8217;s position is given in <em>ms</em>.</p>
+<p>TODO: example code</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+<p>
+<iframe src="http://ghbtns.com/github-btn.html?user=G-Node&repo=nixpy&type=watch&count=False&size=large"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+    
+
+<p>
+<a href="https://travis-ci.org/G-Node/nixpy">
+    <img
+        alt="https://secure.travis-ci.org/G-Node/nixpy.png?branch=master"
+        src="https://secure.travis-ci.org/G-Node/nixpy.png?branch=master"
+    >
+</a>
+</p>
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation Guidelines</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#design-principles">Design Principles</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api_data.html">API Documentation for Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_metadata.html">API Documentation for Metadata</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, German Neuroinformatics Node, Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, Balint Morvai.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.2.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.6.0</a>
+      
+      |
+      <a href="_sources/overview.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,631 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tutorials &mdash; Python bindings for NIX 1.1.0 Release documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1.0 Release',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Python bindings for NIX 1.1.0 Release documentation" href="index.html" />
+    <link rel="next" title="API Documentation for Data" href="api_data.html" />
+    <link rel="prev" title="Overview" href="overview.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="api_data.html" title="API Documentation for Data"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="overview.html" title="Overview"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Python bindings for NIX 1.1.0 Release documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="tutorials">
+<h1>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this headline">¶</a></h1>
+<p>The following tutorials show how to work with NIX files, to store
+different kinds of data, tag points or regions of interest and add
+further information to the data.</p>
+<div class="section" id="list-of-tutorials">
+<span id="toc"></span><h2>List of Tutorials<a class="headerlink" href="#list-of-tutorials" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>Working with files<ul>
+<li><a class="reference internal" href="#working-with-files"><em>Working with Files</em></a></li>
+</ul>
+</li>
+<li>Basic data structures<ul>
+<li><a class="reference internal" href="#regularly-sampled-data"><em>Regularly sampled data</em></a></li>
+<li><a class="reference internal" href="#irregularly-sampled-data"><em>Irregularly sampled data</em></a></li>
+<li><a class="reference internal" href="#event-data"><em>Event data</em></a></li>
+<li><a class="reference internal" href="#multiple-signals"><em>Series of signals</em></a></li>
+<li><a class="reference internal" href="#image-data"><em>Image data</em></a></li>
+</ul>
+</li>
+<li>Tagging points and regions-of-interest<ul>
+<li><a class="reference internal" href="#single-roi"><em>Single point or region</em></a></li>
+<li><a class="reference internal" href="#multiple-rois"><em>Multiple points or regions</em></a></li>
+<li><a class="reference internal" href="#spike-tagging"><em>Tagging spikes in membrane potential</em></a></li>
+</ul>
+</li>
+<li>Features<ul>
+<li><a class="reference internal" href="#untagged-feature"><em>Untagged Feature</em></a></li>
+<li><a class="reference internal" href="#tagged-feature"><em>Tagged Feature</em></a></li>
+<li><a class="reference internal" href="#indexed-feature"><em>Indexed Feature</em></a></li>
+</ul>
+</li>
+<li>Retrieve data<ul>
+<li><a class="reference internal" href="#retrieve-tagged-data"><em>Retrieving tagged regions</em></a></li>
+<li><a class="reference internal" href="#retrieve-feature-data"><em>Retrieving feature data</em></a></li>
+</ul>
+</li>
+<li>Additional information<ul>
+<li><a class="reference internal" href="#sources"><em>Storing the origin of data</em></a></li>
+<li><a class="reference internal" href="#metadata"><em>Adding arbitrary metadata</em></a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="working-with-files">
+<span id="id1"></span><h2>Working with Files<a class="headerlink" href="#working-with-files" title="Permalink to this headline">¶</a></h2>
+<p>The following code shows how to create a new nix-file, close it and
+re-open them with different access rights (examples/fileCreate.py).</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">nix</span>
+
+
+<span class="n">file_name</span> <span class="o">=</span> <span class="s">&#39;file_create_example.h5&#39;</span>
+
+<span class="c"># create a new file overwriting any existing content</span>
+<span class="nb">file</span> <span class="o">=</span> <span class="n">nix</span><span class="o">.</span><span class="n">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">nix</span><span class="o">.</span><span class="n">FileMode</span><span class="o">.</span><span class="n">Overwrite</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="nb">file</span><span class="o">.</span><span class="n">format</span><span class="p">,</span> <span class="nb">file</span><span class="o">.</span><span class="n">version</span><span class="p">,</span> <span class="nb">file</span><span class="o">.</span><span class="n">created_at</span><span class="p">)</span>
+
+<span class="c"># close file</span>
+<span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="c"># re-open file for read-only access</span>
+<span class="nb">file</span>  <span class="o">=</span> <span class="n">nix</span><span class="o">.</span><span class="n">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">nix</span><span class="o">.</span><span class="n">FileMode</span><span class="o">.</span><span class="n">ReadOnly</span><span class="p">)</span>
+
+<span class="c"># this command will fail putting out HDF5 Errors</span>
+<span class="nb">file</span><span class="o">.</span><span class="n">create_block</span><span class="p">(</span><span class="s">&quot;test block&quot;</span><span class="p">,</span> <span class="s">&quot;test&quot;</span><span class="p">)</span>
+
+<span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="c"># re-open for read-write access</span>
+<span class="nb">file</span>  <span class="o">=</span> <span class="n">nix</span><span class="o">.</span><span class="n">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">nix</span><span class="o">.</span><span class="n">FileMode</span><span class="o">.</span><span class="n">ReadWrite</span><span class="p">)</span>
+
+<span class="c"># the following command now works fine</span>
+<span class="nb">file</span><span class="o">.</span><span class="n">create_block</span><span class="p">(</span><span class="s">&quot;test block&quot;</span><span class="p">,</span> <span class="s">&quot;test&quot;</span><span class="p">)</span>
+
+<span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Source code of this example: <a class="reference external" href="examples/fileCreate.py">fileCreate.py</a>.</p>
+<p><a class="reference internal" href="#toc"><em>List of Tutorials</em></a></p>
+</div>
+<div class="section" id="basic-data-structures">
+<h2>Basic data structures<a class="headerlink" href="#basic-data-structures" title="Permalink to this headline">¶</a></h2>
+<p>In this section we will show how different kinds of data are stored in
+nix files. We will start with simple regularly and irregularly sampled
+signals, turn to series of such signals and end with images stacks.</p>
+<div class="section" id="regularly-sampled-data">
+<span id="id2"></span><h3>Regularly sampled data<a class="headerlink" href="#regularly-sampled-data" title="Permalink to this headline">¶</a></h3>
+<p>Regularly sampled data is everything which is sampled in regular
+intervals in space, time, or something else. Let&#8217;s consider a signal
+that has been digitized using an AD-Converter at a fixed sampling
+rate. In this case the axis representing time has to be described
+using a <strong>SampledDimension</strong>. This dimension descriptor contains as
+mandatory element the <em>sampling_interval</em>. The <em>sampling_interval</em> has
+to be given because it also applies e.g. to spatial sampling, it is
+the more general term than the sampling rate which may appear
+appropriate for time discretization. Further, the <em>unit</em> in which this
+number has to be interpreted and a <em>label</em> for the axis can be
+specified. The following code illustrates how this is stored in nix
+files.</p>
+<div class="highlight-python"><div class="highlight"><pre>    <span class="c"># create a &#39;Block&#39; that represents a grouping object. Here, the recording session.</span>
+    <span class="c"># it gets a name and a type </span>
+    <span class="n">block</span> <span class="o">=</span> <span class="nb">file</span><span class="o">.</span><span class="n">create_block</span><span class="p">(</span><span class="s">&quot;block name&quot;</span><span class="p">,</span> <span class="s">&quot;nix.session&quot;</span><span class="p">)</span>
+
+    <span class="c"># create a &#39;DataArray&#39; to take the sinewave, add some information about the signal</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&quot;sinewave&quot;</span><span class="p">,</span> <span class="s">&quot;nix.regular_sampled&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s">&quot;mV&quot;</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;voltage&quot;</span>
+    <span class="c"># add a descriptor for the xaxis</span>
+    <span class="n">dim</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">append_sampled_dimension</span><span class="p">(</span><span class="n">stepsize</span><span class="p">)</span>
+    <span class="n">dim</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s">&quot;s&quot;</span>
+    <span class="n">dim</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;time&quot;</span>
+    <span class="n">dim</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="mf">0.0</span> <span class="c"># optional</span>
+    
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/regular_sampled.png"><img alt="_images/regular_sampled.png" src="_images/regular_sampled.png" style="width: 240px;" /></a>
+<p>Source code for this example: <a class="reference external" href="examples/regularlySampledData.py">regularlySampledData.py</a>.</p>
+<p><a class="reference internal" href="#toc"><em>List of Tutorials</em></a></p>
+</div>
+<div class="section" id="irregularly-sampled-data">
+<span id="id3"></span><h3>Irregularly sampled data<a class="headerlink" href="#irregularly-sampled-data" title="Permalink to this headline">¶</a></h3>
+<p>Irregularly sampled data is sampled at irregular intervals. The
+dimension which is sampled in this way has to be described using a
+<strong>RangeDimension</strong>. This dimension descriptor stores besides the
+<em>unit</em> and <em>label</em> of the axis the ticks, e.g. time-stamps of the
+instances at which the samples were taken.</p>
+<div class="highlight-python"><div class="highlight"><pre>    <span class="n">data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&quot;sinewave&quot;</span><span class="p">,</span> <span class="s">&quot;nix.irregular_sampled&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s">&quot;mV&quot;</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;voltage&quot;</span>
+    <span class="c"># add a descriptor for the xaxis</span>
+    <span class="n">dim</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">append_range_dimension</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+    <span class="n">dim</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s">&quot;s&quot;</span>
+    <span class="n">dim</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;time&quot;</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/irregular.png"><img alt="_images/irregular.png" src="_images/irregular.png" style="width: 240px;" /></a>
+<p>Source code for this example: <a class="reference external" href="examples/irregularlySampledData.py">irregularlySampledData.py</a>.</p>
+<p><a class="reference internal" href="#toc"><em>List of Tutorials</em></a></p>
+</div>
+<div class="section" id="event-data">
+<span id="id4"></span><h3>Event data<a class="headerlink" href="#event-data" title="Permalink to this headline">¶</a></h3>
+<p>TODO</p>
+</div>
+<div class="section" id="series-of-signals">
+<span id="multiple-signals"></span><h3>Series of signals<a class="headerlink" href="#series-of-signals" title="Permalink to this headline">¶</a></h3>
+<p>It is possible to store multiple signals that have the same shape and
+logically belong together in the same <em>DataArray</em> object. In this
+case, the data is two-dimensional and two dimension-descriptors are
+needed. Depending on the layout of the data one dimension represents
+time and is described with a <em>SampledDimension</em> while the other
+represents the various signals. This is described with a
+<em>SetDimension</em>. A <em>SetDimension</em> can have labels for each entry along
+this dimension of the data.</p>
+<div class="highlight-python"><div class="highlight"><pre>    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">sine</span><span class="p">,</span> <span class="n">cosine</span><span class="p">))</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&quot;waveforms&quot;</span><span class="p">,</span> <span class="s">&quot;nix.regular_sampled.multiple_series&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s">&quot;mV&quot;</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;voltage&quot;</span>
+    <span class="c"># descriptor for first dimension is a set</span>
+    <span class="n">set_dim</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">append_set_dimension</span><span class="p">()</span>
+    <span class="n">set_dim</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sin&#39;</span><span class="p">,</span> <span class="s">&#39;cos&#39;</span><span class="p">]</span>
+    <span class="c"># add a descriptor for the xaxis</span>
+    <span class="n">dim</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">append_sampled_dimension</span><span class="p">(</span><span class="n">stepsize</span><span class="p">)</span>
+    <span class="n">dim</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s">&quot;s&quot;</span>
+    <span class="n">dim</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;time&quot;</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/multiple_time_series.png"><img alt="_images/multiple_time_series.png" src="_images/multiple_time_series.png" style="width: 240px;" /></a>
+<p>Source code for this example: <a class="reference external" href="examples/irregularlySampledData.py">multipleTimeSeries.py</a>.</p>
+<p><a class="reference internal" href="#toc"><em>List of Tutorials</em></a></p>
+</div>
+<div class="section" id="image-data">
+<span id="id5"></span><h3>Image data<a class="headerlink" href="#image-data" title="Permalink to this headline">¶</a></h3>
+<p>Color images can be stored as 3-D data in a <em>DataArray</em>. The first two
+dimensions represent <em>width</em> and <em>height</em> of the image while the 3rd
+dimension represents the color channels. Accordingly, we need three
+dimension descriptors. The first two are <em>SampledDimensions</em> since the
+pixels of the image are regularly sampled in space. The third
+dimension is a <em>SetDimension</em> with labels for each of the channels.
+In this tutorial the &#8220;Lenna&#8221; image is used. Please see the author
+attribution in the code.</p>
+<div class="highlight-python"><div class="highlight"><pre>    <span class="n">data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&quot;lenna&quot;</span><span class="p">,</span> <span class="s">&quot;nix.image.rgb&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">img_data</span><span class="p">)</span>
+    <span class="c"># add descriptors for width, height and channels</span>
+    <span class="n">height_dim</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">append_sampled_dimension</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">height_dim</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;height&quot;</span>
+    <span class="n">width_dim</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">append_sampled_dimension</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">width_dim</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;width&quot;</span>
+    <span class="n">color_dim</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">append_set_dimension</span><span class="p">()</span>
+    <span class="n">color_dim</span><span class="o">.</span><span class="n">labels</span> <span class="o">=</span> <span class="n">channels</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/lenna.png"><img alt="_images/lenna.png" src="_images/lenna.png" style="width: 240px;" /></a>
+<p>if the image is not shown install <em>imagemagick</em> or <em>xv</em> tools (Linux)
+Source code for this example: <a class="reference external" href="examples/imageData.py">imageData.py</a>.</p>
+<p><a class="reference internal" href="#toc"><em>List of Tutorials</em></a></p>
+</div>
+</div>
+<div class="section" id="tagging-regions">
+<h2>Tagging regions<a class="headerlink" href="#tagging-regions" title="Permalink to this headline">¶</a></h2>
+<p>One key feature of the nix-model is its ability to annotate, or &#8220;tag&#8221;,
+points or regions-of-interest in the stored data. This feature can be
+used to state the occurrence of events during the recording, to state
+the intervals of a certain condition, e.g. a stimulus presentation, or
+to mark the regions of interests in image data. In the nix data-model
+two types of Tags are discriminated. (1) the <strong>Tag</strong> for single points
+or regions, and (2) the <strong>MultiTag</strong> to annotate multiple points or
+regions using the same entity.</p>
+<div class="section" id="single-point-or-region">
+<span id="single-roi"></span><h3>Single point or region<a class="headerlink" href="#single-point-or-region" title="Permalink to this headline">¶</a></h3>
+<p>Single points of regions-of-interest are annotated using a <strong>Tag</strong>
+object. The Tag contains the start <em>position</em> and, optional, the
+<em>extent</em> of the point or region. The link to the data is established
+by adding the <strong>DataArray</strong> that contains the data to the list of
+references. It is important to note that <em>position</em> and <em>extent</em> are
+arrays with the length matching the dimensionality of the referenced
+data. The same Tag can be applied to many references as long as
+<em>position</em> and <em>extent</em> can be applied to these.</p>
+<div class="highlight-python"><div class="highlight"><pre>    <span class="n">position</span> <span class="o">=</span> <span class="p">[</span><span class="mi">250</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">extent</span> <span class="o">=</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+    <span class="n">tag</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_tag</span><span class="p">(</span><span class="s">&#39;Region of interest&#39;</span><span class="p">,</span> <span class="s">&#39;nix.roi&#39;</span><span class="p">,</span> <span class="n">position</span><span class="p">)</span>
+    <span class="n">tag</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">extent</span>
+    <span class="n">tag</span><span class="o">.</span><span class="n">references</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/single_roi.png"><img alt="_images/single_roi.png" src="_images/single_roi.png" style="width: 240px;" /></a>
+<p>Source code for this example: <a class="reference external" href="examples/singleROI.py">singleROI.py</a>.</p>
+<p><a class="reference internal" href="#toc"><em>List of Tutorials</em></a></p>
+</div>
+<div class="section" id="multiple-points-or-regions">
+<span id="multiple-rois"></span><h3>Multiple points or regions<a class="headerlink" href="#multiple-points-or-regions" title="Permalink to this headline">¶</a></h3>
+<p>For tagging multiple regions of interest in the same data the
+<strong>MultiTag</strong> object is used. Unlike the simple <strong>Tag</strong> from the
+previous example, the multiple <em>positions</em> and <em>extents</em> can be
+given. These are stored in <strong>DataArray</strong> objects. The tagged dataset
+is linked via the references.  There are some restrictions regarding
+the <strong>DataArrays</strong> storing positions and extents. The data stored in
+them <strong>must</strong> be 2-dimensional. Both dimensions are <strong>SetDimensions</strong>
+representing the individual positions and the positions in the
+referenced data, respectively. Thus, the second dimension has as many
+entries as the referenced data has dimensions.</p>
+<p>In the following example we will declare multiple ROIs in a image. The
+image as a spatial extent and three color channels, is hence 3-D. The
+same mechanism can, of course, be used to tag other event in different
+kinds of data. For example in the neuroscience context: the detection
+of action potentials in a recorded membrane potential.</p>
+<div class="highlight-python"><div class="highlight"><pre>    <span class="n">roi_starts</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">250</span><span class="p">,</span> <span class="mi">245</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> 
+    <span class="n">roi_starts</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">250</span><span class="p">,</span> <span class="mi">315</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> 
+    <span class="n">roi_starts</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">340</span><span class="p">,</span> <span class="mi">260</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> 
+
+    <span class="n">roi_extents</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>    
+    <span class="n">roi_extents</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> 
+    <span class="n">roi_extents</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> 
+    <span class="n">roi_extents</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">65</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> 
+        
+    <span class="c"># create the positions DataArray</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&quot;ROI positions&quot;</span><span class="p">,</span> <span class="s">&quot;nix.positions&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">roi_starts</span><span class="p">)</span>
+    <span class="n">positions</span><span class="o">.</span><span class="n">append_set_dimension</span><span class="p">()</span> <span class="c"># these can be empty</span>
+    <span class="n">positions</span><span class="o">.</span><span class="n">append_set_dimension</span><span class="p">()</span>
+    
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/multi_roi.png"><img alt="_images/multi_roi.png" src="_images/multi_roi.png" style="width: 240px;" /></a>
+<p>Source code for this example: <a class="reference external" href="examples/multipleROIs.py">multipleROIs.py</a>.</p>
+<p><a class="reference internal" href="#toc"><em>List of Tutorials</em></a></p>
+</div>
+<div class="section" id="tagging-spikes-in-membrane-potential">
+<span id="spike-tagging"></span><h3>Tagging spikes in membrane potential<a class="headerlink" href="#tagging-spikes-in-membrane-potential" title="Permalink to this headline">¶</a></h3>
+<p>Neuroscience example. The same construct as above is used to mark the
+times at which action potentials were detected in the recording of a
+neuron&#8217;s membrane potential.</p>
+<div class="highlight-python"><div class="highlight"><pre>    <span class="n">data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&quot;membrane voltage&quot;</span><span class="p">,</span> <span class="s">&quot;nix.regular_sampled.time_series&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">voltage</span><span class="p">)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;membrane voltage&quot;</span>
+    <span class="c"># add descriptors for time axis</span>
+    <span class="n">time_dim</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">append_sampled_dimension</span><span class="p">(</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">time_dim</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;time&quot;</span>
+    <span class="n">time_dim</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s">&quot;s&quot;</span>
+   
+    <span class="c"># create the positions DataArray</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&quot;times&quot;</span><span class="p">,</span> <span class="s">&quot;nix.positions&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">spike_times</span><span class="p">)</span>
+    <span class="n">positions</span><span class="o">.</span><span class="n">append_set_dimension</span><span class="p">()</span> <span class="c"># these can be empty</span>
+    <span class="n">positions</span><span class="o">.</span><span class="n">append_set_dimension</span><span class="p">()</span>
+    
+    <span class="c"># create a MultiTag</span>
+    <span class="n">multi_tag</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_multi_tag</span><span class="p">(</span><span class="s">&quot;spike times&quot;</span><span class="p">,</span> <span class="s">&quot;nix.events.spike_times&quot;</span><span class="p">,</span> <span class="n">positions</span><span class="p">)</span>
+    <span class="n">multi_tag</span><span class="o">.</span><span class="n">references</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/spike_tagging.png"><img alt="_images/spike_tagging.png" src="_images/spike_tagging.png" style="width: 240px;" /></a>
+<p>Source code for this example: <a class="reference external" href="examples/spikeTagging.py">spikeTagging.py</a>.</p>
+<p><a class="reference internal" href="#toc"><em>List of Tutorials</em></a></p>
+</div>
+<div class="section" id="retrieving-tagged-regions">
+<span id="retrieve-tagged-data"></span><h3>Retrieving tagged regions<a class="headerlink" href="#retrieving-tagged-regions" title="Permalink to this headline">¶</a></h3>
+<p>Tagging regions of interest in one thing but retrieving the tagged
+data slice is another. The <strong>Tag</strong> and <strong>MultiTag</strong> entities offer a
+function for this. Consider the image example from above:</p>
+<a class="reference internal image-reference" href="_images/multi_roi.png"><img alt="_images/multi_roi.png" src="_images/multi_roi.png" style="width: 240px;" /></a>
+<p>Three regions were tagged. To retrieve the respective data the
+following code has to be executed:</p>
+<div class="highlight-python"><div class="highlight"><pre>    <span class="n">position_count</span> <span class="o">=</span> <span class="n">tag</span><span class="o">.</span><span class="n">positions</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">position_count</span><span class="p">):</span>
+        <span class="n">roi_data</span> <span class="o">=</span> <span class="n">tag</span><span class="o">.</span><span class="n">retrieve_data</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="mi">0</span><span class="p">)[:]</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/retrieved_rois.png"><img alt="_images/retrieved_rois.png" src="_images/retrieved_rois.png" style="width: 240px;" /></a>
+<p>Source code for this example: <a class="reference external" href="examples/multipleROIs.py">multipleROIs.py</a>.</p>
+<p><a class="reference internal" href="#toc"><em>List of Tutorials</em></a></p>
+</div>
+<div class="section" id="unit-support-in-tagging">
+<h3>Unit support in tagging<a class="headerlink" href="#unit-support-in-tagging" title="Permalink to this headline">¶</a></h3>
+<p>TODO</p>
+<p><a class="reference internal" href="#toc"><em>List of Tutorials</em></a></p>
+</div>
+</div>
+<div class="section" id="features">
+<span id="id7"></span><h2>Features<a class="headerlink" href="#features" title="Permalink to this headline">¶</a></h2>
+<p>The following code shows how to use the <strong>Features</strong> of the
+NIX-model. Suppose that we have the recording of a signal in which a
+set of events is detected. Each event may have certain characteristics
+one wants to store. These are stored as <strong>Features</strong> of the
+events. There are three different link-types between the features and
+the events stored in the tag. <em>nix.LinkType.Untagged</em> indicates that
+the whole data stored in the <strong>Feature</strong> applies to the points defined
+in the tag. <em>nix.LinkType.Tagged</em> on the other side implies that the
+<em>position</em> and <em>extent</em> have to be applied also to the data stored in
+the <strong>Feature</strong>. Finally, the <em>nix.LinkType.Indexed</em> indicates that
+there is one point (or slice) in the <strong>Feature</strong> data that is related
+to each position in the Tag.</p>
+<p>The following examples show how this works.</p>
+<div class="section" id="untagged-feature">
+<span id="id8"></span><h3>Untagged Feature<a class="headerlink" href="#untagged-feature" title="Permalink to this headline">¶</a></h3>
+<p>Let&#8217;s say we record the activity of a neuron and at a certain epoch of
+that recording a stimulus was presented. This time interval is
+annotated using a <strong>Tag</strong>. This inidicates the time in which the
+stimulus was on but we may also want to link the stimulus trace to
+it. The stimulus is also stored as a <strong>DataArray</strong> in the file and can
+be linked to the stimulus interval as an <em>untagged</em> <strong>Feature</strong> of it.</p>
+<div class="highlight-python"><div class="highlight"><pre>    <span class="n">tag</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_tag</span><span class="p">(</span><span class="s">&quot;stimulus presentation&quot;</span><span class="p">,</span> <span class="s">&quot;nix.epoch.stimulus_presentation&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">stim_onset</span><span class="p">])</span>
+    <span class="n">tag</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="p">[</span><span class="n">stim_duration</span><span class="p">]</span>
+    <span class="n">tag</span><span class="o">.</span><span class="n">references</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="c"># set stimulus as untagged feature of the tag</span>
+    <span class="n">tag</span><span class="o">.</span><span class="n">create_feature</span><span class="p">(</span><span class="n">stim</span><span class="p">,</span> <span class="n">nix</span><span class="o">.</span><span class="n">LinkType</span><span class="o">.</span><span class="n">Untagged</span><span class="p">)</span>
+
+    <span class="c"># let&#39;s plot the data from the stored information</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/untagged_feature.png"><img alt="_images/untagged_feature.png" src="_images/untagged_feature.png" style="width: 240px;" /></a>
+<p>Source code for this example: <a class="reference external" href="examples/untaggedFeature.py">untaggedFeature.py</a>.</p>
+<p><a class="reference internal" href="#toc"><em>List of Tutorials</em></a></p>
+</div>
+<div class="section" id="tagged-feature">
+<span id="id9"></span><h3>Tagged Feature<a class="headerlink" href="#tagged-feature" title="Permalink to this headline">¶</a></h3>
+<p>Tagged <strong>Features</strong> are used in cases in which the positions and
+extents of a tag also apply to another linked dataset. In the
+following example the spike times should also be applied to the
+stimulus that led to the responses. The stimulus is saved in an
+additional <strong>DataArray</strong> and is linked to the spike times as a
+<strong>Feature</strong> setting the <strong>LinkType</strong> to <em>tagged</em>.</p>
+<div class="highlight-python"><div class="highlight"><pre>    <span class="n">stimulus_array</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&quot;stimulus&quot;</span><span class="p">,</span> <span class="s">&quot;nix.regular_sampled&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">stimulus</span><span class="p">)</span>
+    <span class="n">stimulus_array</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;stimulus&quot;</span>
+    <span class="n">stimulus_array</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s">&quot;nA&quot;</span>
+    <span class="c"># add a descriptor for the time axis</span>
+    <span class="n">dim</span> <span class="o">=</span> <span class="n">stimulus_array</span><span class="o">.</span><span class="n">append_sampled_dimension</span><span class="p">(</span><span class="n">stepsize</span><span class="p">)</span>
+    <span class="n">dim</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s">&quot;s&quot;</span>
+    <span class="n">dim</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;time&quot;</span>
+    
+    <span class="c"># set stimulus as a tagged feature of the multi_tag</span>
+    <span class="n">multi_tag</span><span class="o">.</span><span class="n">create_feature</span><span class="p">(</span><span class="n">stimulus_array</span><span class="p">,</span> <span class="n">nix</span><span class="o">.</span><span class="n">LinkType</span><span class="o">.</span><span class="n">Tagged</span><span class="p">)</span>
+
+    <span class="c"># let&#39;s plot the data from the stored information</span>
+    <span class="n">plot_data</span><span class="p">(</span><span class="n">multi_tag</span><span class="p">)</span>
+    <span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/tagged_feature.png"><img alt="_images/tagged_feature.png" src="_images/tagged_feature.png" style="width: 240px;" /></a>
+<p>Source code for this example: <a class="reference external" href="examples/taggedFeature.py">taggedFeature.py</a>.</p>
+<p><a class="reference internal" href="#toc"><em>List of Tutorials</em></a></p>
+</div>
+<div class="section" id="indexed-feature">
+<span id="id10"></span><h3>Indexed Feature<a class="headerlink" href="#indexed-feature" title="Permalink to this headline">¶</a></h3>
+<p>In the example, the signal is the membrane potential of a (model)
+neuron which was stimulated with some stimulus. The events are again
+the action potentials (or spikes) fired by that neuron. A typical
+analysis performed on such data is the Spike triggered average which
+represent the average stimulus that led to a spike. For each spike, a
+snippet of the respective stimulus is cut out and later averaged. In
+this example we store these stimulus snippets and link them to the
+events by adding a <strong>Feature</strong> to the <strong>MultiTag</strong>. There are three
+different flags that define how this link has to be interpreted. In
+this case there is one snippet for each spike. The index of each
+position has to be used as an index in the first dimension of the
+Feature data. The <strong>LinkType</strong> has to be set to <em>indexed</em>.</p>
+<div class="highlight-python"><div class="highlight"><pre>    <span class="n">snippets</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s">&quot;nA&quot;</span>
+    <span class="n">set_dim</span> <span class="o">=</span> <span class="n">snippets</span><span class="o">.</span><span class="n">append_set_dimension</span><span class="p">()</span>
+    <span class="c"># add a descriptor for the time axis</span>
+    <span class="n">dim</span> <span class="o">=</span> <span class="n">snippets</span><span class="o">.</span><span class="n">append_sampled_dimension</span><span class="p">(</span><span class="n">stepsize</span><span class="p">)</span>
+    <span class="n">dim</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s">&quot;s&quot;</span>
+    <span class="n">dim</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="s">&quot;time&quot;</span>
+    <span class="n">dim</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="o">-</span><span class="n">sta_offset</span> <span class="o">*</span> <span class="n">stepsize</span>
+    
+    <span class="c"># set snippets as an indexed feature of the multi_tag</span>
+    <span class="n">multi_tag</span><span class="o">.</span><span class="n">create_feature</span><span class="p">(</span><span class="n">snippets</span><span class="p">,</span> <span class="n">nix</span><span class="o">.</span><span class="n">LinkType</span><span class="o">.</span><span class="n">Indexed</span><span class="p">)</span>
+
+    <span class="c"># let&#39;s plot the data from the stored information</span>
+    <span class="n">plot_data</span><span class="p">(</span><span class="n">multi_tag</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/spike_feature.png"><img alt="_images/spike_feature.png" src="_images/spike_feature.png" style="width: 240px;" /></a>
+<p>Source code for this example: <a class="reference external" href="examples/spikeFeatures.py">spikeFeatures.py</a>.</p>
+<p><a class="reference internal" href="#toc"><em>List of Tutorials</em></a></p>
+</div>
+<div class="section" id="retrieving-feature-data">
+<span id="retrieve-feature-data"></span><h3>Retrieving feature data<a class="headerlink" href="#retrieving-feature-data" title="Permalink to this headline">¶</a></h3>
+<p>The above sections have shown how to attach features to tagged
+regions. To get the feature data back there are two ways. (i) You can
+access the data via the selected feature as it is shown in the
+<a class="reference external" href="examples/spikeFeatures.py">spikeFeatures.py</a>. example (line 61).</p>
+<div class="highlight-python"><div class="highlight"><pre>    <span class="n">snippets</span> <span class="o">=</span> <span class="n">tag</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">[:]</span>
+</pre></div>
+</div>
+<p>With this line of code you get all the data stored in the Feature as
+one numpy array.  If you want to get the feature data that is related
+to a singe point (or region) one can call (line 62):</p>
+<div class="highlight-python"><div class="highlight"><pre>    <span class="n">single_snippet</span> <span class="o">=</span> <span class="n">tag</span><span class="o">.</span><span class="n">retrieve_feature_data</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">)[:]</span>
+</pre></div>
+</div>
+<p>with the first argument being the index of the position and the second
+one that of the feature. In case of <strong>Tag</strong> entities, there is only
+one argument that is the index of the feature you want the data from.</p>
+<p><a class="reference internal" href="#toc"><em>List of Tutorials</em></a></p>
+</div>
+</div>
+<div class="section" id="storing-the-origin-of-data">
+<span id="sources"></span><h2>Storing the origin of data<a class="headerlink" href="#storing-the-origin-of-data" title="Permalink to this headline">¶</a></h2>
+<p>Let&#8217;s assume we want to note the origin of the data. For example they
+have been obtained from a certain experiment or an experimental
+subject. For this purpose <strong>Source</strong> entities are used.  Sources can
+be nested to reflect dependencies between different sources. For
+example One may record data from different neurons in the same brain
+region of the same animal.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># create some source entities</span>
+<span class="n">subject</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">create_source</span><span class="p">(</span><span class="s">&#39;mouese A&#39;</span><span class="p">,</span> <span class="s">&#39;nix.experimental_subject&#39;</span><span class="p">)</span>
+<span class="n">brain_region</span> <span class="o">=</span> <span class="n">subject</span><span class="o">.</span><span class="n">create_source</span><span class="p">(</span><span class="s">&#39;hippocampus&#39;</span><span class="p">,</span> <span class="s">&#39;nix.experimental_subject&#39;</span><span class="p">)</span>
+<span class="n">cell_1</span> <span class="o">=</span> <span class="n">brain_region</span><span class="o">.</span><span class="n">create_source</span><span class="p">(</span><span class="s">&#39;CA1 1&#39;</span><span class="p">,</span> <span class="s">&#39;nix.experimental_subject&#39;</span><span class="p">)</span>
+<span class="n">cell_2</span> <span class="o">=</span> <span class="n">brain_region</span><span class="o">.</span><span class="n">create_source</span><span class="p">(</span><span class="s">&#39;CA1 2&#39;</span><span class="p">,</span> <span class="s">&#39;nix.experimental_subject&#39;</span><span class="p">)</span>
+<span class="c"># add them to the data.</span>
+<span class="n">da1</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&quot;cell1 response&quot;</span><span class="p">,</span> <span class="s">&quot;nix.regular_sampled&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">response_1</span><span class="p">)</span>
+<span class="n">da1</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell_1</span><span class="p">)</span>
+<span class="n">da2</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_data_array</span><span class="p">(</span><span class="s">&quot;cell2 response&quot;</span><span class="p">,</span> <span class="s">&quot;nix.regular_sampled&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">response_2</span><span class="p">)</span>
+<span class="n">da2</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell_2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <strong>Sources</strong> can be used to indicate links between data that cannot
+be reflected by the data itself.</p>
+<p><a class="reference internal" href="#toc"><em>List of Tutorials</em></a></p>
+</div>
+<div class="section" id="adding-arbitrary-metadata">
+<span id="metadata"></span><h2>Adding arbitrary metadata<a class="headerlink" href="#adding-arbitrary-metadata" title="Permalink to this headline">¶</a></h2>
+<p>Almost all entities allow to attach arbitray metadata. The basic
+concept of the metadata model is that <strong>Properties</strong> are oragnized in
+<strong>Sections</strong> which in turn can be nested to represent hierarchical
+structures. The <strong>Sections</strong> basically act like python
+dictionaries. How to create sections and properties is demonstrated by
+attaching information about the &#8216;Lenna&#8217; image used above.</p>
+<div class="highlight-python"><div class="highlight"><pre>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cell_text</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cell_text</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s">&#39;off&#39;</span><span class="p">)</span>
+        <span class="n">the_table</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">table</span><span class="p">(</span><span class="n">cellText</span><span class="o">=</span><span class="n">cell_text</span><span class="p">,</span>
+                               <span class="n">colLabels</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> 
+                               <span class="n">loc</span><span class="o">=</span><span class="s">&#39;center&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cell</span> <span class="ow">in</span> <span class="n">the_table</span><span class="o">.</span><span class="n">get_children</span><span class="p">():</span>
+            <span class="n">cell</span><span class="o">.</span><span class="n">set_height</span><span class="p">(</span><span class="o">.</span><span class="mo">075</span><span class="p">)</span>
+            <span class="n">cell</span><span class="o">.</span><span class="n">set_fontsize</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Source code for this example: <a class="reference external" href="examples/imageWithMetadata.py">imageWithMetadata.py</a>.</p>
+<a class="reference internal image-reference" href="_images/image_with_metadata.png"><img alt="_images/image_with_metadata.png" src="_images/image_with_metadata.png" style="width: 240px;" /></a>
+<p><a class="reference internal" href="#toc"><em>List of Tutorials</em></a></p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+<p>
+<iframe src="http://ghbtns.com/github-btn.html?user=G-Node&repo=nixpy&type=watch&count=False&size=large"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+    
+
+<p>
+<a href="https://travis-ci.org/G-Node/nixpy">
+    <img
+        alt="https://secure.travis-ci.org/G-Node/nixpy.png?branch=master"
+        src="https://secure.travis-ci.org/G-Node/nixpy.png?branch=master"
+    >
+</a>
+</p>
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#list-of-tutorials">List of Tutorials</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#working-with-files">Working with Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#basic-data-structures">Basic data structures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tagging-regions">Tagging regions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#features">Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#storing-the-origin-of-data">Storing the origin of data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#adding-arbitrary-metadata">Adding arbitrary metadata</a></li>
+</ul>
+</li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api_data.html">API Documentation for Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_metadata.html">API Documentation for Metadata</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, German Neuroinformatics Node, Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, Balint Morvai.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.2.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.6.0</a>
+      
+      |
+      <a href="_sources/tutorial.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

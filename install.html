@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation Guidelines &mdash; Python bindings for NIX 1.1.0 Release documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1.0 Release',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Python bindings for NIX 1.1.0 Release documentation" href="index.html" />
+    <link rel="next" title="Overview" href="overview.html" />
+    <link rel="prev" title="NIX Python Binding Documentation" href="index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="overview.html" title="Overview"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="NIX Python Binding Documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Python bindings for NIX 1.1.0 Release documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="installation-guidelines">
+<h1>Installation Guidelines<a class="headerlink" href="#installation-guidelines" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="install-nix-and-other-dependencies">
+<h2>Install NIX and other dependencies<a class="headerlink" href="#install-nix-and-other-dependencies" title="Permalink to this headline">¶</a></h2>
+<p>Because NIXPy is build upon the <a class="reference external" href="https://github.com/G-Node/nix">NIX library</a> it is necessary to install the NIX library before you can install or build NIXPy on your system.
+The following two sections explain how NIX can be installed on Windows and Linux.</p>
+<div class="section" id="linux">
+<h3>Linux<a class="headerlink" href="#linux" title="Permalink to this headline">¶</a></h3>
+<p>If you use the latest Ubuntu LTS you can install NIX from our <a class="reference external" href="https://launchpad.net/~gnode/+archive/ubuntu/nix">PPA</a> on launchpad.
+First you have to add the PPA to your system:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo add-apt-repository ppa:gnode/nix
+sudo apt-get update
+</pre></div>
+</div>
+<p>Afterwards you can use apt to install the NIX package:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo apt-get install libnix-dev
+</pre></div>
+</div>
+<p>If you want to use NIX on other distributions you have to compile and install NIX from source (<a class="reference internal" href="#build-nix-from-source"><em>see below</em></a>).</p>
+</div>
+<div class="section" id="windows">
+<h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
+<p>To install NIX under Windows it is recommended to use the latest installer.
+The installer can be downloaded from the <a class="reference external" href="https://github.com/G-Node/nix/releases">nix releases</a> on GitHub.</p>
+</div>
+<div class="section" id="build-nix-from-source">
+<span id="id1"></span><h3>Build NIX from Source<a class="headerlink" href="#build-nix-from-source" title="Permalink to this headline">¶</a></h3>
+<p>In order to build and install NIX from source please follow the build instructions in the NIX repository.
+Comprehensive build instructions for Linux can be found in the <a class="reference external" href="https://github.com/G-Node/nix/blob/master/README.md#getting-started-linux">nix README.md</a>.
+For Windows this information can be found in the <a class="reference external" href="https://github.com/G-Node/nix/blob/master/Win32.md">nix Win32.md</a> file.</p>
+</div>
+</div>
+<div class="section" id="install-nixpy">
+<h2>Install NIXPy<a class="headerlink" href="#install-nixpy" title="Permalink to this headline">¶</a></h2>
+<p>Once the <a class="reference external" href="https://github.com/G-Node/nix">NIX library</a> ist installed on your system you can proceed with the installation of the python bindings.</p>
+<div class="section" id="compatibility">
+<h3>Compatibility<a class="headerlink" href="#compatibility" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference external" href="https://github.com/G-Node/nix">NIX library</a> as well as NIXPy undergo continuous development and improvement.
+Although most changes do not affect the NIX API, the compatibility between the NIX library and their bindings might still break from time to time.
+Therefore it is worth mentioning which assumptions can be made concerning compatibility between versions of the NIX projects.</p>
+<blockquote>
+<div><ul class="simple">
+<li>The head of the master branches of the NIX library and the bindings are usually compatible to each other.</li>
+<li>Nix releases of the same version and their corresponding tags in the repositories are always compatible with each other e.g.
+NIXPy 1.0.x is compatible with libnix 1.0.x etc.</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="id2">
+<h3>Linux<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>If you use the latest Ubuntu LTS you can install NIXPy the same was as shown above for NIX from our <a class="reference external" href="https://launchpad.net/~gnode/+archive/ubuntu/nix">PPA</a> on launchpad.
+If the PPA was not already added to your system, you can do so by executing the following commands::</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo add-apt-repository ppa:gnode/nix
+sudo apt-get update
+</pre></div>
+</div>
+<p>Once the PPA was added NIXPy can be installed via apt-get:</p>
+<div class="highlight-python"><div class="highlight"><pre>sudo apt-get install python-nix
+</pre></div>
+</div>
+<p>If you want to use NIXPy on other distributions, please follow the instructions for building NIXPy from source (<a class="reference internal" href="#build-nixpy-from-source"><em>see below</em></a>).</p>
+</div>
+<div class="section" id="id3">
+<h3>Windows<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>To install NIXPy under Windows it is recommended to use the Windows installer.
+Download the installer with the same version as your NIX installation from the <a class="reference external" href="https://github.com/G-Node/nixpy/releases">NIXPy releases</a> and execute the installer.
+In addition NIXPy requires numpy to be installed.</p>
+</div>
+<div class="section" id="build-nixpy-from-source">
+<span id="id4"></span><h3>Build NIXPy from Source<a class="headerlink" href="#build-nixpy-from-source" title="Permalink to this headline">¶</a></h3>
+<p>If you want to use the latest development version or in cases where the provided installers or packages can&#8217;t be used,
+it is possible to build and install NIXPy from sources.
+Instructions for building NIX on Linux can be found in the <a class="reference external" href="https://github.com/G-Node/nixpy/blob/master/README.md#getting-started-linux">NIXPy README.md</a> file.
+For the Windows platform those instructions are described in the <a class="reference external" href="https://github.com/G-Node/nixpy/blob/master/Win32.md">NIXPy Win32.md</a> file.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+<p>
+<iframe src="http://ghbtns.com/github-btn.html?user=G-Node&repo=nixpy&type=watch&count=False&size=large"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+    
+
+<p>
+<a href="https://travis-ci.org/G-Node/nixpy">
+    <img
+        alt="https://secure.travis-ci.org/G-Node/nixpy.png?branch=master"
+        src="https://secure.travis-ci.org/G-Node/nixpy.png?branch=master"
+    >
+</a>
+</p>
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">Installation Guidelines</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#install-nix-and-other-dependencies">Install NIX and other dependencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-nixpy">Install NIXPy</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorials</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api_data.html">API Documentation for Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api_metadata.html">API Documentation for Metadata</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, German Neuroinformatics Node, Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, Balint Morvai.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.2.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.6.0</a>
+      
+      |
+      <a href="_sources/install.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

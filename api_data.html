@@ -1,0 +1,2529 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>API Documentation for Data &mdash; Python bindings for NIX 1.1.0 Release documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.1.0 Release',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Python bindings for NIX 1.1.0 Release documentation" href="index.html" />
+    <link rel="next" title="API Documentation for Metadata" href="api_metadata.html" />
+    <link rel="prev" title="Tutorials" href="tutorial.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="api_metadata.html" title="API Documentation for Metadata"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorials"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">Python bindings for NIX 1.1.0 Release documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="api-documentation-for-data">
+<h1>API Documentation for Data<a class="headerlink" href="#api-documentation-for-data" title="Permalink to this headline">¶</a></h1>
+<p>TODO write something about the data model</p>
+<div class="section" id="file">
+<h2>File<a class="headerlink" href="#file" title="Permalink to this headline">¶</a></h2>
+<p>A File represents a specific data source of a NIX back-end for example an NIX HDF5 file. All entities of the nix data
+model (except the Value entity) must exist in the context of an open File object. Therefore NIX entities can&#8217;t be
+initialized via their constructors but only through the factory methods of their respective parent entity.</p>
+<div class="section" id="working-with-files">
+<h3>Working with files<a class="headerlink" href="#working-with-files" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="highlight"><pre><span class="nb">file</span> <span class="o">=</span> <span class="n">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s">&quot;test.h5&quot;</span><span class="p">,</span> <span class="n">FileMode</span><span class="o">.</span><span class="n">ReadWrite</span><span class="p">)</span>
+<span class="c"># do some work</span>
+<span class="nb">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="file-open-modes">
+<h3>File open modes<a class="headerlink" href="#file-open-modes" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="nix.FileMode">
+<em class="property">class </em><tt class="descclassname">nix.</tt><tt class="descname">FileMode</tt><a class="headerlink" href="#nix.FileMode" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="nix.FileMode.Overwrite">
+<tt class="descname">Overwrite</tt><em class="property"> = nix.core.FileMode.Overwrite</em><a class="headerlink" href="#nix.FileMode.Overwrite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="nix.FileMode.ReadOnly">
+<tt class="descname">ReadOnly</tt><em class="property"> = nix.core.FileMode.ReadOnly</em><a class="headerlink" href="#nix.FileMode.ReadOnly" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="nix.FileMode.ReadWrite">
+<tt class="descname">ReadWrite</tt><em class="property"> = nix.core.FileMode.ReadWrite</em><a class="headerlink" href="#nix.FileMode.ReadWrite" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="file-api">
+<h3>File API<a class="headerlink" href="#file-api" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="nix.File">
+<em class="property">class </em><tt class="descclassname">nix.</tt><tt class="descname">File</tt><big>(</big><em>(object)arg1</em><big>)</big><a class="headerlink" href="#nix.File" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="nix.File.blocks">
+<tt class="descname">blocks</tt><a class="headerlink" href="#nix.File.blocks" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property containing all blocks of a file. Blocks can be obtained by their id or their
+index. Blocks can be deleted from the list, when a block is deleted all its content
+(data arrays, tags and sources) will be also deleted from the file.
+Adding new Block is done via the crate_block method of File. This is a read-only attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">ProxyList of Block entities.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.File.close">
+<tt class="descname">close</tt><big>(</big><em>(File)arg1</em><big>)</big> &rarr; None :<a class="headerlink" href="#nix.File.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Closes an open file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.File.create_block">
+<tt class="descname">create_block</tt><big>(</big><em>(File)arg1</em>, <em>(str)arg2</em>, <em>(str)arg3</em><big>)</big> &rarr; Block :<a class="headerlink" href="#nix.File.create_block" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new block inside the file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The name of the block to create.</li>
+<li><strong>type</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The type of the block.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The newly created block.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Block</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.File.create_section">
+<tt class="descname">create_section</tt><big>(</big><em>(File)arg1</em>, <em>(str)arg2</em>, <em>(str)arg3</em><big>)</big> &rarr; Section :<a class="headerlink" href="#nix.File.create_section" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new metadata section inside the file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The name of the section to create.</li>
+<li><strong>type</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The type of the section.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The newly created section.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Section</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.File.created_at">
+<tt class="descname">created_at</tt><a class="headerlink" href="#nix.File.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>The creation time of the entity. This is a read-only property. Use :py:meth:force_created_at in order to
+change the creation time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.File.find_sections">
+<tt class="descname">find_sections</tt><big>(</big><em>filtr=&lt;function &lt;lambda&gt; at 0x7f41e5febb18&gt;</em>, <em>limit=9223372036854775807</em><big>)</big><a class="headerlink" href="#nix.File.find_sections" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all sections and their child sections recursively.</p>
+<p>This method traverses the trees of all sections. The traversal
+is accomplished via breadth first and can be limited in depth. On each node or
+section a filter is applied. If the filter returns true the respective section
+will be added to the result list.
+By default a filter is used that accepts all sections.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filtr</strong> (<em>function</em>) &#8211; A filter function</li>
+<li><strong>limit</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The maximum depth of traversal</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list containing the matching sections.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of Section</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.File.force_created_at">
+<tt class="descname">force_created_at</tt><big>(</big><em>(File)arg1</em>, <em>(int)arg2</em><big>)</big> &rarr; None :<a class="headerlink" href="#nix.File.force_created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the creation time created_at to the given time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The time to set</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.File.force_updated_at">
+<tt class="descname">force_updated_at</tt><big>(</big><em>(File)arg1</em><big>)</big> &rarr; None :<a class="headerlink" href="#nix.File.force_updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the update time updated_at to the current time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.File.format">
+<tt class="descname">format</tt><a class="headerlink" href="#nix.File.format" title="Permalink to this definition">¶</a></dt>
+<dd><p>The format of the file. This read only property should have
+always the value &#8216;nix&#8217;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.File.is_open">
+<tt class="descname">is_open</tt><big>(</big><em>(File)arg1</em><big>)</big> &rarr; bool :<a class="headerlink" href="#nix.File.is_open" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checks whether a file is open or closed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the file is open, False otherwise.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">bool</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.File.open">
+<tt class="descname">open</tt><big>(</big><em>(str)arg1</em><span class="optional">[</span>, <em>(FileMode)arg2</em><span class="optional">]</span><big>)</big> &rarr; File<a class="headerlink" href="#nix.File.open" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="nix.File.sections">
+<tt class="descname">sections</tt><a class="headerlink" href="#nix.File.sections" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property containing all root sections of a file. Specific root sections can be obtained
+by their id or their index. Sections can be deleted from this list. Notice: when a section
+is deleted all its child section and properties will be removed too.
+Adding a new Section is done via the crate_section method of File. This is a read-only
+property.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">ProxyList of Section entities.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.File.updated_at">
+<tt class="descname">updated_at</tt><a class="headerlink" href="#nix.File.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time of the last update of the entity. This is a read-only property. Use force_updated_at in order
+to change the update time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.File.validate">
+<tt class="descname">validate</tt><big>(</big><em>(File)arg1</em><big>)</big> &rarr; Result<a class="headerlink" href="#nix.File.validate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="nix.File.version">
+<tt class="descname">version</tt><a class="headerlink" href="#nix.File.version" title="Permalink to this definition">¶</a></dt>
+<dd><p>The file format version.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="block">
+<h2>Block<a class="headerlink" href="#block" title="Permalink to this headline">¶</a></h2>
+<p>The Block entity is a top-level, summarizing element that allows to
+group the other data entities belonging for example to the same recording session.
+All data entities such as Source, DataArray, Tag and
+MultiTag have to be associated with one Block.</p>
+<div class="section" id="create-a-new-block">
+<h3>Create a new Block<a class="headerlink" href="#create-a-new-block" title="Permalink to this headline">¶</a></h3>
+<p>A block can only be created on an existing file object. Do not use the blocks constructors for this
+purpose.</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">block</span> <span class="o">=</span> <span class="nb">file</span><span class="o">.</span><span class="n">create_block</span><span class="p">(</span><span class="s">&quot;session one&quot;</span><span class="p">,</span> <span class="s">&quot;recordingsession&quot;</span><span class="p">);</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="working-with-blocks">
+<h3>Working with blocks<a class="headerlink" href="#working-with-blocks" title="Permalink to this headline">¶</a></h3>
+<p>After a block was created it can be used to create further entities. See the documentation of
+Source, DataArray, Tag and MultiTag for more information. The next example shows how some
+properties of a block can be accessed.</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">block</span> <span class="o">=</span> <span class="nb">file</span><span class="o">.</span><span class="n">blocks</span><span class="p">[</span><span class="n">some_id</span><span class="p">]</span>
+
+<span class="c"># set the blocks name</span>
+<span class="n">block</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s">&quot;session two&quot;</span>
+
+<span class="c"># add metadata to a block</span>
+<span class="n">section</span> <span class="o">=</span> <span class="nb">file</span><span class="o">.</span><span class="n">sections</span><span class="p">[</span><span class="n">sec_id</span><span class="p">]</span>
+<span class="n">block</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">section</span>
+
+<span class="c"># get associated metadata from a block</span>
+<span class="n">block</span><span class="o">.</span><span class="n">metadata</span>
+
+<span class="c"># remove associated metadata from a block</span>
+<span class="n">block</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="bp">None</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="deleting-a-block">
+<h3>Deleting a block<a class="headerlink" href="#deleting-a-block" title="Permalink to this headline">¶</a></h3>
+<p>When a block is deleted from a file all contained data e.g. sources, data arrays
+and tags will be removed too.</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span class="k">del</span> <span class="nb">file</span><span class="o">.</span><span class="n">blocks</span><span class="p">[</span><span class="n">some_id</span><span class="p">]</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="block-api">
+<h3>Block API<a class="headerlink" href="#block-api" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="nix.Block">
+<em class="property">class </em><tt class="descclassname">nix.</tt><tt class="descname">Block</tt><big>(</big><em>(object)arg1</em><big>)</big><a class="headerlink" href="#nix.Block" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="nix.Block.create_data_array">
+<tt class="descname">create_data_array</tt><big>(</big><em>name</em>, <em>array_type</em>, <em>dtype=None</em>, <em>shape=None</em>, <em>data=None</em><big>)</big><a class="headerlink" href="#nix.Block.create_data_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new data array for this block. Either <tt class="docutils literal"><span class="pre">shape</span></tt>
+or <tt class="docutils literal"><span class="pre">data</span></tt> must be given. If both are given their shape must agree.
+If <tt class="docutils literal"><span class="pre">dtype</span></tt> is not specified it will default to 64-bit floating points.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The name of the data array to create.</li>
+<li><strong>array_type</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The type of the data array.</li>
+<li><strong>dtype</strong> (<a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.10)"><tt class="xref py py-class docutils literal"><span class="pre">numpy.dtype</span></tt></a>) &#8211; Which data-type to use for storage</li>
+<li><strong>shape</strong> (<em>tuple of int or long</em>) &#8211; Layout (dimensionality and extent)</li>
+<li><strong>data</strong> (<em>array-like data</em>) &#8211; Data to write after storage has been created</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The newly created data array.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference internal" href="#nix.DataArray" title="nix.DataArray"><tt class="xref py py-class docutils literal"><span class="pre">DataArray</span></tt></a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.Block.create_group">
+<tt class="descname">create_group</tt><big>(</big><em>(Block)arg1</em>, <em>(str)arg2</em>, <em>(str)arg3</em><big>)</big> &rarr; Group :<a class="headerlink" href="#nix.Block.create_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new group on this block.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The name of the group to create.</li>
+<li><strong>type</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The type of the group.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The newly created group.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Group</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.Block.create_multi_tag">
+<tt class="descname">create_multi_tag</tt><big>(</big><em>(Block)arg1</em>, <em>(str)arg2</em>, <em>(str)arg3</em>, <em>(DataArray)arg4</em><big>)</big> &rarr; MultiTag :<a class="headerlink" href="#nix.Block.create_multi_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new multi tag for this block.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The name of the tag to create.</li>
+<li><strong>type</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The type of tag.</li>
+<li><strong>positions</strong> (<em>DataArray</em>) &#8211; A data array defining all positions of the tag.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The newly created tag.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">MultiTag</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.Block.create_source">
+<tt class="descname">create_source</tt><big>(</big><em>(Block)arg1</em>, <em>(str)arg2</em>, <em>(str)arg3</em><big>)</big> &rarr; Source :<a class="headerlink" href="#nix.Block.create_source" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new source on this block.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The name of the source to create.</li>
+<li><strong>type</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The type of the source.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The newly created source.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Source</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.Block.create_tag">
+<tt class="descname">create_tag</tt><big>(</big><em>(Block)arg1</em>, <em>(str)arg2</em>, <em>(str)arg3</em>, <em>(object)arg4</em><big>)</big> &rarr; Tag :<a class="headerlink" href="#nix.Block.create_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new tag for this block.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>name</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The name of the tag to create.</li>
+<li><strong>type</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; The type of tag.</li>
+<li><strong>position</strong> &#8211; Coordinates of the start position
+in units of the respective data dimension.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The newly created tag.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Tag</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Block.created_at">
+<tt class="descname">created_at</tt><a class="headerlink" href="#nix.Block.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>The creation time of the entity. This is a read-only property. Use :py:meth:force_created_at in order to
+change the creation time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Block.data_arrays">
+<tt class="descname">data_arrays</tt><a class="headerlink" href="#nix.Block.data_arrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property containing all data arrays of a block. DataArray entities can be obtained via their index or by their id.
+Data arrays can be deleted from the list. Adding a data array is done using the Blocks create_data_array method.
+This is a read only attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">ProxyList of DataArray entities.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Block.definition">
+<tt class="descname">definition</tt><a class="headerlink" href="#nix.Block.definition" title="Permalink to this definition">¶</a></dt>
+<dd><p>The definition of the entity. The definition can contain a textual description of the
+entity. This is an optional read-write property, and can be None if no definition is available.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.Block.find_sources">
+<tt class="descname">find_sources</tt><big>(</big><em>filtr=&lt;function &lt;lambda&gt; at 0x7f41e5feb578&gt;</em>, <em>limit=9223372036854775807</em><big>)</big><a class="headerlink" href="#nix.Block.find_sources" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all sources in this block recursively.</p>
+<p>This method traverses the tree of all sources in the block. The traversal
+is accomplished via breadth first and can be limited in depth. On each node or
+source a filter is applied. If the filter returns true the respective source
+will be added to the result list.
+By default a filter is used that accepts all sources.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filtr</strong> (<em>function</em>) &#8211; A filter function</li>
+<li><strong>limit</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The maximum depth of traversal</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list containing the matching sources.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of Source</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.Block.force_created_at">
+<tt class="descname">force_created_at</tt><big>(</big><em>(__EntityBlock)arg1</em>, <em>(int)arg2</em><big>)</big> &rarr; None :<a class="headerlink" href="#nix.Block.force_created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the creation time created_at to the given time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The time to set</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.Block.force_updated_at">
+<tt class="descname">force_updated_at</tt><big>(</big><em>(__EntityBlock)arg1</em><big>)</big> &rarr; None :<a class="headerlink" href="#nix.Block.force_updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the update time updated_at to the current time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Block.groups">
+<tt class="descname">groups</tt><a class="headerlink" href="#nix.Block.groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property containing all groups of a block. Group entities can be obtained via their index or by their id.
+Groups can be deleted from the list. Adding a Group is done using the Blocks create_group method.
+This is a read only attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">ProxyList of Group entities.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Block.id">
+<tt class="descname">id</tt><a class="headerlink" href="#nix.Block.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property providing the ID of the Entity. The id is generated automatically,
+therefore the property is read-only.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Block.metadata">
+<tt class="descname">metadata</tt><a class="headerlink" href="#nix.Block.metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Associated metadata of the entity. Sections attached to the entity via this attribute can
+provide additional annotations. This is an optional read-write property, and can be None if
+no metadata is available.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Section</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Block.multi_tags">
+<tt class="descname">multi_tags</tt><a class="headerlink" href="#nix.Block.multi_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property containing all multi tags of a block. MultiTag entities can be obtained via their index or by their id.
+Tags can be deleted from the list. Adding tags is done using the Blocks create_multi_tag method.
+This is a read only attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">ProxyList of MultiTag entities.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Block.name">
+<tt class="descname">name</tt><a class="headerlink" href="#nix.Block.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of an entity. The name serves as a human readable identifier.
+This is a read-write property, but it can&#8217;t be set to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Block.sources">
+<tt class="descname">sources</tt><a class="headerlink" href="#nix.Block.sources" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property containing all sources of a block. Sources can be obtained via their index or by their id.
+Sources can be deleted from the list. Adding sources is done using the Blocks create_source method.
+This is a read only attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">ProxyList of Source entities.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Block.tags">
+<tt class="descname">tags</tt><a class="headerlink" href="#nix.Block.tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property containing all tags of a block. Tag entities can be obtained via their index or by their id.
+Tags can be deleted from the list. Adding tags is done using the Blocks create_tag method.
+This is a read only attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">ProxyList of Tag entities.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Block.type">
+<tt class="descname">type</tt><a class="headerlink" href="#nix.Block.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The type of the entity. The type is used in order to add semantic meaning to the entity.
+This is a read-write property, but it can&#8217;t be set to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Block.updated_at">
+<tt class="descname">updated_at</tt><a class="headerlink" href="#nix.Block.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time of the last update of the entity. This is a read-only property. Use force_updated_at in order
+to change the update time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="dataarray">
+<h2>DataArray<a class="headerlink" href="#dataarray" title="Permalink to this headline">¶</a></h2>
+<p>The DataArray is the core entity of the NIX data model, its purpose is to
+store arbitrary n-dimensional data. In addition to the common fields id,
+name, type, and definition the DataArray stores sufficient information to
+understand the physical nature of the stored data.</p>
+<p>A guiding principle of the data model is provides enough information to create a
+plot of the stored data. In order to do so, the DataArray defines a property
+dataType which provides the physical type of the stored data (for example
+16 bit integer or double precision IEEE floatingpoint number).
+The property unit specifies the SI unit of the values stored in the
+DataArray whereas the label defines what is given in this units.
+Together, both specify what corresponds to the the y-axis of a plot.</p>
+<p>In some cases it is much more efficient or convenient to store data not as
+floating point numbers but rather as (16 bit) integer values as, for example
+read from a data acquisition board. In order to convert such data to the
+correct values, we follow the approach taken by the comedi data-acquisition
+library (<a class="reference external" href="http://www.comedi.org">http://www.comedi.org</a>) and provide polynomCoefficients and an
+expansionOrigin.</p>
+<div class="section" id="create-and-delete-a-dataarray">
+<h3>Create and delete a DataArray<a class="headerlink" href="#create-and-delete-a-dataarray" title="Permalink to this headline">¶</a></h3>
+<p>A DataArray can only be created at an existing block. Do not use the
+DataArrays constructors for this purpose.</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">data_array</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">crate_data_array</span><span class="p">(</span><span class="s">&quot;matrix&quot;</span><span class="p">,</span> <span class="s">&quot;data&quot;</span><span class="p">);</span>
+<span class="k">del</span> <span class="n">block</span><span class="o">.</span><span class="n">data_arrays</span><span class="p">[</span><span class="n">data_array</span><span class="p">]</span>
+</pre></div>
+</td></tr></table></div>
+</div>
+<div class="section" id="dataarray-api">
+<h3>DataArray API<a class="headerlink" href="#dataarray-api" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="nix.DataArray">
+<em class="property">class </em><tt class="descclassname">nix.</tt><tt class="descname">DataArray</tt><big>(</big><em>(object)arg1</em><big>)</big><a class="headerlink" href="#nix.DataArray" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="nix.DataArray.append">
+<tt class="descname">append</tt><big>(</big><em>data</em>, <em>axis=0</em><big>)</big><a class="headerlink" href="#nix.DataArray.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append <tt class="docutils literal"><span class="pre">data</span></tt> to the DataSet along the <tt class="docutils literal"><span class="pre">axis</span></tt> specified.
+:param data: The data to append. Shape must agree except for the specified axis
+:param axis: Along which axis to append the data to</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.DataArray.append_alias_range_dimension">
+<tt class="descname">append_alias_range_dimension</tt><big>(</big><em>(DataArray)arg1</em><big>)</big> &rarr; RangeDimension :<a class="headerlink" href="#nix.DataArray.append_alias_range_dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a new RangeDimension that uses the data stored in this DataArray as ticks.
+This works only if the data is 1-D and numeric. That is, this dimension discriptor must be
+the only descriptor in this DataArray. An ValueError is raised otherwise.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The newly created RangeDimension.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">RangeDimension</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.DataArray.append_range_dimension">
+<tt class="descname">append_range_dimension</tt><big>(</big><em>(DataArray)arg1</em>, <em>(object)arg2</em><big>)</big> &rarr; RangeDimension :<a class="headerlink" href="#nix.DataArray.append_range_dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a new RangeDimension to the list of existing dimension descriptors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>ticks</strong> (<em>list of float</em>) &#8211; The ticks of the RangeDimension to create.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The newly created RangeDimension.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">RangeDimension</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.DataArray.append_sampled_dimension">
+<tt class="descname">append_sampled_dimension</tt><big>(</big><em>(DataArray)arg1</em>, <em>(float)arg2</em><big>)</big> &rarr; SampledDimension :<a class="headerlink" href="#nix.DataArray.append_sampled_dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a new SampledDimension to the list of existing dimension
+descriptors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sampling_interval</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The sampling interval of the SetDimension
+to create.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The newly created SampledDimension.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">SampledDimension</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.DataArray.append_set_dimension">
+<tt class="descname">append_set_dimension</tt><big>(</big><em>(DataArray)arg1</em><big>)</big> &rarr; SetDimension :<a class="headerlink" href="#nix.DataArray.append_set_dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a new SetDimension to the list of existing dimension descriptors.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The newly created SetDimension.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">SetDimension</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.DataArray.create_alias_range_dimension">
+<tt class="descname">create_alias_range_dimension</tt><big>(</big><em>(DataArray)arg1</em><big>)</big> &rarr; RangeDimension :<a class="headerlink" href="#nix.DataArray.create_alias_range_dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append a new RangeDimension that uses the data stored in this DataArray as ticks.
+This works only(!) if the DataArray is 1-D and the stored data is numeric. An ValueError
+will be raised otherwise.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The created dimension descriptor.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">RangeDimension</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.DataArray.create_range_dimension">
+<tt class="descname">create_range_dimension</tt><big>(</big><em>(DataArray)arg1</em>, <em>(long)arg2</em>, <em>(object)arg3</em><big>)</big> &rarr; RangeDimension :<a class="headerlink" href="#nix.DataArray.create_range_dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new RangeDimension at a specified dimension index. This adds a
+new dimension descriptor of the type RangeDimension that describes the
+dimension of the data at the specified index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>index</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The index of the dimension. Must be a value &gt; 0 and &lt;=
+len(dimensions) + 1.</li>
+<li><strong>ticks</strong> (<em>list of float</em>) &#8211; The ticks of the RangeDimension.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The created dimension descriptor.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">RangeDimension</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.DataArray.create_sampled_dimension">
+<tt class="descname">create_sampled_dimension</tt><big>(</big><em>(DataArray)arg1</em>, <em>(long)arg2</em>, <em>(float)arg3</em><big>)</big> &rarr; SampledDimension :<a class="headerlink" href="#nix.DataArray.create_sampled_dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new SampledDimension at a specified dimension index. This adds a
+new dimension descriptor of the type SampledDimension that describes the
+dimension of the data at the specified index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>index</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The index of the dimension. Must be a value &gt; 0 and &lt;=
+len(dimensions) + 1.</li>
+<li><strong>sampling_interval</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) &#8211; The sampling interval of the dimension.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The created dimension descriptor.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">SampledDimension</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.DataArray.create_set_dimension">
+<tt class="descname">create_set_dimension</tt><big>(</big><em>(DataArray)arg1</em>, <em>(long)arg2</em><big>)</big> &rarr; SetDimension :<a class="headerlink" href="#nix.DataArray.create_set_dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new SetDimension at a specified dimension index. This adds a new
+dimension descriptor of the type SetDimension that describes the dimension
+of the data at the specified index.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The index of the dimension. Must be a value &gt; 0 and &lt;=
+len(dimensions) + 1.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The created dimension descriptor.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">SetDimension</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.created_at">
+<tt class="descname">created_at</tt><a class="headerlink" href="#nix.DataArray.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>The creation time of the entity. This is a read-only property. Use :py:meth:force_created_at in order to
+change the creation time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.data">
+<tt class="descname">data</tt><a class="headerlink" href="#nix.DataArray.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEPRECATED DO NOT USE ANYMORE! Returns self</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">DataArray</span></tt></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.data_extent">
+<tt class="descname">data_extent</tt><a class="headerlink" href="#nix.DataArray.data_extent" title="Permalink to this definition">¶</a></dt>
+<dd><p>The size of the data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">set of int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.data_type">
+<tt class="descname">data_type</tt><a class="headerlink" href="#nix.DataArray.data_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The data type of the data stored in the DataArray. This is a read only
+property.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">DataType</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.definition">
+<tt class="descname">definition</tt><a class="headerlink" href="#nix.DataArray.definition" title="Permalink to this definition">¶</a></dt>
+<dd><p>The definition of the entity. The definition can contain a textual description of the
+entity. This is an optional read-write property, and can be None if no definition is available.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.dimensions">
+<tt class="descname">dimensions</tt><a class="headerlink" href="#nix.DataArray.dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property containing all dimensions of a DataArray. Dimensions can be
+obtained via their index. Dimensions can be deleted from the list. Adding
+sources is done using the respective create and append methods for
+dimension descriptors. This is a read only attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">ProxyList of dimension descriptors.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.dtype">
+<tt class="descname">dtype</tt><a class="headerlink" href="#nix.DataArray.dtype" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.10)"><tt class="xref py py-class docutils literal"><span class="pre">numpy.dtype</span></tt></a> object holding type infromation about
+the data stored in the DataSet.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.expansion_origin">
+<tt class="descname">expansion_origin</tt><a class="headerlink" href="#nix.DataArray.expansion_origin" title="Permalink to this definition">¶</a></dt>
+<dd><p>The expansion origin of the calibration polynom. This is a read-write
+property and can be set to None. The default value is 0.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.DataArray.force_created_at">
+<tt class="descname">force_created_at</tt><big>(</big><em>(__EntityDataArray)arg1</em>, <em>(int)arg2</em><big>)</big> &rarr; None :<a class="headerlink" href="#nix.DataArray.force_created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the creation time created_at to the given time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The time to set</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.DataArray.force_updated_at">
+<tt class="descname">force_updated_at</tt><big>(</big><em>(__EntityDataArray)arg1</em><big>)</big> &rarr; None :<a class="headerlink" href="#nix.DataArray.force_updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the update time updated_at to the current time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.id">
+<tt class="descname">id</tt><a class="headerlink" href="#nix.DataArray.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property providing the ID of the Entity. The id is generated automatically,
+therefore the property is read-only.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.label">
+<tt class="descname">label</tt><a class="headerlink" href="#nix.DataArray.label" title="Permalink to this definition">¶</a></dt>
+<dd><p>The label of the DataArray. The label corresponds to the label of the
+x-axis of a plot. This is a read-write property and can be set to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.DataArray.len">
+<tt class="descname">len</tt><big>(</big><big>)</big><a class="headerlink" href="#nix.DataArray.len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Length of the first dimension. Equivalent to <cite>DataSet.shape[0]</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int or long</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.metadata">
+<tt class="descname">metadata</tt><a class="headerlink" href="#nix.DataArray.metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Associated metadata of the entity. Sections attached to the entity via this attribute can
+provide additional annotations. This is an optional read-write property, and can be None if
+no metadata is available.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Section</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.name">
+<tt class="descname">name</tt><a class="headerlink" href="#nix.DataArray.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of an entity. The name serves as a human readable identifier.
+This is a read-write property, but it can&#8217;t be set to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.polynom_coefficients">
+<tt class="descname">polynom_coefficients</tt><a class="headerlink" href="#nix.DataArray.polynom_coefficients" title="Permalink to this definition">¶</a></dt>
+<dd><p>The polynom coefficients for the calibration. By default this is set
+to a {0.0, 1.0} for a linear calibration with zero offset. This is a
+read-write property and can be set to None</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">list of float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.DataArray.read_direct">
+<tt class="descname">read_direct</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#nix.DataArray.read_direct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directly read all data stored in the <a class="reference internal" href="#nix.data_array.DataSet" title="nix.data_array.DataSet"><tt class="xref py py-class docutils literal"><span class="pre">DataSet</span></tt></a>
+into <tt class="docutils literal"><span class="pre">data</span></tt>. The supplied data must be a <a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.10)"><tt class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></tt></a> that
+matches the DataSet&#8217;s shape, must have C-style contiguous memory layout
+and must be writeable (see <a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.flags.html#numpy.ndarray.flags" title="(in NumPy v1.10)"><tt class="xref py py-attr docutils literal"><span class="pre">numpy.ndarray.flags</span></tt></a> and
+<a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.10)"><tt class="xref py py-class docutils literal"><span class="pre">ndarray</span></tt></a> for more information).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.10)"><tt class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></tt></a>) &#8211; The array where data is being read into</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.shape">
+<tt class="descname">shape</tt><a class="headerlink" href="#nix.DataArray.shape" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">tuple of data array dimensions.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.size">
+<tt class="descname">size</tt><a class="headerlink" href="#nix.DataArray.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of elements in the DataSet, i.e. the product of the
+elements in <a class="reference internal" href="#nix.data_array.DataSet.shape" title="nix.data_array.DataSet.shape"><tt class="xref py py-attr docutils literal"><span class="pre">shape</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.sources">
+<tt class="descname">sources</tt><a class="headerlink" href="#nix.DataArray.sources" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for sources.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.type">
+<tt class="descname">type</tt><a class="headerlink" href="#nix.DataArray.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The type of the entity. The type is used in order to add semantic meaning to the entity.
+This is a read-write property, but it can&#8217;t be set to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.unit">
+<tt class="descname">unit</tt><a class="headerlink" href="#nix.DataArray.unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>The unit of the values stored in the DataArray. This is a read-write property
+and can be set to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.DataArray.updated_at">
+<tt class="descname">updated_at</tt><a class="headerlink" href="#nix.DataArray.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time of the last update of the entity. This is a read-only property. Use force_updated_at in order
+to change the update time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.DataArray.write_direct">
+<tt class="descname">write_direct</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#nix.DataArray.write_direct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directly write all of <tt class="docutils literal"><span class="pre">data</span></tt> to the <a class="reference internal" href="#nix.data_array.DataSet" title="nix.data_array.DataSet"><tt class="xref py py-class docutils literal"><span class="pre">DataSet</span></tt></a>.
+The supplied data must be a <a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.10)"><tt class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></tt></a> that matches the
+DataSet&#8217;s shape and must have C-style contiguous memory layout (see
+<a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.flags.html#numpy.ndarray.flags" title="(in NumPy v1.10)"><tt class="xref py py-attr docutils literal"><span class="pre">numpy.ndarray.flags</span></tt></a> and <a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.10)"><tt class="xref py py-class docutils literal"><span class="pre">ndarray</span></tt></a> for more
+information).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.10)"><tt class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></tt></a>) &#8211; The array which contents is being written</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="dataset">
+<h2>DataSet<a class="headerlink" href="#dataset" title="Permalink to this headline">¶</a></h2>
+<p>The DataSet object is used for data input/output to the underlying storage.</p>
+<dl class="class">
+<dt id="nix.data_array.DataSet">
+<em class="property">class </em><tt class="descclassname">nix.data_array.</tt><tt class="descname">DataSet</tt><big>(</big><em>(object)arg1</em><big>)</big><a class="headerlink" href="#nix.data_array.DataSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data IO object for DataArray.</p>
+<dl class="method">
+<dt id="nix.data_array.DataSet.append">
+<tt class="descname">append</tt><big>(</big><em>data</em>, <em>axis=0</em><big>)</big><a class="headerlink" href="#nix.data_array.DataSet.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append <tt class="docutils literal"><span class="pre">data</span></tt> to the DataSet along the <tt class="docutils literal"><span class="pre">axis</span></tt> specified.
+:param data: The data to append. Shape must agree except for the specified axis
+:param axis: Along which axis to append the data to</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.data_array.DataSet.data_extent">
+<tt class="descname">data_extent</tt><a class="headerlink" href="#nix.data_array.DataSet.data_extent" title="Permalink to this definition">¶</a></dt>
+<dd><p>The size of the data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">set of int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.data_array.DataSet.data_type">
+<tt class="descname">data_type</tt><a class="headerlink" href="#nix.data_array.DataSet.data_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The data type of the data stored in the DataArray. This is a read only
+property.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">DataType</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.data_array.DataSet.dtype">
+<tt class="descname">dtype</tt><a class="headerlink" href="#nix.data_array.DataSet.dtype" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body"><a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.dtype.html#numpy.dtype" title="(in NumPy v1.10)"><tt class="xref py py-class docutils literal"><span class="pre">numpy.dtype</span></tt></a> object holding type infromation about
+the data stored in the DataSet.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.data_array.DataSet.len">
+<tt class="descname">len</tt><big>(</big><big>)</big><a class="headerlink" href="#nix.data_array.DataSet.len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Length of the first dimension. Equivalent to <cite>DataSet.shape[0]</cite>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int or long</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.data_array.DataSet.read_direct">
+<tt class="descname">read_direct</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#nix.data_array.DataSet.read_direct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directly read all data stored in the <a class="reference internal" href="#nix.data_array.DataSet" title="nix.data_array.DataSet"><tt class="xref py py-class docutils literal"><span class="pre">DataSet</span></tt></a>
+into <tt class="docutils literal"><span class="pre">data</span></tt>. The supplied data must be a <a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.10)"><tt class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></tt></a> that
+matches the DataSet&#8217;s shape, must have C-style contiguous memory layout
+and must be writeable (see <a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.flags.html#numpy.ndarray.flags" title="(in NumPy v1.10)"><tt class="xref py py-attr docutils literal"><span class="pre">numpy.ndarray.flags</span></tt></a> and
+<a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.10)"><tt class="xref py py-class docutils literal"><span class="pre">ndarray</span></tt></a> for more information).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.10)"><tt class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></tt></a>) &#8211; The array where data is being read into</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.data_array.DataSet.shape">
+<tt class="descname">shape</tt><a class="headerlink" href="#nix.data_array.DataSet.shape" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">tuple of data array dimensions.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.data_array.DataSet.size">
+<tt class="descname">size</tt><a class="headerlink" href="#nix.data_array.DataSet.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of elements in the DataSet, i.e. the product of the
+elements in <a class="reference internal" href="#nix.data_array.DataSet.shape" title="nix.data_array.DataSet.shape"><tt class="xref py py-attr docutils literal"><span class="pre">shape</span></tt></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.data_array.DataSet.write_direct">
+<tt class="descname">write_direct</tt><big>(</big><em>data</em><big>)</big><a class="headerlink" href="#nix.data_array.DataSet.write_direct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Directly write all of <tt class="docutils literal"><span class="pre">data</span></tt> to the <a class="reference internal" href="#nix.data_array.DataSet" title="nix.data_array.DataSet"><tt class="xref py py-class docutils literal"><span class="pre">DataSet</span></tt></a>.
+The supplied data must be a <a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.10)"><tt class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></tt></a> that matches the
+DataSet&#8217;s shape and must have C-style contiguous memory layout (see
+<a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.flags.html#numpy.ndarray.flags" title="(in NumPy v1.10)"><tt class="xref py py-attr docutils literal"><span class="pre">numpy.ndarray.flags</span></tt></a> and <a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.10)"><tt class="xref py py-class docutils literal"><span class="pre">ndarray</span></tt></a> for more
+information).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<a class="reference external" href="http://docs.scipy.org/doc/numpy/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.10)"><tt class="xref py py-class docutils literal"><span class="pre">numpy.ndarray</span></tt></a>) &#8211; The array which contents is being written</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="tags">
+<h2>Tags<a class="headerlink" href="#tags" title="Permalink to this headline">¶</a></h2>
+<p>Besides the DataArray the tag entities can be considered as the other
+core entities of the data model.
+They are meant to attach annotations directly to the data and to establish meaningful
+links between different kinds of stored data.
+Most importantly tags allow the definition of points or regions of interest in data
+that is stored in other DataArray entities. The data array entities the
+tag applies to are defined by its property references.</p>
+<p>Further the referenced data is defined by an origin vector called position
+and an optional extent vector that defines its size.
+Therefore position and extent of a tag, together with the references field
+defines a group of points or regions of interest collected from a subset of all
+available DataArray entities.</p>
+<p>Further tags have a field called features which makes it possible to associate
+other data with the tag.  Semantically a feature of a tag is some additional data that
+contains additional information about the points of hyperslabs defined by the tag.
+This could be for example data that represents a stimulus (e.g. an image or a
+signal) that was applied in a certain interval during the recording.</p>
+<div class="section" id="tag-api">
+<h3>Tag API<a class="headerlink" href="#tag-api" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="nix.Tag">
+<em class="property">class </em><tt class="descclassname">nix.</tt><tt class="descname">Tag</tt><big>(</big><em>(object)arg1</em><big>)</big><a class="headerlink" href="#nix.Tag" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="nix.Tag.create_feature">
+<tt class="descname">create_feature</tt><big>(</big><em>(Tag)arg1</em>, <em>(DataArray)arg2</em>, <em>(LinkType)arg3</em><big>)</big> &rarr; Feature :<a class="headerlink" href="#nix.Tag.create_feature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new feature.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>DataArray</em>) &#8211; The data array of this feature.</li>
+<li><strong>link_type</strong> (<em>LinkType</em>) &#8211; The link type of this feature.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The created feature object.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Feature</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Tag.created_at">
+<tt class="descname">created_at</tt><a class="headerlink" href="#nix.Tag.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>The creation time of the entity. This is a read-only property. Use :py:meth:force_created_at in order to
+change the creation time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Tag.definition">
+<tt class="descname">definition</tt><a class="headerlink" href="#nix.Tag.definition" title="Permalink to this definition">¶</a></dt>
+<dd><p>The definition of the entity. The definition can contain a textual description of the
+entity. This is an optional read-write property, and can be None if no definition is available.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Tag.extent">
+<tt class="descname">extent</tt><a class="headerlink" href="#nix.Tag.extent" title="Permalink to this definition">¶</a></dt>
+<dd><p>The extent defined by the tag. This is an optional read-write property and may be set
+to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">list of float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Tag.features">
+<tt class="descname">features</tt><a class="headerlink" href="#nix.Tag.features" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property containing all features of the tag. Features can be
+obtained via their index or their id. Features can be deleted from the list.
+Adding new features to the tag is done using the create_feature method.
+This is a read only attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">ProxyList of Feature.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.Tag.force_created_at">
+<tt class="descname">force_created_at</tt><big>(</big><em>(__EntityTag)arg1</em>, <em>(int)arg2</em><big>)</big> &rarr; None :<a class="headerlink" href="#nix.Tag.force_created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the creation time created_at to the given time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The time to set</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.Tag.force_updated_at">
+<tt class="descname">force_updated_at</tt><big>(</big><em>(__EntityTag)arg1</em><big>)</big> &rarr; None :<a class="headerlink" href="#nix.Tag.force_updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the update time updated_at to the current time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Tag.id">
+<tt class="descname">id</tt><a class="headerlink" href="#nix.Tag.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property providing the ID of the Entity. The id is generated automatically,
+therefore the property is read-only.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Tag.metadata">
+<tt class="descname">metadata</tt><a class="headerlink" href="#nix.Tag.metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Associated metadata of the entity. Sections attached to the entity via this attribute can
+provide additional annotations. This is an optional read-write property, and can be None if
+no metadata is available.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Section</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Tag.name">
+<tt class="descname">name</tt><a class="headerlink" href="#nix.Tag.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of an entity. The name serves as a human readable identifier.
+This is a read-write property, but it can&#8217;t be set to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Tag.position">
+<tt class="descname">position</tt><a class="headerlink" href="#nix.Tag.position" title="Permalink to this definition">¶</a></dt>
+<dd><p>The position defined by the tag. This is a read-write property.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">list of float</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Tag.references">
+<tt class="descname">references</tt><a class="headerlink" href="#nix.Tag.references" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property containing all data arrays referenced by the tag. Referenced data arrays
+can be obtained by index or their id. References can be removed from the list, removing
+a referenced DataArray will not remove it from the file. New references can be added using
+the append method of the list.
+This is a read only attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">RefProxyList of DataArray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.Tag.retrieve_data">
+<tt class="descname">retrieve_data</tt><big>(</big><em>(Tag)arg1</em>, <em>(int)arg2</em><big>)</big> &rarr; DataView<a class="headerlink" href="#nix.Tag.retrieve_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="nix.Tag.retrieve_feature_data">
+<tt class="descname">retrieve_feature_data</tt><big>(</big><em>(Tag)arg1</em>, <em>(int)arg2</em><big>)</big> &rarr; DataView<a class="headerlink" href="#nix.Tag.retrieve_feature_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Tag.sources">
+<tt class="descname">sources</tt><a class="headerlink" href="#nix.Tag.sources" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for sources.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Tag.type">
+<tt class="descname">type</tt><a class="headerlink" href="#nix.Tag.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The type of the entity. The type is used in order to add semantic meaning to the entity.
+This is a read-write property, but it can&#8217;t be set to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Tag.units">
+<tt class="descname">units</tt><a class="headerlink" href="#nix.Tag.units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property containing the units of the tag. The tag must provide a unit for each
+dimension of the position or extent vector. This is a read-write property.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">list of str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Tag.updated_at">
+<tt class="descname">updated_at</tt><a class="headerlink" href="#nix.Tag.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time of the last update of the entity. This is a read-only property. Use force_updated_at in order
+to change the update time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="multitag-api">
+<h3>MultiTag API<a class="headerlink" href="#multitag-api" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="nix.MultiTag">
+<em class="property">class </em><tt class="descclassname">nix.</tt><tt class="descname">MultiTag</tt><big>(</big><em>(object)arg1</em><big>)</big><a class="headerlink" href="#nix.MultiTag" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="nix.MultiTag.create_feature">
+<tt class="descname">create_feature</tt><big>(</big><em>(MultiTag)arg1</em>, <em>(DataArray)arg2</em>, <em>(LinkType)arg3</em><big>)</big> &rarr; Feature :<a class="headerlink" href="#nix.MultiTag.create_feature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new feature.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data</strong> (<em>DataArray</em>) &#8211; The data array of this feature.</li>
+<li><strong>link_type</strong> (<em>LinkType</em>) &#8211; The link type of this feature.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">The created feature object.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">Feature</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.MultiTag.created_at">
+<tt class="descname">created_at</tt><a class="headerlink" href="#nix.MultiTag.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>The creation time of the entity. This is a read-only property. Use :py:meth:force_created_at in order to
+change the creation time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.MultiTag.definition">
+<tt class="descname">definition</tt><a class="headerlink" href="#nix.MultiTag.definition" title="Permalink to this definition">¶</a></dt>
+<dd><p>The definition of the entity. The definition can contain a textual description of the
+entity. This is an optional read-write property, and can be None if no definition is available.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.MultiTag.extents">
+<tt class="descname">extents</tt><a class="headerlink" href="#nix.MultiTag.extents" title="Permalink to this definition">¶</a></dt>
+<dd><p>The extents defined by the tag. This is an optional read-write property and may be set
+to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">DataArray or None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.MultiTag.features">
+<tt class="descname">features</tt><a class="headerlink" href="#nix.MultiTag.features" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property containing all features of the tag. Features can be
+obtained via their index or their id. Features can be deleted from the list.
+Adding new features to the tag is done using the create_feature method.
+This is a read only attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">ProxyList of Feature.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.MultiTag.force_created_at">
+<tt class="descname">force_created_at</tt><big>(</big><em>(__EntityMultiTag)arg1</em>, <em>(int)arg2</em><big>)</big> &rarr; None :<a class="headerlink" href="#nix.MultiTag.force_created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the creation time created_at to the given time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The time to set</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.MultiTag.force_updated_at">
+<tt class="descname">force_updated_at</tt><big>(</big><em>(__EntityMultiTag)arg1</em><big>)</big> &rarr; None :<a class="headerlink" href="#nix.MultiTag.force_updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the update time updated_at to the current time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.MultiTag.id">
+<tt class="descname">id</tt><a class="headerlink" href="#nix.MultiTag.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property providing the ID of the Entity. The id is generated automatically,
+therefore the property is read-only.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.MultiTag.metadata">
+<tt class="descname">metadata</tt><a class="headerlink" href="#nix.MultiTag.metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Associated metadata of the entity. Sections attached to the entity via this attribute can
+provide additional annotations. This is an optional read-write property, and can be None if
+no metadata is available.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Section</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.MultiTag.name">
+<tt class="descname">name</tt><a class="headerlink" href="#nix.MultiTag.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of an entity. The name serves as a human readable identifier.
+This is a read-write property, but it can&#8217;t be set to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.MultiTag.positions">
+<tt class="descname">positions</tt><a class="headerlink" href="#nix.MultiTag.positions" title="Permalink to this definition">¶</a></dt>
+<dd><p>The positions defined by the tag. This is a read-write property.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">DataArray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.MultiTag.references">
+<tt class="descname">references</tt><a class="headerlink" href="#nix.MultiTag.references" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property containing all data arrays referenced by the tag. Referenced data arrays
+can be obtained by index or their id. References can be removed from the list, removing
+a referenced DataArray will not remove it from the file. New references can be added using
+the append method of the list.
+This is a read only attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">RefProxyList of DataArray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.MultiTag.retrieve_data">
+<tt class="descname">retrieve_data</tt><big>(</big><em>(MultiTag)arg1</em>, <em>(int)arg2</em>, <em>(int)arg3</em><big>)</big> &rarr; DataView<a class="headerlink" href="#nix.MultiTag.retrieve_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="nix.MultiTag.retrieve_feature_data">
+<tt class="descname">retrieve_feature_data</tt><big>(</big><em>(MultiTag)arg1</em>, <em>(int)arg2</em>, <em>(int)arg3</em><big>)</big> &rarr; DataView<a class="headerlink" href="#nix.MultiTag.retrieve_feature_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="nix.MultiTag.sources">
+<tt class="descname">sources</tt><a class="headerlink" href="#nix.MultiTag.sources" title="Permalink to this definition">¶</a></dt>
+<dd><p>Getter for sources.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.MultiTag.type">
+<tt class="descname">type</tt><a class="headerlink" href="#nix.MultiTag.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The type of the entity. The type is used in order to add semantic meaning to the entity.
+This is a read-write property, but it can&#8217;t be set to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.MultiTag.units">
+<tt class="descname">units</tt><a class="headerlink" href="#nix.MultiTag.units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Property containing the units of the tag. The tag must provide a unit for each
+dimension of the positions or extents vector. This is a read-write property.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">list of str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.MultiTag.updated_at">
+<tt class="descname">updated_at</tt><a class="headerlink" href="#nix.MultiTag.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time of the last update of the entity. This is a read-only property. Use force_updated_at in order
+to change the update time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="source">
+<h2>Source<a class="headerlink" href="#source" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="nix.Source">
+<em class="property">class </em><tt class="descclassname">nix.</tt><tt class="descname">Source</tt><big>(</big><em>(object)arg1</em><big>)</big><a class="headerlink" href="#nix.Source" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="nix.Source.create_source">
+<tt class="descname">create_source</tt><big>(</big><em>(Source)arg1</em>, <em>(str)arg2</em>, <em>(str)arg3</em><big>)</big> &rarr; Source<a class="headerlink" href="#nix.Source.create_source" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Source.created_at">
+<tt class="descname">created_at</tt><a class="headerlink" href="#nix.Source.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>The creation time of the entity. This is a read-only property. Use :py:meth:force_created_at in order to
+change the creation time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Source.definition">
+<tt class="descname">definition</tt><a class="headerlink" href="#nix.Source.definition" title="Permalink to this definition">¶</a></dt>
+<dd><p>The definition of the entity. The definition can contain a textual description of the
+entity. This is an optional read-write property, and can be None if no definition is available.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.Source.find_sources">
+<tt class="descname">find_sources</tt><big>(</big><em>filtr=&lt;function &lt;lambda&gt; at 0x7f41e5ff0938&gt;</em>, <em>limit=9223372036854775807</em><big>)</big><a class="headerlink" href="#nix.Source.find_sources" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all child sources of this source recursively.</p>
+<p>This method traverses the tree of all sources. The traversal
+is accomplished via breadth first and can be limited in depth. On each node or
+source a filter is applied. If the filter returns true the respective source
+will be added to the result list.
+By default a filter is used that accepts all sources.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>filtr</strong> (<em>function</em>) &#8211; A filter function</li>
+<li><strong>limit</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The maximum depth of traversal</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">A list containing the matching sources.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list of Source</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.Source.force_created_at">
+<tt class="descname">force_created_at</tt><big>(</big><em>(__EntitySource)arg1</em>, <em>(int)arg2</em><big>)</big> &rarr; None :<a class="headerlink" href="#nix.Source.force_created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the creation time created_at to the given time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The time to set</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.Source.force_updated_at">
+<tt class="descname">force_updated_at</tt><big>(</big><em>(__EntitySource)arg1</em><big>)</big> &rarr; None :<a class="headerlink" href="#nix.Source.force_updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the update time updated_at to the current time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Source.id">
+<tt class="descname">id</tt><a class="headerlink" href="#nix.Source.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property providing the ID of the Entity. The id is generated automatically,
+therefore the property is read-only.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Source.metadata">
+<tt class="descname">metadata</tt><a class="headerlink" href="#nix.Source.metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Associated metadata of the entity. Sections attached to the entity via this attribute can
+provide additional annotations. This is an optional read-write property, and can be None if
+no metadata is available.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Section</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Source.name">
+<tt class="descname">name</tt><a class="headerlink" href="#nix.Source.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of an entity. The name serves as a human readable identifier.
+This is a read-write property, but it can&#8217;t be set to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Source.sources">
+<tt class="descname">sources</tt><a class="headerlink" href="#nix.Source.sources" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Source.type">
+<tt class="descname">type</tt><a class="headerlink" href="#nix.Source.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The type of the entity. The type is used in order to add semantic meaning to the entity.
+This is a read-write property, but it can&#8217;t be set to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Source.updated_at">
+<tt class="descname">updated_at</tt><a class="headerlink" href="#nix.Source.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time of the last update of the entity. This is a read-only property. Use force_updated_at in order
+to change the update time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="group">
+<h2>Group<a class="headerlink" href="#group" title="Permalink to this headline">¶</a></h2>
+<p>Groups establish a simple way of grouping entities that in some way
+belong together. The Group exists inside a Block and can contain
+(link) DataArrays, Tags, and MultiTags. As any other nix-entity, the
+Groups is named, has a type, and a definition property. Additionally,
+it contains data_arrays, tags, and multi_tags lists. As indicated
+before, the group does only link the entities. Thus, deleting elements
+from the lists does not remove them from file, it merely removes the
+link from the group.</p>
+<div class="highlight-python"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6
+7
+8</pre></div></td><td class="code"><div class="highlight"><pre><span class="n">data_array</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">crate_data_array</span><span class="p">(</span><span class="s">&quot;matrix&quot;</span><span class="p">,</span> <span class="s">&quot;data&quot;</span><span class="p">);</span>
+<span class="n">tag</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_tag</span><span class="p">(</span><span class="s">&quot;a tag&quot;</span><span class="p">,</span> <span class="s">&quot;event&quot;</span><span class="p">,</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+<span class="n">group</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s">&quot;things that belong together&quot;</span><span class="p">,</span> <span class="s">&quot;group&quot;</span><span class="p">)</span>
+<span class="n">group</span><span class="o">.</span><span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+<span class="n">group</span><span class="o">.</span><span class="n">data_arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_array</span><span class="p">)</span>
+
+<span class="k">del</span> <span class="n">group</span><span class="o">.</span><span class="n">data_arrays</span><span class="p">[</span><span class="n">data_array</span><span class="p">]</span>
+<span class="k">del</span> <span class="n">group</span><span class="o">.</span><span class="n">tags</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+</pre></div>
+</td></tr></table></div>
+<div class="section" id="group-api">
+<h3>Group API<a class="headerlink" href="#group-api" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="nix.Group">
+<em class="property">class </em><tt class="descclassname">nix.</tt><tt class="descname">Group</tt><big>(</big><em>(object)arg1</em><big>)</big><a class="headerlink" href="#nix.Group" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="attribute">
+<dt id="nix.Group.created_at">
+<tt class="descname">created_at</tt><a class="headerlink" href="#nix.Group.created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>The creation time of the entity. This is a read-only property. Use :py:meth:force_created_at in order to
+change the creation time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Group.data_arrays">
+<tt class="descname">data_arrays</tt><a class="headerlink" href="#nix.Group.data_arrays" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property containing all data arrays referenced by the group. Referenced data arrays
+can be obtained by index or their id. References can be removed from the list, removing
+a referenced DataArray will not remove it from the file. New references can be added using
+the append method of the list.
+This is a read only attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">DataArrayProxyList of DataArray</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Group.definition">
+<tt class="descname">definition</tt><a class="headerlink" href="#nix.Group.definition" title="Permalink to this definition">¶</a></dt>
+<dd><p>The definition of the entity. The definition can contain a textual description of the
+entity. This is an optional read-write property, and can be None if no definition is available.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.Group.force_created_at">
+<tt class="descname">force_created_at</tt><big>(</big><em>(__EntityGroup)arg1</em>, <em>(int)arg2</em><big>)</big> &rarr; None :<a class="headerlink" href="#nix.Group.force_created_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the creation time created_at to the given time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>time</strong> (<a class="reference external" href="http://docs.python.org/2.7/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; The time to set</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="nix.Group.force_updated_at">
+<tt class="descname">force_updated_at</tt><big>(</big><em>(__EntityGroup)arg1</em><big>)</big> &rarr; None :<a class="headerlink" href="#nix.Group.force_updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the update time updated_at to the current time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Group.id">
+<tt class="descname">id</tt><a class="headerlink" href="#nix.Group.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property providing the ID of the Entity. The id is generated automatically,
+therefore the property is read-only.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Group.metadata">
+<tt class="descname">metadata</tt><a class="headerlink" href="#nix.Group.metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Associated metadata of the entity. Sections attached to the entity via this attribute can
+provide additional annotations. This is an optional read-write property, and can be None if
+no metadata is available.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">Section</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Group.multi_tags">
+<tt class="descname">multi_tags</tt><a class="headerlink" href="#nix.Group.multi_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property containing all MultiTags referenced by the group. MultiTags
+can be obtained by index or their id. Tags can be removed from the list, removing
+a referenced MultiTag will not remove it from the file. New MultiTags can be added using
+the append method of the list.
+This is a read only attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">MultiTagProxyList of MultiTags</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Group.name">
+<tt class="descname">name</tt><a class="headerlink" href="#nix.Group.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The name of an entity. The name serves as a human readable identifier.
+This is a read-write property, but it can&#8217;t be set to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Group.tags">
+<tt class="descname">tags</tt><a class="headerlink" href="#nix.Group.tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>A property containing all tags referenced by the group. Tags
+can be obtained by index or their id. Tags can be removed from the list, removing
+a referenced Tag will not remove it from the file. New Tags can be added using
+the append method of the list.
+This is a read only attribute.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">TagProxyList of Tags</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Group.type">
+<tt class="descname">type</tt><a class="headerlink" href="#nix.Group.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>The type of the entity. The type is used in order to add semantic meaning to the entity.
+This is a read-write property, but it can&#8217;t be set to None.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">str</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="nix.Group.updated_at">
+<tt class="descname">updated_at</tt><a class="headerlink" href="#nix.Group.updated_at" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time of the last update of the entity. This is a read-only property. Use force_updated_at in order
+to change the update time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Type:</th><td class="field-body">int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<p class="logo">
+  <a href="index.html">
+    <img class="logo" src="_static/logo.png" alt="Logo"/>
+    
+  </a>
+</p>
+
+
+
+
+
+<p>
+<iframe src="http://ghbtns.com/github-btn.html?user=G-Node&repo=nixpy&type=watch&count=False&size=large"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+    
+
+<p>
+<a href="https://travis-ci.org/G-Node/nixpy">
+    <img
+        alt="https://secure.travis-ci.org/G-Node/nixpy.png?branch=master"
+        src="https://secure.travis-ci.org/G-Node/nixpy.png?branch=master"
+    >
+</a>
+</p>
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation Guidelines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorials</a></li>
+</ul>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="">API Documentation for Data</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#file">File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#block">Block</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dataarray">DataArray</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dataset">DataSet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tags">Tags</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#source">Source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#group">Group</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api_metadata.html">API Documentation for Metadata</a></li>
+</ul>
+
+
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2014, German Neuroinformatics Node, Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, Balint Morvai.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.2.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.6.0</a>
+      
+      |
+      <a href="_sources/api_data.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>
