@@ -14,6 +14,12 @@ import numpy as np
 
 from nix import *
 
+try:
+    basestring = basestring
+except NameError:  # 'basestring' is undefined, must be Python 3
+    basestring = (str,bytes)
+
+
 class TestDataArray(unittest.TestCase):
 
     def setUp(self):
@@ -136,6 +142,8 @@ class TestDataArray(unittest.TestCase):
 
         self.array[...] = [float(-i) for i in range(100)]
         assert(np.array_equal(self.array[()], data))
+        assert(np.array_equal(self.array[0:-10], data[0:-10]))
+        assert(np.array_equal(self.array[-10], data[-10]))
 
         self.array[0] = 42
         assert(self.array[0] == 42.0)
@@ -164,8 +172,11 @@ class TestDataArray(unittest.TestCase):
         assert(np.array_equal(dset[12, ...], data[12, ...]))
         assert(np.array_equal(dset[..., 12], data[..., 12]))
         assert(np.array_equal(dset[1:], data[1:]))
+        assert(np.array_equal(dset[-20:, -20:], data[123-20:, 123-20:]))
         assert(np.array_equal(dset[:1], data[:1]))
+        assert(np.array_equal(dset[:-1, :-1], data[1:123, 1:123]))
         assert(np.array_equal(dset[1:10, 1:10], data[1:10, 1:10]))
+        assert(np.array_equal(dset[1:-2, 1:-2], data[1:121, 1:121]))
 
         a3 = self.block.create_data_array("int identity array", "signal", DataType.Int32, (123, 123))
         assert(a3.shape == (123, 123))
@@ -179,9 +190,13 @@ class TestDataArray(unittest.TestCase):
         assert(len(dset) == len(data))
         assert(dset.size == data.size)
         assert(np.array_equal(dset[2, ...], data[2, ...]))
+        assert(np.array_equal(dset[-1, ...], data[2, ...]))
         assert(np.array_equal(dset[..., 3], data[..., 3]))
+        assert(np.array_equal(dset[..., -2], data[..., 3]))
         assert(np.array_equal(dset[2, ..., 3], data[2, ..., 3]))
+        assert(np.array_equal(dset[2, ..., -2], data[2, ..., 3]))
         assert(np.array_equal(dset[1:2, ..., 3:5], data[1:2, ..., 3:5]))
+        assert(np.array_equal(dset[1:2, ..., 3:-1], data[1:2, ..., 3:4]))
 
         #indexed writing (n-d)
         d2 = np.random.rand(2,2)
@@ -243,7 +258,11 @@ class TestDataArray(unittest.TestCase):
         da = self.block.create_data_array('dtype_int_from_data', 'b', data=test_data)
         assert(da.dtype == test_data.dtype)
 
-        void_data = np.array(['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'], dtype='V1')
+        bdata = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+        if sys.version_info[0] == 3:
+            bdata = [bytes(x, 'UTF-8') for x in bdata]
+
+        void_data = np.array(bdata, dtype='V1')
         da = self.block.create_data_array('dtype_opaque', 'b', data=void_data)
         assert(da.dtype == np.dtype('V1'))
         assert(np.array_equal(void_data, da[:]))
@@ -276,6 +295,25 @@ class TestDataArray(unittest.TestCase):
         del self.array.dimensions[0]
 
         assert(len(self.array.dimensions) == 0)
+        self.array.append_alias_range_dimension()
+        assert(len(self.array.dimensions) == 1)
+        del self.array.dimensions[0]
+        self.array.create_alias_range_dimension()
+        assert(len(self.array.dimensions) == 1)
+
+        self.assertRaises(ValueError, lambda : self.array.append_alias_range_dimension())
+        self.assertRaises(ValueError, lambda : self.array.create_alias_range_dimension())
+        string_array = self.block.create_data_array('string_array', 'nix.texts', dtype=DataType.String, shape=(10,))
+        self.assertRaises(ValueError, lambda : string_array.append_alias_range_dimension())
+        self.assertRaises(ValueError, lambda : string_array.create_alias_range_dimension())
+        assert(len(string_array.dimensions) == 0)
+        del self.block.data_arrays['string_array']
+
+        array_2D = self.block.create_data_array('array_2d', 'nix.2d', dtype=DataType.Double, shape=(10,10))
+        self.assertRaises(ValueError, lambda : array_2D.append_alias_range_dimension())
+        self.assertRaises(ValueError, lambda : array_2D.create_alias_range_dimension())
+        assert(len(array_2D.dimensions) == 0)
+        del self.block.data_arrays['array_2d']
 
     def test_data_array_sources(self):
         source1 = self.block.create_source("source1", "channel")

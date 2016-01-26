@@ -66,8 +66,6 @@ void PyProperty::do_export() {
         .value("UInt32"  , DataType::UInt32)
         .value("UInt64"  , DataType::UInt64)
         .value("String"  , DataType::String)
-        .value("Date"    , DataType::Date)
-        .value("DateTime", DataType::DateTime)
         .value("Nothing" , DataType::Nothing)
         ;
 

@@ -12,14 +12,11 @@ import sys
 
 from nix.core import DataArray
 from nix.core import DataSet
-from nix.util.inject import Inject
+from nix.util.inject import inject
 
 import numpy as np
 
 class DataArrayMixin(DataArray):
-
-    class __metaclass__(Inject, DataArray.__class__):
-        pass
 
     @property
     def data(self):
@@ -107,9 +104,6 @@ class DataSetMixin(DataSet):
     Data IO object for DataArray.
     """
 
-    class __metaclass__(Inject, DataSet.__class__):
-        pass
-
     def __array__(self):
         raw = np.empty(self.shape, dtype=self.dtype)
         self.read_direct(raw)
@@ -117,15 +111,14 @@ class DataSetMixin(DataSet):
 
     def __getitem__(self, index):
         index = self.__index_to_tuple(index)
-
         if len(index) < 1:
             return np.array(self)
-
         # if we got to here we have a tuple with len >= 1
         count, offset, shape = self.__tuple_to_count_offset_shape(index)
-
         raw = np.empty(shape, dtype=self.dtype)
+
         self._read_data(raw, count, offset)
+
         return raw
 
     def __setitem__(self, index, value):
@@ -253,12 +246,23 @@ class DataSetMixin(DataSet):
         if type(index) is slice:
             if index.step is not None:
                 raise IndexError('Invalid index, stepping unsupported')
-            if index.start is None:
-                index = slice(0, index.stop)
-            if index.stop is None:
-                index = slice(index.start, shape)
+            start = index.start
+            stop = index.stop
+            if start is None:
+                start = 0
+            elif start < 0:
+                start = shape + start
+            if stop is None:
+                stop = shape
+            elif stop < 0:
+                stop = shape + stop
+            index = slice(start, stop, index.step)
         elif type(index) is int:
-            index = slice(index, index+1)
+            if index < 0:
+                index = shape + index
+                index = slice(index, index+1)
+            else:
+                index = slice(index, index+1)
         elif index is None:
             index = slice(0, shape)
         else:
@@ -266,8 +270,8 @@ class DataSetMixin(DataSet):
         return index
 
     @staticmethod
-    def __fill_none(shape, index):
-        size = len(shape) - len(index) + 1
+    def __fill_none(shape, index, to_replace=1):
+        size = len(shape) - len(index) + to_replace
         return tuple([None] * size)
 
     def __tuple_to_count_offset_shape(self, index):
@@ -289,16 +293,25 @@ class DataSetMixin(DataSet):
         if pos > -1:
             index = index[:pos] + fill_none(shape, index) + index[pos+1:]
 
-        completed = map(self.__complete_slices, shape, index)
-        combined = map(lambda s: (s.start, s.stop), completed)
+        # in python3 map does not work with None therefore if
+        # len(shape) != len(index) we wont get the expected
+        # result. We therefore need to fill up the missing values
+        index = index + fill_none(shape, index, to_replace=0)
+
+        completed = list(map(self.__complete_slices, shape, index))
+        combined = list(map(lambda s: (s.start, s.stop), completed))
         count = tuple(x[1] - x[0] for x in combined)
-        offset = zip(*combined)[0]
+        offset = [x for x in zip(*combined)][0]
 
         # drop all indices from count that came from single ints
         # NB: special case when we only have ints, e.g. (int, ) then
         # we get back the empty tuple and this is what we want,
         # because it indicates a scalar result
         squeezed = map(lambda i, c: c if type(i) != int else None, index, count)
-        shape = filter(lambda x: x is not None, squeezed)
+        shape = list(filter(lambda x: x is not None, squeezed))
 
         return count, offset, shape
+
+
+inject((DataArray,), dict(DataArrayMixin.__dict__))
+inject((DataSet,), dict(DataSetMixin.__dict__))

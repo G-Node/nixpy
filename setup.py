@@ -11,9 +11,9 @@ except:
 
 # python version dependent import of getstatusoutput
 try:
-	from commands import getstatusoutput
+    from commands import getstatusoutput
 except:
-	from subprocess import getstatusoutput
+    from subprocess import getstatusoutput
 
 import numpy as np
 import sys
@@ -21,6 +21,7 @@ import os
 import re
 import fnmatch
 import distutils
+import platform
 
 def find(pattern, path):
     result = []
@@ -102,14 +103,21 @@ nixpy_sources = [
     'src/PyFeature.cpp',
     'src/PyTag.cpp',
     'src/PyMultiTag.cpp',
-    'src/PyResult.cpp'
+    'src/PyResult.cpp',
+    'src/PyGroup.cpp'
 ]
 
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
 boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
+
 if os.name != 'nt':
-    boost_lnk_arg = ['-lboost_python']
-else:
+    is_darwin = platform.system().lower() == 'darwin'
+    is_py3 = sys.version_info[0] == 3
+    if is_darwin:
+        boost_lnk_arg = ['-lboost_python' + ('3' if is_py3 else '')]
+    else:
+        boost_lnk_arg = ['-lboost_python-py%s%s' % sys.version_info[0:2]] # NB: the latter is returning a tuple
+else:  # windows
     boostlib = find('libboost_python*.lib', boost_lib_dir)
     boost_lnk_arg = ['/LIBPATH:'+boost_lib_dir, '/DEFAULTLIB:'+boostlib[0]]
 
@@ -118,6 +126,7 @@ classifiers   = [
                     'Programming Language :: Python',
                     'Programming Language :: Python :: 2.6',
                     'Programming Language :: Python :: 2.7',
+                    'Programming Language :: Python :: 3.4',
                     'Topic :: Scientific/Engineering'
 ]
 
@@ -149,7 +158,7 @@ setup(name             = 'nix',
       scripts          = [],
       tests_require    = ['nose'],
       test_suite       = 'nose.collector',
-      setup_requires   = ['numpy', 'sphinx'],
+      setup_requires   = ['numpy'],
       package_data     = {'nix': [license_text, description_text]},
       include_package_data = True,
       zip_safe         = False,

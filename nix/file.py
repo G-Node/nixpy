@@ -12,8 +12,14 @@ import sys
 
 import nix.util.find as finders
 from nix.core import File
-from nix.util.inject import Inject
+from nix.util.inject import inject
 from nix.util.proxy_list import ProxyList
+
+try:
+    from sys import maxint
+except:
+    from sys import maxsize as maxint
+
 
 class BlockProxyList(ProxyList):
 
@@ -31,9 +37,6 @@ class SectionProxyList(ProxyList):
 
 class FileMixin(File):
 
-    class __metaclass__(Inject, File.__class__):
-        pass
-
     @property
     def blocks(self):
         """
@@ -48,7 +51,7 @@ class FileMixin(File):
             setattr(self, "_blocks", BlockProxyList(self))
         return self._blocks
 
-    def find_sections(self, filtr=lambda _ : True, limit=sys.maxint):
+    def find_sections(self, filtr=lambda _ : True, limit=maxint):
         """
         Get all sections and their child sections recursively.
 
@@ -82,3 +85,6 @@ class FileMixin(File):
         if not hasattr(self, "_sections"):
             setattr(self, "_sections", SectionProxyList(self))
         return self._sections
+
+
+inject((File,), dict(FileMixin.__dict__))

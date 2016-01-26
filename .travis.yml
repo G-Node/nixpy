@@ -1,34 +1,51 @@
+sudo: false
+
 language: python
-python:
-  - "2.7"
 
-virtualenv:
-  system_site_packages: true
+env:
+  global:
+    - CC=gcc-4.8
+    - CXX=g++-4.8
+    - NIX_LIBDIR=./nix-build/inst/lib
+    - NIX_INCDIR=./nix-build/inst/include
 
+matrix:
+  include:
+    - python: "2.7_with_system_site_packages"
+      env: COVERALLS=1
+    - python: "3.2"
+      env: COVERALLS=0
+
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+      - kalakris-cmake
+      - boost-latest
+    packages:
+      - libcppunit-dev
+      - libboost1.55-all-dev
+      - libhdf5-serial-dev
+      - cmake
+      - g++-4.8
 
 install:
-- sudo add-apt-repository ppa:gnode/pandora -y
-- sudo add-apt-repository ppa:mapnik/boost -y
-- sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-- sudo add-apt-repository ppa:apokluda/boost1.53 -y
-- sudo apt-get update -q -y
-- sudo apt-get install libboost-python1.53-dev libboost-date-time1.53-dev libboost1.53-dev libboost-regex1.53-dev libboost-filesystem1.53-dev libboost-system1.53-dev libboost-program-options1.53-dev cmake -y
-- sudo apt-get install -q gcc-4.8 g++-4.8 libstdc++-4.8-dev libcppunit-dev -y
-- sudo apt-get install libhdf5-serial-dev libhdf5-dev libhdf5-7 -y
-- sudo apt-get install python-dev -y
-- sudo pip install coveralls numpy
+- pip install coveralls numpy
 - git clone https://github.com/G-Node/nix.git nix-build
 - cd nix-build
-- CC=gcc-4.8 CXX=g++-4.8 cmake -DBUILD_TESTING=OFF .
+- cmake -DCMAKE_INSTALL_PREFIX=./inst -DBUILD_TESTING=OFF .
 - make
-- sudo make install
+- make install
 - cd ..
 
-
 script:
-- CC=gcc-4.8 CXX=g++-4.8 python setup.py install
-- coverage run --source=nix setup.py test
-- coverage report -m
+- python setup.py build
+- if [ $COVERALLS = 1 ]; then
+    coverage run --source=nix setup.py test;
+    coverage report -m;
+  else
+    python setup.py test;
+  fi;
 
 after_success:
-- coveralls
+- if [ $COVERALLS = 1 ]; then coveralls; fi;

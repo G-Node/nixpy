@@ -117,7 +117,11 @@ PyObject* transmorgify_integer(const U value, const U max_val)
     //of boost::none, so we can call it with just value
     const bool can_downgrade = max_val < std::numeric_limits<T>::max();
     if (can_downgrade) {
+#if PY_MAJOR_VERSION >= 3
+        return PyLong_FromLong(static_cast<T>(value));
+#else
         return PyInt_FromLong(static_cast<T>(value));
+#endif
     } else if (std::numeric_limits<U>::is_signed) {
         return PyLong_FromLongLong(value);
     } else {

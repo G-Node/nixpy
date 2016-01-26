@@ -13,6 +13,12 @@ import unittest
 from nix import *
 from nix.util.proxy_list import ProxyList
 
+try:
+    basestring = basestring
+except NameError:  # 'basestring' is undefined, must be Python 3
+    basestring = (str,bytes)
+
+
 class WithIdMock(object):
 
     def __init__(self, id):

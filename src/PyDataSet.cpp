@@ -238,15 +238,17 @@ struct DataSetWrapper : public nix::DataSet, public boost::python::wrapper<nix::
     void ioRead(nix::DataType dtype,
                 void *data,
                 const nix::NDSize &count,
-                const nix::NDSize &offset) const override {
-        this->get_override("ioRead")(dtype, data, count, offset);
+                const nix::NDSize &offset) const {
+        const boost::python::override fn = this->get_override("ioRead");
+        fn(dtype, static_cast<char*>(data), std::ref(count), std::ref(offset));
     }
 
      void ioWrite(nix::DataType dtype,
                   const void *data,
                   const nix::NDSize &count,
-                  const nix::NDSize &offset) override {
-        this->get_override("ioWrite")(dtype, data, count, offset);
+                  const nix::NDSize &offset) {
+        const boost::python::override fn = this->get_override("ioWrite");
+        fn(dtype, static_cast<const char*>(data), std::ref(count), std::ref(offset));
      }
      virtual void dataExtent(const nix::NDSize &extent) override {
         this->get_override("dataExtent")(extent);
@@ -261,7 +263,7 @@ struct DataSetWrapper : public nix::DataSet, public boost::python::wrapper<nix::
      }
 };
 
-void PyDataSet::do_export() {
+NIXPY_DO_EXPORT_RETTYPE PyDataSet::do_export() {
     using namespace boost::python;
 
     // For numpy to work
@@ -282,6 +284,8 @@ void PyDataSet::do_export() {
     class_<nix::DataView, bases<nix::DataSet>>("DataView", boost::python::no_init);
 
     dtype_transmogrify::register_from_python();
+    
+    return NIXPY_DO_EXPORT_RETVAL;
 }
 
 } // nixpy::

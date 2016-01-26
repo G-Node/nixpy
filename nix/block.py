@@ -12,9 +12,14 @@ import sys
 
 import nix.util.find as finders
 from nix.core import Block
-from nix.util.inject import Inject
+from nix.util.inject import inject
 from nix.util.proxy_list import ProxyList
 import numpy as np
+
+try:
+    from sys import maxint
+except:
+    from sys import maxsize as maxint
 
 
 class SourceProxyList(ProxyList):
@@ -45,11 +50,14 @@ class TagProxyList(ProxyList):
                                                  "_get_tag_by_pos", "_delete_tag_by_id")
 
 
-class BlockMixin(Block):
+class GroupProxyList(ProxyList):
 
-    class __metaclass__(Inject, Block.__class__):
-        # this injects all members and the doc into nix.core.Block
-        pass
+    def __init__(self, obj):
+        super(GroupProxyList, self).__init__(obj, "_group_count", "_get_group_by_id",
+                                                 "_get_group_by_pos", "_delete_group_by_id")
+
+
+class BlockMixin(Block):
 
     def create_data_array(self, name, array_type, dtype=None, shape=None, data=None):
         """
@@ -91,7 +99,7 @@ class BlockMixin(Block):
             da.data.write_direct(data)
         return da
 
-    def find_sources(self, filtr=lambda _ : True, limit=sys.maxint):
+    def find_sources(self, filtr=lambda _ : True, limit=maxint):
         """
         Get all sources in this block recursively.
 
@@ -163,6 +171,19 @@ class BlockMixin(Block):
             setattr(self, "_data_arrays", DataArrayProxyList(self))
         return self._data_arrays
 
+    @property
+    def groups(self):
+        """
+        A property containing all groups of a block. Group entities can be obtained via their index or by their id.
+        Groups can be deleted from the list. Adding a Group is done using the Blocks create_group method.
+        This is a read only attribute.
+
+        :type: ProxyList of Group entities.
+        """
+        if not hasattr(self, "_groups"):
+            setattr(self, "_groups", GroupProxyList(self))
+        return self._groups
+
     def __eq__(self, other):
         """
         Two blocks are considered equal when they have the same id
@@ -178,3 +199,6 @@ class BlockMixin(Block):
         hash has to be either explicitly inherited from parent class, implemented or escaped
         """
         return hash(self.id)
+
+
+inject((Block,), dict(BlockMixin.__dict__))

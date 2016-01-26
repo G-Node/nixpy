@@ -9,7 +9,7 @@
 from __future__ import (absolute_import, division, print_function)#, unicode_literals)
 
 import unittest
-
+import numpy as np
 from nix import *
 
 test_range  = tuple([float(i) for i in range(10)])
@@ -101,7 +101,7 @@ class TestDimensions(unittest.TestCase):
         assert(self.range_dim.ticks == other)
 
         assert(self.range_dim.index_of(0.) == 0)
-        assert(self.range_dim.index_of(10.) == (round(10./3.14)))
+        assert(self.range_dim.index_of(10.) == (np.ceil(10./3.14)))
         assert(self.range_dim.index_of(100.) == 9)
         assert(self.range_dim.index_of(-100.) == 0)
 

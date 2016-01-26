@@ -264,6 +264,18 @@ const char* block_create_source = R"(
     :rtype: Source
     )";
 
+const char* block_create_group = R"(
+    Create a new group on this block.
+
+    :param name: The name of the group to create.
+    :type name: str
+    :param type: The type of the group.
+    :type type: str
+
+    :returns: The newly created group.
+    :rtype: Group
+    )";
+
 // PyDataArray
 
 const char* data_array_label = R"(
@@ -350,6 +362,15 @@ const char* data_array_create_range_dimension = R"(
     :rtype: RangeDimension
     )";
 
+const char* data_array_create_alias_range_dimension = R"(
+    Append a new RangeDimension that uses the data stored in this DataArray as ticks.
+    This works only(!) if the DataArray is 1-D and the stored data is numeric. An ValueError
+    will be raised otherwise.
+
+    :returns: The created dimension descriptor.
+    :rtype: RangeDimension
+    )";
+
 const char* data_array_append_set_dimension = R"(
     Append a new SetDimension to the list of existing dimension descriptors.
 
@@ -379,6 +400,14 @@ const char* data_array_append_range_dimension = R"(
     :rtype: RangeDimension
     )";
 
+const char* data_array_append_alias_range_dimension = R"(
+    Append a new RangeDimension that uses the data stored in this DataArray as ticks.
+    This works only if the data is 1-D and numeric. That is, this dimension discriptor must be
+    the only descriptor in this DataArray. An ValueError is raised otherwise.
+
+    :returns: The newly created RangeDimension.
+    :rtype: RangeDimension
+    )";
 
 const char* tag_units = R"(
     Property containing the units of the tag. The tag must provide a unit for each
