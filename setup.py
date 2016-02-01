@@ -144,7 +144,7 @@ native_ext    = Extension(
                     )
                 )
 
-setup(name             = 'nix',
+setup(name             = 'nixpy',
       version          = VERSION,
       author           = AUTHOR,
       author_email     = CONTACT,
