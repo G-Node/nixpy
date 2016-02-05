@@ -211,10 +211,12 @@ class TestDataArray(unittest.TestCase):
         sys.maxsize = savemaxsize
 
         # test inferring shape & dtype from data, and writing the data
-        test_data = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 0], dtype=int)
+        test_ten = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
+        test_data = np.array(test_ten, dtype=int)
         da = self.block.create_data_array('created_from_data', 'b', data=test_data)
         assert(da.shape == test_data.shape)
         assert(np.array_equal(test_data, da[:]))
+        assert(test_ten == [x for x in da])
 
         #test for exceptions
         self.assertRaises(ValueError, lambda: self.block.create_data_array('x', 'y'))
