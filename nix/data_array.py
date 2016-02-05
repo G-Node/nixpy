@@ -148,6 +148,10 @@ class DataSetMixin(DataSet):
             raise OverflowError(estr)
         return s
 
+    def __iter__(self):
+        for idx in range(self.len()):
+            yield self[idx]
+
     def len(self):
         """
         Length of the first dimension. Equivalent to `DataSet.shape[0]`.
