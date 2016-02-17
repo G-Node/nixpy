@@ -72,9 +72,11 @@ def pkg_config(*packages, **kw):
 
     return kw
 
+is_win = os.name == 'nt'
+
 nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include')
 nix_lib_dir = os.getenv('NIX_LIBDIR', '/usr/local/lib')
-if os.name != 'nt':
+if not is_win:
     nix_lnk_arg = ['-lnix']
 else:
     nix_lnk_arg = ['/LIBPATH:'+nix_lib_dir, '/DEFAULTLIB:nix.lib']
@@ -111,7 +113,7 @@ if boost_lib is None:
     print("Available boost python libs:\n" + "\n".join(boost_libs))
     sys.exit(-1)
 
-boost_lnk_arg = [boost_lib.link_directive] + (['/LIBPATH:'+boost_lib_dir] if os.name =='nt' else [])
+boost_lnk_arg = [boost_lib.link_directive] + (['/LIBPATH:'+boost_lib_dir] if is_win else [])
 
 classifiers   = [
                     'Development Status :: 5 - Production/Stable',
@@ -124,10 +126,10 @@ classifiers   = [
 
 native_ext    = Extension(
                     'nix.core',
-                    extra_compile_args = ['-std=c++11'] if os.name!='nt' else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
+                    extra_compile_args = ['-std=c++11'] if not is_win else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
                     extra_link_args=boost_lnk_arg + nix_lnk_arg,
                     sources = nixpy_sources,
-                    runtime_library_dirs = [nix_lib_dir, boost_lib_dir] if os.name!='nt' else None,
+                    runtime_library_dirs = [nix_lib_dir, boost_lib_dir] if not is_win else None,
                     **pkg_config(
                         "nix",
                         library_dirs=[boost_lib_dir, nix_lib_dir],
