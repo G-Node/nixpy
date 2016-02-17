@@ -19,19 +19,10 @@ import numpy as np
 import sys
 import os
 import re
-import fnmatch
 import distutils
 import platform
 
 from findboost import BoostPyLib
-
-def find(pattern, path):
-    result = []
-    for root, dirs, files in os.walk(path):
-        for name in files:
-            if fnmatch.fnmatch(name, pattern):
-                result.append(os.path.join(root, name))
-    return result
 
 with open('README.md') as f:
     description_text = f.read()
