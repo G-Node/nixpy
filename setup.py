@@ -23,6 +23,8 @@ import fnmatch
 import distutils
 import platform
 
+from findboost import BoostPyLib
+
 def find(pattern, path):
     result = []
     for root, dirs, files in os.walk(path):
@@ -110,16 +112,15 @@ nixpy_sources = [
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
 boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
 
-if os.name != 'nt':
-    is_darwin = platform.system().lower() == 'darwin'
-    is_py3 = sys.version_info[0] == 3
-    if is_darwin:
-        boost_lnk_arg = ['-lboost_python' + ('3' if is_py3 else '')]
-    else:
-        boost_lnk_arg = ['-lboost_python-py%s%s' % sys.version_info[0:2]] # NB: the latter is returning a tuple
-else:  # windows
-    boostlib = find('libboost_python*.lib', boost_lib_dir)
-    boost_lnk_arg = ['/LIBPATH:'+boost_lib_dir, '/DEFAULTLIB:'+boostlib[0]]
+boost_libs = BoostPyLib.list_in_dir(boost_lib_dir)
+boost_lib = BoostPyLib.find_lib_for_current_python(boost_libs)
+
+if boost_lib is None:
+    print("Could not find boost python version for %s%s" % sys.version_info[0:2])
+    print("Available boost python libs:\n" + "\n".join(boost_libs))
+    sys.exit(-1)
+
+boost_lnk_arg = [boost_lib.link_directive] + (['/LIBPATH:'+boost_lib_dir] if os.name =='nt' else [])
 
 classifiers   = [
                     'Development Status :: 5 - Production/Stable',
