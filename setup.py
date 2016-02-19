@@ -6,13 +6,13 @@ __author__ = 'gicmo'
 
 try:
     from setuptools import setup, Extension
-except:
+except ImportError:
     from distutils.core import setup, Extension
 
 # python version dependent import of getstatusoutput
 try:
     from commands import getstatusoutput
-except:
+except ImportError:
     from subprocess import getstatusoutput
 
 import numpy as np
