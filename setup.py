@@ -113,7 +113,7 @@ if boost_lib is None:
     print("Available boost python libs:\n" + "\n".join(boost_libs))
     sys.exit(-1)
 
-boost_lnk_arg = [boost_lib.link_directive] + (['/LIBPATH:'+boost_lib_dir] if is_win else [])
+boost_lnk_arg = boost_lib.link_directive
 
 classifiers   = [
                     'Development Status :: 5 - Production/Stable',

@@ -26,9 +26,9 @@ class BoostPyLib(object):
     def link_directive(self):
         name, ext = os.path.splitext(self.filename)
         if ext == 'lib':
-            return "/DEFAULTLIB:" + self.filename
+            return ["/DEFAULTLIB:" + self.filename, '/LIBPATH:' + self.path]
         else:
-            return '-l' + name[3:]
+            return ['-l' + name[3:]]
 
     def __str__(self):
         major = str(self.major or '?')
