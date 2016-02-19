@@ -12,8 +12,9 @@ import sys
 class BoostPyLib(object):
     matcher = re.compile(r'libboost_python(?:-py)?(\d{0,2})((?:-\w+[^-])*)\.(?:so|dylib|lib)')
 
-    def __init__(self, path, major, minor, ismt):
-        self.filename = path
+    def __init__(self, path, name, major, minor, ismt):
+        self.path = path
+        self.filename = name
         self.major = major
         self.minor = minor
         self.threadsafe = ismt
@@ -42,12 +43,13 @@ class BoostPyLib(object):
     @classmethod
     def make_from_path(cls, path):
         filename = os.path.basename(path)
+        dirname = os.path.dirname(path)
         m = cls.matcher.match(filename)
         if m is None:
             return m
         ismt = '-mt' in m.group(2)
         major, minor = cls.parse_version(m.group(1))
-        return cls(filename, major, minor, ismt)
+        return cls(dirname, filename, major, minor, ismt)
 
     @classmethod
     def find_lib_for_current_python(cls, libs):
