@@ -45,13 +45,14 @@ In order to build the NIXPY library a compiler is needed (gcc, clang). Further n
 
 _Instructions_
 
-```bash
+```
+bash
 # install dependencies
 sudo apt-get install libboost-python-dev build-essential python-dev python-setuptools python-numpy
 
 # clone NIX
 git clone https://github.com/G-Node/nixpy
-cd nix
+cd nixpy
 
 # build nixpy
 python setup.py build
@@ -62,6 +63,62 @@ python setup.py test
 # install
 sudo python setup.py install
 ```
+
+Getting Started (Mac OS X)
+-------------------------
+**Getting the source code**
+
+Get the source code from GitHub using :
+
+`git clone https://github.com/G-Node/nixpy.git`
+
+**Build NIXPY under OS X**
+
+_Dependecies_
+
+- NIXPY requires installation of [NIX](https://github.com/G-Node/nix). Make sure you install NIX first.
+- boost-python.
+ Install it using homebrew. `brew install boost-python`
+- Python (version = 2.7.x) + python-setuptools + python-numpy (version >= 1.8.0). 
+
+OS X default python works well.
+
+_Instruction to build_
+
+```
+bash
+
+# install dependencies if required
+sudo apt-get install libboost-python-dev build-essential python-dev python-setuptools python-numpy
+
+# build
+python setup.py build
+
+# unit tests
+python setup.py test
+
+# install 
+sudo python setup.py install
+```
+
+**To check if installed properly**
+
+```
+bash
+
+python
+
+Python 2.7.11 (default, Dec  5 2015, 14:44:53)
+[GCC 4.2.1 Compatible Apple LLVM 7.0.0 (clang-700.1.76)] on darwin
+Type "help", "copyright", "credits" or "license" for more information.
+>>>import nix
+>>>
+```
+
+If python succesfully executes `import nix`, the installation went good.
+Check out the API documentation for further tutorials. 
+
+
 
 Getting Started (Windows)
 -------------------------
