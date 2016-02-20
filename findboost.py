@@ -19,7 +19,7 @@ except ImportError:
 
 
 class BoostPyLib(object):
-    matcher = re.compile(r'libboost_python(?:-py)?(\d{0,2})((?:-\w+[^-])*)\.(?:so|dylib|lib)')
+    matcher = re.compile(r'^libboost_python(?:-py)?(\d{0,2})((?:-\w+[^-])*)\.(?:so|dylib|lib)$')
 
     def __init__(self, path, name, major, minor, ismt):
         self.path = path
@@ -120,6 +120,7 @@ class BoostPyLib(object):
             ('libboost_python.dylib', (None, None, False)),
             ('libboost_python3.dylib', (3, None, False)),
             ('libboost_python-py27.so', (2, 7, False)),
+            ('libboost_python-py27.so.1.55.0', None),
             ('libboost_python-py34.so', (3, 4, False)),
             ('libboost_python-py35.so', (3, 5, False)),
             ('libboost_python.lib', (None, None, False)),
