@@ -132,11 +132,11 @@ class BoostPyLib(object):
             ml = max(map(lambda s: len(s[0]), survey)) + 3
             for s, c in survey:
                 o = cls.make_from_path(s)
-                sys.stderr.write('Checking: ' + s)
+                sys.stderr.write('Checking: ' + str(o and str(o.match(*c))) + s)
                 assert(c is not None or o is None)
                 assert(o is not None or c is None)
                 assert(o is None or o.match(*c))
-                sys.stderr.write(u' '*(ml - len(s)) + u'✓\n')
+                sys.stderr.write(' '*(ml - len(s)) + 'ok\n')
         except AssertionError as e:
             print("Self-test failed:", e, file=sys.stderr)
             return -1
