@@ -111,7 +111,7 @@ boost_lib = BoostPyLib.find_lib_for_current_python(boost_libs)
 
 if boost_lib is None:
     print("Could not find boost python version for %s%s" % sys.version_info[0:2])
-    print("Available boost python libs:\n" + "\n".join(boost_libs))
+    print("Available boost python libs:\n" + "\n".join(map(str, boost_libs)))
     sys.exit(-1)
 
 boost_lnk_arg = boost_lib.link_directive
