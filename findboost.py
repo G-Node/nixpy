@@ -59,13 +59,19 @@ class BoostPyLib(object):
         paths = out[start:].split(":")
         ordered_set = {k: idx for idx, k in enumerate(paths)}
         ordered_set.update({d: -1*(len(dirs) - i) for i, d in enumerate(dirs)})
-        return list(map(itemgetter(0), (sorted(ordered_set.iteritems(), key=itemgetter(1)))))
+        return list(map(itemgetter(0), (sorted(ordered_set.items(), key=itemgetter(1)))))
 
     @classmethod
     def list_in_dirs(cls, dirs):
-        not_none = lambda x: x is not None
-        foo = [cls.make_from_path(f) for d in dirs for f in os.listdir(d)]
-        return list(filter(not_none, foo))
+        return list(cls.iterate_libs_in_dirs(dirs))
+
+    @classmethod
+    def iterate_libs_in_dirs(cls, dirs):
+        for d in dirs:
+            for f in os.listdir(d):
+                l = cls.make_from_path(f)
+                if l is not None:
+                    yield l
 
     @classmethod
     def make_from_path(cls, path):
