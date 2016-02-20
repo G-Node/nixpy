@@ -98,7 +98,7 @@ class BoostPyLib(object):
         criteria = [(major, minor), (major, None)] + ([(None, None)] if unknown_is_match else [])
         for c in [[c[0], c[1], mt] for c in criteria for mt in [True, False]]:
             res = list(filter(lambda x: x.match(*c), available))
-            if len(res) == 1:
+            if len(res) > 0:
                 return res[0]
         return None
 
