@@ -110,7 +110,7 @@ boost_libs = BoostPyLib.list_in_dirs(lib_dirs)
 boost_lib = BoostPyLib.find_lib_for_current_python(boost_libs)
 
 if boost_lib is None:
-    print("Could not find boost python version for %s%s" % sys.version_info[0:2])
+    print("Could not find boost python version for %s.%s" % sys.version_info[0:2])
     print("Available boost python libs:\n" + "\n".join(map(str, boost_libs)))
     sys.exit(-1)
 
