@@ -2,50 +2,19 @@ sudo: false
 
 language: python
 
-os:
-  - linux
-  - osx
-
-compiler:
-  - gcc
-  - clang
-
-
 env:
   global:
     - CC=gcc-4.8
     - CXX=g++-4.8
     - NIX_LIBDIR=./nix-build/inst/lib
     - NIX_INCDIR=./nix-build/inst/include
-    - TOOLCHAIN=default CONFIG=Release
-    - TOOLCHAIN=default CONFIG=Debug
-    - TOOLCHAIN=libcxx CONFIG=Debug
-    - TOOLCHAIN=libcxx CONFIG=Release
-    - TOOLCHAIN=clang-libstdcxx CONFIG=Release
-    - TOOLCHAIN=clang-libstdcxx CONFIG=Debug
-    - TOOLCHAIN=xcode CONFIG=Debug
-    - TOOLCHAIN=xcode CONFIG=Release
-    - TOOLCHAIN=osx-10-9 CONFIG=Debug
-    - TOOLCHAIN=osx-10-9 CONFIG=Release
-    - TOOLCHAIN=gcc CONFIG=Debug
-    - TOOLCHAIN=gcc CONFIG=Release
-    - TOOLCHAIN=gcc-4-8 CONFIG=Release
-    - TOOLCHAIN=gcc-4-8 CONFIG=Debug
 
 matrix:
   include:
-    - os: linux
-      dist: trusty
-      python: "2.7_with_system_site_packages"
+    - python: "2.7_with_system_site_packages"
       env: COVERALLS=1
-    - os: linux
-      dist: trusty
-      python: "3.2"
+    - python: "3.2"
       env: COVERALLS=0
-    - os: osx
-      osx_image: xcode7.2
-      language: generic
-      
 
 addons:
   apt:
@@ -60,15 +29,7 @@ addons:
       - cmake
       - g++-4.8
 
-before install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update          ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install boost-python ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install cmake ; fi
-
 install:
-- which cmake
-- cmake --version
-
 - pip install coveralls numpy
 - git clone https://github.com/G-Node/nix.git nix-build
 - cd nix-build
@@ -76,9 +37,6 @@ install:
 - make
 - make install
 - cd ..
-
-
- 
 
 script:
 - python setup.py build
