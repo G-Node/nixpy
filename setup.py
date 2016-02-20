@@ -6,30 +6,23 @@ __author__ = 'gicmo'
 
 try:
     from setuptools import setup, Extension
-except:
+except ImportError:
     from distutils.core import setup, Extension
 
 # python version dependent import of getstatusoutput
 try:
     from commands import getstatusoutput
-except:
+except ImportError:
     from subprocess import getstatusoutput
 
 import numpy as np
 import sys
 import os
 import re
-import fnmatch
 import distutils
 import platform
 
-def find(pattern, path):
-    result = []
-    for root, dirs, files in os.walk(path):
-        for name in files:
-            if fnmatch.fnmatch(name, pattern):
-                result.append(os.path.join(root, name))
-    return result
+from findboost import BoostPyLib
 
 with open('README.md') as f:
     description_text = f.read()
@@ -79,9 +72,11 @@ def pkg_config(*packages, **kw):
 
     return kw
 
+is_win = os.name == 'nt'
+
 nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include')
 nix_lib_dir = os.getenv('NIX_LIBDIR', '/usr/local/lib')
-if os.name != 'nt':
+if not is_win:
     nix_lnk_arg = ['-lnix']
 else:
     nix_lnk_arg = ['/LIBPATH:'+nix_lib_dir, '/DEFAULTLIB:nix.lib']
@@ -110,16 +105,16 @@ nixpy_sources = [
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
 boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
 
-if os.name != 'nt':
-    is_darwin = platform.system().lower() == 'darwin'
-    is_py3 = sys.version_info[0] == 3
-    if is_darwin:
-        boost_lnk_arg = ['-lboost_python' + ('3' if is_py3 else '')]
-    else:
-        boost_lnk_arg = ['-lboost_python-py%s%s' % sys.version_info[0:2]] # NB: the latter is returning a tuple
-else:  # windows
-    boostlib = find('libboost_python*.lib', boost_lib_dir)
-    boost_lnk_arg = ['/LIBPATH:'+boost_lib_dir, '/DEFAULTLIB:'+boostlib[0]]
+lib_dirs = BoostPyLib.library_search_dirs([boost_lib_dir])
+boost_libs = BoostPyLib.list_in_dirs(lib_dirs)
+boost_lib = BoostPyLib.find_lib_for_current_python(boost_libs)
+
+if boost_lib is None:
+    print("Could not find boost python version for %s.%s" % sys.version_info[0:2])
+    print("Available boost python libs:\n" + "\n".join(map(str, boost_libs)))
+    sys.exit(-1)
+
+boost_lnk_arg = boost_lib.link_directive
 
 classifiers   = [
                     'Development Status :: 5 - Production/Stable',
@@ -132,10 +127,10 @@ classifiers   = [
 
 native_ext    = Extension(
                     'nix.core',
-                    extra_compile_args = ['-std=c++11'] if os.name!='nt' else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
+                    extra_compile_args = ['-std=c++11'] if not is_win else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
                     extra_link_args=boost_lnk_arg + nix_lnk_arg,
                     sources = nixpy_sources,
-                    runtime_library_dirs = [nix_lib_dir, boost_lib_dir] if os.name!='nt' else None,
+                    runtime_library_dirs = [nix_lib_dir, boost_lib_dir] if not is_win else None,
                     **pkg_config(
                         "nix",
                         library_dirs=[boost_lib_dir, nix_lib_dir],
