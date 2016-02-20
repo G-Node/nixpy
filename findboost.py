@@ -4,9 +4,18 @@
 from __future__ import print_function
 from __future__ import division
 
+import functools
 import os
 import re
 import sys
+from operator import itemgetter
+
+import operator
+
+try:
+    from commands import getstatusoutput
+except ImportError:
+    from subprocess import getstatusoutput
 
 
 class BoostPyLib(object):
@@ -36,9 +45,27 @@ class BoostPyLib(object):
         mt = 'threadsafe' if self.threadsafe else ''
         return "%s [%s.%s] (%s) " % (self.filename, major, minor, mt)
 
+    @staticmethod
+    def library_search_dirs(additional_dirs=None):
+        dirs = additional_dirs or []
+        cc = os.getenv("CC", "cc")
+        cmd = "%s --print-search-dirs | grep ^libraries" % cc
+        res, out = getstatusoutput(cmd)
+        if res != 0:
+            print("Warning: \"%s\" failed with %d" % (cmd, res), file=sys.stderr)
+            return dirs
+
+        start = out.find("=") + 1
+        paths = out[start:].split(":")
+        ordered_set = {k: idx for idx, k in enumerate(paths)}
+        ordered_set.update({d: -1*(len(dirs) - i) for i, d in enumerate(dirs)})
+        return list(map(itemgetter(0), (sorted(ordered_set.iteritems(), key=itemgetter(1)))))
+
     @classmethod
-    def list_in_dir(cls, path):
-        return list(filter(lambda x: x is not None, [cls.make_from_path(f) for f in os.listdir(path)]))
+    def list_in_dirs(cls, dirs):
+        not_none = lambda x: x is not None
+        foo = [cls.make_from_path(f) for d in dirs for f in os.listdir(d)]
+        return list(filter(not_none, foo))
 
     @classmethod
     def make_from_path(cls, path):
@@ -122,9 +149,9 @@ if __name__ == '__main__':
         ret = BoostPyLib.selftest()
         sys.exit(ret)
 
-    libs = BoostPyLib.list_in_dir(default_path)
+    libs = BoostPyLib.list_in_dirs([default_path])
     for lib in libs:
-        print(' %s [%s]' % (str(lib), lib.link_directive), file=sys.stderr)
+        print(' %s (ld: %s)' % (str(lib), lib.link_directive), file=sys.stderr)
         linked = BoostPyLib.find_lib_with_version(libs, (v_major, v_minor), unknown_is_match=v_major == 2)
         if linked is not None:
             print(' match: ' + str(linked), file=sys.stderr)

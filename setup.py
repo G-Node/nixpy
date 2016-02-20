@@ -105,7 +105,8 @@ nixpy_sources = [
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
 boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
 
-boost_libs = BoostPyLib.list_in_dir(boost_lib_dir)
+lib_dirs = BoostPyLib.library_search_dirs([boost_lib_dir])
+boost_libs = BoostPyLib.list_in_dirs(lib_dirs)
 boost_lib = BoostPyLib.find_lib_for_current_python(boost_libs)
 
 if boost_lib is None:
