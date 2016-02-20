@@ -68,6 +68,8 @@ class BoostPyLib(object):
     @classmethod
     def iterate_libs_in_dirs(cls, dirs):
         for d in dirs:
+            if not os.path.isdir(d):
+                continue
             for f in os.listdir(d):
                 l = cls.make_from_path(f)
                 if l is not None:
