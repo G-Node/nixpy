@@ -106,7 +106,7 @@ sudo python setup.py install
 ```
 bash
 
-python
+$python
 
 Python 2.7.11 (default, Dec  5 2015, 14:44:53)
 [GCC 4.2.1 Compatible Apple LLVM 7.0.0 (clang-700.1.76)] on darwin
