@@ -76,20 +76,17 @@ Get the source code from GitHub using :
 
 _Dependecies_
 
-- NIXPY requires installation of [NIX](https://github.com/G-Node/nix). Make sure you install NIX first.
+- NIXPY requires installation of [NIX](https://github.com/G-Node/nix). Make sure you install NIX first. Use `brew install homebrew/science/nixio`.
 - boost-python.
  Install it using homebrew. `brew install boost-python`
 - Python (version = 2.7.x) + python-setuptools + python-numpy (version >= 1.8.0). 
 
-OS X default python works well.
+OS X default python works well as well as the homebrew version.
 
 _Instruction to build_
 
 ```
 bash
-
-# install dependencies if required
-sudo apt-get install libboost-python-dev build-essential python-dev python-setuptools python-numpy
 
 # build
 python setup.py build
