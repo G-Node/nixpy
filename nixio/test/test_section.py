@@ -10,8 +10,8 @@ from __future__ import (absolute_import, division, print_function)#, unicode_lit
 
 import unittest
 
-from nix import *
-import nix
+from nixio import *
+import nixio
 
 
 class TestSection(unittest.TestCase):
@@ -93,8 +93,8 @@ class TestSection(unittest.TestCase):
 
         assert(len(self.section.sections) == 0)
 
-        self.section['easy subsection'] = nix.S('electrode')
-        subject = self.section['subject'] = nix.S('subject')
+        self.section['easy subsection'] = nixio.S('electrode')
+        subject = self.section['subject'] = nixio.S('subject')
         
         assert(self.section['subject'] == subject)
         assert(self.section['subject'].id == subject.id)

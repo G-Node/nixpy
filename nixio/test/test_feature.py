@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function)#, unicode_lit
 
 import unittest
 
-from nix import *
+from nixio import *
 
 
 class TestFeature(unittest.TestCase):

@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 
-import nix
+import nixio as nix
 
 
 file_name = 'file_create_example.h5'

@@ -8,24 +8,24 @@
 
 from __future__ import (absolute_import, division, print_function)#, unicode_literals)
 
-from nix.core import File, FileMode, Block, DataType, Section, Property, Value, \
+from nixio.core import File, FileMode, Block, DataType, Section, Property, Value, \
     Source, DataArray, RangeDimension, SetDimension, SampledDimension, \
     DimensionType, Feature, LinkType, Tag, MultiTag, Group
 
-from nix.block import BlockMixin
-from nix.file import FileMixin
-from nix.section import SectionMixin
-from nix.property import PropertyMixin, ValueMixin
-from nix.source import SourceMixin
-from nix.data_array import DataSetMixin
-from nix.data_array import DataArrayMixin
-from nix.tag import TagMixin
-from nix.multi_tag import MultiTagMixin
-from nix.group import GroupMixin
-from nix.entity_with_sources import DataArraySourcesMixin, MultiTagSourcesMixin, \
+from nixio.block import BlockMixin
+from nixio.file import FileMixin
+from nixio.section import SectionMixin
+from nixio.property import PropertyMixin, ValueMixin
+from nixio.source import SourceMixin
+from nixio.data_array import DataSetMixin
+from nixio.data_array import DataArrayMixin
+from nixio.tag import TagMixin
+from nixio.multi_tag import MultiTagMixin
+from nixio.group import GroupMixin
+from nixio.entity_with_sources import DataArraySourcesMixin, MultiTagSourcesMixin, \
     TagSourcesMixin
 
-from nix.section import S
+from nixio.section import S
 
 __all__ = ("File", "FileMode", "Block", "DataType", "Section", "Property",
            "Value", "Source", "DataArray", "RangeDimension", "SetDimension",

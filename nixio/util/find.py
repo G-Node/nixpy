@@ -8,7 +8,7 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import nix
+import nixio
 
 
 class _cont(object):
@@ -31,7 +31,7 @@ def _find_sources(with_sources, filtr, limit):
     result = []
     level = 0
 
-    if isinstance(with_sources, nix.Source):
+    if isinstance(with_sources, nixio.Source):
         fifo.append(_cont(with_sources, level))
     else:
         level += 1
@@ -59,7 +59,7 @@ def _find_sections(with_sections, filtr, limit):
     result = []
     level = 0
 
-    if isinstance(with_sections, nix.Section):
+    if isinstance(with_sections, nixio.Section):
         fifo.append(_cont(with_sections, level))
     else:
         level += 1
