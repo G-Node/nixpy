@@ -41,7 +41,7 @@ install:
 script:
 - python setup.py build
 - if [ $COVERALLS = 1 ]; then
-    coverage run --source=nix setup.py test;
+    coverage run --source=nixio setup.py test;
     coverage report -m;
   else
     python setup.py test;
