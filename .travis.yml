@@ -1,11 +1,10 @@
-sudo: false
+sudo: required
+dist: trusty
 
 language: python
 
 env:
   global:
-    - CC=gcc-4.8
-    - CXX=g++-4.8
     - NIX_LIBDIR=./nix-build/inst/lib
     - NIX_INCDIR=./nix-build/inst/include
 
@@ -13,36 +12,39 @@ matrix:
   include:
     - python: "2.7_with_system_site_packages"
       env: COVERALLS=1
-    - python: "3.2"
+    - python: "3.4"
       env: COVERALLS=0
 
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
-      - kalakris-cmake
-      - boost-latest
     packages:
-      - libcppunit-dev
-      - libboost1.55-all-dev
-      - libhdf5-serial-dev
       - cmake
-      - g++-4.8
+      - libcppunit-dev
+      - libhdf5-serial-dev
+      - libhdf5-dev
+      - libhdf5-7
+      - libboost-all-dev
 
 install:
-- pip install coveralls numpy
-- git clone https://github.com/G-Node/nix.git nix-build
-- cd nix-build
-- cmake -DCMAKE_INSTALL_PREFIX=./inst -DBUILD_TESTING=OFF .
-- make
-- make install
-- cd ..
+  - export PYVER=${TRAVIS_PYTHON_VERSION:0:1}
+  # install dependencies
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      g++ --version;
+    fi
+  - pip install --upgrade numpy coveralls
+  #build NIX
+  - git clone https://github.com/G-Node/nix.git nix-build
+  - cd nix-build
+  - cmake -DCMAKE_INSTALL_PREFIX=./inst -DBUILD_TESTING=OFF .
+  - make
+  - make install
+  - cd ..
 
 script:
 - python setup.py build
 - if [ $COVERALLS = 1 ]; then
-    coverage run --source=nixio setup.py test;
-    coverage report -m;
+    coverage${PYVER} run --source=nixio setup.py test;
+    coverage${PYVER} report -m;
   else
     python setup.py test;
   fi;
