@@ -139,7 +139,7 @@ native_ext    = Extension(
                     )
                 )
 
-setup(name             = 'nix',
+setup(name             = 'nixio',
       version          = VERSION,
       author           = AUTHOR,
       author_email     = CONTACT,
@@ -154,7 +154,7 @@ setup(name             = 'nix',
       tests_require    = ['nose'],
       test_suite       = 'nose.collector',
       setup_requires   = ['numpy'],
-      package_data     = {'nix': [license_text, description_text]},
+      package_data     = {'nixio': [license_text, description_text]},
       include_package_data = True,
       zip_safe         = False,
 )
