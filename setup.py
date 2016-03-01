@@ -30,7 +30,7 @@ with open('README.md') as f:
 with open('LICENSE') as f:
     license_text = f.read()
 
-with open('nix/info.py') as f:
+with open('nixio/info.py') as f:
     info = f.read()
 
 VERSION         = re.search(r"VERSION\s*=\s*'([^']*)'", info).group(1)
@@ -126,20 +126,20 @@ classifiers   = [
 ]
 
 native_ext    = Extension(
-                    'nix.core',
+                    'nixio.core',
                     extra_compile_args = ['-std=c++11'] if not is_win else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
                     extra_link_args=boost_lnk_arg + nix_lnk_arg,
                     sources = nixpy_sources,
                     runtime_library_dirs = [nix_lib_dir, boost_lib_dir] if not is_win else None,
                     **pkg_config(
-                        "nix",
+                        "nixio",
                         library_dirs=[boost_lib_dir, nix_lib_dir],
                         include_dirs=[boost_inc_dir, nix_inc_dir, np.get_include(), 'src'],
                         ignore_error=True
                     )
                 )
 
-setup(name             = 'nix',
+setup(name             = 'nixio',
       version          = VERSION,
       author           = AUTHOR,
       author_email     = CONTACT,
@@ -149,12 +149,12 @@ setup(name             = 'nix',
       classifiers      = classifiers,
       license          = 'BSD',
       ext_modules      = [native_ext],
-      packages         = ['nix', 'nix.util'],
+      packages         = ['nixio', 'nixio.util'],
       scripts          = [],
       tests_require    = ['nose'],
       test_suite       = 'nose.collector',
       setup_requires   = ['numpy'],
-      package_data     = {'nix': [license_text, description_text]},
+      package_data     = {'nixio': [license_text, description_text]},
       include_package_data = True,
       zip_safe         = False,
 )

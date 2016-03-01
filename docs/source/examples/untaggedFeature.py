@@ -19,7 +19,7 @@
 
 """
 
-import nix
+import nixio as nix
 import lif
 import numpy as np
 import scipy.signal as signal

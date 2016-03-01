@@ -12,7 +12,7 @@ from __future__ import print_function
 
 import unittest
 
-from nix import *
+from nixio import *
 import numpy as np
 
 class TestMultiTag(unittest.TestCase):

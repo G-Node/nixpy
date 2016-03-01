@@ -16,7 +16,7 @@
 
 """
 
-import nix
+import nixio as nix
 import numpy as np
 import matplotlib.pylab as plt
 

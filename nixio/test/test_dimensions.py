@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function)#, unicode_lit
 
 import unittest
 import numpy as np
-from nix import *
+from nixio import *
 
 test_range  = tuple([float(i) for i in range(10)])
 test_sampl  = 0.1

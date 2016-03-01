@@ -15,7 +15,7 @@
  This tutorial shows how irregulary sampled data is stored in nix-files.
  See https://github.com/G-node/nix/wiki for more information.
 """
-import nix
+import nixio as nix
 import numpy as np
 import matplotlib.pylab as plt
 

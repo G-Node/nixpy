@@ -11,13 +11,13 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import sys
 import functools
 
-import nix.util.find as finders
-from nix.core import Section
-from nix.util.inject import inject
-from nix.util.proxy_list import ProxyList
-from nix.property import Value
+import nixio.util.find as finders
+from nixio.core import Section
+from nixio.util.inject import inject
+from nixio.util.proxy_list import ProxyList
+from nixio.property import Value
 
-from nix.file import SectionProxyList
+from nixio.file import SectionProxyList
 
 from operator import attrgetter
 import collections

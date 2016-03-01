@@ -8,8 +8,8 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from nix.core import Property, Value
-from nix.util.inject import inject
+from nixio.core import Property, Value
+from nixio.util.inject import inject
 
 
 class PropertyMixin(Property):

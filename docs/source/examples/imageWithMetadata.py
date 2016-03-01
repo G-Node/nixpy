@@ -25,7 +25,7 @@
 
 """
 
-import nix
+import nixio as nix
 import numpy as np
 import Image as img
 import matplotlib.pyplot as plt

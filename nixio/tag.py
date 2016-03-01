@@ -8,9 +8,9 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from nix.core import Tag
-from nix.util.inject import inject
-from nix.util.proxy_list import ProxyList, RefProxyList
+from nixio.core import Tag
+from nixio.util.inject import inject
+from nixio.util.proxy_list import ProxyList, RefProxyList
 
 
 class ReferenceProxyList(RefProxyList):

@@ -1,0 +1,5 @@
+include LICENSE README.md Win32.md
+recursive-include docs *
+graft src
+include findboost.py
+include CMakeLists.txt

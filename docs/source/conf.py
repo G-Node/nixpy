@@ -6,7 +6,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from nix.info import RELEASE, COPYRIGHT, BRIEF
+from nixio.info import RELEASE, COPYRIGHT, BRIEF
 
 # general config
 extensions              = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx']
@@ -19,7 +19,7 @@ exclude_patterns        = []
 pygments_style          = 'sphinx'
 
 # html options
-htmlhelp_basename       = 'nix'
+htmlhelp_basename       = 'nixio'
 try:
     import alabaster
 

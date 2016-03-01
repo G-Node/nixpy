@@ -10,12 +10,12 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import sys
 
-import nix.util.find as finders
-from nix.core import Source
-from nix.util.inject import inject
-from nix.util.proxy_list import ProxyList
+import nixio.util.find as finders
+from nixio.core import Source
+from nixio.util.inject import inject
+from nixio.util.proxy_list import ProxyList
 
-from nix.block import SourceProxyList
+from nixio.block import SourceProxyList
 
 try:
     from sys import maxint

@@ -15,7 +15,7 @@
  See https://github.com/G-node/nix/wiki for more information.
 """
 
-import nix
+import nixio as nix
 import numpy as np
 import matplotlib.pylab as plt
 

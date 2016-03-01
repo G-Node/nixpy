@@ -8,9 +8,9 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from nix.core import MultiTag
-from nix.util.inject import inject
-from nix.tag import ReferenceProxyList, FeatureProxyList
+from nixio.core import MultiTag
+from nixio.util.inject import inject
+from nixio.tag import ReferenceProxyList, FeatureProxyList
 
 
 class MultiTagMixin(MultiTag):

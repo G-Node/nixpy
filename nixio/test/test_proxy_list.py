@@ -10,8 +10,8 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import unittest
 
-from nix import *
-from nix.util.proxy_list import ProxyList
+from nixio import *
+from nixio.util.proxy_list import ProxyList
 
 try:
     basestring = basestring

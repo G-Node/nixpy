@@ -10,9 +10,9 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import sys
 
-from nix.core import DataArray
-from nix.core import DataSet
-from nix.util.inject import inject
+from nixio.core import DataArray
+from nixio.core import DataSet
+from nixio.util.inject import inject
 
 import numpy as np
 
@@ -23,7 +23,7 @@ class DataArrayMixin(DataArray):
         """
         DEPRECATED DO NOT USE ANYMORE! Returns self
 
-        :type: :class:`~nix.data_array.DataArray`
+        :type: :class:`~nixio.data_array.DataArray`
         """
         import warnings
         warnings.warn("Call to deprecated property DataArray.data",
@@ -171,7 +171,7 @@ class DataSetMixin(DataSet):
     def size(self):
         """
         Number of elements in the DataSet, i.e. the product of the
-        elements in :attr:`~nix.data_array.DataSet.shape`.
+        elements in :attr:`~nixio.data_array.DataSet.shape`.
 
         :type: int
         """
@@ -187,7 +187,7 @@ class DataSetMixin(DataSet):
 
     def write_direct(self, data):
         """
-        Directly write all of ``data`` to the :class:`~nix.data_array.DataSet`.
+        Directly write all of ``data`` to the :class:`~nixio.data_array.DataSet`.
         The supplied data must be a :class:`numpy.ndarray` that matches the
         DataSet's shape and must have C-style contiguous memory layout (see
         :attr:`numpy.ndarray.flags` and :class:`~numpy.ndarray` for more
@@ -200,7 +200,7 @@ class DataSetMixin(DataSet):
 
     def read_direct(self, data):
         """
-        Directly read all data stored in the :class:`~nix.data_array.DataSet`
+        Directly read all data stored in the :class:`~nixio.data_array.DataSet`
         into ``data``. The supplied data must be a :class:`numpy.ndarray` that
         matches the DataSet's shape, must have C-style contiguous memory layout
         and must be writeable (see :attr:`numpy.ndarray.flags` and

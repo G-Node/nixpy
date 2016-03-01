@@ -12,7 +12,7 @@ import unittest
 import sys
 import numpy as np
 
-from nix import *
+from nixio import *
 
 try:
     basestring = basestring
