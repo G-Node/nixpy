@@ -256,8 +256,8 @@ We could also say that each point in the tagged data (e.g. a matrix of
 measurements) has a corresponding point in an input matrix.
 
 .. code-block:: python
-		
-		input_matrix = np.random.randn(data.shape)
+		a,b=data.shape
+		input_matrix = np.random.randn(a,b)
 		input_data = block.create_data_array('input matrix', 'nix.feature', data=input_matrix)
 		dim_x = input_data.append_sampled_dimension(1.0)
 		dim_x.label = 'x'
@@ -298,7 +298,7 @@ same brain region of the same animal. To represent this hierarchy,
 
 .. code-block:: python
 
-		subject.block.create_source('subject A', 'nix.experimental_subject')
+		subject=block.create_source('subject A', 'nix.experimental_subject')
 		brain_region = subject.create_source('hippocampus', 'nix.experimental_subject')
 		cell_a = brain_region.create_source('Cell 1', 'nix.experimental_subject')
 		cell_b = brain_region.create_source('Cell 2', 'nix.experimental_subject')
@@ -329,7 +329,7 @@ Most of the data entities can link to metadata sections.
 
 		sec = nix_file.create_section('recording session', 'odml.recording')
 		sec.create_property('experimenter', nix.Value('John Doe'))
-		sec.create_property('recording date', nix_Value('2014-01-01'))
+		sec.create_property('recording date', nix.Value('2014-01-01'))
 		subject = sec.create_section('subject', 'odml.subject')
 		subject.create_property('id', nix.Value('mouse xyz'))
 		cell = subject.create_section('cell', 'odml.cell')
