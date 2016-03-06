@@ -88,7 +88,7 @@ up data-to-be-recorded. In this case you have to provide the space
 that will be needed in advance. 
 
 .. code-block:: python
-		
+		import numpy as np
 		# create an empty DataArray to store 2x1000 values
 		data = block.create_data_array("my data", "nix.sampled", dtype=nix.dtype.Double, shape=(2,1000))
 		some_numpy_array = np.random.randn(2, 1000)
