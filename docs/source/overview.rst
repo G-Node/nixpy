@@ -353,4 +353,17 @@ will handle unit scaling. The correct data will be returned even if
 the tag's position is given in *ms*.
 
 
-TODO: example code
+.. code-block:: python
+
+		x_positions=[2,4,6,8,10,12]
+		tag=block.create_tag('unit example','nix.sampled',x_positions)
+		
+		#single SI unit is supported like mV,cm etc.
+		tag.units="cm"
+		
+		#for compound units we can make list
+		tag.units=["mV","cm"]
+		
+		#we can make a compound_unit attribute to get the compound units
+		#result will show : mV/cm
+		tag.compound_unit = "/".join(tag.units)
