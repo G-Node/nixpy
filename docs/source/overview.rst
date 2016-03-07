@@ -8,7 +8,7 @@ Design Principles
 The design of the data model tries to draw on similarities of
 different data types and structures and and come up with *entities*
 that are as generic and versatile as meaningful. At the same time we
-aim for clearly established links between differen entities to keep the
+aim for clearly established links between different entities to keep the
 model as expressive as possible. 
 
 Most entities of the NIX-model have a *name* and a *type* field which
@@ -17,7 +17,7 @@ be freely chose, the type is meant to provide semantic information
 about the entity and we aim at definitions of different types. Via the
 type, the generic entities can become domain specific.
 
-For the electrophysiology disicplines of the neurosciences, an INCF
+For the electrophysiology disciplines of the neuroscience, an INCF
 working groups has set out to define such data types. For more
 information see `here
 <http://crcns.org/files/data/nwb/ephys_requirements_v0_72.pdf>`_
@@ -154,7 +154,7 @@ the x-axis are defined using the *ticks* property of a
 		dim.label = "time"
 		dim.unit = "s"
 
-Finally, some data belongs into categroies which do not necessarly
+Finally, some data belongs into categories which do not necessarily
 have a natural order. In these cases a **SetDimension** is used. This
 descriptor can store for each category an optional label.
 
@@ -195,7 +195,7 @@ dimensionality of the referenced data.
 		tag = block.create_tag('interesting part', 'nix.roi', position)
 		tag.extent = extent
 		# finally, add the referenced data to this tag
-		tag.references.add(data)
+		tag.references.append(data)
 
 
 MuliTag
@@ -211,14 +211,14 @@ the referenced n-dimensional **DataArray**.
 .. code-block:: python
 
 		# fake data
-		frame = np.random.randn((100,100))
+		frame = np.random.randn(100,100)
 		data = block.create_data_array('random image', 'nix.image', data=frame)
 		dim_x = data.append_sampled_dimension(1.0)
 		dim_x.label = 'x'
 		dim_y = data.append_sampled_dimension(1.0)
 		dim_y.label = 'y'
 		# positions array must be 2D
-		p = np.zeros(3,2) # 1st dim, represents the positions, 2nd the coordinates
+		p = np.zeros((3,2)) # 1st dim, represents the positions, 2nd the coordinates
 		p[1,:] = [10,10]
 		p[2,:] = [20,10]
 		positions = block.create_data_array('special points', 'nix.positions', data=p)
@@ -248,7 +248,7 @@ Let's say we want to give each  point a name, we can create a feature like this:
 
 .. code-block:: python
 
-		spot_names = block.create_data_array('spot ids', 'nix.feature', data=['a', 'b'])
+		spot_names = block.create_data_array('spot ids', 'nix.feature',dtype=nix.DataType.Int8, data=[1, 2])
 		spot_names.append_set_dimension()
 		feature = tag.create_feature(spot_names, nix.LinkType.Indexed)
 
