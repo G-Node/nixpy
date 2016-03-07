@@ -248,8 +248,8 @@ Let's say we want to give each  point a name, we can create a feature like this:
 
 .. code-block:: python
 
-		spot_names.append_set_dimension()
 		spot_names = block.create_data_array('spot ids', 'nix.feature',dtype=nix.DataType.Int8, data=[1, 2])
+		spot_names.append_set_dimension()
 		feature = tag.create_feature(spot_names, nix.LinkType.Indexed)
 
 We could also say that each point in the tagged data (e.g. a matrix of
