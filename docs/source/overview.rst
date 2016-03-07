@@ -90,7 +90,7 @@ that will be needed in advance.
 .. code-block:: python
 		
 		# create an empty DataArray to store 2x1000 values
-		data = block.create_data_array("my data", "nix.sampled", dtype=nix.dtype.Double, shape=(2,1000))
+		data = block.create_data_array("my data", "nix.sampled", dtype=nix.DataType.Double, shape=(2,1000))
 		some_numpy_array = np.random.randn(2, 1000)
 		data = some_numpy_array
 
@@ -103,7 +103,7 @@ dimensionality (rank) of the data afterwards.
 .. code-block:: python
 		
 		# create an empty DataArray to store 2x1000 values
-		data = block.create_data_array("my data", "nix.sampled", dtype=nix.dtype.Double, shape=(2,1000))
+		data = block.create_data_array("my data", "nix.sampled", dtype=nix.DataType.Double, shape=(2,1000))
 		some_numpy_array = np.random.randn(2, 1000)
 		data[:, :] = some_numpy_array
 		some_more_data = np.random.randn(2,10)
