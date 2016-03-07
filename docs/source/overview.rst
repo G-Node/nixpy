@@ -195,7 +195,7 @@ dimensionality of the referenced data.
 		tag = block.create_tag('interesting part', 'nix.roi', position)
 		tag.extent = extent
 		# finally, add the referenced data to this tag
-		tag.references.extend(data)
+		tag.references.append(data)
 
 
 MuliTag
