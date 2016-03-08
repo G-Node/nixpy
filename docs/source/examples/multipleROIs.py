@@ -24,12 +24,10 @@
  http://en.wikipedia.org/wiki/File:Lenna.png#mediaviewer/File:Lenna.png
 
 """
-
 import nixio as nix
 import numpy as np
 import Image as img
 import matplotlib.pyplot as plt
-
 
 def load_image():
     image = img.open('lenna.png')
@@ -56,7 +54,7 @@ def plot_data(tag):
         img_data = draw_rect(img_data, positions_data[i,:], extents_data[i,:])
     new_img = img.fromarray(img_data)
     new_img.show()
-        
+
 
 def plot_roi_data(tag):
     position_count = tag.positions.shape[0] 
@@ -68,6 +66,7 @@ def plot_roi_data(tag):
         ax.imshow(image)
     plt.savefig('retrieved_rois.png')
     plt.show()
+
 
 if __name__ == '__main__':
     img_data, channels = load_image()
@@ -88,7 +87,7 @@ if __name__ == '__main__':
     width_dim.label = "width"
     color_dim = data.append_set_dimension()
     color_dim.labels = channels
-    
+ 
     # some space for three regions-of-interest
     roi_starts = np.zeros((3,3))
     roi_starts[0, :] = [250, 245, 0] 
@@ -99,12 +98,12 @@ if __name__ == '__main__':
     roi_extents[0, :] = [30, 45, 3] 
     roi_extents[1, :] = [30, 40, 3] 
     roi_extents[2, :] = [25, 65, 3] 
-        
+ 
     # create the positions DataArray
     positions = block.create_data_array("ROI positions", "nix.positions", data=roi_starts)
     positions.append_set_dimension() # these can be empty
     positions.append_set_dimension()
-    
+ 
     # create the extents DataArray
     extents = block.create_data_array("ROI extents", "nix.extents", data=roi_extents)
     extents.append_set_dimension()
