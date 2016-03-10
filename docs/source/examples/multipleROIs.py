@@ -103,20 +103,17 @@ if __name__ == '__main__':
     roi_extents[2, :] = [25, 65, 3]
 
     # create the positions DataArray
-    positions = block.create_data_array(
-        "ROI positions", "nix.positions", data=roi_starts)
+    positions = block.create_data_array("ROI positions", "nix.positions", data=roi_starts)
     positions.append_set_dimension()  # these can be empty
     positions.append_set_dimension()
 
     # create the extents DataArray
-    extents = block.create_data_array(
-        "ROI extents", "nix.extents", data=roi_extents)
+    extents = block.create_data_array("ROI extents", "nix.extents", data=roi_extents)
     extents.append_set_dimension()
     extents.append_set_dimension()
 
     # create a MultiTag
-    multi_tag = block.create_multi_tag(
-        "Regions of interest", "nix.roi", positions)
+    multi_tag = block.create_multi_tag("Regions of interest", "nix.roi", positions)
     multi_tag.extents = extents
     multi_tag.references.append(data)
 
