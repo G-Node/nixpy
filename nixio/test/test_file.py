@@ -13,10 +13,10 @@ import unittest
 from nixio import *
 
 
-class TestFile(unittest.TestCase):
+class _FileTest(unittest.TestCase):
 
     def setUp(self):
-        self.file  = File.open("unittest.h5", FileMode.Overwrite)
+        self.file = File.open("unittest.h5", FileMode.Overwrite, backend="hdf5")
 
     def tearDown(self):
         self.file.close()
@@ -81,3 +81,30 @@ class TestFile(unittest.TestCase):
         assert(len(self.file.find_sections(limit=1)) == 2)
         assert(len(self.file.find_sections(filtr=lambda x : "level2-p1-s" in x.name)) == 2)
         assert(len(self.file.find_sections(filtr=lambda x : "level2-p1-s" in x.name, limit=1)) == 0)
+
+
+class FileTestCPP(_FileTest):
+
+    def setUp(self):
+        self.file = File.open("unittest.h5", FileMode.Overwrite, backend="hdf5")
+
+
+class FileTestPy(_FileTest):
+
+    def setUp(self):
+        self.file = File.open("unittest.h5", FileMode.Overwrite, backend="h5py")
+
+    def test_file_format(self):
+        pass
+
+    def test_file_timestamps(self):
+        pass
+
+    def test_file_blocks(self):
+        pass
+
+    def test_file_sections(self):
+        pass
+
+    def test_file_find_sections(self):
+        pass
