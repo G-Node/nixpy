@@ -12,14 +12,8 @@ import unittest
 
 from nixio import *
 
-class TestProperty(unittest.TestCase):
 
-    def setUp(self):
-        self.file    = File.open("unittest.h5", FileMode.Overwrite)
-        self.section = self.file.create_section("test section", "recordingsession")
-        self.prop    = self.section.create_property("test property", Value(0))
-        self.prop_s  = self.section.create_property("test str", DataType.String)
-        self.other   = self.section.create_property("other property", DataType.Int64)
+class _TestProperty(unittest.TestCase):
 
     def tearDown(self):
         del self.file.sections[self.section.id]
@@ -121,7 +115,6 @@ class TestValue(unittest.TestCase):
         assert(value == 66.6)
         assert(value.value == 66.6)
 
-
     def test_value_bool(self):
         value = Value(True)
         other = Value(False)
@@ -171,3 +164,52 @@ class TestValue(unittest.TestCase):
 
         value.uncertainty = 0.5
         assert(value.uncertainty == 0.5)
+
+
+class TestPropertyCPP(_TestProperty):
+
+    def setUp(self):
+        self.file    = File.open("unittest.h5", FileMode.Overwrite,
+                                 backend="hdf5")
+        self.section = self.file.create_section("test section",
+                                                "recordingsession")
+        self.prop    = self.section.create_property("test property", Value(0))
+        self.prop_s  = self.section.create_property("test str",
+                                                    DataType.String)
+        self.other   = self.section.create_property("other property",
+                                                    DataType.Int64)
+
+
+class TestPropertyPy(_TestProperty):
+
+    def setUp(self):
+        self.file    = File.open("unittest.h5", FileMode.Overwrite,
+                                 backend="h5py")
+        # self.section = self.file.create_section("test section",
+        #                                         "recordingsession")
+        # self.prop    = self.section.create_property("test property", Value(0))
+        # self.prop_s  = self.section.create_property("test str", DataType.String)
+        # self.other   = self.section.create_property("other property",
+        #                                             DataType.Int64)
+
+    def tearDown(self):
+        pass
+
+    def test_property_eq(self):
+        pass
+
+    def test_property_id(self):
+        pass
+
+    def test_property_name(self):
+        pass
+
+    def test_property_definition(self):
+        pass
+
+    def test_property_mapping(self):
+        pass
+
+    def test_property_values(self):
+        pass
+
