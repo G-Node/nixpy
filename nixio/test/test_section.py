@@ -14,12 +14,7 @@ from nixio import *
 import nixio
 
 
-class TestSection(unittest.TestCase):
-
-    def setUp(self):
-        self.file    = File.open("unittest.h5", FileMode.Overwrite)
-        self.section = self.file.create_section("test section", "recordingsession")
-        self.other   = self.file.create_section("other section", "recordingsession")
+class _TestSection(unittest.TestCase):
 
     def tearDown(self):
         del self.file.sections[self.section.id]
@@ -117,7 +112,6 @@ class TestSection(unittest.TestCase):
         assert(len(self.section.find_related()) == 3)
         assert(len(self.section.sections[0].find_related()) == 5)
 
-
     def test_section_properties(self):
         assert(len(self.section) == 0)
 
@@ -155,7 +149,6 @@ class TestSection(unittest.TestCase):
 
         self.section['ep_val'] = 2.0
 
-
         res = [x in self.section for x in ['ep_str', 'ep_int', 'ep_float']]
         assert(all(res))
 
@@ -173,3 +166,51 @@ class TestSection(unittest.TestCase):
             del self.section[x]
 
         assert(len(self.section) == 0)
+
+
+class TestSectionCPP(_TestSection):
+
+    def setUp(self):
+        self.file    = File.open("unittest.h5", FileMode.Overwrite,
+                                 backend="hdf5")
+        self.section = self.file.create_section("test section", "recordingsession")
+        self.other   = self.file.create_section("other section", "recordingsession")
+
+
+class TestSectionPy(_TestSection):
+
+    def setUp(self):
+        self.file = File.open("unittest.h5", FileMode.Overwrite, backend="h5py")
+
+    def tearDown(self):
+        pass
+
+    def test_section_eq(self):
+        pass
+
+    def test_section_id(self):
+        pass
+
+    def test_section_name(self):
+        pass
+
+    def test_section_type(self):
+        pass
+
+    def test_section_definition(self):
+        pass
+
+    def test_section_mapping(self):
+        pass
+
+    def test_section_repository(self):
+        pass
+
+    def test_section_sections(self):
+        pass
+
+    def test_section_find_sections(self):
+        pass
+
+    def test_section_properties(self):
+        pass

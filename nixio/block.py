@@ -11,7 +11,8 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import sys
 
 import nixio.util.find as finders
-from nixio.core import Block
+from nixio.core import Block, CDataType
+from nixio.value import DataType
 from nixio.util.inject import inject
 from nixio.util.proxy_list import ProxyList
 import numpy as np
@@ -94,6 +95,8 @@ class BlockMixin(Block):
                     raise ValueError("Shape must equal data.shape")
             else:
                 shape = data.shape
+        if dtype is DataType.String:
+            dtype = CDataType.String
         da = self._create_data_array(name, array_type, dtype, shape)
         if data is not None:
             da.data.write_direct(data)

@@ -15,6 +15,7 @@ import unittest
 from nixio import *
 import numpy as np
 
+
 class TestMultiTag(unittest.TestCase):
 
     def setUp(self):
@@ -270,7 +271,7 @@ class TestMultiTag(unittest.TestCase):
         untagged_feature = self.feature_tag.create_feature(index_data, LinkType.Untagged)
         
         # preparations done, actually test 
-        print(self.feature_tag.features)
+        # print(self.feature_tag.features)
         assert(len(self.feature_tag.features) == 3)
         
         # indexed feature

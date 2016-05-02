@@ -11,7 +11,8 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import sys
 
 import nixio.util.find as finders
-from nixio.core import File
+from nixio.core import File as CPPFile
+from nixio.pycore import File as PyFile
 from nixio.util.inject import inject
 from nixio.util.proxy_list import ProxyList
 
@@ -35,7 +36,14 @@ class SectionProxyList(ProxyList):
                                                "_get_section_by_pos", "_delete_section_by_id")
 
 
-class FileMixin(File):
+class FileMixin(CPPFile, PyFile):
+
+    @staticmethod
+    def open(path, mode, backend="hdf5"):
+        if backend == "hdf5":
+            return CPPFile._open(path, mode)
+        elif backend == "h5py":
+            return PyFile._open(path, mode)
 
     @property
     def blocks(self):
@@ -87,4 +95,4 @@ class FileMixin(File):
         return self._sections
 
 
-inject((File,), dict(FileMixin.__dict__))
+inject((CPPFile, PyFile), dict(FileMixin.__dict__))

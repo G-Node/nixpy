@@ -305,9 +305,13 @@ class TestDataArray(unittest.TestCase):
 
         self.assertRaises(ValueError, lambda : self.array.append_alias_range_dimension())
         self.assertRaises(ValueError, lambda : self.array.create_alias_range_dimension())
-        string_array = self.block.create_data_array('string_array', 'nix.texts', dtype=DataType.String, shape=(10,))
-        self.assertRaises(ValueError, lambda : string_array.append_alias_range_dimension())
-        self.assertRaises(ValueError, lambda : string_array.create_alias_range_dimension())
+        string_array = self.block.create_data_array('string_array', 'nix.texts',
+                                                    dtype=DataType.String,
+                                                    shape=(10,))
+        self.assertRaises(ValueError,
+                          lambda : string_array.append_alias_range_dimension())
+        self.assertRaises(ValueError,
+                          lambda : string_array.create_alias_range_dimension())
         assert(len(string_array.dimensions) == 0)
         del self.block.data_arrays['string_array']
 

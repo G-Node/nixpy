@@ -13,24 +13,8 @@ import numpy as np
 from nixio import *
 
 
-class TestTag(unittest.TestCase):
+class _TestTag(unittest.TestCase):
 
-    def setUp(self):
-        self.file     = File.open("unittest.h5", FileMode.Overwrite)
-        self.block    = self.file.create_block("test block", "recordingsession")
-
-        self.my_array = self.block.create_data_array("my array", "test", DataType.Int16, (1, ))
-        self.my_tag   = self.block.create_tag(
-            "my tag", "tag", [0]
-        )
-        self.my_tag.references.append(self.my_array)
-
-        self.your_array = self.block.create_data_array("your array", "test", DataType.Int16, (1, ))
-        self.your_tag = self.block.create_tag(
-            "your tag", "tag", [0]
-        )
-        self.your_tag.references.append(self.your_array)
-       
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
@@ -174,4 +158,69 @@ class TestTag(unittest.TestCase):
         assert(data1.size == 1) 
         assert(data2.size == 2) 
         assert(data3.size == len(ramp_data))
-        
+
+
+class TestTagCPP(_TestTag):
+
+    def setUp(self):
+        self.file     = File.open("unittest.h5", FileMode.Overwrite,
+                                  backend="hdf5")
+        self.block    = self.file.create_block("test block", "recordingsession")
+
+        self.my_array = self.block.create_data_array("my array", "test", DataType.Int16, (1, ))
+        self.my_tag   = self.block.create_tag(
+            "my tag", "tag", [0]
+        )
+        self.my_tag.references.append(self.my_array)
+
+        self.your_array = self.block.create_data_array("your array", "test", DataType.Int16, (1, ))
+        self.your_tag = self.block.create_tag(
+            "your tag", "tag", [0]
+        )
+        self.your_tag.references.append(self.your_array)
+
+
+class TestTagPy(_TestTag):
+
+    def setUp(self):
+        self.file = File.open("unittest.h5", FileMode.Overwrite,
+                              backend="h5py")
+
+    def tearDown(self):
+        pass
+
+    def test_tag_eq(self):
+        pass
+
+    def test_tag_id(self):
+        pass
+
+    def test_tag_name(self):
+        pass
+
+    def test_tag_type(self):
+        pass
+
+    def test_tag_definition(self):
+        pass
+
+    def test_tag_timestamps(self):
+        pass
+
+    def test_tag_units(self):
+        pass
+
+    def test_tag_position(self):
+        pass
+
+    def test_tag_extent(self):
+        pass
+
+    def test_tag_references(self):
+        pass
+
+    def test_tag_features(self):
+        pass
+
+    def test_tag_retrieve_feature_data(self):
+        pass

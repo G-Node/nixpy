@@ -12,15 +12,8 @@ import unittest
 
 from nixio import *
 
-class TestSource(unittest.TestCase):
 
-    def setUp(self):
-        self.file   = File.open("unittest.h5", FileMode.Overwrite)
-        self.block  = self.file.create_block("test block", "recordingsession")
-        self.source = self.block.create_source("test source", "recordingchannel")
-        self.other  = self.block.create_source("other source", "sometype")
-        self.third  = self.block.create_source("third source", "sometype")
-        self.array  = self.block.create_data_array("test array", "test type", dtype=DataType.Double, shape=(1,1))
+class _TestSource(unittest.TestCase):
 
     def tearDown(self):
         del self.file.blocks[self.block.id]
@@ -101,3 +94,56 @@ class TestSource(unittest.TestCase):
         assert(len(self.array.sources) == 2)
         self.array.sources.extend(self.third)
         assert(len(self.array.sources) == 3)
+
+
+class TestSourceCPP(_TestSource):
+
+    def setUp(self):
+        self.file   = File.open("unittest.h5", FileMode.Overwrite,
+                                backend="hdf5")
+        self.block  = self.file.create_block("test block", "recordingsession")
+        self.source = self.block.create_source("test source",
+                                               "recordingchannel")
+        self.other  = self.block.create_source("other source", "sometype")
+        self.third  = self.block.create_source("third source", "sometype")
+        self.array  = self.block.create_data_array("test array", "test type",
+                                                   dtype=DataType.Double,
+                                                   shape=(1, 1))
+
+
+class TestSourcePy(_TestSource):
+
+    def setUp(self):
+        self.file = File.open("unittest.h5", FileMode.Overwrite,
+                              backend="h5py")
+
+    def tearDown(self):
+        pass
+
+    def test_source_eq(self):
+        pass
+
+    def test_source_id(self):
+        pass
+
+    def test_source_name(self):
+        pass
+
+    def test_source_type(self):
+        pass
+
+    def test_source_definition(self):
+        pass
+
+    def test_source_timestamps(self):
+        pass
+
+    def test_source_sources(self):
+        pass
+
+    def test_source_find_sources(self):
+        pass
+
+    def test_sources_extend(self):
+        pass
+

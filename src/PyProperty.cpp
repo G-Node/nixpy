@@ -52,7 +52,7 @@ void setUnit(Property& prop, const boost::optional<std::string>& str) {
 
 void PyProperty::do_export() {
 
-    enum_<DataType>("DataType")
+    enum_<DataType>("CDataType")
         .value("Bool"    , DataType::Bool)
         .value("Char"    , DataType::Char)
         .value("Float"   , DataType::Float)
@@ -87,8 +87,8 @@ void PyProperty::do_export() {
         .add_property("unit",
                       OPT_GETTER(std::string, Property, unit),
                       setUnit)
-        .add_property("data_type", &Property::dataType)
-        .add_property("values",
+        .add_property("_data_type", &Property::dataType)
+        .add_property("_values",
                       GETTER(std::vector<Value>, Property, values),
                       REF_SETTER(std::vector<Value>, Property, values))
         .def("delete_values", &Property::deleteValues)

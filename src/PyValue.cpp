@@ -112,7 +112,7 @@ PyObject* get(const Value& ref) {
 
 void PyValue::do_export() {
 
-    class_<Value>("Value")
+    class_<Value>("CValue")
         .def("__init__", make_constructor(create))
         .def_readwrite("reference", &Value::reference)
         .def_readwrite("filename", &Value::filename)
