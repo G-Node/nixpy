@@ -11,12 +11,19 @@ from __future__ import (absolute_import, division, print_function)#, unicode_lit
 import unittest
 import numpy as np
 from nixio import *
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 
 test_range  = tuple([float(i) for i in range(10)])
 test_sampl  = 0.1
 test_label  = "test label"
 test_labels = tuple([str(i) + "_label" for i in range(10)])
 
+
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestDimensions(unittest.TestCase):
 
     def setUp(self):

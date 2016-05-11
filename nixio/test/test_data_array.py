@@ -13,6 +13,11 @@ import sys
 import numpy as np
 
 from nixio import *
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 
 try:
     basestring = basestring
@@ -20,6 +25,7 @@ except NameError:  # 'basestring' is undefined, must be Python 3
     basestring = (str,bytes)
 
 
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestDataArray(unittest.TestCase):
 
     def setUp(self):

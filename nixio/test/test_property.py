@@ -11,6 +11,11 @@ from __future__ import (absolute_import, division, print_function)#, unicode_lit
 import unittest
 
 from nixio import *
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 
 
 class _TestProperty(unittest.TestCase):
@@ -167,6 +172,7 @@ class TestValue(unittest.TestCase):
         assert(value.uncertainty == 0.5)
 
 
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestPropertyCPP(_TestProperty):
 
     def setUp(self):

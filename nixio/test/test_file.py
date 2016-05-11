@@ -10,9 +10,15 @@ from __future__ import (absolute_import, division, print_function)#, unicode_lit
 
 import unittest
 
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 from nixio import *
 
 
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class _FileTest(unittest.TestCase):
 
     def setUp(self):

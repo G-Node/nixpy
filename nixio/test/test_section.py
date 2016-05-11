@@ -11,6 +11,11 @@ from __future__ import (absolute_import, division, print_function)#, unicode_lit
 import unittest
 
 from nixio import *
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 import nixio
 
 
@@ -168,6 +173,7 @@ class _TestSection(unittest.TestCase):
         assert(len(self.section) == 0)
 
 
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestSectionCPP(_TestSection):
 
     def setUp(self):
