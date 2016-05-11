@@ -8,10 +8,19 @@
 
 from __future__ import (absolute_import, division, print_function)#, unicode_literals)
 
-from nixio.core import (File, FileMode, Block, Section, Property, CDataType,
-                        CValue, Source, DataArray, RangeDimension, SetDimension,
-                        SampledDimension, DimensionType, Feature, LinkType, Tag,
-                        MultiTag, Group)
+try:
+    import nixio.core as ccore
+    from nixio.core import LinkType, DimensionType, Source, Section
+except ImportError:
+    ccore = None
+    # TODO: The following will be replaced by Python classes
+    LinkType = None
+    DimensionType = None
+    Source = None
+    Section = None
+
+from nixio.pycore.file import File, FileMode
+from nixio.value import Value, DataType
 
 from nixio.block import BlockMixin
 from nixio.file import FileMixin
@@ -29,10 +38,12 @@ from nixio.entity_with_sources import (DataArraySourcesMixin,
 
 from nixio.section import S
 
-__all__ = ("File", "FileMode", "Block", "DataType", "Section", "Property",
-           "Value", "Source", "DataArray", "RangeDimension", "SetDimension",
-           "SampledDimension", "DimensionType", "Feature", "LinkType", "Tag",
-           "MultiTag", "Group")
+__all__ = ("File", "FileMode", "DataType", "Value", "LinkType", "DimensionType")
+
+# __all__ = ("File", "FileMode", "Block", "DataType", "Section", "Property",
+#            "Value", "Source", "DataArray", "RangeDimension", "SetDimension",
+#            "SampledDimension", "DimensionType", "Feature", "LinkType", "Tag",
+#            "MultiTag", "Group")
 
 del BlockMixin, FileMixin, SectionMixin, PropertyMixin, SourceMixin, DataArrayMixin, TagMixin
 del MultiTagMixin, DataArraySourcesMixin, MultiTagSourcesMixin, TagSourcesMixin, GroupMixin

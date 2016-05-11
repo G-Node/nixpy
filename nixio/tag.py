@@ -8,7 +8,10 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from nixio.core import Tag
+try:
+    from nixio.core import Tag
+except ImportError:
+    Tag = None
 from nixio.util.inject import inject
 from nixio.util.proxy_list import ProxyList, RefProxyList
 
@@ -32,7 +35,7 @@ class FeatureProxyList(ProxyList):
         )
 
 
-class TagMixin(Tag):
+class TagMixin(object):
 
     @property
     def references(self):

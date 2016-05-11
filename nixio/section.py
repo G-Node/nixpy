@@ -12,8 +12,11 @@ import sys
 import functools
 import numpy as np
 
+try:
+    from nixio.core import Section
+except ImportError:
+    Section = None
 import nixio.util.find as finders
-from nixio.core import Section
 from nixio.util.inject import inject
 from nixio.util.proxy_list import ProxyList
 from nixio.value import Value, DataType
@@ -60,7 +63,7 @@ class PropertyProxyList(ProxyList):
                                                 "_delete_property_by_id")
 
 
-class SectionMixin(Section):
+class SectionMixin(object):
 
     def create_property(self, name, value):
         if isinstance(value, Value):

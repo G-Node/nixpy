@@ -11,7 +11,12 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import sys
 
 import nixio.util.find as finders
-from nixio.core import Block, CDataType
+try:
+    from nixio.core import Block as CBlock
+    from nixio.core import CDataType
+except ImportError:
+    CBlock = None
+    CDataType = None
 from nixio.value import DataType
 from nixio.util.inject import inject
 from nixio.util.proxy_list import ProxyList
@@ -58,7 +63,7 @@ class GroupProxyList(ProxyList):
                                                  "_get_group_by_pos", "_delete_group_by_id")
 
 
-class BlockMixin(Block):
+class BlockMixin(object):
 
     def create_data_array(self, name, array_type, dtype=None, shape=None, data=None):
         """
@@ -95,7 +100,7 @@ class BlockMixin(Block):
                     raise ValueError("Shape must equal data.shape")
             else:
                 shape = data.shape
-        if dtype is DataType.String:
+        if dtype is DataType.String:  # and backend == hdf5
             dtype = CDataType.String
         da = self._create_data_array(name, array_type, dtype, shape)
         if data is not None:
@@ -204,4 +209,5 @@ class BlockMixin(Block):
         return hash(self.id)
 
 
-inject((Block,), dict(BlockMixin.__dict__))
+if CBlock:
+    inject((CBlock,), dict(BlockMixin.__dict__))

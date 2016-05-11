@@ -8,13 +8,17 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from nixio.core import Property
+try:
+    from nixio.core import Property, CValue, CDataType
+except ImportError:
+    Property = None
+    CValue = None
+    CDataType = None
 from nixio.util.inject import inject
 from nixio.value import Value
-from nixio.core import CValue, CDataType
 
 
-class PropertyMixin(Property):
+class PropertyMixin(object):
 
     @property
     def values(self):

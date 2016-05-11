@@ -7,7 +7,11 @@
 # LICENSE file in the root of the Project.
 
 import numpy as np
-from nixio.core import CValue, CDataType
+try:
+    from nixio.core import CValue, CDataType
+except ImportError:
+    CValue = None
+    CDataType = None
 
 try:
     integers = (int, long)
@@ -63,9 +67,11 @@ class Value(object):
         self.data_type = DataType.get_dtype(value)
 
     def to_cvalue(self):
-        # cdtype = self.dtype_to_c(self.data_type)
-        cvalue = CValue(self.value)
-        return cvalue
+        if CValue:
+            cvalue = CValue(self.value)
+            return cvalue
+        else:
+            raise RuntimeError("HDF5 backend is not available.")
 
     @staticmethod
     def dtype_from_c(cdtype):
@@ -94,7 +100,7 @@ class Value(object):
         elif cdtype is CDataType.Bool:
             dtype = DataType.Bool
         else:
-            raise TypeError("Unknown data type ({}).".format(dtype))
+            raise TypeError("Unknown data type ({}).".format(cdtype))
         return dtype
 
     @staticmethod
