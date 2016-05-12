@@ -50,6 +50,49 @@ void setUnit(Property& prop, const boost::optional<std::string>& str) {
 
 // Values
 
+void setValues(Property& prop, list& valuelist) {
+    std::vector<Value> nixvaluelist;
+    for (int idx = 0; idx < len(valuelist); ++idx) {
+        // TODO: valuelist[idx] must be converted to a native type
+        nixvaluelist.push_back(Value(object(valuelist[idx])));
+    }
+    prop.values(nixvaluelist);
+}
+
+void appendValue(list valuelist, const Value& value) {
+    DataType type = value.type();
+    switch(type) {
+        case DataType::Bool:
+            valuelist.append(value.get<bool>()); break;
+        case DataType::Float:
+        case DataType::Double:
+            valuelist.append(value.get<double>()); break;
+        case DataType::Char:
+        case DataType::Int8:
+        case DataType::Int16:
+        case DataType::Int32:
+        case DataType::Int64:
+            valuelist.append(value.get<int64_t>()); break;
+        case DataType::UInt8:
+        case DataType::UInt16:
+        case DataType::UInt32:
+        case DataType::UInt64:
+            valuelist.append(value.get<uint64_t>()); break;
+        case DataType::String:
+            valuelist.append(value.get<std::string>()); break;
+    }
+}
+
+list getValues(Property& prop) {
+    list valuelist;
+    std::vector<Value> nixvaluelist = prop.values();
+    for (std::vector<Value>::iterator it = nixvaluelist.begin(); it != nixvaluelist.end(); ++it) {
+        Value& value = *it;
+        appendValue(valuelist, value);
+    }
+    return valuelist;
+}
+
 void PyProperty::do_export() {
 
     enum_<DataType>("CDataType")
@@ -89,8 +132,10 @@ void PyProperty::do_export() {
                       setUnit)
         .add_property("_data_type", &Property::dataType)
         .add_property("_values",
-                      GETTER(std::vector<Value>, Property, values),
-                      REF_SETTER(std::vector<Value>, Property, values))
+                      getValues,
+                      setValues)
+//                      GETTER(std::vector<Value>, Property, values),
+//                      REF_SETTER(std::vector<Value>, Property, values))
         .def("delete_values", &Property::deleteValues)
         .def("__str__", &toStr<Property>)
         .def("__repr__", &toStr<Property>)
