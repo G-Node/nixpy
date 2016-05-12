@@ -67,7 +67,8 @@ class SectionMixin(object):
 
     def create_property(self, name, value):
         if isinstance(value, Value):
-            value = value.to_cvalue()
+            # value = value.to_cvalue()
+            value = value.value
         elif isinstance(value, type):
             value = Value.dtype_to_c(value)
         return self._create_property(name, value)

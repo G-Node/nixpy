@@ -23,11 +23,11 @@ class PropertyMixin(object):
     @property
     def values(self):
         values = self._values
-        return [Value(v.value) for v in values]
+        return [Value(v) for v in values]
 
     @values.setter
     def values(self, values):
-        self._values = [CValue(v.value) for v in values]
+        self._values = [v.value for v in values]
 
     @property
     def data_type(self):
