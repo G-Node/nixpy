@@ -36,25 +36,66 @@ boost::optional<Section> getSectionByPos(const Section& section, size_t index) {
 }
 
 // Property
-
-Property createProperty(Section& sec, const std::string& name, PyObject* obj) {
-    extract<DataType> ext_type(obj);
-    if (ext_type.check()) {
-        return sec.createProperty(name, ext_type());
+Property createProperty(Section& sec, const std::string& name, list& valuelist) {
+    std::vector<Value> nixvaluelist;
+    for (int idx = 0; idx < len(valuelist); ++idx) {
+        nixvaluelist.push_back(Value(object(valuelist[idx])));
     }
-
-    extract<Value&> ext_val(obj);
-    if (ext_val.check()) {
-        return sec.createProperty(name, ext_val());
-    }
-
-    extract<std::vector<Value>> ext_vec(obj);
-    if (ext_vec.check()) {
-        return sec.createProperty(name, ext_vec());
-    }
-
-    throw new std::runtime_error("Second parameter must be a Value, list of Value or DataType");
+    return sec.createProperty(name, nixvaluelist);
 }
+
+Property createProperty(Section& sec, const std::string& name, PyObject* value) {
+
+    Value nixvalue;
+
+    if (PyBool_Check(value)) {
+        bool conv = extract<bool>(value);
+        nixvalue = Value(conv);
+#if PY_MAJOR_VERSION >= 3
+    } else if (PyLong_Check(value)) {
+#else
+    } else if (PyInt_Check(value)) {
+#endif
+        int64_t conv = extract<int64_t>(value);
+        nixvalue = Value(conv);
+    } else if (PyFloat_Check(value)) {
+        double conv = extract<double>(value);
+        nixvalue = Value(conv);
+#if PY_MAJOR_VERSION >= 3
+    } else if (PyUnicode_Check(value)) {
+#else
+    } else if (PyString_Check(value)) {
+#endif
+        std::string conv = extract<std::string>(value);
+        nixvalue = Value(conv);
+    } else {
+        throw std::runtime_error("Wrong type");
+    }
+
+    return sec.createProperty(name, nixvalue);
+}
+
+Property (*createPropertyValue)(Section&, const std::string&, PyObject*) = createProperty;
+Property (*createPropertyList)(Section&, const std::string&, boost::python::list&) = createProperty;
+
+//Property createProperty(Section& sec, const std::string& name, PyObject* obj) {
+//    extract<DataType> ext_type(obj);
+//    if (ext_type.check()) {
+//        return sec.createProperty(name, ext_type());
+//    }
+//
+//    extract<Value&> ext_val(obj);
+//    if (ext_val.check()) {
+//        return sec.createProperty(name, ext_val());
+//    }
+//
+//    extract<std::vector<Value>> ext_vec(obj);
+//    if (ext_vec.check()) {
+//        return sec.createProperty(name, ext_vec());
+//    }
+//
+//    throw new std::runtime_error("Second parameter must be a Value, list of Value or DataType");
+//}
 
 boost::optional<Property> getPropertyById(const Section& section, const std::string& id) {
     Property prop = section.getProperty(id);
@@ -140,7 +181,8 @@ void PySection::do_export() {
         .def("_get_section_by_pos", &getSectionByPos)
         .def("_delete_section_by_id", REMOVER(std::string, nix::Section, deleteSection))
         // Property
-        .def("_create_property", createProperty)
+        .def("_create_property", createPropertyValue)
+        .def("_create_property", createPropertyList)
         .def("has_property_by_name", hasPropertyByName,
              doc::section_has_property_by_name)
         .def("get_property_by_name", getPropertyByName,
