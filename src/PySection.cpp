@@ -44,7 +44,27 @@ Property createProperty(Section& sec, const std::string& name, list& valuelist) 
     return sec.createProperty(name, nixvaluelist);
 }
 
-Property createProperty(Section& sec, const std::string& name, PyObject* value) {
+Property createProperty(Section& sec, const std::string& name, PyObject* v) {
+
+    PyObject* value;
+
+    if (PyObject_HasAttrString(v, "value")) {
+
+        value = PyObject_GetAttrString(v, "value");
+    } else if (PyType_Check(v)) {
+        std::string tname = extract<std::string>(PyObject_GetAttrString(v, "__name__"));
+        if (tname == "bytes_" || tname == "string_") {
+            tname = "string";
+        } else if (tname == "bool_") {
+            tname = "bool";
+        } else if (tname == "float32") {
+            tname = "float";
+        } else if (tname == "float64") {
+            tname = "double";
+        }
+        DataType dtype =  string_to_data_type(tname);
+        return sec.createProperty(name, dtype);
+    }
 
     Value nixvalue;
 
@@ -71,7 +91,6 @@ Property createProperty(Section& sec, const std::string& name, PyObject* value) 
     } else {
         throw std::runtime_error("Wrong type");
     }
-
     return sec.createProperty(name, nixvalue);
 }
 
@@ -181,8 +200,8 @@ void PySection::do_export() {
         .def("_get_section_by_pos", &getSectionByPos)
         .def("_delete_section_by_id", REMOVER(std::string, nix::Section, deleteSection))
         // Property
-        .def("_create_property", createPropertyValue)
-        .def("_create_property", createPropertyList)
+        .def("create_property", createPropertyValue)
+        .def("create_property", createPropertyList)
         .def("has_property_by_name", hasPropertyByName,
              doc::section_has_property_by_name)
         .def("get_property_by_name", getPropertyByName,

@@ -27,7 +27,8 @@ class PropertyMixin(object):
 
     @values.setter
     def values(self, values):
-        self._values = [v.value for v in values]
+        # self._values = [v.value for v in values]
+        pass
 
     @property
     def data_type(self):
