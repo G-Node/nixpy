@@ -49,7 +49,6 @@ Property createProperty(Section& sec, const std::string& name, PyObject* v) {
     PyObject* value;
 
     if (PyObject_HasAttrString(v, "value")) {
-
         value = PyObject_GetAttrString(v, "value");
     } else if (PyType_Check(v)) {
         std::string tname = extract<std::string>(PyObject_GetAttrString(v, "__name__"));
