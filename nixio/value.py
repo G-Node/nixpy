@@ -7,11 +7,6 @@
 # LICENSE file in the root of the Project.
 
 import numpy as np
-try:
-    from nixio.core import CValue, CDataType
-except ImportError:
-    CValue = None
-    CDataType = None
 
 try:
     integers = (int, long)
@@ -65,61 +60,6 @@ class Value(object):
         self.checksum = ""
         self.uncertainty = 0
         self.data_type = DataType.get_dtype(value)
-
-    def to_cvalue(self):
-        if CValue:
-            cvalue = CValue(self.value)
-            return cvalue
-        else:
-            raise RuntimeError("HDF5 backend is not available.")
-
-    @staticmethod
-    def dtype_from_c(cdtype):
-        if cdtype is CDataType.UInt8:
-            dtype = DataType.UInt8
-        elif cdtype is CDataType.UInt16:
-            dtype = DataType.UInt16
-        elif cdtype is CDataType.UInt32:
-            dtype = DataType.UInt32
-        elif cdtype is CDataType.UInt64:
-            dtype = DataType.UInt64
-        elif cdtype is CDataType.Int8:
-            dtype = DataType.Int8
-        elif cdtype is CDataType.Int16:
-            dtype = DataType.Int16
-        elif cdtype is CDataType.Int32:
-            dtype = DataType.Int32
-        elif cdtype is CDataType.Int64:
-            dtype = DataType.Int64
-        elif cdtype is CDataType.Float:
-            dtype = DataType.Float
-        elif cdtype is CDataType.Double:
-            dtype = DataType.Double
-        elif cdtype is CDataType.String:
-            dtype = DataType.String
-        elif cdtype is CDataType.Bool:
-            dtype = DataType.Bool
-        else:
-            raise TypeError("Unknown data type ({}).".format(cdtype))
-        return dtype
-
-    @staticmethod
-    def dtype_to_c(dtype):
-        if dtype in (DataType.UInt8, DataType.UInt16, CDataType.UInt16,
-                     DataType.UInt32, DataType.UInt64):
-            cdtype = CDataType.UInt64
-        elif dtype in (DataType.Int8, DataType.Int16, CDataType.Int16,
-                       DataType.Int32, DataType.Int64):
-            cdtype = CDataType.Int64
-        elif dtype in (DataType.Float, CDataType.Double):
-            cdtype = CDataType.Double
-        elif dtype is DataType.String:
-            cdtype = CDataType.String
-        elif dtype is DataType.Bool:
-            cdtype = CDataType.Bool
-        else:
-            raise TypeError("Unknown data type ({}).".format(dtype))
-        return cdtype
 
     def __str__(self):
         return "Value{{[{dtype}] {value}}}".format(dtype=self.data_type,
