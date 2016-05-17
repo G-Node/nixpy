@@ -17,7 +17,7 @@ try:
 except NameError:
     strings = (str, bytes)
 
-valid_types = (bool, float, *integers, *strings)
+valid_types = (bool, float, integers, strings)
 
 
 class DataType(object):

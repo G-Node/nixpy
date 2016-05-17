@@ -13,11 +13,8 @@ import sys
 import nixio.util.find as finders
 try:
     from nixio.core import Block as CBlock
-    from nixio.core import CDataType
 except ImportError:
     CBlock = None
-    CDataType = None
-from nixio.value import DataType
 from nixio.util.inject import inject
 from nixio.util.proxy_list import ProxyList
 import numpy as np
@@ -100,8 +97,6 @@ class BlockMixin(object):
                     raise ValueError("Shape must equal data.shape")
             else:
                 shape = data.shape
-        if dtype is DataType.String:  # and backend == hdf5
-            dtype = CDataType.String
         da = self._create_data_array(name, array_type, dtype, shape)
         if data is not None:
             da.data.write_direct(data)
