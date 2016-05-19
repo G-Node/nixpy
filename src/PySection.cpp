@@ -36,21 +36,10 @@ boost::optional<Section> getSectionByPos(const Section& section, size_t index) {
 }
 
 // Property
-Property createProperty(Section& sec, const std::string& name, Value value) {
+template<typename T>
+Property createProperty(Section& sec, const std::string& name, T value) {
     return sec.createProperty(name, value);
 }
-
-Property createProperty(Section& sec, const std::string& name, DataType dt) {
-    return sec.createProperty(name, dt);
-}
-
-Property createProperty(Section& sec, const std::string& name, std::vector<Value> values) {
-    return sec.createProperty(name, values);
-}
-
-Property (*createPropertyValue)(Section&, const std::string&, Value) = createProperty;
-Property (*createPropertyType)(Section&, const std::string&, DataType) = createProperty;
-Property (*createPropertyVector)(Section&, const std::string&, std::vector<Value>) = createProperty;
 
 boost::optional<Property> getPropertyById(const Section& section, const std::string& id) {
     Property prop = section.getProperty(id);
@@ -136,9 +125,9 @@ void PySection::do_export() {
         .def("_get_section_by_pos", &getSectionByPos)
         .def("_delete_section_by_id", REMOVER(std::string, nix::Section, deleteSection))
         // Property
-        .def("create_property", createPropertyValue)
-        .def("create_property", createPropertyType)
-        .def("create_property", createPropertyVector)
+        .def("create_property", createProperty<Value>)
+        .def("create_property", createProperty<DataType>)
+        .def("create_property", createProperty<std::vector<Value>>)
         .def("has_property_by_name", hasPropertyByName,
              doc::section_has_property_by_name)
         .def("get_property_by_name", getPropertyByName,
