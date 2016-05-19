@@ -36,84 +36,21 @@ boost::optional<Section> getSectionByPos(const Section& section, size_t index) {
 }
 
 // Property
-Property createProperty(Section& sec, const std::string& name, list& valuelist) {
-    std::vector<Value> nixvaluelist;
-    for (int idx = 0; idx < len(valuelist); ++idx) {
-        nixvaluelist.push_back(Value(object(valuelist[idx])));
-    }
-    return sec.createProperty(name, nixvaluelist);
+Property createProperty(Section& sec, const std::string& name, Value value) {
+    return sec.createProperty(name, value);
 }
 
-Property createProperty(Section& sec, const std::string& name, PyObject* v) {
-
-    PyObject* value;
-
-    if (PyObject_HasAttrString(v, "value")) {
-        value = PyObject_GetAttrString(v, "value");
-    } else if (PyType_Check(v)) {
-        std::string tname = extract<std::string>(PyObject_GetAttrString(v, "__name__"));
-        if (tname == "bytes_" || tname == "string_") {
-            tname = "string";
-        } else if (tname == "bool_") {
-            tname = "bool";
-        } else if (tname == "float32") {
-            tname = "float";
-        } else if (tname == "float64") {
-            tname = "double";
-        }
-        DataType dtype =  string_to_data_type(tname);
-        return sec.createProperty(name, dtype);
-    }
-
-    Value nixvalue;
-
-    if (PyBool_Check(value)) {
-        bool conv = extract<bool>(value);
-        nixvalue = Value(conv);
-#if PY_MAJOR_VERSION >= 3
-    } else if (PyLong_Check(value)) {
-#else
-    } else if (PyInt_Check(value)) {
-#endif
-        int64_t conv = extract<int64_t>(value);
-        nixvalue = Value(conv);
-    } else if (PyFloat_Check(value)) {
-        double conv = extract<double>(value);
-        nixvalue = Value(conv);
-#if PY_MAJOR_VERSION >= 3
-    } else if (PyUnicode_Check(value)) {
-#else
-    } else if (PyString_Check(value)) {
-#endif
-        std::string conv = extract<std::string>(value);
-        nixvalue = Value(conv);
-    } else {
-        throw std::runtime_error("Wrong type");
-    }
-    return sec.createProperty(name, nixvalue);
+Property createProperty(Section& sec, const std::string& name, DataType dt) {
+    return sec.createProperty(name, dt);
 }
 
-Property (*createPropertyValue)(Section&, const std::string&, PyObject*) = createProperty;
-Property (*createPropertyList)(Section&, const std::string&, boost::python::list&) = createProperty;
+Property createProperty(Section& sec, const std::string& name, std::vector<Value> values) {
+    return sec.createProperty(name, values);
+}
 
-//Property createProperty(Section& sec, const std::string& name, PyObject* obj) {
-//    extract<DataType> ext_type(obj);
-//    if (ext_type.check()) {
-//        return sec.createProperty(name, ext_type());
-//    }
-//
-//    extract<Value&> ext_val(obj);
-//    if (ext_val.check()) {
-//        return sec.createProperty(name, ext_val());
-//    }
-//
-//    extract<std::vector<Value>> ext_vec(obj);
-//    if (ext_vec.check()) {
-//        return sec.createProperty(name, ext_vec());
-//    }
-//
-//    throw new std::runtime_error("Second parameter must be a Value, list of Value or DataType");
-//}
+Property (*createPropertyValue)(Section&, const std::string&, Value) = createProperty;
+Property (*createPropertyType)(Section&, const std::string&, DataType) = createProperty;
+Property (*createPropertyVector)(Section&, const std::string&, std::vector<Value>) = createProperty;
 
 boost::optional<Property> getPropertyById(const Section& section, const std::string& id) {
     Property prop = section.getProperty(id);
@@ -200,7 +137,8 @@ void PySection::do_export() {
         .def("_delete_section_by_id", REMOVER(std::string, nix::Section, deleteSection))
         // Property
         .def("create_property", createPropertyValue)
-        .def("create_property", createPropertyList)
+        .def("create_property", createPropertyType)
+        .def("create_property", createPropertyVector)
         .def("has_property_by_name", hasPropertyByName,
              doc::section_has_property_by_name)
         .def("get_property_by_name", getPropertyByName,
