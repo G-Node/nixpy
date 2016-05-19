@@ -59,28 +59,41 @@ struct value_transmogrify {
         PyObject* module = PyImport_ImportModule("nixio.value");
         if (!module) return NULL;
         static PyObject* PyValueClass = PyObject_GetAttrString(module, "Value");
+        PyObject* pyvalue;
 
         DataType type = value.type();
         switch(type) {
             case DataType::Bool:
-                return PyObject_CallFunction(PyValueClass, "O", value.get<bool>() ? Py_True: Py_False);
+                pyvalue = PyObject_CallFunction(PyValueClass, "O", value.get<bool>() ? Py_True: Py_False);
+                break;
             case DataType::Float:
             case DataType::Double:
-                return PyObject_CallFunction(PyValueClass, "d", value.get<double>());
+                pyvalue = PyObject_CallFunction(PyValueClass, "d", value.get<double>());
+                break;
             case DataType::Char:
             case DataType::Int8:
             case DataType::Int16:
             case DataType::Int32:
             case DataType::Int64:
-                return PyObject_CallFunction(PyValueClass, "l", value.get<int64_t>());
+                pyvalue = PyObject_CallFunction(PyValueClass, "l", value.get<int64_t>());
+                break;
             case DataType::UInt8:
             case DataType::UInt16:
             case DataType::UInt32:
             case DataType::UInt64:
-                return PyObject_CallFunction(PyValueClass, "k", value.get<uint64_t>());
+                pyvalue = PyObject_CallFunction(PyValueClass, "k", value.get<uint64_t>());
+                break;
             case DataType::String:
-                return PyObject_CallFunction(PyValueClass, "s", value.get<std::string>().c_str());
+                pyvalue = PyObject_CallFunction(PyValueClass, "s", value.get<std::string>().c_str());
+                break;
         }
+
+        PyObject_SetAttrString(pyvalue, "reference", PyUnicode_FromString(value.reference.c_str()));
+        PyObject_SetAttrString(pyvalue, "filename", PyUnicode_FromString(value.filename.c_str()));
+        PyObject_SetAttrString(pyvalue, "encoder", PyUnicode_FromString(value.encoder.c_str()));
+        PyObject_SetAttrString(pyvalue, "checksum", PyUnicode_FromString(value.checksum.c_str()));
+        PyObject_SetAttrString(pyvalue, "uncertainty", PyFloat_FromDouble(value.uncertainty));
+        return pyvalue;
     }
 
     static void register_from_python() {
@@ -106,39 +119,46 @@ struct value_transmogrify {
         namespace bp = boost::python;
 
         void* storage = ((py_storage*)data)->storage.bytes;
-
+        new (storage) Value();
+        Value* nixvalue = static_cast<Value*>(storage);
 
         PyObject* pyvalue = PyObject_GetAttrString(obj, "value");
         PyObject* pytype = PyObject_GetAttrString(obj, "data_type");
         std::string tname = extract<std::string>(PyObject_GetAttrString(pytype, "__name__"));
 
         if (tname == "uint8") {
-            new (storage) Value(extract<uint8_t>(pyvalue));
+            nixvalue->set(extract<uint8_t>(pyvalue));
         } else if (tname == "uint16") {
-            new (storage) Value(extract<uint16_t>(pyvalue));
+            nixvalue->set(extract<uint16_t>(pyvalue));
         } else if (tname == "uint32") {
-            new (storage) Value(extract<uint32_t>(pyvalue));
+            nixvalue->set(extract<uint32_t>(pyvalue));
         } else if (tname == "uint64") {
-            new (storage) Value(extract<uint64_t>(pyvalue));
+            nixvalue->set(extract<uint64_t>(pyvalue));
         } else if (tname == "int8") {
-            new (storage) Value(extract<int8_t>(pyvalue));
+            nixvalue->set(extract<int8_t>(pyvalue));
         } else if (tname == "int16") {
-            new (storage) Value(extract<int16_t>(pyvalue));
+            nixvalue->set(extract<int16_t>(pyvalue));
         } else if (tname == "int32") {
-            new (storage) Value(extract<int32_t>(pyvalue));
+            nixvalue->set(extract<int32_t>(pyvalue));
         } else if (tname == "int64") {
-            new (storage) Value(extract<int64_t>(pyvalue));
+            nixvalue->set(extract<int64_t>(pyvalue));
         } else if (tname == "bytes_" || tname == "string_") {
-            new (storage) Value(extract<std::string>(pyvalue));
+            nixvalue->set(extract<std::string>(pyvalue));
         } else if (tname == "bool_") {
-            new (storage) Value(extract<bool>(pyvalue));
+            nixvalue->set(extract<bool>(pyvalue));
         } else if (tname == "float32") {
-            new (storage) Value(extract<float>(pyvalue));
+            nixvalue->set(extract<float>(pyvalue));
         } else if (tname == "float64") {
-            new (storage) Value(extract<double>(pyvalue));
+            nixvalue->set(extract<double>(pyvalue));
         } else {
             // TODO: Error
         }
+        nixvalue->reference = extract<std::string>(PyObject_GetAttrString(obj, "reference"));
+        nixvalue->filename = extract<std::string>(PyObject_GetAttrString(obj, "filename"));
+        nixvalue->encoder = extract<std::string>(PyObject_GetAttrString(obj, "encoder"));
+        nixvalue->checksum = extract<std::string>(PyObject_GetAttrString(obj, "checksum"));
+        nixvalue->uncertainty = extract<double>(PyObject_GetAttrString(obj, "uncertainty"));
+
         data->convertible = storage;
     }
 };

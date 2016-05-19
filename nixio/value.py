@@ -49,7 +49,6 @@ class DataType(object):
 class Value(object):
 
     def __init__(self, value):
-        # super(Value, self).__init__(*args, **kwargs)
         if isinstance(value, valid_types):
             self.value = value
         else:
