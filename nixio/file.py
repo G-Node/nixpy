@@ -102,6 +102,5 @@ class FileMixin(object):
         return self._sections
 
 
-if CPPFile:
-    inject((CPPFile,), dict(FileMixin.__dict__))
+inject((CPPFile,), dict(FileMixin.__dict__))
 inject((PyFile,), dict(FileMixin.__dict__))

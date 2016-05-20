@@ -204,5 +204,4 @@ class BlockMixin(object):
         return hash(self.id)
 
 
-if CBlock:
-    inject((CBlock,), dict(BlockMixin.__dict__))
+inject((CBlock,), dict(BlockMixin.__dict__))
