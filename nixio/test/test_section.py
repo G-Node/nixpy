@@ -21,6 +21,14 @@ import nixio
 
 class _TestSection(unittest.TestCase):
 
+    backend = None
+
+    def setUp(self):
+        self.file    = File.open("unittest.h5", FileMode.Overwrite,
+                                 backend=self.backend)
+        self.section = self.file.create_section("test section", "recordingsession")
+        self.other   = self.file.create_section("other section", "recordingsession")
+
     def tearDown(self):
         del self.file.sections[self.section.id]
         del self.file.sections[self.other.id]
@@ -176,17 +184,15 @@ class _TestSection(unittest.TestCase):
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestSectionCPP(_TestSection):
 
-    def setUp(self):
-        self.file    = File.open("unittest.h5", FileMode.Overwrite,
-                                 backend="hdf5")
-        self.section = self.file.create_section("test section", "recordingsession")
-        self.other   = self.file.create_section("other section", "recordingsession")
+    backend = "hdf5"
 
 
 class TestSectionPy(_TestSection):
 
+    backend = "h5py"
+
     def setUp(self):
-        self.file = File.open("unittest.h5", FileMode.Overwrite, backend="h5py")
+        pass
 
     def tearDown(self):
         pass

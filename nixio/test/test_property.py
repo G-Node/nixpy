@@ -20,6 +20,19 @@ except ImportError:
 
 class _TestProperty(unittest.TestCase):
 
+    backend = None
+
+    def setUp(self):
+        self.file    = File.open("unittest.h5", FileMode.Overwrite,
+                                 backend=self.backend)
+        self.section = self.file.create_section("test section",
+                                                "recordingsession")
+        self.prop    = self.section.create_property("test property", Value(0))
+        self.prop_s  = self.section.create_property("test str",
+                                                    DataType.String)
+        self.other   = self.section.create_property("other property",
+                                                    DataType.Int64)
+
     def tearDown(self):
         del self.file.sections[self.section.id]
         self.file.close()
@@ -175,29 +188,15 @@ class TestValue(unittest.TestCase):
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestPropertyCPP(_TestProperty):
 
-    def setUp(self):
-        self.file    = File.open("unittest.h5", FileMode.Overwrite,
-                                 backend="hdf5")
-        self.section = self.file.create_section("test section",
-                                                "recordingsession")
-        self.prop    = self.section.create_property("test property", Value(0))
-        self.prop_s  = self.section.create_property("test str",
-                                                    DataType.String)
-        self.other   = self.section.create_property("other property",
-                                                    DataType.Int64)
+    backend = "hdf5"
 
 
 class TestPropertyPy(_TestProperty):
 
+    backend = "h5py"
+
     def setUp(self):
-        self.file    = File.open("unittest.h5", FileMode.Overwrite,
-                                 backend="h5py")
-        # self.section = self.file.create_section("test section",
-        #                                         "recordingsession")
-        # self.prop    = self.section.create_property("test property", Value(0))
-        # self.prop_s  = self.section.create_property("test str", DataType.String)
-        # self.other   = self.section.create_property("other property",
-        #                                             DataType.Int64)
+        pass
 
     def tearDown(self):
         pass

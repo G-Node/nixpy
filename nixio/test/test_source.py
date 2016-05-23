@@ -20,6 +20,20 @@ except ImportError:
 
 class _TestSource(unittest.TestCase):
 
+    backend = None
+
+    def setUp(self):
+        self.file   = File.open("unittest.h5", FileMode.Overwrite,
+                                backend=self.backend)
+        self.block  = self.file.create_block("test block", "recordingsession")
+        self.source = self.block.create_source("test source",
+                                               "recordingchannel")
+        self.other  = self.block.create_source("other source", "sometype")
+        self.third  = self.block.create_source("third source", "sometype")
+        self.array  = self.block.create_data_array("test array", "test type",
+                                                   dtype=DataType.Double,
+                                                   shape=(1, 1))
+
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
@@ -104,24 +118,13 @@ class _TestSource(unittest.TestCase):
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestSourceCPP(_TestSource):
 
-    def setUp(self):
-        self.file   = File.open("unittest.h5", FileMode.Overwrite,
-                                backend="hdf5")
-        self.block  = self.file.create_block("test block", "recordingsession")
-        self.source = self.block.create_source("test source",
-                                               "recordingchannel")
-        self.other  = self.block.create_source("other source", "sometype")
-        self.third  = self.block.create_source("third source", "sometype")
-        self.array  = self.block.create_data_array("test array", "test type",
-                                                   dtype=DataType.Double,
-                                                   shape=(1, 1))
+    backend = "hdf5"
 
 
 class TestSourcePy(_TestSource):
 
     def setUp(self):
-        self.file = File.open("unittest.h5", FileMode.Overwrite,
-                              backend="h5py")
+        pass
 
     def tearDown(self):
         pass

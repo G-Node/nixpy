@@ -20,6 +20,25 @@ except ImportError:
 
 class _TestTag(unittest.TestCase):
 
+    backend = None
+
+    def setUp(self):
+        self.file     = File.open("unittest.h5", FileMode.Overwrite,
+                                  backend=self.backend)
+        self.block    = self.file.create_block("test block", "recordingsession")
+
+        self.my_array = self.block.create_data_array("my array", "test", DataType.Int16, (1, ))
+        self.my_tag   = self.block.create_tag(
+            "my tag", "tag", [0]
+        )
+        self.my_tag.references.append(self.my_array)
+
+        self.your_array = self.block.create_data_array("your array", "test", DataType.Int16, (1, ))
+        self.your_tag = self.block.create_tag(
+            "your tag", "tag", [0]
+        )
+        self.your_tag.references.append(self.your_array)
+
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
@@ -168,29 +187,15 @@ class _TestTag(unittest.TestCase):
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestTagCPP(_TestTag):
 
-    def setUp(self):
-        self.file     = File.open("unittest.h5", FileMode.Overwrite,
-                                  backend="hdf5")
-        self.block    = self.file.create_block("test block", "recordingsession")
-
-        self.my_array = self.block.create_data_array("my array", "test", DataType.Int16, (1, ))
-        self.my_tag   = self.block.create_tag(
-            "my tag", "tag", [0]
-        )
-        self.my_tag.references.append(self.my_array)
-
-        self.your_array = self.block.create_data_array("your array", "test", DataType.Int16, (1, ))
-        self.your_tag = self.block.create_tag(
-            "your tag", "tag", [0]
-        )
-        self.your_tag.references.append(self.your_array)
+    backend = "hdf5"
 
 
 class TestTagPy(_TestTag):
 
+    backend = "h5py"
+
     def setUp(self):
-        self.file = File.open("unittest.h5", FileMode.Overwrite,
-                              backend="h5py")
+        pass
 
     def tearDown(self):
         pass
