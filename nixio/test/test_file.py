@@ -18,7 +18,6 @@ except ImportError:
 from nixio import *
 
 
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class _FileTest(unittest.TestCase):
 
     def setUp(self):
@@ -89,6 +88,7 @@ class _FileTest(unittest.TestCase):
         assert(len(self.file.find_sections(filtr=lambda x : "level2-p1-s" in x.name, limit=1)) == 0)
 
 
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class FileTestCPP(_FileTest):
 
     def setUp(self):
