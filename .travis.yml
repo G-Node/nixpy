@@ -31,7 +31,7 @@ install:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       g++ --version;
     fi
-  - pip install --upgrade numpy coveralls
+  - pip install --upgrade numpy coveralls h5py
   #build NIX
   - git clone https://github.com/G-Node/nix.git nix-build
   - cd nix-build
@@ -43,8 +43,7 @@ install:
 script:
 - python setup.py build
 - if [ $COVERALLS = 1 ]; then
-    coverage${PYVER} run --source=nixio setup.py test;
-    coverage${PYVER} report -m;
+    coverage${PYVER} run --source=nixio setup.py test && coverage${PYVER} report -m;
   else
     python setup.py test;
   fi;
