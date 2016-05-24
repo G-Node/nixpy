@@ -11,9 +11,27 @@ from __future__ import (absolute_import, division, print_function)#, unicode_lit
 import unittest
 
 from nixio import *
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 
 
 class _TestProperty(unittest.TestCase):
+
+    backend = None
+
+    def setUp(self):
+        self.file    = File.open("unittest.h5", FileMode.Overwrite,
+                                 backend=self.backend)
+        self.section = self.file.create_section("test section",
+                                                "recordingsession")
+        self.prop    = self.section.create_property("test property", Value(0))
+        self.prop_s  = self.section.create_property("test str",
+                                                    DataType.String)
+        self.other   = self.section.create_property("other property",
+                                                    DataType.Int64)
 
     def tearDown(self):
         del self.file.sections[self.section.id]
@@ -50,6 +68,7 @@ class _TestProperty(unittest.TestCase):
 
     def test_property_values(self):
         self.prop.values = [Value(10)]
+
         assert(self.prop.data_type == DataType.Int64)
         assert(len(self.prop.values) == 1)
 
@@ -166,31 +185,18 @@ class TestValue(unittest.TestCase):
         assert(value.uncertainty == 0.5)
 
 
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestPropertyCPP(_TestProperty):
 
-    def setUp(self):
-        self.file    = File.open("unittest.h5", FileMode.Overwrite,
-                                 backend="hdf5")
-        self.section = self.file.create_section("test section",
-                                                "recordingsession")
-        self.prop    = self.section.create_property("test property", Value(0))
-        self.prop_s  = self.section.create_property("test str",
-                                                    DataType.String)
-        self.other   = self.section.create_property("other property",
-                                                    DataType.Int64)
+    backend = "hdf5"
 
 
 class TestPropertyPy(_TestProperty):
 
+    backend = "h5py"
+
     def setUp(self):
-        self.file    = File.open("unittest.h5", FileMode.Overwrite,
-                                 backend="h5py")
-        # self.section = self.file.create_section("test section",
-        #                                         "recordingsession")
-        # self.prop    = self.section.create_property("test property", Value(0))
-        # self.prop_s  = self.section.create_property("test str", DataType.String)
-        # self.other   = self.section.create_property("other property",
-        #                                             DataType.Int64)
+        pass
 
     def tearDown(self):
         pass

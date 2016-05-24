@@ -8,12 +8,15 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from nixio.core import MultiTag
+try:
+    from nixio.core import MultiTag
+except ImportError:
+    MultiTag = None
 from nixio.util.inject import inject
 from nixio.tag import ReferenceProxyList, FeatureProxyList
 
 
-class MultiTagMixin(MultiTag):
+class MultiTagMixin(object):
 
     @property
     def references(self):

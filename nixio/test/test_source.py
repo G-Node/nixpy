@@ -11,9 +11,28 @@ from __future__ import (absolute_import, division, print_function)#, unicode_lit
 import unittest
 
 from nixio import *
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 
 
 class _TestSource(unittest.TestCase):
+
+    backend = None
+
+    def setUp(self):
+        self.file   = File.open("unittest.h5", FileMode.Overwrite,
+                                backend=self.backend)
+        self.block  = self.file.create_block("test block", "recordingsession")
+        self.source = self.block.create_source("test source",
+                                               "recordingchannel")
+        self.other  = self.block.create_source("other source", "sometype")
+        self.third  = self.block.create_source("third source", "sometype")
+        self.array  = self.block.create_data_array("test array", "test type",
+                                                   dtype=DataType.Double,
+                                                   shape=(1, 1))
 
     def tearDown(self):
         del self.file.blocks[self.block.id]
@@ -96,26 +115,16 @@ class _TestSource(unittest.TestCase):
         assert(len(self.array.sources) == 3)
 
 
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestSourceCPP(_TestSource):
 
-    def setUp(self):
-        self.file   = File.open("unittest.h5", FileMode.Overwrite,
-                                backend="hdf5")
-        self.block  = self.file.create_block("test block", "recordingsession")
-        self.source = self.block.create_source("test source",
-                                               "recordingchannel")
-        self.other  = self.block.create_source("other source", "sometype")
-        self.third  = self.block.create_source("third source", "sometype")
-        self.array  = self.block.create_data_array("test array", "test type",
-                                                   dtype=DataType.Double,
-                                                   shape=(1, 1))
+    backend = "hdf5"
 
 
 class TestSourcePy(_TestSource):
 
     def setUp(self):
-        self.file = File.open("unittest.h5", FileMode.Overwrite,
-                              backend="h5py")
+        pass
 
     def tearDown(self):
         pass

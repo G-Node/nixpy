@@ -90,7 +90,6 @@ nixpy_sources = [
     'src/PyFile.cpp',
     'src/PySection.cpp',
     'src/PyProperty.cpp',
-    'src/PyValue.cpp',
     'src/PySource.cpp',
     'src/PyDataArray.cpp',
     'src/PyDataSet.cpp',

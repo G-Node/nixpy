@@ -11,10 +11,23 @@ from __future__ import (absolute_import, division, print_function)#, unicode_lit
 import unittest
 
 from nixio import *
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 import nixio
 
 
 class _TestSection(unittest.TestCase):
+
+    backend = None
+
+    def setUp(self):
+        self.file    = File.open("unittest.h5", FileMode.Overwrite,
+                                 backend=self.backend)
+        self.section = self.file.create_section("test section", "recordingsession")
+        self.other   = self.file.create_section("other section", "recordingsession")
 
     def tearDown(self):
         del self.file.sections[self.section.id]
@@ -112,7 +125,6 @@ class _TestSection(unittest.TestCase):
         assert(len(self.section.find_related()) == 3)
         assert(len(self.section.sections[0].find_related()) == 5)
 
-
     def test_section_properties(self):
         assert(len(self.section) == 0)
 
@@ -150,7 +162,6 @@ class _TestSection(unittest.TestCase):
 
         self.section['ep_val'] = 2.0
 
-
         res = [x in self.section for x in ['ep_str', 'ep_int', 'ep_float']]
         assert(all(res))
 
@@ -170,19 +181,18 @@ class _TestSection(unittest.TestCase):
         assert(len(self.section) == 0)
 
 
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestSectionCPP(_TestSection):
 
-    def setUp(self):
-        self.file    = File.open("unittest.h5", FileMode.Overwrite,
-                                 backend="hdf5")
-        self.section = self.file.create_section("test section", "recordingsession")
-        self.other   = self.file.create_section("other section", "recordingsession")
+    backend = "hdf5"
 
 
 class TestSectionPy(_TestSection):
 
+    backend = "h5py"
+
     def setUp(self):
-        self.file = File.open("unittest.h5", FileMode.Overwrite, backend="h5py")
+        pass
 
     def tearDown(self):
         pass

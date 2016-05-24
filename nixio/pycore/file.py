@@ -1,6 +1,12 @@
+class FileMode(object):
+    ReadOnly = 'r'
+    ReadWrite = 'a'
+    Overwrite = 'w'
+
+
 class File(object):
 
-    def __init__(self, path, mode=None):
+    def __init__(self, path, mode=FileMode.ReadWrite):
         pass
 
     @classmethod

@@ -23,8 +23,22 @@ using namespace boost::python;
 namespace nixpy {
 
 
-File open(std::string path, FileMode mode = FileMode::ReadWrite) {
-    return File::open(path, mode);
+//File open(std::string path, FileMode mode = FileMode::ReadWrite) {
+//    return File::open(path, mode);
+//}
+
+File open(std::string path, std::string mode = "a") {
+    FileMode nixmode;
+    if (mode == "a") {
+        nixmode = FileMode::ReadWrite;
+    } else if (mode == "w") {
+        nixmode = FileMode::Overwrite;
+    } else if (mode == "r") {
+        nixmode = FileMode::ReadOnly;
+    } else {
+        // TODO: Raise error
+    }
+    return File::open(path, nixmode);
 }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(open_overloads, open, 1, 2)

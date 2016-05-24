@@ -1,1 +1,1 @@
-from .file import File
+from .file import File, FileMode

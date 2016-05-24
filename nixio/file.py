@@ -11,7 +11,10 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import sys
 
 import nixio.util.find as finders
-from nixio.core import File as CPPFile
+try:
+    from nixio.core import File as CPPFile
+except ImportError:
+    CPPFile = None
 from nixio.pycore import File as PyFile
 from nixio.util.inject import inject
 from nixio.util.proxy_list import ProxyList
@@ -36,12 +39,16 @@ class SectionProxyList(ProxyList):
                                                "_get_section_by_pos", "_delete_section_by_id")
 
 
-class FileMixin(CPPFile, PyFile):
+class FileMixin(object):
 
     @staticmethod
     def open(path, mode, backend="hdf5"):
         if backend == "hdf5":
-            return CPPFile._open(path, mode)
+            if CPPFile:
+                return CPPFile._open(path, mode)
+            else:
+                # TODO: Brief instructions or web URL for building C++ files?
+                raise RuntimeError("HDF5 backend is not available.")
         elif backend == "h5py":
             return PyFile._open(path, mode)
 
@@ -95,4 +102,5 @@ class FileMixin(CPPFile, PyFile):
         return self._sections
 
 
-inject((CPPFile, PyFile), dict(FileMixin.__dict__))
+inject((CPPFile,), dict(FileMixin.__dict__))
+inject((PyFile,), dict(FileMixin.__dict__))

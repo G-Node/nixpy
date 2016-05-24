@@ -11,7 +11,10 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import sys
 
 import nixio.util.find as finders
-from nixio.core import Block
+try:
+    from nixio.core import Block as CBlock
+except ImportError:
+    CBlock = None
 from nixio.util.inject import inject
 from nixio.util.proxy_list import ProxyList
 import numpy as np
@@ -57,7 +60,7 @@ class GroupProxyList(ProxyList):
                                                  "_get_group_by_pos", "_delete_group_by_id")
 
 
-class BlockMixin(Block):
+class BlockMixin(object):
 
     def create_data_array(self, name, array_type, dtype=None, shape=None, data=None):
         """
@@ -201,4 +204,4 @@ class BlockMixin(Block):
         return hash(self.id)
 
 
-inject((Block,), dict(BlockMixin.__dict__))
+inject((CBlock,), dict(BlockMixin.__dict__))
