@@ -10,13 +10,19 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import sys
 
-from nixio.core import DataArray
-from nixio.core import DataSet
+try:
+    from nixio.core import DataArray
+    from nixio.core import DataSet
+except ImportError:
+    DataArray = None
+    DataSet = None
+
 from nixio.util.inject import inject
 
 import numpy as np
 
-class DataArrayMixin(DataArray):
+
+class DataArrayMixin(object):
 
     @property
     def data(self):
@@ -99,7 +105,7 @@ class DimensionProxyList(object):
         return str(self)
 
 
-class DataSetMixin(DataSet):
+class DataSetMixin(object):
     """
     Data IO object for DataArray.
     """

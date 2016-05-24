@@ -140,10 +140,6 @@ struct PySection {
     static void do_export();
 };
 
-struct PyValue {
-    static void do_export();
-};
-
 struct PySource {
     static void do_export();
 };

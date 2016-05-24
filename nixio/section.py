@@ -10,12 +10,16 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 
 import sys
 import functools
+import numpy as np
 
+try:
+    from nixio.core import Section
+except ImportError:
+    Section = None
 import nixio.util.find as finders
-from nixio.core import Section
 from nixio.util.inject import inject
 from nixio.util.proxy_list import ProxyList
-from nixio.property import Value
+from nixio.value import Value, DataType
 
 from nixio.file import SectionProxyList
 
@@ -52,10 +56,14 @@ class S(object):
 class PropertyProxyList(ProxyList):
 
     def __init__(self, obj):
-        super(PropertyProxyList, self).__init__(obj, "_property_count", "_get_property_by_id_or_name",
-                                                "_get_property_by_pos", "_delete_property_by_id")
+        super(PropertyProxyList, self).__init__(obj,
+                                                "_property_count",
+                                                "_get_property_by_id_or_name",
+                                                "_get_property_by_pos",
+                                                "_delete_property_by_id")
 
-class SectionMixin(Section):
+
+class SectionMixin(object):
 
     def find_sections(self, filtr=lambda _ : True, limit=maxint):
         """

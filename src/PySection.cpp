@@ -36,24 +36,9 @@ boost::optional<Section> getSectionByPos(const Section& section, size_t index) {
 }
 
 // Property
-
-Property createProperty(Section& sec, const std::string& name, PyObject* obj) {
-    extract<DataType> ext_type(obj);
-    if (ext_type.check()) {
-        return sec.createProperty(name, ext_type());
-    }
-
-    extract<Value&> ext_val(obj);
-    if (ext_val.check()) {
-        return sec.createProperty(name, ext_val());
-    }
-
-    extract<std::vector<Value>> ext_vec(obj);
-    if (ext_vec.check()) {
-        return sec.createProperty(name, ext_vec());
-    }
-
-    throw new std::runtime_error("Second parameter must be a Value, list of Value or DataType");
+template<typename T>
+Property createProperty(Section& sec, const std::string& name, T value) {
+    return sec.createProperty(name, value);
 }
 
 boost::optional<Property> getPropertyById(const Section& section, const std::string& id) {
@@ -140,7 +125,9 @@ void PySection::do_export() {
         .def("_get_section_by_pos", &getSectionByPos)
         .def("_delete_section_by_id", REMOVER(std::string, nix::Section, deleteSection))
         // Property
-        .def("create_property", createProperty)
+        .def("create_property", createProperty<Value>)
+        .def("create_property", createProperty<DataType>)
+        .def("create_property", createProperty<std::vector<Value>>)
         .def("has_property_by_name", hasPropertyByName,
              doc::section_has_property_by_name)
         .def("get_property_by_name", getPropertyByName,

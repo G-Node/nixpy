@@ -74,6 +74,10 @@ static nix::DataType pyDtypeToNixDtype(const PyArray_Descr *dtype)
         //maybe we should throw an exception instead
         break;
 
+    case 'S':
+        return nix::DataType::String;
+        break;
+
     default:
         break;
     }

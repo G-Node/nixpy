@@ -8,7 +8,12 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from nixio.core import DataArray, MultiTag, Tag
+try:
+    from nixio.core import DataArray, MultiTag, Tag
+except ImportError:
+    DataArray = None
+    MultiTag = None
+    Tag = None
 from nixio.util.inject import inject
 from nixio.util.proxy_list import RefProxyList
 
@@ -29,17 +34,17 @@ def _get_sources(self):
     return self._sources
 
 
-class DataArraySourcesMixin(DataArray):
+class DataArraySourcesMixin(object):
 
     sources = property(_get_sources, None, None, _sources_doc)
 
 
-class MultiTagSourcesMixin(MultiTag):
+class MultiTagSourcesMixin(object):
 
     sources = property(_get_sources, None, None, _sources_doc)
 
 
-class TagSourcesMixin(Tag):
+class TagSourcesMixin(object):
 
     sources = property(_get_sources, None, None, _sources_doc)
 

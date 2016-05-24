@@ -11,9 +11,12 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import sys
 
 import nixio.util.find as finders
-from nixio.core import Source
+try:
+    from nixio.core import Source
+except ImportError:
+    Source = None
 from nixio.util.inject import inject
-from nixio.util.proxy_list import ProxyList
+# from nixio.util.proxy_list import ProxyList
 
 from nixio.block import SourceProxyList
 
@@ -23,7 +26,7 @@ except:
     from sys import maxsize as maxint
 
 
-class SourceMixin(Source):
+class SourceMixin(object):
 
     def find_sources(self, filtr=lambda _ : True, limit=maxint):
         """

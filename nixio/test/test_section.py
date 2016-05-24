@@ -11,13 +11,21 @@ from __future__ import (absolute_import, division, print_function)#, unicode_lit
 import unittest
 
 from nixio import *
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 import nixio
 
 
-class TestSection(unittest.TestCase):
+class _TestSection(unittest.TestCase):
+
+    backend = None
 
     def setUp(self):
-        self.file    = File.open("unittest.h5", FileMode.Overwrite)
+        self.file    = File.open("unittest.h5", FileMode.Overwrite,
+                                 backend=self.backend)
         self.section = self.file.create_section("test section", "recordingsession")
         self.other   = self.file.create_section("other section", "recordingsession")
 
@@ -117,7 +125,6 @@ class TestSection(unittest.TestCase):
         assert(len(self.section.find_related()) == 3)
         assert(len(self.section.sections[0].find_related()) == 5)
 
-
     def test_section_properties(self):
         assert(len(self.section) == 0)
 
@@ -155,7 +162,6 @@ class TestSection(unittest.TestCase):
 
         self.section['ep_val'] = 2.0
 
-
         res = [x in self.section for x in ['ep_str', 'ep_int', 'ep_float']]
         assert(all(res))
 
@@ -173,3 +179,50 @@ class TestSection(unittest.TestCase):
             del self.section[x]
 
         assert(len(self.section) == 0)
+
+
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
+class TestSectionCPP(_TestSection):
+
+    backend = "hdf5"
+
+
+class TestSectionPy(_TestSection):
+
+    backend = "h5py"
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_section_eq(self):
+        pass
+
+    def test_section_id(self):
+        pass
+
+    def test_section_name(self):
+        pass
+
+    def test_section_type(self):
+        pass
+
+    def test_section_definition(self):
+        pass
+
+    def test_section_mapping(self):
+        pass
+
+    def test_section_repository(self):
+        pass
+
+    def test_section_sections(self):
+        pass
+
+    def test_section_find_sections(self):
+        pass
+
+    def test_section_properties(self):
+        pass

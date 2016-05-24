@@ -11,12 +11,20 @@ from __future__ import (absolute_import, division, print_function)#, unicode_lit
 import unittest
 import numpy as np
 from nixio import *
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 
 
-class TestTag(unittest.TestCase):
+class _TestTag(unittest.TestCase):
+
+    backend = None
 
     def setUp(self):
-        self.file     = File.open("unittest.h5", FileMode.Overwrite)
+        self.file     = File.open("unittest.h5", FileMode.Overwrite,
+                                  backend=self.backend)
         self.block    = self.file.create_block("test block", "recordingsession")
 
         self.my_array = self.block.create_data_array("my array", "test", DataType.Int16, (1, ))
@@ -30,7 +38,7 @@ class TestTag(unittest.TestCase):
             "your tag", "tag", [0]
         )
         self.your_tag.references.append(self.your_array)
-       
+
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
@@ -174,4 +182,56 @@ class TestTag(unittest.TestCase):
         assert(data1.size == 1) 
         assert(data2.size == 2) 
         assert(data3.size == len(ramp_data))
-        
+
+
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
+class TestTagCPP(_TestTag):
+
+    backend = "hdf5"
+
+
+class TestTagPy(_TestTag):
+
+    backend = "h5py"
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_tag_eq(self):
+        pass
+
+    def test_tag_id(self):
+        pass
+
+    def test_tag_name(self):
+        pass
+
+    def test_tag_type(self):
+        pass
+
+    def test_tag_definition(self):
+        pass
+
+    def test_tag_timestamps(self):
+        pass
+
+    def test_tag_units(self):
+        pass
+
+    def test_tag_position(self):
+        pass
+
+    def test_tag_extent(self):
+        pass
+
+    def test_tag_references(self):
+        pass
+
+    def test_tag_features(self):
+        pass
+
+    def test_tag_retrieve_feature_data(self):
+        pass

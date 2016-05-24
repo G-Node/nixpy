@@ -27,7 +27,6 @@ BOOST_PYTHON_MODULE(core)
 
     PySection::do_export();
     PyProperty::do_export();
-    PyValue::do_export();
 
     PyBlock::do_export();
     PySource::do_export();

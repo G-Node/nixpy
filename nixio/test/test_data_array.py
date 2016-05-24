@@ -13,6 +13,11 @@ import sys
 import numpy as np
 
 from nixio import *
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 
 try:
     basestring = basestring
@@ -20,6 +25,7 @@ except NameError:  # 'basestring' is undefined, must be Python 3
     basestring = (str,bytes)
 
 
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestDataArray(unittest.TestCase):
 
     def setUp(self):
@@ -305,9 +311,13 @@ class TestDataArray(unittest.TestCase):
 
         self.assertRaises(ValueError, lambda : self.array.append_alias_range_dimension())
         self.assertRaises(ValueError, lambda : self.array.create_alias_range_dimension())
-        string_array = self.block.create_data_array('string_array', 'nix.texts', dtype=DataType.String, shape=(10,))
-        self.assertRaises(ValueError, lambda : string_array.append_alias_range_dimension())
-        self.assertRaises(ValueError, lambda : string_array.create_alias_range_dimension())
+        string_array = self.block.create_data_array('string_array', 'nix.texts',
+                                                    dtype=DataType.String,
+                                                    shape=(10,))
+        self.assertRaises(ValueError,
+                          lambda : string_array.append_alias_range_dimension())
+        self.assertRaises(ValueError,
+                          lambda : string_array.create_alias_range_dimension())
         assert(len(string_array.dimensions) == 0)
         del self.block.data_arrays['string_array']
 

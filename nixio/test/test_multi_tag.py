@@ -14,7 +14,14 @@ import unittest
 
 from nixio import *
 import numpy as np
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 
+
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestMultiTag(unittest.TestCase):
 
     def setUp(self):
@@ -270,7 +277,7 @@ class TestMultiTag(unittest.TestCase):
         untagged_feature = self.feature_tag.create_feature(index_data, LinkType.Untagged)
         
         # preparations done, actually test 
-        print(self.feature_tag.features)
+        # print(self.feature_tag.features)
         assert(len(self.feature_tag.features) == 3)
         
         # indexed feature

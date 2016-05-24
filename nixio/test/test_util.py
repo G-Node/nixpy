@@ -12,10 +12,15 @@
 from __future__ import (absolute_import, division, print_function)#, unicode_literals)
 
 import unittest
-from nixio.core import names
-from nixio.core import units
+try:
+    from nixio.core import names
+    from nixio.core import units
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 
 
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestUtil(unittest.TestCase):
 
     def setUp(self):

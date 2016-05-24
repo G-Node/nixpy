@@ -8,7 +8,10 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from nixio.core import Group
+try:
+    from nixio.core import Group
+except ImportError:
+    Group = None
 from nixio.util.inject import inject
 from nixio.util.proxy_list import RefProxyList
 
@@ -43,7 +46,7 @@ class MultiTagProxyList(RefProxyList):
         )
 
 
-class GroupMixin(Group):
+class GroupMixin(object):
 
     @property
     def data_arrays(self):

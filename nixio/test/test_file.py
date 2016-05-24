@@ -10,13 +10,21 @@ from __future__ import (absolute_import, division, print_function)#, unicode_lit
 
 import unittest
 
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 from nixio import *
 
 
-class TestFile(unittest.TestCase):
+class _FileTest(unittest.TestCase):
+
+    backend = None
 
     def setUp(self):
-        self.file  = File.open("unittest.h5", FileMode.Overwrite)
+        self.file = File.open("unittest.h5", FileMode.Overwrite,
+                              backend=self.backend)
 
     def tearDown(self):
         self.file.close()
@@ -81,3 +89,29 @@ class TestFile(unittest.TestCase):
         assert(len(self.file.find_sections(limit=1)) == 2)
         assert(len(self.file.find_sections(filtr=lambda x : "level2-p1-s" in x.name)) == 2)
         assert(len(self.file.find_sections(filtr=lambda x : "level2-p1-s" in x.name, limit=1)) == 0)
+
+
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
+class FileTestCPP(_FileTest):
+
+    backend = "hdf5"
+
+
+class FileTestPy(_FileTest):
+
+    backend = "h5py"
+
+    def test_file_format(self):
+        pass
+
+    def test_file_timestamps(self):
+        pass
+
+    def test_file_blocks(self):
+        pass
+
+    def test_file_sections(self):
+        pass
+
+    def test_file_find_sections(self):
+        pass

@@ -23,8 +23,22 @@ using namespace boost::python;
 namespace nixpy {
 
 
-File open(std::string path, FileMode mode = FileMode::ReadWrite) {
-    return File::open(path, mode);
+//File open(std::string path, FileMode mode = FileMode::ReadWrite) {
+//    return File::open(path, mode);
+//}
+
+File open(std::string path, std::string mode = "a") {
+    FileMode nixmode;
+    if (mode == "a") {
+        nixmode = FileMode::ReadWrite;
+    } else if (mode == "w") {
+        nixmode = FileMode::Overwrite;
+    } else if (mode == "r") {
+        nixmode = FileMode::ReadOnly;
+    } else {
+        // TODO: Raise error
+    }
+    return File::open(path, nixmode);
 }
 
 BOOST_PYTHON_FUNCTION_OVERLOADS(open_overloads, open, 1, 2)
@@ -87,8 +101,8 @@ void PyFile::do_export() {
         // Open and close
         .def("is_open", &File::isOpen, doc::file_is_open)
         .def("close", &File::close, doc::file_close)
-        .def("open", open, open_overloads())
-        .staticmethod("open")
+        .def("_open", open, open_overloads())
+        .staticmethod("_open")
         // Other
         .def("validate", &File::validate)
         .def(self == other<File>())
