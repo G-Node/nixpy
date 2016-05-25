@@ -80,15 +80,26 @@ class _FileTest(unittest.TestCase):
         assert(len(self.file.sections) == 0)
 
     def test_file_find_sections(self):
-        for i in range(2): self.file.create_section("level1-p0-s" + str(i), "dummy")
-        for i in range(2): self.file.sections[0].create_section("level2-p1-s" + str(i), "dummy")
-        for i in range(2): self.file.sections[1].create_section("level2-p2-s" + str(i), "dummy")
-        for i in range(2): self.file.sections[0].sections[0].create_section("level3-p1-s" + str(i), "dummy")
+        for i in range(2):
+            self.file.create_section("level1-p0-s" + str(i), "dummy")
+        for i in range(2):
+            self.file.sections[0].create_section("level2-p1-s" + str(i),
+                                                 "dummy")
+        for i in range(2):
+            self.file.sections[1].create_section("level2-p2-s" + str(i),
+                                                 "dummy")
+        for i in range(2):
+            self.file.sections[0].sections[0].create_section(
+                "level3-p1-s" + str(i), "dummy"
+            )
 
         assert(len(self.file.find_sections()) == 8)
         assert(len(self.file.find_sections(limit=1)) == 2)
-        assert(len(self.file.find_sections(filtr=lambda x : "level2-p1-s" in x.name)) == 2)
-        assert(len(self.file.find_sections(filtr=lambda x : "level2-p1-s" in x.name, limit=1)) == 0)
+        assert(len(self.file.find_sections(filtr=lambda x: "level2-p1-s" in
+                                                           x.name)) == 2)
+        assert(len(self.file.find_sections(filtr=lambda x: "level2-p1-s" in
+                                                           x.name,
+                                           limit=1)) == 0)
 
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
@@ -100,15 +111,6 @@ class FileTestCPP(_FileTest):
 class FileTestPy(_FileTest):
 
     backend = "h5py"
-
-    def test_file_format(self):
-        pass
-
-    def test_file_timestamps(self):
-        pass
-
-    def test_file_blocks(self):
-        pass
 
     def test_file_sections(self):
         pass

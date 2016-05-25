@@ -15,6 +15,7 @@ try:
     from nixio.core import Block as CBlock
 except ImportError:
     CBlock = None
+from nixio.pycore import Block
 from nixio.util.inject import inject
 from nixio.util.proxy_list import ProxyList
 import numpy as np
@@ -204,4 +205,4 @@ class BlockMixin(object):
         return hash(self.id)
 
 
-inject((CBlock,), dict(BlockMixin.__dict__))
+inject((CBlock, Block), dict(BlockMixin.__dict__))
