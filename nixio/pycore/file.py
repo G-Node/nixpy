@@ -32,7 +32,8 @@ class File(object):
         self.created_at = util.now()
         self.updated_at = util.now()
         self._root = self._h5file["/"]
-        self._data = self._root.create_group("data")
+        self._data = self._root.require_group("data")
+        self.metadata = self._root.require_group("metadata")
 
     @classmethod
     def _open(cls, path, mode=FileMode.ReadWrite):
