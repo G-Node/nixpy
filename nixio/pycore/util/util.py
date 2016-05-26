@@ -168,3 +168,41 @@ def create_container_methods(cls, chcls, chclsname):
     setattr(cls, "_delete_{}_by_id".format(chclsname), deleter)
     setattr(cls, "_{}_count".format(chclsname), counter)
 
+
+def create_link_methods(cls, chcls, chclsname):
+
+    container = chclsname + "s"
+
+    def adder(self, id_or_name):
+        parent = self._h5obj.parent.parent
+        if is_uuid(id_or_name):
+            for h5obj in parent[container].values():
+                if h5obj.attrs["id"] == id_or_name:
+                    break
+            else:
+                raise KeyError("Group add {type}: "
+                               "{type} not found in parent Block!"
+                               .format(type=chcls.__name__))
+        else:
+            try:
+                h5obj = parent._h5obj[container][id_or_name]
+            except KeyError:
+                raise KeyError("Group add {type}: "
+                               "{type} not found in parent Block!"
+                               .format(type=chcls.__name__))
+
+        self._h5obj[container][h5obj.attrs["name"]] = h5obj
+
+    def containschecker(self, id_or_name):
+        if is_uuid(id_or_name):
+            for h5obj in self._h5obj[container]:
+                if h5obj.attrs["id"] == id_or_name:
+                    return True
+            else:
+                return False
+        else:
+            return id_or_name in self._h5obj[container]
+
+    setattr(cls, "_add_{}_by_id".format(chclsname), adder)
+    setattr(cls, "_has_{}_by_id".format(chclsname), containschecker)
+
