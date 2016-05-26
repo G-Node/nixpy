@@ -66,6 +66,8 @@ class NamedEntity(object):
     def __repr__(self):
         return self.__str__()
 
-util.create_h5props(NamedEntity, ("name", "type", "definition",
-                                  "id", "created_at", "updated_at"))
+util.create_h5props(NamedEntity,
+                    ("name", "type", "definition", "id",
+                     "created_at", "updated_at"),
+                    (str, str, str, str, int, int))
 

@@ -91,23 +91,23 @@ def create_h5props(cls, attributes, types=None):
 
         def getter(self):
             value = self._h5obj.attrs.get(propname)
-            if type_:
+            if value is not None and type_:
                 value = type_(value)
             return value
 
         def setter(self, value):
-            if type_ and not isinstance(value, type_):
-                raise TypeError("Attribute {} requires type {} but {} "
-                                "was provided".format(propname, type_,
-                                                      type(value)))
-            if propname in ("name", "id") and propname in self._h5obj.attrs:
-                raise AttributeError("can't set attribute")
             if value is None:
                 if propname == "type":
                     raise AttributeError("type can't be None")
                 # Can't set H5Py attribute to None
                 # Deleting will return None on get
                 del self._h5obj.attrs[propname]
+            elif type_ and not isinstance(value, type_):
+                raise TypeError("Attribute {} requires type {} but {} "
+                                "was provided".format(propname, type_,
+                                                      type(value)))
+            elif propname in ("name", "id") and propname in self._h5obj.attrs:
+                raise AttributeError("can't set attribute")
             else:
                 self._h5obj.attrs[propname] = value
 
