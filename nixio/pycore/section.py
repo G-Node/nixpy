@@ -7,6 +7,9 @@
 # LICENSE file in the root of the Project.
 
 from .entity import NamedEntity
+from .util import util
+from . import Property
+from . import exceptions
 
 
 class Section(NamedEntity):
@@ -17,43 +20,64 @@ class Section(NamedEntity):
     @classmethod
     def _create_new(cls, parent, name, type_):
         newentity = super(Section, cls)._create_new(parent, name, type_)
+        newentity._h5obj.create_group("sections")
+        newentity._h5obj.create_group("properties")
         return newentity
 
-    def create_section(self):
+    def create_section(self, name, type_):
+        util.check_entity_name_and_type(name, type_)
+        sections = self._h5obj["sections"]
+        if name in sections:
+            raise exceptions.DuplicateName("create_section")
+        sec = Section._create_new(sections, name, type_)
+        return sec
+
+    @property
+    def parent(self):
+        h5parent = self._h5obj.parent
+        if h5parent.name == "/metadata":
+            # Top level section
+            return None
+        else:
+            return Section(h5parent.parent)
+
+    @property
+    def link(self):
+        if "link" not in self._h5obj:
+            return None
+        else:
+            return Section(self._h5obj["link"])
+
+    @link.setter
+    def link(self, id_or_sec):
+        if isinstance(id_or_sec, Section):
+            id = id_or_sec.id
+        else:
+            id = id_or_sec
+        # TODO: Complete the link setter
         pass
 
-    def _section_count(self):
-        pass
+    def create_property(self, name, dtype):
+        properties = self._h5obj["properties"]
+        if name in properties:
+            raise exceptions.DuplicateName("create_property")
+        prop = Property._create_new(properties, name, dtype)
+        return prop
 
-    def _get_section_by_id(self):
-        pass
+    def has_property_by_name(self, name):
+        return name in self._h5obj["properties"]
 
-    def _get_section_by_pos(self):
-        pass
-
-    def _delete_section_by_id(self):
-        pass
-
-    def create_property(self):
-        pass
-
-    def has_property_by_name(self):
-        pass
-
-    def get_property_by_name(self):
-        pass
-
-    def _property_count(self):
-        pass
-
-    def _get_property_by_id(self):
-        pass
-
-    def _get_property_by_pos(self):
-        pass
-
-    def _delete_property_by_id(self):
-        pass
+    def get_property_by_name(self, name):
+        return self._h5obj["properties"].get(name)
 
     def inherited_properties(self):
-        pass
+        properties = [Property(h5prop)
+                      for h5prop in self._h5obj["properties"].values()]
+        if self.link:
+            properties.append(self.link.inherited_properties)
+        return properties
+
+
+util.create_h5props(Section, ("mapping", "repository"), (str, str))
+util.create_container_methods(Section, Section, "section")
+util.create_container_methods(Section, Property, "property", "properties")
