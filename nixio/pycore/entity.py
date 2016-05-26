@@ -8,7 +8,6 @@
 
 from time import time
 from . import util
-from . import exceptions
 
 
 class Entity(object):
@@ -82,16 +81,4 @@ class EntityWithMetadata(NamedEntity):
         newentity = super(EntityWithMetadata, cls)._create_new(parent,
                                                                name, type_)
         newentity.metadata = None  # TODO: Metadata section
-        return newentity
-
-
-class EntityWithSources(EntityWithMetadata):
-
-    def __init__(self, h5obj):
-        super(EntityWithSources, self).__init__(h5obj)
-
-    @classmethod
-    def _create_new(cls, parent, name, type_):
-        newentity = super(EntityWithSources, cls)._create_new(parent,
-                                                              name, type_)
         return newentity
