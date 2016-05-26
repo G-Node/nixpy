@@ -124,12 +124,10 @@ def create_h5props(cls, attributes, types=None):
         setattr(cls, attr, makeprop(attr, type_))
 
 
-def create_container_methods(cls, chcls, chclsname):
+def create_container_methods(cls, chcls, chclsname, container=None):
     # TODO: Better exception handling and messages
 
-    if chclsname == "block":
-        container = "data"
-    else:
+    if container is None:
         container = chclsname + "s"
 
     def id_or_name_getter(self, id_or_name):
@@ -169,9 +167,10 @@ def create_container_methods(cls, chcls, chclsname):
     setattr(cls, "_{}_count".format(chclsname), counter)
 
 
-def create_link_methods(cls, chcls, chclsname):
+def create_link_methods(cls, chcls, chclsname, container=None):
 
-    container = chclsname + "s"
+    if container is None:
+        container = chclsname + "s"
 
     def adder(self, id_or_name):
         parent = self._h5obj.parent.parent
