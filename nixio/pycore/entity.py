@@ -69,16 +69,3 @@ class NamedEntity(object):
 util.create_h5props(NamedEntity, ("name", "type", "definition",
                                   "id", "created_at", "updated_at"))
 
-
-class EntityWithMetadata(NamedEntity):
-
-    def __init__(self, h5obj):
-        super(EntityWithMetadata, self).__init__(h5obj)
-        # TODO: Additional validation for metadata
-
-    @classmethod
-    def _create_new(cls, parent, name, type_):
-        newentity = super(EntityWithMetadata, cls)._create_new(parent,
-                                                               name, type_)
-        newentity.metadata = None  # TODO: Metadata section
-        return newentity
