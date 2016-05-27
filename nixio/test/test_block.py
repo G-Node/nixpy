@@ -208,8 +208,5 @@ class TestBlockPy(_TestBlock):
 
     backend = "h5py"
 
-    def test_block_find_sources(self):
-        pass
-
     def test_block_multi_tags(self):
         pass

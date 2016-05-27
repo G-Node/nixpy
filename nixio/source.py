@@ -12,11 +12,13 @@ import sys
 
 import nixio.util.find as finders
 try:
-    from nixio.core import Source
+    from nixio.core import Source as CSource
 except ImportError:
-    Source = None
+    CSource = None
 from nixio.util.inject import inject
 # from nixio.util.proxy_list import ProxyList
+
+from nixio.pycore import Source
 
 from nixio.block import SourceProxyList
 
@@ -68,4 +70,4 @@ class SourceMixin(object):
         return hash(self.id)
 
 
-inject((Source,), dict(SourceMixin.__dict__))
+inject((Source, CSource), dict(SourceMixin.__dict__))
