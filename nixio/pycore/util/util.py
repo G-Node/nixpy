@@ -11,6 +11,7 @@ import h5py
 from time import time
 from uuid import uuid4, UUID
 from .. import exceptions
+from . import names
 
 try:
     unicode = unicode
@@ -42,7 +43,7 @@ def check_entity_type(type_):
 def check_entity_name(name):
     if not name:
         raise ValueError("String provided for entity name is empty!")
-    if not check_name(name):
+    if not names.check(name):
         raise ValueError("String provided for entity name is invalid!")
 
 
