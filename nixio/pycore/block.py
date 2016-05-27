@@ -35,7 +35,7 @@ class Block(EntityWithMetadata):
         data_arrays = self._h5obj["data_arrays"]
         if name in data_arrays:
             raise exceptions.DuplicateName("create_data_array")
-        da = DataArray._create_new(data_arrays, name, type_, data_type)
+        da = DataArray._create_new(data_arrays, name, type_, data_type, shape)
         return da
 
     # MultiTag
