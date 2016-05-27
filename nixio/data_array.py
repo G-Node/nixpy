@@ -11,11 +11,14 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import sys
 
 try:
-    from nixio.core import DataArray
-    from nixio.core import DataSet
+    from nixio.core import DataArray as CDataArray
+    from nixio.core import DataSet as CDataSet
 except ImportError:
-    DataArray = None
-    DataSet = None
+    CDataArray = None
+    CDataSet = None
+
+from nixio.pycore import DataArray, DataSet
+
 
 from nixio.util.inject import inject
 
@@ -323,5 +326,5 @@ class DataSetMixin(object):
         return count, offset, shape
 
 
-inject((DataArray,), dict(DataArrayMixin.__dict__))
-inject((DataSet,), dict(DataSetMixin.__dict__))
+inject((DataArray, CDataArray), dict(DataArrayMixin.__dict__))
+inject((DataSet, CDataSet), dict(DataSetMixin.__dict__))
