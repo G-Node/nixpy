@@ -13,18 +13,18 @@ import functools
 import numpy as np
 
 try:
-    from nixio.core import Section
+    from nixio.core import Section as CSection
 except ImportError:
-    Section = None
+    CSection = None
+from nixio.pycore import Section
 import nixio.util.find as finders
 from nixio.util.inject import inject
 from nixio.util.proxy_list import ProxyList
-from nixio.value import Value, DataType
+from nixio.value import Value
 
 from nixio.file import SectionProxyList
 
 from operator import attrgetter
-import collections
 
 try:
     from sys import maxint
@@ -208,4 +208,4 @@ class SectionMixin(object):
         return p
 
 
-inject((Section,), dict(SectionMixin.__dict__))
+inject((CSection, Section), dict(SectionMixin.__dict__))
