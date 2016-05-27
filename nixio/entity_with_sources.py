@@ -9,11 +9,16 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 try:
-    from nixio.core import DataArray, MultiTag, Tag
+    from nixio.core import DataArray as CDataArray
+    from nixio.core import MultiTag as CMultiTag
+    from nixio.core import Tag as CTag
 except ImportError:
-    DataArray = None
-    MultiTag = None
-    Tag = None
+    CDataArray = None
+    CMultiTag = None
+    CTag = None
+
+from nixio.pycore import DataArray, MultiTag, Tag
+
 from nixio.util.inject import inject
 from nixio.util.proxy_list import RefProxyList
 
@@ -49,6 +54,6 @@ class TagSourcesMixin(object):
     sources = property(_get_sources, None, None, _sources_doc)
 
 
-inject((DataArray,), dict(DataArraySourcesMixin.__dict__))
-inject((MultiTag,), dict(MultiTagSourcesMixin.__dict__))
-inject((Tag,), dict(TagSourcesMixin.__dict__))
+inject((DataArray, CDataArray), dict(DataArraySourcesMixin.__dict__))
+inject((MultiTag, CMultiTag), dict(MultiTagSourcesMixin.__dict__))
+inject((Tag, CTag), dict(TagSourcesMixin.__dict__))
