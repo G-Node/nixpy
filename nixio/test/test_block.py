@@ -210,3 +210,6 @@ class TestBlockPy(_TestBlock):
 
     def test_block_find_sources(self):
         pass
+
+    def test_block_multi_tags(self):
+        pass
