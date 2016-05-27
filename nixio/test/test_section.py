@@ -205,3 +205,6 @@ class TestSectionCPP(_TestSection):
 class TestSectionPy(_TestSection):
 
     backend = "h5py"
+
+    def test_section_properties(self):
+        pass
