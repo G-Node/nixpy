@@ -112,8 +112,3 @@ class FileTestPy(_FileTest):
 
     backend = "h5py"
 
-    def test_file_sections(self):
-        pass
-
-    def test_file_find_sections(self):
-        pass
