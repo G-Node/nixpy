@@ -61,7 +61,7 @@ class Section(NamedEntity):
         properties = self._h5obj["properties"]
         if name in properties:
             raise exceptions.DuplicateName("create_property")
-        prop = Property._create_new(properties, name, dtype)
+        prop = Property._create_new(properties)
         return prop
 
     def has_property_by_name(self, name):
