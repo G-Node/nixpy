@@ -137,11 +137,3 @@ class TestDimensionsPy(_TestDimensions):
 
     backend = "h5py"
 
-    def test_set_dimension(self):
-        pass
-
-    def test_range_dimension(self):
-        pass
-
-    def test_sample_dimension(self):
-        pass
