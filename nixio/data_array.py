@@ -15,8 +15,8 @@ try:
     from nixio.core import DataSet as CDataSet
     from nixio.core import SetDimension, RangeDimension, SampledDimension
 except ImportError:
-    CDataArray = None
-    CDataSet = None
+    CDataArray = CDataSet = None
+    SetDimension = RangeDimension = SampledDimension = None
 
 from nixio.pycore import DataArray, DataSet, DimensionType
 
