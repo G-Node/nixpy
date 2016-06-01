@@ -7,30 +7,19 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
+import h5py
 from time import time
 from uuid import uuid4, UUID
 from .. import exceptions
+from . import names
+
+try:
+    unicode = unicode
+except NameError:
+    unicode = str
 
 
-def create_id():
-    return str(uuid4())
-
-
-def check_name(name):
-    return "/" not in name
-
-
-def sanitize_name(name):
-    return name.replace("/", "_")
-
-
-def sanitizer(unit):
-    # micro = "\u03bc"
-    micro = "µ"
-    # mugr = "\u00b5"
-    mugr = "μ"
-    return unit.replace(" ", "").replace("mu", "u").\
-        replace(micro, "u").replace(mugr, "u")
+vlen_str_dtype = h5py.special_dtype(vlen=unicode)
 
 
 def is_uuid(id_):
@@ -54,7 +43,7 @@ def check_entity_type(type_):
 def check_entity_name(name):
     if not name:
         raise ValueError("String provided for entity name is empty!")
-    if not check_name(name):
+    if not names.check(name):
         raise ValueError("String provided for entity name is invalid!")
 
 
@@ -91,7 +80,7 @@ def create_h5props(cls, attributes, types=None):
 
         def getter(self):
             value = self._h5obj.attrs.get(propname)
-            if value is not None and type_:
+            if type_ is not None and value is not None:
                 value = type_(value)
             return value
 
@@ -99,17 +88,15 @@ def create_h5props(cls, attributes, types=None):
             if value is None:
                 if propname == "type":
                     raise AttributeError("type can't be None")
-                # Can't set H5Py attribute to None
-                # Deleting will return None on get
                 del self._h5obj.attrs[propname]
-            elif type_ and not isinstance(value, type_):
+                return
+            if type_ and not isinstance(value, type_):
                 raise TypeError("Attribute {} requires type {} but {} "
                                 "was provided".format(propname, type_,
                                                       type(value)))
-            elif propname in ("name", "id") and propname in self._h5obj.attrs:
+            if propname in ("name", "id") and propname in self._h5obj.attrs:
                 raise AttributeError("can't set attribute")
-            else:
-                self._h5obj.attrs[propname] = value
+            self._h5obj.attrs[propname] = value
 
         def deleter(self):
             # TODO: Allow deleting attributes?

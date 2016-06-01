@@ -23,11 +23,13 @@ test_label  = "test label"
 test_labels = tuple([str(i) + "_label" for i in range(10)])
 
 
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestDimensions(unittest.TestCase):
+class _TestDimensions(unittest.TestCase):
+
+    backend = None
 
     def setUp(self):
-        self.file  = File.open("unittest.h5", FileMode.Overwrite)
+        self.file  = File.open("unittest.h5", FileMode.Overwrite,
+                               backend=self.backend)
         self.block = self.file.create_block("test block", "recordingsession")
         self.array = self.block.create_data_array("test array", "signal", DataType.Float, (0, ))
 
@@ -123,3 +125,15 @@ class TestDimensions(unittest.TestCase):
         with self.assertRaises(IndexError):
             self.range_dim.axis(10, 2)
             self.range_dim.axis(100)
+
+
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
+class TestDimensionsCPP(_TestDimensions):
+
+    backend = "hdf5"
+
+
+class TestDimensionsPy(_TestDimensions):
+
+    backend = "h5py"
+

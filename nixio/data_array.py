@@ -11,11 +11,15 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import sys
 
 try:
-    from nixio.core import DataArray
-    from nixio.core import DataSet
+    from nixio.core import DataArray as CDataArray
+    from nixio.core import DataSet as CDataSet
+    from nixio.core import SetDimension, RangeDimension, SampledDimension
 except ImportError:
-    DataArray = None
-    DataSet = None
+    CDataArray = CDataSet = None
+    SetDimension = RangeDimension = SampledDimension = None
+
+from nixio.pycore import DataArray, DataSet, DimensionType
+
 
 from nixio.util.inject import inject
 
@@ -62,6 +66,21 @@ class DataArrayMixin(object):
         hash has to be either explicitly inherited from parent class, implemented or escaped
         """
         return hash(self.id)
+
+
+class SetDimensionMixin(object):
+
+    dimension_type = DimensionType.Set
+
+
+class RangeDimensionMixin(object):
+
+    dimension_type = DimensionType.Range
+
+
+class SampleDimensionMixin(object):
+
+    dimension_type = DimensionType.Sample
 
 
 class DimensionProxyList(object):
@@ -323,5 +342,8 @@ class DataSetMixin(object):
         return count, offset, shape
 
 
-inject((DataArray,), dict(DataArrayMixin.__dict__))
-inject((DataSet,), dict(DataSetMixin.__dict__))
+inject((DataArray, CDataArray), dict(DataArrayMixin.__dict__))
+inject((DataSet, CDataSet), dict(DataSetMixin.__dict__))
+inject((SetDimension,), dict(SetDimensionMixin.__dict__))
+inject((RangeDimension,), dict(RangeDimensionMixin.__dict__))
+inject((SampledDimension,), dict(SampleDimensionMixin.__dict__))

@@ -45,6 +45,19 @@ class DataType(object):
         elif isinstance(value, strings):
             return cls.String
 
+    @classmethod
+    def is_numeric_dtype(cls, dtype):
+        return (dtype == cls.Int8 or
+                dtype == cls.Int16 or
+                dtype == cls.Int32 or
+                dtype == cls.Int64 or
+                dtype == cls.UInt8 or
+                dtype == cls.UInt16 or
+                dtype == cls.UInt32 or
+                dtype == cls.UInt64 or
+                dtype == cls.Float or
+                dtype == cls.Double)
+
 
 class Value(object):
 
