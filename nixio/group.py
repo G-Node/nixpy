@@ -9,9 +9,10 @@
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
 try:
-    from nixio.core import Group
+    from nixio.core import Group as CGroup
 except ImportError:
-    Group = None
+    CGroup = None
+from nixio.pycore import Group
 from nixio.util.inject import inject
 from nixio.util.proxy_list import RefProxyList
 
@@ -93,4 +94,4 @@ class GroupMixin(object):
             setattr(self, "_multi_tags", MultiTagProxyList(self))
         return self._multi_tags
 
-inject((Group,), dict(GroupMixin.__dict__))
+inject((Group, CGroup), dict(GroupMixin.__dict__))

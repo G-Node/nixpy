@@ -8,7 +8,6 @@
 
 from time import time
 from . import util
-from . import exceptions
 
 
 class Entity(object):
@@ -67,31 +66,8 @@ class NamedEntity(object):
     def __repr__(self):
         return self.__str__()
 
-util.create_h5props(NamedEntity, ("name", "type", "definition",
-                                  "id", "created_at", "updated_at"))
+util.create_h5props(NamedEntity,
+                    ("name", "type", "definition", "id",
+                     "created_at", "updated_at"),
+                    (str, str, str, str, int, int))
 
-
-class EntityWithMetadata(NamedEntity):
-
-    def __init__(self, h5obj):
-        super(EntityWithMetadata, self).__init__(h5obj)
-        # TODO: Additional validation for metadata
-
-    @classmethod
-    def _create_new(cls, parent, name, type_):
-        newentity = super(EntityWithMetadata, cls)._create_new(parent,
-                                                               name, type_)
-        newentity.metadata = None  # TODO: Metadata section
-        return newentity
-
-
-class EntityWithSources(EntityWithMetadata):
-
-    def __init__(self, h5obj):
-        super(EntityWithSources, self).__init__(h5obj)
-
-    @classmethod
-    def _create_new(cls, parent, name, type_):
-        newentity = super(EntityWithSources, cls)._create_new(parent,
-                                                              name, type_)
-        return newentity

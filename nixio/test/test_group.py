@@ -17,23 +17,28 @@ except ImportError:
     skip_cpp = True
 
 
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestGroup(unittest.TestCase):
+class _TestGroup(unittest.TestCase):
+
+    backend = None
 
     def setUp(self):
-        self.file  = File.open("unittest.h5", FileMode.Overwrite)
+        self.file  = File.open("unittest.h5", FileMode.Overwrite,
+                               backend=self.backend)
         self.block = self.file.create_block("test block", "recordingsession")
 
-        self.my_array = self.block.create_data_array("my array", "test", DataType.Int16, (1, ))
+        self.my_array = self.block.create_data_array("my array", "test",
+                                                     DataType.Int16, (1, ))
         self.my_tag   = self.block.create_tag("my tag", "test", [0.25])
         self.my_group = self.block.create_group("my group", "group")
-        self.my_multiTag = self.block.create_multi_tag("my_mt", "test", self.my_array)
+        self.my_multiTag = self.block.create_multi_tag("my_mt", "test",
+                                                       self.my_array)
 
         self.my_group.data_arrays.append(self.my_array)
         self.my_group.tags.append(self.my_tag)
         self.my_group.multi_tags.append(self.my_multiTag)
 
-        self.your_array = self.block.create_data_array("your array", "test", DataType.Int16, (1, ))
+        self.your_array = self.block.create_data_array("your array", "test",
+                                                       DataType.Int16, (1, ))
         self.your_group = self.block.create_group("your group", "group")
         self.your_group.data_arrays.append(self.your_array)
 
@@ -84,10 +89,13 @@ class TestGroup(unittest.TestCase):
     def test_group_data_arrays(self):
         assert(len(self.my_group.data_arrays) == 1)
 
-        self.assertRaises(TypeError, lambda _: self.my_group.data_arrays.append(100))
+        self.assertRaises(TypeError,
+                          lambda _: self.my_group.data_arrays.append(100))
 
-        a1 = self.block.create_data_array("reference1", "stimuli", DataType.Int16, (1, ))
-        a2 = self.block.create_data_array("reference2", "stimuli", DataType.Int16, (1, ))
+        a1 = self.block.create_data_array("reference1", "stimuli",
+                                          DataType.Int16, (1, ))
+        a2 = self.block.create_data_array("reference2", "stimuli",
+                                          DataType.Int16, (1, ))
 
         self.my_group.data_arrays.append(a1)
         self.my_group.data_arrays.append(a2)
@@ -131,7 +139,8 @@ class TestGroup(unittest.TestCase):
     def test_group_multi_tags(self):
         assert(len(self.my_group.multi_tags) == 1)
 
-        self.assertRaises(TypeError, lambda _: self.my_group.multi_tags.append(100))
+        self.assertRaises(TypeError,
+                          lambda _: self.my_group.multi_tags.append(100))
 
         mt1 = self.block.create_multi_tag("mtag1", "stimuli", self.my_array)
         mt2 = self.block.create_multi_tag("mtag2", "stimuli", self.my_array)
@@ -152,3 +161,14 @@ class TestGroup(unittest.TestCase):
 
         self.my_group.multi_tags.extend([mt1, mt2])
         assert(len(self.my_group.multi_tags) == 3)
+
+
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
+class TestGroupCPP(_TestGroup):
+
+    backend = "hdf5"
+
+
+class TestGroupPy(_TestGroup):
+
+    backend = "h5py"

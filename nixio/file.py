@@ -51,6 +51,8 @@ class FileMixin(object):
                 raise RuntimeError("HDF5 backend is not available.")
         elif backend == "h5py":
             return PyFile._open(path, mode)
+        else:
+            raise ValueError("Valid backends are 'hdf5' and 'h5py'.")
 
     @property
     def blocks(self):

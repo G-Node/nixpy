@@ -7,7 +7,7 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import absolute_import
-from .entity import EntityWithMetadata
+from .entity_with_metadata import EntityWithMetadata
 from . import util
 from . import exceptions
 from . import Group, DataArray, MultiTag, Tag, Source
@@ -22,7 +22,6 @@ class Block(EntityWithMetadata):
     @classmethod
     def _create_new(cls, parent, name, type_):
         newentity = super(Block, cls)._create_new(parent, name, type_)
-        # TODO: Create child containers
         newentity._h5obj.create_group("groups")
         newentity._h5obj.create_group("data_arrays")
         newentity._h5obj.create_group("tags")

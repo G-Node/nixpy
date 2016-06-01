@@ -12,14 +12,8 @@ from .entity import Entity
 
 class Property(Entity):
 
-    def __init__(self):
-        super(Property, self).__init__()
-        self.name = None
-        self.property = None
-        self.mapping = None
-        self.unit = None
-        self.data_type = None
-        self.values = None
+    def __init__(self, h5obj):
+        super(Property, self).__init__(h5obj)
 
     def delete_values(self):
         pass

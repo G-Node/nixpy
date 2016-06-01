@@ -6,7 +6,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from .entity import EntityWithMetadata
+from .entity_with_metadata import EntityWithMetadata
 from . import util
 from . import exceptions
 

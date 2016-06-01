@@ -6,8 +6,11 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from .entity import EntityWithSources
+from .entity_with_sources import EntityWithSources
 from . import util
+from .data_array import DataArray
+from .tag import Tag
+from .multi_tag import MultiTag
 
 
 class Group(EntityWithSources):
@@ -19,59 +22,16 @@ class Group(EntityWithSources):
     @classmethod
     def _create_new(cls, parent, name, type_):
         newentity = super(Group, cls)._create_new(parent, name, type_)
-        # TODO: Make link containers
+        newentity._h5obj.create_group("data_arrays")
+        newentity._h5obj.create_group("tags")
+        newentity._h5obj.create_group("multi_tags")
         return newentity
 
-    def _add_data_array_by_id(self):
-        pass
 
-    def _has_data_array_by_id(self):
-        pass
+util.create_container_methods(Group, DataArray, "data_array")
+util.create_container_methods(Group, Tag, "tag")
+util.create_container_methods(Group, MultiTag, "multi_tag")
 
-    def _data_array_count(self):
-        pass
-
-    def _get_data_array_by_id(self):
-        pass
-
-    def _get_data_array_by_pos(self):
-        pass
-
-    def _delete_data_array_by_id(self):
-        pass
-
-    def _add_tag_by_id(self):
-        pass
-
-    def _has_tag_by_id(self):
-        pass
-
-    def _tag_count(self):
-        pass
-
-    def _get_tag_by_id(self):
-        pass
-
-    def _get_tag_by_pos(self):
-        pass
-
-    def _delete_tag_by_id(self):
-        pass
-
-    def _add_multi_tag_by_id(self):
-        pass
-
-    def _has_multi_tag_by_id(self):
-        pass
-
-    def _multi_tag_count(self):
-        pass
-
-    def _get_multi_tag_by_id(self):
-        pass
-
-    def _get_multi_tag_by_pos(self):
-        pass
-
-    def _delete_multi_tag_by_id(self):
-        pass
+util.create_link_methods(Group, DataArray, "data_array")
+util.create_link_methods(Group, Tag, "tag")
+util.create_link_methods(Group, MultiTag, "multi_tag")

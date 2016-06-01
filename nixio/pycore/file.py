@@ -10,8 +10,10 @@ from __future__ import absolute_import
 import h5py
 import numpy as np
 
-from . import util
+from .util import util
 from . import Block
+from . import exceptions
+from . import Section
 
 
 class FileMode(object):
@@ -30,7 +32,8 @@ class File(object):
         self.created_at = util.now()
         self.updated_at = util.now()
         self._root = self._h5file["/"]
-        self._data = self._root.create_group("data")
+        self._data = self._root.require_group("data")
+        self.metadata = self._root.require_group("metadata")
 
     @classmethod
     def _open(cls, path, mode=FileMode.ReadWrite):
@@ -49,8 +52,12 @@ class File(object):
         block = Block._create_new(self._data, name, type_)
         return block
 
-    def create_section(self):
-        pass
+    def create_section(self, name, type_):
+        util.check_entity_name_and_type(name, type_)
+        if name in self.metadata:
+            raise exceptions.DuplicateName("create_section")
+        sec = Section._create_new(self.metadata, name, type_)
+        return sec
 
     def _section_count(self):
         pass
@@ -75,4 +82,5 @@ class File(object):
 
 util.create_h5props(File, ["version", "format", "created_at", "updated_at"],
                     [tuple, str, int, int])
-util.create_container_methods(File, Block, "block")
+util.create_container_methods(File, Block, "block", "data")
+util.create_container_methods(File, Section, "section", "metadata")

@@ -49,6 +49,7 @@ def _find_sources(with_sources, filtr, limit):
 
     return result
 
+
 def _find_sections(with_sections, filtr, limit):
     """
     Find a list of matching sections recursively.
@@ -59,7 +60,13 @@ def _find_sections(with_sections, filtr, limit):
     result = []
     level = 0
 
-    if isinstance(with_sections, nixio.Section):
+    sectioncls = (nixio.pycore.Section,)
+    try:
+        sectioncls += (nixio.core.Section,)
+    except AttributeError:
+        pass
+
+    if isinstance(with_sections, sectioncls):
         fifo.append(_cont(with_sections, level))
     else:
         level += 1

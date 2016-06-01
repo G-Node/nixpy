@@ -26,8 +26,10 @@ class _TestSection(unittest.TestCase):
     def setUp(self):
         self.file    = File.open("unittest.h5", FileMode.Overwrite,
                                  backend=self.backend)
-        self.section = self.file.create_section("test section", "recordingsession")
-        self.other   = self.file.create_section("other section", "recordingsession")
+        self.section = self.file.create_section("test section",
+                                                "recordingsession")
+        self.other   = self.file.create_section("other section",
+                                                "recordingsession")
 
     def tearDown(self):
         del self.file.sections[self.section.id]
@@ -106,21 +108,34 @@ class _TestSection(unittest.TestCase):
         
         assert(self.section['subject'] == subject)
         assert(self.section['subject'].id == subject.id)
-        assert('easy subsection' in [v.name for k, v in self.section.sections.items()])
+        assert('easy subsection' in
+               [v.name for k, v in self.section.sections.items()])
         assert('easy subsection' in self.section.sections)
         assert(self.section['easy subsection'].name == 'easy subsection')
         #assert('easy subsection' in self.section)
 
     def test_section_find_sections(self):
-        for i in range(2): self.section.create_section("level1-p0-s" + str(i), "dummy")
-        for i in range(2): self.section.sections[0].create_section("level2-p1-s" + str(i), "dummy")
-        for i in range(2): self.section.sections[1].create_section("level2-p2-s" + str(i), "dummy")
-        for i in range(2): self.section.sections[0].sections[0].create_section("level3-p1-s" + str(i), "dummy")
+        for i in range(2):
+            self.section.create_section("level1-p0-s" + str(i), "dummy")
+        for i in range(2):
+            self.section.sections[0].create_section("level2-p1-s" + str(i),
+                                                    "dummy")
+        for i in range(2):
+            self.section.sections[1].create_section("level2-p2-s" + str(i),
+                                                    "dummy")
+        for i in range(2):
+            self.section.sections[0].sections[0].create_section(
+                "level3-p1-s" + str(i), "dummy"
+            )
 
         assert(len(self.section.find_sections()) == 9)
         assert(len(self.section.find_sections(limit=1)) == 3)
-        assert(len(self.section.find_sections(filtr=lambda x : "level2-p1-s" in x.name)) == 2)
-        assert(len(self.section.find_sections(filtr=lambda x : "level2-p1-s" in x.name, limit=1)) == 0)
+        assert(len(self.section.find_sections(
+            filtr=lambda x: "level2-p1-s" in x.name)) == 2
+               )
+        assert(len(self.section.find_sections(
+            filtr=lambda x: "level2-p1-s" in x.name, limit=1)) == 0
+               )
 
         assert(len(self.section.find_related()) == 3)
         assert(len(self.section.sections[0].find_related()) == 5)
@@ -190,39 +205,6 @@ class TestSectionCPP(_TestSection):
 class TestSectionPy(_TestSection):
 
     backend = "h5py"
-
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    def test_section_eq(self):
-        pass
-
-    def test_section_id(self):
-        pass
-
-    def test_section_name(self):
-        pass
-
-    def test_section_type(self):
-        pass
-
-    def test_section_definition(self):
-        pass
-
-    def test_section_mapping(self):
-        pass
-
-    def test_section_repository(self):
-        pass
-
-    def test_section_sections(self):
-        pass
-
-    def test_section_find_sections(self):
-        pass
 
     def test_section_properties(self):
         pass

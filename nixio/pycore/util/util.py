@@ -91,23 +91,23 @@ def create_h5props(cls, attributes, types=None):
 
         def getter(self):
             value = self._h5obj.attrs.get(propname)
-            if type_:
+            if value is not None and type_:
                 value = type_(value)
             return value
 
         def setter(self, value):
-            if type_ and not isinstance(value, type_):
-                raise TypeError("Attribute {} requires type {} but {} "
-                                "was provided".format(propname, type_,
-                                                      type(value)))
-            if propname in ("name", "id") and propname in self._h5obj.attrs:
-                raise AttributeError("can't set attribute")
             if value is None:
                 if propname == "type":
                     raise AttributeError("type can't be None")
                 # Can't set H5Py attribute to None
                 # Deleting will return None on get
                 del self._h5obj.attrs[propname]
+            elif type_ and not isinstance(value, type_):
+                raise TypeError("Attribute {} requires type {} but {} "
+                                "was provided".format(propname, type_,
+                                                      type(value)))
+            elif propname in ("name", "id") and propname in self._h5obj.attrs:
+                raise AttributeError("can't set attribute")
             else:
                 self._h5obj.attrs[propname] = value
 
@@ -124,12 +124,10 @@ def create_h5props(cls, attributes, types=None):
         setattr(cls, attr, makeprop(attr, type_))
 
 
-def create_container_methods(cls, chcls, chclsname):
+def create_container_methods(cls, chcls, chclsname, container=None):
     # TODO: Better exception handling and messages
 
-    if chclsname == "block":
-        container = "data"
-    else:
+    if container is None:
         container = chclsname + "s"
 
     def id_or_name_getter(self, id_or_name):
@@ -167,4 +165,43 @@ def create_container_methods(cls, chcls, chclsname):
     setattr(cls, "_get_{}_by_pos".format(chclsname), pos_getter)
     setattr(cls, "_delete_{}_by_id".format(chclsname), deleter)
     setattr(cls, "_{}_count".format(chclsname), counter)
+
+
+def create_link_methods(cls, chcls, chclsname, container=None):
+
+    if container is None:
+        container = chclsname + "s"
+
+    def adder(self, id_or_name):
+        parent = self._h5obj.parent.parent
+        if is_uuid(id_or_name):
+            for h5obj in parent[container].values():
+                if h5obj.attrs["id"] == id_or_name:
+                    break
+            else:
+                raise KeyError("Group add {type}: "
+                               "{type} not found in parent Block!"
+                               .format(type=chcls.__name__))
+        else:
+            try:
+                h5obj = parent._h5obj[container][id_or_name]
+            except KeyError:
+                raise KeyError("Group add {type}: "
+                               "{type} not found in parent Block!"
+                               .format(type=chcls.__name__))
+
+        self._h5obj[container][h5obj.attrs["name"]] = h5obj
+
+    def containschecker(self, id_or_name):
+        if is_uuid(id_or_name):
+            for h5obj in self._h5obj[container]:
+                if h5obj.attrs["id"] == id_or_name:
+                    return True
+            else:
+                return False
+        else:
+            return id_or_name in self._h5obj[container]
+
+    setattr(cls, "_add_{}_by_id".format(chclsname), adder)
+    setattr(cls, "_has_{}_by_id".format(chclsname), containschecker)
 

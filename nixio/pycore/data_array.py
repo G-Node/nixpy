@@ -7,7 +7,7 @@
 # LICENSE file in the root of the Project.
 
 from . import util
-from .entity import EntityWithSources
+from .entity_with_sources import EntityWithSources
 
 
 class DataArray(EntityWithSources):
