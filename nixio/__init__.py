@@ -9,49 +9,11 @@
 from __future__ import (absolute_import, division, print_function)#, unicode_literals)
 
 try:
-    import nixio.core
-    from nixio.core import LinkType, Source, Section
-    from nixio.section import S
-
-    from nixio.file import FileMixin
-    from nixio.block import BlockMixin
-    from nixio.section import SectionMixin
-    from nixio.property import PropertyMixin
-    from nixio.group import GroupMixin
-    from nixio.data_array import (DataSetMixin, DataArrayMixin,
-                                  SetDimensionMixin, RangeDimensionMixin,
-                                  SampleDimensionMixin)
-    from nixio.source import SourceMixin
-    from nixio.tag import TagMixin
-    from nixio.multi_tag import MultiTagMixin
-    from nixio.entity_with_sources import EntityWithSourcesMixin
-
-    from nixio.util.inject import inject
-
-    inject((nixio.core.File,),  dict(FileMixin.__dict__))
-    inject((nixio.core.Section,), dict(SectionMixin.__dict__))
-    inject((nixio.core.Property,), dict(PropertyMixin.__dict__))
-    inject((nixio.core.Block,), dict(BlockMixin.__dict__))
-    inject((nixio.core.Group,), dict(GroupMixin.__dict__))
-    inject((nixio.core.DataArray,), dict(DataArrayMixin.__dict__))
-    inject((nixio.core.DataSet,), dict(DataSetMixin.__dict__))
-    inject((nixio.core.Tag,), dict(TagMixin.__dict__))
-    inject((nixio.core.MultiTag,), dict(MultiTagMixin.__dict__))
-    inject((nixio.core.Source, ), dict(SourceMixin.__dict__))
-    inject((nixio.core.SetDimension, ), dict(SetDimensionMixin.__dict__))
-    inject((nixio.core.RangeDimension, ), dict(RangeDimensionMixin.__dict__))
-    inject((nixio.core.SampledDimension, ), dict(SampleDimensionMixin.__dict__))
-    inject((nixio.core.DataArray,), dict(EntityWithSourcesMixin.__dict__))
-    inject((nixio.core.Tag,), dict(EntityWithSourcesMixin.__dict__))
-    inject((nixio.core.MultiTag,), dict(EntityWithSourcesMixin.__dict__))
-
-    del (FileMixin, BlockMixin, SectionMixin, PropertyMixin, GroupMixin,
-         DataSetMixin, DataArrayMixin, SetDimensionMixin, RangeDimensionMixin,
-         SampleDimensionMixin, SourceMixin, TagMixin, MultiTagMixin,
-         EntityWithSourcesMixin, inject)
-
+    import nixio.util.inject
+    from nixio.core import LinkType
 except ImportError:
     LinkType = None
+
 
 from nixio.pycore.file import File, FileMode
 from nixio.value import Value, DataType
