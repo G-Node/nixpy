@@ -6,13 +6,8 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
-try:
-    from nixio.core import Property
-except ImportError:
-    Property = None
-from nixio.util.inject import inject
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 
 class PropertyMixin(object):
@@ -34,5 +29,3 @@ class PropertyMixin(object):
         implemented or escaped
         """
         return hash(self.id)
-
-inject((Property,), dict(PropertyMixin.__dict__))

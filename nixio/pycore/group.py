@@ -6,6 +6,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
+from ..group import GroupMixin
 from .entity_with_sources import EntityWithSources
 from . import util
 from .data_array import DataArray
@@ -13,7 +14,7 @@ from .tag import Tag
 from .multi_tag import MultiTag
 
 
-class Group(EntityWithSources):
+class Group(EntityWithSources, GroupMixin):
 
     def __init__(self, h5obj):
         super(Group, self).__init__(h5obj)

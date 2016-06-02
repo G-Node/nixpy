@@ -8,11 +8,12 @@
 
 import numpy as np
 from .entity_with_sources import EntityWithSources
+from ..data_array import DataSetMixin
 from .util import util
 from ..value import DataType
 
 
-class DataSet(EntityWithSources):
+class DataSet(EntityWithSources, DataSetMixin):
 
     def __init__(self, h5obj):
         super(DataSet, self).__init__(h5obj)

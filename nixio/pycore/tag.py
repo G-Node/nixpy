@@ -7,10 +7,11 @@
 # LICENSE file in the root of the Project.
 
 from .entity_with_sources import EntityWithSources
-from . import util
+from ..tag import TagMixin
+from ..entity_with_sources import EntityWithSourcesMixin
 
 
-class Tag(EntityWithSources):
+class Tag(EntityWithSources, TagMixin, EntityWithSourcesMixin):
 
     def __init__(self, h5obj):
         super(Tag, self).__init__(h5obj)

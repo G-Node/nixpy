@@ -8,12 +8,14 @@
 
 from . import util
 from .data_set import DataSet
+from ..data_array import DataArrayMixin
+from ..entity_with_sources import EntityWithSourcesMixin
 from ..value import DataType
 from .dimensions import (SampledDimension, RangeDimension, SetDimension,
                          DimensionType)
 
 
-class DataArray(DataSet):
+class DataArray(DataSet, DataArrayMixin, EntityWithSourcesMixin):
 
     def __init__(self, h5obj):
         super(DataArray, self).__init__(h5obj)

@@ -7,11 +7,12 @@
 # LICENSE file in the root of the Project.
 
 from .entity_with_metadata import EntityWithMetadata
+from ..source import SourceMixin
 from . import util
 from . import exceptions
 
 
-class Source(EntityWithMetadata):
+class Source(EntityWithMetadata, SourceMixin):
 
     def __init__(self, h5obj):
         super(Source, self).__init__(h5obj)

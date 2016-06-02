@@ -7,12 +7,13 @@
 # LICENSE file in the root of the Project.
 
 from .entity import NamedEntity
+from ..section import SectionMixin
 from .util import util
 from . import Property
 from . import exceptions
 
 
-class Section(NamedEntity):
+class Section(NamedEntity, SectionMixin):
 
     def __init__(self, h5obj):
         super(Section, self).__init__(h5obj)

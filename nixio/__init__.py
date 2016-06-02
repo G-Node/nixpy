@@ -9,41 +9,58 @@
 from __future__ import (absolute_import, division, print_function)#, unicode_literals)
 
 try:
-    import nixio.core as ccore
+    import nixio.core
     from nixio.core import LinkType, Source, Section
+    from nixio.section import S
+
+    from nixio.file import FileMixin
+    from nixio.block import BlockMixin
+    from nixio.section import SectionMixin
+    from nixio.property import PropertyMixin
+    from nixio.group import GroupMixin
+    from nixio.data_array import (DataSetMixin, DataArrayMixin,
+                                  SetDimensionMixin, RangeDimensionMixin,
+                                  SampleDimensionMixin)
+    from nixio.source import SourceMixin
+    from nixio.tag import TagMixin
+    from nixio.multi_tag import MultiTagMixin
+    from nixio.entity_with_sources import EntityWithSourcesMixin
+
+    from nixio.util.inject import inject
+
+    inject((nixio.core.File,),  dict(FileMixin.__dict__))
+    inject((nixio.core.Section,), dict(SectionMixin.__dict__))
+    inject((nixio.core.Property,), dict(PropertyMixin.__dict__))
+    inject((nixio.core.Block,), dict(BlockMixin.__dict__))
+    inject((nixio.core.Group,), dict(GroupMixin.__dict__))
+    inject((nixio.core.DataArray,), dict(DataArrayMixin.__dict__))
+    inject((nixio.core.DataSet,), dict(DataSetMixin.__dict__))
+    inject((nixio.core.Tag,), dict(TagMixin.__dict__))
+    inject((nixio.core.MultiTag,), dict(MultiTagMixin.__dict__))
+    inject((nixio.core.Source, ), dict(SourceMixin.__dict__))
+    inject((nixio.core.SetDimension, ), dict(SetDimensionMixin.__dict__))
+    inject((nixio.core.RangeDimension, ), dict(RangeDimensionMixin.__dict__))
+    inject((nixio.core.SampledDimension, ), dict(SampleDimensionMixin.__dict__))
+    inject((nixio.core.DataArray,), dict(EntityWithSourcesMixin.__dict__))
+    inject((nixio.core.Tag,), dict(EntityWithSourcesMixin.__dict__))
+    inject((nixio.core.MultiTag,), dict(EntityWithSourcesMixin.__dict__))
+
+    del (FileMixin, BlockMixin, SectionMixin, PropertyMixin, GroupMixin,
+         DataSetMixin, DataArrayMixin, SetDimensionMixin, RangeDimensionMixin,
+         SampleDimensionMixin, SourceMixin, TagMixin, MultiTagMixin,
+         EntityWithSourcesMixin, inject)
+
 except ImportError:
-    ccore = None
-    # TODO: The following will be replaced by Python classes
     LinkType = None
-    Source = None
-    Section = None
 
 from nixio.pycore.file import File, FileMode
 from nixio.value import Value, DataType
 from nixio.pycore.dimensions import DimensionType
 
-from nixio.block import BlockMixin
-from nixio.file import FileMixin
-from nixio.section import SectionMixin
-from nixio.value import Value, DataType
-from nixio.property import PropertyMixin
-from nixio.source import SourceMixin
-from nixio.data_array import DataSetMixin
-from nixio.data_array import DataArrayMixin
-from nixio.tag import TagMixin
-from nixio.multi_tag import MultiTagMixin
-from nixio.group import GroupMixin
-from nixio.entity_with_sources import (DataArraySourcesMixin,
-                                       MultiTagSourcesMixin, TagSourcesMixin)
-
 from nixio.section import S
 
-__all__ = ("File", "FileMode", "DataType", "Value", "LinkType", "DimensionType")
 
-del (BlockMixin, FileMixin, SectionMixin, PropertyMixin, SourceMixin,
-     DataArrayMixin, TagMixin)
-del (MultiTagMixin, DataArraySourcesMixin, MultiTagSourcesMixin,
-     TagSourcesMixin, GroupMixin)
+__all__ = ("File", "FileMode", "DataType", "Value", "LinkType", "DimensionType")
 
 __author__ = ('Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe,'
               ' Balint Morvai')

@@ -6,20 +6,10 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
-import sys
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import nixio.util.find as finders
-try:
-    from nixio.core import Source as CSource
-except ImportError:
-    CSource = None
-from nixio.util.inject import inject
-# from nixio.util.proxy_list import ProxyList
-
-from nixio.pycore import Source
-
 from nixio.block import SourceProxyList
 
 try:
@@ -69,5 +59,3 @@ class SourceMixin(object):
         """
         return hash(self.id)
 
-
-inject((Source, CSource), dict(SourceMixin.__dict__))

@@ -9,12 +9,7 @@
 import numpy as np
 from .util import util
 from .data_set import DataType
-
-
-class DimensionType(object):
-    Sample = "sample"
-    Range = "range"
-    Set = "set"
+from ..dimension_type import DimensionType
 
 
 class Dimension(object):

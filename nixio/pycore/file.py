@@ -15,6 +15,13 @@ from . import Block
 from . import exceptions
 from . import Section
 
+from ..file import FileMixin
+
+try:
+    from nixio.core import File as CFile
+except ImportError:
+    CFile = None
+
 
 class FileMode(object):
     ReadOnly = 'r'
@@ -22,7 +29,7 @@ class FileMode(object):
     Overwrite = 'w'
 
 
-class File(object):
+class File(FileMixin):
 
     def __init__(self, path, mode=FileMode.ReadWrite):
         self._h5file = h5py.File(name=path, mode=mode)
@@ -36,8 +43,17 @@ class File(object):
         self.metadata = self._root.require_group("metadata")
 
     @classmethod
-    def _open(cls, path, mode=FileMode.ReadWrite):
-        return cls(path, mode)
+    def open(cls, path, mode, backend="hdf5"):
+        if backend == "hdf5":
+            if CFile:
+                return CFile.open(path, mode)
+            else:
+                # TODO: Brief instructions or web URL for building C++ files?
+                raise RuntimeError("HDF5 backend is not available.")
+        elif backend == "h5py":
+            return cls(path, mode)
+        else:
+            raise ValueError("Valid backends are 'hdf5' and 'h5py'.")
 
     def force_created_at(self, t):
         self.created_at = t

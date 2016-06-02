@@ -6,13 +6,9 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
-try:
-    from nixio.core import Tag
-except ImportError:
-    Tag = None
-from nixio.util.inject import inject
 from nixio.util.proxy_list import ProxyList, RefProxyList
 
 
@@ -66,5 +62,3 @@ class TagMixin(object):
             setattr(self, "_features", FeatureProxyList(self))
         return self._features
 
-
-inject((Tag,), dict(TagMixin.__dict__))

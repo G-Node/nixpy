@@ -8,12 +8,11 @@
 
 from __future__ import absolute_import
 from .entity_with_metadata import EntityWithMetadata
-from . import util
-from . import exceptions
-from . import Group, DataArray, MultiTag, Tag, Source
+from ..block import BlockMixin
+from . import util, exceptions, Group, DataArray, MultiTag, Tag, Source
 
 
-class Block(EntityWithMetadata):
+class Block(EntityWithMetadata, BlockMixin):
 
     def __init__(self, h5obj):
         super(Block, self).__init__(h5obj)
