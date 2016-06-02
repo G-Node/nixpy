@@ -28,10 +28,46 @@ class Group(EntityWithSources, GroupMixin):
         newentity._h5obj.create_group("multi_tags")
         return newentity
 
+    # DataArray
+    def _get_data_array_by_id(self, id_or_name):
+        return DataArray(util.id_or_name_getter(self._h5obj["data_arrays"],
+                                                id_or_name))
 
-util.create_container_methods(Group, DataArray, "data_array")
-util.create_container_methods(Group, Tag, "tag")
-util.create_container_methods(Group, MultiTag, "multi_tag")
+    def _get_data_array_by_pos(self, pos):
+        return DataArray(util.pos_getter(self._h5obj["data_arrays"], pos))
+
+    def _delete_data_array_by_id(self, id_or_name):
+        util.deleter(self._h5obj["data_arrays"], id_or_name)
+
+    def _data_array_count(self):
+        return len(self._h5obj["data_arrays"])
+
+    # MultiTag
+    def _get_multi_tag_by_id(self, id_or_name):
+        return MultiTag(util.id_or_name_getter(self._h5obj["multi_tags"],
+                                               id_or_name))
+
+    def _get_multi_tag_by_pos(self, pos):
+        return MultiTag(util.pos_getter(self._h5obj["multi_tags"], pos))
+
+    def _delete_multi_tag_by_id(self, id_or_name):
+        util.deleter(self._h5obj["multi_tags"], id_or_name)
+
+    def _multi_tag_count(self):
+        return len(self._h5obj["multi_tags"])
+
+    # Tag
+    def _get_tag_by_id(self, id_or_name):
+        return Tag(util.id_or_name_getter(self._h5obj["tags"], id_or_name))
+
+    def _get_tag_by_pos(self, pos):
+        return Tag(util.pos_getter(self._h5obj["tags"], pos))
+
+    def _delete_tag_by_id(self, id_or_name):
+        util.deleter(self._h5obj["tags"], id_or_name)
+
+    def _tag_count(self):
+        return len(self._h5obj["tags"])
 
 util.create_link_methods(Group, DataArray, "data_array")
 util.create_link_methods(Group, Tag, "tag")

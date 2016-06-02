@@ -37,6 +37,19 @@ class Block(EntityWithMetadata, BlockMixin):
         da = DataArray._create_new(data_arrays, name, type_, data_type, shape)
         return da
 
+    def _get_data_array_by_id(self, id_or_name):
+        return DataArray(util.id_or_name_getter(self._h5obj["data_arrays"],
+                                                id_or_name))
+
+    def _get_data_array_by_pos(self, pos):
+        return DataArray(util.pos_getter(self._h5obj["data_arrays"], pos))
+
+    def _delete_data_array_by_id(self, id_or_name):
+        util.deleter(self._h5obj["data_arrays"], id_or_name)
+
+    def _data_array_count(self):
+        return len(self._h5obj["data_arrays"])
+
     # MultiTag
     def create_multi_tag(self, name, type_, positions):
         util.check_entity_name_and_type(name, type_)
@@ -49,6 +62,19 @@ class Block(EntityWithMetadata, BlockMixin):
         mtag = MultiTag._create_new(multi_tags, name, type_, positions)
         return mtag
 
+    def _get_multi_tag_by_id(self, id_or_name):
+        return MultiTag(util.id_or_name_getter(self._h5obj["multi_tags"],
+                                                id_or_name))
+
+    def _get_multi_tag_by_pos(self, pos):
+        return MultiTag(util.pos_getter(self._h5obj["multi_tags"], pos))
+
+    def _delete_multi_tag_by_id(self, id_or_name):
+        util.deleter(self._h5obj["multi_tags"], id_or_name)
+
+    def _multi_tag_count(self):
+        return len(self._h5obj["multi_tags"])
+
     # Tag
     def create_tag(self, name, type_, position):
         util.check_entity_name_and_type(name, type_)
@@ -57,6 +83,18 @@ class Block(EntityWithMetadata, BlockMixin):
             raise exceptions.DuplicateName("create_tag")
         tag = Tag._create_new(tags, name, type_, position)
         return tag
+
+    def _get_tag_by_id(self, id_or_name):
+        return Tag(util.id_or_name_getter(self._h5obj["tags"], id_or_name))
+
+    def _get_tag_by_pos(self, pos):
+        return Tag(util.pos_getter(self._h5obj["tags"], pos))
+
+    def _delete_tag_by_id(self, id_or_name):
+        util.deleter(self._h5obj["tags"], id_or_name)
+
+    def _tag_count(self):
+        return len(self._h5obj["tags"])
 
     # Source
     def create_source(self, name, type_):
@@ -67,6 +105,19 @@ class Block(EntityWithMetadata, BlockMixin):
         src = Source._create_new(sources, name, type_)
         return src
 
+    def _get_source_by_id(self, id_or_name):
+        return Source(util.id_or_name_getter(self._h5obj["sources"],
+                                             id_or_name))
+
+    def _get_source_by_pos(self, pos):
+        return Source(util.pos_getter(self._h5obj["sources"], pos))
+
+    def _delete_source_by_id(self, id_or_name):
+        util.deleter(self._h5obj["sources"], id_or_name)
+
+    def _source_count(self):
+        return len(self._h5obj["sources"])
+
     # Group
     def create_group(self, name, type_):
         util.check_entity_name_and_type(name, type_)
@@ -76,9 +127,14 @@ class Block(EntityWithMetadata, BlockMixin):
         grp = Group._create_new(groups, name, type_)
         return grp
 
+    def _get_group_by_id(self, id_or_name):
+        return Group(util.id_or_name_getter(self._h5obj["groups"], id_or_name))
 
-util.create_container_methods(Block, DataArray, "data_array")
-util.create_container_methods(Block, Tag, "tag")
-util.create_container_methods(Block, MultiTag, "multi_tag")
-util.create_container_methods(Block, Group, "group")
-util.create_container_methods(Block, Source, "source")
+    def _get_group_by_pos(self, pos):
+        return Group(util.pos_getter(self._h5obj["groups"], pos))
+
+    def _delete_group_by_id(self, id_or_name):
+        util.deleter(self._h5obj["groups"], id_or_name)
+
+    def _group_count(self):
+        return len(self._h5obj["groups"])

@@ -22,15 +22,19 @@ except:
 class BlockProxyList(ProxyList):
 
     def __init__(self, obj):
-        super(BlockProxyList, self).__init__(obj, "_block_count", "_get_block_by_id",
-                                             "_get_block_by_pos", "_delete_block_by_id")
+        super(BlockProxyList, self).__init__(obj, "_block_count",
+                                             "_get_block_by_id",
+                                             "_get_block_by_pos",
+                                             "_delete_block_by_id")
 
 
 class SectionProxyList(ProxyList):
 
     def __init__(self, obj):
-        super(SectionProxyList, self).__init__(obj, "_section_count", "_get_section_by_id",
-                                               "_get_section_by_pos", "_delete_section_by_id")
+        super(SectionProxyList, self).__init__(obj, "_section_count",
+                                               "_get_section_by_id",
+                                               "_get_section_by_pos",
+                                               "_delete_section_by_id")
 
 
 class FileMixin(object):

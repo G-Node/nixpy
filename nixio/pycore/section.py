@@ -25,6 +25,7 @@ class Section(NamedEntity, SectionMixin):
         newentity._h5obj.create_group("properties")
         return newentity
 
+    # Section
     def create_section(self, name, type_):
         util.check_entity_name_and_type(name, type_)
         sections = self._h5obj["sections"]
@@ -32,6 +33,43 @@ class Section(NamedEntity, SectionMixin):
             raise exceptions.DuplicateName("create_section")
         sec = Section._create_new(sections, name, type_)
         return sec
+
+    def _get_section_by_id(self, id_or_name):
+        return Section(util.id_or_name_getter(self._h5obj["sections"],
+                                              id_or_name))
+
+    def _get_section_by_pos(self, pos):
+        return Section(util.pos_getter(self._h5obj["sections"], pos))
+
+    def _delete_section_by_id(self, id_or_name):
+        util.deleter(self._h5obj["sections"], id_or_name)
+
+    def _section_count(self):
+        return len(self._h5obj["sections"])
+
+    # Property
+    def create_property(self, name, dtype):
+        properties = self._h5obj["properties"]
+        if name in properties:
+            raise exceptions.DuplicateName("create_property")
+        prop = Property._create_new(properties)
+        return prop
+
+    def has_property_by_name(self, name):
+        return name in self._h5obj["properties"]
+
+    def _get_property_by_id(self, id_or_name):
+        return Property(util.id_or_name_getter(self._h5obj["properties"],
+                                               id_or_name))
+
+    def _get_property_by_pos(self, pos):
+        return Property(util.pos_getter(self._h5obj["properties"], pos))
+
+    def _delete_property_by_id(self, id_or_name):
+        util.deleter(self._h5obj["properties"], id_or_name)
+
+    def _property_count(self):
+        return len(self._h5obj["properties"])
 
     @property
     def parent(self):
@@ -58,19 +96,6 @@ class Section(NamedEntity, SectionMixin):
         # TODO: Complete the link setter
         pass
 
-    def create_property(self, name, dtype):
-        properties = self._h5obj["properties"]
-        if name in properties:
-            raise exceptions.DuplicateName("create_property")
-        prop = Property._create_new(properties)
-        return prop
-
-    def has_property_by_name(self, name):
-        return name in self._h5obj["properties"]
-
-    def get_property_by_name(self, name):
-        return self._h5obj["properties"].get(name)
-
     def inherited_properties(self):
         properties = [Property(h5prop)
                       for h5prop in self._h5obj["properties"].values()]
@@ -78,7 +103,4 @@ class Section(NamedEntity, SectionMixin):
             properties.append(self.link.inherited_properties)
         return properties
 
-
 util.create_h5props(Section, ("mapping", "repository"), (str, str))
-util.create_container_methods(Section, Section, "section")
-util.create_container_methods(Section, Property, "property", "properties")

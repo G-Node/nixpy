@@ -61,6 +61,7 @@ class File(FileMixin):
     def force_updated_at(self, t):
         self.updated_at = t
 
+    # Block
     def create_block(self, name, type_):
         util.check_entity_name_and_type(name, type_)
         if name in self._data:
@@ -68,6 +69,19 @@ class File(FileMixin):
         block = Block._create_new(self._data, name, type_)
         return block
 
+    def _get_block_by_id(self, id_or_name):
+        return Block(util.id_or_name_getter(self._data, id_or_name))
+
+    def _get_block_by_pos(self, pos):
+        return Block(util.pos_getter(self._data, pos))
+
+    def _delete_block_by_id(self, id_or_name):
+        util.deleter(self._data, id_or_name)
+
+    def _block_count(self):
+        return len(self._data)
+
+    # Section
     def create_section(self, name, type_):
         util.check_entity_name_and_type(name, type_)
         if name in self.metadata:
@@ -75,17 +89,18 @@ class File(FileMixin):
         sec = Section._create_new(self.metadata, name, type_)
         return sec
 
+    def _get_section_by_id(self, id_or_name):
+        return Section(util.id_or_name_getter(self.metadata,
+                                              id_or_name))
+
+    def _get_section_by_pos(self, pos):
+        return Section(util.pos_getter(self.metadata, pos))
+
+    def _delete_section_by_id(self, id_or_name):
+        util.deleter(self.metadata, id_or_name)
+
     def _section_count(self):
-        pass
-
-    def _get_section_by_id(self):
-        pass
-
-    def _get_section_by_pos(self):
-        pass
-
-    def _delete_section_by_id(self):
-        pass
+        return len(self.metadata)
 
     def is_open(self):
         pass
@@ -98,5 +113,3 @@ class File(FileMixin):
 
 util.create_h5props(File, ["version", "format", "created_at", "updated_at"],
                     [tuple, str, int, int])
-util.create_container_methods(File, Block, "block", "data")
-util.create_container_methods(File, Section, "section", "metadata")

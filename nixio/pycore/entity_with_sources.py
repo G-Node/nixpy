@@ -23,6 +23,19 @@ class EntityWithSources(EntityWithMetadata):
         newentity._h5obj.create_group("sources")
         return newentity
 
-util.create_container_methods(EntityWithSources, Source, "source")
+    # Source
+    def _get_source_by_id(self, id_or_name):
+        return Source(util.id_or_name_getter(self._h5obj["sources"], id_or_name))
+
+    def _get_source_by_pos(self, pos):
+        return Source(util.pos_getter(self._h5obj["sources"], pos))
+
+    def _delete_source_by_id(self, id_or_name):
+        util.deleter(self._h5obj["sources"], id_or_name)
+
+    def _source_count(self):
+        return len(self._h5obj["sources"])
+
+
 util.create_link_methods(EntityWithSources, Source, "source")
 EntityWithSources._remove_source_by_id = EntityWithSources._delete_source_by_id

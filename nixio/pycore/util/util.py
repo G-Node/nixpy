@@ -111,47 +111,35 @@ def create_h5props(cls, attributes, types=None):
         setattr(cls, attr, makeprop(attr, type_))
 
 
-def create_container_methods(cls, chcls, chclsname, container=None):
-    # TODO: Better exception handling and messages
-
-    if container is None:
-        container = chclsname + "s"
-
-    def id_or_name_getter(self, id_or_name):
-        if is_uuid(id_or_name):
-            for h5obj in self._h5obj[container].values():
-                if h5obj.attrs["id"] == id_or_name:
-                    break
-            else:
-                raise ValueError
+def id_or_name_getter(container, id_or_name):
+    if is_uuid(id_or_name):
+        for h5obj in container.values():
+            if h5obj.attrs["id"] == id_or_name:
+                break
         else:
-            try:
-                h5obj = self._h5obj[container][id_or_name]
-            except Exception:
-                raise ValueError
-        return chcls(h5obj)
-
-    def pos_getter(self, pos):
-        obj = list(self._h5obj[container].values())[pos]
-        return chcls(obj)
-
-    def deleter(self, id_or_name):
-        if is_uuid(id_or_name):
-            name = id_or_name_getter(self, id_or_name).name
-        else:
-            name = id_or_name
+            raise ValueError
+    else:
         try:
-            del self._h5obj[container][name]
+            h5obj = container[id_or_name]
         except Exception:
             raise ValueError
+    return h5obj
 
-    def counter(self):
-        return len(self._h5obj[container])
 
-    setattr(cls, "_get_{}_by_id".format(chclsname), id_or_name_getter)
-    setattr(cls, "_get_{}_by_pos".format(chclsname), pos_getter)
-    setattr(cls, "_delete_{}_by_id".format(chclsname), deleter)
-    setattr(cls, "_{}_count".format(chclsname), counter)
+def pos_getter(container, pos):
+    obj = list(container.values())[pos]
+    return obj
+
+
+def deleter(container, id_or_name):
+    if is_uuid(id_or_name):
+        name = id_or_name_getter(container, id_or_name).name
+    else:
+        name = id_or_name
+    try:
+        del container[name]
+    except Exception:
+        raise ValueError
 
 
 def create_link_methods(cls, chcls, chclsname, container=None):
