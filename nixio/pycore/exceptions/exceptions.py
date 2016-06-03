@@ -19,3 +19,12 @@ class InvalidUnit(Exception):
     def __init__(self, what, where):
         self.message = "InvalidUnit: {} evoked at: {}".format(what, where)
         super(InvalidUnit, self).__init__(self.message)
+
+
+class InvalidAttrType(TypeError):
+
+    def __init__(self, type_, value):
+        self.message = ("Attribute requires type {} but {} "
+                        "was provided.".format(type_, type(value)))
+        super(InvalidAttrType, self).__init__(self.message)
+

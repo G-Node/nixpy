@@ -13,28 +13,32 @@ from .util import util
 
 class EntityWithSources(EntityWithMetadata):
 
-    def __init__(self, h5obj):
-        super(EntityWithSources, self).__init__(h5obj)
+    def __init__(self, h5group):
+        super(EntityWithSources, self).__init__(h5group)
 
     @classmethod
     def _create_new(cls, parent, name, type_):
         newentity = super(EntityWithSources, cls)._create_new(parent,
                                                               name, type_)
-        newentity._h5obj.create_group("sources")
+        newentity._h5group.open_group("sources")
         return newentity
 
     # Source
     def _get_source_by_id(self, id_or_name):
-        return Source(util.id_or_name_getter(self._h5obj["sources"], id_or_name))
+        sources = self._h5group.open_group("sources")
+        return Source(sources.get_by_id(id_or_name))
 
     def _get_source_by_pos(self, pos):
-        return Source(util.pos_getter(self._h5obj["sources"], pos))
+        sources = self._h5group.open_group("sources")
+        return Source(sources.get_by_pos(pos))
 
     def _delete_source_by_id(self, id_or_name):
-        util.deleter(self._h5obj["sources"], id_or_name)
+        sources = self._h5group.open_group("sources")
+        sources.delete(id_or_name)
 
     def _source_count(self):
-        return len(self._h5obj["sources"])
+        sources = self._h5group.open_group("sources")
+        return len(sources)
 
 
 util.create_link_methods(EntityWithSources, Source, "source")

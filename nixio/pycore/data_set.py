@@ -15,8 +15,8 @@ from ..value import DataType
 
 class DataSet(EntityWithSources, DataSetMixin):
 
-    def __init__(self, h5obj):
-        super(DataSet, self).__init__(h5obj)
+    def __init__(self, h5group):
+        super(DataSet, self).__init__(h5group)
 
     @classmethod
     def _create_new(cls, parent, name, type_, data_type, shape):
@@ -24,13 +24,13 @@ class DataSet(EntityWithSources, DataSetMixin):
         maxshape = (None,) * len(shape)
         if data_type == DataType.String:
             data_type = util.vlen_str_dtype
-        newentity._h5obj.create_dataset("data", shape=shape, dtype=data_type,
-                                        chunks=True, maxshape=maxshape)
+        newentity._h5group.create_dataset("data", shape=shape, dtype=data_type,
+                                          chunks=True, maxshape=maxshape)
         return newentity
 
     def _write_data(self, data, count, offset):
         # TODO: Check shape and flags
-        dataset = self._h5obj["data"]
+        dataset = self._h5group.group["data"]
         if isinstance(data, np.ndarray) and len(data):
             if isinstance(data[0], np.bytes_):
                 # TODO: convert string types
@@ -50,7 +50,7 @@ class DataSet(EntityWithSources, DataSetMixin):
 
     def _read_data(self, data, count, offset):
         # TODO: Check shape and flags
-        dataset = self._h5obj["data"]
+        dataset = self._h5group.group["data"]
         if count and offset:
             datashape = data.shape
             sl = []
@@ -70,11 +70,11 @@ class DataSet(EntityWithSources, DataSetMixin):
 
     @property
     def data_extent(self):
-        return self._h5obj["data"].shape
+        return self._h5group.group["data"].shape
 
     @data_extent.setter
     def data_extent(self, extent):
-        self._h5obj["data"].resize(extent)
+        self._h5group.group["data"].resize(extent)
 
     def _get_dtype(self):
         pass

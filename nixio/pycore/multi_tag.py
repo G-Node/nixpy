@@ -13,8 +13,8 @@ from ..entity_with_sources import EntityWithSourcesMixin
 
 class MultiTag(EntityWithSources, MultiTagMixin, EntityWithSourcesMixin):
 
-    def __init__(self, h5obj):
-        super(MultiTag, self).__init__(h5obj)
+    def __init__(self, h5group):
+        super(MultiTag, self).__init__(h5group)
         # TODO: Validate data containers
 
     @classmethod

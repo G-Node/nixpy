@@ -13,8 +13,8 @@ from ..entity_with_sources import EntityWithSourcesMixin
 
 class Tag(EntityWithSources, TagMixin, EntityWithSourcesMixin):
 
-    def __init__(self, h5obj):
-        super(Tag, self).__init__(h5obj)
+    def __init__(self, h5group):
+        super(Tag, self).__init__(h5group)
         # TODO: Validate data containers
 
     @classmethod

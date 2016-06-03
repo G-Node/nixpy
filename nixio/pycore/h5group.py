@@ -14,58 +14,108 @@ class H5Group(object):
     def __init__(self, parent, name, create=False):
         self.parent = parent
         self.name = name
-        self.h5obj = None
+        self.group = None
         if create or name in self.parent:
             self._create_h5obj()
 
     def _create_h5obj(self):
-        self.h5obj = self.parent.require_group(self.name)
+        self.group = self.parent.require_group(self.name)
 
-    def create_group(self, name, create=False):
+    @classmethod
+    def _create_from_h5obj(cls, h5obj):
+        parent = h5obj.parent
+        name = h5obj.name
+        return cls(parent, name)
+
+    def open_group(self, name, create=False):
+        """
+        Returns a new H5Group with the given name contained in the current group.
+        If the current group does not exist in the file, it is automatically
+        created.
+
+        :param name: the name of the group
+        :param create: creates the child group in the file if it does not exist
+        :return: a new H5Group object
+        """
         self._create_h5obj()
-        return H5Group(self.h5obj, name, create)
+        return H5Group(self.group, name, create)
+
+    def create_dataset(self, *args, **kwargs):
+        """
+        Passthrough method. Calls h5py.Group.create_dataset method with given
+        arguments but does not return the new object.
+        """
+        self._create_h5obj()
+        self.group.create_dataset(*args, **kwargs)
+
+    def get_data(self, name):
+        """
+        Returns the data contained in the dataset identified by 'name', or None
+        if the a dataset of that name does not exist in the Group.
+
+        :param name: The name of the dataset
+        :return: The data contained in the dataset as a numpy array or None
+        """
+        if name not in self.group:
+            return tuple()
+
+        dset = self.group[name]
+        # TODO: Error if dset is Group?
+        return dset[:]
 
     def get_by_id(self, id_or_name):
-        if not self.h5obj:
+        if not self.group:
             raise ValueError
         if util.is_uuid(id_or_name):
-            for item in self.h5obj.values():
+            for item in self.group.values():
                 if item.attrs["id"] == id_or_name:
                     break
             else:
                 raise ValueError
         else:
             try:
-                item = self.h5obj[id_or_name]
+                item = self.group[id_or_name]
             except Exception:
                 raise ValueError
-        return item
+        return self._create_from_h5obj(item)
 
-    def pos_getter(self, pos):
-        if not self.h5obj:
+    def get_by_pos(self, pos):
+        if not self.group:
             raise ValueError
-        return list(self.h5obj.values())[pos]
+        return self._create_from_h5obj(list(self.group.values())[pos])
 
-    def deleter(self, id_or_name):
+    def delete(self, id_or_name):
         if util.is_uuid(id_or_name):
             name = self.get_by_id(id_or_name).name
         else:
             name = id_or_name
         try:
-            del self.h5obj[name]
+            del self.group[name]
         except Exception:
             raise ValueError
         # Delete if empty
-        if not len(self.h5obj):
-            del self.h5obj
-            self.h5obj = None
+        if not len(self.group):
+            del self.group
+            self.group = None
 
     def set_attr(self, name, value):
         self._create_h5obj()
-        self.h5obj.attrs[name] = value
+        if value is None:
+            del self.group.attrs[name]
+        else:
+            self.group.attrs[name] = value
 
     def get_attr(self, name):
-        return self.h5obj.attrs[name]
+        return self.group.attrs.get(name)
 
     def __contains__(self, item):
-        return item in self.h5obj
+        if self.group is None:
+            return False
+        return item in self.group
+
+    def __len__(self):
+        if self.group is None:
+            return 0
+        else:
+            return len(self.group)
+

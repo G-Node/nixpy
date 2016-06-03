@@ -35,14 +35,13 @@ class File(FileMixin):
 
     def __init__(self, path, mode=FileMode.ReadWrite):
         self._h5file = h5py.File(name=path, mode=mode)
-        self._h5obj = self._h5file  # convenience synonym
         self.format = "nix"
         self.version = (1, 0, 0)
         self.created_at = util.now()
         self.updated_at = util.now()
         self._root = H5Group(self._h5file, "/", create=True)
-        self._data = self._root.create_group("data", create=True)
-        self.metadata = self._root.create_group("metadata", create=True)
+        self._data = self._root.open_group("data", create=True)
+        self.metadata = self._root.open_group("metadata", create=True)
 
     @classmethod
     def open(cls, path, mode, backend="hdf5"):
@@ -72,13 +71,13 @@ class File(FileMixin):
         return block
 
     def _get_block_by_id(self, id_or_name):
-        return Block(util.id_or_name_getter(self._data, id_or_name))
+        return Block(self._data.get_by_id(id_or_name))
 
     def _get_block_by_pos(self, pos):
-        return Block(util.pos_getter(self._data, pos))
+        return Block(self._data.get_by_pos(pos))
 
     def _delete_block_by_id(self, id_or_name):
-        util.deleter(self._data, id_or_name)
+        self._data.delete(id_or_name)
 
     def _block_count(self):
         return len(self._data)
@@ -113,5 +112,3 @@ class File(FileMixin):
     def validate(self):
         pass
 
-# util.create_h5props(File, ["version", "format", "created_at", "updated_at"],
-#                     [tuple, str, int, int])

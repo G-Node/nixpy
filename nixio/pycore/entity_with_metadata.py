@@ -12,8 +12,8 @@ from .section import Section
 
 class EntityWithMetadata(NamedEntity):
 
-    def __init__(self, h5obj):
-        super(EntityWithMetadata, self).__init__(h5obj)
+    def __init__(self, h5group):
+        super(EntityWithMetadata, self).__init__(h5group)
         # TODO: Additional validation for metadata
 
     @classmethod
@@ -24,4 +24,4 @@ class EntityWithMetadata(NamedEntity):
 
     @property
     def metadata(self):
-        return Section(self._h5obj["metadata"])
+        return Section(self._h5group["metadata"])

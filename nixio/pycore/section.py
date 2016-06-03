@@ -15,65 +15,65 @@ from . import exceptions
 
 class Section(NamedEntity, SectionMixin):
 
-    def __init__(self, h5obj):
-        super(Section, self).__init__(h5obj)
+    def __init__(self, h5group):
+        super(Section, self).__init__(h5group)
 
     @classmethod
     def _create_new(cls, parent, name, type_):
         newentity = super(Section, cls)._create_new(parent, name, type_)
-        newentity._h5obj.create_group("sections")
-        newentity._h5obj.create_group("properties")
+        newentity._group.open_group("sections")
+        newentity._group.open_group("properties")
         return newentity
 
     # Section
     def create_section(self, name, type_):
         util.check_entity_name_and_type(name, type_)
-        sections = self._h5obj["sections"]
+        sections = self._h5group["sections"]
         if name in sections:
             raise exceptions.DuplicateName("create_section")
         sec = Section._create_new(sections, name, type_)
         return sec
 
     def _get_section_by_id(self, id_or_name):
-        return Section(util.id_or_name_getter(self._h5obj["sections"],
+        return Section(util.id_or_name_getter(self._h5group["sections"],
                                               id_or_name))
 
     def _get_section_by_pos(self, pos):
-        return Section(util.pos_getter(self._h5obj["sections"], pos))
+        return Section(util.pos_getter(self._h5group["sections"], pos))
 
     def _delete_section_by_id(self, id_or_name):
-        util.deleter(self._h5obj["sections"], id_or_name)
+        util.deleter(self._h5group["sections"], id_or_name)
 
     def _section_count(self):
-        return len(self._h5obj["sections"])
+        return len(self._h5group["sections"])
 
     # Property
     def create_property(self, name, dtype):
-        properties = self._h5obj["properties"]
+        properties = self._h5group["properties"]
         if name in properties:
             raise exceptions.DuplicateName("create_property")
         prop = Property._create_new(properties)
         return prop
 
     def has_property_by_name(self, name):
-        return name in self._h5obj["properties"]
+        return name in self._h5group["properties"]
 
     def _get_property_by_id(self, id_or_name):
-        return Property(util.id_or_name_getter(self._h5obj["properties"],
+        return Property(util.id_or_name_getter(self._h5group["properties"],
                                                id_or_name))
 
     def _get_property_by_pos(self, pos):
-        return Property(util.pos_getter(self._h5obj["properties"], pos))
+        return Property(util.pos_getter(self._h5group["properties"], pos))
 
     def _delete_property_by_id(self, id_or_name):
-        util.deleter(self._h5obj["properties"], id_or_name)
+        util.deleter(self._h5group["properties"], id_or_name)
 
     def _property_count(self):
-        return len(self._h5obj["properties"])
+        return len(self._h5group["properties"])
 
     @property
     def parent(self):
-        h5parent = self._h5obj.parent
+        h5parent = self._h5group.parent
         if h5parent.name == "/metadata":
             # Top level section
             return None
@@ -82,10 +82,10 @@ class Section(NamedEntity, SectionMixin):
 
     @property
     def link(self):
-        if "link" not in self._h5obj:
+        if "link" not in self._h5group:
             return None
         else:
-            return Section(self._h5obj["link"])
+            return Section(self._h5group["link"])
 
     @link.setter
     def link(self, id_or_sec):
@@ -98,7 +98,7 @@ class Section(NamedEntity, SectionMixin):
 
     def inherited_properties(self):
         properties = [Property(h5prop)
-                      for h5prop in self._h5obj["properties"].values()]
+                      for h5prop in self._h5group["properties"].values()]
         if self.link:
             properties.append(self.link.inherited_properties)
         return properties
