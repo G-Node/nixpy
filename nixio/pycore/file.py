@@ -10,6 +10,8 @@ from __future__ import absolute_import
 import h5py
 import numpy as np
 
+from .h5group import H5Group
+
 from .util import util
 from . import Block
 from . import exceptions
@@ -39,8 +41,9 @@ class File(FileMixin):
         self.created_at = util.now()
         self.updated_at = util.now()
         self._root = self._h5file["/"]
-        self._data = self._root.require_group("data")
-        self.metadata = self._root.require_group("metadata")
+        self._root = H5Group(self._h5file, "/", create=True)
+        self._data = self._root.create_group("data", create=True)
+        self.metadata = self._root.create_group("metadata", create=True)
 
     @classmethod
     def open(cls, path, mode, backend="hdf5"):
