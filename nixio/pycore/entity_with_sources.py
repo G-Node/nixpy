@@ -32,7 +32,7 @@ class EntityWithSources(EntityWithMetadata):
         sources = self._h5group.open_group("sources")
         return Source(sources.get_by_pos(pos))
 
-    def _delete_source_by_id(self, id_or_name):
+    def _remove_source_by_id(self, id_or_name):
         sources = self._h5group.open_group("sources")
         sources.delete(id_or_name)
 
@@ -40,6 +40,11 @@ class EntityWithSources(EntityWithMetadata):
         sources = self._h5group.open_group("sources")
         return len(sources)
 
+    def _add_source_by_id(self, id_or_name):
+        sources = self._h5group.open_group("sources")
+        sources.add_by_id(id_or_name)
 
-util.create_link_methods(EntityWithSources, Source, "source")
-EntityWithSources._remove_source_by_id = EntityWithSources._delete_source_by_id
+    def _has_source_by_id(self, id_or_name):
+        sources = self._h5group.open_group("sources")
+        sources.has_by_id(id_or_name)
+

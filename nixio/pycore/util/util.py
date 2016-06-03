@@ -86,7 +86,7 @@ def check_attr_type(value, type_):
         raise exceptions.InvalidAttrType(type_, value)
 
 
-def create_link_methods(cls, chcls, chclsname, container=None):
+def _create_link_methods(cls, chcls, chclsname, container=None):
 
     if container is None:
         container = chclsname + "s"
