@@ -103,4 +103,4 @@ class Section(NamedEntity, SectionMixin):
             properties.append(self.link.inherited_properties)
         return properties
 
-util.create_h5props(Section, ("mapping", "repository"), (str, str))
+# util.create_h5props(Section, ("mapping", "repository"), (str, str))

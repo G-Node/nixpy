@@ -40,7 +40,6 @@ class File(FileMixin):
         self.version = (1, 0, 0)
         self.created_at = util.now()
         self.updated_at = util.now()
-        self._root = self._h5file["/"]
         self._root = H5Group(self._h5file, "/", create=True)
         self._data = self._root.create_group("data", create=True)
         self.metadata = self._root.create_group("metadata", create=True)
@@ -114,5 +113,5 @@ class File(FileMixin):
     def validate(self):
         pass
 
-util.create_h5props(File, ["version", "format", "created_at", "updated_at"],
-                    [tuple, str, int, int])
+# util.create_h5props(File, ["version", "format", "created_at", "updated_at"],
+#                     [tuple, str, int, int])

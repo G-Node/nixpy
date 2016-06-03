@@ -146,8 +146,8 @@ class SetDimension(Dimension):
         ldata[:] = labels
 
 
-util.create_h5props(Dimension, ["dimension_type", "index"], [str, int])
-util.create_h5props(SampledDimension,
-                    ["unit", "sampling_interval", "offset", "label"],
-                    [str, float, float, str])
-util.create_h5props(RangeDimension, ["unit", "label"], [str, str])
+# util.create_h5props(Dimension, ["dimension_type", "index"], [str, int])
+# util.create_h5props(SampledDimension,
+#                     ["unit", "sampling_interval", "offset", "label"],
+#                     [str, float, float, str])
+# util.create_h5props(RangeDimension, ["unit", "label"], [str, str])

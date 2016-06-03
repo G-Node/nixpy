@@ -74,41 +74,41 @@ def now():
     return int(time())
 
 
-def create_h5props(cls, attributes, types=None):
-
-    def makeprop(propname, type_):
-
-        def getter(self):
-            value = self._h5obj.attrs.get(propname)
-            if type_ is not None and value is not None:
-                value = type_(value)
-            return value
-
-        def setter(self, value):
-            if value is None:
-                if propname == "type":
-                    raise AttributeError("type can't be None")
-                del self._h5obj.attrs[propname]
-                return
-            if type_ and not isinstance(value, type_):
-                raise TypeError("Attribute {} requires type {} but {} "
-                                "was provided".format(propname, type_,
-                                                      type(value)))
-            if propname in ("name", "id") and propname in self._h5obj.attrs:
-                raise AttributeError("can't set attribute")
-            self._h5obj.attrs[propname] = value
-
-        def deleter(self):
-            # TODO: Allow deleting attributes?
-            # TODO: Do not allow deleting required attributes (name, type, id)
-            del self._h5obj.attrs[propname]
-
-        return property(fget=getter, fset=setter, fdel=deleter)
-
-    if types is None:
-        types = [None]*len(attributes)
-    for attr, type_ in zip(attributes, types):
-        setattr(cls, attr, makeprop(attr, type_))
+# def create_h5props(cls, attributes, types=None):
+#
+#     def makeprop(propname, type_):
+#
+#         def getter(self):
+#             value = self._h5obj.get_attr(propname)
+#             if type_ is not None and value is not None:
+#                 value = type_(value)
+#             return value
+#
+#         def setter(self, value):
+#             if value is None:
+#                 if propname == "type":
+#                     raise AttributeError("type can't be None")
+#                 # del self._h5obj.attrs[propname]
+#                 return
+#             if type_ and not isinstance(value, type_):
+#                 raise TypeError("Attribute {} requires type {} but {} "
+#                                 "was provided".format(propname, type_,
+#                                                       type(value)))
+#             if propname in ("name", "id") and propname in self._h5obj.attrs:
+#                 raise AttributeError("can't set attribute")
+#             self._h5obj.attrs[propname] = value
+#
+#         def deleter(self):
+#             # TODO: Allow deleting attributes?
+#             # TODO: Do not allow deleting required attributes (name, type, id)
+#             del self._h5obj.attrs[propname]
+#
+#         return property(fget=getter, fset=setter, fdel=deleter)
+#
+#     if types is None:
+#         types = [None]*len(attributes)
+#     for attr, type_ in zip(attributes, types):
+#         setattr(cls, attr, makeprop(attr, type_))
 
 
 def id_or_name_getter(container, id_or_name):

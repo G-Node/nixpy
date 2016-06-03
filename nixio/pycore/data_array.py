@@ -110,7 +110,7 @@ class DataArray(DataSet, DataArrayMixin, EntityWithSourcesMixin):
     def polynom_coefficients(self, coeff):
         self._h5obj.create_dataset("polynom_coefficients", data=coeff)
 
-util.create_h5props(DataArray,
-                    ["label", "unit", "expansion_origin"],
-                    [str, str, float])
+# util.create_h5props(DataArray,
+#                     ["label", "unit", "expansion_origin"],
+#                     [str, str, float])
 

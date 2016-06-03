@@ -22,7 +22,7 @@ class Block(EntityWithMetadata, BlockMixin):
     def _create_new(cls, parent, name, type_):
         newentity = super(Block, cls)._create_new(parent, name, type_)
         newentity._h5obj.create_group("groups")
-        newentity._h5obj.create_group("data_arrays")
+        # newentity._h5obj.create_group("data_arrays")
         newentity._h5obj.create_group("tags")
         newentity._h5obj.create_group("multi_tags")
         newentity._h5obj.create_group("sources")
