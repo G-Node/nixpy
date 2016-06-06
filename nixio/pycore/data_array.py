@@ -129,3 +129,12 @@ class DataArray(DataSet, DataArrayMixin, EntityWithSourcesMixin):
     def label(self, l):
         util.check_attr_type(l, str)
         self._h5group.set_attr("label", l)
+
+    @property
+    def unit(self):
+        return self._h5group.get_attr("unit")
+
+    @unit.setter
+    def unit(self, u):
+        util.check_attr_type(u, str)
+        self._h5group.set_attr("unit", u)

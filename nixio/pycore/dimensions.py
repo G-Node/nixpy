@@ -6,6 +6,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
+from numbers import Number
 import numpy as np
 from .util import util
 from .data_set import DataType
@@ -80,6 +81,33 @@ class SampledDimension(Dimension):
         end = (count + start) * sample + offset
         return tuple(np.arange(offset, end, sample))
 
+    @property
+    def label(self):
+        return self._h5group.get_attr("label")
+
+    @label.setter
+    def label(self, l):
+        util.check_attr_type(l, str)
+        self._h5group.set_attr("label", l)
+
+    @property
+    def unit(self):
+        return self._h5group.get_attr("unit")
+
+    @unit.setter
+    def unit(self, u):
+        util.check_attr_type(u, str)
+        self._h5group.set_attr("unit", u)
+
+    @property
+    def offset(self):
+        return self._h5group.get_attr("offset")
+
+    @offset.setter
+    def offset(self, o):
+        util.check_attr_type(o, Number)
+        self._h5group.set_attr("offset", o)
+
 
 class RangeDimension(Dimension):
 
@@ -98,7 +126,7 @@ class RangeDimension(Dimension):
     def ticks(self):
         if "ticks" not in self._h5group:
             return None
-        tdata = self._h5group["ticks"]
+        tdata = self._h5group.group["ticks"]
         return tuple(tdata)
 
     @ticks.setter
@@ -109,10 +137,28 @@ class RangeDimension(Dimension):
         dt = DataType.Double
         # TODO: Resize instead of delete?
         if "ticks" in self._h5group:
-            del self._h5group["ticks"]
-        tdata = self._h5group.create_dataset("ticks", shape=tshape, dtype=dt,
-                                             chunks=True, maxshape=None)
-        tdata[:] = ticks
+            del self._h5group.group["ticks"]
+        self._h5group.create_dataset("ticks", shape=tshape, dtype=dt,
+                                     chunks=True, maxshape=None)
+        self._h5group.group["ticks"][:] = ticks
+
+    @property
+    def label(self):
+        return self._h5group.get_attr("label")
+
+    @label.setter
+    def label(self, l):
+        util.check_attr_type(l, str)
+        self._h5group.set_attr("label", l)
+
+    @property
+    def unit(self):
+        return self._h5group.get_attr("unit")
+
+    @unit.setter
+    def unit(self, u):
+        util.check_attr_type(u, str)
+        self._h5group.set_attr("unit", u)
 
     def index_of(self, position):
         ticks = self.ticks
@@ -154,23 +200,13 @@ class SetDimension(Dimension):
     def labels(self):
         if "labels" not in self._h5group:
             return ()
-        return tuple(self._h5group["labels"])
+        return tuple(self._h5group.group["labels"])
 
     @labels.setter
     def labels(self, labels):
         lshape = np.shape(labels)
         dt = util.vlen_str_dtype
-        if "labels" in self._h5group:
-            ldata = self._h5group["labels"]
-            ldata.resize(lshape)
-        else:
-            ldata = self._h5group.create_dataset("labels", shape=lshape,
-                                                 dtype=dt, chunks=True,
-                                                 maxshape=None)
-        ldata[:] = labels
+        self._h5group.create_dataset("labels", shape=lshape, dtype=dt,
+                                     chunks=True, maxshape=None)
+        self._h5group.group["labels"][:] = labels
 
-
-# util.create_h5props(SampledDimension,
-#                     ["unit", "sampling_interval", "offset", "label"],
-#                     [str, float, float, str])
-# util.create_h5props(RangeDimension, ["unit", "label"], [str, str])

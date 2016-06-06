@@ -35,7 +35,7 @@ class Source(EntityWithMetadata, SourceMixin):
     # Source
     def _get_source_by_id(self, id_or_name):
         sources = self._h5group.open_group("sources")
-        return Source(sources.get_by_id(id_or_name))
+        return Source(sources.get_by_id_or_name(id_or_name))
 
     def _get_source_by_pos(self, pos):
         sources = self._h5group.open_group("sources")

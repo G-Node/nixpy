@@ -28,3 +28,9 @@ class InvalidAttrType(TypeError):
                         "was provided.".format(type_, type(value)))
         super(InvalidAttrType, self).__init__(self.message)
 
+
+class InvalidEntity(Exception):
+
+    def __init__(self, *args, **kwargs):
+        self.message = "Invalid entity found in HDF5 file."
+        super(InvalidEntity, self).__init__(self.message, *args, **kwargs)

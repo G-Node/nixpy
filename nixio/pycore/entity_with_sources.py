@@ -20,13 +20,12 @@ class EntityWithSources(EntityWithMetadata):
     def _create_new(cls, parent, name, type_):
         newentity = super(EntityWithSources, cls)._create_new(parent,
                                                               name, type_)
-        newentity._h5group.open_group("sources")
         return newentity
 
     # Source
     def _get_source_by_id(self, id_or_name):
         sources = self._h5group.open_group("sources")
-        return Source(sources.get_by_id(id_or_name))
+        return Source(sources.get_by_id_or_name(id_or_name))
 
     def _get_source_by_pos(self, pos):
         sources = self._h5group.open_group("sources")

@@ -71,7 +71,7 @@ class File(FileMixin):
         return block
 
     def _get_block_by_id(self, id_or_name):
-        return Block(self._data.get_by_id(id_or_name))
+        return Block(self._data.get_by_id_or_name(id_or_name))
 
     def _get_block_by_pos(self, pos):
         return Block(self._data.get_by_pos(pos))

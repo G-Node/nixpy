@@ -34,7 +34,7 @@ class Block(EntityWithMetadata, BlockMixin):
 
     def _get_data_array_by_id(self, id_or_name):
         data_arrays = self._h5group.open_group("data_arrays")
-        return DataArray(data_arrays.get_by_id(id_or_name))
+        return DataArray(data_arrays.get_by_id_or_name(id_or_name))
 
     def _get_data_array_by_pos(self, pos):
         data_arrays = self._h5group.open_group("data_arrays")
@@ -62,7 +62,7 @@ class Block(EntityWithMetadata, BlockMixin):
 
     def _get_multi_tag_by_id(self, id_or_name):
         multi_tags = self._h5group.open_group("multi_tags")
-        return MultiTag(multi_tags.get_by_id(id_or_name))
+        return MultiTag(multi_tags.get_by_id_or_name(id_or_name))
 
     def _get_multi_tag_by_pos(self, pos):
         multi_tags = self._h5group.open_group("multi_tags")
@@ -87,7 +87,7 @@ class Block(EntityWithMetadata, BlockMixin):
 
     def _get_tag_by_id(self, id_or_name):
         tags = self._h5group.open_group("tags")
-        return Tag(tags.get_by_id(id_or_name))
+        return Tag(tags.get_by_id_or_name(id_or_name))
 
     def _get_tag_by_pos(self, pos):
         tags = self._h5group.open_group("tags")
@@ -112,7 +112,7 @@ class Block(EntityWithMetadata, BlockMixin):
 
     def _get_source_by_id(self, id_or_name):
         sources = self._h5group.open_group("sources")
-        return Source(sources.get_by_id(id_or_name))
+        return Source(sources.get_by_id_or_name(id_or_name))
 
     def _get_source_by_pos(self, pos):
         sources = self._h5group.open_group("sources")
@@ -137,7 +137,7 @@ class Block(EntityWithMetadata, BlockMixin):
 
     def _get_group_by_id(self, id_or_name):
         groups = self._h5group.open_group("groups")
-        return Group(groups.get_by_id(id_or_name))
+        return Group(groups.get_by_id_or_name(id_or_name))
 
     def _get_group_by_pos(self, pos):
         groups = self._h5group.open_group("groups")

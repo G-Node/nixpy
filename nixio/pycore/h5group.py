@@ -24,7 +24,7 @@ class H5Group(object):
     @classmethod
     def _create_from_h5obj(cls, h5obj):
         parent = h5obj.parent
-        name = h5obj.name
+        name = h5obj.name.split("/")[-1]
         return cls(parent, name)
 
     def open_group(self, name, create=False):
@@ -48,6 +48,25 @@ class H5Group(object):
         self._create_h5obj()
         self.group.create_dataset(*args, **kwargs)
 
+    def add_by_id(self, id_or_name):
+        self._create_h5obj()
+        parblock = self._create_from_h5obj(self.parent.parent.parent)
+        parcontainer = parblock.open_group(self.name)
+        target = parcontainer.get_by_id_or_name(id_or_name)
+        self.group[target.get_attr("name")] = target.group
+
+    def has_by_id(self, id_or_name):
+        if not self.group:
+            return False
+        if util.is_uuid(id_or_name):
+            for item in self.group:
+                if item.attrs["id"] == id_or_name:
+                    return True
+            else:
+                return False
+        else:
+            return id_or_name in self.group
+
     def get_data(self, name):
         """
         Returns the data contained in the dataset identified by 'name', or None
@@ -63,21 +82,28 @@ class H5Group(object):
         # TODO: Error if dset is Group?
         return dset[:]
 
-    def get_by_id(self, id_or_name):
-        if not self.group:
-            raise ValueError
+    def get_by_id_or_name(self, id_or_name):
         if util.is_uuid(id_or_name):
-            for item in self.group.values():
-                if item.attrs["id"] == id_or_name:
-                    break
-            else:
-                raise ValueError
+            return self.get_by_id(id_or_name)
         else:
-            try:
-                item = self.group[id_or_name]
-            except Exception:
-                raise ValueError
-        return self._create_from_h5obj(item)
+            return self.get_by_name(id_or_name)
+
+    def get_by_name(self, name):
+        if self.group and name in self.group:
+            return self._create_from_h5obj(self.group[name])
+        else:
+            raise ValueError("No item with name {} found in {}".format(
+                name, self.group.name
+            ))
+
+    def get_by_id(self, id_):
+        if self.group:
+            for item in self.group.values():
+                if item.attrs["id"] == id_:
+                    return self._create_from_h5obj(item)
+        raise ValueError("No item with ID {} found in {}".format(
+            id_, self.group.name
+        ))
 
     def get_by_pos(self, pos):
         if not self.group:
@@ -86,7 +112,7 @@ class H5Group(object):
 
     def delete(self, id_or_name):
         if util.is_uuid(id_or_name):
-            name = self.get_by_id(id_or_name).name
+            name = self.get_by_id_or_name(id_or_name).name
         else:
             name = id_or_name
         try:
@@ -118,4 +144,7 @@ class H5Group(object):
             return 0
         else:
             return len(self.group)
+
+    def __str__(self):
+        return "<H5Group object: {}>".format(self.group.name)
 
