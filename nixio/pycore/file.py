@@ -64,7 +64,6 @@ class File(FileMixin):
 
     # Block
     def create_block(self, name, type_):
-        util.check_entity_name_and_type(name, type_)
         if name in self._data:
             raise ValueError("Block with the given name already exists!")
         block = Block._create_new(self._data, name, type_)
@@ -84,21 +83,19 @@ class File(FileMixin):
 
     # Section
     def create_section(self, name, type_):
-        util.check_entity_name_and_type(name, type_)
         if name in self.metadata:
             raise exceptions.DuplicateName("create_section")
         sec = Section._create_new(self.metadata, name, type_)
         return sec
 
     def _get_section_by_id(self, id_or_name):
-        return Section(util.id_or_name_getter(self.metadata,
-                                              id_or_name))
+        return Section(self.metadata.get_by_id_or_name(id_or_name))
 
     def _get_section_by_pos(self, pos):
-        return Section(util.pos_getter(self.metadata, pos))
+        return Section(self.metadata.get_by_pos(pos))
 
     def _delete_section_by_id(self, id_or_name):
-        util.deleter(self.metadata, id_or_name)
+        self.metadata.delete(id_or_name)
 
     def _section_count(self):
         return len(self.metadata)
