@@ -29,7 +29,7 @@ class _TestGroup(unittest.TestCase):
         self.my_array = self.block.create_data_array("my array", "test",
                                                      DataType.Int16, (1, ))
         self.my_tag   = self.block.create_tag("my tag", "test", [0.25])
-        self.my_group = self.block.open_group("my group", "group")
+        self.my_group = self.block.create_group("my group", "group")
         self.my_multiTag = self.block.create_multi_tag("my_mt", "test",
                                                        self.my_array)
 
@@ -39,7 +39,7 @@ class _TestGroup(unittest.TestCase):
 
         self.your_array = self.block.create_data_array("your array", "test",
                                                        DataType.Int16, (1, ))
-        self.your_group = self.block.open_group("your group", "group")
+        self.your_group = self.block.create_group("your group", "group")
         self.your_group.data_arrays.append(self.your_array)
 
     def tearDown(self):
