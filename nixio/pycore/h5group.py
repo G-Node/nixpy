@@ -12,14 +12,14 @@ from . import util
 class H5Group(object):
 
     def __init__(self, parent, name, create=False):
-        self.parent = parent
+        self._parent = parent
         self.name = name
         self.group = None
-        if create or name in self.parent:
+        if create or name in self._parent:
             self._create_h5obj()
 
     def _create_h5obj(self):
-        self.group = self.parent.require_group(self.name)
+        self.group = self._parent.require_group(self.name)
 
     @classmethod
     def _create_from_h5obj(cls, h5obj):
@@ -50,7 +50,7 @@ class H5Group(object):
 
     def add_by_id(self, id_or_name):
         self._create_h5obj()
-        parblock = self._create_from_h5obj(self.parent.parent.parent)
+        parblock = self.parent.parent.parent
         parcontainer = parblock.open_group(self.name)
         target = parcontainer.get_by_id_or_name(id_or_name)
         self.group[target.get_attr("name")] = target.group
@@ -133,6 +133,10 @@ class H5Group(object):
 
     def get_attr(self, name):
         return self.group.attrs.get(name)
+
+    @property
+    def parent(self):
+        return self._create_from_h5obj(self._parent)
 
     def __contains__(self, item):
         if self.group is None:
