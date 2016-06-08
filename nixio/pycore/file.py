@@ -37,8 +37,8 @@ class File(FileMixin):
         self._h5file = h5py.File(name=path, mode=mode)
         self.format = "nix"
         self.version = (1, 0, 0)
-        self.created_at = util.now()
-        self.updated_at = util.now()
+        self.force_created_at()
+        self.force_updated_at()
         self._root = H5Group(self._h5file, "/", create=True)
         self._data = self._root.open_group("data", create=True)
         self.metadata = self._root.open_group("metadata", create=True)
@@ -56,11 +56,50 @@ class File(FileMixin):
         else:
             raise ValueError("Valid backends are 'hdf5' and 'h5py'.")
 
-    def force_created_at(self, t):
-        self.created_at = t
+    @property
+    def version(self):
+        return tuple(self._h5file.attrs["version"])
 
-    def force_updated_at(self, t):
-        self.updated_at = t
+    @version.setter
+    def version(self, v):
+        util.check_attr_type(v, tuple)
+        for part in v:
+            util.check_attr_type(part, int)
+        self._h5file.attrs["version"] = v
+
+    @property
+    def format(self):
+        return self._h5file.attrs["format"]
+
+    @format.setter
+    def format(self, f):
+        util.check_attr_type(f, str)
+        self._h5file.attrs["format"] = f
+
+    @property
+    def created_at(self):
+        return util.str_to_time(self._h5file.attrs["created_at"])
+
+    def force_created_at(self, t=util.now_int()):
+        util.check_attr_type(t, int)
+        self._h5file.attrs["created_at"] = util.time_to_str(t)
+
+    @property
+    def updated_at(self):
+        return util.str_to_time(self._h5file.attrs["updated_at"])
+
+    def force_updated_at(self, t=util.now_int()):
+        util.check_attr_type(t, int)
+        self._h5file.attrs["updated_at"] = util.time_to_str(t)
+
+    def is_open(self):
+        pass
+
+    def close(self):
+        self._h5file.close()
+
+    def validate(self):
+        pass
 
     # Block
     def create_block(self, name, type_):
@@ -100,12 +139,4 @@ class File(FileMixin):
     def _section_count(self):
         return len(self.metadata)
 
-    def is_open(self):
-        pass
-
-    def close(self):
-        self._h5file.close()
-
-    def validate(self):
-        pass
 

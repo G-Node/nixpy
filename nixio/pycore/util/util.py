@@ -9,6 +9,7 @@
 
 import h5py
 from time import time
+from datetime import datetime
 from uuid import uuid4, UUID
 from .. import exceptions
 from . import names
@@ -70,8 +71,33 @@ def check_entity_input(entity, raise_exception=True):
     return False
 
 
-def now():
+def now_int():
     return int(time())
+
+
+def time_to_str(t):
+    """
+    Returns the time represented by the parameter in the format of Boost's
+    posix time `to_iso_string` function.
+
+    :param t: integer POSIX time
+    :return: string in the form "YYYYMMDDTHHMMSS", where T is the date-time
+    separator
+    """
+    dt = datetime.fromtimestamp(t)
+    return dt.strftime("%Y%m%dT%H%M%S").encode("utf-8")
+
+
+def str_to_time(s):
+    """
+    Returns the POSIX time represented by the given string as an integer.
+
+    :param s: string in the form "YYYYMMDDTHHMMSS", where T is the date-time
+    separator
+    :return: integer POSIX time
+    """
+    dt = datetime.strptime(s, "%Y%m%dT%H%M%S")
+    return int(dt.strftime("%s"))
 
 
 def check_attr_type(value, type_):
