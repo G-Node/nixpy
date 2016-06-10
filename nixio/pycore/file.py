@@ -89,7 +89,7 @@ class File(FileMixin):
 
     @property
     def format(self):
-        return self._h5file.attrs["format"]
+        return self._h5file.attrs["format"].decode()
 
     @format.setter
     def format(self, f):

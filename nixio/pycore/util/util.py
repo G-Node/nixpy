@@ -96,7 +96,7 @@ def str_to_time(s):
     separator
     :return: integer POSIX time
     """
-    dt = datetime.strptime(s, "%Y%m%dT%H%M%S")
+    dt = datetime.strptime(s.decode(), "%Y%m%dT%H%M%S")
     return int(dt.strftime("%s"))
 
 
