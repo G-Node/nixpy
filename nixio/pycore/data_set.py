@@ -6,11 +6,9 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-import numpy as np
 from .entity_with_sources import EntityWithSources
 from ..data_array import DataSetMixin
-from .util import util
-from ..value import DataType
+from .h5dataset import H5DataSet
 
 
 class DataSet(EntityWithSources, DataSetMixin):
@@ -21,63 +19,25 @@ class DataSet(EntityWithSources, DataSetMixin):
     @classmethod
     def _create_new(cls, parent, name, type_, data_type, shape):
         newentity = super(DataSet, cls)._create_new(parent, name, type_)
-        maxshape = (None,) * len(shape)
-        if data_type == DataType.String:
-            data_type = util.vlen_str_dtype
-        newentity._h5group.create_dataset("data", shape=shape, dtype=data_type,
-                                          chunks=True, maxshape=maxshape)
+        newentity._h5dataset = H5DataSet(parent, "data", data_type, shape)
         return newentity
 
     def _write_data(self, data, count, offset):
-        # TODO: Check shape and flags
-        dataset = self._h5group.group["data"]
-        if isinstance(data, np.ndarray) and len(data):
-            if isinstance(data[0], np.bytes_):
-                # TODO: convert string types
-                pass
-
-        if count and offset:
-            sl = []
-            for c, o in zip(count, offset):
-                sl.append(slice(o, c+o))
-            if len(sl) == 1:
-                sl = sl[0]
-            else:
-                sl = tuple(sl)
-            dataset[sl] = data
-        else:
-            dataset[:] = data
+        self._h5dataset.write_data(data, count, offset)
 
     def _read_data(self, data, count, offset):
-        # TODO: Check shape and flags
-        dataset = self._h5group.group["data"]
-        if count and offset:
-            datashape = data.shape
-            sl = []
-            for c, o in zip(count, offset):
-                sl.append(slice(o, c+o))
-            if len(sl) == 1:
-                sl = sl[0]
-            else:
-                sl = tuple(sl)
-            if isinstance(sl, tuple) and np.ndim(data) != len(sl):
-                if count[-1] == 1:
-                    data.resize(datashape + (1,))
-            dataset.read_direct(data, sl)
-            data.resize(datashape)
-        else:
-            dataset.read_direct(data)
+        self._h5dataset.read_data(data, count, offset)
 
     @property
     def data_extent(self):
-        return self._h5group.group["data"].shape
+        return self._h5dataset.shape
 
     @data_extent.setter
     def data_extent(self, extent):
-        self._h5group.group["data"].resize(extent)
+        self._h5dataset.shape = extent
 
     def _get_dtype(self):
-        pass
+        return self._h5dataset.dtype
 
 
 class DataView(DataSet):

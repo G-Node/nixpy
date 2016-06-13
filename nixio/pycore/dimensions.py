@@ -9,7 +9,7 @@
 from numbers import Number
 import numpy as np
 from .util import util
-from .data_set import DataType
+from ..value import DataType
 from ..dimension_type import DimensionType
 
 
