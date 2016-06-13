@@ -13,16 +13,37 @@ from .util import util
 
 class EntityWithSources(EntityWithMetadata):
 
-    def __init__(self, h5obj):
-        super(EntityWithSources, self).__init__(h5obj)
+    def __init__(self, h5group):
+        super(EntityWithSources, self).__init__(h5group)
 
     @classmethod
     def _create_new(cls, parent, name, type_):
         newentity = super(EntityWithSources, cls)._create_new(parent,
                                                               name, type_)
-        newentity._h5obj.create_group("sources")
         return newentity
 
-util.create_container_methods(EntityWithSources, Source, "source")
-util.create_link_methods(EntityWithSources, Source, "source")
-EntityWithSources._remove_source_by_id = EntityWithSources._delete_source_by_id
+    # Source
+    def _get_source_by_id(self, id_or_name):
+        sources = self._h5group.open_group("sources")
+        return Source(sources.get_by_id_or_name(id_or_name))
+
+    def _get_source_by_pos(self, pos):
+        sources = self._h5group.open_group("sources")
+        return Source(sources.get_by_pos(pos))
+
+    def _remove_source_by_id(self, id_or_name):
+        sources = self._h5group.open_group("sources")
+        sources.delete(id_or_name)
+
+    def _source_count(self):
+        sources = self._h5group.open_group("sources")
+        return len(sources)
+
+    def _add_source_by_id(self, id_or_name):
+        sources = self._h5group.open_group("sources")
+        sources.add_by_id(id_or_name)
+
+    def _has_source_by_id(self, id_or_name):
+        sources = self._h5group.open_group("sources")
+        sources.has_by_id(id_or_name)
+

@@ -12,51 +12,99 @@ from . import util
 
 class Entity(object):
 
-    def __init__(self, h5obj):
-        util.check_entity_id(h5obj.attrs.get("id"))
-        self._h5obj = h5obj
+    def __init__(self, h5group):
+        util.check_entity_id(h5group.get_attr("id"))
+        self._h5group = h5group
 
     @classmethod
-    def _create_new(cls, h5obj):
-        h5obj.attrs["id"] = util.create_id()
-        h5obj.attrs["created_at"] = int(time())
-        h5obj.attrs["updated_at"] = int(time())
-        return cls(h5obj)
+    def _create_new(cls, h5group):
+        h5group.set_attr("id", util.create_id())
+        h5group.set_attr("created_at", int(time()))
+        h5group.set_attr("updated_at", int(time()))
+        return cls(h5group)
 
-util.create_h5props(Entity, ("created_at", "updated_at", "id"))
+    @property
+    def id(self):
+        return self._h5group.get_attr("id")
+
+    @property
+    def created_at(self):
+        return self._h5group.get_attr("created_at")
+
+    @property
+    def updated_at(self):
+        return self._h5group.get_attr("updated_at")
 
 
 class NamedEntity(object):
 
-    def __init__(self, h5obj):
-        self._h5obj = h5obj
+    def __init__(self, h5group):
+        self._h5group = h5group
         # TODO: Validate object
         try:
-            util.check_entity_name_and_type(h5obj.attrs.get("name"),
-                                            h5obj.attrs.get("type"))
-            util.check_entity_id(h5obj.attrs.get("id"))
+            util.check_entity_name_and_type(h5group.get_attr("name"),
+                                            h5group.get_attr("type"))
+            util.check_entity_id(h5group.get_attr("id"))
         except ValueError:
             ValueError("Invalid NIX object found in file.")
 
     @classmethod
     def _create_new(cls, parent, name, type_):
         util.check_entity_name_and_type(name, type_)
-        h5obj = parent.create_group(name)
-        h5obj.attrs["name"] = name
-        h5obj.attrs["type"] = type_
-        h5obj.attrs["id"] = util.create_id()
-        h5obj.attrs["created_at"] = int(time())
-        h5obj.attrs["updated_at"] = int(time())
-        newentity = cls(h5obj)
+        h5group = parent.open_group(name)
+        h5group.set_attr("name", name)
+        h5group.set_attr("type", type_)
+        h5group.set_attr("id", util.create_id())
+        h5group.set_attr("created_at", int(time()))
+        h5group.set_attr("updated_at", int(time()))
+        newentity = cls(h5group)
         return newentity
+
+    @property
+    def name(self):
+        return self._h5group.get_attr("name")
+
+    @property
+    def type(self):
+        return self._h5group.get_attr("type")
+
+    @type.setter
+    def type(self, t):
+        if t is None:
+            raise AttributeError("type can't be None")
+        util.check_attr_type(t, str)
+        self._h5group.set_attr("type", t)
+
+    @property
+    def definition(self):
+        return self._h5group.get_attr("definition")
+
+    @definition.setter
+    def definition(self, d):
+        util.check_attr_type(d, str)
+        self._h5group.set_attr("definition", d)
+
+    @property
+    def id(self):
+        return self._h5group.get_attr("id")
+
+    @property
+    def created_at(self):
+        return self._h5group.get_attr("created_at")
 
     def force_created_at(self, t):
         # TODO: Check if convertible to date
-        self.created_at = t
+        util.check_attr_type(t, int)
+        self._h5group.set_attr("created_at", t)
+
+    @property
+    def updated_at(self):
+        return self._h5group.get_attr("updated_at")
 
     def force_updated_at(self, t):
         # TODO: Check if convertible to date
-        self.updated_at = t
+        util.check_attr_type(t, int)
+        self._h5group.set_attr("updated_at", t)
 
     def __str__(self):
         return "{}: {{name = {}, type = {}, id = {}}}".format(
@@ -65,9 +113,4 @@ class NamedEntity(object):
 
     def __repr__(self):
         return self.__str__()
-
-util.create_h5props(NamedEntity,
-                    ("name", "type", "definition", "id",
-                     "created_at", "updated_at"),
-                    (str, str, str, str, int, int))
 

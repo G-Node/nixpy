@@ -11,7 +11,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 try:
     basestring = basestring
 except NameError:  # 'basestring' is undefined, must be Python 3
-    basestring = (str,bytes)
+    basestring = (str, bytes)
 
 
 class ProxyList(object):

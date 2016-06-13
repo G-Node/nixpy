@@ -6,34 +6,54 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
+from numbers import Number
 import numpy as np
 from .util import util
 from .data_set import DataType
-
-
-class DimensionType(object):
-    Sample = "sample"
-    Range = "range"
-    Set = "set"
+from ..dimension_type import DimensionType
 
 
 class Dimension(object):
 
-    def __init__(self, h5obj):
-        self._h5obj = h5obj
+    def __init__(self, h5group):
+        from nixio.pycore.h5group import H5Group
+        if not isinstance(h5group, H5Group):
+            print(h5group)
+            raise Exception
+        self._h5group = h5group
 
     @classmethod
     def _create_new(cls, parent, index):
-        h5obj = parent.create_group(str(index))
-        newdim = cls(h5obj)
+        h5group = parent.open_group(str(index))
+        newdim = cls(h5group)
         newdim.index = index
         return newdim
+
+    @property
+    def dimension_type(self):
+        return self._h5group.get_attr("dimension_type")
+
+    @dimension_type.setter
+    def dimension_type(self, dimtype):
+        if dimtype not in (DimensionType.Sample, DimensionType.Range,
+                           DimensionType.Set):
+            raise ValueError("Invalid dimension type.")
+        self._h5group.set_attr("dimension_type", dimtype)
+
+    @property
+    def index(self):
+        return self._h5group.get_attr("index")
+
+    @index.setter
+    def index(self, idx):
+        util.check_attr_type(idx, int)
+        self._h5group.set_attr("index", idx)
 
 
 class SampledDimension(Dimension):
 
-    def __init__(self, h5obj):
-        super(SampledDimension, self).__init__(h5obj)
+    def __init__(self, h5group):
+        super(SampledDimension, self).__init__(h5group)
 
     @classmethod
     def _create_new(cls, parent, index, sample):
@@ -61,25 +81,52 @@ class SampledDimension(Dimension):
         end = (count + start) * sample + offset
         return tuple(np.arange(offset, end, sample))
 
+    @property
+    def label(self):
+        return self._h5group.get_attr("label")
+
+    @label.setter
+    def label(self, l):
+        util.check_attr_type(l, str)
+        self._h5group.set_attr("label", l)
+
+    @property
+    def unit(self):
+        return self._h5group.get_attr("unit")
+
+    @unit.setter
+    def unit(self, u):
+        util.check_attr_type(u, str)
+        self._h5group.set_attr("unit", u)
+
+    @property
+    def offset(self):
+        return self._h5group.get_attr("offset")
+
+    @offset.setter
+    def offset(self, o):
+        util.check_attr_type(o, Number)
+        self._h5group.set_attr("offset", o)
+
 
 class RangeDimension(Dimension):
 
-    def __init__(self, h5obj):
-        super(RangeDimension, self).__init__(h5obj)
+    def __init__(self, h5group):
+        super(RangeDimension, self).__init__(h5group)
 
     @classmethod
     def _create_new(cls, parent, index, ticks):
         newdim = super(RangeDimension, cls)._create_new(parent, index)
         newdim.dimension_type = DimensionType.Range
-        newdim._h5obj.create_dataset("ticks", shape=np.shape(ticks))
-        newdim._h5obj["ticks"][:] = ticks
+        newdim._h5group.create_dataset("ticks", shape=np.shape(ticks))
+        newdim._h5group.group["ticks"][:] = ticks
         return newdim
 
     @property
     def ticks(self):
-        if "ticks" not in self._h5obj:
+        if "ticks" not in self._h5group:
             return None
-        tdata = self._h5obj["ticks"]
+        tdata = self._h5group.group["ticks"]
         return tuple(tdata)
 
     @ticks.setter
@@ -89,11 +136,29 @@ class RangeDimension(Dimension):
         tshape = np.shape(ticks)
         dt = DataType.Double
         # TODO: Resize instead of delete?
-        if "ticks" in self._h5obj:
-            del self._h5obj["ticks"]
-        tdata = self._h5obj.create_dataset("ticks", shape=tshape, dtype=dt,
-                                           chunks=True, maxshape=None)
-        tdata[:] = ticks
+        if "ticks" in self._h5group:
+            del self._h5group.group["ticks"]
+        self._h5group.create_dataset("ticks", shape=tshape, dtype=dt,
+                                     chunks=True, maxshape=None)
+        self._h5group.group["ticks"][:] = ticks
+
+    @property
+    def label(self):
+        return self._h5group.get_attr("label")
+
+    @label.setter
+    def label(self, l):
+        util.check_attr_type(l, str)
+        self._h5group.set_attr("label", l)
+
+    @property
+    def unit(self):
+        return self._h5group.get_attr("unit")
+
+    @unit.setter
+    def unit(self, u):
+        util.check_attr_type(u, str)
+        self._h5group.set_attr("unit", u)
 
     def index_of(self, position):
         ticks = self.ticks
@@ -122,8 +187,8 @@ class RangeDimension(Dimension):
 
 class SetDimension(Dimension):
 
-    def __init__(self, h5obj):
-        super(SetDimension, self).__init__(h5obj)
+    def __init__(self, h5group):
+        super(SetDimension, self).__init__(h5group)
 
     @classmethod
     def _create_new(cls, parent, index):
@@ -133,26 +198,15 @@ class SetDimension(Dimension):
 
     @property
     def labels(self):
-        if "labels" not in self._h5obj:
+        if "labels" not in self._h5group:
             return ()
-        return tuple(self._h5obj["labels"])
+        return tuple(self._h5group.group["labels"])
 
     @labels.setter
     def labels(self, labels):
         lshape = np.shape(labels)
         dt = util.vlen_str_dtype
-        if "labels" in self._h5obj:
-            ldata = self._h5obj["labels"]
-            ldata.resize(lshape)
-        else:
-            ldata = self._h5obj.create_dataset("labels", shape=lshape,
-                                               dtype=dt, chunks=True,
-                                               maxshape=None)
-        ldata[:] = labels
+        self._h5group.create_dataset("labels", shape=lshape, dtype=dt,
+                                     chunks=True, maxshape=None)
+        self._h5group.group["labels"][:] = labels
 
-
-util.create_h5props(Dimension, ["dimension_type", "index"], [str, int])
-util.create_h5props(SampledDimension,
-                    ["unit", "sampling_interval", "offset", "label"],
-                    [str, float, float, str])
-util.create_h5props(RangeDimension, ["unit", "label"], [str, str])

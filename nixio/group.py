@@ -6,14 +6,9 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
-try:
-    from nixio.core import Group as CGroup
-except ImportError:
-    CGroup = None
-from nixio.pycore import Group
-from nixio.util.inject import inject
 from nixio.util.proxy_list import RefProxyList
 
 
@@ -93,5 +88,3 @@ class GroupMixin(object):
         if not hasattr(self, "_multi_tags"):
             setattr(self, "_multi_tags", MultiTagProxyList(self))
         return self._multi_tags
-
-inject((Group, CGroup), dict(GroupMixin.__dict__))

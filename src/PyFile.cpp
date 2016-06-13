@@ -101,8 +101,8 @@ void PyFile::do_export() {
         // Open and close
         .def("is_open", &File::isOpen, doc::file_is_open)
         .def("close", &File::close, doc::file_close)
-        .def("_open", open, open_overloads())
-        .staticmethod("_open")
+        .def("open", open, open_overloads())
+        .staticmethod("open")
         // Other
         .def("validate", &File::validate)
         .def(self == other<File>())

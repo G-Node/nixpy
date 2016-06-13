@@ -6,22 +6,12 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import sys
 
-try:
-    from nixio.core import DataArray as CDataArray
-    from nixio.core import DataSet as CDataSet
-    from nixio.core import SetDimension, RangeDimension, SampledDimension
-except ImportError:
-    CDataArray = CDataSet = None
-    SetDimension = RangeDimension = SampledDimension = None
-
-from nixio.pycore import DataArray, DataSet, DimensionType
-
-
-from nixio.util.inject import inject
+from nixio.dimension_type import DimensionType
 
 import numpy as np
 
@@ -340,10 +330,3 @@ class DataSetMixin(object):
         shape = list(filter(lambda x: x is not None, squeezed))
 
         return count, offset, shape
-
-
-inject((DataArray, CDataArray), dict(DataArrayMixin.__dict__))
-inject((DataSet, CDataSet), dict(DataSetMixin.__dict__))
-inject((SetDimension,), dict(SetDimensionMixin.__dict__))
-inject((RangeDimension,), dict(RangeDimensionMixin.__dict__))
-inject((SampledDimension,), dict(SampleDimensionMixin.__dict__))

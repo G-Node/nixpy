@@ -7,13 +7,14 @@
 # LICENSE file in the root of the Project.
 
 from .entity_with_sources import EntityWithSources
-from . import util
+from ..multi_tag import MultiTagMixin
+from ..entity_with_sources import EntityWithSourcesMixin
 
 
-class MultiTag(EntityWithSources):
+class MultiTag(EntityWithSources, MultiTagMixin, EntityWithSourcesMixin):
 
-    def __init__(self, h5obj):
-        super(MultiTag, self).__init__(h5obj)
+    def __init__(self, h5group):
+        super(MultiTag, self).__init__(h5group)
         # TODO: Validate data containers
 
     @classmethod

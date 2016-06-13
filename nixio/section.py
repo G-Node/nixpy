@@ -6,19 +6,12 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
-import sys
 import functools
-import numpy as np
 
-try:
-    from nixio.core import Section as CSection
-except ImportError:
-    CSection = None
-from nixio.pycore import Section
 import nixio.util.find as finders
-from nixio.util.inject import inject
 from nixio.util.proxy_list import ProxyList
 from nixio.value import Value
 
@@ -207,5 +200,3 @@ class SectionMixin(object):
             p = self.get_property_by_name(ident)
         return p
 
-
-inject((CSection, Section), dict(SectionMixin.__dict__))

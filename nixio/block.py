@@ -11,12 +11,6 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import sys
 
 import nixio.util.find as finders
-try:
-    from nixio.core import Block as CBlock
-except ImportError:
-    CBlock = None
-from nixio.pycore import Block
-from nixio.util.inject import inject
 from nixio.util.proxy_list import ProxyList
 import numpy as np
 
@@ -204,5 +198,3 @@ class BlockMixin(object):
         """
         return hash(self.id)
 
-
-inject((CBlock, Block), dict(BlockMixin.__dict__))

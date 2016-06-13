@@ -8,12 +8,13 @@
 
 import numpy as np
 from .entity import Entity
+from ..property import PropertyMixin
 
 
-class Property(Entity):
+class Property(Entity, PropertyMixin):
 
-    def __init__(self, h5obj):
-        super(Property, self).__init__(h5obj)
+    def __init__(self, h5group):
+        super(Property, self).__init__(h5group)
 
     def delete_values(self):
         pass
