@@ -11,7 +11,7 @@ from ..multi_tag import MultiTagMixin
 from ..entity_with_sources import EntityWithSourcesMixin
 
 
-class MultiTag(EntityWithSources, MultiTagMixin, EntityWithSourcesMixin):
+class MultiTag(EntityWithSources, MultiTagMixin):
 
     def __init__(self, h5group):
         super(MultiTag, self).__init__(h5group)

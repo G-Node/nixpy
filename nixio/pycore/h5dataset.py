@@ -13,23 +13,27 @@ from ..value import DataType
 
 class H5DataSet(object):
 
-    def __init__(self, parent, name, dtype, shape):
+    def __init__(self, parent, name, dtype=None, shape=None):
         self._parent = parent
         self.name = name
-        maxshape = (None,) * len(shape)
-        if dtype == DataType.String:
-            dtype = util.vlen_str_dtype
-        self.dataset = self._parent.create_dataset(name, shape=shape,
-                                                   dtype=dtype, chunks=True,
-                                                   maxshape=maxshape)
+        if (dtype is None) or (shape is None):
+            self.dataset = self._parent[name]
+        else:
+            maxshape = (None,) * len(shape)
+            if dtype == DataType.String:
+                dtype = util.vlen_str_dtype
+            self.dataset = self._parent.require_dataset(name, shape=shape,
+                                                        dtype=dtype,
+                                                        chunks=True,
+                                                        maxshape=maxshape)
 
     @classmethod
-    def _create_from_h5obj(cls, h5obj):
+    def create_from_h5obj(cls, h5obj):
         parent = h5obj.parent
         name = h5obj.name.split("/")[-1]
         return cls(parent, name)
 
-    def write_data(self, data, count, offset):
+    def write_data(self, data, count=None, offset=None):
         if count and offset:
             sl = []
             for c, o in zip(count, offset):
@@ -42,7 +46,7 @@ class H5DataSet(object):
         else:
             self.dataset[:] = data
 
-    def read_data(self, data, count, offset):
+    def read_data(self, data, count=None, offset=None):
         if count and offset:
             datashape = data.shape
             sl = []

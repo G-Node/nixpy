@@ -19,25 +19,8 @@ class DataSet(EntityWithSources, DataSetMixin):
     @classmethod
     def _create_new(cls, parent, name, type_, data_type, shape):
         newentity = super(DataSet, cls)._create_new(parent, name, type_)
-        newentity._h5dataset = H5DataSet(parent, "data", data_type, shape)
+        # newentity._h5dataset = H5DataSet(parent, "data", data_type, shape)
         return newentity
-
-    def _write_data(self, data, count, offset):
-        self._h5dataset.write_data(data, count, offset)
-
-    def _read_data(self, data, count, offset):
-        self._h5dataset.read_data(data, count, offset)
-
-    @property
-    def data_extent(self):
-        return self._h5dataset.shape
-
-    @data_extent.setter
-    def data_extent(self, extent):
-        self._h5dataset.shape = extent
-
-    def _get_dtype(self):
-        return self._h5dataset.dtype
 
 
 class DataView(DataSet):

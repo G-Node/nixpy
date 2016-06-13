@@ -1,7 +1,7 @@
 from .property import Property
 from .section import Section
 from .source import Source
-from .data_array import DataArray, DataSet
+from .data_array import DataArray
 from .dimensions import RangeDimension, SetDimension, SampledDimension
 from .feature import Feature, LinkType
 from .tag import Tag
