@@ -5,6 +5,10 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+import h5py
+
+import numpy as np
+from ..value import DataType
 
 from . import util
 from .h5dataset import H5DataSet
@@ -60,7 +64,7 @@ class H5Group(object):
 
     def get_dataset(self, name):
         """
-        Returns a contained dataset (H5DataSet) object.
+        Returns a contained H5DataSet object.
 
         :param name: name of the dataset
         :return: H5DataSet object
@@ -76,18 +80,31 @@ class H5Group(object):
 
     def get_data(self, name):
         """
-        Returns the data contained in the dataset identified by 'name', or None
-        if the a dataset of that name does not exist in the Group.
+        Returns the data contained in the dataset identified by 'name', or an
+        empty list if a dataset of that name does not exist in the Group.
 
         :param name: The name of the dataset
         :return: The data contained in the dataset as a numpy array or None
         """
         if name not in self.group:
-            return tuple()
+            return []
 
         dset = self.group[name]
         # TODO: Error if dset is Group?
         return dset[:]
+
+    def has_data(self, name):
+        """
+        Return True if the Group contains a Dataset object with the given name.
+
+        :param name: name of Dataset
+        :return: True if Dataset exists in Group, False if it does not exist,
+        or exists and is not a Dataset
+        """
+        if self.group.get(name, getclass=True) == h5py.Dataset:
+            return True
+        else:
+            return False
 
     def add_by_id(self, id_or_name):
         self._create_h5obj()
@@ -183,6 +200,9 @@ class H5Group(object):
             return 0
         else:
             return len(self.group)
+
+    def __delitem__(self, key):
+        del self.group[key]
 
     def __str__(self):
         return "<H5Group object: {}>".format(self.group.name)
