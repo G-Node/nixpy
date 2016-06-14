@@ -20,7 +20,6 @@ class DataArray(EntityWithSources, DataSetMixin, DataArrayMixin):
 
     def __init__(self, h5group):
         super(DataArray, self).__init__(h5group)
-        # TODO: Validate data containers
 
     @classmethod
     def _create_new(cls, parent, name, type_, data_type, shape):

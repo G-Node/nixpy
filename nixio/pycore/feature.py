@@ -7,17 +7,35 @@
 # LICENSE file in the root of the Project.
 
 from .entity import Entity
+from .data_array import DataArray
 
 
 class LinkType(object):
-    Tagged = 1
-    Untagged = 2
-    Indexed = 3
+    Tagged = "tagged"
+    Untagged = "untagged"
+    Indexed = "indexed"
 
 
 class Feature(Entity):
 
     def __init__(self):
         super(Feature, self).__init__()
-        self.link_type = None
-        self.data = None
+
+    @classmethod
+    def _create_new(cls, parent, data, link_type):
+        newentity = super(Feature, cls)._create_new(parent)
+        newentity._h5group.set_attr("link_type", link_type)
+        datagroup = newentity._h5group.create_link(data, "data")
+        return newentity
+
+    @property
+    def id(self):
+        return self._h5group.get_attr("id")
+
+    @property
+    def link_type(self):
+        return self._h5group.get_attr("link_type")
+
+    @property
+    def data(self):
+        return DataArray(self._h5group.open_group("data"))

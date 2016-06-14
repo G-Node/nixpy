@@ -22,6 +22,10 @@ class H5Group(object):
     def _create_h5obj(self):
         self.group = self._parent.require_group(self.name)
 
+    def create_link(self, group, name):
+        self._create_h5obj()
+        self.group[name] = group
+
     @classmethod
     def create_from_h5obj(cls, h5obj):
         parent = h5obj.parent
@@ -88,8 +92,10 @@ class H5Group(object):
     def add_by_id(self, id_or_name):
         self._create_h5obj()
         parblock = self.parent.parent.parent
+        raise NotImplementedError("FIXME: Container name is not always equal to self.name (e.g., Tag.references)")
         parcontainer = parblock.open_group(self.name)
         target = parcontainer.get_by_id_or_name(id_or_name)
+        # TODO: Check if name or id should be the link name
         self.group[target.get_attr("name")] = target.group
 
     def has_by_id(self, id_or_name):
@@ -124,7 +130,7 @@ class H5Group(object):
                 if item.attrs["id"] == id_:
                     return self.create_from_h5obj(item)
         raise ValueError("No item with ID {} found in {}".format(
-            id_, self.group.name
+            id_, self.name
         ))
 
     def get_by_pos(self, pos):

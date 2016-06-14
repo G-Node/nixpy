@@ -17,8 +17,9 @@ class Entity(object):
         self._h5group = h5group
 
     @classmethod
-    def _create_new(cls, h5group):
-        h5group.set_attr("id", util.create_id())
+    def _create_new(cls, parent):
+        id_ = util.create_id()
+        h5group = parent.open_group(id_)
         h5group.set_attr("created_at", int(time()))
         h5group.set_attr("updated_at", int(time()))
         return cls(h5group)
