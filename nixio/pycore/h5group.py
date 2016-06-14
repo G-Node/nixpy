@@ -92,9 +92,15 @@ class H5Group(object):
     def add_by_id(self, id_or_name):
         self._create_h5obj()
         parblock = self.parent.parent.parent
-        raise NotImplementedError("FIXME: Container name is not always equal to self.name (e.g., Tag.references)")
-        parcontainer = parblock.open_group(self.name)
-        target = parcontainer.get_by_id_or_name(id_or_name)
+
+        def find_group(name, group):
+            if id_or_name in name:
+                return group
+            if (util.is_uuid(id_or_name) and
+                    group.attrs.get("entity_id") == id_or_name):
+                return group
+            return None
+        target = parblock.group.visititems(find_group)
         # TODO: Check if name or id should be the link name
         self.group[target.get_attr("name")] = target.group
 
