@@ -13,7 +13,7 @@ from . import util
 class Entity(object):
 
     def __init__(self, h5group):
-        util.check_entity_id(h5group.get_attr("id"))
+        util.check_entity_id(h5group.get_attr("entity_id"))
         self._h5group = h5group
 
     @classmethod
@@ -26,7 +26,7 @@ class Entity(object):
 
     @property
     def id(self):
-        return self._h5group.get_attr("id")
+        return self._h5group.get_attr("entity_id")
 
     @property
     def created_at(self):
@@ -45,7 +45,7 @@ class NamedEntity(object):
         try:
             util.check_entity_name_and_type(h5group.get_attr("name"),
                                             h5group.get_attr("type"))
-            util.check_entity_id(h5group.get_attr("id"))
+            util.check_entity_id(h5group.get_attr("entity_id"))
         except ValueError:
             ValueError("Invalid NIX object found in file.")
 
@@ -55,7 +55,7 @@ class NamedEntity(object):
         h5group = parent.open_group(name)
         h5group.set_attr("name", name)
         h5group.set_attr("type", type_)
-        h5group.set_attr("id", util.create_id())
+        h5group.set_attr("entity_id", util.create_id())
         h5group.set_attr("created_at", int(time()))
         h5group.set_attr("updated_at", int(time()))
         newentity = cls(h5group)
@@ -87,7 +87,7 @@ class NamedEntity(object):
 
     @property
     def id(self):
-        return self._h5group.get_attr("id")
+        return self._h5group.get_attr("entity_id")
 
     @property
     def created_at(self):

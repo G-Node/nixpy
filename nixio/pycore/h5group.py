@@ -102,14 +102,14 @@ class H5Group(object):
             return None
         target = parblock.group.visititems(find_group)
         # TODO: Check if name or id should be the link name
-        self.group[target.get_attr("name")] = target.group
+        self.group[target.attrs["entity_id"]] = target
 
     def has_by_id(self, id_or_name):
         if not self.group:
             return False
         if util.is_uuid(id_or_name):
             for item in self.group:
-                if item.attrs["id"] == id_or_name:
+                if item.attrs["entity_id"] == id_or_name:
                     return True
             else:
                 return False
@@ -133,7 +133,7 @@ class H5Group(object):
     def get_by_id(self, id_):
         if self.group:
             for item in self.group.values():
-                if item.attrs["id"] == id_:
+                if item.attrs["entity_id"] == id_:
                     return self.create_from_h5obj(item)
         raise ValueError("No item with ID {} found in {}".format(
             id_, self.name
