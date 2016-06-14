@@ -20,8 +20,8 @@ class Entity(object):
     def _create_new(cls, parent):
         id_ = util.create_id()
         h5group = parent.open_group(id_)
-        h5group.set_attr("created_at", int(time()))
-        h5group.set_attr("updated_at", int(time()))
+        h5group.set_attr("created_at", util.now_int())
+        h5group.set_attr("updated_at", util.now_int())
         return cls(h5group)
 
     @property
@@ -93,7 +93,9 @@ class NamedEntity(object):
     def created_at(self):
         return self._h5group.get_attr("created_at")
 
-    def force_created_at(self, t):
+    def force_created_at(self, t=None):
+        if t is None:
+            t = util.now_int()
         # TODO: Check if convertible to date
         util.check_attr_type(t, int)
         self._h5group.set_attr("created_at", t)
@@ -102,7 +104,9 @@ class NamedEntity(object):
     def updated_at(self):
         return self._h5group.get_attr("updated_at")
 
-    def force_updated_at(self, t):
+    def force_updated_at(self, t=None):
+        if t is None:
+            t = util.now_int()
         # TODO: Check if convertible to date
         util.check_attr_type(t, int)
         self._h5group.set_attr("updated_at", t)
