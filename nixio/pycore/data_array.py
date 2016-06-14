@@ -112,10 +112,7 @@ class DataArray(EntityWithSources, DataSetMixin, DataArrayMixin):
 
     @property
     def polynom_coefficients(self):
-        if "polynom_coefficients" not in self._h5group.group:
-            return tuple()
-        pc = self._h5group.get_data("polynom_coefficients")
-        return tuple(pc)
+        return tuple(self._h5group.get_data("polynom_coefficients"))
 
     @polynom_coefficients.setter
     def polynom_coefficients(self, coeff):
