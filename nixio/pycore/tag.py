@@ -10,6 +10,7 @@ import numpy as np
 from .entity_with_sources import EntityWithSources
 from ..tag import TagMixin
 from ..value import DataType
+from .data_array import DataArray
 
 
 class Tag(EntityWithSources, TagMixin):
@@ -20,6 +21,7 @@ class Tag(EntityWithSources, TagMixin):
     @classmethod
     def _create_new(cls, parent, name, type_, position):
         newentity = super(Tag, cls)._create_new(parent, name, type_)
+        newentity.position = position
         return newentity
 
     def _add_reference_by_id(self, id_or_name):
@@ -35,7 +37,7 @@ class Tag(EntityWithSources, TagMixin):
 
     def _get_reference_by_id(self, id_or_name):
         references = self._h5group.open_group("references")
-        return references.get_by_id(id_or_name)
+        return DataArray(references.get_by_id(id_or_name))
 
     def _get_reference_by_pos(self, pos):
         references = self._h5group.open_group("references")
@@ -45,7 +47,7 @@ class Tag(EntityWithSources, TagMixin):
         references = self._h5group.open_group("references")
         references.delete(id_or_name)
 
-    def create_feature(self):
+    def create_feature(self, da, link_type):
         pass
 
     def _has_feature_by_id(self, id_or_name):
@@ -84,10 +86,7 @@ class Tag(EntityWithSources, TagMixin):
                 del self._h5group["units"]
         else:
             dtype = DataType.String
-            shape = np.shape(units)
-            unitsdset = self._h5group.create_dataset("units",
-                                                     shape=shape, dtype=dtype)
-            unitsdset.write_data(units)
+            self._h5group.write_data("units", units, dtype)
             self.force_updated_at()
 
     @property
@@ -97,14 +96,11 @@ class Tag(EntityWithSources, TagMixin):
     @position.setter
     def position(self, pos):
         if not pos:
-            if self._h5group.has_data("positions"):
-                del self._h5group["positions"]
+            if self._h5group.has_data("position"):
+                del self._h5group["position"]
         else:
             dtype = DataType.Double
-            shape = np.shape(pos)
-            posdset = self._h5group.create_dataset("position",
-                                                   shape=shape, dtype=dtype)
-            posdset.write_data(pos)
+            self._h5group.write_data("position", pos, dtype)
 
     @property
     def extent(self):
@@ -117,7 +113,4 @@ class Tag(EntityWithSources, TagMixin):
                 del self._h5group["extent"]
         else:
             dtype = DataType.Double
-            shape = np.shape(ext)
-            posdset = self._h5group.create_dataset("extent",
-                                                   shape=shape, dtype=dtype)
-            posdset.write_data(ext)
+            self._h5group.write_data("extent", ext, dtype)

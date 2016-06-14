@@ -116,11 +116,12 @@ class DataArray(EntityWithSources, DataSetMixin, DataArrayMixin):
 
     @polynom_coefficients.setter
     def polynom_coefficients(self, coeff):
-        dtype = DataType.Double
-        shape = np.shape(coeff)
-        coeffdset = self._h5group.create_dataset("polynom_coefficients",
-                                                 shape=shape, dtype=dtype)
-        coeffdset.write_data(coeff)
+        if not coeff:
+            if self._h5group.has_data("polynom_coefficients"):
+                del self._h5group["polynom_coefficients"]
+        else:
+            dtype = DataType.Double
+            self._h5group.write_data("polynom_coefficients", coeff, dtype)
 
     @property
     def expansion_origin(self):

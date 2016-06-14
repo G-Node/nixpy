@@ -78,20 +78,24 @@ class H5Group(object):
         else:
             raise notfound
 
-    def write_data(self, name, data):
+    def write_data(self, name, data, dtype=None):
         """
         Writes the data to a Dataset contained in the group with the given name.
         Creates the Dataset if necessary.
 
         :param name: name of the Dataset object
         :param data: the data to write
+        :param dtype: optionally specify the data type, otherwise it will be
+        automatically determined by the data
         """
-        if name not in self.group:
-            dtype = DataType.get_dtype(data[0])
-            shape = np.shape(data)
-            dset = self.create_dataset(name, shape, dtype)
+        shape = np.shape(data)
+        if self.has_data(name):
+            dset = self.get_dataset(name)
+            dset.shape = shape
         else:
-            dset = self.group[name]
+            if dtype is None:
+                dtype = DataType.get_dtype(data[0])
+            dset = self.create_dataset(name, shape, dtype)
 
         dset.write_data(data)
 
