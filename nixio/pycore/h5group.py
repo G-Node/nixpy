@@ -26,9 +26,9 @@ class H5Group(object):
     def _create_h5obj(self):
         self.group = self._parent.require_group(self.name)
 
-    def create_link(self, group, name):
+    def create_link(self, target, name):
         self._create_h5obj()
-        self.group[name] = group
+        self.group[name] = target._h5group.group
 
     @classmethod
     def create_from_h5obj(cls, h5obj):
