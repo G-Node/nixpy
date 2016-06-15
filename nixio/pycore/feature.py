@@ -10,22 +10,16 @@ from .entity import Entity
 from .data_array import DataArray
 
 
-class LinkType(object):
-    Tagged = "tagged"
-    Untagged = "untagged"
-    Indexed = "indexed"
-
-
 class Feature(Entity):
 
-    def __init__(self):
-        super(Feature, self).__init__()
+    def __init__(self, h5group):
+        super(Feature, self).__init__(h5group)
 
     @classmethod
     def _create_new(cls, parent, data, link_type):
         newentity = super(Feature, cls)._create_new(parent)
         newentity._h5group.set_attr("link_type", link_type)
-        datagroup = newentity._h5group.create_link(data, "data")
+        newentity._h5group.create_link(data, "data")
         return newentity
 
     @property
