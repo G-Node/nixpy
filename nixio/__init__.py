@@ -10,14 +10,13 @@ from __future__ import (absolute_import, division, print_function)#, unicode_lit
 
 try:
     import nixio.util.inject
-    from nixio.core import LinkType
 except ImportError:
-    LinkType = None
-
+    pass
 
 from nixio.pycore.file import File, FileMode
 from nixio.value import Value, DataType
-from nixio.pycore.dimensions import DimensionType
+from nixio.dimension_type import DimensionType
+from nixio.link_type import LinkType
 
 from nixio.section import S
 

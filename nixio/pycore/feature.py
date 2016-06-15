@@ -30,7 +30,7 @@ class Feature(Entity):
 
     @property
     def id(self):
-        return self._h5group.get_attr("id")
+        return self._h5group.get_attr("entity_id")
 
     @property
     def link_type(self):
