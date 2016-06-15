@@ -91,6 +91,17 @@ class SampledDimension(Dimension):
         self._h5group.set_attr("label", l)
 
     @property
+    def sampling_interval(self):
+        return self._h5group.get_attr("sampling_interval")
+
+    @sampling_interval.setter
+    def sampling_interval(self, interval):
+        util.check_attr_type(interval, Number)
+        self._h5group.set_attr("sampling_interval", interval)
+
+
+
+    @property
     def unit(self):
         return self._h5group.get_attr("unit")
 
