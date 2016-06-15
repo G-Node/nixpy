@@ -5,12 +5,16 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-import numpy as np
 
 from .entity_with_sources import EntityWithSources
 from ..tag import TagMixin
 from ..value import DataType
 from .data_array import DataArray
+from .feature import Feature
+from .exceptions import OutOfBounds, IncompatibleDimensions
+from ..dimension_type import DimensionType
+from ..link_type import LinkType
+from . import util
 
 
 class Tag(EntityWithSources, TagMixin):
@@ -48,7 +52,9 @@ class Tag(EntityWithSources, TagMixin):
         references.delete(id_or_name)
 
     def create_feature(self, da, link_type):
-        pass
+        features = self._h5group.open_group("features")
+        feat = Feature._create_new(features, da, link_type)
+        return feat
 
     def _has_feature_by_id(self, id_or_name):
         features = self._h5group.open_group("features")
@@ -59,21 +65,76 @@ class Tag(EntityWithSources, TagMixin):
 
     def _get_feature_by_id(self, id_or_name):
         features = self._h5group.open_group("features")
-        return features.get_by_id(id_or_name)
+        return Feature(features.get_by_id(id_or_name))
 
     def _get_feature_by_pos(self, pos):
         features = self._h5group.open_group("features")
-        return features.get_by_pos(pos)
+        return Feature(features.get_by_pos(pos))
 
     def _delete_feature_by_id(self, id_or_name):
         features = self._h5group.open_group("features")
-        features.delete_by_id(id_or_name)
+        features.delete(id_or_name)
 
-    def retrieve_data(self):
-        pass
+    def retrieve_data(self, refidx):
+        references = self._h5group.open_group("references")
+        if len(references) == 0:
+            raise OutOfBounds("There are no references in this tag!", 0)
 
-    def retrieve_feature_data(self):
-        pass
+        if refidx >= len(references):
+            raise OutOfBounds("Reference index out of bounds.", 0)
+
+        ref = references[refidx]
+        dimcount = ref.dimension_count()
+        if (len(self.position) != dimcount) or (len(self.extent) > 0 and
+                                                len(self.extent) != dimcount):
+            raise IncompatibleDimensions(
+                "Number of dimensions in position or extent do not match "
+                "dimensionality of data",
+                "Tag.retrieve_data")
+
+        offset, count = self._get_offset_and_count(ref)
+        return DataView(ref, count, offset)
+
+    def retrieve_feature_data(self, featidx):
+        # TODO: Errors
+        feat = self.features[featidx]
+        da = feat.data()
+        if feat.link_type == LinkType.Tagged:
+            offset, count = self._get_offset_and_count(da)
+            return DataView(da, count, offset)
+
+        count = data.data_extent
+        offset = [0] * len(count)
+        return DataView(da, count, offset)
+
+    def _get_offset_and_count(self, data):
+        offset = []
+        count = []
+        for idx in range(len(self.position)):
+            dim = data.dimensions[idx+1]
+            pos = self.position[idx]
+            if self.units:
+                unit = self.units[idx]
+            else:
+                unit = None
+            offset.append(self.pos_to_idx(self.position[idx], unit, dim))
+            if idx < len(self.extent):
+                ext = self.extent[idx]
+                count.append(self.pos_to_idx(pos+ext, unit, dim))
+            else:
+                count.append(1)
+        return offset, count
+
+    @staticmethod
+    def pos_to_idx(pos, unit, dim):
+        if dim.dimension_type in (DimensionType.Sample, DimensionType.Range):
+            # scaling = 1.0
+            scaling = util.scaling(unit, dim.unit)
+            return dim.index_of(pos * scaling)
+        elif dim.dimension_type == DimensionType.Set:
+            return round(pos)
+
+
 
     @property
     def units(self):
