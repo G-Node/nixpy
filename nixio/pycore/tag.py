@@ -17,6 +17,18 @@ from ..link_type import LinkType
 from . import util
 
 
+class DataView(object):
+
+    def __init__(self, da, count, offset):
+        self.da = da
+        self.count = count
+        self.offset = offset
+
+    @property
+    def size(self):
+        return 1
+
+
 class Tag(EntityWithSources, TagMixin):
 
     def __init__(self, h5group):
@@ -98,12 +110,12 @@ class Tag(EntityWithSources, TagMixin):
     def retrieve_feature_data(self, featidx):
         # TODO: Errors
         feat = self.features[featidx]
-        da = feat.data()
+        da = feat.data
         if feat.link_type == LinkType.Tagged:
             offset, count = self._get_offset_and_count(da)
             return DataView(da, count, offset)
 
-        count = data.data_extent
+        count = da.data_extent
         offset = [0] * len(count)
         return DataView(da, count, offset)
 
@@ -111,7 +123,7 @@ class Tag(EntityWithSources, TagMixin):
         offset = []
         count = []
         for idx in range(len(self.position)):
-            dim = data.dimensions[idx+1]
+            dim = data.dimensions[idx]
             pos = self.position[idx]
             if self.units:
                 unit = self.units[idx]
