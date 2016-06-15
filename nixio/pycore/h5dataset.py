@@ -35,13 +35,7 @@ class H5DataSet(object):
 
     def write_data(self, data, count=None, offset=None):
         if count and offset:
-            sl = []
-            for c, o in zip(count, offset):
-                sl.append(slice(o, c+o))
-            if len(sl) == 1:
-                sl = sl[0]
-            else:
-                sl = tuple(sl)
+            sl = util.co_to_slice(count, offset)
             self.dataset[sl] = data
         else:
             self.dataset[:] = data
@@ -49,13 +43,7 @@ class H5DataSet(object):
     def read_data(self, data, count=None, offset=None):
         if count and offset:
             datashape = data.shape
-            sl = []
-            for c, o in zip(count, offset):
-                sl.append(slice(o, c+o))
-            if len(sl) == 1:
-                sl = sl[0]
-            else:
-                sl = tuple(sl)
+            sl = util.co_to_slice(count, offset)
             if isinstance(sl, tuple) and np.ndim(data) != len(sl):
                 if count[-1] == 1:
                     data.resize(datashape + (1,))
