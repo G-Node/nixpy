@@ -8,10 +8,9 @@
 
 from .entity_with_sources import EntityWithSources
 from ..tag import TagMixin
-from ..entity_with_sources import EntityWithSourcesMixin
 
 
-class Tag(EntityWithSources, TagMixin, EntityWithSourcesMixin):
+class Tag(EntityWithSources, TagMixin):
 
     def __init__(self, h5group):
         super(Tag, self).__init__(h5group)

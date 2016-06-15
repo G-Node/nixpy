@@ -6,17 +6,17 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 from numbers import Number
+import numpy as np
 
 from . import util
-from .data_set import DataSet
-from ..data_array import DataArrayMixin
-from ..entity_with_sources import EntityWithSourcesMixin
+from .entity_with_sources import EntityWithSources
+from ..data_array import DataArrayMixin, DataSetMixin
 from ..value import DataType
 from .dimensions import (SampledDimension, RangeDimension, SetDimension,
                          DimensionType)
 
 
-class DataArray(DataSet, DataArrayMixin, EntityWithSourcesMixin):
+class DataArray(EntityWithSources, DataSetMixin, DataArrayMixin):
 
     def __init__(self, h5group):
         super(DataArray, self).__init__(h5group)
@@ -24,21 +24,9 @@ class DataArray(DataSet, DataArrayMixin, EntityWithSourcesMixin):
 
     @classmethod
     def _create_new(cls, parent, name, type_, data_type, shape):
-        newentity = super(DataArray, cls)._create_new(parent, name, type_,
-                                                      data_type, shape)
-        newentity._h5group.open_group("dimensions")
+        newentity = super(DataArray, cls)._create_new(parent, name, type_)
+        newentity._h5group.create_dataset("data", shape, data_type)
         return newentity
-
-    def _create_dimension(self, index):
-        dimgroup = self._h5group["dimensions"]
-        maxidx = len(dimgroup) + 1
-        if not (0 < index <= maxidx):
-            raise IndexError("Invalid dimension index: has to be "
-                             "0 < index <= {}".format(maxidx))
-        id_ = str(index)
-        if id_ in dimgroup:
-            del dimgroup[id_]
-        return dimgroup.open_group[id_]
 
     def create_set_dimension(self, index):
         dimgroup = self._h5group.open_group("dimensions")
@@ -97,6 +85,28 @@ class DataArray(DataSet, DataArrayMixin, EntityWithSourcesMixin):
         else:
             raise TypeError("Invalid Dimension object in file.")
 
+    def _write_data(self, data, count, offset):
+        dataset = self._h5group.get_dataset("data")
+        dataset.write_data(data, count, offset)
+
+    def _read_data(self, data, count, offset):
+        dataset = self._h5group.get_dataset("data")
+        dataset.read_data(data, count, offset)
+
+    @property
+    def data_extent(self):
+        dataset = self._h5group.get_dataset("data")
+        return dataset.shape
+
+    @data_extent.setter
+    def data_extent(self, extent):
+        dataset = self._h5group.get_dataset("data")
+        dataset.shape = extent
+
+    def _get_dtype(self):
+        dataset = self._h5group.get_dataset("data")
+        dataset.dtype
+
     @property
     def dtype(self):
         return self._h5group.group["data"].dtype
@@ -110,7 +120,11 @@ class DataArray(DataSet, DataArrayMixin, EntityWithSourcesMixin):
 
     @polynom_coefficients.setter
     def polynom_coefficients(self, coeff):
-        self._h5group.create_dataset("polynom_coefficients", data=coeff)
+        dtype = DataType.Double
+        shape = np.shape(coeff)
+        coeffdset = self._h5group.create_dataset("polynom_coefficients",
+                                                 shape=shape, dtype=dtype)
+        coeffdset.write_data(coeff)
 
     @property
     def expansion_origin(self):

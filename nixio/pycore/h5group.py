@@ -7,6 +7,7 @@
 # LICENSE file in the root of the Project.
 
 from . import util
+from .h5dataset import H5DataSet
 
 
 class H5Group(object):
@@ -22,7 +23,7 @@ class H5Group(object):
         self.group = self._parent.require_group(self.name)
 
     @classmethod
-    def _create_from_h5obj(cls, h5obj):
+    def create_from_h5obj(cls, h5obj):
         parent = h5obj.parent
         name = h5obj.name.split("/")[-1]
         return cls(parent, name)
@@ -40,13 +41,49 @@ class H5Group(object):
         self._create_h5obj()
         return H5Group(self.group, name, create)
 
-    def create_dataset(self, *args, **kwargs):
+    def create_dataset(self, name, shape, dtype):
         """
-        Passthrough method. Calls h5py.Group.create_dataset method with given
-        arguments but does not return the new object.
+        Creates a dataset object under the current group with a given name,
+        shape, and type.
+
+        :param name: the name of the dataset
+        :param shape: tuple representing the shape of the dataset
+        :param dtype: the type of the data for this dataset (DataType)
+        :return: a new H5DataSet object
         """
         self._create_h5obj()
-        self.group.create_dataset(*args, **kwargs)
+        return H5DataSet(self.group, name, dtype, shape)
+
+    def get_dataset(self, name):
+        """
+        Returns a contained dataset (H5DataSet) object.
+
+        :param name: name of the dataset
+        :return: H5DataSet object
+        """
+        notfound = KeyError("No DataSet named {} found.")
+        if self.group is None:
+            raise notfound
+        if name in self.group:
+            dset = self.group[name]
+            return H5DataSet.create_from_h5obj(dset)
+        else:
+            raise notfound
+
+    def get_data(self, name):
+        """
+        Returns the data contained in the dataset identified by 'name', or None
+        if the a dataset of that name does not exist in the Group.
+
+        :param name: The name of the dataset
+        :return: The data contained in the dataset as a numpy array or None
+        """
+        if name not in self.group:
+            return tuple()
+
+        dset = self.group[name]
+        # TODO: Error if dset is Group?
+        return dset[:]
 
     def add_by_id(self, id_or_name):
         self._create_h5obj()
@@ -67,21 +104,6 @@ class H5Group(object):
         else:
             return id_or_name in self.group
 
-    def get_data(self, name):
-        """
-        Returns the data contained in the dataset identified by 'name', or None
-        if the a dataset of that name does not exist in the Group.
-
-        :param name: The name of the dataset
-        :return: The data contained in the dataset as a numpy array or None
-        """
-        if name not in self.group:
-            return tuple()
-
-        dset = self.group[name]
-        # TODO: Error if dset is Group?
-        return dset[:]
-
     def get_by_id_or_name(self, id_or_name):
         if util.is_uuid(id_or_name):
             return self.get_by_id(id_or_name)
@@ -90,7 +112,7 @@ class H5Group(object):
 
     def get_by_name(self, name):
         if self.group and name in self.group:
-            return self._create_from_h5obj(self.group[name])
+            return self.create_from_h5obj(self.group[name])
         else:
             raise ValueError("No item with name {} found in {}".format(
                 name, self.group.name
@@ -100,7 +122,7 @@ class H5Group(object):
         if self.group:
             for item in self.group.values():
                 if item.attrs["id"] == id_:
-                    return self._create_from_h5obj(item)
+                    return self.create_from_h5obj(item)
         raise ValueError("No item with ID {} found in {}".format(
             id_, self.group.name
         ))
@@ -108,7 +130,7 @@ class H5Group(object):
     def get_by_pos(self, pos):
         if not self.group:
             raise ValueError
-        return self._create_from_h5obj(list(self.group.values())[pos])
+        return self.create_from_h5obj(list(self.group.values())[pos])
 
     def delete(self, id_or_name):
         if util.is_uuid(id_or_name):
@@ -137,7 +159,7 @@ class H5Group(object):
 
     @property
     def parent(self):
-        return self._create_from_h5obj(self._parent)
+        return self.create_from_h5obj(self._parent)
 
     def __contains__(self, item):
         if self.group is None:

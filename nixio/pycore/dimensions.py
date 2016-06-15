@@ -9,7 +9,7 @@
 from numbers import Number
 import numpy as np
 from .util import util
-from .data_set import DataType
+from ..value import DataType
 from ..dimension_type import DimensionType
 
 
@@ -118,29 +118,23 @@ class RangeDimension(Dimension):
     def _create_new(cls, parent, index, ticks):
         newdim = super(RangeDimension, cls)._create_new(parent, index)
         newdim.dimension_type = DimensionType.Range
-        newdim._h5group.create_dataset("ticks", shape=np.shape(ticks))
-        newdim._h5group.group["ticks"][:] = ticks
+        ticksds = newdim._h5group.create_dataset("ticks", shape=np.shape(ticks),
+                                                 dtype=DataType.Double)
+        ticksds.write_data(ticks)
         return newdim
 
     @property
     def ticks(self):
-        if "ticks" not in self._h5group:
-            return None
-        tdata = self._h5group.group["ticks"]
-        return tuple(tdata)
+        return tuple(self._h5group.get_data("ticks"))
 
     @ticks.setter
     def ticks(self, ticks):
         if np.any(np.diff(ticks) < 0):
             raise ValueError("Ticks are not given in an ascending order.")
-        tshape = np.shape(ticks)
-        dt = DataType.Double
-        # TODO: Resize instead of delete?
-        if "ticks" in self._h5group:
-            del self._h5group.group["ticks"]
-        self._h5group.create_dataset("ticks", shape=tshape, dtype=dt,
-                                     chunks=True, maxshape=None)
-        self._h5group.group["ticks"][:] = ticks
+        # tshape = np.shape(ticks)
+        # dt = DataType.Double
+        ticksds = self._h5group.get_dataset("ticks")
+        ticksds.write_data(ticks)
 
     @property
     def label(self):
@@ -198,15 +192,13 @@ class SetDimension(Dimension):
 
     @property
     def labels(self):
-        if "labels" not in self._h5group:
-            return ()
-        return tuple(self._h5group.group["labels"])
+        return tuple(self._h5group.get_data("labels"))
 
     @labels.setter
     def labels(self, labels):
         lshape = np.shape(labels)
         dt = util.vlen_str_dtype
-        self._h5group.create_dataset("labels", shape=lshape, dtype=dt,
-                                     chunks=True, maxshape=None)
-        self._h5group.group["labels"][:] = labels
+        labelsds = self._h5group.create_dataset("labels", shape=lshape,
+                                                dtype=dt)
+        labelsds.write_data(labels)
 
