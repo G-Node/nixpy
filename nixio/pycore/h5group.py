@@ -24,7 +24,16 @@ class H5Group(object):
             self._create_h5obj()
 
     def _create_h5obj(self):
-        self.group = self._parent.require_group(self.name)
+        if self.name in self._parent:
+            self.group = self._parent.require_group(self.name)
+        else:
+            gcpl = h5py.h5p.create(h5py.h5p.GROUP_CREATE)
+            flags = h5py.h5p.CRT_ORDER_TRACKED | h5py.h5p.CRT_ORDER_INDEXED
+            gcpl.set_link_creation_order(flags)
+            name = self.name.encode("utf-8")
+            gid = h5py.h5g.create(self._parent.id, name, gcpl=gcpl)
+            self.group = h5py.Group(gid)
+        # self.group = self._parent.require_group(self.name)
 
     def create_link(self, target, name):
         self._create_h5obj()

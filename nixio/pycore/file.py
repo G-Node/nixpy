@@ -7,6 +7,7 @@
 # LICENSE file in the root of the Project.
 from __future__ import absolute_import
 import os
+import sys
 
 import h5py
 import numpy as np
@@ -37,10 +38,10 @@ class File(FileMixin):
     def __init__(self, path, mode=FileMode.ReadWrite):
         if not os.path.exists(path):
             mode = FileMode.Overwrite
-        if os.path.isfile(path):
-            self._open_existing(path, mode)
-        else:
-            self._create_new(path, mode)
+        # if os.path.isfile(path):
+        #     self._open_existing(path, mode, fcpl)
+        # else:
+        self._create_new(path, mode)
 
         self._root = H5Group(self._h5file, "/", create=True)
         self._data = self._root.open_group("data", create=True)
@@ -50,13 +51,29 @@ class File(FileMixin):
         if "updated_at" not in self._h5file.attrs:
             self.force_updated_at()
 
-    def _open_existing(self, path, mode):
+    def _open_existing(self, path, mode, fcpl):
         self._h5file = h5py.File(name=path, mode=mode)
         if mode == FileMode.Overwrite:
             self._create_header()
 
     def _create_new(self, path, mode):
-        self._h5file = h5py.File(name=path, mode=mode)
+        # if mode == "w":
+        if True:
+            print("Truncating enforced for testing")
+            try:
+                path = path.encode(sys.getfilesystemencoding())
+            except (UnicodeError, LookupError):
+                pass
+
+            fcpl = h5py.h5p.create(h5py.h5p.FILE_CREATE)
+            flags = h5py.h5p.CRT_ORDER_TRACKED | h5py.h5p.CRT_ORDER_INDEXED
+            fcpl.set_link_creation_order(flags)
+            fapl = h5py.h5p.create(h5py.h5p.FILE_ACCESS)
+            fid = h5py.h5f.create(path, h5py.h5f.ACC_TRUNC, fapl=fapl,
+                                  fcpl=fcpl)
+            self._h5file = h5py.File(fid)
+        else:
+            self._h5file = h5py.File(name=path, mode=mode)
         self._create_header()
 
     def _create_header(self):
