@@ -21,11 +21,13 @@ except ImportError:
     skip_cpp = True
 
 
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestMultiTag(unittest.TestCase):
+class _TestMultiTag(unittest.TestCase):
+
+    backend = None
 
     def setUp(self):
-        self.file     = File.open("unittest.h5", FileMode.Overwrite)
+        self.file     = File.open("unittest.h5", FileMode.Overwrite,
+                                  backend=self.backend)
         self.block    = self.file.create_block("test block", "recordingsession")
 
         self.my_array = self.block.create_data_array("my array", "test", DataType.Int16, (0, 0))
@@ -308,3 +310,14 @@ class TestMultiTag(unittest.TestCase):
             self.feature_tag.retrieve_feature_data(2, 1)
 
         self.assertRaises(IndexError,  out_of_bounds)
+
+
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
+class TestMultiTagCPP(_TestMultiTag):
+
+    backend = "hdf5"
+
+
+class TestMultiTagPy(_TestMultiTag):
+
+    backend = "h5py"
