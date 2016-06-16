@@ -38,7 +38,7 @@ class DataSet(DataSetMixin):
 
     def _get_dtype(self):
         dataset = self._h5group.get_dataset("data")
-        dataset.dtype
+        return dataset.dtype
 
 
 class DataArray(EntityWithSources, DataSet, DataArrayMixin):

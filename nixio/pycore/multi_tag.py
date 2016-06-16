@@ -35,11 +35,17 @@ class MultiTag(BaseTag, MultiTagMixin):
 
     @property
     def extents(self):
-        return DataArray(self._h5group.open_group("extents"))
+        if "extents" in self._h5group:
+            return DataArray(self._h5group.open_group("extents"))
+        else:
+            return None
 
     @extents.setter
     def extents(self, da):
-        self._h5group.create_link(da, "extents")
+        if da is None:
+            del self._h5group["extents"]
+        else:
+            self._h5group.create_link(da, "extents")
 
     def _get_offset_and_count(self, data, index):
         offsets = []
@@ -157,7 +163,7 @@ class MultiTag(BaseTag, MultiTagMixin):
                                   "in the Feature!")
             offset = [0] * len(da.data_extent)
             offset[0] = posidx
-            count = [0] * len(da.data_extent)
+            count = list(da.data_extent)
             count[0] = 1
 
             if not self._position_and_extent_in_data(da, offset, count):
