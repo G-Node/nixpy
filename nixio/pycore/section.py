@@ -5,12 +5,15 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from collections import Sequence
+import numpy as np
 
 from .entity import NamedEntity
 from ..section import SectionMixin
 from .util import util
 from . import Property
 from . import exceptions
+from ..value import DataType
 
 
 class Section(NamedEntity, SectionMixin):
@@ -48,15 +51,25 @@ class Section(NamedEntity, SectionMixin):
         return len(self._h5group.open_group("sections"))
 
     # Property
-    def create_property(self, name, dtype):
+    def create_property(self, name, value):
         properties = self._h5group.open_group("properties", True)
         if name in properties:
             raise exceptions.DuplicateName("create_property")
-        prop = Property._create_new(properties)
+        if isinstance(value, type):
+            dtype = value
+            value = np.array([0])
+        else:
+            if isinstance(value, Sequence) and not isinstance(value, str):
+                value = np.array(value)
+                dtype = DataType.get_dtype(value[0])
+            else:
+                dtype = DataType.get_dtype(value)
+        prop = Property._create_new(properties, name, dtype)
+        prop.value = value
         return prop
 
     def has_property_by_name(self, name):
-        return name in self._h5group["properties"]
+        return self._h5group.has_by_id(name)
 
     def _get_property_by_id(self, id_or_name):
         properties = self._h5group.open_group("properties")
