@@ -56,7 +56,7 @@ class BaseTag(EntityWithSources):
 
     def _get_reference_by_pos(self, pos):
         references = self._h5group.open_group("references")
-        return references.get_by_pos(pos)
+        return DataArray(references.get_by_pos(pos))
 
     def _delete_reference_by_id(self, id_or_name):
         references = self._h5group.open_group("references")
@@ -100,6 +100,7 @@ class BaseTag(EntityWithSources):
     def _pos_to_idx(pos, unit, dim):
         dimtype = dim.dimension_type
         dimunit = dim.unit
+        scaling = 1.0
         if dimtype == DimensionType.Sample:
             if not dimunit and unit is not None:
                 raise IncompatibleDimensions(
@@ -109,12 +110,13 @@ class BaseTag(EntityWithSources):
             if dimunit and unit is not None:
                 try:
                     scaling = util.scaling(unit, dimunit)
-                    return dim.index_of(pos * scaling)
                 except InvalidUnit:
                     raise IncompatibleDimensions(
                         "Cannot apply a position with unit to a SetDimension",
                         "Tag._pos_to_idx"
                     )
+
+            index = dim.index_of(pos * scaling)
         elif dimtype == DimensionType.Set:
             if unit:
                 raise IncompatibleDimensions(
@@ -126,18 +128,18 @@ class BaseTag(EntityWithSources):
             if nlabels and index > nlabels:
                 raise OutOfBounds("Position is out of bounds in SetDimension",
                                   pos)
-            return index
-        elif dimtype == DimensionType.Range:
+        else:  # dimtype == DimensionType.Range:
             if dimunit and unit is not None:
                 try:
                     scaling = util.scaling(unit, dimunit)
-                    return dim.index_of(pos * scaling)
                 except InvalidUnit:
                     raise IncompatibleDimensions(
                         "Provided units are not scalable!",
                         "Tag._pos_to_idx"
                     )
-        return pos
+            index = dim.index_of(pos * scaling)
+
+        return int(index)
 
 
 class Tag(BaseTag, TagMixin):
@@ -201,7 +203,7 @@ class Tag(BaseTag, TagMixin):
         return tuple(offset), tuple(count)
 
     def retrieve_data(self, refidx):
-        references = self._h5group.open_group("references")
+        references = self.references
         position = self.position
         extent = self.extent
         if len(references) == 0:

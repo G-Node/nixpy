@@ -31,7 +31,12 @@ class MultiTag(BaseTag, MultiTagMixin):
 
     @positions.setter
     def positions(self, da):
+        if da is None:
+            raise TypeError("MultiTag.positions cannot be None.")
+        if "positions" in self._h5group:
+            del self._h5group["positions"]
         self._h5group.create_link(da, "positions")
+        self.force_updated_at()
 
     @property
     def extents(self):
@@ -108,21 +113,21 @@ class MultiTag(BaseTag, MultiTagMixin):
         return offsets, counts
 
     def retrieve_data(self, posidx, refidx):
-        references = self._h5group.open_group("references")
+        references = self.references
         positions = self.positions
         extents = self.extents
         if len(references) == 0:
             raise OutOfBounds("There are no references in this multitag!")
 
         if (posidx >= positions.data_extent[0] or
-            extents and posidx >= extents.data_extent[0]):
+                extents and posidx >= extents.data_extent[0]):
             raise OutOfBounds("Index out of bounds of positions or extents!")
 
         if refidx >= len(references):
             raise OutOfBounds("Reference index out of bounds.")
 
         ref = references[refidx]
-        dimcount = ref.dimension_count()
+        dimcount = len(ref.dimensions)
         if len(positions.data_extent) == 1 and dimcount != 1:
             raise IncompatibleDimensions(
                 "Number of dimensions in position or extent do not match "
