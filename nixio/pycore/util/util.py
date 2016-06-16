@@ -64,7 +64,7 @@ def check_name_or_id(name_or_id):
 
 
 def check_entity_input(entity, raise_exception=True):
-    if entity:
+    if entity is not None:
         return True
     if raise_exception:
         raise exceptions.UninitializedEntity()
