@@ -195,27 +195,3 @@ class TestPropertyPy(_TestProperty):
 
     backend = "h5py"
 
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    def test_property_eq(self):
-        pass
-
-    def test_property_id(self):
-        pass
-
-    def test_property_name(self):
-        pass
-
-    def test_property_definition(self):
-        pass
-
-    def test_property_mapping(self):
-        pass
-
-    def test_property_values(self):
-        pass
-

@@ -123,36 +123,5 @@ class TestSourceCPP(_TestSource):
 
 class TestSourcePy(_TestSource):
 
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    def test_source_eq(self):
-        pass
-
-    def test_source_id(self):
-        pass
-
-    def test_source_name(self):
-        pass
-
-    def test_source_type(self):
-        pass
-
-    def test_source_definition(self):
-        pass
-
-    def test_source_timestamps(self):
-        pass
-
-    def test_source_sources(self):
-        pass
-
-    def test_source_find_sources(self):
-        pass
-
-    def test_sources_extend(self):
-        pass
+    backend = "h5py"
 
