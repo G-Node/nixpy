@@ -172,7 +172,7 @@ class _TestTag(unittest.TestCase):
         assert(data1.size == 1) 
         assert(data2.size == 1) 
         assert(data3.size == len(ramp_data))
-        
+
         # make the tag pointing to a slice
         pos_tag.extent = [2.0]
         data1 = pos_tag.retrieve_feature_data(0)

@@ -16,7 +16,32 @@ from .dimensions import (SampledDimension, RangeDimension, SetDimension,
                          DimensionType)
 
 
-class DataArray(EntityWithSources, DataSetMixin, DataArrayMixin):
+class DataSet(DataSetMixin):
+
+    def _write_data(self, data, count, offset):
+        dataset = self._h5group.get_dataset("data")
+        dataset.write_data(data, count, offset)
+
+    def _read_data(self, data, count, offset):
+        dataset = self._h5group.get_dataset("data")
+        dataset.read_data(data, count, offset)
+
+    @property
+    def data_extent(self):
+        dataset = self._h5group.get_dataset("data")
+        return dataset.shape
+
+    @data_extent.setter
+    def data_extent(self, extent):
+        dataset = self._h5group.get_dataset("data")
+        dataset.shape = extent
+
+    def _get_dtype(self):
+        dataset = self._h5group.get_dataset("data")
+        dataset.dtype
+
+
+class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     def __init__(self, h5group):
         super(DataArray, self).__init__(h5group)
@@ -83,28 +108,6 @@ class DataArray(EntityWithSources, DataSetMixin, DataArrayMixin):
             return SetDimension(h5dim)
         else:
             raise TypeError("Invalid Dimension object in file.")
-
-    def _write_data(self, data, count, offset):
-        dataset = self._h5group.get_dataset("data")
-        dataset.write_data(data, count, offset)
-
-    def _read_data(self, data, count, offset):
-        dataset = self._h5group.get_dataset("data")
-        dataset.read_data(data, count, offset)
-
-    @property
-    def data_extent(self):
-        dataset = self._h5group.get_dataset("data")
-        return dataset.shape
-
-    @data_extent.setter
-    def data_extent(self, extent):
-        dataset = self._h5group.get_dataset("data")
-        dataset.shape = extent
-
-    def _get_dtype(self):
-        dataset = self._h5group.get_dataset("data")
-        dataset.dtype
 
     @property
     def dtype(self):

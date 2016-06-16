@@ -38,9 +38,10 @@ class InvalidEntity(Exception):
 
 class OutOfBounds(IndexError):
 
-    def __init__(self, message, index):
-        self.message = "{message} [at index: {index}]".format(message=message,
-                                                              index=index)
+    def __init__(self, message, index=None):
+        self.message = message
+        if index is not None:
+            self.message += " [at index: {}]".format(index)
         super(OutOfBounds, self).__init__(self.message)
 
 

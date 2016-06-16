@@ -10,23 +10,12 @@ from .entity_with_sources import EntityWithSources
 from ..tag import TagMixin
 from ..value import DataType
 from .data_array import DataArray
+from .data_view import DataView
 from .feature import Feature
 from .exceptions import OutOfBounds, IncompatibleDimensions
 from ..dimension_type import DimensionType
 from ..link_type import LinkType
 from . import util
-
-
-class DataView(object):
-
-    def __init__(self, da, count, offset):
-        self.da = da
-        self.count = count
-        self.offset = offset
-
-    @property
-    def size(self):
-        return 1
 
 
 class Tag(EntityWithSources, TagMixin):
@@ -116,7 +105,7 @@ class Tag(EntityWithSources, TagMixin):
             return DataView(da, count, offset)
 
         count = da.data_extent
-        offset = [0] * len(count)
+        offset = (0,) * len(count)
         return DataView(da, count, offset)
 
     def _get_offset_and_count(self, data):
@@ -135,7 +124,7 @@ class Tag(EntityWithSources, TagMixin):
                 count.append(self.pos_to_idx(pos+ext, unit, dim))
             else:
                 count.append(1)
-        return offset, count
+        return tuple(offset), tuple(count)
 
     @staticmethod
     def pos_to_idx(pos, unit, dim):
@@ -145,8 +134,6 @@ class Tag(EntityWithSources, TagMixin):
             return dim.index_of(pos * scaling)
         elif dim.dimension_type == DimensionType.Set:
             return round(pos)
-
-
 
     @property
     def units(self):
