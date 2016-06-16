@@ -18,11 +18,13 @@ except ImportError:
     skip_cpp = True
 
 
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestFeature(unittest.TestCase):
+class _TestFeature(unittest.TestCase):
+
+    backend = None
 
     def setUp(self):
-        self.file     = File.open("unittest.h5", FileMode.Overwrite)
+        self.file     = File.open("unittest.h5", FileMode.Overwrite,
+                                  backend=self.backend)
         self.block    = self.file.create_block("test block", "recordingsession")
 
         self.signal = self.block.create_data_array("output", "analogsignal", DataType.Float, (0, ))
@@ -72,3 +74,14 @@ class TestFeature(unittest.TestCase):
         new_data_ref = self.block.create_data_array("test", "current", DataType.Float, (0, ))
         self.feature_1.data = new_data_ref
         assert(self.feature_1.data == new_data_ref)
+
+
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
+class TestFeatureCPP(_TestFeature):
+
+    backend = "hdf5"
+
+
+class TestFeaturePy(_TestFeature):
+
+    backend = "h5py"
