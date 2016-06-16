@@ -33,15 +33,45 @@ class FileMode(object):
     Overwrite = 'w'
 
 
+def map_file_mode(mode):
+    if mode == FileMode.ReadOnly:
+        return h5py.h5f.ACC_RDONLY
+    elif mode == FileMode.ReadWrite:
+        return h5py.h5f.ACC_RDWR
+    elif mode == FileMode.Overwrite:
+        return h5py.h5f.ACC_TRUNC
+    else:
+        ValueError("Invalid file mode specified.")
+
+
+def make_fapl():
+    return h5py.h5p.create(h5py.h5p.FILE_ACCESS)
+
+
+def make_fcpl():
+    fcpl = h5py.h5p.create(h5py.h5p.FILE_CREATE)
+    flags = h5py.h5p.CRT_ORDER_TRACKED | h5py.h5p.CRT_ORDER_INDEXED
+    fcpl.set_link_creation_order(flags)
+    return fcpl
+
+
 class File(FileMixin):
 
     def __init__(self, path, mode=FileMode.ReadWrite):
+        try:
+            path = path.encode("utf-8")
+        except (UnicodeError, LookupError):
+            pass
         if not os.path.exists(path):
             mode = FileMode.Overwrite
-        # if os.path.isfile(path):
-        #     self._open_existing(path, mode, fcpl)
-        # else:
-        self._create_new(path, mode)
+
+        self.mode = mode
+        h5mode = map_file_mode(mode)
+
+        if os.path.exists(path):
+            self._open_existing(path, h5mode)
+        else:
+            self._create_new(path, mode)
 
         self._root = H5Group(self._h5file, "/", create=True)
         self._data = self._root.open_group("data", create=True)
@@ -51,29 +81,17 @@ class File(FileMixin):
         if "updated_at" not in self._h5file.attrs:
             self.force_updated_at()
 
-    def _open_existing(self, path, mode, fcpl):
-        self._h5file = h5py.File(name=path, mode=mode)
-        if mode == FileMode.Overwrite:
-            self._create_header()
-
-    def _create_new(self, path, mode):
-        # if mode == "w":
-        if True:
-            print("Truncating enforced for testing")
-            try:
-                path = path.encode(sys.getfilesystemencoding())
-            except (UnicodeError, LookupError):
-                pass
-
-            fcpl = h5py.h5p.create(h5py.h5p.FILE_CREATE)
-            flags = h5py.h5p.CRT_ORDER_TRACKED | h5py.h5p.CRT_ORDER_INDEXED
-            fcpl.set_link_creation_order(flags)
-            fapl = h5py.h5p.create(h5py.h5p.FILE_ACCESS)
-            fid = h5py.h5f.create(path, h5py.h5f.ACC_TRUNC, fapl=fapl,
-                                  fcpl=fcpl)
-            self._h5file = h5py.File(fid)
+    def _open_existing(self, path, h5mode):
+        if h5mode == h5py.h5f.ACC_TRUNC:
+            self._create_new(path, h5mode)
         else:
-            self._h5file = h5py.File(name=path, mode=mode)
+            fid = h5py.h5f.open(path, flags=h5mode, fapl=make_fapl())
+            self._h5file = h5py.File(fid)
+
+    def _create_new(self, path, h5mode):
+        fid = h5py.h5f.create(path, flags=h5mode, fapl=make_fapl(),
+                              fcpl=make_fcpl())
+        self._h5file = h5py.File(fid)
         self._create_header()
 
     def _create_header(self):
