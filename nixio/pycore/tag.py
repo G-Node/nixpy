@@ -13,7 +13,8 @@ from ..value import DataType
 from .data_array import DataArray
 from .data_view import DataView
 from .feature import Feature
-from .exceptions import OutOfBounds, IncompatibleDimensions, UninitializedEntity
+from .exceptions import (OutOfBounds, IncompatibleDimensions,
+                         UninitializedEntity, InvalidUnit)
 from ..dimension_type import DimensionType
 from ..link_type import LinkType
 from . import util
@@ -97,12 +98,46 @@ class BaseTag(EntityWithSources):
 
     @staticmethod
     def _pos_to_idx(pos, unit, dim):
-        if dim.dimension_type in (DimensionType.Sample, DimensionType.Range):
-            # scaling = 1.0
-            scaling = util.scaling(unit, dim.unit)
-            return dim.index_of(pos * scaling)
-        elif dim.dimension_type == DimensionType.Set:
-            return round(pos)
+        dimtype = dim.dimension_type
+        dimunit = dim.unit
+        if dimtype == DimensionType.Sample:
+            if not dimunit and unit is not None:
+                raise IncompatibleDimensions(
+                    "Units of position and SampledDimension must both be given!",
+                    "Tag._pos_to_idx"
+                )
+            if dimunit and unit is not None:
+                try:
+                    scaling = util.scaling(unit, dimunit)
+                    return dim.index_of(pos * scaling)
+                except InvalidUnit:
+                    raise IncompatibleDimensions(
+                        "Cannot apply a position with unit to a SetDimension",
+                        "Tag._pos_to_idx"
+                    )
+        elif dimtype == DimensionType.Set:
+            if unit:
+                raise IncompatibleDimensions(
+                    "Cannot apply a position with unit to a SetDimension",
+                    "Tag._pos_to_idx"
+                )
+            index = round(pos)
+            nlabels = len(dim.labels)
+            if nlabels and index > nlabels:
+                raise OutOfBounds("Position is out of bounds in SetDimension",
+                                  pos)
+            return index
+        elif dimtype == DimensionType.Range:
+            if dimunit and unit is not None:
+                try:
+                    scaling = util.scaling(unit, dimunit)
+                    return dim.index_of(pos * scaling)
+                except InvalidUnit:
+                    raise IncompatibleDimensions(
+                        "Provided units are not scalable!",
+                        "Tag._pos_to_idx"
+                    )
+        return pos
 
 
 class Tag(BaseTag, TagMixin):
