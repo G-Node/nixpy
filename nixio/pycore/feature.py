@@ -8,6 +8,7 @@
 
 from .entity import Entity
 from .data_array import DataArray
+from ..link_type import LinkType
 
 
 class Feature(Entity):
@@ -18,8 +19,8 @@ class Feature(Entity):
     @classmethod
     def _create_new(cls, parent, data, link_type):
         newentity = super(Feature, cls)._create_new(parent)
-        newentity._h5group.set_attr("link_type", link_type)
-        newentity._h5group.create_link(data, "data")
+        newentity.link_type = link_type
+        newentity.data = data
         return newentity
 
     @property
@@ -30,6 +31,21 @@ class Feature(Entity):
     def link_type(self):
         return self._h5group.get_attr("link_type")
 
+    @link_type.setter
+    def link_type(self, lt):
+        if lt not in (LinkType.Indexed, LinkType.Tagged, LinkType.Untagged):
+            raise ValueError("Invalid link type.")
+        self._h5group.set_attr("link_type", lt)
+
     @property
     def data(self):
         return DataArray(self._h5group.open_group("data"))
+
+    @data.setter
+    def data(self, da):
+        if da is None:
+            raise TypeError("Feature.data cannot be None.")
+        if "data" in self._h5group:
+            del self._h5group["data"]
+        self._h5group.create_link(da, "data")
+        self.force_updated_at()

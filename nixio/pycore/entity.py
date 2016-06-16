@@ -33,9 +33,23 @@ class Entity(object):
     def created_at(self):
         return self._h5group.get_attr("created_at")
 
+    def force_created_at(self, t=None):
+        if t is None:
+            t = util.now_int()
+        # TODO: Check if convertible to date
+        util.check_attr_type(t, int)
+        self._h5group.set_attr("created_at", t)
+
     @property
     def updated_at(self):
         return self._h5group.get_attr("updated_at")
+
+    def force_updated_at(self, t=None):
+        if t is None:
+            t = util.now_int()
+        # TODO: Check if convertible to date
+        util.check_attr_type(t, int)
+        self._h5group.set_attr("updated_at", t)
 
 
 class NamedEntity(object):
