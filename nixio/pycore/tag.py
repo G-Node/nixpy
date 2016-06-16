@@ -5,6 +5,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+import numpy as np
 
 from .entity_with_sources import EntityWithSources
 from ..tag import TagMixin
@@ -12,7 +13,7 @@ from ..value import DataType
 from .data_array import DataArray
 from .data_view import DataView
 from .feature import Feature
-from .exceptions import OutOfBounds, IncompatibleDimensions
+from .exceptions import OutOfBounds, IncompatibleDimensions, UninitializedEntity
 from ..dimension_type import DimensionType
 from ..link_type import LinkType
 from . import util
@@ -79,10 +80,10 @@ class Tag(EntityWithSources, TagMixin):
     def retrieve_data(self, refidx):
         references = self._h5group.open_group("references")
         if len(references) == 0:
-            raise OutOfBounds("There are no references in this tag!", 0)
+            raise OutOfBounds("There are no references in this tag!")
 
         if refidx >= len(references):
-            raise OutOfBounds("Reference index out of bounds.", 0)
+            raise OutOfBounds("Reference index out of bounds.")
 
         ref = references[refidx]
         dimcount = ref.dimension_count()
@@ -94,19 +95,41 @@ class Tag(EntityWithSources, TagMixin):
                 "Tag.retrieve_data")
 
         offset, count = self._get_offset_and_count(ref)
+
+        if not self.position_and_extent_in_data(ref, offset, count):
+            raise OutOfBounds("Referenced data slice out of the extent of the "
+                              "DataArray!")
         return DataView(ref, count, offset)
 
     def retrieve_feature_data(self, featidx):
-        # TODO: Errors
+        if self._feature_count() == 0:
+            raise OutOfBounds("There are no features associated with this tag!")
+        if featidx > self._feature_count():
+            raise OutOfBounds("Feature index out of bounds.")
         feat = self.features[featidx]
         da = feat.data
+        if da is None:
+            raise UninitializedEntity()
         if feat.link_type == LinkType.Tagged:
             offset, count = self._get_offset_and_count(da)
+            if not self.position_and_extent_in_data(da, offset, count):
+                raise OutOfBounds("Requested data slice out of the extent "
+                                  "of the Feature!")
             return DataView(da, count, offset)
-
+        # For untagged and indexed return the full data
         count = da.data_extent
         offset = (0,) * len(count)
         return DataView(da, count, offset)
+
+    @classmethod
+    def position_and_extent_in_data(cls, data, offset, count):
+        pos = tuple(np.add(offset, count) - 1)
+        return cls.position_in_data(data, pos)
+
+    @staticmethod
+    def position_in_data(data, pos):
+        dasize = data.data_extent
+        return np.all(np.less(pos, dasize))
 
     def _get_offset_and_count(self, data):
         offset = []
@@ -118,10 +141,13 @@ class Tag(EntityWithSources, TagMixin):
                 unit = self.units[idx]
             else:
                 unit = None
-            offset.append(self.pos_to_idx(self.position[idx], unit, dim))
+            o = self.pos_to_idx(self.position[idx], unit, dim)
+            offset.append(o)
             if idx < len(self.extent):
                 ext = self.extent[idx]
-                count.append(self.pos_to_idx(pos+ext, unit, dim))
+                c = self.pos_to_idx(pos+ext, unit, dim) - o
+                if c > 1:
+                    count.append(c if c > 1 else 1)
             else:
                 count.append(1)
         return tuple(offset), tuple(count)
