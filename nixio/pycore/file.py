@@ -71,7 +71,7 @@ class File(FileMixin):
         if os.path.exists(path):
             self._open_existing(path, h5mode)
         else:
-            self._create_new(path, mode)
+            self._create_new(path, h5mode)
 
         self._root = H5Group(self._h5file, "/", create=True)
         self._data = self._root.open_group("data", create=True)
