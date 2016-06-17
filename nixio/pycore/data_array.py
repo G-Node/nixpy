@@ -6,14 +6,13 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 from numbers import Number
-import numpy as np
 
-from . import util
 from .entity_with_sources import EntityWithSources
 from ..data_array import DataArrayMixin, DataSetMixin
 from ..value import DataType
 from .dimensions import (SampledDimension, RangeDimension, SetDimension,
                          DimensionType)
+from . import util
 
 
 class DataSet(DataSetMixin):

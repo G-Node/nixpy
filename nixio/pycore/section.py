@@ -5,15 +5,16 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-from collections import Sequence
-import numpy as np
+from __future__ import (absolute_import, division, print_function)
 
-from .entity import NamedEntity
+from collections import Sequence
+
+from ..value import Value
 from ..section import SectionMixin
-from .util import util
-from . import Property
+from .entity import NamedEntity
+from .property import Property
+from . import util
 from . import exceptions
-from ..value import Value, DataType
 
 
 class Section(NamedEntity, SectionMixin):

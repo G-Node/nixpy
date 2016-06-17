@@ -5,13 +5,15 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-import h5py
+from __future__ import (absolute_import, division, print_function)
 
+import h5py
 import numpy as np
+
+from .h5dataset import H5DataSet
 from ..value import DataType
 
 from . import util
-from .h5dataset import H5DataSet
 
 
 class H5Group(object):

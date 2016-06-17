@@ -7,6 +7,7 @@
 # LICENSE file in the root of the Project.
 
 import numpy as np
+from .pycore.util.util import vlen_str_dtype
 
 integers = (int,)
 try:

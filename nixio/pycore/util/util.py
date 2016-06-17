@@ -11,7 +11,7 @@ import h5py
 from time import time
 from datetime import datetime
 from uuid import uuid4, UUID
-from .. import exceptions
+from ..exceptions import exceptions
 from . import names
 
 try:

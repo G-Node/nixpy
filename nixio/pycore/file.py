@@ -5,24 +5,20 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function)
 import os
-import sys
 
 import h5py
-import numpy as np
 
 from .h5group import H5Group
-
-from .util import util
-from . import Block
-from . import exceptions
-from . import Section
-
+from .block import Block
+from .exceptions import exceptions
+from .section import Section
 from ..file import FileMixin
+from . import util
 
 try:
-    from nixio.core import File as CFile
+    from ..core import File as CFile
 except ImportError:
     CFile = None
 

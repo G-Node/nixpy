@@ -5,13 +5,14 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from __future__ import (absolute_import, division, print_function)
 
 from ..multi_tag import MultiTagMixin
 from .tag import BaseTag
 from .data_array import DataArray
 from .data_view import DataView
-from .exceptions import OutOfBounds, IncompatibleDimensions, UninitializedEntity
 from ..link_type import LinkType
+from .exceptions import OutOfBounds, IncompatibleDimensions, UninitializedEntity
 
 
 class MultiTag(BaseTag, MultiTagMixin):
