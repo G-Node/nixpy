@@ -75,11 +75,11 @@ class Group(EntityWithSources, GroupMixin):
     # Tag
     def _get_tag_by_id(self, id_or_name):
         tags = self._h5group.open_group("tags")
-        return MultiTag(tags.get_by_id_or_name(id_or_name))
+        return Tag(tags.get_by_id_or_name(id_or_name))
 
     def _get_tag_by_pos(self, pos):
         tags = self._h5group.open_group("tags")
-        return MultiTag(tags.get_by_pos(pos))
+        return Tag(tags.get_by_pos(pos))
 
     def _delete_tag_by_id(self, id_or_name):
         tags = self._h5group.open_group("tags")
