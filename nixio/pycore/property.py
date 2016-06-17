@@ -69,13 +69,21 @@ class Property(PropertyMixin):
     @property
     def values(self):
         dataset = self._h5dataset
+        if not sum(dataset.shape):
+            return tuple()
         data = np.empty(dataset.shape, dtype=dataset.dtype)
         self._h5dataset.read_data(data)
-        values = []
-        for d in data:
-            raise NotImplementedError("IMPLEMENT ME")
-            v = Value(0)
-            values.append(v)
+
+        def data_to_value(d):
+            v = Value(d["value"])
+            v.uncertainty = d["uncertainty"]
+            v.reference = d["reference"]
+            v.filename = d["filename"]
+            v.encoder = d["encoder"]
+            v.checksum = d["checksum"]
+            return v
+
+        values = tuple(map(data_to_value, data))
         return values
 
     @values.setter
