@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 from ..property import PropertyMixin
-from ..value import Value
+from ..value import Value, DataType
 from . import util
 
 
@@ -22,6 +22,7 @@ class Property(PropertyMixin):
     @classmethod
     def _create_new(cls, parent, name, dtype):
         util.check_entity_name(name)
+        dtype = cls._make_h5_dtype(dtype)
         h5dataset = parent.create_dataset(name, shape=(0,), dtype=dtype)
         h5dataset.set_attr("name", name)
         h5dataset.set_attr("entity_id", util.create_id())
@@ -65,8 +66,55 @@ class Property(PropertyMixin):
         util.check_attr_type(u, str)
         self._h5dataset.set_attr("unit", u)
 
+    @property
+    def values(self):
+        dataset = self._h5dataset
+        data = np.empty(dataset.shape, dtype=dataset.dtype)
+        self._h5dataset.read_data(data)
+        values = []
+        for d in data:
+            raise NotImplementedError("IMPLEMENT ME")
+            v = Value(0)
+            values.append(v)
+        return values
+
+    @values.setter
+    def values(self, values):
+        if not len(values):
+            self.delete_values()
+            return
+
+        for v in values:
+            util.check_attr_type(v, Value)
+
+        self._h5dataset.shape = np.shape(values)
+
+        dtype = self._h5dataset.dtype
+        data = np.array([], dtype=dtype)
+        for v in values:
+            d = np.array((v.value, v.uncertainty, v.reference,
+                          v.filename, v.encoder, v.checksum),
+                         dtype=dtype)
+            data = np.append(data, d)
+
+        self._h5dataset.write_data(data)
+
     def delete_values(self):
         self._h5dataset.shape = (0,)
+
+    @staticmethod
+    def _make_h5_dtype(valuedtype):
+        str_ = util.vlen_str_dtype
+        common = [("uncertainty", float),
+                  ("reference", str_),
+                  ("filename",  str_),
+                  ("encoder",   str_),
+                  ("checksum",  str_)]
+
+        if valuedtype == DataType.String:
+            valuedtype = str_
+
+        return np.dtype([("value", valuedtype)] + common)
 
     def __str__(self):
         return "{}: {{name = {}}}".format(

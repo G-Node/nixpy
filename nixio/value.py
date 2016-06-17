@@ -7,7 +7,6 @@
 # LICENSE file in the root of the Project.
 
 import numpy as np
-from .pycore.util.util import vlen_str_dtype
 
 integers = (int,)
 try:
@@ -70,11 +69,11 @@ class Value(object):
             self.value = value
         else:
             raise TypeError("Invalid value type: {}".format(type(value)))
+        self.uncertainty = 0
         self.reference = ""
         self.filename = ""
         self.encoder = ""
         self.checksum = ""
-        self.uncertainty = 0
         self.data_type = DataType.get_dtype(value)
 
     def __str__(self):
@@ -90,10 +89,3 @@ class Value(object):
         else:
             return self.value == other
 
-    def __hash__(self):
-        """
-        Overwriting method __eq__ blocks inheritance of __hash__ in Python 3
-        hash has to be either explicitly inherited from parent class,
-        implemented or escaped
-        """
-        return hash(self.id)
