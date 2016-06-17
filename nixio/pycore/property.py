@@ -6,61 +6,69 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from .entity import Entity
 from ..property import PropertyMixin
-from .util import util
+from . import util
 
 
-class Property(Entity, PropertyMixin):
+class Property(PropertyMixin):
 
-    def __init__(self, h5group):
-        super(Property, self).__init__(h5group)
+    def __init__(self, h5dataset):
+        self._h5dataset = h5dataset
 
     @classmethod
     def _create_new(cls, parent, name, dtype):
-        newentity = super(Property, cls)._create_new(parent)
-        newentity._h5group.set_attr("name", name)
-        # TODO: Create dataset and use it for storing all property info
-        # TODO: Does a property also create a Group object in the file?
-        # newentity._h5group.create_dataset()
+        util.check_entity_name(name)
+        h5dataset = parent.create_dataset(name, shape=(0,), dtype=dtype)
+        h5dataset.set_attr("name", name)
+        h5dataset.set_attr("entity_id", util.create_id())
+        h5dataset.set_attr("created_at", int(util.now_int()))
+        h5dataset.set_attr("updated_at", int(util.now_int()))
+        newentity = cls(h5dataset)
         return newentity
 
     @property
+    def id(self):
+        return self._h5dataset.get_attr("entity_id")
+
+    @property
     def name(self):
-        return self._h5group.get_attr("name")
+        return self._h5dataset.get_attr("name")
 
     @property
     def definition(self):
-        return self._h5group.get_attr("definition")
+        return self._h5dataset.get_attr("definition")
 
     @definition.setter
     def definition(self, d):
         util.check_attr_type(d, str)
-        self._h5group.set_attr("definition", d)
+        self._h5dataset.set_attr("definition", d)
 
     @property
     def mapping(self):
-        return self._h5group.get_attr("mapping")
+        return self._h5dataset.get_attr("mapping")
 
     @mapping.setter
     def mapping(self, mapping):
         util.check_attr_type(mapping, str)
-        self._h5group.set_attr("mapping", mapping)
+        self._h5dataset.set_attr("mapping", mapping)
 
     @property
     def unit(self):
-        return self._h5group.get_attr("unit")
+        return self._h5dataset.get_attr("unit")
 
     @unit.setter
     def unit(self, u):
         util.check_attr_type(u, str)
-        self._h5group.set_attr("unit", u)
+        self._h5dataset.set_attr("unit", u)
 
     def delete_values(self):
-        pass
+        self._h5dataset.shape = (0,)
 
     def __str__(self):
-        pass
+        return "{}: {{name = {}}}".format(
+            type(self).__name__, self.name
+        )
 
     def __repr__(self):
-        pass
+        return self.__str__()
+

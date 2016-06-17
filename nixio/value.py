@@ -8,14 +8,17 @@
 
 import numpy as np
 
+integers = (int,)
 try:
-    integers = (int, long)
+    integers += (long,)
 except NameError:
-    integers = (int,)
+    pass
+
+strings = (str, bytes)
 try:
-    strings = (str, bytes, basestring)
+    strings += (basestring,)
 except NameError:
-    strings = (str, bytes)
+    pass
 
 valid_types = (bool, float, integers, strings)
 

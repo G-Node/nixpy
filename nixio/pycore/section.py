@@ -13,7 +13,7 @@ from ..section import SectionMixin
 from .util import util
 from . import Property
 from . import exceptions
-from ..value import DataType
+from ..value import Value, DataType
 
 
 class Section(NamedEntity, SectionMixin):
@@ -57,13 +57,12 @@ class Section(NamedEntity, SectionMixin):
             raise exceptions.DuplicateName("create_property")
         if isinstance(value, type):
             dtype = value
-            value = np.array([0])
+            value = Value(0)
         else:
-            if isinstance(value, Sequence) and not isinstance(value, str):
-                value = np.array(value)
-                dtype = DataType.get_dtype(value[0])
+            if isinstance(value, Sequence):
+                dtype = value[0].data_type
             else:
-                dtype = DataType.get_dtype(value)
+                dtype = value.data_type
         prop = Property._create_new(properties, name, dtype)
         prop.value = value
         return prop
