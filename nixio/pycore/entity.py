@@ -71,8 +71,8 @@ class NamedEntity(object):
         h5group.set_attr("name", name)
         h5group.set_attr("type", type_)
         h5group.set_attr("entity_id", util.create_id())
-        h5group.set_attr("created_at", int(time()))
-        h5group.set_attr("updated_at", int(time()))
+        h5group.set_attr("created_at", util.now_int())
+        h5group.set_attr("updated_at", util.now_int())
         newentity = cls(h5group)
         return newentity
 

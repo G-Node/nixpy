@@ -52,6 +52,15 @@ class H5DataSet(object):
         else:
             self.dataset.read_direct(data)
 
+    def set_attr(self, name, value):
+        if value is None:
+            del self.dataset.attrs[name]
+        else:
+            self.dataset.attrs[name] = value
+
+    def get_attr(self, name):
+        return self.dataset.attrs.get(name)
+
     @property
     def shape(self):
         return self.dataset.shape
