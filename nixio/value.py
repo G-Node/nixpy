@@ -5,14 +5,10 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from __future__ import (absolute_import, division, print_function)
+from numbers import Number, Integral, Real
 
 import numpy as np
-
-integers = (int,)
-try:
-    integers += (long,)
-except NameError:
-    pass
 
 strings = (str, bytes)
 try:
@@ -20,7 +16,9 @@ try:
 except NameError:
     pass
 
-valid_types = (bool, float, integers, strings)
+bools = (bool, np.bool_)
+
+valid_types = (Number, strings)
 
 
 class DataType(object):
@@ -39,14 +37,16 @@ class DataType(object):
 
     @classmethod
     def get_dtype(cls, value):
-        if isinstance(value, bool):
+        if isinstance(value, bools):
             return cls.Bool
-        elif isinstance(value, integers):
+        elif isinstance(value, Integral):
             return cls.Int64
-        elif isinstance(value, float):
+        elif isinstance(value, Real):
             return cls.Float
         elif isinstance(value, strings):
             return cls.String
+        else:
+            raise ValueError("Unknown type for value {}".format(value))
 
     @classmethod
     def is_numeric_dtype(cls, dtype):
