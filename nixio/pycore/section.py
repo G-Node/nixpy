@@ -69,7 +69,16 @@ class Section(NamedEntity, SectionMixin):
         return prop
 
     def has_property_by_name(self, name):
-        return self._h5group.has_by_id(name)
+        properties = self._h5group.open_group("properties")
+        return properties.has_by_id(name)
+
+    def get_property_by_name(self, name):
+        properties = self._h5group.open_group("properties")
+        try:
+            p = Property(properties.get_by_name(name))
+        except ValueError:
+            p = None
+        return p
 
     def _get_property_by_id(self, id_or_name):
         properties = self._h5group.open_group("properties")
@@ -100,23 +109,26 @@ class Section(NamedEntity, SectionMixin):
         if "link" not in self._h5group:
             return None
         else:
-            return Section(self._h5group["link"])
+            return Section(self._h5group.open_group("link"))
 
     @link.setter
     def link(self, id_or_sec):
+        if id_or_sec is None:
+            self._h5group.delete("link")
         if isinstance(id_or_sec, Section):
-            id = id_or_sec.id
+            sec = id_or_sec
         else:
-            id = id_or_sec
-        # TODO: Complete the link setter
-        pass
+            rootsec = Section(self._h5group.h5root)
+            sec = rootsec.find_sections(filtr=lambda x: x.id == id_or_sec)
+
+        self._h5group.create_link(sec, "link")
 
     def inherited_properties(self):
-        properties = [Property(h5prop)
-                      for h5prop in self._h5group["properties"].values()]
+        properties = self._h5group.open_group("properties")
+        inhprops = [Property(h5prop) for h5prop in properties]
         if self.link:
-            properties.append(self.link.inherited_properties)
-        return properties
+            inhprops.append(self.link.inherited_properties)
+        return inhprops
 
     @property
     def mapping(self):
