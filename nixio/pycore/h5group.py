@@ -223,9 +223,49 @@ class H5Group(object):
     def get_attr(self, name):
         return self.group.attrs.get(name)
 
+    def find_children(self, filtr=None, limit=None):
+
+        result = []
+        start_depth = len(self.group.name.split("/"))
+
+        def match(name, obj):
+            curdepth = name.split("/")
+            if limit is not None and curdepth == start_depth + limit:
+                return None
+
+            h5grp = H5Group.create_from_h5obj(obj)
+            if filtr(h5grp):
+                result.append(h5grp)
+
+        self.group.visit_items(match)
+        return result
+
+    @property
+    def h5root(self):
+        """
+        Returns the H5Group of the Block or top-level Section which contains
+        this object. Returns None if requested on the file root '/' or the /data
+        or /metadata groups.
+
+        :return: Top level object containing this group (H5Group)
+        """
+        pathparts = self.group.name.split("/")
+        if len(pathparts) == 3:
+            return self
+        if self.group.name == "/":
+            return None
+        if len(pathparts) == 2:
+            return None
+
+        return self.parent.h5root
+
     @property
     def parent(self):
         return self.create_from_h5obj(self._parent)
+
+    def __iter__(self):
+        for grp in self.group.values():
+            yield self.create_from_h5obj(grp)
 
     def __contains__(self, item):
         if self.group is None:
