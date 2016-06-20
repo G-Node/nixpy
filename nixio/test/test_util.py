@@ -8,19 +8,13 @@
 # Redistribution and use in section and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
-from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 
 import unittest
-try:
-    from nixio.core import names
-    from nixio.core import units
-    skip_cpp = False
-except ImportError:
-    skip_cpp = True
+
+from nixio.pycore.util import names, units
 
 
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestUtil(unittest.TestCase):
 
     def setUp(self):
@@ -108,4 +102,5 @@ class TestUtil(unittest.TestCase):
 
         p, u, po = units.split(unit_3)
         assert(p == '' and u == 'Hz' and po == '-1')
+
 
