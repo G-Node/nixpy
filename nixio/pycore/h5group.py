@@ -44,7 +44,13 @@ class H5Group(object):
     def create_from_h5obj(cls, h5obj):
         parent = h5obj.parent
         name = h5obj.name.split("/")[-1]
-        return cls(parent, name)
+        if isinstance(h5obj, h5py.Group):
+            return cls(parent, name)
+        elif isinstance(h5obj, h5py.Dataset):
+            return H5DataSet(parent, name)
+        else:
+            raise ValueError("Invalid object: "
+                             "{} must be either h5py.Group of h5py.Dataset.")
 
     def open_group(self, name, create=False):
         """
