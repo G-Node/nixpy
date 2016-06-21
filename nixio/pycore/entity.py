@@ -5,35 +5,51 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from __future__ import (absolute_import, division, print_function)
 
-from time import time
 from . import util
 
 
 class Entity(object):
 
     def __init__(self, h5group):
-        util.check_entity_id(h5group.get_attr("id"))
+        util.check_entity_id(h5group.get_attr("entity_id"))
         self._h5group = h5group
 
     @classmethod
-    def _create_new(cls, h5group):
-        h5group.set_attr("id", util.create_id())
-        h5group.set_attr("created_at", int(time()))
-        h5group.set_attr("updated_at", int(time()))
+    def _create_new(cls, parent):
+        id_ = util.create_id()
+        h5group = parent.open_group(id_)
+        h5group.set_attr("entity_id", id_)
+        h5group.set_attr("created_at", util.now_int())
+        h5group.set_attr("updated_at", util.now_int())
         return cls(h5group)
 
     @property
     def id(self):
-        return self._h5group.get_attr("id")
+        return self._h5group.get_attr("entity_id")
 
     @property
     def created_at(self):
         return self._h5group.get_attr("created_at")
 
+    def force_created_at(self, t=None):
+        if t is None:
+            t = util.now_int()
+        # TODO: Check if convertible to date
+        util.check_attr_type(t, int)
+        self._h5group.set_attr("created_at", t)
+
     @property
     def updated_at(self):
         return self._h5group.get_attr("updated_at")
+
+    def force_updated_at(self, t=None):
+        if t is None:
+            t = util.now_int()
+        # TODO: Check if convertible to date
+        util.check_attr_type(t, int)
+        self._h5group.set_attr("updated_at", t)
 
 
 class NamedEntity(object):
@@ -44,7 +60,7 @@ class NamedEntity(object):
         try:
             util.check_entity_name_and_type(h5group.get_attr("name"),
                                             h5group.get_attr("type"))
-            util.check_entity_id(h5group.get_attr("id"))
+            util.check_entity_id(h5group.get_attr("entity_id"))
         except ValueError:
             ValueError("Invalid NIX object found in file.")
 
@@ -54,9 +70,9 @@ class NamedEntity(object):
         h5group = parent.open_group(name)
         h5group.set_attr("name", name)
         h5group.set_attr("type", type_)
-        h5group.set_attr("id", util.create_id())
-        h5group.set_attr("created_at", int(time()))
-        h5group.set_attr("updated_at", int(time()))
+        h5group.set_attr("entity_id", util.create_id())
+        h5group.set_attr("created_at", util.now_int())
+        h5group.set_attr("updated_at", util.now_int())
         newentity = cls(h5group)
         return newentity
 
@@ -86,13 +102,15 @@ class NamedEntity(object):
 
     @property
     def id(self):
-        return self._h5group.get_attr("id")
+        return self._h5group.get_attr("entity_id")
 
     @property
     def created_at(self):
         return self._h5group.get_attr("created_at")
 
-    def force_created_at(self, t):
+    def force_created_at(self, t=None):
+        if t is None:
+            t = util.now_int()
         # TODO: Check if convertible to date
         util.check_attr_type(t, int)
         self._h5group.set_attr("created_at", t)
@@ -101,7 +119,9 @@ class NamedEntity(object):
     def updated_at(self):
         return self._h5group.get_attr("updated_at")
 
-    def force_updated_at(self, t):
+    def force_updated_at(self, t=None):
+        if t is None:
+            t = util.now_int()
         # TODO: Check if convertible to date
         util.check_attr_type(t, int)
         self._h5group.set_attr("updated_at", t)

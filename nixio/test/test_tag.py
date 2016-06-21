@@ -172,7 +172,7 @@ class _TestTag(unittest.TestCase):
         assert(data1.size == 1) 
         assert(data2.size == 1) 
         assert(data3.size == len(ramp_data))
-        
+
         # make the tag pointing to a slice
         pos_tag.extent = [2.0]
         data1 = pos_tag.retrieve_feature_data(0)
@@ -194,44 +194,3 @@ class TestTagPy(_TestTag):
 
     backend = "h5py"
 
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    def test_tag_eq(self):
-        pass
-
-    def test_tag_id(self):
-        pass
-
-    def test_tag_name(self):
-        pass
-
-    def test_tag_type(self):
-        pass
-
-    def test_tag_definition(self):
-        pass
-
-    def test_tag_timestamps(self):
-        pass
-
-    def test_tag_units(self):
-        pass
-
-    def test_tag_position(self):
-        pass
-
-    def test_tag_extent(self):
-        pass
-
-    def test_tag_references(self):
-        pass
-
-    def test_tag_features(self):
-        pass
-
-    def test_tag_retrieve_feature_data(self):
-        pass

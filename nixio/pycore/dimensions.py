@@ -5,12 +5,14 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
+from __future__ import (absolute_import, division, print_function)
 from numbers import Number
+
 import numpy as np
-from .util import util
+
 from ..value import DataType
 from ..dimension_type import DimensionType
+from . import util
 
 
 class Dimension(object):
@@ -89,6 +91,17 @@ class SampledDimension(Dimension):
     def label(self, l):
         util.check_attr_type(l, str)
         self._h5group.set_attr("label", l)
+
+    @property
+    def sampling_interval(self):
+        return self._h5group.get_attr("sampling_interval")
+
+    @sampling_interval.setter
+    def sampling_interval(self, interval):
+        util.check_attr_type(interval, Number)
+        self._h5group.set_attr("sampling_interval", interval)
+
+
 
     @property
     def unit(self):

@@ -11,7 +11,7 @@ import h5py
 from time import time
 from datetime import datetime
 from uuid import uuid4, UUID
-from .. import exceptions
+from ..exceptions import exceptions
 from . import names
 
 try:
@@ -64,7 +64,7 @@ def check_name_or_id(name_or_id):
 
 
 def check_entity_input(entity, raise_exception=True):
-    if entity:
+    if entity is not None:
         return True
     if raise_exception:
         raise exceptions.UninitializedEntity()
@@ -112,3 +112,18 @@ def check_attr_type(value, type_):
         raise exceptions.InvalidAttrType(type_, value)
 
 
+def co_to_slice(count, offset):
+    """
+    Converts an offset-count pair to an h5py compatible slice
+
+    :param count: number of items
+    :param offset: offset from start
+    :return: slice-like tuple or single index
+    """
+    sl = []
+    for c, o in zip(count, offset):
+        sl.append(slice(o, c+o))
+    if len(sl) == 1:
+        return sl[0]
+    else:
+        return tuple(sl)

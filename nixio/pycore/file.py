@@ -5,23 +5,20 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-from __future__ import absolute_import
+from __future__ import (absolute_import, division, print_function)
 import os
 
 import h5py
-import numpy as np
 
 from .h5group import H5Group
-
-from .util import util
-from . import Block
-from . import exceptions
-from . import Section
-
+from .block import Block
+from .exceptions import exceptions
+from .section import Section
 from ..file import FileMixin
+from . import util
 
 try:
-    from nixio.core import File as CFile
+    from ..core import File as CFile
 except ImportError:
     CFile = None
 
@@ -32,15 +29,45 @@ class FileMode(object):
     Overwrite = 'w'
 
 
+def map_file_mode(mode):
+    if mode == FileMode.ReadOnly:
+        return h5py.h5f.ACC_RDONLY
+    elif mode == FileMode.ReadWrite:
+        return h5py.h5f.ACC_RDWR
+    elif mode == FileMode.Overwrite:
+        return h5py.h5f.ACC_TRUNC
+    else:
+        ValueError("Invalid file mode specified.")
+
+
+def make_fapl():
+    return h5py.h5p.create(h5py.h5p.FILE_ACCESS)
+
+
+def make_fcpl():
+    fcpl = h5py.h5p.create(h5py.h5p.FILE_CREATE)
+    flags = h5py.h5p.CRT_ORDER_TRACKED | h5py.h5p.CRT_ORDER_INDEXED
+    fcpl.set_link_creation_order(flags)
+    return fcpl
+
+
 class File(FileMixin):
 
     def __init__(self, path, mode=FileMode.ReadWrite):
+        try:
+            path = path.encode("utf-8")
+        except (UnicodeError, LookupError):
+            pass
         if not os.path.exists(path):
             mode = FileMode.Overwrite
-        if os.path.isfile(path):
-            self._open_existing(path, mode)
+
+        self.mode = mode
+        h5mode = map_file_mode(mode)
+
+        if os.path.exists(path):
+            self._open_existing(path, h5mode)
         else:
-            self._create_new(path, mode)
+            self._create_new(path, h5mode)
 
         self._root = H5Group(self._h5file, "/", create=True)
         self._data = self._root.open_group("data", create=True)
@@ -50,13 +77,17 @@ class File(FileMixin):
         if "updated_at" not in self._h5file.attrs:
             self.force_updated_at()
 
-    def _open_existing(self, path, mode):
-        self._h5file = h5py.File(name=path, mode=mode)
-        if mode == FileMode.Overwrite:
-            self._create_header()
+    def _open_existing(self, path, h5mode):
+        if h5mode == h5py.h5f.ACC_TRUNC:
+            self._create_new(path, h5mode)
+        else:
+            fid = h5py.h5f.open(path, flags=h5mode, fapl=make_fapl())
+            self._h5file = h5py.File(fid)
 
-    def _create_new(self, path, mode):
-        self._h5file = h5py.File(name=path, mode=mode)
+    def _create_new(self, path, h5mode):
+        fid = h5py.h5f.create(path, flags=h5mode, fapl=make_fapl(),
+                              fcpl=make_fcpl())
+        self._h5file = h5py.File(fid)
         self._create_header()
 
     def _create_header(self):

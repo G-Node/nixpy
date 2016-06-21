@@ -5,10 +5,12 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
-from . import util
+
 from ..value import DataType
+from . import util
 
 
 class H5DataSet(object):
@@ -35,13 +37,7 @@ class H5DataSet(object):
 
     def write_data(self, data, count=None, offset=None):
         if count and offset:
-            sl = []
-            for c, o in zip(count, offset):
-                sl.append(slice(o, c+o))
-            if len(sl) == 1:
-                sl = sl[0]
-            else:
-                sl = tuple(sl)
+            sl = util.co_to_slice(count, offset)
             self.dataset[sl] = data
         else:
             self.dataset[:] = data
@@ -49,13 +45,7 @@ class H5DataSet(object):
     def read_data(self, data, count=None, offset=None):
         if count and offset:
             datashape = data.shape
-            sl = []
-            for c, o in zip(count, offset):
-                sl.append(slice(o, c+o))
-            if len(sl) == 1:
-                sl = sl[0]
-            else:
-                sl = tuple(sl)
+            sl = util.co_to_slice(count, offset)
             if isinstance(sl, tuple) and np.ndim(data) != len(sl):
                 if count[-1] == 1:
                     data.resize(datashape + (1,))
@@ -63,6 +53,15 @@ class H5DataSet(object):
             data.resize(datashape)
         else:
             self.dataset.read_direct(data)
+
+    def set_attr(self, name, value):
+        if value is None:
+            del self.dataset.attrs[name]
+        else:
+            self.dataset.attrs[name] = value
+
+    def get_attr(self, name):
+        return self.dataset.attrs.get(name)
 
     @property
     def shape(self):

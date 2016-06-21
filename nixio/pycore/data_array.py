@@ -6,21 +6,44 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 from numbers import Number
-import numpy as np
 
-from . import util
 from .entity_with_sources import EntityWithSources
 from ..data_array import DataArrayMixin, DataSetMixin
 from ..value import DataType
 from .dimensions import (SampledDimension, RangeDimension, SetDimension,
                          DimensionType)
+from . import util
 
 
-class DataArray(EntityWithSources, DataSetMixin, DataArrayMixin):
+class DataSet(DataSetMixin):
+
+    def _write_data(self, data, count, offset):
+        dataset = self._h5group.get_dataset("data")
+        dataset.write_data(data, count, offset)
+
+    def _read_data(self, data, count, offset):
+        dataset = self._h5group.get_dataset("data")
+        dataset.read_data(data, count, offset)
+
+    @property
+    def data_extent(self):
+        dataset = self._h5group.get_dataset("data")
+        return dataset.shape
+
+    @data_extent.setter
+    def data_extent(self, extent):
+        dataset = self._h5group.get_dataset("data")
+        dataset.shape = extent
+
+    def _get_dtype(self):
+        dataset = self._h5group.get_dataset("data")
+        return dataset.dtype
+
+
+class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     def __init__(self, h5group):
         super(DataArray, self).__init__(h5group)
-        # TODO: Validate data containers
 
     @classmethod
     def _create_new(cls, parent, name, type_, data_type, shape):
@@ -85,46 +108,22 @@ class DataArray(EntityWithSources, DataSetMixin, DataArrayMixin):
         else:
             raise TypeError("Invalid Dimension object in file.")
 
-    def _write_data(self, data, count, offset):
-        dataset = self._h5group.get_dataset("data")
-        dataset.write_data(data, count, offset)
-
-    def _read_data(self, data, count, offset):
-        dataset = self._h5group.get_dataset("data")
-        dataset.read_data(data, count, offset)
-
-    @property
-    def data_extent(self):
-        dataset = self._h5group.get_dataset("data")
-        return dataset.shape
-
-    @data_extent.setter
-    def data_extent(self, extent):
-        dataset = self._h5group.get_dataset("data")
-        dataset.shape = extent
-
-    def _get_dtype(self):
-        dataset = self._h5group.get_dataset("data")
-        dataset.dtype
-
     @property
     def dtype(self):
         return self._h5group.group["data"].dtype
 
     @property
     def polynom_coefficients(self):
-        if "polynom_coefficients" not in self._h5group.group:
-            return tuple()
-        pc = self._h5group.get_data("polynom_coefficients")
-        return tuple(pc)
+        return tuple(self._h5group.get_data("polynom_coefficients"))
 
     @polynom_coefficients.setter
     def polynom_coefficients(self, coeff):
-        dtype = DataType.Double
-        shape = np.shape(coeff)
-        coeffdset = self._h5group.create_dataset("polynom_coefficients",
-                                                 shape=shape, dtype=dtype)
-        coeffdset.write_data(coeff)
+        if not coeff:
+            if self._h5group.has_data("polynom_coefficients"):
+                del self._h5group["polynom_coefficients"]
+        else:
+            dtype = DataType.Double
+            self._h5group.write_data("polynom_coefficients", coeff, dtype)
 
     @property
     def expansion_origin(self):

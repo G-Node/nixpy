@@ -5,11 +5,17 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from __future__ import (absolute_import, division, print_function)
 
-from __future__ import absolute_import
 from .entity_with_metadata import EntityWithMetadata
 from ..block import BlockMixin
-from . import util, exceptions, Group, DataArray, MultiTag, Tag, Source
+from .exceptions import exceptions
+from .group import Group
+from .data_array import DataArray
+from .multi_tag import MultiTag
+from .tag import Tag
+from .source import Source
+from . import util
 
 
 class Block(EntityWithMetadata, BlockMixin):

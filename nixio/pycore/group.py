@@ -5,10 +5,10 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from __future__ import (absolute_import, division, print_function)
 
 from ..group import GroupMixin
 from .entity_with_sources import EntityWithSources
-from . import util
 from .data_array import DataArray
 from .tag import Tag
 from .multi_tag import MultiTag
@@ -75,11 +75,11 @@ class Group(EntityWithSources, GroupMixin):
     # Tag
     def _get_tag_by_id(self, id_or_name):
         tags = self._h5group.open_group("tags")
-        return MultiTag(tags.get_by_id_or_name(id_or_name))
+        return Tag(tags.get_by_id_or_name(id_or_name))
 
     def _get_tag_by_pos(self, pos):
         tags = self._h5group.open_group("tags")
-        return MultiTag(tags.get_by_pos(pos))
+        return Tag(tags.get_by_pos(pos))
 
     def _delete_tag_by_id(self, id_or_name):
         tags = self._h5group.open_group("tags")

@@ -34,3 +34,20 @@ class InvalidEntity(Exception):
     def __init__(self, *args, **kwargs):
         self.message = "Invalid entity found in HDF5 file."
         super(InvalidEntity, self).__init__(self.message, *args, **kwargs)
+
+
+class OutOfBounds(IndexError):
+
+    def __init__(self, message, index=None):
+        self.message = message
+        if index is not None:
+            self.message += " [at index: {}]".format(index)
+        super(OutOfBounds, self).__init__(self.message)
+
+
+class IncompatibleDimensions(ValueError):
+
+    def __init__(self, what, where):
+        self.message = "IncompatibleDimensions: {} evoked at: {})".format(what,
+                                                                          where)
+        super(IncompatibleDimensions, self).__init__(self.message)
