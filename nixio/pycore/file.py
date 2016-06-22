@@ -64,7 +64,20 @@ class File(FileMixin):
         self.version = (1, 0, 0)
 
     @classmethod
-    def open(cls, path, mode, backend="hdf5"):
+    def open(cls, path, mode=FileMode.ReadWrite, backend=None):
+        """
+        Open a NIX file, or create it if it does not exist.
+
+        :param path: Path to file
+        :param mode: FileMode ReadOnly, ReadWrite, or Overwrite. Default: ReadWrite
+        :param backend: Either "hdf5" or "h5py". Defaults to "hdf5" if available, or "h5py" otherwise
+        :return: nixio.File object
+        """
+        if backend is None:
+            if CFile is None:
+                backend = "h5py"
+            else:
+                backend = "hdf5"
         if backend == "hdf5":
             if CFile:
                 return CFile.open(path, mode)
