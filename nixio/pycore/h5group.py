@@ -216,7 +216,8 @@ class H5Group(object):
     def set_attr(self, name, value):
         self._create_h5obj()
         if value is None:
-            del self.group.attrs[name]
+            if name in self.group.attrs:
+                del self.group.attrs[name]
         else:
             self.group.attrs[name] = value
 
