@@ -222,6 +222,8 @@ class H5Group(object):
             self.group.attrs[name] = value
 
     def get_attr(self, name):
+        if self.group is None:
+            return None
         return self.group.attrs.get(name)
 
     def find_children(self, filtr=None, limit=None):
