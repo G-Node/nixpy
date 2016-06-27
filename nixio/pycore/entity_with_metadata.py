@@ -24,4 +24,15 @@ class EntityWithMetadata(NamedEntity):
 
     @property
     def metadata(self):
-        return Section(self._h5group["metadata"])
+        if "metadata" in self._h5group:
+            return Section(self._h5group.open_group("metadata"))
+        else:
+            return None
+
+    @metadata.setter
+    def metadata(self, sect):
+        if not isinstance(sect, Section):
+            raise TypeError("Error setting metadata to {}. Not a Section."
+                            .format(sect))
+        self._h5group.create_link(sect, "metadata")
+
