@@ -148,16 +148,24 @@ class H5Group(object):
 
     def add_by_id(self, id_or_name):
         self._create_h5obj()
-        parblock = self.parent.parent.parent
+        parblockgrp = self.h5root
 
-        def find_group(name, group):
+        def find_group_name(name, group):
             if id_or_name in name:
                 return group
-            if (util.is_uuid(id_or_name) and
-                    group.attrs.get("entity_id") == id_or_name):
+            return None
+
+        def find_group_id(name, group):
+            if group.attrs.get("entity_id") == id_or_name:
                 return group
             return None
-        target = parblock.group.visititems(find_group)
+
+        if util.is_uuid(id_or_name):
+            target = parblockgrp.group.visititems(find_group_id)
+        else:
+            target = parblockgrp.group.visititems(find_group_name)
+        if target is None:
+            raise RuntimeError("Target not found in parent block!")
         self.group[target.attrs["entity_id"]] = target
 
     def has_by_id(self, id_or_name):
