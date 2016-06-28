@@ -187,6 +187,20 @@ class _TestGroup(unittest.TestCase):
         for name in tg_names:
             assert(self.block.tags[name].id == self.my_group.tags[name].id)
 
+    def test_group_invalid_add(self):
+        da = self.block.data_arrays[0]
+        mt = self.block.multi_tags[0]
+        tg = self.block.tags[0]
+
+        newblock = self.file.create_block("second block", "block")
+        newgroup = newblock.create_group("second block group", "group")
+
+        self.assertRaises(RuntimeError, newgroup.data_arrays.append, da)
+        self.assertRaises(RuntimeError, newgroup.multi_tags.append, mt)
+        self.assertRaises(RuntimeError, newgroup.tags.append, tg)
+
+        del self.file.blocks[newblock.id]
+
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestGroupCPP(_TestGroup):
