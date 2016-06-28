@@ -155,7 +155,6 @@ class H5Group(object):
                 return group
             return None
         target = parblock.group.visititems(find_group)
-        # TODO: Check if name or id should be the link name
         self.group[target.attrs["entity_id"]] = target
 
     def has_by_id(self, id_or_name):
