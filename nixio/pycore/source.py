@@ -42,9 +42,9 @@ class Source(EntityWithMetadata, SourceMixin):
         sources = self._h5group.open_group("sources")
         return Source(sources.get_by_pos(pos))
 
-    def _delete_source_by_id(self, id_or_name):
+    def _delete_source_by_id(self, id_):
         sources = self._h5group.open_group("sources")
-        sources.delete(id_or_name)
+        sources.delete(id_)
 
     def _source_count(self):
         sources = self._h5group.open_group("sources")

@@ -66,9 +66,9 @@ class BaseTag(EntityWithSources):
         references = self._h5group.open_group("references")
         return DataArray(references.get_by_pos(pos))
 
-    def _delete_reference_by_id(self, id_or_name):
+    def _delete_reference_by_id(self, id_):
         references = self._h5group.open_group("references")
-        references.delete(id_or_name)
+        references.delete(id_)
 
     def create_feature(self, da, link_type):
         features = self._h5group.open_group("features")
@@ -90,9 +90,9 @@ class BaseTag(EntityWithSources):
         features = self._h5group.open_group("features")
         return Feature(features.get_by_pos(pos))
 
-    def _delete_feature_by_id(self, id_or_name):
+    def _delete_feature_by_id(self, id_):
         features = self._h5group.open_group("features")
-        features.delete(id_or_name)
+        features.delete(id_)
 
     @classmethod
     def _position_and_extent_in_data(cls, data, offset, count):

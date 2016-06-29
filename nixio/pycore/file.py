@@ -180,8 +180,8 @@ class File(FileMixin):
     def _get_block_by_pos(self, pos):
         return Block(self._data.get_by_pos(pos))
 
-    def _delete_block_by_id(self, id_or_name):
-        self._data.delete(id_or_name)
+    def _delete_block_by_id(self, id_):
+        self._data.delete(id_)
 
     def _block_count(self):
         return len(self._data)
@@ -199,8 +199,8 @@ class File(FileMixin):
     def _get_section_by_pos(self, pos):
         return Section(self.metadata.get_by_pos(pos))
 
-    def _delete_section_by_id(self, id_or_name):
-        self.metadata.delete(id_or_name)
+    def _delete_section_by_id(self, id_):
+        self.metadata.delete(id_)
 
     def _section_count(self):
         return len(self.metadata)

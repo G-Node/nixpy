@@ -194,11 +194,12 @@ class H5Group(object):
         try:
             del self.group[name]
         except Exception:
-            raise ValueError
+            raise ValueError("Error deleting {} from {}".format(name, self.name))
         # Delete if empty and non-root container
         groupdepth = len(self.group.name.split("/")) - 1
         if not len(self.group) and groupdepth > 1:
-            del self.group
+            del self.parent.group[self.name]
+            # del self.group
             self.group = None
 
     def set_attr(self, name, value):

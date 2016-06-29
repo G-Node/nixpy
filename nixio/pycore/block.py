@@ -46,9 +46,9 @@ class Block(EntityWithMetadata, BlockMixin):
         data_arrays = self._h5group.open_group("data_arrays")
         return DataArray(data_arrays.get_by_pos(pos))
 
-    def _delete_data_array_by_id(self, id_or_name):
+    def _delete_data_array_by_id(self, id_):
         data_arrays = self._h5group.open_group("data_arrays")
-        data_arrays.delete(id_or_name)
+        data_arrays.delete(id_)
 
     def _data_array_count(self):
         data_arrays = self._h5group.open_group("data_arrays")
@@ -74,9 +74,9 @@ class Block(EntityWithMetadata, BlockMixin):
         multi_tags = self._h5group.open_group("multi_tags")
         return MultiTag(multi_tags.get_by_pos(pos))
 
-    def _delete_multi_tag_by_id(self, id_or_name):
+    def _delete_multi_tag_by_id(self, id_):
         multi_tags = self._h5group.open_group("multi_tags")
-        multi_tags.delete(id_or_name)
+        multi_tags.delete(id_)
 
     def _multi_tag_count(self):
         multi_tags = self._h5group.open_group("multi_tags")
@@ -99,9 +99,9 @@ class Block(EntityWithMetadata, BlockMixin):
         tags = self._h5group.open_group("tags")
         return Tag(tags.get_by_pos(pos))
 
-    def _delete_tag_by_id(self, id_or_name):
+    def _delete_tag_by_id(self, id_):
         tags = self._h5group.open_group("tags")
-        tags.delete(id_or_name)
+        tags.delete(id_)
 
     def _tag_count(self):
         tags = self._h5group.open_group("tags")
@@ -124,9 +124,9 @@ class Block(EntityWithMetadata, BlockMixin):
         sources = self._h5group.open_group("sources")
         return Source(sources.get_by_pos(pos))
 
-    def _delete_source_by_id(self, id_or_name):
+    def _delete_source_by_id(self, id_):
         sources = self._h5group.open_group("sources")
-        sources.delete(id_or_name)
+        sources.delete(id_)
 
     def _source_count(self):
         sources = self._h5group.open_group("sources")
@@ -149,9 +149,9 @@ class Block(EntityWithMetadata, BlockMixin):
         groups = self._h5group.open_group("groups")
         return Group(groups.get_by_pos(pos))
 
-    def _delete_group_by_id(self, id_or_name):
+    def _delete_group_by_id(self, id_):
         groups = self._h5group.open_group("groups")
-        groups.delete(id_or_name)
+        groups.delete(id_)
 
     def _group_count(self):
         groups = self._h5group.open_group("groups")

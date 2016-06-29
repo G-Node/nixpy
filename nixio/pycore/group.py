@@ -39,9 +39,9 @@ class Group(EntityWithSources, GroupMixin):
         data_arrays = self._h5group.open_group("data_arrays")
         return DataArray(data_arrays.get_by_pos(pos))
 
-    def _delete_data_array_by_id(self, id_or_name):
+    def _delete_data_array_by_id(self, id_):
         data_arrays = self._h5group.open_group("data_arrays")
-        data_arrays.delete(id_or_name)
+        data_arrays.delete(id_)
 
     def _data_array_count(self):
         return len(self._h5group.open_group("data_arrays"))
@@ -72,9 +72,9 @@ class Group(EntityWithSources, GroupMixin):
         multi_tags = self._h5group.open_group("multi_tags")
         return MultiTag(multi_tags.get_by_pos(pos))
 
-    def _delete_multi_tag_by_id(self, id_or_name):
+    def _delete_multi_tag_by_id(self, id_):
         multi_tags = self._h5group.open_group("multi_tags")
-        multi_tags.delete(id_or_name)
+        multi_tags.delete(id_)
 
     def _multi_tag_count(self):
         return len(self._h5group.open_group("multi_tags"))
@@ -105,9 +105,9 @@ class Group(EntityWithSources, GroupMixin):
         tags = self._h5group.open_group("tags")
         return Tag(tags.get_by_pos(pos))
 
-    def _delete_tag_by_id(self, id_or_name):
+    def _delete_tag_by_id(self, id_):
         tags = self._h5group.open_group("tags")
-        tags.delete(id_or_name)
+        tags.delete(id_)
 
     def _tag_count(self):
         return len(self._h5group.open_group("tags"))
