@@ -7,6 +7,7 @@
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
 import os
+import gc
 
 import h5py
 
@@ -160,6 +161,7 @@ class File(FileMixin):
         pass
 
     def close(self):
+        gc.collect()  # should handle refs better instead of calling collect()
         # Flush is probably unnecessary
         self._h5file.flush()
         self._h5file.close()
