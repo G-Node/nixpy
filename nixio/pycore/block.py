@@ -32,7 +32,7 @@ class Block(EntityWithMetadata, BlockMixin):
     # DataArray
     def _create_data_array(self, name, type_, data_type, shape):
         util.check_entity_name_and_type(name, type_)
-        data_arrays = self._h5group.open_group("data_arrays", True)
+        data_arrays = self._h5group.open_group("data_arrays")
         if name in data_arrays:
             raise exceptions.DuplicateName("create_data_array")
         da = DataArray._create_new(data_arrays, name, type_, data_type, shape)
@@ -60,7 +60,7 @@ class Block(EntityWithMetadata, BlockMixin):
         util.check_entity_input(positions)
         if not isinstance(positions, DataArray):
             raise TypeError("DataArray expected for 'positions'")
-        multi_tags = self._h5group.open_group("multi_tags", True)
+        multi_tags = self._h5group.open_group("multi_tags")
         if name in multi_tags:
             raise exceptions.DuplicateName("create_multi_tag")
         mtag = MultiTag._create_new(multi_tags, name, type_, positions)

@@ -42,8 +42,14 @@ class BaseTag(EntityWithSources):
             self.force_updated_at()
 
     def _add_reference_by_id(self, id_or_name):
+        parblock = self._h5group.root
+        if id_or_name not in parblock.data_arrays:
+            cls = type(self).__name__
+            raise RuntimeError("{}._add_reference_by_id: "
+                               "Reference not found in Block!".format(cls))
+        target = parblock.data_arrays[id_or_name]
         references = self._h5group.open_group("references")
-        references.add_by_id(id_or_name)
+        references.create_link(target, target.id)
 
     def _has_reference_by_id(self, id_or_name):
         references = self._h5group.open_group("references")
