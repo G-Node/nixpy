@@ -96,7 +96,7 @@ class BlockMixin(Block):
                 shape = data.shape
         da = self._create_data_array(name, array_type, dtype, shape)
         if data is not None:
-            da.data.write_direct(data)
+            da.write_direct(data)
         return da
 
     def find_sources(self, filtr=lambda _ : True, limit=maxint):
