@@ -6,7 +6,6 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-import gc
 import nixio
 
 
@@ -52,7 +51,6 @@ def _find_sources(with_sources, filtr, limit):
         if filtr(c.elem):
             result.append(c.elem)
 
-    gc.collect()
     return result
 
 
@@ -88,5 +86,4 @@ def _find_sections(with_sections, filtr, limit):
         if filtr(c.elem):
             result.append(c.elem)
 
-    gc.collect()
     return result

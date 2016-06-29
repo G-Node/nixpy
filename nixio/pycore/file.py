@@ -160,6 +160,8 @@ class File(FileMixin):
         pass
 
     def close(self):
+        # Flush is probably unnecessary
+        self._h5file.flush()
         self._h5file.close()
 
     def validate(self):
