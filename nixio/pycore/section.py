@@ -44,9 +44,9 @@ class Section(NamedEntity, SectionMixin):
         sections = self._h5group.open_group("sections")
         return Section(sections.get_by_pos(pos))
 
-    def _delete_section_by_id(self, id_or_name):
+    def _delete_section_by_id(self, id_):
         sections = self._h5group.open_group("sections")
-        sections.delete(id_or_name)
+        sections.delete(id_)
 
     def _section_count(self):
         return len(self._h5group.open_group("sections"))
@@ -88,9 +88,9 @@ class Section(NamedEntity, SectionMixin):
         properties = self._h5group.open_group("properties")
         return Property(properties.get_by_pos(pos))
 
-    def _delete_property_by_id(self, id_or_name):
+    def _delete_property_by_id(self, id_):
         properties = self._h5group.open_group("properties")
-        properties.delete(id_or_name)
+        properties.delete(id_)
 
     def _property_count(self):
         return len(self._h5group.open_group("properties"))

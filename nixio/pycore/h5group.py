@@ -12,8 +12,11 @@ import numpy as np
 
 from .h5dataset import H5DataSet
 from ..value import DataType
+from .block import Block
+from .section import Section
 
 from . import util
+from .exceptions import InvalidEntity
 
 
 class H5Group(object):
@@ -143,21 +146,6 @@ class H5Group(object):
         else:
             return False
 
-    def add_by_id(self, id_or_name):
-        self._create_h5obj()
-        parblock = self.parent.parent.parent
-
-        def find_group(name, group):
-            if id_or_name in name:
-                return group
-            if (util.is_uuid(id_or_name) and
-                    group.attrs.get("entity_id") == id_or_name):
-                return group
-            return None
-        target = parblock.group.visititems(find_group)
-        # TODO: Check if name or id should be the link name
-        self.group[target.attrs["entity_id"]] = target
-
     def has_by_id(self, id_or_name):
         if not self.group:
             return False
@@ -206,21 +194,25 @@ class H5Group(object):
         try:
             del self.group[name]
         except Exception:
-            raise ValueError
+            raise ValueError("Error deleting {} from {}".format(name, self.name))
         # Delete if empty and non-root container
         groupdepth = len(self.group.name.split("/")) - 1
         if not len(self.group) and groupdepth > 1:
-            del self.group
+            del self.parent.group[self.name]
+            # del self.group
             self.group = None
 
     def set_attr(self, name, value):
         self._create_h5obj()
         if value is None:
-            del self.group.attrs[name]
+            if name in self.group.attrs:
+                del self.group.attrs[name]
         else:
             self.group.attrs[name] = value
 
     def get_attr(self, name):
+        if self.group is None:
+            return None
         return self.group.attrs.get(name)
 
     def find_children(self, filtr=None, limit=None):
@@ -258,6 +250,27 @@ class H5Group(object):
             return None
 
         return self.parent.h5root
+
+    @property
+    def root(self):
+        """
+        Returns the Block or top-level Section which contains this object.
+        Returns None if requested on the file root '/' or the /data or /metadata
+        groups.
+
+        :return: Top level object containing this group (Block or Section)
+        """
+        h5root = self.h5root
+        if h5root is None:
+            return None
+        topgroup = self.group.name.split("/")[1]
+        if topgroup == "data":
+            cls = Block
+        elif topgroup == "metadata":
+            cls = Section
+        else:
+            raise InvalidEntity
+        return cls(h5root)
 
     @property
     def parent(self):

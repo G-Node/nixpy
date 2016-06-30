@@ -13,6 +13,8 @@ from .data_array import DataArray
 from .tag import Tag
 from .multi_tag import MultiTag
 
+from . import util
+
 
 class Group(EntityWithSources, GroupMixin):
 
@@ -27,22 +29,31 @@ class Group(EntityWithSources, GroupMixin):
     # DataArray
     def _get_data_array_by_id(self, id_or_name):
         data_arrays = self._h5group.open_group("data_arrays")
-        return DataArray(data_arrays.get_by_id_or_name(id_or_name))
+        if not util.is_uuid(id_or_name):
+            parblock = self._h5group.root
+            id_or_name = parblock.data_arrays[id_or_name].id
+        # Using get_by_name - linked entries use id as name in backend
+        return DataArray(data_arrays.get_by_name(id_or_name))
 
     def _get_data_array_by_pos(self, pos):
         data_arrays = self._h5group.open_group("data_arrays")
         return DataArray(data_arrays.get_by_pos(pos))
 
-    def _delete_data_array_by_id(self, id_or_name):
+    def _delete_data_array_by_id(self, id_):
         data_arrays = self._h5group.open_group("data_arrays")
-        data_arrays.delete(id_or_name)
+        data_arrays.delete(id_)
 
     def _data_array_count(self):
         return len(self._h5group.open_group("data_arrays"))
 
     def _add_data_array_by_id(self, id_or_name):
+        parblock = self._h5group.root
+        if id_or_name not in parblock.data_arrays:
+            raise RuntimeError("Group._add_data_array_by_id: "
+                               "DataArray not found in Block!")
+        target = parblock.data_arrays[id_or_name]
         data_arrays = self._h5group.open_group("data_arrays")
-        data_arrays.add_by_id(id_or_name)
+        data_arrays.create_link(target, target.id)
 
     def _has_data_array_by_id(self, id_or_name):
         data_arrays = self._h5group.open_group("data_arrays")
@@ -51,22 +62,31 @@ class Group(EntityWithSources, GroupMixin):
     # MultiTag
     def _get_multi_tag_by_id(self, id_or_name):
         multi_tags = self._h5group.open_group("multi_tags")
-        return MultiTag(multi_tags.get_by_id_or_name(id_or_name))
+        if not util.is_uuid(id_or_name):
+            parblock = self._h5group.root
+            id_or_name = parblock.multi_tags[id_or_name].id
+        # Using get_by_name - linked entries use id as name in backend
+        return MultiTag(multi_tags.get_by_name(id_or_name))
 
     def _get_multi_tag_by_pos(self, pos):
         multi_tags = self._h5group.open_group("multi_tags")
         return MultiTag(multi_tags.get_by_pos(pos))
 
-    def _delete_multi_tag_by_id(self, id_or_name):
+    def _delete_multi_tag_by_id(self, id_):
         multi_tags = self._h5group.open_group("multi_tags")
-        multi_tags.delete(id_or_name)
+        multi_tags.delete(id_)
 
     def _multi_tag_count(self):
         return len(self._h5group.open_group("multi_tags"))
 
     def _add_multi_tag_by_id(self, id_or_name):
+        parblock = self._h5group.root
+        if id_or_name not in parblock.multi_tags:
+            raise RuntimeError("Group._add_multi_tag_by_id: "
+                               "MultiTag not found in Block!")
+        target = parblock.multi_tags[id_or_name]
         multi_tags = self._h5group.open_group("multi_tags")
-        multi_tags.add_by_id(id_or_name)
+        multi_tags.create_link(target, target.id)
 
     def _has_multi_tag_by_id(self, id_or_name):
         multi_tags = self._h5group.open_group("multi_tags")
@@ -75,22 +95,31 @@ class Group(EntityWithSources, GroupMixin):
     # Tag
     def _get_tag_by_id(self, id_or_name):
         tags = self._h5group.open_group("tags")
-        return Tag(tags.get_by_id_or_name(id_or_name))
+        if not util.is_uuid(id_or_name):
+            parblock = self._h5group.root
+            id_or_name = parblock.tags[id_or_name].id
+        # Using get_by_name - linked entries use id as name in backend
+        return Tag(tags.get_by_name(id_or_name))
 
     def _get_tag_by_pos(self, pos):
         tags = self._h5group.open_group("tags")
         return Tag(tags.get_by_pos(pos))
 
-    def _delete_tag_by_id(self, id_or_name):
+    def _delete_tag_by_id(self, id_):
         tags = self._h5group.open_group("tags")
-        tags.delete(id_or_name)
+        tags.delete(id_)
 
     def _tag_count(self):
         return len(self._h5group.open_group("tags"))
 
     def _add_tag_by_id(self, id_or_name):
+        parblock = self._h5group.root
+        if id_or_name not in parblock.tags:
+            raise RuntimeError("Group._add_tag_by_id: "
+                               "Tag not found in Block!")
+        target = parblock.tags[id_or_name]
         tags = self._h5group.open_group("tags")
-        tags.add_by_id(id_or_name)
+        tags.create_link(target, target.id)
 
     def _has_tag_by_id(self, id_or_name):
         tags = self._h5group.open_group("tags")

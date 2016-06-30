@@ -162,6 +162,45 @@ class _TestGroup(unittest.TestCase):
         self.my_group.multi_tags.extend([mt1, mt2])
         assert(len(self.my_group.multi_tags) == 3)
 
+    def test_group_get_by_name(self):
+        for idx in range(3):
+            da = self.block.create_data_array("da"+str(idx), "da",
+                                              data=list(range(idx)))
+            self.my_group.data_arrays.append(da)
+
+            mt = self.block.create_multi_tag("mt"+str(idx), "mt",
+                                             da)
+            self.my_group.multi_tags.append(mt)
+            tg = self.block.create_tag("tg"+str(idx), "tg", [0.3, 0.6])
+            self.my_group.tags.append(tg)
+
+        da_names = [da.name for da in self.my_group.data_arrays]
+        mt_names = [mt.name for mt in self.my_group.multi_tags]
+        tg_names = [tg.name for tg in self.my_group.tags]
+
+        for name in da_names:
+            assert(self.block.data_arrays[name].id ==
+                   self.my_group.data_arrays[name].id)
+        for name in mt_names:
+            assert(self.block.multi_tags[name].id ==
+                   self.my_group.multi_tags[name].id)
+        for name in tg_names:
+            assert(self.block.tags[name].id == self.my_group.tags[name].id)
+
+    def test_group_invalid_add(self):
+        da = self.block.data_arrays[0]
+        mt = self.block.multi_tags[0]
+        tg = self.block.tags[0]
+
+        newblock = self.file.create_block("second block", "block")
+        newgroup = newblock.create_group("second block group", "group")
+
+        self.assertRaises(RuntimeError, newgroup.data_arrays.append, da)
+        self.assertRaises(RuntimeError, newgroup.multi_tags.append, mt)
+        self.assertRaises(RuntimeError, newgroup.tags.append, tg)
+
+        del self.file.blocks[newblock.id]
+
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestGroupCPP(_TestGroup):

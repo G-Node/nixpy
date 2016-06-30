@@ -45,6 +45,9 @@ class Feature(Entity):
     def data(self, da):
         if da is None:
             raise TypeError("Feature.data cannot be None.")
+        parblock = self._h5group.root
+        if da not in parblock.data_arrays:
+            raise RuntimeError("Feature.data: DataArray not found in Block!")
         if "data" in self._h5group:
             del self._h5group["data"]
         self._h5group.create_link(da, "data")
