@@ -208,5 +208,3 @@ class TestBlockPy(_TestBlock):
 
     backend = "h5py"
 
-    def test_block_multi_tags(self):
-        pass
