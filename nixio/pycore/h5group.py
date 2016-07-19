@@ -41,6 +41,8 @@ class H5Group(object):
 
     def create_link(self, target, name):
         self._create_h5obj()
+        if name in self.group:
+            del self.group[name]
         self.group[name] = target._h5group.group
 
     @classmethod
