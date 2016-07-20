@@ -60,7 +60,12 @@ class BaseTag(EntityWithSources):
 
     def _get_reference_by_id(self, id_or_name):
         references = self._h5group.open_group("references")
-        return DataArray(references.get_by_id(id_or_name))
+        if util.is_uuid(id_or_name):
+            id_ = id_or_name
+        else:
+            parblock = self._h5group.root
+            id_ = parblock.data_arrays[id_or_name].id
+        return DataArray(references.get_by_id(id_))
 
     def _get_reference_by_pos(self, pos):
         references = self._h5group.open_group("references")
