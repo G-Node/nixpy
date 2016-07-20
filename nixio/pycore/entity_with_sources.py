@@ -28,10 +28,17 @@ class EntityWithSources(EntityWithMetadata, EntityWithSourcesMixin):
     # Source
     def _get_source_by_id(self, id_or_name):
         sources = self._h5group.open_group("sources")
-        if not util.is_uuid(id_or_name):
-            parblock = self._h5group.root
-            id_or_name = parblock.sources[id_or_name].id
-        return Source(sources.get_by_name(id_or_name))
+        if util.is_uuid(id_or_name):
+            id_ = id_or_name
+        else:
+            for grp in sources:
+                if grp.get_attr("name") == id_or_name:
+                    id_ = grp.get_attr("entity_id")
+                    break
+            else:
+                raise ValueError("No Source with name {} found {}.sources"
+                                 .format(id_or_name, self.name))
+        return Source(sources.get_by_name(id_))
 
     def _get_source_by_pos(self, pos):
         sources = self._h5group.open_group("sources")
