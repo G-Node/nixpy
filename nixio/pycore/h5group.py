@@ -237,7 +237,7 @@ class H5Group(object):
             if filtr(h5grp):
                 result.append(h5grp)
 
-        self.group.visit_items(match)
+        self.group.visititems(match)
         return result
 
     @property
