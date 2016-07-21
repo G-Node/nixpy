@@ -221,7 +221,10 @@ class H5Group(object):
     def get_attr(self, name):
         if self.group is None:
             return None
-        return self.group.attrs.get(name)
+        attr = self.group.attrs.get(name)
+        if isinstance(attr, bytes):
+            attr = attr.decode()
+        return attr
 
     def find_children(self, filtr=None, limit=None):
 
