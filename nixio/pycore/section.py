@@ -58,7 +58,7 @@ class Section(NamedEntity, SectionMixin):
             raise exceptions.DuplicateName("create_property")
         if isinstance(value, type):
             dtype = value
-            values = [Value(0)]
+            values = []
         else:
             if isinstance(value, Sequence):
                 dtype = value[0].data_type
