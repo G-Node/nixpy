@@ -155,6 +155,40 @@ class _TestBackendCompatibility(unittest.TestCase):
 
         self.check_compatibility()
 
+    def test_dimensions(self):
+        blk = self.write_file.create_block("testblock", "dimtest")
+
+        da_set = blk.create_data_array("da with seet", "datype",
+                                       data=np.random.random(20))
+        da_set.append_set_dimension()
+        da_set.dimensions[0].labels = ["label one", "label two"]
+
+        da_range = blk.create_data_array("da with range", "datype",
+                                         data=np.random.random(12))
+        da_range.append_range_dimension(np.random.random(12))
+        da_range.dimensions[0].label = "range dim label"
+
+        da_sample = blk.create_data_array("da with sample", "datype",
+                                          data=np.random.random(10))
+        da_sample.append_sampled_dimension(0.3)
+        da_sample.dimensions[0].label = "sample dim label"
+
+        self.check_compatibility()
+
+        for idx in range(len(blk.data_arrays)):
+            wda = self.write_file.blocks[0].data_arrays[idx]
+            rda = self.read_file.blocks[0].data_arrays[idx]
+            wdadim = wda.dimensions[0]
+            rdadim = rda.dimensions[0]
+
+            self.assertEqual(wdadim.dimension_type,
+                             rdadim.dimension_type)
+
+            if hasattr(wdadim, "label"):
+                self.assertEqual(wdadim.label, rdadim.label)
+            else:
+                self.assertEqual(wdadim.labels, rdadim.labels)
+
 
 class TestWriteCPPReadPy(_TestBackendCompatibility):
 
