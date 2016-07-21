@@ -28,10 +28,17 @@ class EntityWithSources(EntityWithMetadata, EntityWithSourcesMixin):
     # Source
     def _get_source_by_id(self, id_or_name):
         sources = self._h5group.open_group("sources")
-        if not util.is_uuid(id_or_name):
-            parblock = self._h5group.root
-            id_or_name = parblock.sources[id_or_name].id
-        return Source(sources.get_by_name(id_or_name))
+        if util.is_uuid(id_or_name):
+            id_ = id_or_name
+        else:
+            for grp in sources:
+                if grp.get_attr("name") == id_or_name:
+                    id_ = grp.get_attr("entity_id")
+                    break
+            else:
+                raise ValueError("No Source with name {} found {}.sources"
+                                 .format(id_or_name, self.name))
+        return Source(sources.get_by_name(id_))
 
     def _get_source_by_pos(self, pos):
         sources = self._h5group.open_group("sources")
@@ -45,13 +52,21 @@ class EntityWithSources(EntityWithMetadata, EntityWithSourcesMixin):
         sources = self._h5group.open_group("sources")
         return len(sources)
 
-    def _add_source_by_id(self, id_or_name):
+    def _add_source_by_id(self, id_):
         parblock = self._h5group.root
-        if id_or_name not in parblock.sources:
-            cls = type(self).__name__
+        target = parblock._h5group.find_children(
+            filtr=lambda x: x.get_attr("entity_id") == id_
+        )
+        cls = type(self).__name__
+        if not target:
             raise RuntimeError("{}._add_source_by_id: "
-                               "Source not found in Block!".format(cls))
-        target = parblock.sources[id_or_name]
+                               "Source not found!".format(cls))
+        if len(target) > 1:
+            raise RuntimeError("{}._add_source_by_id: "
+                               "Invalid data found in NIX file. "
+                               "Multiple Sources found with the same ID."
+                               .format(cls))
+        target = Source(target[0])
         sources = self._h5group.open_group("sources")
         sources.create_link(target, target.id)
 

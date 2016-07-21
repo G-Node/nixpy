@@ -41,6 +41,8 @@ class H5Group(object):
 
     def create_link(self, target, name):
         self._create_h5obj()
+        if name in self.group:
+            del self.group[name]
         self.group[name] = target._h5group.group
 
     @classmethod
@@ -184,7 +186,13 @@ class H5Group(object):
     def get_by_pos(self, pos):
         if not self.group:
             raise ValueError
-        return self.create_from_h5obj(list(self.group.values())[pos])
+
+        # Using low level interface to specify iteration order
+        name, _ = self.group.id.links.iterate(lambda n: n,
+                                              idx_type=h5py.h5.INDEX_CRT_ORDER,
+                                              order=h5py.h5.ITER_NATIVE,
+                                              idx=pos)
+        return self.get_by_name(name)
 
     def delete(self, id_or_name):
         if util.is_uuid(id_or_name):
@@ -229,7 +237,7 @@ class H5Group(object):
             if filtr(h5grp):
                 result.append(h5grp)
 
-        self.group.visit_items(match)
+        self.group.visititems(match)
         return result
 
     @property

@@ -58,14 +58,16 @@ class Section(NamedEntity, SectionMixin):
             raise exceptions.DuplicateName("create_property")
         if isinstance(value, type):
             dtype = value
-            value = Value(0)
+            values = []
         else:
             if isinstance(value, Sequence):
                 dtype = value[0].data_type
+                values = value
             else:
                 dtype = value.data_type
+                values = [value]
         prop = Property._create_new(properties, name, dtype)
-        prop.value = value
+        prop.values = values
         return prop
 
     def has_property_by_name(self, name):
