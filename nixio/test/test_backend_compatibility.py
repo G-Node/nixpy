@@ -34,7 +34,11 @@ class _TestBackendCompatibility(unittest.TestCase):
     def check_containers(self, cont_one, cont_two):
         self.assertEqual(len(cont_one), len(cont_two))
         for idx in range(len(cont_one)):
-            self.assertEqual(cont_one[idx].id, cont_two[idx].id)
+            item_one = cont_one[idx]
+            item_two = cont_two[idx]
+            self.assertEqual(item_one.id, item_two.id)
+            if len(item_one.sources) or len(item_two.sources):
+                self.check_containers(item_one.sources, item_two.sources)
 
     def check_compatibility(self):
         self.read_file = File.open("compat_test.h5", FileMode.ReadOnly,
@@ -49,7 +53,6 @@ class _TestBackendCompatibility(unittest.TestCase):
             self.check_containers(wblock.data_arrays, rblock.data_arrays)
             self.check_containers(wblock.tags, rblock.tags)
             self.check_containers(wblock.multi_tags, rblock.multi_tags)
-            self.check_containers(wblock.sources, rblock.sources)
             for grpidx in range(len(wblock.groups)):
                 wgrp = wblock.groups[grpidx]
                 rgrp = rblock.groups[grpidx]
