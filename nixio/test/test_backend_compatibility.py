@@ -49,6 +49,7 @@ class _TestBackendCompatibility(unittest.TestCase):
             self.check_containers(wblock.data_arrays, rblock.data_arrays)
             self.check_containers(wblock.tags, rblock.tags)
             self.check_containers(wblock.multi_tags, rblock.multi_tags)
+            self.check_containers(wblock.sources, rblock.sources)
             for grpidx in range(len(wblock.groups)):
                 wgrp = wblock.groups[grpidx]
                 rgrp = rblock.groups[grpidx]
@@ -126,6 +127,30 @@ class _TestBackendCompatibility(unittest.TestCase):
         for wmt, rmt in zip(wmts, rmts):
             np.testing.assert_almost_equal(wmt.positions[:], rmt.positions[:])
             np.testing.assert_almost_equal(wmt.extents[:], rmt.extents[:])
+
+    def test_sources(self):
+        blk = self.write_file.create_block("testblock", "sourcetest")
+        grp = blk.create_group("testgroup", "sourcetest")
+        da = blk.create_data_array("da", "sourcetest",
+                                   data=np.random.random(10))
+        pos = blk.create_data_array("pos", "sourcetest",
+                                    data=np.random.random(10))
+        mtag = blk.create_multi_tag("mtag", "sourcetest", pos)
+        grp.data_arrays.append(da)
+
+        for idx in range(20):
+            src = blk.create_source("src" + str(idx), "source")
+
+            if (idx % 5) == 0:
+                grp.sources.append(src)
+
+            if (idx % 3) == 0:
+                mtag.sources.append(src)
+
+            if (idx % 8) == 0:
+                da.sources.append(src)
+
+        self.check_compatibility()
 
 
 class TestWriteCPPReadPy(_TestBackendCompatibility):
