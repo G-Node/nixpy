@@ -172,7 +172,7 @@ class Tag(BaseTag, TagMixin):
 
     @position.setter
     def position(self, pos):
-        if not pos:
+        if pos is None or len(pos) == 0:
             if self._h5group.has_data("position"):
                 del self._h5group["position"]
         else:
@@ -185,7 +185,7 @@ class Tag(BaseTag, TagMixin):
 
     @extent.setter
     def extent(self, ext):
-        if not ext:
+        if ext is None or len(ext) == 0:
             if self._h5group.has_data("extent"):
                 del self._h5group["extent"]
         else:
