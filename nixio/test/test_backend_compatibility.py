@@ -91,10 +91,41 @@ class _TestBackendCompatibility(unittest.TestCase):
         grp = blk.create_group("testgroup", "grouptype")
 
         for idx in range(7):
-            da = blk.create_data_array("data_" + str(idx), "thedata",
-                                       data=np.random.random(40))
             tag = blk.create_tag("tag_" + str(idx), "atag",
-                                 np.random.random(idx))
+                                 np.random.random(idx*2))
+            tag.extent = np.random.random(idx*2)
+            if (idx % 3) == 0:
+                grp.tags.append(tag)
+
+        self.check_compatibility()
+        wtags = blk.tags
+        rtags = self.read_file.blocks[0].tags
+        for wtag, rtag in zip(rtags, wtags):
+            np.testing.assert_almost_equal(wtag.position, rtag.position)
+            np.testing.assert_almost_equal(wtag.extent, rtag.extent)
+
+    def test_multi_tags(self):
+        blk = self.write_file.create_block("testblock", "blocktype")
+        grp = blk.create_group("testgroup", "grouptype")
+
+        for idx in range(11):
+            posda = blk.create_data_array("pos_" + str(idx), "positions",
+                                          data=np.random.random(idx*10))
+            extda = blk.create_data_array("ext_" + str(idx), "extents",
+                                          data=np.random.random(idx*10))
+            mtag = blk.create_multi_tag("mtag_" + str(idx), "some multi tag",
+                                        posda)
+            mtag.extents = extda
+
+            if (idx % 2) == 0:
+                grp.multi_tags.append(mtag)
+
+        self.check_compatibility()
+        wmts = blk.multi_tags
+        rmts = self.read_file.blocks[0].multi_tags
+        for wmt, rmt in zip(wmts, rmts):
+            np.testing.assert_almost_equal(wmt.positions[:], rmt.positions[:])
+            np.testing.assert_almost_equal(wmt.extents[:], rmt.extents[:])
 
 
 class TestWriteCPPReadPy(_TestBackendCompatibility):
