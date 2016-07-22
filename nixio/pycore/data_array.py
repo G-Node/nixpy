@@ -104,11 +104,11 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         h5dim = self._h5group.open_group("dimensions").open_group(str(index))
         dimtype = h5dim.get_attr("dimension_type")
         if dimtype == DimensionType.Sample:
-            return SampledDimension(h5dim)
+            return SampledDimension(h5dim, index)
         elif dimtype == DimensionType.Range:
-            return RangeDimension(h5dim)
+            return RangeDimension(h5dim, index)
         elif dimtype == DimensionType.Set:
-            return SetDimension(h5dim)
+            return SetDimension(h5dim, index)
         else:
             raise TypeError("Invalid Dimension object in file.")
 
