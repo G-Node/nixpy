@@ -29,7 +29,9 @@ class BaseTag(EntityWithSources):
 
     @property
     def units(self):
-        return tuple(self._h5group.get_data("units"))
+        return tuple(u.decode() if isinstance(u, bytes) else u
+                     for u in self._h5group.get_data("units"))
+
 
     @units.setter
     def units(self, units):
