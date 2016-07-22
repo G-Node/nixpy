@@ -84,15 +84,17 @@ class _TestBackendCompatibility(unittest.TestCase):
 
     def test_blocks(self):
         for idx in range(10):
-            self.write_file.create_block("test_block" + str(idx),
-                                         "blocktype")
+            blk = self.write_file.create_block("test_block" + str(idx),
+                                               "blocktype")
+            blk.definition = "definition block " + str(idx)
 
         self.check_compatibility()
 
     def test_groups(self):
         blk = self.write_file.create_block("test_block", "blocktype")
         for idx in range(12):
-            blk.create_group("group_" + str(idx), "grouptype")
+            grp = blk.create_group("group_" + str(idx), "grouptype")
+            grp.definition = "group definition " + str(idx*10)
 
         self.check_compatibility()
 
@@ -103,6 +105,12 @@ class _TestBackendCompatibility(unittest.TestCase):
         for idx in range(7):
             da = blk.create_data_array("data_" + str(idx), "thedata",
                                        data=np.random.random(40))
+            da.definition = "da definition " + str(sum(da[:]))
+            da.label = "data label " + str(idx)
+            da.unit = "mV"
+            da.expansion_origin = np.random.random()*100
+            da.polynom_coefficients = tuple(np.random.random(3))
+
             if (idx % 2) == 0:
                 grp.data_arrays.append(da)
 
