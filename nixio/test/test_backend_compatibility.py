@@ -108,17 +108,39 @@ class _TestBackendCompatibility(unittest.TestCase):
             da.definition = "da definition " + str(sum(da[:]))
             da.label = "data label " + str(idx)
             da.unit = "mV"
-            da.expansion_origin = np.random.random()*100
-            da.polynom_coefficients = tuple(np.random.random(3))
 
             if (idx % 2) == 0:
+                da.expansion_origin = np.random.random()*100
                 grp.data_arrays.append(da)
+            if (idx % 3) == 0:
+                da.polynom_coefficients = tuple(np.random.random(3))
 
         self.check_compatibility()
         wdata = blk.data_arrays
         rdata = self.read_file.blocks[0].data_arrays
+        self.assertEqual(len(wdata), len(rdata))
         for wda, rda in zip(wdata, rdata):
-            np.testing.assert_almost_equal(wda[:], rda[:])
+            warray = np.empty(wda.shape)
+            wda.read_direct(warray)
+            rarray = np.empty(rda.shape)
+            rda.read_direct(rarray)
+            np.testing.assert_almost_equal(
+                warray, rarray,
+                err_msg="DataArray direct data mismatch "
+                        "while testing {}".format(wda.name)
+            )
+            np.testing.assert_almost_equal(
+                wda[:], rda[:],
+                err_msg="DataArray data mismatch "
+                        "while testing {}".format(wda.name)
+            )
+            start = np.random.randint(40)
+            end = start + np.random.randint(40-start)
+            np.testing.assert_almost_equal(
+                wda[start:end], rda[start:end],
+                err_msg="DataArray partial data mismatch "
+                        "while testing {}".format(wda.name)
+            )
 
     def test_tags(self):
         blk = self.write_file.create_block("testblock", "blocktype")
