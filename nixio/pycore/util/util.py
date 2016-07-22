@@ -10,6 +10,8 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import numpy as np
+
 import h5py
 from datetime import datetime
 from uuid import uuid4, UUID
@@ -137,3 +139,9 @@ def co_to_slice(count, offset):
         return sl[0]
     else:
         return tuple(sl)
+
+
+def apply_polynomial(coefficients, origin, data):
+    data[:] = data[:] - origin
+    if coefficients:
+        data[:] = np.polynomial.polynomial.polyval(data, coefficients)

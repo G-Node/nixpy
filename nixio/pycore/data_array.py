@@ -55,6 +55,18 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         newentity._h5group.create_dataset("data", shape, data_type)
         return newentity
 
+    def _read_data(self, data, count, offset):
+        coeff = self.polynom_coefficients
+        origin = self.expansion_origin
+        if len(coeff) or origin:
+            if not origin:
+                origin = 0.0
+
+            super(DataArray, self)._read_data(data, count, offset)
+            util.apply_polynomial(coeff, origin, data)
+        else:
+            super(DataArray, self)._read_data(data, count, offset)
+
     def create_set_dimension(self, index):
         dimgroup = self._h5group.open_group("dimensions")
         return SetDimension._create_new(dimgroup, index)
