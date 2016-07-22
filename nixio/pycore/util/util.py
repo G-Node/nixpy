@@ -75,11 +75,6 @@ def check_entity_input(entity, raise_exception=True):
     return False
 
 
-def system_utc_offset():
-    # Possibly inaccurate, but most stable across time zones when tested
-    return now_int() - int(datetime.utcnow().strftime("%s"))
-
-
 def now_int():
     now = datetime.now()
     return int(now.strftime("%s"))
@@ -94,7 +89,7 @@ def time_to_str(t):
     :return: string in the form "YYYYMMDDTHHMMSS", where T is the date-time
     separator
     """
-    dt = datetime.fromtimestamp(t)
+    dt = datetime.utcfromtimestamp(t)
     return dt.strftime("%Y%m%dT%H%M%S").encode("utf-8")
 
 
@@ -108,8 +103,8 @@ def str_to_time(s):
     """
     if isinstance(s, bytes):
         s = s.decode()
-    dt = datetime.strptime(s, "%Y%m%dT%H%M%S")
-    return int(dt.strftime("%s")) + system_utc_offset()
+    dt = datetime.strptime(s, "%Y%m%dT%H%M%S") - datetime(1970, 1, 1)
+    return int(dt.total_seconds())
 
 
 def check_attr_type(value, type_):
