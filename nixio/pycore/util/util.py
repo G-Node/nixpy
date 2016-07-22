@@ -11,7 +11,6 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import h5py
-from time import time
 from datetime import datetime
 from uuid import uuid4, UUID
 from ..exceptions import exceptions
@@ -74,8 +73,14 @@ def check_entity_input(entity, raise_exception=True):
     return False
 
 
+def system_utc_offset():
+    # Possibly inaccurate, but most stable across time zones when tested
+    return now_int() - int(datetime.utcnow().strftime("%s"))
+
+
 def now_int():
-    return int(time())
+    now = datetime.now()
+    return int(now.strftime("%s"))
 
 
 def time_to_str(t):
@@ -99,8 +104,10 @@ def str_to_time(s):
     separator
     :return: integer POSIX time
     """
-    dt = datetime.strptime(s.decode(), "%Y%m%dT%H%M%S")
-    return int(dt.strftime("%s"))
+    if isinstance(s, bytes):
+        s = s.decode()
+    dt = datetime.strptime(s, "%Y%m%dT%H%M%S")
+    return int(dt.strftime("%s")) + system_utc_offset()
 
 
 def check_attr_type(value, type_):
