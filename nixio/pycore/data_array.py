@@ -35,6 +35,10 @@ class DataSet(DataSetMixin):
         dataset = self._h5group.get_dataset("data")
         dataset.shape = extent
 
+    @property
+    def data_type(self):
+        return self._get_dtype()
+
     def _get_dtype(self):
         dataset = self._h5group.get_dataset("data")
         return dataset.dtype
