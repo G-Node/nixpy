@@ -22,8 +22,9 @@ all_attrs = [
     "id", "created_at", "updated_at", "name", "type", "definition",
     "dtype", "polynom_coefficients", "expansion_origin", "label", "unit",
     "data_extent", "data_type", "dimension_type", "index",
-    "sampling_interval", "offset", "ticks",
-
+    "sampling_interval", "offset", "ticks", "metadata", "link_type", "data",
+    "positions", "extents", "mapping", "values", "parent", "link",
+    "repository", "units", "position", "extent"
 ]
 
 
@@ -186,23 +187,31 @@ class _TestBackendCompatibility(unittest.TestCase):
 
         da_range = blk.create_data_array("da with range", "datype",
                                          data=np.random.random(12))
-        da_range.append_range_dimension(np.random.random(12))
-        da_range.dimensions[0].label = "range dim label"
+        rngdim = da_range.append_range_dimension(np.random.random(12))
+        rngdim.label = "range dim label"
+        rngdim.unit = "ms"
 
         da_sample = blk.create_data_array("da with sample", "datype",
                                           data=np.random.random(10))
-        da_sample.append_sampled_dimension(0.3)
+        smpldim = da_sample.append_sampled_dimension(0.3)
+        smpldim.offset = 0.1
+        smpldim.unit = "mV"
+
         da_sample.dimensions[0].label = "sample dim label"
+
+        da_multi_dim = blk.create_data_array("da with multiple", "datype",
+                                             data=np.random.random(30))
+        da_multi_dim.append_sampled_dimension(0.1)
+        da_multi_dim.append_set_dimension()
+        da_multi_dim.append_range_dimension(np.random.random(10))
 
         self.check_compatibility()
 
         for idx in range(len(blk.data_arrays)):
             wda = self.write_file.blocks[0].data_arrays[idx]
             rda = self.read_file.blocks[0].data_arrays[idx]
-            wdadim = wda.dimensions[0]
-            rdadim = rda.dimensions[0]
-
-            self.check_attributes(wdadim, rdadim)
+            for wdadim, rdadim in zip(wda.dimensions, rda.dimensions):
+                self.check_attributes(wdadim, rdadim)
 
 
 class TestWriteCPPReadPy(_TestBackendCompatibility):
