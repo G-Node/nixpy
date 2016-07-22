@@ -87,6 +87,7 @@ class _TestBackendCompatibility(unittest.TestCase):
             blk = self.write_file.create_block("test_block" + str(idx),
                                                "blocktype")
             blk.definition = "definition block " + str(idx)
+            blk.force_created_at(np.random.randint(100000000))
 
         self.check_compatibility()
 
@@ -95,6 +96,7 @@ class _TestBackendCompatibility(unittest.TestCase):
         for idx in range(12):
             grp = blk.create_group("group_" + str(idx), "grouptype")
             grp.definition = "group definition " + str(idx*10)
+            grp.force_created_at(np.random.randint(100000000))
 
         self.check_compatibility()
 
@@ -106,6 +108,7 @@ class _TestBackendCompatibility(unittest.TestCase):
             da = blk.create_data_array("data_" + str(idx), "thedata",
                                        data=np.random.random(40))
             da.definition = "da definition " + str(sum(da[:]))
+            da.force_created_at(np.random.randint(100000000))
             da.label = "data label " + str(idx)
             da.unit = "mV"
 
@@ -146,10 +149,15 @@ class _TestBackendCompatibility(unittest.TestCase):
         blk = self.write_file.create_block("testblock", "blocktype")
         grp = blk.create_group("testgroup", "grouptype")
 
-        for idx in range(7):
+        for idx in range(16):
             tag = blk.create_tag("tag_" + str(idx), "atag",
                                  np.random.random(idx*2))
+            tag.definition = "tag def " + str(idx)
             tag.extent = np.random.random(idx*2)
+
+            tag.units = ["mV", "s"]
+            tag.force_created_at(np.random.randint(100000000))
+
             if (idx % 3) == 0:
                 grp.tags.append(tag)
 
@@ -242,6 +250,18 @@ class _TestBackendCompatibility(unittest.TestCase):
             rda = self.read_file.blocks[0].data_arrays[idx]
             for wdadim, rdadim in zip(wda.dimensions, rda.dimensions):
                 self.check_attributes(wdadim, rdadim)
+
+    def test_features(self):
+        pass
+
+    def test_file(self):
+        pass
+
+    def test_properties(self):
+        pass
+
+    def test_sections(self):
+        pass
 
 
 class TestWriteCPPReadPy(_TestBackendCompatibility):
