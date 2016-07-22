@@ -40,22 +40,24 @@ class _TestBackendCompatibility(unittest.TestCase):
         if self.read_file:
             self.read_file.close()
 
+    def check_attributes(self, writeitem, readitem):
+        for attr in all_attrs:
+            if hasattr(writeitem, attr) or hasattr(readitem, attr):
+                writeval = getattr(writeitem, attr)
+                readval = getattr(readitem, attr)
+                self.assertEqual(
+                    writeval, readval,
+                    "Attribute mismatch between {} and {} "
+                    "for attribute '{}': {} != {}".format(
+                        writeitem, readitem, attr, writeval, readval
+                    ))
+
     def check_recurse(self, writecont, readcont):
         self.assertEqual(len(writecont), len(readcont))
         for idx in range(len(writecont)):
             writeitem = writecont[idx]
             readitem = readcont[idx]
-            self.assertEqual(writeitem.id, readitem.id)
-            for attr in all_attrs:
-                if hasattr(writeitem, attr) or hasattr(readitem, attr):
-                    writeval = getattr(writeitem, attr)
-                    readval = getattr(readitem, attr)
-                    self.assertEqual(
-                        writeval, readval,
-                        "Attribute mismatch between {} and {} "
-                        "for attribute '{}': {} != {}".format(
-                            writeitem, readitem, attr, writeval, readval
-                        ))
+            self.check_attributes(writeitem, readitem)
             if len(writeitem.sources) or len(readitem.sources):
                 self.check_recurse(writeitem.sources, readitem.sources)
 
@@ -200,13 +202,7 @@ class _TestBackendCompatibility(unittest.TestCase):
             wdadim = wda.dimensions[0]
             rdadim = rda.dimensions[0]
 
-            self.assertEqual(wdadim.dimension_type,
-                             rdadim.dimension_type)
-
-            if hasattr(wdadim, "label"):
-                self.assertEqual(wdadim.label, rdadim.label)
-            else:
-                self.assertEqual(wdadim.labels, rdadim.labels)
+            self.check_attributes(wdadim, rdadim)
 
 
 class TestWriteCPPReadPy(_TestBackendCompatibility):
