@@ -18,6 +18,15 @@ except ImportError:
     skip = True
 
 
+all_attrs = [
+    "id", "created_at", "updated_at", "name", "type", "definition",
+    "dtype", "polynom_coefficients", "expansion_origin", "label", "unit",
+    "data_extent", "data_type", "dimension_type", "index",
+    "sampling_interval", "offset", "ticks",
+
+]
+
+
 @unittest.skipIf(skip, "HDF5 backend not available.")
 class _TestBackendCompatibility(unittest.TestCase):
 
@@ -31,34 +40,44 @@ class _TestBackendCompatibility(unittest.TestCase):
         if self.read_file:
             self.read_file.close()
 
-    def check_containers(self, cont_one, cont_two):
-        self.assertEqual(len(cont_one), len(cont_two))
-        for idx in range(len(cont_one)):
-            item_one = cont_one[idx]
-            item_two = cont_two[idx]
-            self.assertEqual(item_one.id, item_two.id)
-            if len(item_one.sources) or len(item_two.sources):
-                self.check_containers(item_one.sources, item_two.sources)
+    def check_recurse(self, writecont, readcont):
+        self.assertEqual(len(writecont), len(readcont))
+        for idx in range(len(writecont)):
+            writeitem = writecont[idx]
+            readitem = readcont[idx]
+            self.assertEqual(writeitem.id, readitem.id)
+            for attr in all_attrs:
+                if hasattr(writeitem, attr) or hasattr(readitem, attr):
+                    writeval = getattr(writeitem, attr)
+                    readval = getattr(readitem, attr)
+                    self.assertEqual(
+                        writeval, readval,
+                        "Attribute mismatch between {} and {} "
+                        "for attribute '{}': {} != {}".format(
+                            writeitem, readitem, attr, writeval, readval
+                        ))
+            if len(writeitem.sources) or len(readitem.sources):
+                self.check_recurse(writeitem.sources, readitem.sources)
 
     def check_compatibility(self):
         self.read_file = File.open("compat_test.h5", FileMode.ReadOnly,
                                    backend=self.read_backend)
 
-        self.check_containers(self.write_file.blocks, self.read_file.blocks)
+        self.check_recurse(self.write_file.blocks, self.read_file.blocks)
 
         for blkidx in range(len(self.write_file.blocks)):
             wblock = self.write_file.blocks[blkidx]
             rblock = self.read_file.blocks[blkidx]
-            self.check_containers(wblock.groups, rblock.groups)
-            self.check_containers(wblock.data_arrays, rblock.data_arrays)
-            self.check_containers(wblock.tags, rblock.tags)
-            self.check_containers(wblock.multi_tags, rblock.multi_tags)
+            self.check_recurse(wblock.groups, rblock.groups)
+            self.check_recurse(wblock.data_arrays, rblock.data_arrays)
+            self.check_recurse(wblock.tags, rblock.tags)
+            self.check_recurse(wblock.multi_tags, rblock.multi_tags)
             for grpidx in range(len(wblock.groups)):
                 wgrp = wblock.groups[grpidx]
                 rgrp = rblock.groups[grpidx]
-                self.check_containers(wgrp.data_arrays, rgrp.data_arrays)
-                self.check_containers(wgrp.tags, rgrp.tags)
-                self.check_containers(wgrp.multi_tags, rgrp.multi_tags)
+                self.check_recurse(wgrp.data_arrays, rgrp.data_arrays)
+                self.check_recurse(wgrp.tags, rgrp.tags)
+                self.check_recurse(wgrp.multi_tags, rgrp.multi_tags)
 
     def test_blocks(self):
         for idx in range(10):
