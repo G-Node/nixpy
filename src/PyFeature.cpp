@@ -28,7 +28,7 @@ void setLinkType(Feature& f, const std::string& link_type) {
         lt = LinkType::Untagged;
     else if (link_type == "Indexed")
         lt = LinkType::Indexed;
-    // TODO: Throw error
+    else throw std::runtime_error("Invalid string for LinkType.");
 
     f.linkType(lt);
 }

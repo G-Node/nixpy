@@ -18,6 +18,8 @@ from uuid import uuid4, UUID
 from ..exceptions import exceptions
 from . import names
 
+from nixio.link_type import LinkType
+
 try:
     unicode = unicode
 except NameError:
@@ -140,3 +142,28 @@ def apply_polynomial(coefficients, origin, data):
     data[:] = data[:] - origin
     if coefficients:
         data[:] = np.polynomial.polynomial.polyval(data, coefficients)
+
+
+# The following two functions currently behave as capitalised <-> lowercase
+# converters, but they are general solutions for alternate implementations of
+# LinkType (e.g., enum)
+def link_type_to_string(lt):
+    if lt == LinkType.Indexed:
+        return "indexed"
+    elif lt == LinkType.Tagged:
+        return "tagged"
+    elif lt == LinkType.Untagged:
+        return "untagged"
+    else:
+        raise RuntimeError("Invalid LinkType")
+
+
+def link_type_from_string(ltstr):
+    if ltstr == "indexed":
+        return LinkType.Indexed
+    elif ltstr == "tagged":
+        return LinkType.Tagged
+    elif ltstr == "untagged":
+        return LinkType.Untagged
+    else:
+        raise RuntimeError("Invalid string for LinkType")
