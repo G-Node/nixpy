@@ -24,7 +24,7 @@ all_attrs = [
     "unit", "data_extent", "data_type", "dimension_type", "index",
     "sampling_interval", "offset", "ticks", "metadata", "link_type", "data",
     "positions", "extents", "mapping", "values", "parent", "link",
-    "repository", "units", "position", "extent"
+    "repository", "units", "position", "extent", "shape", "size"
 ]
 
 
@@ -59,8 +59,9 @@ class _TestBackendCompatibility(unittest.TestCase):
             writeitem = writecont[idx]
             readitem = readcont[idx]
             self.check_attributes(writeitem, readitem)
-            if len(writeitem.sources) or len(readitem.sources):
-                self.check_recurse(writeitem.sources, readitem.sources)
+            if hasattr(writeitem, "sources"):
+                if len(writeitem.sources) or len(readitem.sources):
+                    self.check_recurse(writeitem.sources, readitem.sources)
 
     def check_compatibility(self):
         self.read_file = File.open("compat_test.h5", FileMode.ReadOnly,
@@ -87,7 +88,7 @@ class _TestBackendCompatibility(unittest.TestCase):
             blk = self.write_file.create_block("test_block" + str(idx),
                                                "blocktype")
             blk.definition = "definition block " + str(idx)
-            blk.force_created_at(np.random.randint(100000000))
+            blk.force_created_at(np.random.randint(1000000000))
 
         self.check_compatibility()
 
@@ -96,7 +97,7 @@ class _TestBackendCompatibility(unittest.TestCase):
         for idx in range(12):
             grp = blk.create_group("group_" + str(idx), "grouptype")
             grp.definition = "group definition " + str(idx*10)
-            grp.force_created_at(np.random.randint(100000000))
+            grp.force_created_at(np.random.randint(1000000000))
 
         self.check_compatibility()
 
@@ -108,7 +109,7 @@ class _TestBackendCompatibility(unittest.TestCase):
             da = blk.create_data_array("data_" + str(idx), "thedata",
                                        data=np.random.random(40))
             da.definition = "da definition " + str(sum(da[:]))
-            da.force_created_at(np.random.randint(100000000))
+            da.force_created_at(np.random.randint(1000000000))
             da.label = "data label " + str(idx)
             da.unit = "mV"
 
@@ -248,24 +249,23 @@ class _TestBackendCompatibility(unittest.TestCase):
         for idx in range(len(blk.data_arrays)):
             wda = self.write_file.blocks[0].data_arrays[idx]
             rda = self.read_file.blocks[0].data_arrays[idx]
-            for wdadim, rdadim in zip(wda.dimensions, rda.dimensions):
-                self.check_attributes(wdadim, rdadim)
+            self.check_recurse(wda.dimensions, rda.dimensions)
 
-    def test_features(self):
+    def test_tag_features(self):
         blk = self.write_file.create_block("testblock", "feattest")
         da_ref = blk.create_data_array("da for ref", "datype",
                                        DataType.Double,
-                                       data=np.random.random(5))
-        tag_feat = blk.create_tag("tag for feat", "tagtype", [2, 3])
+                                       data=np.random.random(15))
+        tag_feat = blk.create_tag("tag for feat", "tagtype", [2])
         tag_feat.references.append(da_ref)
 
-        for idx in range(4):
+        linktypes = [LinkType.Tagged, LinkType.Untagged, LinkType.Indexed]
+        for idx in range(6):
             da_feat = blk.create_data_array("da for feat " + str(idx),
-                                            "datype",
-                                            DataType.Float,
-                                            data=np.random.random(3))
+                                            "datype", DataType.Float,
+                                            data=np.random.random(12))
             da_feat.append_sampled_dimension(1.0)
-            tag_feat.create_feature(da_feat, LinkType.Tagged)
+            tag_feat.create_feature(da_feat, linktypes[idx % 3])
 
         self.check_compatibility()
 
@@ -276,19 +276,120 @@ class _TestBackendCompatibility(unittest.TestCase):
             self.check_attributes(wfeat.data, rfeat.data)
             np.testing.assert_almost_equal(wfeat.data[:], rfeat.data[:])
 
-        wdata = wtag.retrieve_feature_data(0)
-        rdata = rtag.retrieve_feature_data(0)
-        self.check_attributes(wdata, rdata)
-        print(wdata[:])
-        np.testing.assert_almost_equal(wdata[:], rdata[:])
+        wfdata = wtag.retrieve_feature_data(0)
+        rfdata = rtag.retrieve_feature_data(0)
+        self.check_attributes(wfdata, rfdata)
+        np.testing.assert_almost_equal(wfdata[:], rfdata[:])
 
-    def test_file(self):
-        pass
+        self.check_recurse(wtag.references, rtag.references)
+
+    def test_multi_tag_features(self):
+        blk = self.write_file.create_block("testblock", "mtfeattest")
+        index_data = blk.create_data_array(
+            "indexed feature data", "test",
+            dtype=DataType.Double, shape=(10, 10)
+        )
+        dim1 = index_data.append_sampled_dimension(1.0)
+        dim1.unit = "ms"
+        dim2 = index_data.append_sampled_dimension(1.0)
+        dim2.unit = "ms"
+
+        data1 = np.zeros((10, 10))
+        value = 0.0
+        total = 0.0
+        for i in range(10):
+            value = 100 * i
+            for j in range(10):
+                value += 1
+                data1[i,j] = value
+                total += data1[i,j]
+
+        index_data[:, :] = data1
+
+        tagged_data = blk.create_data_array(
+            "tagged feature data", "test",
+            dtype=DataType.Double, shape=(10, 20, 10)
+        )
+        dim1 = tagged_data.append_sampled_dimension(1.0)
+        dim1.unit = "ms"
+        dim2 = tagged_data.append_sampled_dimension(1.0)
+        dim2.unit = "ms"
+        dim3 = tagged_data.append_sampled_dimension(1.0)
+        dim3.unit = "ms"
+
+        data2 = np.zeros((10, 20, 10))
+        for i in range(10):
+            value = 100 * i
+            for j in range(20):
+                for k in range(10):
+                    value += 1
+                    data2[i, j, k] = value
+
+        tagged_data[:, :, :] = data2
+
+        event_labels = ["event 1", "event 2"]
+        dim_labels = ["dim 0", "dim 1", "dim 2"]
+        event_array = blk.create_data_array("positions", "test",
+                                            data=np.random.random((2, 3)))
+        extent_array = blk.create_data_array("extents", "test",
+                                             data=np.random.random((2, 3)))
+        extent_set_dim = extent_array.append_set_dimension()
+        extent_set_dim.labels = event_labels
+        extent_set_dim = extent_array.append_set_dimension()
+        extent_set_dim.labels = dim_labels
+
+        feature_tag = blk.create_multi_tag("feature_tag", "events",
+                                           event_array)
+        data_array = blk.create_data_array("featureTest", "test",
+                                           DataType.Double, (2, 10, 5))
+        data = np.random.random((2, 10, 5))
+        data_array[:, :, :] = data
+
+        feature_tag.extents = extent_array
+        feature_tag.references.append(data_array)
+
+        feature_tag.create_feature(index_data, LinkType.Indexed)
+        feature_tag.create_feature(tagged_data, LinkType.Tagged)
+        feature_tag.create_feature(index_data, LinkType.Untagged)
+
+        self.check_compatibility()
+
+        wmtag = self.write_file.blocks[0].multi_tags[0]
+        rmtag = self.read_file.blocks[0].multi_tags[0]
+        self.check_recurse(wmtag.features, rmtag.features)
+        self.check_recurse(wmtag.references, rmtag.references)
+
+        wfdata = wmtag.retrieve_feature_data(0, 0)
+        rfdata = rmtag.retrieve_feature_data(0, 0)
+
+        self.check_attributes(wfdata, rfdata)
+
+        wfdataview = wmtag.retrieve_feature_data(9, 0)
+        rfdataview = rmtag.retrieve_feature_data(9, 0)
+        self.check_attributes(wfdataview, rfdataview)
+
+        wfdataview = wmtag.retrieve_feature_data(0, 2)
+        rfdataview = rmtag.retrieve_feature_data(0, 2)
+        self.check_attributes(wfdataview, rfdataview)
+
+        wfdataview = wmtag.retrieve_feature_data(0, 1)
+        rfdataview = rmtag.retrieve_feature_data(0, 1)
+        self.check_attributes(wfdataview, rfdataview)
+
+        wfdataview = wmtag.retrieve_feature_data(1, 1)
+        rfdataview = rmtag.retrieve_feature_data(1, 1)
+        self.check_attributes(wfdataview, rfdataview)
+
+        self.assertRaises(IndexError, wmtag.retrieve_feature_data, 2, 1)
+        self.assertRaises(IndexError, rmtag.retrieve_feature_data, 2, 1)
 
     def test_properties(self):
         pass
 
     def test_sections(self):
+        pass
+
+    def test_file(self):
         pass
 
 
