@@ -43,9 +43,9 @@ class H5DataSet(object):
             self.dataset[:] = data
 
     def read_data(self, data, count=None, offset=None):
-        if sum(count) == 0 and len(data) == 0:
-            return data
         if count and offset:
+            if sum(count) == 0 and len(data) == 0:
+                return data
             datashape = data.shape
             sl = util.co_to_slice(count, offset)
             if isinstance(sl, tuple) and np.ndim(data) != len(sl):
