@@ -51,7 +51,6 @@ class NamedEntity(object):
 
     def __init__(self, h5group):
         self._h5group = h5group
-        # TODO: Validate object
         try:
             util.check_entity_name_and_type(h5group.get_attr("name"),
                                             h5group.get_attr("type"))

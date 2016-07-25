@@ -63,7 +63,10 @@ class H5DataSet(object):
             self.dataset.attrs[name] = value
 
     def get_attr(self, name):
-        return self.dataset.attrs.get(name)
+        attr = self.dataset.attrs.get(name)
+        if isinstance(attr, bytes):
+            attr = attr.decode()
+        return attr
 
     @property
     def shape(self):
@@ -76,3 +79,6 @@ class H5DataSet(object):
     @property
     def dtype(self):
         return self.dataset.dtype
+
+    def __str__(self):
+        return "<H5DataSet object: {}>".format(self.dataset.name)
