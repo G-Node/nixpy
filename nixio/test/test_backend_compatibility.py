@@ -256,8 +256,7 @@ class _TestBackendCompatibility(unittest.TestCase):
         da_ref = blk.create_data_array("da for ref", "datype",
                                        DataType.Double,
                                        data=np.random.random(5))
-        tag_feat = blk.create_tag("tag for feat", "tagtype",
-                                  [10, 11])
+        tag_feat = blk.create_tag("tag for feat", "tagtype", [2, 3])
         tag_feat.references.append(da_ref)
 
         for idx in range(4):
@@ -265,6 +264,7 @@ class _TestBackendCompatibility(unittest.TestCase):
                                             "datype",
                                             DataType.Float,
                                             data=np.random.random(3))
+            da_feat.append_sampled_dimension(1.0)
             tag_feat.create_feature(da_feat, LinkType.Tagged)
 
         self.check_compatibility()
@@ -273,6 +273,14 @@ class _TestBackendCompatibility(unittest.TestCase):
         rtag = self.read_file.blocks[0].tags[0]
         for wfeat, rfeat in zip(wtag.features, rtag.features):
             self.check_attributes(wfeat, rfeat)
+            self.check_attributes(wfeat.data, rfeat.data)
+            np.testing.assert_almost_equal(wfeat.data[:], rfeat.data[:])
+
+        wdata = wtag.retrieve_feature_data(0)
+        rdata = rtag.retrieve_feature_data(0)
+        self.check_attributes(wdata, rdata)
+        print(wdata[:])
+        np.testing.assert_almost_equal(wdata[:], rdata[:])
 
     def test_file(self):
         pass
