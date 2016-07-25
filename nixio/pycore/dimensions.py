@@ -206,7 +206,7 @@ class SetDimension(Dimension):
     @property
     def labels(self):
         labels = tuple(self._h5group.get_data("labels"))
-        if isinstance(labels[0], bytes):
+        if len(labels) and isinstance(labels[0], bytes):
             labels = tuple(l.decode() for l in labels)
         return labels
 

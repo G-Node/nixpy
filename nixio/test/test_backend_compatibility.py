@@ -20,8 +20,8 @@ except ImportError:
 
 all_attrs = [
     "id", "created_at", "updated_at", "name", "type", "definition",
-    "dtype", "polynom_coefficients", "expansion_origin", "label", "unit",
-    "data_extent", "data_type", "dimension_type", "index",
+    "dtype", "polynom_coefficients", "expansion_origin", "label", "labels",
+    "unit", "data_extent", "data_type", "dimension_type", "index",
     "sampling_interval", "offset", "ticks", "metadata", "link_type", "data",
     "positions", "extents", "mapping", "values", "parent", "link",
     "repository", "units", "position", "extent"
