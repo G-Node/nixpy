@@ -252,7 +252,27 @@ class _TestBackendCompatibility(unittest.TestCase):
                 self.check_attributes(wdadim, rdadim)
 
     def test_features(self):
-        pass
+        blk = self.write_file.create_block("testblock", "feattest")
+        da_ref = blk.create_data_array("da for ref", "datype",
+                                       DataType.Double,
+                                       data=np.random.random(5))
+        tag_feat = blk.create_tag("tag for feat", "tagtype",
+                                  [10, 11])
+        tag_feat.references.append(da_ref)
+
+        for idx in range(4):
+            da_feat = blk.create_data_array("da for feat " + str(idx),
+                                            "datype",
+                                            DataType.Float,
+                                            data=np.random.random(3))
+            tag_feat.create_feature(da_feat, LinkType.Tagged)
+
+        self.check_compatibility()
+
+        wtag = self.write_file.blocks[0].tags[0]
+        rtag = self.read_file.blocks[0].tags[0]
+        for wfeat, rfeat in zip(wtag.features, rtag.features):
+            self.check_attributes(wfeat, rfeat)
 
     def test_file(self):
         pass
