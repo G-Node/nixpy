@@ -65,6 +65,12 @@ class _TestBackendCompatibility(unittest.TestCase):
             if hasattr(writeitem, "metadata"):
                 self.check_attributes(writeitem.metadata, readitem.metadata)
 
+    def check_sections(self, writeitem, readitem):
+        self.assertEqual(len(writeitem.sections), len(readitem.sections))
+        for wsec, rsec in zip(writeitem.sections, readitem.sections):
+            self.check_attributes(wsec, rsec)
+            self.check_sections(wsec, rsec)
+
     def check_compatibility(self):
         self.read_file = File.open("compat_test.h5", FileMode.ReadOnly,
                                    backend=self.read_backend)
@@ -84,6 +90,7 @@ class _TestBackendCompatibility(unittest.TestCase):
                 self.check_recurse(wgrp.data_arrays, rgrp.data_arrays)
                 self.check_recurse(wgrp.tags, rgrp.tags)
                 self.check_recurse(wgrp.multi_tags, rgrp.multi_tags)
+        self.check_sections(self.write_file, self.read_file)
 
     def test_blocks(self):
         for idx in range(10):
@@ -386,7 +393,7 @@ class _TestBackendCompatibility(unittest.TestCase):
         self.assertRaises(IndexError, rmtag.retrieve_feature_data, 2, 1)
 
     def test_properties(self):
-        sec = self.write_file.create_section("test section", "sectiontest")
+        sec = self.write_file.create_section("test section", "proptest")
         sec.create_property("test property", Value(0))
         sec.create_property("test str", DataType.String)
         sec.create_property("other property", DataType.Int64)
@@ -412,10 +419,29 @@ class _TestBackendCompatibility(unittest.TestCase):
             self.check_attributes(wprop, rprop)
 
     def test_sections(self):
-        pass
+        for idx in range(6):
+            sec = self.write_file.create_section("test section" + str(idx),
+                                                 "sectiontest")
+            sec.definition = "sec definition " + str(idx)
+            sec.mapping = "sec mapping " + str(idx)
+            sec.repository = "sec repo" + str(idx * 3)
+
+            nested_sec = sec.create_section("nested_section", "sec")
+            if (idx % 3) == 0:
+                nested_sec.create_section("level 3", "sec")
+
+        self.check_compatibility()
 
     def test_file(self):
-        pass
+        self.check_compatibility()
+
+        wfile = self.write_file
+        rfile = self.read_file
+
+        self.assertEqual(wfile.version, rfile.version)
+        self.assertEqual(wfile.format, rfile.format)
+        self.assertEqual(wfile.created_at, rfile.created_at)
+        self.assertEqual(wfile.updated_at, rfile.updated_at)
 
 
 class TestWriteCPPReadPy(_TestBackendCompatibility):
