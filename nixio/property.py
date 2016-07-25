@@ -12,10 +12,6 @@ from __future__ import (absolute_import, division, print_function,
 
 class PropertyMixin(object):
 
-    @property
-    def data_type(self):
-        return self.values[0].data_type
-
     def __eq__(self, other):
         if hasattr(other, "id"):
             return self.id == other.id

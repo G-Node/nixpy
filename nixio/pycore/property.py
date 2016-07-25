@@ -73,7 +73,10 @@ class Property(Entity, PropertyMixin):
         self._h5dataset.read_data(data)
 
         def data_to_value(d):
-            v = Value(d["value"])
+            vitem = d["value"]
+            if isinstance(vitem, bytes):
+                vitem = vitem.decode()
+            v = Value(vitem)
             v.uncertainty = d["uncertainty"]
             v.reference = d["reference"]
             v.filename = d["filename"]
@@ -104,6 +107,14 @@ class Property(Entity, PropertyMixin):
             data = np.append(data, d)
 
         self._h5dataset.write_data(data)
+
+    @property
+    def data_type(self):
+        dt = self._h5dataset.dtype[0].type
+        if dt == util.vlen_str_dtype:
+            return DataType.String
+        else:
+            return dt
 
     def delete_values(self):
         self._h5dataset.shape = (0,)
