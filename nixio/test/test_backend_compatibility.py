@@ -62,6 +62,8 @@ class _TestBackendCompatibility(unittest.TestCase):
             if hasattr(writeitem, "sources"):
                 if len(writeitem.sources) or len(readitem.sources):
                     self.check_recurse(writeitem.sources, readitem.sources)
+            if hasattr(writeitem, "metadata"):
+                self.check_attributes(writeitem.metadata, readitem.metadata)
 
     def check_compatibility(self):
         self.read_file = File.open("compat_test.h5", FileMode.ReadOnly,
@@ -384,7 +386,30 @@ class _TestBackendCompatibility(unittest.TestCase):
         self.assertRaises(IndexError, rmtag.retrieve_feature_data, 2, 1)
 
     def test_properties(self):
-        pass
+        sec = self.write_file.create_section("test section", "sectiontest")
+        sec.create_property("test property", Value(0))
+        sec.create_property("test str", DataType.String)
+        sec.create_property("other property", DataType.Int64)
+
+        sec.props[0].mapping = "mapping"
+        sec.props[1].definition = "def"
+
+        self.check_compatibility()
+
+        wsec = self.write_file.sections[0]
+        rsec = self.read_file.sections[0]
+        self.check_attributes(wsec, rsec)
+
+        for wprop, rprop in zip(wsec.props, rsec.props):
+            self.check_attributes(wprop, rprop)
+
+        sec.props[0].values = [Value(101)]
+        for wprop, rprop in zip(wsec.props, rsec.props):
+            self.check_attributes(wprop, rprop)
+
+        sec.props[1].values = [Value("foo"), Value("bar"), Value("baz")]
+        for wprop, rprop in zip(wsec.props, rsec.props):
+            self.check_attributes(wprop, rprop)
 
     def test_sections(self):
         pass
