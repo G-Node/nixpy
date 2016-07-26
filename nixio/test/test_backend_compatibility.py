@@ -23,7 +23,7 @@ all_attrs = [
     "dtype", "polynom_coefficients", "expansion_origin", "label", "labels",
     "unit", "data_extent", "data_type", "dimension_type", "index",
     "sampling_interval", "offset", "ticks", "metadata", "link_type", "data",
-    "positions", "extents", "mapping", "values", "parent", "link",
+    "positions", "extents", "mapping", "values", "_parent", "link",
     "repository", "units", "position", "extent", "shape", "size"
 ]
 
@@ -64,6 +64,8 @@ class _TestBackendCompatibility(unittest.TestCase):
                     self.check_recurse(writeitem.sources, readitem.sources)
             if hasattr(writeitem, "metadata"):
                 self.check_attributes(writeitem.metadata, readitem.metadata)
+                if writeitem.metadata or readitem.metadata:
+                    self.check_sections(writeitem.metadata, readitem.metadata)
 
     def check_sections(self, writeitem, readitem):
         self.assertEqual(len(writeitem.sections), len(readitem.sections))
@@ -213,15 +215,18 @@ class _TestBackendCompatibility(unittest.TestCase):
 
         for idx in range(20):
             src = blk.create_source("src" + str(idx), "source")
+            src_child = src.create_source("child src " + str(idx), "source")
 
             if (idx % 5) == 0:
                 grp.sources.append(src)
 
             if (idx % 3) == 0:
-                mtag.sources.append(src)
+                mtag.sources.append(src_child)
 
             if (idx % 8) == 0:
                 da.sources.append(src)
+
+        # TODO: Nested sources
 
         self.check_compatibility()
 
@@ -268,6 +273,8 @@ class _TestBackendCompatibility(unittest.TestCase):
         tag_feat = blk.create_tag("tag for feat", "tagtype", [2])
         tag_feat.references.append(da_ref)
 
+        # TODO: Retrieve data
+
         linktypes = [LinkType.Tagged, LinkType.Untagged, LinkType.Indexed]
         for idx in range(6):
             da_feat = blk.create_data_array("da for feat " + str(idx),
@@ -280,6 +287,10 @@ class _TestBackendCompatibility(unittest.TestCase):
 
         wtag = self.write_file.blocks[0].tags[0]
         rtag = self.read_file.blocks[0].tags[0]
+
+        # np.testing.assert_almost_equal(wtag.retrieve_data(0),
+        #                                rtag.retrieve_data(0))
+
         for wfeat, rfeat in zip(wtag.features, rtag.features):
             self.check_attributes(wfeat, rfeat)
             self.check_attributes(wfeat.data, rfeat.data)
@@ -392,6 +403,8 @@ class _TestBackendCompatibility(unittest.TestCase):
         self.assertRaises(IndexError, wmtag.retrieve_feature_data, 2, 1)
         self.assertRaises(IndexError, rmtag.retrieve_feature_data, 2, 1)
 
+        # TODO: Retrieve data
+
     def test_properties(self):
         sec = self.write_file.create_section("test section", "proptest")
         sec.create_property("test property", Value(0))
@@ -429,6 +442,11 @@ class _TestBackendCompatibility(unittest.TestCase):
             nested_sec = sec.create_section("nested_section", "sec")
             if (idx % 3) == 0:
                 nested_sec.create_section("level 3", "sec")
+
+        self.check_compatibility()
+
+        block = self.write_file.create_block("block", "section test")
+        block.metadata = self.write_file.sections[3]
 
         self.check_compatibility()
 

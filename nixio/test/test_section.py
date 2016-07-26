@@ -195,6 +195,16 @@ class _TestSection(unittest.TestCase):
 
         assert(len(self.section) == 0)
 
+    def test_parent(self):
+        self.assertIs(self.section.parent, None)
+        child = self.section.create_section("child section", "sect")
+        self.assertEqual(self.section, child.parent)
+
+        block = self.file.create_block("block", "section parent test")
+        mdsection = self.file.create_section("block md", "metadata sect")
+        block.metadata = mdsection
+        self.assertIs(block.metadata.parent, None)
+
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestSectionCPP(_TestSection):
