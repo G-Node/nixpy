@@ -441,6 +441,14 @@ class _TestBackendCompatibility(unittest.TestCase):
         sec.create_property("test str", DataType.String)
         sec.create_property("other property", DataType.Int64)
 
+        sec.create_property("prop Int32", DataType.Int32)
+        sec.create_property("prop Int64", DataType.Int64)
+        sec.create_property("prop UInt32", DataType.UInt32)
+        sec.create_property("prop UInt64", DataType.UInt64)
+        sec.create_property("prop Float", DataType.Float)
+        sec.create_property("prop Double", DataType.Double)
+        sec.create_property("prop String", DataType.String)
+
         sec.props[0].mapping = "mapping"
         sec.props[1].definition = "def"
 
