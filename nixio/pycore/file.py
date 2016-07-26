@@ -54,22 +54,8 @@ def make_fcpl():
 
 class File(FileMixin):
 
-    def __init__(self, path, mode=FileMode.ReadWrite):
-        try:
-            path = path.encode("utf-8")
-        except (UnicodeError, LookupError):
-            pass
-        if not os.path.exists(path):
-            mode = FileMode.Overwrite
-
-        self.mode = mode
-        h5mode = map_file_mode(mode)
-
-        if os.path.exists(path):
-            self._open_existing(path, h5mode)
-        else:
-            self._create_new(path, h5mode)
-
+    def __init__(self, h5file):
+        self._h5file = h5file
         self._root = H5Group(self._h5file, "/", create=True)
         self._data = self._root.open_group("data", create=True)
         self.metadata = self._root.open_group("metadata", create=True)
@@ -78,22 +64,43 @@ class File(FileMixin):
         if "updated_at" not in self._h5file.attrs:
             self.force_updated_at()
 
-    def _open_existing(self, path, h5mode):
+    @classmethod
+    def _open_existing(cls, path, h5mode):
         if h5mode == h5py.h5f.ACC_TRUNC:
-            self._create_new(path, h5mode)
+            file = cls._create_new(path, h5mode)
         else:
             fid = h5py.h5f.open(path, flags=h5mode, fapl=make_fapl())
-            self._h5file = h5py.File(fid)
+            h5file = h5py.File(fid)
+            file = cls(h5file)
+        return file
 
-    def _create_new(self, path, h5mode):
+    @classmethod
+    def _create_new(cls, path, h5mode):
         fid = h5py.h5f.create(path, flags=h5mode, fapl=make_fapl(),
                               fcpl=make_fcpl())
-        self._h5file = h5py.File(fid)
-        self._create_header()
+        h5file = h5py.File(fid)
+        newfile = cls(h5file)
+        newfile._create_header()
+        return newfile
 
-    def _create_header(self):
-        self.format = "nix"
-        self.version = (1, 0, 0)
+    @classmethod
+    def _open(cls, path, mode=FileMode.ReadWrite):
+        try:
+            path = path.encode("utf-8")
+        except (UnicodeError, LookupError):
+            pass
+        if not os.path.exists(path):
+            mode = FileMode.Overwrite
+
+        h5mode = map_file_mode(mode)
+
+        if os.path.exists(path):
+            newfile = cls._open_existing(path, h5mode)
+        else:
+            newfile = cls._create_new(path, h5mode)
+
+        newfile.mode = mode
+        return newfile
 
     @classmethod
     def open(cls, path, mode=FileMode.ReadWrite, backend=None):
@@ -117,9 +124,13 @@ class File(FileMixin):
                 # TODO: Brief instructions or web URL for building C++ files?
                 raise RuntimeError("HDF5 backend is not available.")
         elif backend == "h5py":
-            return cls(path, mode)
+            return cls._open(path, mode)
         else:
             raise ValueError("Valid backends are 'hdf5' and 'h5py'.")
+
+    def _create_header(self):
+        self.format = "nix"
+        self.version = (1, 0, 0)
 
     @property
     def version(self):
@@ -192,7 +203,7 @@ class File(FileMixin):
     def create_section(self, name, type_):
         if name in self.metadata:
             raise exceptions.DuplicateName("create_section")
-        sec = Section._create_new(self.metadata, name, type_)
+        sec = Section._create_new(self.metadata, None, name, type_)
         return sec
 
     def _get_section_by_id(self, id_or_name):
