@@ -270,10 +270,9 @@ class _TestBackendCompatibility(unittest.TestCase):
         da_ref = blk.create_data_array("da for ref", "datype",
                                        DataType.Double,
                                        data=np.random.random(15))
+        da_ref.append_sampled_dimension(0.2)
         tag_feat = blk.create_tag("tag for feat", "tagtype", [2])
         tag_feat.references.append(da_ref)
-
-        # TODO: Retrieve data
 
         linktypes = [LinkType.Tagged, LinkType.Untagged, LinkType.Indexed]
         for idx in range(6):
@@ -288,8 +287,10 @@ class _TestBackendCompatibility(unittest.TestCase):
         wtag = self.write_file.blocks[0].tags[0]
         rtag = self.read_file.blocks[0].tags[0]
 
-        # np.testing.assert_almost_equal(wtag.retrieve_data(0),
-        #                                rtag.retrieve_data(0))
+        wrefdv = wtag.retrieve_data(0)
+        rrefdv = rtag.retrieve_data(0)
+        self.check_attributes(wrefdv, rrefdv)
+        np.testing.assert_almost_equal(wrefdv[:], rrefdv[:])
 
         for wfeat, rfeat in zip(wtag.features, rtag.features):
             self.check_attributes(wfeat, rfeat)
@@ -366,7 +367,6 @@ class _TestBackendCompatibility(unittest.TestCase):
         data_array[:, :, :] = data
 
         feature_tag.extents = extent_array
-        feature_tag.references.append(data_array)
 
         feature_tag.create_feature(index_data, LinkType.Indexed)
         feature_tag.create_feature(tagged_data, LinkType.Tagged)

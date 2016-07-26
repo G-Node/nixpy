@@ -228,7 +228,7 @@ class Tag(BaseTag, TagMixin):
             raise OutOfBounds("Reference index out of bounds.")
 
         ref = references[refidx]
-        dimcount = ref.dimension_count()
+        dimcount = len(ref.dimensions)
         if (len(position) != dimcount) or (len(extent) > 0 and
                                            len(extent) != dimcount):
             raise IncompatibleDimensions(
