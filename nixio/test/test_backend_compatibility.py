@@ -403,7 +403,37 @@ class _TestBackendCompatibility(unittest.TestCase):
         self.assertRaises(IndexError, wmtag.retrieve_feature_data, 2, 1)
         self.assertRaises(IndexError, rmtag.retrieve_feature_data, 2, 1)
 
-        # TODO: Retrieve data
+    def test_multi_tag_references(self):
+        interval = 0.001
+        x = np.arange(0, 10, interval)
+        y = np.sin(2*np.pi*x)
+        blk = self.write_file.create_block("blk", "reftest")
+        da = blk.create_data_array("sin", "data", data=y)
+        da.unit = "dB"
+        dim = da.append_sampled_dimension(interval)
+        dim.unit = "s"
+
+        pos = blk.create_data_array("pos1", "positions", data=np.array([[0]]))
+        pos.append_set_dimension()
+        pos.append_set_dimension()
+        pos.unit = "ms"
+        ext = blk.create_data_array("ext1", "extents",
+                                    data=np.array([[2000]]))
+        ext.append_set_dimension()
+        ext.append_set_dimension()
+        ext.unit = "ms"
+
+        mtag = blk.create_multi_tag("sin1", "tag", pos)
+        mtag.extents = ext
+        mtag.units = ["ms"]
+        mtag.references.append(da)
+
+        self.check_compatibility()
+
+        for wmtag, rmtag in zip(self.write_file.blocks[0].multi_tags,
+                                self.read_file.blocks[0].multi_tags):
+            np.testing.assert_almost_equal(wmtag.retrieve_data(0, 0)[:],
+                                           rmtag.retrieve_data(0, 0)[:])
 
     def test_properties(self):
         sec = self.write_file.create_section("test section", "proptest")
