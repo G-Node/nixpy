@@ -18,12 +18,14 @@ from . import exceptions
 
 class Section(NamedEntity, SectionMixin):
 
-    def __init__(self, h5group):
+    def __init__(self, h5group, parent=None):
         super(Section, self).__init__(h5group)
+        self.parent = parent
 
     @classmethod
-    def _create_new(cls, parent, name, type_):
+    def _create_new(cls, parent, parent_section, name, type_):
         newentity = super(Section, cls)._create_new(parent, name, type_)
+        newentity.parent = parent_section
         return newentity
 
     # Section
@@ -32,16 +34,16 @@ class Section(NamedEntity, SectionMixin):
         sections = self._h5group.open_group("sections", True)
         if name in sections:
             raise exceptions.DuplicateName("create_section")
-        sec = Section._create_new(sections, name, type_)
+        sec = Section._create_new(sections, self, name, type_)
         return sec
 
     def _get_section_by_id(self, id_or_name):
         sections = self._h5group.open_group("sections")
-        return Section(sections.get_by_id_or_name(id_or_name))
+        return Section(sections.get_by_id_or_name(id_or_name), parent=self)
 
     def _get_section_by_pos(self, pos):
         sections = self._h5group.open_group("sections")
-        return Section(sections.get_by_pos(pos))
+        return Section(sections.get_by_pos(pos), parent=self)
 
     def _delete_section_by_id(self, id_):
         sections = self._h5group.open_group("sections")
@@ -95,15 +97,6 @@ class Section(NamedEntity, SectionMixin):
 
     def _property_count(self):
         return len(self._h5group.open_group("properties"))
-
-    @property
-    def parent(self):
-        h5parent = self._h5group.parent
-        if h5parent.group.name == "/metadata":
-            # Top level section
-            return None
-        else:
-            return Section(h5parent.parent)
 
     @property
     def link(self):
