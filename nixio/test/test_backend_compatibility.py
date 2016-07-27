@@ -23,7 +23,7 @@ all_attrs = [
     "dtype", "polynom_coefficients", "expansion_origin", "label", "labels",
     "unit", "data_extent", "data_type", "dimension_type", "index",
     "sampling_interval", "offset", "ticks", "metadata", "link_type", "data",
-    "positions", "extents", "mapping", "values", "_parent", "link",
+    "positions", "extents", "mapping", "values", "parent", "link",
     "repository", "units", "position", "extent", "shape", "size"
 ]
 
@@ -74,8 +74,9 @@ class _TestBackendCompatibility(unittest.TestCase):
             self.check_sections(wsec, rsec)
 
     def check_compatibility(self):
-        self.read_file = File.open("compat_test.h5", FileMode.ReadOnly,
-                                   backend=self.read_backend)
+        if self.read_file is None:
+            self.read_file = File.open("compat_test.h5", FileMode.ReadOnly,
+                                       backend=self.read_backend)
 
         self.check_recurse(self.write_file.blocks, self.read_file.blocks)
 
@@ -470,7 +471,7 @@ class _TestBackendCompatibility(unittest.TestCase):
             self.check_attributes(wprop, rprop)
 
     def test_sections(self):
-        for idx in range(6):
+        for idx in range(30):
             sec = self.write_file.create_section("test section" + str(idx),
                                                  "sectiontest")
             sec.definition = "sec definition " + str(idx)
@@ -479,14 +480,21 @@ class _TestBackendCompatibility(unittest.TestCase):
 
             nested_sec = sec.create_section("nested_section", "sec")
             if (idx % 3) == 0:
-                nested_sec.create_section("level 3", "sec")
+                lvl2 = nested_sec.create_section("level 2", "sec")
 
-        self.check_compatibility()
+                if (idx % 12) == 0:
+                    lvl2.create_section("level 3", "sec")
 
         block = self.write_file.create_block("block", "section test")
-        block.metadata = self.write_file.sections[3]
+        block.metadata = self.write_file.sections[0].sections[0].sections[0]
 
         self.check_compatibility()
+
+        wblock = self.write_file.blocks[0]
+        rblock = self.read_file.blocks[0]
+
+        self.assertEqual(wblock.metadata, rblock.metadata)
+        self.assertEqual(wblock.metadata.parent, rblock.metadata.parent)
 
     def test_file(self):
         self.check_compatibility()
