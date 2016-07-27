@@ -5,10 +5,9 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
 from .entity import Entity
 from .data_array import DataArray
-from ..link_type import LinkType
+from .util import util
 
 
 class Feature(Entity):
@@ -29,13 +28,11 @@ class Feature(Entity):
 
     @property
     def link_type(self):
-        return self._h5group.get_attr("link_type")
+        return util.link_type_from_string(self._h5group.get_attr("link_type"))
 
     @link_type.setter
     def link_type(self, lt):
-        if lt not in (LinkType.Indexed, LinkType.Tagged, LinkType.Untagged):
-            raise ValueError("Invalid link type.")
-        self._h5group.set_attr("link_type", lt)
+        self._h5group.set_attr("link_type", util.link_type_to_string(lt))
 
     @property
     def data(self):

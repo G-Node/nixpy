@@ -10,14 +10,16 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 from ..property import PropertyMixin
+from .entity import Entity
 from ..value import Value, DataType
 from . import util
 
 
-class Property(PropertyMixin):
+class Property(Entity, PropertyMixin):
 
     def __init__(self, h5dataset):
-        self._h5dataset = h5dataset
+        super(Property, self).__init__(h5dataset)
+        self._h5dataset = self._h5group
 
     @classmethod
     def _create_new(cls, parent, name, dtype):
@@ -26,14 +28,10 @@ class Property(PropertyMixin):
         h5dataset = parent.create_dataset(name, shape=(0,), dtype=dtype)
         h5dataset.set_attr("name", name)
         h5dataset.set_attr("entity_id", util.create_id())
-        h5dataset.set_attr("created_at", int(util.now_int()))
-        h5dataset.set_attr("updated_at", int(util.now_int()))
         newentity = cls(h5dataset)
+        newentity.force_created_at()
+        newentity.force_updated_at()
         return newentity
-
-    @property
-    def id(self):
-        return self._h5dataset.get_attr("entity_id")
 
     @property
     def name(self):
@@ -75,7 +73,10 @@ class Property(PropertyMixin):
         self._h5dataset.read_data(data)
 
         def data_to_value(d):
-            v = Value(d["value"])
+            vitem = d["value"]
+            if isinstance(vitem, bytes):
+                vitem = vitem.decode()
+            v = Value(vitem)
             v.uncertainty = d["uncertainty"]
             v.reference = d["reference"]
             v.filename = d["filename"]
@@ -106,6 +107,14 @@ class Property(PropertyMixin):
             data = np.append(data, d)
 
         self._h5dataset.write_data(data)
+
+    @property
+    def data_type(self):
+        dt = self._h5dataset.dtype[0].type
+        if dt == util.vlen_str_dtype:
+            return DataType.String
+        else:
+            return dt
 
     def delete_values(self):
         self._h5dataset.shape = (0,)

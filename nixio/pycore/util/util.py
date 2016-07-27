@@ -10,12 +10,15 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
+import numpy as np
+
 import h5py
-from time import time
 from datetime import datetime
 from uuid import uuid4, UUID
 from ..exceptions import exceptions
 from . import names
+
+from nixio.link_type import LinkType
 
 try:
     unicode = unicode
@@ -75,7 +78,8 @@ def check_entity_input(entity, raise_exception=True):
 
 
 def now_int():
-    return int(time())
+    now = datetime.now()
+    return int(now.strftime("%s"))
 
 
 def time_to_str(t):
@@ -87,7 +91,7 @@ def time_to_str(t):
     :return: string in the form "YYYYMMDDTHHMMSS", where T is the date-time
     separator
     """
-    dt = datetime.fromtimestamp(t)
+    dt = datetime.utcfromtimestamp(t)
     return dt.strftime("%Y%m%dT%H%M%S").encode("utf-8")
 
 
@@ -99,8 +103,10 @@ def str_to_time(s):
     separator
     :return: integer POSIX time
     """
-    dt = datetime.strptime(s.decode(), "%Y%m%dT%H%M%S")
-    return int(dt.strftime("%s"))
+    if isinstance(s, bytes):
+        s = s.decode()
+    dt = datetime.strptime(s, "%Y%m%dT%H%M%S") - datetime(1970, 1, 1)
+    return int(dt.total_seconds())
 
 
 def check_attr_type(value, type_):
@@ -130,3 +136,34 @@ def co_to_slice(count, offset):
         return sl[0]
     else:
         return tuple(sl)
+
+
+def apply_polynomial(coefficients, origin, data):
+    data[:] = data[:] - origin
+    if coefficients:
+        data[:] = np.polynomial.polynomial.polyval(data, coefficients)
+
+
+# The following two functions currently behave as capitalised <-> lowercase
+# converters, but they are general solutions for alternate implementations of
+# LinkType (e.g., enum)
+def link_type_to_string(lt):
+    if lt == LinkType.Indexed:
+        return "indexed"
+    elif lt == LinkType.Tagged:
+        return "tagged"
+    elif lt == LinkType.Untagged:
+        return "untagged"
+    else:
+        raise RuntimeError("Invalid LinkType")
+
+
+def link_type_from_string(ltstr):
+    if ltstr == "indexed":
+        return LinkType.Indexed
+    elif ltstr == "tagged":
+        return LinkType.Tagged
+    elif ltstr == "untagged":
+        return LinkType.Untagged
+    else:
+        raise RuntimeError("Invalid string for LinkType")

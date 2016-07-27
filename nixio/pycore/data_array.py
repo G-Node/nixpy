@@ -35,6 +35,10 @@ class DataSet(DataSetMixin):
         dataset = self._h5group.get_dataset("data")
         dataset.shape = extent
 
+    @property
+    def data_type(self):
+        return self._get_dtype()
+
     def _get_dtype(self):
         dataset = self._h5group.get_dataset("data")
         return dataset.dtype
@@ -50,6 +54,18 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         newentity = super(DataArray, cls)._create_new(parent, name, type_)
         newentity._h5group.create_dataset("data", shape, data_type)
         return newentity
+
+    def _read_data(self, data, count, offset):
+        coeff = self.polynom_coefficients
+        origin = self.expansion_origin
+        if len(coeff) or origin:
+            if not origin:
+                origin = 0.0
+
+            super(DataArray, self)._read_data(data, count, offset)
+            util.apply_polynomial(coeff, origin, data)
+        else:
+            super(DataArray, self)._read_data(data, count, offset)
 
     def create_set_dimension(self, index):
         dimgroup = self._h5group.open_group("dimensions")
@@ -100,11 +116,11 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         h5dim = self._h5group.open_group("dimensions").open_group(str(index))
         dimtype = h5dim.get_attr("dimension_type")
         if dimtype == DimensionType.Sample:
-            return SampledDimension(h5dim)
+            return SampledDimension(h5dim, index)
         elif dimtype == DimensionType.Range:
-            return RangeDimension(h5dim)
+            return RangeDimension(h5dim, index)
         elif dimtype == DimensionType.Set:
-            return SetDimension(h5dim)
+            return SetDimension(h5dim, index)
         else:
             raise TypeError("Invalid Dimension object in file.")
 

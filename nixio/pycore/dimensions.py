@@ -17,18 +17,18 @@ from . import util
 
 class Dimension(object):
 
-    def __init__(self, h5group):
+    def __init__(self, h5group, index):
         from nixio.pycore.h5group import H5Group
         if not isinstance(h5group, H5Group):
             print(h5group)
             raise Exception
         self._h5group = h5group
+        self.dim_index = index
 
     @classmethod
     def _create_new(cls, parent, index):
         h5group = parent.open_group(str(index))
-        newdim = cls(h5group)
-        newdim.index = index
+        newdim = cls(h5group, index)
         return newdim
 
     @property
@@ -44,18 +44,18 @@ class Dimension(object):
 
     @property
     def index(self):
-        return self._h5group.get_attr("index")
+        return self.dim_index
 
     @index.setter
     def index(self, idx):
         util.check_attr_type(idx, int)
-        self._h5group.set_attr("index", idx)
+        self.dim_index = idx
 
 
 class SampledDimension(Dimension):
 
-    def __init__(self, h5group):
-        super(SampledDimension, self).__init__(h5group)
+    def __init__(self, h5group, index):
+        super(SampledDimension, self).__init__(h5group, index)
 
     @classmethod
     def _create_new(cls, parent, index, sample):
@@ -124,8 +124,8 @@ class SampledDimension(Dimension):
 
 class RangeDimension(Dimension):
 
-    def __init__(self, h5group):
-        super(RangeDimension, self).__init__(h5group)
+    def __init__(self, h5group, index):
+        super(RangeDimension, self).__init__(h5group, index)
 
     @classmethod
     def _create_new(cls, parent, index, ticks):
@@ -194,8 +194,8 @@ class RangeDimension(Dimension):
 
 class SetDimension(Dimension):
 
-    def __init__(self, h5group):
-        super(SetDimension, self).__init__(h5group)
+    def __init__(self, h5group, index):
+        super(SetDimension, self).__init__(h5group, index)
 
     @classmethod
     def _create_new(cls, parent, index):
@@ -205,7 +205,10 @@ class SetDimension(Dimension):
 
     @property
     def labels(self):
-        return tuple(self._h5group.get_data("labels"))
+        labels = tuple(self._h5group.get_data("labels"))
+        if len(labels) and isinstance(labels[0], bytes):
+            labels = tuple(l.decode() for l in labels)
+        return labels
 
     @labels.setter
     def labels(self, labels):

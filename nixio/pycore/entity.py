@@ -21,9 +21,10 @@ class Entity(object):
         id_ = util.create_id()
         h5group = parent.open_group(id_)
         h5group.set_attr("entity_id", id_)
-        h5group.set_attr("created_at", util.now_int())
-        h5group.set_attr("updated_at", util.now_int())
-        return cls(h5group)
+        newentity = cls(h5group)
+        newentity.force_created_at()
+        newentity.force_updated_at()
+        return newentity
 
     @property
     def id(self):
@@ -31,32 +32,25 @@ class Entity(object):
 
     @property
     def created_at(self):
-        return self._h5group.get_attr("created_at")
+        return util.str_to_time(self._h5group.get_attr("created_at"))
 
-    def force_created_at(self, t=None):
-        if t is None:
-            t = util.now_int()
-        # TODO: Check if convertible to date
+    def force_created_at(self, t=util.now_int()):
         util.check_attr_type(t, int)
-        self._h5group.set_attr("created_at", t)
+        self._h5group.set_attr("created_at", util.time_to_str(t))
 
     @property
     def updated_at(self):
-        return self._h5group.get_attr("updated_at")
+        return util.str_to_time(self._h5group.get_attr("updated_at"))
 
-    def force_updated_at(self, t=None):
-        if t is None:
-            t = util.now_int()
-        # TODO: Check if convertible to date
+    def force_updated_at(self, t=util.now_int()):
         util.check_attr_type(t, int)
-        self._h5group.set_attr("updated_at", t)
+        self._h5group.set_attr("updated_at", util.time_to_str(t))
 
 
 class NamedEntity(object):
 
     def __init__(self, h5group):
         self._h5group = h5group
-        # TODO: Validate object
         try:
             util.check_entity_name_and_type(h5group.get_attr("name"),
                                             h5group.get_attr("type"))
@@ -71,9 +65,9 @@ class NamedEntity(object):
         h5group.set_attr("name", name)
         h5group.set_attr("type", type_)
         h5group.set_attr("entity_id", util.create_id())
-        h5group.set_attr("created_at", util.now_int())
-        h5group.set_attr("updated_at", util.now_int())
         newentity = cls(h5group)
+        newentity.force_created_at()
+        newentity.force_updated_at()
         return newentity
 
     @property
@@ -106,25 +100,19 @@ class NamedEntity(object):
 
     @property
     def created_at(self):
-        return self._h5group.get_attr("created_at")
+        return util.str_to_time(self._h5group.get_attr("created_at"))
 
-    def force_created_at(self, t=None):
-        if t is None:
-            t = util.now_int()
-        # TODO: Check if convertible to date
+    def force_created_at(self, t=util.now_int()):
         util.check_attr_type(t, int)
-        self._h5group.set_attr("created_at", t)
+        self._h5group.set_attr("created_at", util.time_to_str(t))
 
     @property
     def updated_at(self):
-        return self._h5group.get_attr("updated_at")
+        return util.str_to_time(self._h5group.get_attr("updated_at"))
 
-    def force_updated_at(self, t=None):
-        if t is None:
-            t = util.now_int()
-        # TODO: Check if convertible to date
+    def force_updated_at(self, t=util.now_int()):
         util.check_attr_type(t, int)
-        self._h5group.set_attr("updated_at", t)
+        self._h5group.set_attr("updated_at", util.time_to_str(t))
 
     def __str__(self):
         return "{}: {{name = {}, type = {}, id = {}}}".format(
