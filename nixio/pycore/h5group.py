@@ -244,6 +244,15 @@ class H5Group(object):
         return result
 
     @property
+    def file(self):
+        """
+        An H5Group object which represents the file root.
+
+        :return: H5Group at '/'
+        """
+        return H5Group(self.group.file, "/", create=False)
+
+    @property
     def h5root(self):
         """
         Returns the H5Group of the Block or top-level Section which contains

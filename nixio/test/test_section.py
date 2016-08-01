@@ -206,6 +206,10 @@ class _TestSection(unittest.TestCase):
         block.metadata = mdsection
         self.assertIs(block.metadata.parent, None)
 
+        grp = block.create_group("group", "section parent test")
+        grp.metadata = child
+        self.assertEqual(grp.metadata.parent, self.section)
+
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestSectionCPP(_TestSection):
