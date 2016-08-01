@@ -25,6 +25,11 @@ try:
 except NameError:
     unicode = str
 
+strings = (str, bytes)
+try:
+    strings += (basestring,)
+except NameError:
+    pass
 
 vlen_str_dtype = h5py.special_dtype(vlen=unicode)
 
@@ -112,11 +117,16 @@ def str_to_time(s):
 def check_attr_type(value, type_):
     """
     Checks if a value is of a given type and raises an exception if the check
-     fails. The check does not fail if value is None.
+    fails. The check does not fail if value is None.
+    Specifying `str` for type checks against all string types
+    (str, bytes, basestring).
+
 
     :param value: the value to check
     :param type_: the type to check against
     """
+    if type_ is str:
+        type_ = strings
     if value is not None and not isinstance(value, type_):
         raise exceptions.InvalidAttrType(type_, value)
 
