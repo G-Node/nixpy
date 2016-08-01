@@ -488,7 +488,7 @@ class _TestBackendCompatibility(unittest.TestCase):
         block = self.write_file.create_block("block", "section test")
         block.metadata = self.write_file.sections[0].sections[0].sections[0]
 
-        # self.check_compatibility()
+        self.check_compatibility()
 
         wblock = self.write_file.blocks[0]
         rblock = self.read_file.blocks[0]
