@@ -152,8 +152,8 @@ class H5Group(object):
         if not self.group:
             return False
         if util.is_uuid(id_or_name):
-            for item in self.group:
-                if item.attrs["entity_id"] == id_or_name:
+            for item in self:
+                if item.get_attr("entity_id") == id_or_name:
                     return True
             else:
                 return False
@@ -176,9 +176,9 @@ class H5Group(object):
 
     def get_by_id(self, id_):
         if self.group:
-            for item in self.group.values():
-                if item.attrs["entity_id"] == id_:
-                    return self.create_from_h5obj(item)
+            for item in self:
+                if item.get_attr("entity_id") == id_:
+                    return item
         raise ValueError("No item with ID {} found in {}".format(
             id_, self.name
         ))
