@@ -134,6 +134,11 @@ class File(FileMixin):
 
     @property
     def version(self):
+        """
+        The file format version.
+
+        :type: tuple
+        """
         return tuple(self._h5file.attrs["version"])
 
     @version.setter
@@ -145,6 +150,12 @@ class File(FileMixin):
 
     @property
     def format(self):
+        """
+        The format of the file. This read only property should always have the
+        value 'nix'.
+
+        :type: str
+        """
         return self._h5file.attrs["format"].decode()
 
     @format.setter
@@ -154,34 +165,68 @@ class File(FileMixin):
 
     @property
     def created_at(self):
+        """
+        The creation time of the file. This is a read-only property.
+        Use :py:meth:force_created_at in order to change the creation time.
+
+        :rtype: int
+        """
         return util.str_to_time(self._h5file.attrs["created_at"])
 
     def force_created_at(self, t=util.now_int()):
+        """
+        Sets the creation time created_at to the given time
+        (default: current time).
+
+        :param t: The time to set (default: now)
+        :type t: int
+        """
         util.check_attr_type(t, int)
         self._h5file.attrs["created_at"] = util.time_to_str(t)
 
     @property
     def updated_at(self):
+        """
+        The time of the last update of the file. This is a read-only
+        property. Use force_updated_at in order to change the update time.
+
+        :rtype: int
+        """
         return util.str_to_time(self._h5file.attrs["updated_at"])
 
     def force_updated_at(self, t=util.now_int()):
+        """
+        Sets the update time updated_at to the current time.
+        (default: current time)
+
+        :param t: The time to set (default: now)
+        :type t: int
+        """
         util.check_attr_type(t, int)
         self._h5file.attrs["updated_at"] = util.time_to_str(t)
 
-    def is_open(self):
-        pass
-
     def close(self):
+        """
+        Closes an open file.
+        """
         gc.collect()  # should handle refs better instead of calling collect()
         # Flush is probably unnecessary
         self._h5file.flush()
         self._h5file.close()
 
-    def validate(self):
-        pass
-
     # Block
     def create_block(self, name, type_):
+        """
+        Create a new block inside the file.
+
+        :param name: The name of the block to create.
+        :type name: str
+        :param type_: The type of the block.
+        :type type_: str
+
+        :returns: The newly created block.
+        :rtype: Block
+        """
         if name in self._data:
             raise ValueError("Block with the given name already exists!")
         block = Block._create_new(self._data, name, type_)
@@ -201,6 +246,17 @@ class File(FileMixin):
 
     # Section
     def create_section(self, name, type_):
+        """
+        Create a new metadata section inside the file.
+
+        :param name: The name of the section to create.
+        :type name: str
+        :param type_: The type of the section.
+        :type type_: str
+
+        :returns: The newly created section.
+        :rtype: Section
+        """
         if name in self.metadata:
             raise exceptions.DuplicateName("create_section")
         sec = Section._create_new(self.metadata, None, name, type_)
