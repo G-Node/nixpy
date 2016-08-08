@@ -181,7 +181,7 @@ This could be for example data that represents a stimulus (e.g. an image or a
 signal) that was applied in a certain interval during the recording.
 
 Tag API
--------------
+-------
 
 .. autoclass:: nix.Tag
     :members:
@@ -189,7 +189,7 @@ Tag API
     :undoc-members:
 
 MultiTag API
--------------
+------------
 
 .. autoclass:: nix.MultiTag
     :members:
