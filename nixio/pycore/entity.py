@@ -151,6 +151,13 @@ class NamedEntity(Entity):
 
     @definition.setter
     def definition(self, d):
+        """
+        The definition of the entity. The definition can contain a textual
+        description of the entity. This is an optional read-write
+        property, and can be None if no definition is available.
+
+        :type: str
+        """
         util.check_attr_type(d, str)
         self._h5group.set_attr("definition", d)
 
