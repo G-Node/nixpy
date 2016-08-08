@@ -29,10 +29,10 @@ class Entity(object):
     @property
     def id(self):
         """
-        A property providing the ID of the Entity. The id is generated automatically,
-        therefore the property is read-only.
+        A property providing the ID of the Entity. The id is generated
+        automatically, therefore the property is read-only.
 
-        :type: str
+        :rtype: str
         """
         return self._h5group.get_attr("entity_id")
 
@@ -40,22 +40,41 @@ class Entity(object):
     def created_at(self):
         """
         The creation time of the entity. This is a read-only property.
-         Use :py:meth:force_created_at in order to
-        change the creation time.
+        Use :py:meth:force_created_at in order to change the creation time.
 
-        :type: int
+        :rtype: int
         """
         return util.str_to_time(self._h5group.get_attr("created_at"))
 
     def force_created_at(self, t=util.now_int()):
+        """
+        Sets the creation time created_at to the given time
+        (default: current time).
+
+        :param t: The time to set (default: now)
+        :type t: int
+        """
         util.check_attr_type(t, int)
         self._h5group.set_attr("created_at", util.time_to_str(t))
 
     @property
     def updated_at(self):
+        """
+        The time of the last update of the entity. This is a read-only
+        property. Use force_updated_at in order to change the update time.
+
+        :rtype: int
+        """
         return util.str_to_time(self._h5group.get_attr("updated_at"))
 
     def force_updated_at(self, t=util.now_int()):
+        """
+        Sets the update time updated_at to the current time.
+        (default: current time)
+
+        :param t: The time to set (default: now)
+        :type t: int
+        """
         util.check_attr_type(t, int)
         self._h5group.set_attr("updated_at", util.time_to_str(t))
 
@@ -85,10 +104,24 @@ class NamedEntity(Entity):
 
     @property
     def name(self):
+        """
+        The name of an entity. The name serves as a human readable
+        identifier. This is a read-only property; entities cannot be
+        renamed.
+
+        :type: str
+        """
         return self._h5group.get_attr("name")
 
     @property
     def type(self):
+        """
+        The type of the entity. The type is used in order to add semantic
+        meaning to the entity. This is a read-write property, but it can't
+        be set to None.
+
+        :type: str
+        """
         return self._h5group.get_attr("type")
 
     @type.setter
@@ -104,6 +137,13 @@ class NamedEntity(Entity):
 
     @definition.setter
     def definition(self, d):
+        """
+        The definition of the entity. The definition can contain a textual
+        description of the entity. This is an optional read-write
+        property, and can be None if no definition is available.
+
+        :type: str
+        """
         util.check_attr_type(d, str)
         self._h5group.set_attr("definition", d)
 
