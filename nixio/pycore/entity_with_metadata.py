@@ -24,6 +24,14 @@ class EntityWithMetadata(NamedEntity):
 
     @property
     def metadata(self):
+        """
+        Associated metadata of the entity. Sections attached to the entity
+        via this attribute can provide additional annotations. This is an
+        optional read-write property, and can be None if no metadata is
+        available.
+
+        :type: Section
+        """
         if "metadata" in self._h5group:
             mdsection = Section(self._h5group.open_group("metadata"))
             sectionid = mdsection.id
