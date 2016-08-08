@@ -92,8 +92,8 @@ const char* file_version = R"(
     )";
 
 const char* file_format = R"(
-    The format of the file. This read only property should have
-    always the value 'nix'.
+    The format of the file. This read only property should always have
+    the value 'nix'.
 
     :type: str
     )";
