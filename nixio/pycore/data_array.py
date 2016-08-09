@@ -16,6 +16,8 @@ from .dimensions import (SampledDimension, RangeDimension, SetDimension,
                          DimensionType)
 from . import util
 
+from .exceptions import InvalidUnit
+
 
 class DataSet(DataSetMixin):
 
@@ -243,15 +245,22 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @property
     def unit(self):
-        return self._h5group.get_attr("unit")
-
-    @unit.setter
-    def unit(self, u):
         """
         The unit of the values stored in the DataArray. This is a read-write
         property and can be set to None.
 
         :type: str
         """
+        return self._h5group.get_attr("unit")
+
+    @unit.setter
+    def unit(self, u):
         util.check_attr_type(u, str)
+        if u is not None:
+            u = util.units.sanitizer(u)
+            if not (util.units.is_si(u) or util.units.is_compound(u)):
+                raise InvalidUnit(
+                    "{} is not SI or composite of SI units".format(u),
+                    "DataArray.unit"
+                )
         self._h5group.set_attr("unit", u)

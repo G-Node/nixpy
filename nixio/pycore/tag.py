@@ -45,8 +45,19 @@ class BaseTag(EntityWithSources):
             if self._h5group.has_data("units"):
                 del self._h5group["units"]
         else:
+            sanitized = []
+            for u in units:
+                util.check_attr_type(u, str)
+                u = util.units.sanitizer(u)
+                if not (util.units.is_si(u) or util.units.is_compound(u)):
+                    raise InvalidUnit(
+                        "{} is not SI or composite of SI units".format(u),
+                        "{}.units".format(type(self).__name__)
+                    )
+                sanitized.append(u)
+
             dtype = DataType.String
-            self._h5group.write_data("units", units, dtype)
+            self._h5group.write_data("units", sanitized, dtype)
             self.force_updated_at()
 
     def _add_reference_by_id(self, id_or_name):
@@ -141,7 +152,7 @@ class BaseTag(EntityWithSources):
                 )
             if dimunit and unit is not None:
                 try:
-                    scaling = util.scaling(unit, dimunit)
+                    scaling = util.units.scaling(unit, dimunit)
                 except InvalidUnit:
                     raise IncompatibleDimensions(
                         "Cannot apply a position with unit to a SetDimension",
