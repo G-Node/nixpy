@@ -443,6 +443,8 @@ const char* tag_create_feature = R"(
     :rtype: Feature
     )";
 
+// PyMultiTag
+
 const char* multi_tag_units = R"(
     Property containing the units of the tag. The tag must provide a unit for each
     dimension of the positions or extents vector. This is a read-write property.
