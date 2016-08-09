@@ -20,16 +20,27 @@ class Section(NamedEntity, SectionMixin):
 
     def __init__(self, h5group, parent=None):
         super(Section, self).__init__(h5group)
-        self.parent = parent
+        self._parent = parent
 
     @classmethod
     def _create_new(cls, parent, parent_section, name, type_):
         newentity = super(Section, cls)._create_new(parent, name, type_)
-        newentity.parent = parent_section
+        newentity._parent = parent_section
         return newentity
 
     # Section
     def create_section(self, name, type_):
+        """
+        Creates a new subsection that is a child of this section entity.
+
+        :param name: The name of the section to create.
+        :type name: str
+        :param type_: The type of the section.
+        :type type_: str
+
+        :returns: The newly created section.
+        :rtype: Section
+        """
         util.check_entity_name_and_type(name, type_)
         sections = self._h5group.open_group("sections", True)
         if name in sections:
@@ -53,29 +64,58 @@ class Section(NamedEntity, SectionMixin):
         return len(self._h5group.open_group("sections"))
 
     # Property
-    def create_property(self, name, value):
+    def create_property(self, name, values):
+        """
+        Add a new property to the section.
+
+        :param name: The name of the property to create.
+        :type name: str
+        :param values: The values of the property.
+        :type values: list of Value
+
+        :returns: The newly created property.
+        :rtype: Property
+        """
         properties = self._h5group.open_group("properties", True)
         if name in properties:
             raise exceptions.DuplicateName("create_property")
-        if isinstance(value, type):
-            dtype = value
+        if isinstance(values, type):
+            dtype = values
             values = []
         else:
-            if isinstance(value, Sequence):
-                dtype = value[0].data_type
-                values = value
+            if isinstance(values, Sequence):
+                dtype = values[0].data_type
             else:
-                dtype = value.data_type
-                values = [value]
+                dtype = values.data_type
+                values = [values]
         prop = Property._create_new(properties, name, dtype)
         prop.values = values
         return prop
 
     def has_property_by_name(self, name):
+        """
+        Checks whether a section has a property with a certain name.
+
+        :param name: The name to check.
+        :type name: str
+
+        :returns: True if the section has a property with the given name,
+                  False otherwise.
+        :rtype: bool
+        """
         properties = self._h5group.open_group("properties")
         return properties.has_by_id(name)
 
     def get_property_by_name(self, name):
+        """
+        Get a property by its name.
+
+        :param name: The name to check.
+        :type name: str
+
+        :returns: The property with the given name.
+        :rtype: Property
+        """
         properties = self._h5group.open_group("properties")
         try:
             p = Property(properties.get_by_name(name))
@@ -100,6 +140,13 @@ class Section(NamedEntity, SectionMixin):
 
     @property
     def link(self):
+        """
+        Link to another section. If a section is linked to another section,
+        the linking section inherits all properties from the target section.
+        This is an optional read-write property and may be set to None.
+
+        :type: Section
+        """
         if "link" not in self._h5group:
             return None
         else:
@@ -130,15 +177,37 @@ class Section(NamedEntity, SectionMixin):
 
     @mapping.setter
     def mapping(self, m):
+        """
+        The mapping information of the section.
+        This is an optional read-write property and may be set to None.
+
+        :type: str
+        """
         util.check_attr_type(m, str)
         self._h5group.set_attr("mapping", m)
 
     @property
     def repository(self):
+        """
+        URL to the terminology repository the section is associated with.
+        This is an optional read-write property and may be set to None.
+
+        :type: str
+        """
         return self._h5group.get_attr("repository")
 
     @repository.setter
     def repository(self, r):
         util.check_attr_type(r, str)
         self._h5group.set_attr("repository", r)
+
+    @property
+    def parent(self):
+        """
+        The parent section. This is a read-only property. For root sections
+        this property is always None.
+
+        :type: Section
+        """
+        return self._parent
 
