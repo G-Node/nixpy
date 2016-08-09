@@ -261,12 +261,6 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @unit.setter
     def unit(self, u):
-        """
-        The unit of the values stored in the DataArray. This is a read-write
-        property and can be set to None.
-
-        :type: str
-        """
         util.check_attr_type(u, str)
         if u is not None:
             u = util.units.sanitizer(u)
