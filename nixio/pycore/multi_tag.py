@@ -28,6 +28,11 @@ class MultiTag(BaseTag, MultiTagMixin):
 
     @property
     def positions(self):
+        """
+        The positions defined by the tag. This is a read-write property.
+
+        :type: DataArray
+        """
         return DataArray(self._h5group.open_group("positions"))
 
     @positions.setter
@@ -41,6 +46,12 @@ class MultiTag(BaseTag, MultiTagMixin):
 
     @property
     def extents(self):
+        """
+        The extents defined by the tag. This is an optional read-write
+        property and may be set to None.
+
+        :type: DataArray or None
+        """
         if "extents" in self._h5group:
             return DataArray(self._h5group.open_group("extents"))
         else:
