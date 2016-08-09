@@ -29,6 +29,11 @@ class DataSet(DataSetMixin):
 
     @property
     def data_extent(self):
+        """
+        The size of the data.
+
+        :type: set of int
+        """
         dataset = self._h5group.get_dataset("data")
         return dataset.shape
 
@@ -39,6 +44,12 @@ class DataSet(DataSetMixin):
 
     @property
     def data_type(self):
+        """
+        The data type of the data stored in the DataArray. This is a read only
+        property.
+
+        :type: DataType
+        """
         return self._get_dtype()
 
     def _get_dtype(self):
@@ -82,16 +93,44 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         return self.append_range_dimension(range_)
 
     def append_set_dimension(self):
+        """
+        Append a new SetDimension to the list of existing dimension
+        descriptors.
+
+        :returns: The newly created SetDimension.
+        :rtype: SetDimension
+        """
         dimgroup = self._h5group.open_group("dimensions")
         index = len(self._h5group.open_group("dimensions")) + 1
         return SetDimension._create_new(dimgroup, index)
 
     def append_sampled_dimension(self, sample):
+        """
+        Append a new SampledDimension to the list of existing dimension
+        descriptors.
+
+        :param sampling_interval: The sampling interval of the SetDimension
+                                  to create.
+        :type sampling_interval: float
+
+        :returns: The newly created SampledDimension.
+        :rtype: SampledDimension
+        """
         index = len(self._h5group.open_group("dimensions")) + 1
         dimgroup = self._h5group.open_group("dimensions")
         return SampledDimension._create_new(dimgroup, index, sample)
 
     def append_range_dimension(self, range_):
+        """
+        Append a new RangeDimension to the list of existing dimension
+        descriptors.
+
+        :param ticks: The ticks of the RangeDimension to create.
+        :type ticks: list of float
+
+        :returns: The newly created RangeDimension.
+        :rtype: RangeDimension
+        """
         index = len(self._h5group.open_group("dimensions")) + 1
         dimgroup = self._h5group.open_group("dimensions")
         return RangeDimension._create_new(dimgroup, index, range_)
@@ -141,6 +180,13 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @property
     def polynom_coefficients(self):
+        """
+        The polynomial coefficients for the calibration. By default this is
+        set to a {0.0, 1.0} for a linear calibration with zero offset.
+        This is a read-write property and can be set to None
+
+        :type: list of float
+        """
         return tuple(self._h5group.get_data("polynom_coefficients"))
 
     @polynom_coefficients.setter
@@ -154,6 +200,13 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @property
     def expansion_origin(self):
+        """
+        The expansion origin of the calibration polynomial.
+        This is a read-write property and can be set to None.
+        The default value is 0.
+
+        :type: float
+        """
         return self._h5group.get_attr("expansion_origin")
 
     @expansion_origin.setter
@@ -163,6 +216,13 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @property
     def label(self):
+        """
+        The label of the DataArray. The label corresponds to the label of the
+        x-axis of a plot. This is a read-write property and can be set to
+        None.
+
+        :type: str
+        """
         return self._h5group.get_attr("label")
 
     @label.setter
@@ -176,5 +236,11 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @unit.setter
     def unit(self, u):
+        """
+        The unit of the values stored in the DataArray. This is a read-write
+        property and can be set to None.
+
+        :type: str
+        """
         util.check_attr_type(u, str)
         self._h5group.set_attr("unit", u)
