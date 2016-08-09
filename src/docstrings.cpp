@@ -292,10 +292,11 @@ const char* data_array_unit = R"(
     )";
 
 const char* data_array_expansion_origin = R"(
-    The expansion origin of the calibration polynom. This is a read-write
+    The expansion origin of the calibration polynomial. This is a read-write
     property and can be set to None. The default value is 0.
 
-    :type: float)";
+    :type: float
+    )";
 
 const char* data_array_polynom_coefficients = R"(
     The polynom coefficients for the calibration. By default this is set
@@ -363,7 +364,7 @@ const char* data_array_create_range_dimension = R"(
 
 const char* data_array_create_alias_range_dimension = R"(
     Append a new RangeDimension that uses the data stored in this DataArray as ticks.
-    This works only(!) if the DataArray is 1-D and the stored data is numeric. An ValueError
+    This works only(!) if the DataArray is 1-D and the stored data is numeric. A ValueError
     will be raised otherwise.
 
     :returns: The created dimension descriptor.
@@ -407,6 +408,8 @@ const char* data_array_append_alias_range_dimension = R"(
     :returns: The newly created RangeDimension.
     :rtype: RangeDimension
     )";
+
+// PyTag
 
 const char* tag_units = R"(
     Property containing the units of the tag. The tag must provide a unit for each
