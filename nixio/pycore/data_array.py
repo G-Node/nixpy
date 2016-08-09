@@ -27,6 +27,11 @@ class DataSet(DataSetMixin):
 
     @property
     def data_extent(self):
+        """
+        The size of the data.
+
+        :type: set of int
+        """
         dataset = self._h5group.get_dataset("data")
         return dataset.shape
 
@@ -37,6 +42,12 @@ class DataSet(DataSetMixin):
 
     @property
     def data_type(self):
+        """
+        The data type of the data stored in the DataArray. This is a read only
+        property.
+
+        :type: DataType
+        """
         return self._get_dtype()
 
     def _get_dtype(self):
@@ -68,30 +79,107 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
             super(DataArray, self)._read_data(data, count, offset)
 
     def create_set_dimension(self, index):
+        """
+        Create a new SetDimension at a specified dimension index.
+        This adds a new dimension descriptor of the type SetDimension
+        that describes the dimension of the data at the specified index.
+
+        :param index: The index of the dimension. Must be a value > 0 and <=
+                      len(dimensions) + 1.
+        :type index: int
+
+        :returns: The created dimension descriptor.
+        :rtype: SetDimension
+        """
         dimgroup = self._h5group.open_group("dimensions")
         return SetDimension._create_new(dimgroup, index)
 
-    def create_sampled_dimension(self, index, sample):
-        dimgroup = self._h5group.open_group("dimensions")
-        return SampledDimension._create_new(dimgroup, index, sample)
+    def create_sampled_dimension(self, index, sampling_interval):
+        """
+        Create a new SampledDimension at a specified dimension index.
+        This adds a new dimension descriptor of the type SampledDimension
+        that describes the dimension of the data at the specified index.
 
-    def create_range_dimension(self, index, range_):
+        :param index: The index of the dimension. Must be a value > 0 and <=
+                      len(dimensions) + 1.
+        :type index: int
+        :param sampling_interval:  The sampling interval of the dimension.
+        :type sampling_interval: float
+
+        :returns: The created dimension descriptor.
+        :rtype: SampledDimension
+        """
         dimgroup = self._h5group.open_group("dimensions")
-        return RangeDimension._create_new(dimgroup, index, range_)
+        return SampledDimension._create_new(dimgroup, index,
+                                            sampling_interval)
+
+    def create_range_dimension(self, index, ticks):
+        """
+        Create a new RangeDimension at a specified dimension index.
+        This adds a new dimension descriptor of the type RangeDimension that
+        describes the dimension of the data at the specified index.
+
+        :param index: The index of the dimension. Must be a value > 0 and <=
+                      len(dimensions) + 1.
+        :type index: int
+        :param ticks: The ticks of the RangeDimension.
+        :type ticks: list of float
+
+        :returns: The created dimension descriptor.
+        :rtype: RangeDimension
+        """
+        dimgroup = self._h5group.open_group("dimensions")
+        return RangeDimension._create_new(dimgroup, index, ticks)
 
     def append_set_dimension(self):
+        """
+        Append a new SetDimension to the list of existing dimension
+        descriptors.
+
+        :returns: The newly created SetDimension.
+        :rtype: SetDimension
+        """
         index = len(self._h5group.open_group("dimensions")) + 1
         return self.create_set_dimension(index)
 
-    def append_sampled_dimension(self, sample):
-        index = len(self._h5group.open_group("dimensions")) + 1
-        return self.create_sampled_dimension(index, sample)
+    def append_sampled_dimension(self, sampling_interval):
+        """
+        Append a new SampledDimension to the list of existing dimension
+        descriptors.
 
-    def append_range_dimension(self, range_):
+        :param sampling_interval: The sampling interval of the SetDimension
+                                  to create.
+        :type sampling_interval: float
+
+        :returns: The newly created SampledDimension.
+        :rtype: SampledDimension
+        """
         index = len(self._h5group.open_group("dimensions")) + 1
-        return self.create_range_dimension(index, range_)
+        return self.create_sampled_dimension(index, sampling_interval)
+
+    def append_range_dimension(self, ticks):
+        """
+        Append a new RangeDimension to the list of existing dimension
+        descriptors.
+
+        :param ticks: The ticks of the RangeDimension to create.
+        :type ticks: list of float
+
+        :returns: The newly created RangeDimension.
+        :rtype: RangeDimension
+        """
+        index = len(self._h5group.open_group("dimensions")) + 1
+        return self.create_range_dimension(index, ticks)
 
     def create_alias_range_dimension(self):
+        """
+        Append a new RangeDimension that uses the data stored in this
+        DataArray as ticks. This works only(!) if the DataArray is 1-D and
+        the stored data is numeric. A ValueError will be raised otherwise.
+
+        :returns: The created dimension descriptor.
+        :rtype: RangeDimension
+        """
         if (len(self.data_extent) > 1 or
                 not DataType.is_numeric_dtype(self.dtype)):
             raise ValueError("AliasRangeDimensions only allowed for 1D "
@@ -104,6 +192,15 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         return RangeDimension._create_new(dimgroup, 1, data)
 
     def append_alias_range_dimension(self):
+        """
+        Append a new RangeDimension that uses the data stored in this
+        DataArray as ticks. This works only if the data is 1-D and numeric.
+        That is, this dimension descriptor must be the only descriptor in
+        this DataArray. A ValueError is raised otherwise.
+
+        :returns: The newly created RangeDimension.
+        :rtype: RangeDimension
+        """
         return self.create_alias_range_dimension()
 
     def _dimension_count(self):
@@ -130,6 +227,13 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @property
     def polynom_coefficients(self):
+        """
+        The polynomial coefficients for the calibration. By default this is
+        set to a {0.0, 1.0} for a linear calibration with zero offset.
+        This is a read-write property and can be set to None
+
+        :type: list of float
+        """
         return tuple(self._h5group.get_data("polynom_coefficients"))
 
     @polynom_coefficients.setter
@@ -143,6 +247,13 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @property
     def expansion_origin(self):
+        """
+        The expansion origin of the calibration polynomial.
+        This is a read-write property and can be set to None.
+        The default value is 0.
+
+        :type: float
+        """
         return self._h5group.get_attr("expansion_origin")
 
     @expansion_origin.setter
@@ -152,6 +263,13 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @property
     def label(self):
+        """
+        The label of the DataArray. The label corresponds to the label of the
+        x-axis of a plot. This is a read-write property and can be set to
+        None.
+
+        :type: str
+        """
         return self._h5group.get_attr("label")
 
     @label.setter
@@ -165,5 +283,11 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @unit.setter
     def unit(self, u):
+        """
+        The unit of the values stored in the DataArray. This is a read-write
+        property and can be set to None.
+
+        :type: str
+        """
         util.check_attr_type(u, str)
         self._h5group.set_attr("unit", u)
