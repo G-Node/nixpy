@@ -41,10 +41,11 @@ class FileMixin(object):
     @property
     def blocks(self):
         """
-        A property containing all blocks of a file. Blocks can be obtained by their id or their
-        index. Blocks can be deleted from the list, when a block is deleted all its content
-        (data arrays, tags and sources) will be also deleted from the file.
-        Adding new Block is done via the crate_block method of File. This is a read-only attribute.
+        A property containing all blocks of a file. Blocks can be obtained by
+        their id or their index. Blocks can be deleted from the list, when a
+        block is deleted all its content (data arrays, tags and sources) will be
+        also deleted from the file. Adding new Block is done via the
+        create_block method of File. This is a read-only attribute.
 
         :type: ProxyList of Block entities.
         """
@@ -52,14 +53,14 @@ class FileMixin(object):
             setattr(self, "_blocks", BlockProxyList(self))
         return self._blocks
 
-    def find_sections(self, filtr=lambda _ : True, limit=maxint):
+    def find_sections(self, filtr=lambda _: True, limit=None):
         """
         Get all sections and their child sections recursively.
 
-        This method traverses the trees of all sections. The traversal
-        is accomplished via breadth first and can be limited in depth. On each node or
-        section a filter is applied. If the filter returns true the respective section
-        will be added to the result list.
+        This method traverses the trees of all sections. The traversal is
+        accomplished via breadth first and can be limited in depth. On each node
+        or section a filter is applied. If the filter returns true the
+        respective section will be added to the result list.
         By default a filter is used that accepts all sections.
 
         :param filtr: A filter function
@@ -70,6 +71,8 @@ class FileMixin(object):
         :returns: A list containing the matching sections.
         :rtype: list of Section
         """
+        if limit is None:
+            limit = maxint
         return finders._find_sections(self, filtr, limit)
 
     @property
