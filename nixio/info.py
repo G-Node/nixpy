@@ -9,7 +9,7 @@
 VERSION         = '1.1.0'
 STATUS          = 'Release'
 RELEASE         = '%s %s' % (VERSION, STATUS)
-AUTHOR          = 'Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, Balint Morvai'
+AUTHOR          = 'Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, Balint Morvai, Achilleas Koutsou'
 COPYRIGHT       = '2014, German Neuroinformatics Node, ' + AUTHOR
 CONTACT         = 'kellner@bio.lmu.de'
 BRIEF           = 'Python bindings for NIX'

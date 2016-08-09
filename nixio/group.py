@@ -47,10 +47,11 @@ class GroupMixin(object):
     @property
     def data_arrays(self):
         """
-        A property containing all data arrays referenced by the group. Referenced data arrays
-        can be obtained by index or their id. References can be removed from the list, removing
-        a referenced DataArray will not remove it from the file. New references can be added using
-        the append method of the list.
+        A property containing all data arrays referenced by the group.
+        Referenced data arrays can be obtained by index or their id. References
+        can be removed from the list, removing a referenced DataArray will not
+        remove it from the file. New references can be added using the append
+        method of the list.
         This is a read only attribute.
 
         :type: DataArrayProxyList of DataArray
@@ -62,10 +63,10 @@ class GroupMixin(object):
     @property
     def tags(self):
         """
-        A property containing all tags referenced by the group. Tags
-        can be obtained by index or their id. Tags can be removed from the list, removing
-        a referenced Tag will not remove it from the file. New Tags can be added using
-        the append method of the list.
+        A property containing all tags referenced by the group. Tags can be
+        obtained by index or their id. Tags can be removed from the list,
+        removing a referenced Tag will not remove it from the file. New Tags can
+        be added using the append method of the list.
         This is a read only attribute.
 
         :type: TagProxyList of Tags
@@ -78,9 +79,9 @@ class GroupMixin(object):
     def multi_tags(self):
         """
         A property containing all MultiTags referenced by the group. MultiTags
-        can be obtained by index or their id. Tags can be removed from the list, removing
-        a referenced MultiTag will not remove it from the file. New MultiTags can be added using
-        the append method of the list.
+        can be obtained by index or their id. Tags can be removed from the list,
+        removing a referenced MultiTag will not remove it from the file. New
+        MultiTags can be added using the append method of the list.
         This is a read only attribute.
 
         :type: MultiTagProxyList of MultiTags
