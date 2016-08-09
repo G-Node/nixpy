@@ -103,10 +103,10 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         :rtype: SetDimension
         """
         dimgroup = self._h5group.open_group("dimensions")
-        index = len(self._h5group.open_group("dimensions")) + 1
+        index = len(dimgroup) + 1
         return SetDimension._create_new(dimgroup, index)
 
-    def append_sampled_dimension(self, sample):
+    def append_sampled_dimension(self, sampling_interval):
         """
         Append a new SampledDimension to the list of existing dimension
         descriptors.
@@ -118,11 +118,11 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         :returns: The newly created SampledDimension.
         :rtype: SampledDimension
         """
-        index = len(self._h5group.open_group("dimensions")) + 1
         dimgroup = self._h5group.open_group("dimensions")
-        return SampledDimension._create_new(dimgroup, index, sample)
+        index = len(dimgroup) + 1
+        return SampledDimension._create_new(dimgroup, index, sampling_interval)
 
-    def append_range_dimension(self, range_):
+    def append_range_dimension(self, ticks):
         """
         Append a new RangeDimension to the list of existing dimension
         descriptors.
@@ -133,9 +133,9 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         :returns: The newly created RangeDimension.
         :rtype: RangeDimension
         """
-        index = len(self._h5group.open_group("dimensions")) + 1
         dimgroup = self._h5group.open_group("dimensions")
-        return RangeDimension._create_new(dimgroup, index, range_)
+        index = len(dimgroup) + 1
+        return RangeDimension._create_new(dimgroup, index, ticks)
 
     def create_alias_range_dimension(self):
         warn("This function is deprecated and will be removed. "
@@ -143,6 +143,14 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         return self.append_alias_range_dimension()
 
     def append_alias_range_dimension(self):
+        """
+        Append a new RangeDimension that uses the data stored in this
+        DataArray as ticks. This works only(!) if the DataArray is 1-D and
+        the stored data is numeric. A ValueError will be raised otherwise.
+
+        :returns: The created dimension descriptor.
+        :rtype: RangeDimension
+        """
         if (len(self.data_extent) > 1 or
                 not DataType.is_numeric_dtype(self.dtype)):
             raise ValueError("AliasRangeDimensions only allowed for 1D "
@@ -155,6 +163,9 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         return RangeDimension._create_new(dimgroup, 1, data)
 
     def delete_dimensions(self):
+        """
+        Delete all the dimension descriptors for this DataArray.
+        """
         dimgroup = self._h5group.open_group("dimensions")
         ndims = len(dimgroup)
         for idx in range(ndims):
@@ -250,6 +261,12 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @unit.setter
     def unit(self, u):
+        """
+        The unit of the values stored in the DataArray. This is a read-write
+        property and can be set to None.
+
+        :type: str
+        """
         util.check_attr_type(u, str)
         if u is not None:
             u = util.units.sanitizer(u)
