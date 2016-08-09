@@ -31,9 +31,9 @@ format. In order to store data in a file we need to create one.
 
 .. code-block:: python
 
-        import nix
+        import nixio
 
-        nix_file = nix.File.open('example.h5', nix.FileMode.Overwrite)
+        nix_file = nixio.File.open('example.h5', nixio.FileMode.Overwrite)
 
 The **File** entity is the root of this document and it has only two
 children the *data* and *metadata* nodes. You may want to use the
@@ -91,9 +91,9 @@ that will be needed in advance.
 
         import numpy as np
         # create an empty DataArray to store 2x1000 values
-        data = block.create_data_array("my data", "nix.sampled", dtype=nix.DataType.Double, shape=(2,1000))
+        data = block.create_data_array("my data", "nix.sampled", dtype=nixio.DataType.Double, shape=(2, 1000))
         some_numpy_array = np.random.randn(2, 1000)
-        data = some_numpy_array
+        data.write_direct(some_numpy_array)
 
 
 If you do not know the size of the data in advance, you can append
@@ -104,11 +104,11 @@ dimensionality (rank) of the data afterwards.
 .. code-block:: python
 
         # create an empty DataArray to store 2x1000 values
-        data = block.create_data_array("my data", "nix.sampled", dtype=nix.DataType.Double, shape=(2,1000))
+        data = block.create_data_array("my data", "nix.sampled", dtype=nixio.DataType.Double, shape=(2, 1000))
         some_numpy_array = np.random.randn(2, 1000)
         data[:, :] = some_numpy_array
-        some_more_data = np.random.randn(2,10)
-        data.data_extent((2,1010))
+        some_more_data = np.random.randn(2, 10)
+        data.data_extent((2, 1010))
         data[:, 1000:] = some_more_data
 
 
@@ -133,7 +133,7 @@ irregular intervals, and (iii) data that belongs to categories.
 
         sample_interval = 0.001 # s
         sinewave = np.sin(np.arange(0, 1.0, sample_interval) * 2 * np.pi)
-        data = block.create_data_array("sinewave","nix.regular_sampled",data=sinewave)
+        data = block.create_data_array("sinewave", "nix.regular_sampled", data=sinewave)
         data.label = "voltage"
         data.unit = "mV"
         # define the time dimension of the data
@@ -212,16 +212,16 @@ the referenced n-dimensional **DataArray**.
 .. code-block:: python
 
         # fake data
-        frame = np.random.randn(100,100)
+        frame = np.random.randn(100, 100)
         data = block.create_data_array('random image', 'nix.image', data=frame)
         dim_x = data.append_sampled_dimension(1.0)
         dim_x.label = 'x'
         dim_y = data.append_sampled_dimension(1.0)
         dim_y.label = 'y'
         # positions array must be 2D
-        p = np.zeros((3,2)) # 1st dim, represents the positions, 2nd the coordinates
-        p[1,:] = [10,10]
-        p[2,:] = [20,10]
+        p = np.zeros((3, 2)) # 1st dim, represents the positions, 2nd the coordinates
+        p[1, :] = [10, 10]
+        p[2, :] = [20, 10]
         positions = block.create_data_array('special points', 'nix.positions', data=p)
         positions.append_set_dimension()
         dim = positions.append_set_dimension()
@@ -249,9 +249,9 @@ Let's say we want to give each  point a name, we can create a feature like this:
 
 .. code-block:: python
 
-        spot_names = block.create_data_array('spot ids', 'nix.feature',dtype=nix.DataType.Int8, data=[1, 2])
+        spot_names = block.create_data_array('spot ids', 'nix.feature', dtype=nixio.DataType.Int8, data=[1, 2])
         spot_names.append_set_dimension()
-        feature = tag.create_feature(spot_names, nix.LinkType.Indexed)
+        feature = tag.create_feature(spot_names, nixio.LinkType.Indexed)
 
 We could also say that each point in the tagged data (e.g. a matrix of
 measurements) has a corresponding point in an input matrix.
@@ -264,7 +264,7 @@ measurements) has a corresponding point in an input matrix.
         dim_x.label = 'x'
         dim_y = input_data.append_sampled_dimension(1.0)
         dim_y.label = 'y'
-        tag.create_feature(input_data, nix.LinkType.Tagged)
+        tag.create_feature(input_data, nixio.LinkType.Tagged)
 
 
 Finally, one could need to attach the same information to all
@@ -273,7 +273,7 @@ positions defined in the tag. In this case the feature is *untagged*
 .. code-block:: python
 
         common_feature = block.create_data_array('common feature', 'nix.feature', data=some_common_data)
-        tag.create_feature(common_feature, nix.LinkType.Untagged)
+        tag.create_feature(common_feature, nixio.LinkType.Untagged)
 
 
 Defining the Source of the data
@@ -329,12 +329,12 @@ Most of the data entities can link to metadata sections.
 .. code-block:: python
 
         sec = nix_file.create_section('recording session', 'odml.recording')
-        sec.create_property('experimenter', nix.Value('John Doe'))
-        sec.create_property('recording date', nix.Value('2014-01-01'))
+        sec.create_property('experimenter', nixio.Value('John Doe'))
+        sec.create_property('recording date', nixio.Value('2014-01-01'))
         subject = sec.create_section('subject', 'odml.subject')
-        subject.create_property('id', nix.Value('mouse xyz'))
+        subject.create_property('id', nixio.Value('mouse xyz'))
         cell = subject.create_section('cell', 'odml.cell')
-        v = nix.Value(-64.5)
+        v = nixio.Value(-64.5)
         v.uncertainty = 2.25
         p = cell.create_property('resting potential', v)
         p.unit = 'mV'
@@ -356,8 +356,8 @@ the tag's position is given in *ms*.
 
 .. code-block:: python
 
-        x_positions=[2,4,6,8,10,12]
-        tag=block.create_tag('unit example','nix.sampled',x_positions)
+        x_positions=[2, 4, 6, 8, 10, 12]
+        tag=block.create_tag('unit example', 'nix.sampled', x_positions)
 
         #single SI unit is supported like mV,cm etc.
         tag.units=["cm"]
