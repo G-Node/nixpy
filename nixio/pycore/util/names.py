@@ -13,14 +13,37 @@ from uuid import uuid4
 
 
 def sanitizer(name):
+    """
+    Sanitizes a string supposed to be an entity name. That is,
+    invalid characters like slashes are substituted with underscores.
+
+    :param name: A string representing the name.
+
+    :returns: The sanitized name.
+    :rtype: str
+    """
     return name.replace("/", "_")
 
 
 def check(name):
+    """
+    Checks a string whether is needs to be sanitized.
+
+    :param name: The name.
+
+    :returns: True if the name is valid, false otherwise.
+    :rtype: bool
+    """
     if isinstance(name, bytes):
         name = name.decode()
     return "/" not in name
 
 
 def create_id():
+    """
+    Creates an ID as used for nix entities.
+
+    :returns: The ID.
+    :rtype: str
+    """
     return str(uuid4())
