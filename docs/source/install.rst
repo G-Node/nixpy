@@ -2,10 +2,47 @@
 Installation Guidelines
 =======================
 
-Install NIX and other dependencies
-==================================
+Dependencies
+============
 
-Because NIXPy is build upon the `NIX library`_ it is necessary to install the NIX library before you can install or build NIXPy on your system.
+NIXPy is a reimplementation of the `NIX`_ library and file format for Python.
+Since NIX is built upon HDF5, NIXPy depends on `h5py`_, the Python interface to the HDF5 data format.
+
+NIXPy can also be used as an interface for the original `NIX`_ library.
+`NIX`_ is therefore an optional dependency, if NIXPy is to be used in this mode.
+
+The installation instructions below describe how to build or install NIXPy as a standalone, pure Python version of NIX.
+To use NIXPy as a Python interface for `NIX`_, see the `advanced installation`_ instructions.
+
+Dependencies:
+
+- h5py: http://docs.h5py.org/en/latest/build.html
+- numpy: https://docs.scipy.org/doc/numpy-1.10.1/user/install.html
+
+Optional dependencies (see `advanced installation`_ instructions):
+
+- NIX: https://github.com/G-Node/nix
+
+.. _NIX: https://github.com/G-Node/nix
+.. _h5py: http://www.h5py.org/
+
+Installation instructions
+=========================
+
+The latest stable release of NIXPy is available on PyPi as `nixio`_.
+Therefore, the simplest way to install NIXPy is to use pip::
+
+    pip install nixio
+
+.. _nixio: https://pypi.python.org/pypi/nixio/1.1.0
+
+
+.. _advanced installation:
+
+Advanced installation
+=====================
+
+To use NIXPy as a Python interface for the `NIX library`_ it is necessary to install the NIX library before you can install or build NIXPy on your system.
 The following two sections explain how NIX can be installed on Windows and Linux.
 
 .. _NIX library: https://github.com/G-Node/nix
@@ -48,12 +85,12 @@ For Windows this information can be found in the `nix Win32.md`_ file.
 .. _nix Win32.md: https://github.com/G-Node/nix/blob/master/Win32.md
 
 Install NIXPy
-=============
+-------------
 
-Once the `NIX library`_ ist installed on your system you can proceed with the installation of the python bindings.
+Once the `NIX library`_ is installed on your system you can proceed with the installation of the python bindings.
 
 Compatibility
--------------
+.............
 
 The `NIX library`_ as well as NIXPy undergo continuous development and improvement.
 Although most changes do not affect the NIX API, the compatibility between the NIX library and their bindings might still break from time to time.
