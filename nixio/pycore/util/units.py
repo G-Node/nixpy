@@ -49,6 +49,15 @@ PREFIX_FACTORS = {"y": 1.0e-24,
 
 
 def sanitizer(unit):
+    """
+    Sanitizes a unit string. That is, it is de-blanked, and mu and µ symbols
+    are changed to u for micro.
+
+    :param unit: The unit that needs to be sanitized.
+
+    :returns: the sanitized unit.
+    :rtype: str
+    """
     # micro = "\u03bc"
     micro = "µ"
     # mugr = "\u00b5"
@@ -58,19 +67,48 @@ def sanitizer(unit):
 
 
 def is_si(unit):
+    """
+    Determines whether a unit is a recognized SI unit.
+
+    :param unit: The unit that needs to be checked.
+
+    :returns: True if the unit is an SI unit, false otherwise.
+    :rtype: bool
+    """
     return unit and (is_atomic(unit) or is_compound(unit))
 
 
 def is_atomic(unit):
-    atomic_unit = re.compile("^{prefix}?{unit}{power}?$".format(prefix=PREFIXES,
-                                                                unit=UNITS,
-                                                                power=POWER))
+    """
+    Checked whether a unit string represents an atomic si unit, i.e. not a
+    combination.
+
+    :param unit: The unit to be checked.
+
+    :returns: True if unit is atomic, False otherwise.
+    :rtype: bool
+    """
+    atomic_unit = re.compile(
+        "^{prefix}?{unit}{power}?$".format(prefix=PREFIXES,
+                                           unit=UNITS,
+                                           power=POWER)
+    )
     return atomic_unit.match(unit)
 
 
 def is_compound(unit):
-    atomic_unit = "{prefix}?{unit}{power}?".format(prefix=PREFIXES, unit=UNITS,
-                                                   power=POWER)
+    """
+    Checks whether a unit string represents a combination of SI units.
+
+    :param unit: The unit string.
+
+    :returns: True if the unit string represents a combination of SI units,
+              False otherwise.
+    :rtype: bool
+    """
+    atomic_unit = "{prefix}?{unit}{power}?".format(
+        prefix=PREFIXES, unit=UNITS, power=POWER
+    )
     compound_unit = re.compile(
         "({atomic}(\\*|/))+{atomic}".format(atomic=atomic_unit)
     )
@@ -78,6 +116,17 @@ def is_compound(unit):
 
 
 def scalable(unit_a, unit_b):
+    """
+    Checks whether units are scalable versions of the same SI unit.
+    Method works on two lists and compares the corresponding units in both
+    lists.
+
+    :param unit_a: List of unit strings.
+    :param unit_b: List of unit strings.
+
+    :returns: True if all corresponding units are scalable.
+    :rtype: bool
+    """
     if (isinstance(unit_a, Sequence) and isinstance(unit_b, Sequence) and
             not isinstance(unit_a, strings) and
             not isinstance(unit_b, strings)):
@@ -100,6 +149,15 @@ def scalable(unit_a, unit_b):
 
 
 def scaling(origin, destination):
+    """
+    Returns the scaling factor to convert from one unit to another.
+
+    :param origin: The original unit string.
+    :param destination: The destination unit string.
+
+    :returns: The scaling factor.
+    :rtype: double
+    """
     scale = 1.0
     if not scalable(origin, destination):
         raise InvalidUnit(
@@ -128,6 +186,14 @@ def scaling(origin, destination):
 
 
 def split(combined_unit):
+    """
+    Splits a unit string into magnitude prefix, the base unit, and the power.
+
+    :param combined_unit: The unit string.
+
+    :returns: A tuple of prefix, base unit, and power.
+    :rtype: tuple
+    """
     prefix_re = "(?P<prefix>{})".format(PREFIXES)
     unit_re = "(?P<unit>{})".format(UNITS)
     power_re = "(?P<power>{})".format(POWER)
@@ -176,6 +242,14 @@ def invert_power(unit):
 
 
 def split_compound(compound_unit):
+    """
+    Splits a compound unit (like mV/Hz) into the atomic units.
+
+    :param compound_unit: The unit string.
+
+    :returns: A tuple containing the atomic units.
+    :rtype: tuple
+    """
     opt_pup = re.compile(PREFIXES + "?" + UNITS + POWER + "?")
     match = opt_pup.match(compound_unit)
     sep = ""
