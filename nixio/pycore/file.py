@@ -8,6 +8,7 @@
 from __future__ import (absolute_import, division, print_function)
 import os
 import gc
+from warnings import warn
 
 import h5py
 
@@ -204,6 +205,22 @@ class File(FileMixin):
         """
         util.check_attr_type(t, int)
         self._h5file.attrs["updated_at"] = util.time_to_str(t)
+
+    def validate(self):
+        warn("The h5py backend does not support validation.")
+
+    def is_open(self):
+        """
+        Checks whether a file is open or closed.
+
+        :returns: True if the file is open, False otherwise.
+        :rtype: bool
+        """
+        try:
+            _ = self._h5file.mode
+            return True
+        except ValueError:
+            return False
 
     def close(self):
         """
