@@ -1,3 +1,3 @@
 from .util import *
-from .names import *
-from .units import *
+from . import names
+from . import units
