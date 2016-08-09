@@ -20,14 +20,14 @@ except:
 
 class SourceMixin(object):
 
-    def find_sources(self, filtr=lambda _ : True, limit=maxint):
+    def find_sources(self, filtr=lambda _: True, limit=None):
         """
         Get all child sources of this source recursively.
 
         This method traverses the tree of all sources. The traversal
-        is accomplished via breadth first and can be limited in depth. On each node or
-        source a filter is applied. If the filter returns true the respective source
-        will be added to the result list.
+        is accomplished via breadth first and can be limited in depth. On each
+        node or source a filter is applied. If the filter returns true the
+        respective source will be added to the result list.
         By default a filter is used that accepts all sources.
 
         :param filtr: A filter function
@@ -38,6 +38,8 @@ class SourceMixin(object):
         :returns: A list containing the matching sources.
         :rtype: list of Source
         """
+        if limit is None:
+            limit = maxint
         return finders._find_sources(self, filtr, limit)
 
     @property
@@ -55,7 +57,8 @@ class SourceMixin(object):
     def __hash__(self):
         """
         overwriting method __eq__ blocks inheritance of __hash__ in Python 3
-        hash has to be either explicitly inherited from parent class, implemented or escaped
+        hash has to be either explicitly inherited from parent class,
+        implemented or escaped
         """
         return hash(self.id)
 

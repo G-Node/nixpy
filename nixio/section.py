@@ -80,13 +80,13 @@ class SectionMixin(object):
             limit = maxint
         return finders._find_sections(self, filtr, limit)
 
-    def find_related(self, filtr=lambda _ : True):
+    def find_related(self, filtr=lambda _: True):
         """
         Get all related sections of this section.
 
-        The result can be filtered. On each related section a filter is applied. If the filter
-        returns true the respective section will be added to the result list. By default a filter
-        is used that accepts all sections.
+        The result can be filtered. On each related section a filter is applied.
+        If the filter returns true the respective section will be added to the
+        result list. By default a filter is used that accepts all sections.
 
         :param filtr: A filter function
         :type filtr:  function
@@ -105,10 +105,11 @@ class SectionMixin(object):
     @property
     def sections(self):
         """
-        A property providing all child sections of a section. Child sections can be accessed by
-        index or by their id. Sections can also be deleted: if a section is deleted, all its
-        properties and child sections are removed from the file too.
-        Adding new sections is achieved using the create_section method. This is a read-only
+        A property providing all child sections of a section. Child sections can
+        be accessed by index or by their id. Sections can also be deleted: if a
+        section is deleted, all its properties and child sections are removed
+        from the file too. Adding new sections is achieved using the
+        create_section method. This is a read-only
         attribute.
 
         :type: ProxyList of Section
@@ -126,7 +127,8 @@ class SectionMixin(object):
     def __hash__(self):
         """
         overwriting method __eq__ blocks inheritance of __hash__ in Python 3
-        hash has to be either explicitly inherited from parent class, implemented or escaped
+        hash has to be either explicitly inherited from parent class,
+        implemented or escaped
         """
         return hash(self.id)
 
@@ -157,7 +159,10 @@ class SectionMixin(object):
             data = [data]
 
         val = list(map(lambda x: x if isinstance(x, Value) else Value(x), data))
-        dtypes = functools.reduce(lambda x, y: x if y.data_type in x else x + [y.data_type], val, [val[0].data_type])
+        dtypes = functools.reduce(
+            lambda x, y: x if y.data_type in x else x + [y.data_type],
+            val, [val[0].data_type]
+        )
         if len(dtypes) > 1:
             raise ValueError('Not all input values are of the same type')
 
@@ -183,9 +188,10 @@ class SectionMixin(object):
     @property
     def props(self):
         """
-        A property containing all Property entities associated with the section. Properties can
-        be accessed by index of via their id. Properties can be deleted from the list. Adding
-        new properties is done using the create_property method. This is a read-only attribute.
+        A property containing all Property entities associated with the section.
+        Properties can be accessed by index of via their id. Properties can be
+        deleted from the list. Adding new properties is done using the
+        create_property method. This is a read-only attribute.
 
         :type: ProxyList of Property
         """
