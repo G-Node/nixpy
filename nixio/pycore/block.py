@@ -56,6 +56,19 @@ class Block(EntityWithMetadata, BlockMixin):
 
     # MultiTag
     def create_multi_tag(self, name, type_, positions):
+        """
+        Create a new multi tag for this block.
+
+        :param name: The name of the tag to create.
+        :type name: str
+        :param type_: The type of tag.
+        :type type_: str
+        :param positions: A data array defining all positions of the tag.
+        :type positions: DataArray
+
+        :returns: The newly created tag.
+        :rtype: MultiTag
+        """
         util.check_entity_name_and_type(name, type_)
         util.check_entity_input(positions)
         if not isinstance(positions, DataArray):
@@ -84,6 +97,19 @@ class Block(EntityWithMetadata, BlockMixin):
 
     # Tag
     def create_tag(self, name, type_, position):
+        """
+        Create a new tag for this block.
+
+        :param name: The name of the tag to create.
+        :type name: str
+        :param type_: The type of tag.
+        :type type_: str
+        :param position: Coordinates of the start position
+                         in units of the respective data dimension.
+
+        :returns: The newly created tag.
+        :rtype: Tag
+        """
         util.check_entity_name_and_type(name, type_)
         tags = self._h5group.open_group("tags")
         if name in tags:
@@ -109,6 +135,17 @@ class Block(EntityWithMetadata, BlockMixin):
 
     # Source
     def create_source(self, name, type_):
+        """
+        Create a new source on this block.
+
+        :param name: The name of the source to create.
+        :type name: str
+        :param type_: The type of the source.
+        :type type_: str
+
+        :returns: The newly created source.
+        :rtype: Source
+        """
         util.check_entity_name_and_type(name, type_)
         sources = self._h5group.open_group("sources")
         if name in sources:
@@ -134,6 +171,17 @@ class Block(EntityWithMetadata, BlockMixin):
 
     # Group
     def create_group(self, name, type_):
+        """
+        Create a new group on this block.
+
+        :param name: The name of the group to create.
+        :type name: str
+        :param type_: The type of the group.
+        :type type_: str
+
+        :returns: The newly created group.
+        :rtype: Group
+        """
         util.check_entity_name_and_type(name, type_)
         groups = self._h5group.open_group("groups")
         if name in groups:

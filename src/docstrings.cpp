@@ -232,7 +232,6 @@ const char* block_create_tag = R"(
     :type type: str
     :param position: Coordinates of the start position
                      in units of the respective data dimension.
-    :type references: list
 
     :returns: The newly created tag.
     :rtype: Tag
