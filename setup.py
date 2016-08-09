@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 __author__ = 'gicmo'
 
@@ -151,7 +151,7 @@ setup(name             = 'nixio',
       scripts          = [],
       tests_require    = ['nose'],
       test_suite       = 'nose.collector',
-      setup_requires   = ['numpy'],
+      setup_requires   = ['h5py', 'numpy'],
       package_data     = {'nixio': [license_text, description_text]},
       include_package_data = True,
       zip_safe         = False,
