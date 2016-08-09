@@ -34,6 +34,16 @@ except NameError:
 vlen_str_dtype = h5py.special_dtype(vlen=unicode)
 
 
+def create_id():
+    """
+    Creates an ID as used for nix entities.
+
+    :returns: The ID.
+    :rtype: str
+    """
+    return str(uuid4())
+
+
 def is_uuid(id_):
     try:
         UUID(str(id_))

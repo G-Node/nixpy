@@ -39,11 +39,3 @@ def check(name):
     return "/" not in name
 
 
-def create_id():
-    """
-    Creates an ID as used for nix entities.
-
-    :returns: The ID.
-    :rtype: str
-    """
-    return str(uuid4())

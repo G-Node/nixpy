@@ -35,15 +35,15 @@ PREFIX_FACTORS = {"y": 1.0e-24,
                   "u": 1.0e-6,
                   "m": 1.0e-3,
                   "c": 1.0e-2,
-                  "d":1.0e-1,
+                  "d": 1.0e-1,
                   "da": 1.0e1,
                   "h": 1.0e2,
                   "k": 1.0e3,
-                  "M":1.0e6,
+                  "M": 1.0e6,
                   "G": 1.0e9,
                   "T": 1.0e12,
                   "P": 1.0e15,
-                  "E":1.0e18,
+                  "E": 1.0e18,
                   "Z": 1.0e21,
                   "Y": 1.0e24}
 
@@ -200,8 +200,8 @@ def split(combined_unit):
     pup = re.compile(prefix_re + unit_re + power_re)
     pu = re.compile(prefix_re + unit_re)
     up = re.compile(unit_re + power_re)
-    u = re.compile(unit_re)
-    p = re.compile(prefix_re)
+    # u = re.compile(unit_re)
+    # p = re.compile(prefix_re)
 
     match = pup.match(combined_unit)
     if match:
