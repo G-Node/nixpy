@@ -55,7 +55,7 @@ directly from the respective section.
 Section API
 -----------
 
-.. autoclass:: nix.Section
+.. autoclass:: nixio.pycore.Section
     :members:
     :inherited-members:
     :undoc-members:
@@ -63,7 +63,7 @@ Section API
 Property
 ========
 
-.. autoclass:: nix.Property
+.. autoclass:: nixio.pycore.Property
     :members:
     :inherited-members:
     :undoc-members:
@@ -71,7 +71,7 @@ Property
 Value
 =====
 
-.. autoclass:: nix.Value
+.. autoclass:: nixio.Value
     :members:
     :inherited-members:
     :undoc-members:
