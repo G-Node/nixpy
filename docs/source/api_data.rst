@@ -26,7 +26,7 @@ Working with files
 File open modes
 ---------------
 
-.. autoclass:: nix.FileMode
+.. autoclass:: nixio.FileMode
     :members:
     :undoc-members:
     :exclude-members: names, values
@@ -34,7 +34,7 @@ File open modes
 File API
 --------
 
-.. autoclass:: nix.File
+.. autoclass:: nixio.File
     :members:
     :inherited-members:
     :undoc-members:
@@ -97,7 +97,7 @@ and tags will be removed too.
 Block API
 ---------
 
-.. autoclass:: nix.Block
+.. autoclass:: nixio.pycore.Block
     :members:
     :inherited-members:
     :undoc-members:
@@ -141,7 +141,7 @@ DataArrays constructors for this purpose.
 DataArray API
 -------------
 
-.. autoclass:: nix.DataArray
+.. autoclass:: nixio.pycore.DataArray
     :members:
     :inherited-members:
     :undoc-members:
@@ -151,7 +151,7 @@ DataSet
 
 The DataSet object is used for data input/output to the underlying storage.
 
-.. autoclass:: nix.data_array.DataSet
+.. autoclass:: nixio.pycore.data_array.DataSet
     :members:
     :inherited-members:
     :undoc-members:
@@ -183,7 +183,7 @@ signal) that was applied in a certain interval during the recording.
 Tag API
 -------
 
-.. autoclass:: nix.Tag
+.. autoclass:: nixio.pycore.Tag
     :members:
     :inherited-members:
     :undoc-members:
@@ -191,7 +191,7 @@ Tag API
 MultiTag API
 ------------
 
-.. autoclass:: nix.MultiTag
+.. autoclass:: nixio.pycore.MultiTag
     :members:
     :inherited-members:
     :undoc-members:
@@ -199,7 +199,7 @@ MultiTag API
 Source
 ======
 
-.. autoclass:: nix.Source
+.. autoclass:: nixio.pycore.Source
     :members:
     :inherited-members:
     :undoc-members:
@@ -233,7 +233,7 @@ link from the group.
 Group API
 ---------
 
-.. autoclass:: nix.Group
+.. autoclass:: nixio.pycore.Group
     :members:
     :inherited-members:
     :undoc-members:

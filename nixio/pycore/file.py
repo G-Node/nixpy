@@ -109,8 +109,10 @@ class File(FileMixin):
         Open a NIX file, or create it if it does not exist.
 
         :param path: Path to file
-        :param mode: FileMode ReadOnly, ReadWrite, or Overwrite. Default: ReadWrite
-        :param backend: Either "hdf5" or "h5py". Defaults to "hdf5" if available, or "h5py" otherwise
+        :param mode: FileMode ReadOnly, ReadWrite, or Overwrite.
+                    (default: ReadWrite)
+        :param backend: Either "hdf5" or "h5py".
+                        Defaults to "hdf5" if available, or "h5py" otherwise
         :return: nixio.File object
         """
         if backend is None:
@@ -168,45 +170,58 @@ class File(FileMixin):
     def created_at(self):
         """
         The creation time of the file. This is a read-only property.
-        Use :py:meth:force_created_at in order to change the creation time.
+        Use `force_created_at` in order to change the creation time.
 
         :rtype: int
         """
         return util.str_to_time(self._h5file.attrs["created_at"])
 
-    def force_created_at(self, t=util.now_int()):
+    def force_created_at(self, t=None):
         """
-        Sets the creation time created_at to the given time
+        Sets the creation time `created_at` to the given time
         (default: current time).
 
-        :param t: The time to set (default: now)
+        :param t: The time to set
         :type t: int
         """
-        util.check_attr_type(t, int)
+        if t is None:
+            t = util.now_int()
+        else:
+            util.check_attr_type(t, int)
         self._h5file.attrs["created_at"] = util.time_to_str(t)
 
     @property
     def updated_at(self):
         """
         The time of the last update of the file. This is a read-only
-        property. Use force_updated_at in order to change the update time.
+        property. Use `force_updated_at` in order to change the update
+        time.
 
         :rtype: int
         """
         return util.str_to_time(self._h5file.attrs["updated_at"])
 
-    def force_updated_at(self, t=util.now_int()):
+    def force_updated_at(self, t=None):
         """
-        Sets the update time updated_at to the current time.
+        Sets the update time `updated_at` to the given time.
         (default: current time)
 
         :param t: The time to set (default: now)
         :type t: int
         """
-        util.check_attr_type(t, int)
+        if t is None:
+            t = util.now_int()
+        else:
+            util.check_attr_type(t, int)
         self._h5file.attrs["updated_at"] = util.time_to_str(t)
 
     def validate(self):
+        """
+        Checks if the File is a valid NIX file. This method is only available
+        when using the "hdf5" backend.
+
+        :return: Result object
+        """
         warn("The h5py backend does not support validation.")
 
     def is_open(self):

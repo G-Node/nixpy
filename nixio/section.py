@@ -58,14 +58,14 @@ class PropertyProxyList(ProxyList):
 
 class SectionMixin(object):
 
-    def find_sections(self, filtr=lambda _ : True, limit=maxint):
+    def find_sections(self, filtr=lambda _: True, limit=None):
         """
         Get all child sections recursively.
 
-        This method traverses the trees of all sections. The traversal
-        is accomplished via breadth first and can be limited in depth. On each node or
-        section a filter is applied. If the filter returns true the respective section
-        will be added to the result list.
+        This method traverses the trees of all sections. The traversal is
+        accomplished via breadth first and can be limited in depth. On each node
+         or section a filter is applied. If the filter returns true the
+        respective section will be added to the result list.
         By default a filter is used that accepts all sections.
 
         :param filtr: A filter function
@@ -76,6 +76,8 @@ class SectionMixin(object):
         :returns: A list containing the matching sections.
         :rtype: list of Section
         """
+        if limit is None:
+            limit = maxint
         return finders._find_sections(self, filtr, limit)
 
     def find_related(self, filtr=lambda _ : True):

@@ -97,14 +97,14 @@ class BlockMixin(object):
             da.write_direct(data)
         return da
 
-    def find_sources(self, filtr=lambda _ : True, limit=maxint):
+    def find_sources(self, filtr=lambda _: True, limit=None):
         """
         Get all sources in this block recursively.
 
-        This method traverses the tree of all sources in the block. The traversal
-        is accomplished via breadth first and can be limited in depth. On each node or
-        source a filter is applied. If the filter returns true the respective source
-        will be added to the result list.
+        This method traverses the tree of all sources in the block. The
+        traversal is accomplished via breadth first and can be limited in depth.
+        On each node or source a filter is applied. If the filter returns true
+        the respective source will be added to the result list.
         By default a filter is used that accepts all sources.
 
         :param filtr: A filter function
@@ -115,6 +115,8 @@ class BlockMixin(object):
         :returns: A list containing the matching sources.
         :rtype: list of Source
         """
+        if limit is None:
+            limit = maxint
         return finders._find_sources(self, filtr, limit)
 
     @property
