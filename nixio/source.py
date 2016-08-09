@@ -44,6 +44,14 @@ class SourceMixin(object):
 
     @property
     def sources(self):
+        """
+        A property containing all sources of a block. Sources can be obtained
+        via their index or by their id. Sources can be deleted from the list.
+        Adding sources is done using the Blocks create_source method.
+        This is a read only attribute.
+
+        :type: ProxyList of Source entities.
+        """
         if not hasattr(self, "_sources"):
             setattr(self, "_sources", SourceProxyList(self))
         return self._sources
