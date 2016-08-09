@@ -178,6 +178,12 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @property
     def dtype(self):
+        """
+        The data type of the data stored in the DataArray.
+        This is a read only property.
+
+        :return: DataType
+        """
         return self._h5group.group["data"].dtype
 
     @property
