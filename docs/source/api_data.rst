@@ -70,9 +70,6 @@ properties of a block can be accessed.
 
    block = file.blocks[some_id]
 
-   # set the blocks name
-   block.name = "session two"
-
    # add metadata to a block
    section = file.sections[sec_id]
    block.metadata = section
