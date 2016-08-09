@@ -78,11 +78,11 @@ class FileMixin(object):
     @property
     def sections(self):
         """
-        A property containing all root sections of a file. Specific root sections can be obtained
-        by their id or their index. Sections can be deleted from this list. Notice: when a section
-        is deleted all its child section and properties will be removed too.
-        Adding a new Section is done via the crate_section method of File. This is a read-only
-        property.
+        A property containing all root sections of a file. Specific root
+        sections can be obtained by their id or their index. Sections can be
+        deleted from this list. Notice: when a section is deleted all its child
+        section and properties will be removed too. Adding a new Section is done
+         via the crate_section method of File. This is a read-only property.
 
         :type: ProxyList of Section entities.
         """
