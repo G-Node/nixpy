@@ -19,7 +19,7 @@
 
 """
 
-import nixio
+import nixio as nix
 import lif
 import numpy as np
 import scipy.signal as signal
@@ -106,7 +106,7 @@ if __name__ == '__main__':
    
     # create a new file overwriting any existing content
     file_name = 'spike_features.h5'
-    file = nixio.File.open(file_name, nixio.FileMode.Overwrite)
+    file = nix.File.open(file_name, nix.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.
     # it gets a name and a type 
@@ -141,7 +141,7 @@ if __name__ == '__main__':
     dim.offset = -sta_offset * stepsize
     
     # set snippets as an indexed feature of the multi_tag
-    multi_tag.create_feature(snippets, nixio.LinkType.Indexed)
+    multi_tag.create_feature(snippets, nix.LinkType.Indexed)
 
     # let's plot the data from the stored information
     plot_data(multi_tag)
