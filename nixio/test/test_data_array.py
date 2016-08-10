@@ -300,19 +300,19 @@ class _TestDataArray(unittest.TestCase):
 
             assert(self.array.dimensions[i].index == self.array.dimensions[i - 3].index)
 
-        del self.array.dimensions[2]
-        del self.array.dimensions[1]
-        del self.array.dimensions[0]
+        self.array.delete_dimensions()
 
         assert(len(self.array.dimensions) == 0)
         self.array.append_alias_range_dimension()
         assert(len(self.array.dimensions) == 1)
-        del self.array.dimensions[0]
-        self.array.create_alias_range_dimension()
+        self.array.delete_dimensions()
+        self.array.append_alias_range_dimension()
         assert(len(self.array.dimensions) == 1)
 
-        self.assertRaises(ValueError, lambda : self.array.append_alias_range_dimension())
-        self.assertRaises(ValueError, lambda : self.array.create_alias_range_dimension())
+        self.assertRaises(ValueError,
+                          lambda: self.array.append_alias_range_dimension())
+        self.assertRaises(ValueError,
+                          lambda: self.array.append_alias_range_dimension())
         string_array = self.block.create_data_array('string_array', 'nix.texts',
                                                     dtype=DataType.String,
                                                     shape=(10,))
