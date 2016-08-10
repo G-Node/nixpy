@@ -69,10 +69,10 @@ Storing data
 The heart of our data model is an entity called **DataArray**. This is
 the entity that actually stores all data. It can take n-dimensional
 arrays and provides sufficient information to create a basic plot of
-the data. To achieve this, one essential parts is to define what kind
+the data. To achieve this, one essential part is to define what kind
 of data is stored. Hence, every dimension of the stored data **must**
 be defined using the available Dimension descriptors (below). The
-following code snippets show how to create an **DataArray** and how to
+following code snippets show how to create a **DataArray** and how to
 store data in it.
 
 
@@ -116,7 +116,7 @@ Dimension descriptors
 """""""""""""""""""""
 
 In the above examples we have created **DataArray** entities that are
-used to store the data. Goal of our model design is that the data
+used to store the data. The goal of our model design is that the data
 containing structures carry enough information to create a basic
 plot. Let's assume a time-series of data needs to be stored: The data
 is just a vector of measurements (e.g. voltages). The data would be

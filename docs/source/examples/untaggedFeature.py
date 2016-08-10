@@ -19,7 +19,7 @@
 
 """
 
-import nixio as nix
+import nixio
 import lif
 import numpy as np
 import scipy.signal as signal
@@ -94,7 +94,7 @@ if __name__ == '__main__':
    
     # create a new file overwriting any existing content
     file_name = 'untagged_feature.h5'
-    file = nix.File.open(file_name, nix.FileMode.Overwrite)
+    file = nixio.File.open(file_name, nixio.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.
     # it gets a name and a type 
@@ -121,7 +121,7 @@ if __name__ == '__main__':
     tag.references.append(data)
 
     # set stimulus as untagged feature of the tag
-    tag.create_feature(stim, nix.LinkType.Untagged)
+    tag.create_feature(stim, nixio.LinkType.Untagged)
 
     # let's plot the data from the stored information
     plot_data(tag)

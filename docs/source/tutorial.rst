@@ -324,11 +324,11 @@ NIX-model. Suppose that we have the recording of a signal in which a
 set of events is detected. Each event may have certain characteristics
 one wants to store. These are stored as **Features** of the
 events. There are three different link-types between the features and
-the events stored in the tag. *nix.LinkType.Untagged* indicates that
+the events stored in the tag. *nixio.LinkType.Untagged* indicates that
 the whole data stored in the **Feature** applies to the points defined
-in the tag. *nix.LinkType.Tagged* on the other side implies that the
+in the tag. *nixio.LinkType.Tagged* on the other side implies that the
 *position* and *extent* have to be applied also to the data stored in
-the **Feature**. Finally, the *nix.LinkType.Indexed* indicates that
+the **Feature**. Finally, the *nixio.LinkType.Indexed* indicates that
 there is one point (or slice) in the **Feature** data that is related
 to each position in the Tag.
 
