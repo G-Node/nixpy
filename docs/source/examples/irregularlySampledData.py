@@ -12,10 +12,10 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- This tutorial shows how irregulary sampled data is stored in nix-files.
+ This tutorial shows how irregularly sampled data is stored in nix-files.
  See https://github.com/G-node/nix/wiki for more information.
 """
-import nixio as nix
+import nixio
 import numpy as np
 import matplotlib.pylab as plt
 
@@ -25,7 +25,7 @@ def create_data(duration, interval):
     times = times[times <= duration]
     x = np.arange(0, times[-1] * 2 * np.pi, 0.001)
     y = np.sin(5 * x)
-    return times, y[np.asarray(times / 0.001 *2 * np.pi, dtype=int)]
+    return times, y[np.asarray(times / 0.001 * 2 * np.pi, dtype=int)]
 
 
 def plot_data(data_array):
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
     # create a new file overwriting any existing content
     file_name = 'irregular_data_example.h5'
-    file = nix.File.open(file_name, nix.FileMode.Overwrite)
+    file = nixio.File.open(file_name, nixio.FileMode.Overwrite)
     
     # create a 'Block' that represents a grouping object. Here, the recording session.
     # it gets a name and a type 

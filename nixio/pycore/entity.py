@@ -28,35 +28,74 @@ class Entity(object):
 
     @property
     def id(self):
+        """
+        A property providing the ID of the Entity. The id is generated
+        automatically, therefore the property is read-only.
+
+        :rtype: str
+        """
         return self._h5group.get_attr("entity_id")
 
     @property
     def created_at(self):
+        """
+        The creation time of the entity. This is a read-only property.
+        Use `force_created_at` in order to change the creation time.
+
+        :rtype: int
+        """
         return util.str_to_time(self._h5group.get_attr("created_at"))
 
-    def force_created_at(self, t=util.now_int()):
-        util.check_attr_type(t, int)
+    def force_created_at(self, t=None):
+        """
+        Sets the creation time `created_at` to the given time
+        (default: current time).
+
+        :param t: The time to set.
+        :type t: int
+        """
+        if t is None:
+            t = util.now_int()
+        else:
+            util.check_attr_type(t, int)
         self._h5group.set_attr("created_at", util.time_to_str(t))
 
     @property
     def updated_at(self):
+        """
+        The time of the last update of the entity. This is a read-only
+        property. Use `force_updated_at` in order to change the update
+        time.
+
+        :rtype: int
+        """
         return util.str_to_time(self._h5group.get_attr("updated_at"))
 
-    def force_updated_at(self, t=util.now_int()):
-        util.check_attr_type(t, int)
+    def force_updated_at(self, t=None):
+        """
+        Sets the update time `updated_at` to the given time.
+        (default: current time)
+
+        :param t: The time to set.
+        :type t: int
+        """
+        if t is None:
+            t = util.now_int()
+        else:
+            util.check_attr_type(t, int)
         self._h5group.set_attr("updated_at", util.time_to_str(t))
 
 
-class NamedEntity(object):
+class NamedEntity(Entity):
 
     def __init__(self, h5group):
-        self._h5group = h5group
         try:
             util.check_entity_name_and_type(h5group.get_attr("name"),
                                             h5group.get_attr("type"))
             util.check_entity_id(h5group.get_attr("entity_id"))
         except ValueError:
             ValueError("Invalid NIX object found in file.")
+        super(NamedEntity, self).__init__(h5group)
 
     @classmethod
     def _create_new(cls, parent, name, type_):
@@ -72,10 +111,24 @@ class NamedEntity(object):
 
     @property
     def name(self):
+        """
+        The name of an entity. The name serves as a human readable
+        identifier. This is a read-only property; entities cannot be
+        renamed.
+
+        :type: str
+        """
         return self._h5group.get_attr("name")
 
     @property
     def type(self):
+        """
+        The type of the entity. The type is used in order to add semantic
+        meaning to the entity. This is a read-write property, but it can't
+        be set to None.
+
+        :type: str
+        """
         return self._h5group.get_attr("type")
 
     @type.setter
@@ -87,32 +140,19 @@ class NamedEntity(object):
 
     @property
     def definition(self):
+        """
+        The definition of the entity. The definition can contain a textual
+        description of the entity. This is an optional read-write
+        property, and can be None if no definition is available.
+
+        :type: str
+        """
         return self._h5group.get_attr("definition")
 
     @definition.setter
     def definition(self, d):
         util.check_attr_type(d, str)
         self._h5group.set_attr("definition", d)
-
-    @property
-    def id(self):
-        return self._h5group.get_attr("entity_id")
-
-    @property
-    def created_at(self):
-        return util.str_to_time(self._h5group.get_attr("created_at"))
-
-    def force_created_at(self, t=util.now_int()):
-        util.check_attr_type(t, int)
-        self._h5group.set_attr("created_at", util.time_to_str(t))
-
-    @property
-    def updated_at(self):
-        return util.str_to_time(self._h5group.get_attr("updated_at"))
-
-    def force_updated_at(self, t=util.now_int()):
-        util.check_attr_type(t, int)
-        self._h5group.set_attr("updated_at", util.time_to_str(t))
 
     def __str__(self):
         return "{}: {{name = {}, type = {}, id = {}}}".format(

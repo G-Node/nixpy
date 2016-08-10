@@ -36,8 +36,8 @@ def plot_data(data_array):
     y = np.zeros(data_array.data.shape)
     data_array.data.read_direct(y)
     for i, label in enumerate(set_dim.labels):
-        plt.plot(x, y[i,:], label=label)
-    
+        plt.plot(x, y[i, :], label=label)
+
     plt.xlabel(x_axis.label + " [" + x_axis.unit + "]")
     plt.ylabel(data_array.label + " [" + data_array.unit + "]")
     plt.title(data_array.name)
