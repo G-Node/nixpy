@@ -16,6 +16,8 @@ from .dimensions import (SampledDimension, RangeDimension, SetDimension,
                          DimensionType)
 from . import util
 
+from .exceptions import InvalidUnit
+
 
 class DataSet(DataSetMixin):
 
@@ -29,6 +31,11 @@ class DataSet(DataSetMixin):
 
     @property
     def data_extent(self):
+        """
+        The size of the data.
+
+        :type: set of int
+        """
         dataset = self._h5group.get_dataset("data")
         return dataset.shape
 
@@ -39,6 +46,12 @@ class DataSet(DataSetMixin):
 
     @property
     def data_type(self):
+        """
+        The data type of the data stored in the DataArray. This is a read only
+        property.
+
+        :type: DataType
+        """
         return self._get_dtype()
 
     def _get_dtype(self):
@@ -82,19 +95,47 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         return self.append_range_dimension(range_)
 
     def append_set_dimension(self):
+        """
+        Append a new SetDimension to the list of existing dimension
+        descriptors.
+
+        :returns: The newly created SetDimension.
+        :rtype: SetDimension
+        """
         dimgroup = self._h5group.open_group("dimensions")
-        index = len(self._h5group.open_group("dimensions")) + 1
+        index = len(dimgroup) + 1
         return SetDimension._create_new(dimgroup, index)
 
-    def append_sampled_dimension(self, sample):
-        index = len(self._h5group.open_group("dimensions")) + 1
-        dimgroup = self._h5group.open_group("dimensions")
-        return SampledDimension._create_new(dimgroup, index, sample)
+    def append_sampled_dimension(self, sampling_interval):
+        """
+        Append a new SampledDimension to the list of existing dimension
+        descriptors.
 
-    def append_range_dimension(self, range_):
-        index = len(self._h5group.open_group("dimensions")) + 1
+        :param sampling_interval: The sampling interval of the SetDimension
+                                  to create.
+        :type sampling_interval: float
+
+        :returns: The newly created SampledDimension.
+        :rtype: SampledDimension
+        """
         dimgroup = self._h5group.open_group("dimensions")
-        return RangeDimension._create_new(dimgroup, index, range_)
+        index = len(dimgroup) + 1
+        return SampledDimension._create_new(dimgroup, index, sampling_interval)
+
+    def append_range_dimension(self, ticks):
+        """
+        Append a new RangeDimension to the list of existing dimension
+        descriptors.
+
+        :param ticks: The ticks of the RangeDimension to create.
+        :type ticks: list of float
+
+        :returns: The newly created RangeDimension.
+        :rtype: RangeDimension
+        """
+        dimgroup = self._h5group.open_group("dimensions")
+        index = len(dimgroup) + 1
+        return RangeDimension._create_new(dimgroup, index, ticks)
 
     def create_alias_range_dimension(self):
         warn("This function is deprecated and will be removed. "
@@ -102,6 +143,14 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         return self.append_alias_range_dimension()
 
     def append_alias_range_dimension(self):
+        """
+        Append a new RangeDimension that uses the data stored in this
+        DataArray as ticks. This works only(!) if the DataArray is 1-D and
+        the stored data is numeric. A ValueError will be raised otherwise.
+
+        :returns: The created dimension descriptor.
+        :rtype: RangeDimension
+        """
         if (len(self.data_extent) > 1 or
                 not DataType.is_numeric_dtype(self.dtype)):
             raise ValueError("AliasRangeDimensions only allowed for 1D "
@@ -114,6 +163,9 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         return RangeDimension._create_new(dimgroup, 1, data)
 
     def delete_dimensions(self):
+        """
+        Delete all the dimension descriptors for this DataArray.
+        """
         dimgroup = self._h5group.open_group("dimensions")
         ndims = len(dimgroup)
         for idx in range(ndims):
@@ -137,10 +189,23 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @property
     def dtype(self):
+        """
+        The data type of the data stored in the DataArray.
+        This is a read only property.
+
+        :return: DataType
+        """
         return self._h5group.group["data"].dtype
 
     @property
     def polynom_coefficients(self):
+        """
+        The polynomial coefficients for the calibration. By default this is
+        set to a {0.0, 1.0} for a linear calibration with zero offset.
+        This is a read-write property and can be set to None
+
+        :type: list of float
+        """
         return tuple(self._h5group.get_data("polynom_coefficients"))
 
     @polynom_coefficients.setter
@@ -154,6 +219,13 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @property
     def expansion_origin(self):
+        """
+        The expansion origin of the calibration polynomial.
+        This is a read-write property and can be set to None.
+        The default value is 0.
+
+        :type: float
+        """
         return self._h5group.get_attr("expansion_origin")
 
     @expansion_origin.setter
@@ -163,6 +235,13 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @property
     def label(self):
+        """
+        The label of the DataArray. The label corresponds to the label of the
+        x-axis of a plot. This is a read-write property and can be set to
+        None.
+
+        :type: str
+        """
         return self._h5group.get_attr("label")
 
     @label.setter
@@ -172,9 +251,22 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @property
     def unit(self):
+        """
+        The unit of the values stored in the DataArray. This is a read-write
+        property and can be set to None.
+
+        :type: str
+        """
         return self._h5group.get_attr("unit")
 
     @unit.setter
     def unit(self, u):
         util.check_attr_type(u, str)
+        if u is not None:
+            u = util.units.sanitizer(u)
+            if not (util.units.is_si(u) or util.units.is_compound(u)):
+                raise InvalidUnit(
+                    "{} is not SI or composite of SI units".format(u),
+                    "DataArray.unit"
+                )
         self._h5group.set_attr("unit", u)

@@ -29,9 +29,15 @@ class BaseTag(EntityWithSources):
 
     @property
     def units(self):
+        """
+        Property containing the units of the tag. The tag must provide a
+        unit for each dimension of the position or extent vector.
+        This is a read-write property.
+
+        :type: list of str
+        """
         return tuple(u.decode() if isinstance(u, bytes) else u
                      for u in self._h5group.get_data("units"))
-
 
     @units.setter
     def units(self, units):
@@ -39,8 +45,19 @@ class BaseTag(EntityWithSources):
             if self._h5group.has_data("units"):
                 del self._h5group["units"]
         else:
+            sanitized = []
+            for u in units:
+                util.check_attr_type(u, str)
+                u = util.units.sanitizer(u)
+                if not (util.units.is_si(u) or util.units.is_compound(u)):
+                    raise InvalidUnit(
+                        "{} is not SI or composite of SI units".format(u),
+                        "{}.units".format(type(self).__name__)
+                    )
+                sanitized.append(u)
+
             dtype = DataType.String
-            self._h5group.write_data("units", units, dtype)
+            self._h5group.write_data("units", sanitized, dtype)
             self.force_updated_at()
 
     def _add_reference_by_id(self, id_or_name):
@@ -77,9 +94,20 @@ class BaseTag(EntityWithSources):
         references = self._h5group.open_group("references")
         references.delete(id_)
 
-    def create_feature(self, da, link_type):
+    def create_feature(self, data, link_type):
+        """
+        Create a new feature.
+
+        :param data: The data array of this feature.
+        :type data: DataArray
+        :param link_type: The link type of this feature.
+        :type link_type: LinkType
+
+        :returns: The created feature object.
+        :rtype: Feature
+        """
         features = self._h5group.open_group("features")
-        feat = Feature._create_new(features, da, link_type)
+        feat = Feature._create_new(features, data, link_type)
         return feat
 
     def _has_feature_by_id(self, id_or_name):
@@ -124,7 +152,7 @@ class BaseTag(EntityWithSources):
                 )
             if dimunit and unit is not None:
                 try:
-                    scaling = util.scaling(unit, dimunit)
+                    scaling = util.units.scaling(unit, dimunit)
                 except InvalidUnit:
                     raise IncompatibleDimensions(
                         "Cannot apply a position with unit to a SetDimension",
@@ -170,6 +198,11 @@ class Tag(BaseTag, TagMixin):
 
     @property
     def position(self):
+        """
+        The position defined by the tag. This is a read-write property.
+
+        :type: list of float
+        """
         return tuple(self._h5group.get_data("position"))
 
     @position.setter
@@ -183,6 +216,12 @@ class Tag(BaseTag, TagMixin):
 
     @property
     def extent(self):
+        """
+        The extent defined by the tag. This is an optional read-write
+        property and may be set to None.
+
+        :type: list of float
+        """
         return tuple(self._h5group.get_data("extent"))
 
     @extent.setter

@@ -65,11 +65,27 @@ class SampledDimension(Dimension):
         return newdim
 
     def position_at(self, index):
+        """
+        Returns the position corresponding to a given index.
+
+        :param index: A positive integer.
+
+        :returns: The position matching to the index.
+        :rtype: float
+        """
         offset = self.offset if self.offset else 0
         sample = self.sampling_interval
         return index * sample + offset
 
     def index_of(self, position):
+        """
+        Returns the index of a certain position in the dimension.
+
+        :param position: The position.
+
+        :returns: The nearest index.
+        :rtype: int
+        """
         offset = self.offset if self.offset else 0
         sample = self.sampling_interval
         index = round((position - offset) / sample)
@@ -78,6 +94,16 @@ class SampledDimension(Dimension):
         return index
 
     def axis(self, count, start=0):
+        """
+        Get an axis as defined by this sampled dimension.
+
+        :param count: A positive integer specifying the length of the axis
+        (no of samples).
+        :param start: positive integer, indicates the starting sample.
+
+        :returns: The created axis
+        :rtype: list
+        """
         offset = self.offset if self.offset else 0
         sample = self.sampling_interval
         end = (count + start) * sample + offset
@@ -168,6 +194,14 @@ class RangeDimension(Dimension):
         self._h5group.set_attr("unit", u)
 
     def index_of(self, position):
+        """
+        Returns the index of a certain position in the dimension.
+
+        :param position: The position.
+
+        :returns: The nearest index.
+        :rtype: int
+        """
         ticks = self.ticks
         if position < ticks[0]:
             return 0
@@ -179,10 +213,29 @@ class RangeDimension(Dimension):
         return pidxs[0]
 
     def tick_at(self, index):
+        """
+        Returns the tick at the given index. Will throw an Exception if the
+        index is out of bounds.
+
+        :param index: The index.
+
+        :returns: The corresponding position.
+        :rtype: double
+        """
         ticks = list(self.ticks)
         return ticks[index]
 
     def axis(self, count, start=0):
+        """
+        Get an axis as defined by this range dimension.
+
+        :param count: A positive integer specifying the length of the axis
+        (no of points).
+        :param start: positive integer, indicates the starting tick.
+
+        :returns: The created axis
+        :rtype: list
+        """
         ticks = self.ticks
         end = start + count
         if end > len(ticks):

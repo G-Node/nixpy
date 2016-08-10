@@ -26,6 +26,17 @@ class Source(EntityWithMetadata, SourceMixin):
 
     # Source
     def create_source(self, name, type_):
+        """
+        Create a new source as a child of the current Source.
+
+        :param name: The name of the source to create.
+        :type name: str
+        :param type_: The type of the source.
+        :type type_: str
+
+        :returns: The newly created source.
+        :rtype: Source
+        """
         util.check_entity_name_and_type(name, type_)
         sources = self._h5group.open_group("sources", True)
         if name in sources:

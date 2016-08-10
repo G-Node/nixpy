@@ -30,10 +30,10 @@ So far we have implemented the nix model only for the HDF5 file
 format. In order to store data in a file we need to create one.
 
 .. code-block:: python
-		
-		import nix
-		
-		nix_file = nix.File.open('example.h5', nix.FileMode.Overwrite)
+
+        import nixio as nix
+
+        nix_file = nix.File.open('example.h5', nix.FileMode.Overwrite)
 
 The **File** entity is the root of this document and it has only two
 children the *data* and *metadata* nodes. You may want to use the
@@ -48,7 +48,7 @@ example it can take up everything that was recorded in the same
 
 .. code-block:: python
 
-		block = nix_file.create_block("Test block", "nix.session")
+        block = nix_file.create_block("Test block", "nix.session")
 
 Names can be freely chosen. Duplication of names on the same
 hierarchy-level is not allowed. In this example creating a second
@@ -59,8 +59,8 @@ unique id (UUID).
 
 .. code-block:: python
 
-		block.id
-		'017d7764-173b-4716-a6c2-45f6d37ddb52'
+        block.id
+        '017d7764-173b-4716-a6c2-45f6d37ddb52'
 
 
 Storing data
@@ -69,17 +69,17 @@ Storing data
 The heart of our data model is an entity called **DataArray**. This is
 the entity that actually stores all data. It can take n-dimensional
 arrays and provides sufficient information to create a basic plot of
-the data. To achieve this, one essential parts is to define what kind
+the data. To achieve this, one essential part is to define what kind
 of data is stored. Hence, every dimension of the stored data **must**
 be defined using the available Dimension descriptors (below). The
-following code snippets show how to create an **DataArray** and how to
+following code snippets show how to create a **DataArray** and how to
 store data in it.
 
 
 .. code-block:: python
-		
-		# create a DataArray and store data in it
-		data = block.create_data_array("my data", "nix.sampled", data=some_numpy_array)
+
+        # create a DataArray and store data in it
+        data = block.create_data_array("my data", "nix.sampled", data=some_numpy_array)
 
 Using this call will create a **DataArray**, set name and type, set
 the *dataType* according to the dtype of the passed data, and store
@@ -88,11 +88,12 @@ up data-to-be-recorded. In this case you have to provide the space
 that will be needed in advance. 
 
 .. code-block:: python
-		import numpy as np
-		# create an empty DataArray to store 2x1000 values
-		data = block.create_data_array("my data", "nix.sampled", dtype=nix.DataType.Double, shape=(2,1000))
-		some_numpy_array = np.random.randn(2, 1000)
-		data = some_numpy_array
+
+        import numpy as np
+        # create an empty DataArray to store 2x1000 values
+        data = block.create_data_array("my data", "nix.sampled", dtype=nix.DataType.Double, shape=(2, 1000))
+        some_numpy_array = np.random.randn(2, 1000)
+        data.write_direct(some_numpy_array)
 
 
 If you do not know the size of the data in advance, you can append
@@ -101,21 +102,21 @@ possible to extend the data, it is not possible to change the
 dimensionality (rank) of the data afterwards.
 
 .. code-block:: python
-		
-		# create an empty DataArray to store 2x1000 values
-		data = block.create_data_array("my data", "nix.sampled", dtype=nix.DataType.Double, shape=(2,1000))
-		some_numpy_array = np.random.randn(2, 1000)
-		data[:, :] = some_numpy_array
-		some_more_data = np.random.randn(2,10)
-		data.data_extent((2,1010))
-		data[:, 1000:] = some_more_data
+
+        # create an empty DataArray to store 2x1000 values
+        data = block.create_data_array("my data", "nix.sampled", dtype=nix.DataType.Double, shape=(2, 1000))
+        some_numpy_array = np.random.randn(2, 1000)
+        data[:, :] = some_numpy_array
+        some_more_data = np.random.randn(2, 10)
+        data.data_extent((2, 1010))
+        data[:, 1000:] = some_more_data
 
 
 Dimension descriptors
 """""""""""""""""""""
 
 In the above examples we have created **DataArray** entities that are
-used to store the data. Goal of our model design is that the data
+used to store the data. The goal of our model design is that the data
 containing structures carry enough information to create a basic
 plot. Let's assume a time-series of data needs to be stored: The data
 is just a vector of measurements (e.g. voltages). The data would be
@@ -130,15 +131,15 @@ irregular intervals, and (iii) data that belongs to categories.
 
 .. code-block:: python
 
-		sample_interval = 0.001 # s
-		sinewave = np.sin(np.arange(0, 1.0, sample_interval) * 2 * np.pi)
-		data = block.create_data_array("sinewave","nix.regular_sampled",data=sinewave)
-		data.label = "voltage"
-		data.unit = "mV"
-		# define the time dimension of the data
-		dim = data.append_sampled_dimension(sample_interval)
-		dim.label = "time"
-		dim.unit = "s"
+        sample_interval = 0.001 # s
+        sinewave = np.sin(np.arange(0, 1.0, sample_interval) * 2 * np.pi)
+        data = block.create_data_array("sinewave", "nix.regular_sampled", data=sinewave)
+        data.label = "voltage"
+        data.unit = "mV"
+        # define the time dimension of the data
+        dim = data.append_sampled_dimension(sample_interval)
+        dim.label = "time"
+        dim.unit = "s"
 
 The **SampledDimension** can also be used to desribe space dimensions,
 e.g. in case of images. 
@@ -148,24 +149,24 @@ the x-axis are defined using the *ticks* property of a
 **RangeDimension**.
 
 .. code-block:: python
-		
-		sample_times = [1.0, 3.0, 4.2, 4.7, 9.6]
-		dim = data.append_range_dimension(sample_times)
-		dim.label = "time"
-		dim.unit = "s"
+
+        sample_times = [1.0, 3.0, 4.2, 4.7, 9.6]
+        dim = data.append_range_dimension(sample_times)
+        dim.label = "time"
+        dim.unit = "s"
 
 Finally, some data belongs into categories which do not necessarily
 have a natural order. In these cases a **SetDimension** is used. This
 descriptor can store for each category an optional label.
 
 .. code-block:: python
-		
-		observations = [0, 0, 5, 20, 45, 40, 28, 12, 2, 0, 1, 0]
-		categories = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-		              'Jul', 'Aug','Sep','Oct','Nov', 'Dec']
-		data = block.create_data_array("observations", "nix.histogram", data=observations)
-		dim = data.append_set_dimension()
-		dim.labels = categories
+
+        observations = [0, 0, 5, 20, 45, 40, 28, 12, 2, 0, 1, 0]
+        categories = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                      'Jul', 'Aug','Sep','Oct','Nov', 'Dec']
+        data = block.create_data_array("observations", "nix.histogram", data=observations)
+        dim = data.append_set_dimension()
+        dim.labels = categories
 
 
 Annotate regions in the data
@@ -189,13 +190,13 @@ region. Each of these are vectors of a length matching the
 dimensionality of the referenced data.
 
 .. code-block:: python
-		
-		position = [10, 10]
-		extent = [5, 20]
-		tag = block.create_tag('interesting part', 'nix.roi', position)
-		tag.extent = extent
-		# finally, add the referenced data to this tag
-		tag.references.append(data)
+
+        position = [10, 10]
+        extent = [5, 20]
+        tag = block.create_tag('interesting part', 'nix.roi', position)
+        tag.extent = extent
+        # finally, add the referenced data to this tag
+        tag.references.append(data)
 
 
 MuliTag
@@ -210,25 +211,25 @@ the referenced n-dimensional **DataArray**.
 
 .. code-block:: python
 
-		# fake data
-		frame = np.random.randn(100,100)
-		data = block.create_data_array('random image', 'nix.image', data=frame)
-		dim_x = data.append_sampled_dimension(1.0)
-		dim_x.label = 'x'
-		dim_y = data.append_sampled_dimension(1.0)
-		dim_y.label = 'y'
-		# positions array must be 2D
-		p = np.zeros((3,2)) # 1st dim, represents the positions, 2nd the coordinates
-		p[1,:] = [10,10]
-		p[2,:] = [20,10]
-		positions = block.create_data_array('special points', 'nix.positions', data=p)
-		positions.append_set_dimension()
-		dim = positions.append_set_dimension()
-		dim.labels = ['x', 'y']
-		# create a multi tag
-		tag = block.create_multi_tag('interesting points', 'nix.multiple_roi', positions)
-		tag.references.append(data)
-		
+        # fake data
+        frame = np.random.randn(100, 100)
+        data = block.create_data_array('random image', 'nix.image', data=frame)
+        dim_x = data.append_sampled_dimension(1.0)
+        dim_x.label = 'x'
+        dim_y = data.append_sampled_dimension(1.0)
+        dim_y.label = 'y'
+        # positions array must be 2D
+        p = np.zeros((3, 2)) # 1st dim, represents the positions, 2nd the coordinates
+        p[1, :] = [10, 10]
+        p[2, :] = [20, 10]
+        positions = block.create_data_array('special points', 'nix.positions', data=p)
+        positions.append_set_dimension()
+        dim = positions.append_set_dimension()
+        dim.labels = ['x', 'y']
+        # create a multi tag
+        tag = block.create_multi_tag('interesting points', 'nix.multiple_roi', positions)
+        tag.references.append(data)
+
 
 Adding further information
 """"""""""""""""""""""""""
@@ -248,30 +249,31 @@ Let's say we want to give each  point a name, we can create a feature like this:
 
 .. code-block:: python
 
-		spot_names = block.create_data_array('spot ids', 'nix.feature',dtype=nix.DataType.Int8, data=[1, 2])
-		spot_names.append_set_dimension()
-		feature = tag.create_feature(spot_names, nix.LinkType.Indexed)
+        spot_names = block.create_data_array('spot ids', 'nix.feature', dtype=nix.DataType.Int8, data=[1, 2])
+        spot_names.append_set_dimension()
+        feature = tag.create_feature(spot_names, nix.LinkType.Indexed)
 
 We could also say that each point in the tagged data (e.g. a matrix of
 measurements) has a corresponding point in an input matrix.
 
 .. code-block:: python
-		input_matrix = np.random.random(data.shape)
-		input_data = block.create_data_array('input matrix', 'nix.feature', data=input_matrix)
-		dim_x = input_data.append_sampled_dimension(1.0)
-		dim_x.label = 'x'
-		dim_y = input_data.append_sampled_dimension(1.0)
-		dim_y.label = 'y'
-		tag.create_feature(input_data, nix.LinkType.Tagged)
+
+        input_matrix = np.random.random(data.shape)
+        input_data = block.create_data_array('input matrix', 'nix.feature', data=input_matrix)
+        dim_x = input_data.append_sampled_dimension(1.0)
+        dim_x.label = 'x'
+        dim_y = input_data.append_sampled_dimension(1.0)
+        dim_y.label = 'y'
+        tag.create_feature(input_data, nix.LinkType.Tagged)
 
 
 Finally, one could need to attach the same information to all
 positions defined in the tag. In this case the feature is *untagged*
 
 .. code-block:: python
-		
-		common_feature = block.create_data_array('common feature', 'nix.feature', data=some_common_data)
-		tag.create_feature(common_feature, nix.LinkType.Untagged)
+
+        common_feature = block.create_data_array('common feature', 'nix.feature', data=some_common_data)
+        tag.create_feature(common_feature, nix.LinkType.Untagged)
 
 
 Defining the Source of the data
@@ -286,10 +288,10 @@ definition.
 
 .. code-block:: python
 
-		subject = block.create_source('subject A', 'nix.experimental_subject')
-		subject.definition = 'The experimental subject used in this experiment'
-		data.sources.append(subject)
-		
+        subject = block.create_source('subject A', 'nix.experimental_subject')
+        subject.definition = 'The experimental subject used in this experiment'
+        data.sources.append(subject)
+
 **Sources** may depend on other **Sources**. For example, in an
 electrophysiological experiment we record from different cells in the
 same brain region of the same animal. To represent this hierarchy,
@@ -297,11 +299,11 @@ same brain region of the same animal. To represent this hierarchy,
 
 .. code-block:: python
 
-		subject = block.create_source('subject A', 'nix.experimental_subject')
-		brain_region = subject.create_source('hippocampus', 'nix.experimental_subject')
-		cell_a = brain_region.create_source('Cell 1', 'nix.experimental_subject')
-		cell_b = brain_region.create_source('Cell 2', 'nix.experimental_subject')
-			
+        subject = block.create_source('subject A', 'nix.experimental_subject')
+        brain_region = subject.create_source('hippocampus', 'nix.experimental_subject')
+        cell_a = brain_region.create_source('Cell 1', 'nix.experimental_subject')
+        cell_b = brain_region.create_source('Cell 2', 'nix.experimental_subject')
+
 
 Arbitrary metadata
 """"""""""""""""""
@@ -326,18 +328,18 @@ Most of the data entities can link to metadata sections.
 
 .. code-block:: python
 
-		sec = nix_file.create_section('recording session', 'odml.recording')
-		sec.create_property('experimenter', nix.Value('John Doe'))
-		sec.create_property('recording date', nix.Value('2014-01-01'))
-		subject = sec.create_section('subject', 'odml.subject')
-		subject.create_property('id', nix.Value('mouse xyz'))
-		cell = subject.create_section('cell', 'odml.cell')
-		v = nix.Value(-64.5)
-		v.uncertainty = 2.25
-		p = cell.create_property('resting potential', v)
-		p.unit = 'mV'
-		# set the recording block metadata
-		block.metadata = sec
+        sec = nix_file.create_section('recording session', 'odml.recording')
+        sec.create_property('experimenter', nix.Value('John Doe'))
+        sec.create_property('recording date', nix.Value('2014-01-01'))
+        subject = sec.create_section('subject', 'odml.subject')
+        subject.create_property('id', nix.Value('mouse xyz'))
+        cell = subject.create_section('cell', 'odml.cell')
+        v = nix.Value(-64.5)
+        v.uncertainty = 2.25
+        p = cell.create_property('resting potential', v)
+        p.unit = 'mV'
+        # set the recording block metadata
+        block.metadata = sec
 
 
 Units
@@ -354,11 +356,11 @@ the tag's position is given in *ms*.
 
 .. code-block:: python
 
-		x_positions=[2,4,6,8,10,12]
-		tag=block.create_tag('unit example','nix.sampled',x_positions)
-		
-		#single SI unit is supported like mV,cm etc.
-		tag.units=["cm"]
-		
-		#for compound units we can do
-		tag.units=["mV/cm"]
+        x_positions=[2, 4, 6, 8, 10, 12]
+        tag=block.create_tag('unit example', 'nix.sampled', x_positions)
+
+        #single SI unit is supported like mV,cm etc.
+        tag.units=["cm"]
+
+        #for compound units we can do
+        tag.units=["mV/cm"]
