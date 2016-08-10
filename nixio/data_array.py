@@ -98,10 +98,6 @@ class DimensionProxyList(object):
         else:
             raise TypeError("The key must be an int but was: " + type(key))
 
-    def __delitem__(self, key):
-        elem = self.__getitem__(key)
-        self.__obj._delete_dimension_by_pos(elem.index)
-
     def __iter__(self):
         for i in range(0, len(self)):
             yield self.__obj._get_dimension_by_pos(i + 1)

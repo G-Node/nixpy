@@ -127,7 +127,7 @@ void PyDataArray::do_export() {
         .def("append_alias_range_dimension", &DataArray::appendAliasRangeDimension,
              doc::data_array_append_alias_range_dimension)
         .def("_dimension_count", &DataArray::dimensionCount)
-        .def("_delete_dimension_by_pos", &DataArray::deleteDimension)
+        .def("delete_dimensions", &DataArray::deleteDimensions)
         .def("_get_dimension_by_pos", getDimension)
         // Other
         .def("__str__", &toStr<DataArray>)

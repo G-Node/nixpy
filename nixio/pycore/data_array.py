@@ -103,14 +103,15 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         data = self._h5group.group["data"]
         return RangeDimension._create_new(dimgroup, 1, data)
 
-    def append_alias_range_dimension(self):
-        return self.create_alias_range_dimension()
+    def delete_dimensions(self):
+        dimgroup = self._h5group.open_group("dimensions")
+        ndims = len(dimgroup)
+        for idx in range(ndims):
+            del dimgroup[str(idx+1)]
+        return True
 
     def _dimension_count(self):
         return len(self._h5group.open_group("dimensions"))
-
-    def _delete_dimension_by_pos(self, index):
-        self._h5group.open_group("dimensions").delete(str(index))
 
     def _get_dimension_by_pos(self, index):
         h5dim = self._h5group.open_group("dimensions").open_group(str(index))
