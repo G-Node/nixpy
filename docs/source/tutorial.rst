@@ -68,14 +68,14 @@ The H5Py backend is always available.
 
 .. code-block:: python
 
-    file = nixio.File.open(file_name, nixio.FileMode.Overwrite, backend="h5py")
+    file = nix.File.open(file_name, nix.FileMode.Overwrite, backend="h5py")
 
 Alternatively, if `NIX`_ is installed and NIXPy was built with NIX support, the
 HDF5 backend can be specified.
 
 .. code-block:: python
 
-    file = nixio.File.open(file_name, nixio.FileMode.Overwrite, backend="hdf5")
+    file = nix.File.open(file_name, nix.FileMode.Overwrite, backend="hdf5")
 
 See the :ref:`advanced installation` instructions for details on installing
 NIXPy with NIX HDF5 backend support.
@@ -350,11 +350,11 @@ NIX-model. Suppose that we have the recording of a signal in which a
 set of events is detected. Each event may have certain characteristics
 one wants to store. These are stored as **Features** of the
 events. There are three different link-types between the features and
-the events stored in the tag. *nixio.LinkType.Untagged* indicates that
+the events stored in the tag. *nix.LinkType.Untagged* indicates that
 the whole data stored in the **Feature** applies to the points defined
-in the tag. *nixio.LinkType.Tagged* on the other side implies that the
+in the tag. *nix.LinkType.Tagged* on the other side implies that the
 *position* and *extent* have to be applied also to the data stored in
-the **Feature**. Finally, the *nixio.LinkType.Indexed* indicates that
+the **Feature**. Finally, the *nix.LinkType.Indexed* indicates that
 there is one point (or slice) in the **Feature** data that is related
 to each position in the Tag.
 

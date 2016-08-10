@@ -25,7 +25,7 @@
 
 """
 
-import nixio
+import nixio as nix
 import numpy as np
 import Image as img
 import matplotlib.pyplot as plt
@@ -97,7 +97,7 @@ if __name__ == '__main__':
     img_data, channels = load_image()
     # create a new file overwriting any existing content
     file_name = 'image_with_source_example.h5'
-    file = nixio.File.open(file_name, nixio.FileMode.Overwrite)
+    file = nix.File.open(file_name, nix.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.
     # it gets a name and a type 

@@ -14,7 +14,7 @@ import numpy as np
 
 
 class LIF(object):
-    
+
     def __init__(self, stepsize=0.0001, offset=1.6, tau_m=0.025, tau_a=0.02, da=0.0, D=3.5):
         self.stepsize = stepsize  # simulation stepsize [s]
         self.offset = offset  # offset curent [nA]
@@ -42,7 +42,7 @@ class LIF(object):
         euler solution of the membrane equation with adaptation current and noise
         """
         self.i_a -= self.i_a - self.stepsize/self.tau_a * (self.i_a)
-        self.v += self.stepsize * ( -self.v + stimulus + noise + self.offset - self.i_a)/self.tau_m; 
+        self.v += self.stepsize * ( -self.v + stimulus + noise + self.offset - self.i_a)/self.tau_m;
         self.membrane_voltage.append(self.v)
 
     def _next(self, stimulus):
@@ -57,7 +57,7 @@ class LIF(object):
             self.membrane_voltage[len(self.membrane_voltage)-1] = 2.0
             self.spike_times.append(self.t)
             self.i_a += self.da
-  
+
     def run_const_stim(self, steps, stimulus):
         """
         lif simulation with constant stimulus.

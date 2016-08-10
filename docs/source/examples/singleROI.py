@@ -13,8 +13,8 @@
 
  This tutorial shows how to store image data in nix-files.
  See https://github.com/G-node/nix/wiki for more information.
- 
- We use the "Lenna" image in this tutorial.  
+
+ We use the "Lenna" image in this tutorial.
 
  "Lenna" by Original full portrait: "Playmate of the Month". Playboy
  Magazine. November 1972, photographed by Dwight Hooker.This 512x512
@@ -25,7 +25,7 @@
 
 """
 
-import nixio
+import nixio as nix
 import numpy as np
 import Image as img
 
@@ -54,16 +54,16 @@ def plot_data(tag):
     draw_rect(img_data, pos, ext)
     new_img = img.fromarray(img_data)
     new_img.show()
-        
+
 
 if __name__ == '__main__':
     img_data, channels = load_image()
     # create a new file overwriting any existing content
     file_name = 'single_roi.h5'
-    file = nixio.File.open(file_name, nixio.FileMode.Overwrite)
+    file = nix.File.open(file_name, nix.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.
-    # it gets a name and a type 
+    # it gets a name and a type
     block = file.create_block("block name", "nix.session")
 
     # create a 'DataArray' to take the sinewave, add some information about the signal
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     width_dim.label = "width"
     color_dim = data.append_set_dimension()
     color_dim.labels = channels
-    
+
     # create a Tag, position and extent must be 3-D since the data is 3-D
     position = [250, 250, 0]
     extent = [30, 100, 3]
