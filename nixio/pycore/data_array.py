@@ -104,7 +104,7 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         """
         dimgroup = self._h5group.open_group("dimensions")
         index = len(dimgroup) + 1
-        return SetDimension._create_new(dimgroup, index)
+        return self.create_set_dimension(index)
 
     def append_sampled_dimension(self, sampling_interval):
         """
