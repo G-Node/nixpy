@@ -15,7 +15,7 @@
  See https://github.com/G-node/nix/wiki for more information.
 """
 
-import nixio as nix
+import nixio
 import numpy as np
 import matplotlib.pylab as plt
 
@@ -48,7 +48,7 @@ if __name__ == "__main__":
     
     # create a new file overwriting any existing content
     file_name = 'regular_data_example.h5'
-    file = nix.File.open(file_name, nix.FileMode.Overwrite)
+    file = nixio.File.open(file_name, nixio.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.
     # it gets a name and a type 

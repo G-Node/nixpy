@@ -16,7 +16,7 @@
 
 """
 
-import nixio as nix
+import nixio
 import numpy as np
 import matplotlib.pylab as plt
 
@@ -36,8 +36,8 @@ def plot_data(data_array):
     y = np.zeros(data_array.data.shape)
     data_array.data.read_direct(y)
     for i, label in enumerate(set_dim.labels):
-        plt.plot(x, y[i,:], label=label)
-    
+        plt.plot(x, y[i, :], label=label)
+
     plt.xlabel(x_axis.label + " [" + x_axis.unit + "]")
     plt.ylabel(data_array.label + " [" + data_array.unit + "]")
     plt.title(data_array.name)
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     
     # create a new file overwriting any existing content
     file_name = 'multiple_regular_data_example.h5'
-    file = nix.File.open(file_name, nix.FileMode.Overwrite)
+    file = nixio.File.open(file_name, nixio.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.
     # it gets a name and a type 
