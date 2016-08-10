@@ -60,7 +60,33 @@ Source code of this example: `fileCreate.py`_.
 
 .. _fileCreate.py: examples/fileCreate.py
 
+Selecting a backend
+"""""""""""""""""""
+
+The `open` method supports specifying a NIX backend with the `backend` argument.
+The H5Py backend is always available.
+
+.. code-block:: python
+
+    file = nixio.File.open(file_name, nixio.FileMode.Overwrite, backend="h5py")
+
+Alternatively, if `NIX`_ is installed and NIXPy was built with NIX support, the
+HDF5 backend can be specified.
+
+.. code-block:: python
+
+    file = nixio.File.open(file_name, nixio.FileMode.Overwrite, backend="hdf5")
+
+See the :ref:`advanced installation` instructions for details on installing
+NIXPy with NIX HDF5 backend support.
+
+When no backend is specified, HDF5 is used if available, otherwise the library
+defaults to H5Py.
+
+
 :ref:`toc`
+
+.. _NIX: https://github.com/G-Node/nix
 
 Basic data structures
 =====================
