@@ -7,6 +7,8 @@
 # LICENSE file in the root of the Project.
 from numbers import Number
 
+from warnings import warn
+
 from .entity_with_sources import EntityWithSources
 from ..data_array import DataArrayMixin, DataSetMixin
 from ..value import DataType
@@ -68,30 +70,38 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
             super(DataArray, self)._read_data(data, count, offset)
 
     def create_set_dimension(self, index):
-        dimgroup = self._h5group.open_group("dimensions")
-        return SetDimension._create_new(dimgroup, index)
+        warn("This function is deprecated and ignores the index argument")
+        return self.append_set_dimension()
 
     def create_sampled_dimension(self, index, sample):
-        dimgroup = self._h5group.open_group("dimensions")
-        return SampledDimension._create_new(dimgroup, index, sample)
+        warn("This function is deprecated and ignores the index argument")
+        return self.append_sampled_dimension(sample)
 
     def create_range_dimension(self, index, range_):
-        dimgroup = self._h5group.open_group("dimensions")
-        return RangeDimension._create_new(dimgroup, index, range_)
+        warn("This function is deprecated and ignores the index argument")
+        return self.append_range_dimension(range_)
 
     def append_set_dimension(self):
+        dimgroup = self._h5group.open_group("dimensions")
         index = len(self._h5group.open_group("dimensions")) + 1
-        return self.create_set_dimension(index)
+        return SetDimension._create_new(dimgroup, index)
 
     def append_sampled_dimension(self, sample):
         index = len(self._h5group.open_group("dimensions")) + 1
-        return self.create_sampled_dimension(index, sample)
+        dimgroup = self._h5group.open_group("dimensions")
+        return SampledDimension._create_new(dimgroup, index, sample)
 
     def append_range_dimension(self, range_):
         index = len(self._h5group.open_group("dimensions")) + 1
-        return self.create_range_dimension(index, range_)
+        dimgroup = self._h5group.open_group("dimensions")
+        return RangeDimension._create_new(dimgroup, index, range_)
 
     def create_alias_range_dimension(self):
+        warn("This function is deprecated and will be removed. "
+             "Use append_alias_range_dimension instead.", DeprecationWarning)
+        return self.append_alias_range_dimension()
+
+    def append_alias_range_dimension(self):
         if (len(self.data_extent) > 1 or
                 not DataType.is_numeric_dtype(self.dtype)):
             raise ValueError("AliasRangeDimensions only allowed for 1D "
@@ -103,14 +113,15 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         data = self._h5group.group["data"]
         return RangeDimension._create_new(dimgroup, 1, data)
 
-    def append_alias_range_dimension(self):
-        return self.create_alias_range_dimension()
+    def delete_dimensions(self):
+        dimgroup = self._h5group.open_group("dimensions")
+        ndims = len(dimgroup)
+        for idx in range(ndims):
+            del dimgroup[str(idx+1)]
+        return True
 
     def _dimension_count(self):
         return len(self._h5group.open_group("dimensions"))
-
-    def _delete_dimension_by_pos(self, index):
-        self._h5group.open_group("dimensions").delete(str(index))
 
     def _get_dimension_by_pos(self, index):
         h5dim = self._h5group.open_group("dimensions").open_group(str(index))

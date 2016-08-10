@@ -34,9 +34,9 @@ class DataArrayMixin(object):
     def dimensions(self):
         """
         A property containing all dimensions of a DataArray. Dimensions can be
-        obtained via their index. Dimensions can be deleted from the list. Adding
-        sources is done using the respective create and append methods for
-        dimension descriptors. This is a read only attribute.
+        obtained via their index. Adding dimensions is done using the respective
+        append methods for dimension descriptors.
+        This is a read only attribute.
 
         :type: ProxyList of dimension descriptors.
         """
@@ -97,10 +97,6 @@ class DimensionProxyList(object):
             return self.__obj._get_dimension_by_pos(key + 1)
         else:
             raise TypeError("The key must be an int but was: " + type(key))
-
-    def __delitem__(self, key):
-        elem = self.__getitem__(key)
-        self.__obj._delete_dimension_by_pos(elem.index)
 
     def __iter__(self):
         for i in range(0, len(self)):
