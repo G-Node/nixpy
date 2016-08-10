@@ -82,7 +82,7 @@ class FileMixin(object):
         sections can be obtained by their id or their index. Sections can be
         deleted from this list. Notice: when a section is deleted all its child
         section and properties will be removed too. Adding a new Section is done
-         via the crate_section method of File. This is a read-only property.
+        via the crate_section method of File. This is a read-only property.
 
         :type: ProxyList of Section entities.
         """

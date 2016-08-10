@@ -61,10 +61,9 @@ class SectionMixin(object):
     def find_sections(self, filtr=lambda _: True, limit=None):
         """
         Get all child sections recursively.
-
         This method traverses the trees of all sections. The traversal is
         accomplished via breadth first and can be limited in depth. On each node
-         or section a filter is applied. If the filter returns true the
+        or section a filter is applied. If the filter returns true the
         respective section will be added to the result list.
         By default a filter is used that accepts all sections.
 
