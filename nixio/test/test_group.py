@@ -10,24 +10,35 @@ from __future__ import (absolute_import, division, print_function)#, unicode_lit
 
 import unittest
 from nixio import *
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 
 
-class TestGroup(unittest.TestCase):
+class _TestGroup(unittest.TestCase):
+
+    backend = None
 
     def setUp(self):
-        self.file  = File.open("unittest.h5", FileMode.Overwrite)
+        self.file  = File.open("unittest.h5", FileMode.Overwrite,
+                               backend=self.backend)
         self.block = self.file.create_block("test block", "recordingsession")
 
-        self.my_array = self.block.create_data_array("my array", "test", DataType.Int16, (1, ))
+        self.my_array = self.block.create_data_array("my array", "test",
+                                                     DataType.Int16, (1, ))
         self.my_tag   = self.block.create_tag("my tag", "test", [0.25])
         self.my_group = self.block.create_group("my group", "group")
-        self.my_multiTag = self.block.create_multi_tag("my_mt", "test", self.my_array)
+        self.my_multiTag = self.block.create_multi_tag("my_mt", "test",
+                                                       self.my_array)
 
         self.my_group.data_arrays.append(self.my_array)
         self.my_group.tags.append(self.my_tag)
         self.my_group.multi_tags.append(self.my_multiTag)
 
-        self.your_array = self.block.create_data_array("your array", "test", DataType.Int16, (1, ))
+        self.your_array = self.block.create_data_array("your array", "test",
+                                                       DataType.Int16, (1, ))
         self.your_group = self.block.create_group("your group", "group")
         self.your_group.data_arrays.append(self.your_array)
 
@@ -78,10 +89,13 @@ class TestGroup(unittest.TestCase):
     def test_group_data_arrays(self):
         assert(len(self.my_group.data_arrays) == 1)
 
-        self.assertRaises(TypeError, lambda _: self.my_group.data_arrays.append(100))
+        self.assertRaises(TypeError,
+                          lambda _: self.my_group.data_arrays.append(100))
 
-        a1 = self.block.create_data_array("reference1", "stimuli", DataType.Int16, (1, ))
-        a2 = self.block.create_data_array("reference2", "stimuli", DataType.Int16, (1, ))
+        a1 = self.block.create_data_array("reference1", "stimuli",
+                                          DataType.Int16, (1, ))
+        a2 = self.block.create_data_array("reference2", "stimuli",
+                                          DataType.Int16, (1, ))
 
         self.my_group.data_arrays.append(a1)
         self.my_group.data_arrays.append(a2)
@@ -125,7 +139,8 @@ class TestGroup(unittest.TestCase):
     def test_group_multi_tags(self):
         assert(len(self.my_group.multi_tags) == 1)
 
-        self.assertRaises(TypeError, lambda _: self.my_group.multi_tags.append(100))
+        self.assertRaises(TypeError,
+                          lambda _: self.my_group.multi_tags.append(100))
 
         mt1 = self.block.create_multi_tag("mtag1", "stimuli", self.my_array)
         mt2 = self.block.create_multi_tag("mtag2", "stimuli", self.my_array)
@@ -146,3 +161,53 @@ class TestGroup(unittest.TestCase):
 
         self.my_group.multi_tags.extend([mt1, mt2])
         assert(len(self.my_group.multi_tags) == 3)
+
+    def test_group_get_by_name(self):
+        for idx in range(3):
+            da = self.block.create_data_array("da"+str(idx), "da",
+                                              data=list(range(idx)))
+            self.my_group.data_arrays.append(da)
+
+            mt = self.block.create_multi_tag("mt"+str(idx), "mt",
+                                             da)
+            self.my_group.multi_tags.append(mt)
+            tg = self.block.create_tag("tg"+str(idx), "tg", [0.3, 0.6])
+            self.my_group.tags.append(tg)
+
+        da_names = [da.name for da in self.my_group.data_arrays]
+        mt_names = [mt.name for mt in self.my_group.multi_tags]
+        tg_names = [tg.name for tg in self.my_group.tags]
+
+        for name in da_names:
+            assert(self.block.data_arrays[name].id ==
+                   self.my_group.data_arrays[name].id)
+        for name in mt_names:
+            assert(self.block.multi_tags[name].id ==
+                   self.my_group.multi_tags[name].id)
+        for name in tg_names:
+            assert(self.block.tags[name].id == self.my_group.tags[name].id)
+
+    def test_group_invalid_add(self):
+        da = self.block.data_arrays[0]
+        mt = self.block.multi_tags[0]
+        tg = self.block.tags[0]
+
+        newblock = self.file.create_block("second block", "block")
+        newgroup = newblock.create_group("second block group", "group")
+
+        self.assertRaises(RuntimeError, newgroup.data_arrays.append, da)
+        self.assertRaises(RuntimeError, newgroup.multi_tags.append, mt)
+        self.assertRaises(RuntimeError, newgroup.tags.append, tg)
+
+        del self.file.blocks[newblock.id]
+
+
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
+class TestGroupCPP(_TestGroup):
+
+    backend = "hdf5"
+
+
+class TestGroupPy(_TestGroup):
+
+    backend = "h5py"

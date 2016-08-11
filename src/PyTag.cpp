@@ -53,10 +53,18 @@ boost::optional<DataArray> getReferenceByPos(const Tag& st, size_t index) {
 
 // operations for Feature
 
-Feature createNewFeature(Tag& st, const DataArray &data, LinkType link_type) {
-    Feature f = st.createFeature(data, link_type);
+Feature createNewFeature(Tag& st, const DataArray &data, const std::string& link_type) {
 
-    return f;
+    LinkType lt;
+    if (link_type == "Tagged")
+        lt = LinkType::Tagged;
+    else if (link_type == "Untagged")
+        lt = LinkType::Untagged;
+    else if (link_type == "Indexed")
+        lt = LinkType::Indexed;
+    // TODO: Throw error
+
+    return st.createFeature(data, lt);
 }
 
 boost::optional<Feature> getFeatureById(const Tag& st, const std::string& id) {

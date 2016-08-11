@@ -24,6 +24,7 @@
  http://en.wikipedia.org/wiki/File:Lenna.png#mediaviewer/File:Lenna.png
 
 """
+
 import nixio as nix
 import numpy as np
 import Image as img

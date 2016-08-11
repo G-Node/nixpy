@@ -20,20 +20,31 @@ using namespace boost::python;
 
 namespace nixpy {
 
+void setLinkType(Feature& f, const std::string& link_type) {
+    LinkType lt;
+    if (link_type == "Tagged")
+        lt = LinkType::Tagged;
+    else if (link_type == "Untagged")
+        lt = LinkType::Untagged;
+    else if (link_type == "Indexed")
+        lt = LinkType::Indexed;
+    else throw std::runtime_error("Invalid string for LinkType.");
+
+    f.linkType(lt);
+}
+
+static std::string getLinkType(Feature& f) {
+    return link_type_to_string(f.linkType());
+}
+
 void PyFeature::do_export() {
 
     PyEntity<base::IFeature>::do_export("Feature");
 
-    enum_<LinkType>("LinkType")
-        .value("Tagged",  LinkType::Tagged)
-        .value("Untagged", LinkType::Untagged)
-        .value("Indexed", LinkType::Indexed)
-        ;
-
     class_<Feature, bases<base::Entity<base::IFeature>>>("Feature")
         .add_property("link_type",
-                      GETTER(LinkType, Feature, linkType),
-                      SETTER(LinkType, Feature, linkType))
+                      getLinkType,
+                      setLinkType)
         .add_property("data",
                       GETTER(DataArray, Feature, data),
                       REF_SETTER(DataArray, Feature, data))

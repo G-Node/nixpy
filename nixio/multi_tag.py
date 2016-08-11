@@ -8,20 +8,19 @@
 
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-from nixio.core import MultiTag
-from nixio.util.inject import inject
 from nixio.tag import ReferenceProxyList, FeatureProxyList
 
 
-class MultiTagMixin(MultiTag):
+class MultiTagMixin(object):
 
     @property
     def references(self):
         """
-        A property containing all data arrays referenced by the tag. Referenced data arrays
-        can be obtained by index or their id. References can be removed from the list, removing
-        a referenced DataArray will not remove it from the file. New references can be added using
-        the append method of the list.
+        A property containing all data arrays referenced by the tag. Referenced
+        data arrays can be obtained by index or their id. References can be
+        removed from the list, removing a referenced DataArray will not remove
+        it from the file. New references can be added using the append method of
+        the list.
         This is a read only attribute.
 
         :type: RefProxyList of DataArray
@@ -33,8 +32,8 @@ class MultiTagMixin(MultiTag):
     @property
     def features(self):
         """
-        A property containing all features of the tag. Features can be
-        obtained via their index or their id. Features can be deleted from the list.
+        A property containing all features of the tag. Features can be obtained
+        via their index or their id. Features can be deleted from the list.
         Adding new features to the tag is done using the create_feature method.
         This is a read only attribute.
 
@@ -44,5 +43,3 @@ class MultiTagMixin(MultiTag):
             setattr(self, "_features", FeatureProxyList(self))
         return self._features
 
-
-inject((MultiTag,), dict(MultiTagMixin.__dict__))

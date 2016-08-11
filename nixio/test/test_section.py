@@ -11,15 +11,25 @@ from __future__ import (absolute_import, division, print_function)#, unicode_lit
 import unittest
 
 from nixio import *
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 import nixio
 
 
-class TestSection(unittest.TestCase):
+class _TestSection(unittest.TestCase):
+
+    backend = None
 
     def setUp(self):
-        self.file    = File.open("unittest.h5", FileMode.Overwrite)
-        self.section = self.file.create_section("test section", "recordingsession")
-        self.other   = self.file.create_section("other section", "recordingsession")
+        self.file    = File.open("unittest.h5", FileMode.Overwrite,
+                                 backend=self.backend)
+        self.section = self.file.create_section("test section",
+                                                "recordingsession")
+        self.other   = self.file.create_section("other section",
+                                                "recordingsession")
 
     def tearDown(self):
         del self.file.sections[self.section.id]
@@ -98,25 +108,37 @@ class TestSection(unittest.TestCase):
         
         assert(self.section['subject'] == subject)
         assert(self.section['subject'].id == subject.id)
-        assert('easy subsection' in [v.name for k, v in self.section.sections.items()])
+        assert('easy subsection' in
+               [v.name for k, v in self.section.sections.items()])
         assert('easy subsection' in self.section.sections)
         assert(self.section['easy subsection'].name == 'easy subsection')
         #assert('easy subsection' in self.section)
 
     def test_section_find_sections(self):
-        for i in range(2): self.section.create_section("level1-p0-s" + str(i), "dummy")
-        for i in range(2): self.section.sections[0].create_section("level2-p1-s" + str(i), "dummy")
-        for i in range(2): self.section.sections[1].create_section("level2-p2-s" + str(i), "dummy")
-        for i in range(2): self.section.sections[0].sections[0].create_section("level3-p1-s" + str(i), "dummy")
+        for i in range(2):
+            self.section.create_section("level1-p0-s" + str(i), "dummy")
+        for i in range(2):
+            self.section.sections[0].create_section("level2-p1-s" + str(i),
+                                                    "dummy")
+        for i in range(2):
+            self.section.sections[1].create_section("level2-p2-s" + str(i),
+                                                    "dummy")
+        for i in range(2):
+            self.section.sections[0].sections[0].create_section(
+                "level3-p1-s" + str(i), "dummy"
+            )
 
         assert(len(self.section.find_sections()) == 9)
         assert(len(self.section.find_sections(limit=1)) == 3)
-        assert(len(self.section.find_sections(filtr=lambda x : "level2-p1-s" in x.name)) == 2)
-        assert(len(self.section.find_sections(filtr=lambda x : "level2-p1-s" in x.name, limit=1)) == 0)
+        assert(len(self.section.find_sections(
+            filtr=lambda x: "level2-p1-s" in x.name)) == 2
+               )
+        assert(len(self.section.find_sections(
+            filtr=lambda x: "level2-p1-s" in x.name, limit=1)) == 0
+               )
 
         assert(len(self.section.find_related()) == 3)
         assert(len(self.section.sections[0].find_related()) == 5)
-
 
     def test_section_properties(self):
         assert(len(self.section) == 0)
@@ -155,7 +177,6 @@ class TestSection(unittest.TestCase):
 
         self.section['ep_val'] = 2.0
 
-
         res = [x in self.section for x in ['ep_str', 'ep_int', 'ep_float']]
         assert(all(res))
 
@@ -173,3 +194,30 @@ class TestSection(unittest.TestCase):
             del self.section[x]
 
         assert(len(self.section) == 0)
+
+    @unittest.skip
+    def test_parent(self):
+        self.assertIs(self.section.parent, None)
+        child = self.section.create_section("child section", "sect")
+        self.assertEqual(self.section, child.parent)
+
+        block = self.file.create_block("block", "section parent test")
+        mdsection = self.file.create_section("block md", "metadata sect")
+        block.metadata = mdsection
+        self.assertIs(block.metadata.parent, None)
+
+        grp = block.create_group("group", "section parent test")
+        grp.metadata = child
+        self.assertEqual(grp.metadata.parent, self.section)
+
+
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
+class TestSectionCPP(_TestSection):
+
+    backend = "hdf5"
+
+
+class TestSectionPy(_TestSection):
+
+    backend = "h5py"
+

@@ -8,31 +8,19 @@
 
 from __future__ import (absolute_import, division, print_function)#, unicode_literals)
 
-from nixio.core import File, FileMode, Block, DataType, Section, Property, Value, \
-    Source, DataArray, RangeDimension, SetDimension, SampledDimension, \
-    DimensionType, Feature, LinkType, Tag, MultiTag, Group
-
-from nixio.block import BlockMixin
-from nixio.file import FileMixin
-from nixio.section import SectionMixin
-from nixio.property import PropertyMixin, ValueMixin
-from nixio.source import SourceMixin
-from nixio.data_array import DataSetMixin
-from nixio.data_array import DataArrayMixin
-from nixio.tag import TagMixin
-from nixio.multi_tag import MultiTagMixin
-from nixio.group import GroupMixin
-from nixio.entity_with_sources import DataArraySourcesMixin, MultiTagSourcesMixin, \
-    TagSourcesMixin
+from nixio.pycore.file import File, FileMode
+from nixio.value import Value, DataType
+from nixio.dimension_type import DimensionType
+from nixio.link_type import LinkType
 
 from nixio.section import S
 
-__all__ = ("File", "FileMode", "Block", "DataType", "Section", "Property",
-           "Value", "Source", "DataArray", "RangeDimension", "SetDimension",
-           "SampledDimension", "DimensionType", "Feature", "LinkType",
-           "Tag", "MultiTag", "Group")
+try:
+    import nixio.util.inject
+except ImportError:
+    pass
 
-del BlockMixin, FileMixin, SectionMixin, PropertyMixin, ValueMixin, SourceMixin, DataArrayMixin, TagMixin
-del MultiTagMixin, DataArraySourcesMixin, MultiTagSourcesMixin, TagSourcesMixin, GroupMixin
+__all__ = ("File", "FileMode", "DataType", "Value", "LinkType", "DimensionType")
 
-__author__ = 'Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, Balint Morvai'
+__author__ = ('Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe,'
+              ' Balint Morvai')

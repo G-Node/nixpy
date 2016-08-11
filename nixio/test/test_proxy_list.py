@@ -11,6 +11,11 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import unittest
 
 from nixio import *
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 from nixio.util.proxy_list import ProxyList
 
 try:
@@ -58,6 +63,7 @@ class WithListMock(object):
         return self.__list
 
 
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestProxyList(unittest.TestCase):
 
     def setUp(self):

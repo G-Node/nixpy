@@ -6,19 +6,31 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
 from nixio import *
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 
-class TestBlock(unittest.TestCase):
+
+class _TestBlock(unittest.TestCase):
+
+    backend = None
 
     def setUp(self):
-        # TODO "unittest.h5 is a unicode string and is handed over to a c++ function expecting a string"
-        # this leads to an error. if "unittest.h5".encode("utf-8") or b'unittest.h5' is used, the c++ function can handle the string
-        # but is not able to create the file any longer. Should this somehow be adressed on the c++ side of the code?
-        self.file  = File.open('unittest.h5', FileMode.Overwrite)
+        # TODO: unittest.h5 is a unicode string and is handed over to a c++
+        #  function expecting a string. This leads to an error.
+        #  if "unittest.h5".encode("utf-8") or b'unittest.h5' is used,
+        #  the c++ function can handle the string # but is not able to create
+        #  the file any longer. Should this somehow be adressed on the c++ side
+        #  of the code?
+        self.file  = File.open('unittest.h5', FileMode.Overwrite,
+                               backend=self.backend)
         self.block = self.file.create_block("test block", "recordingsession")
         self.other = self.file.create_block("other block", "recordingsession")
 
@@ -70,7 +82,9 @@ class TestBlock(unittest.TestCase):
     def test_block_data_arrays(self):
         assert(len(self.block.data_arrays) == 0)
 
-        data_array = self.block.create_data_array("test data_array", "recordingsession", DataType.Int32, (0, ))
+        data_array = self.block.create_data_array("test data_array",
+                                                  "recordingsession",
+                                                  DataType.Int32, (0, ))
 
         assert(len(self.block.data_arrays) == 1)
 
@@ -89,8 +103,11 @@ class TestBlock(unittest.TestCase):
     def test_block_multi_tags(self):
         assert(len(self.block.multi_tags) == 0)
 
-        data_array = self.block.create_data_array("test array", "recording", DataType.Int32, (0, ))
-        multi_tag = self.block.create_multi_tag("test multi_tag", "recordingsession", data_array)
+        data_array = self.block.create_data_array("test array",
+                                                  "recording",
+                                                  DataType.Int32, (0, ))
+        multi_tag = self.block.create_multi_tag("test multi_tag",
+                                                "recordingsession", data_array)
 
         assert(len(self.block.multi_tags) == 1)
 
@@ -143,15 +160,24 @@ class TestBlock(unittest.TestCase):
         assert(len(self.block.sources) == 0)
 
     def test_block_find_sources(self):
-        for i in range(2): self.block.create_source("level1-p0-s" + str(i), "dummy")
-        for i in range(2): self.block.sources[0].create_source("level2-p1-s" + str(i), "dummy")
-        for i in range(2): self.block.sources[1].create_source("level2-p2-s" + str(i), "dummy")
-        for i in range(2): self.block.sources[0].sources[0].create_source("level3-p1-s" + str(i), "dummy")
+        for i in range(2):
+            self.block.create_source("level1-p0-s" + str(i), "dummy")
+        for i in range(2):
+            self.block.sources[0].create_source("level2-p1-s" + str(i), "dummy")
+        for i in range(2):
+            self.block.sources[1].create_source("level2-p2-s" + str(i), "dummy")
+        for i in range(2):
+            self.block.sources[0].sources[0].create_source(
+                "level3-p1-s" + str(i), "dummy"
+            )
 
         assert(len(self.block.find_sources()) == 8)
         assert(len(self.block.find_sources(limit=1)) == 2)
-        assert(len(self.block.find_sources(filtr=lambda x : "level2-p1-s" in x.name)) == 2)
-        assert(len(self.block.find_sources(filtr=lambda x : "level2-p1-s" in x.name, limit=1)) == 0)
+        assert(len(self.block.find_sources(filtr=lambda x: "level2-p1-s" in
+                                                           x.name)) == 2)
+        assert(len(self.block.find_sources(filtr=lambda x: "level2-p1-s" in
+                                                           x.name,
+                                           limit=1)) == 0)
 
     def test_block_groups(self):
         assert(len(self.block.groups) == 0)
@@ -170,3 +196,15 @@ class TestBlock(unittest.TestCase):
         del self.block.groups[0]
 
         assert(len(self.block.groups) == 0)
+
+
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
+class TestBlockCPP(_TestBlock):
+
+    backend = "hdf5"
+
+
+class TestBlockPy(_TestBlock):
+
+    backend = "h5py"
+

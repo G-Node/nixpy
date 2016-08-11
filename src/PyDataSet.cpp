@@ -74,6 +74,10 @@ static nix::DataType pyDtypeToNixDtype(const PyArray_Descr *dtype)
         //maybe we should throw an exception instead
         break;
 
+    case 'S':
+        return nix::DataType::String;
+        break;
+
     default:
         break;
     }
@@ -231,6 +235,55 @@ struct dtype_transmogrify {
         data->convertible = raw;
     }
 
+    static PyObject* convert(const nix::DataType& dtype) {
+        PyObject* module = PyImport_ImportModule("nixio.value");
+        if (!module) return NULL;
+        static PyObject* PyDataType = PyObject_GetAttrString(module, "DataType");
+        std::string type_str;
+
+        switch(dtype) {
+            case nix::DataType::Bool:
+                type_str = "Bool";
+                break;
+            case nix::DataType::Float:
+                type_str = "Float";
+                break;
+            case nix::DataType::Double:
+                type_str = "Double";
+                break;
+            case nix::DataType::Int8:
+                type_str = "Int8";
+                break;
+            case nix::DataType::Int16:
+                type_str = "Int16";
+                break;
+            case nix::DataType::Int32:
+                type_str = "Int32";
+                break;
+            case nix::DataType::Int64:
+                type_str = "Int64";
+                break;
+            case nix::DataType::UInt8:
+                type_str = "UInt8";
+                break;
+            case nix::DataType::UInt16:
+                type_str = "UInt16";
+                break;
+            case nix::DataType::UInt32:
+                type_str = "UInt32";
+                break;
+            case nix::DataType::UInt64:
+                type_str = "UInt64";
+                break;
+            case nix::DataType::Char:
+            case nix::DataType::String:
+                type_str = "String";
+                break;
+            // Missing: Nothing and Opaque
+        }
+        return PyObject_GetAttrString(PyDataType, type_str.c_str());
+    }
+
 };
 
 struct DataSetWrapper : public nix::DataSet, public boost::python::wrapper<nix::DataSet> {
@@ -283,8 +336,9 @@ NIXPY_DO_EXPORT_RETTYPE PyDataSet::do_export() {
 
     class_<nix::DataView, bases<nix::DataSet>>("DataView", boost::python::no_init);
 
+    to_python_converter<nix::DataType, dtype_transmogrify>();
     dtype_transmogrify::register_from_python();
-    
+
     return NIXPY_DO_EXPORT_RETVAL;
 }
 

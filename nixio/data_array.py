@@ -6,17 +6,17 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import sys
 
-from nixio.core import DataArray
-from nixio.core import DataSet
-from nixio.util.inject import inject
+from nixio.dimension_type import DimensionType
 
 import numpy as np
 
-class DataArrayMixin(DataArray):
+
+class DataArrayMixin(object):
 
     @property
     def data(self):
@@ -34,9 +34,9 @@ class DataArrayMixin(DataArray):
     def dimensions(self):
         """
         A property containing all dimensions of a DataArray. Dimensions can be
-        obtained via their index. Dimensions can be deleted from the list. Adding
-        sources is done using the respective create and append methods for
-        dimension descriptors. This is a read only attribute.
+        obtained via their index. Adding dimensions is done using the respective
+        append methods for dimension descriptors.
+        This is a read only attribute.
 
         :type: ProxyList of dimension descriptors.
         """
@@ -56,6 +56,21 @@ class DataArrayMixin(DataArray):
         hash has to be either explicitly inherited from parent class, implemented or escaped
         """
         return hash(self.id)
+
+
+class SetDimensionMixin(object):
+
+    dimension_type = DimensionType.Set
+
+
+class RangeDimensionMixin(object):
+
+    dimension_type = DimensionType.Range
+
+
+class SampleDimensionMixin(object):
+
+    dimension_type = DimensionType.Sample
 
 
 class DimensionProxyList(object):
@@ -83,10 +98,6 @@ class DimensionProxyList(object):
         else:
             raise TypeError("The key must be an int but was: " + type(key))
 
-    def __delitem__(self, key):
-        elem = self.__getitem__(key)
-        self.__obj._delete_dimension_by_pos(elem.index)
-
     def __iter__(self):
         for i in range(0, len(self)):
             yield self.__obj._get_dimension_by_pos(i + 1)
@@ -99,7 +110,7 @@ class DimensionProxyList(object):
         return str(self)
 
 
-class DataSetMixin(DataSet):
+class DataSetMixin(object):
     """
     Data IO object for DataArray.
     """
@@ -315,7 +326,3 @@ class DataSetMixin(DataSet):
         shape = list(filter(lambda x: x is not None, squeezed))
 
         return count, offset, shape
-
-
-inject((DataArray,), dict(DataArrayMixin.__dict__))
-inject((DataSet,), dict(DataSetMixin.__dict__))

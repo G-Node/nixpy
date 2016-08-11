@@ -23,7 +23,7 @@ import matplotlib.pylab as plt
 def create_sinewave(duration=1, freq=10, stepsize=0.01):
     x = np.arange(0, duration*2*np.pi, stepsize)
     y = np.sin(freq*x)
-    return x, y 
+    return x, y
 
 
 def plot_data(data_array):
@@ -45,13 +45,13 @@ if __name__ == "__main__":
     frequency = 20
     stepsize = 0.02
     x, y = create_sinewave(duration, frequency, stepsize)
-    
+
     # create a new file overwriting any existing content
     file_name = 'regular_data_example.h5'
     file = nix.File.open(file_name, nix.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.
-    # it gets a name and a type 
+    # it gets a name and a type
     block = file.create_block("block name", "nix.session")
 
     # create a 'DataArray' to take the sinewave, add some information about the signal
@@ -63,7 +63,7 @@ if __name__ == "__main__":
     dim.unit = "s"
     dim.label = "time"
     dim.offset = 0.0 # optional
-    
+
     # let's plot the data from the stored information
     plot_data(data)
     file.close()

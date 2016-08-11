@@ -14,11 +14,20 @@ import unittest
 
 from nixio import *
 import numpy as np
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 
-class TestMultiTag(unittest.TestCase):
+
+class _TestMultiTag(unittest.TestCase):
+
+    backend = None
 
     def setUp(self):
-        self.file     = File.open("unittest.h5", FileMode.Overwrite)
+        self.file     = File.open("unittest.h5", FileMode.Overwrite,
+                                  backend=self.backend)
         self.block    = self.file.create_block("test block", "recordingsession")
 
         self.my_array = self.block.create_data_array("my array", "test", DataType.Int16, (0, 0))
@@ -270,7 +279,7 @@ class TestMultiTag(unittest.TestCase):
         untagged_feature = self.feature_tag.create_feature(index_data, LinkType.Untagged)
         
         # preparations done, actually test 
-        print(self.feature_tag.features)
+        # print(self.feature_tag.features)
         assert(len(self.feature_tag.features) == 3)
         
         # indexed feature
@@ -301,3 +310,14 @@ class TestMultiTag(unittest.TestCase):
             self.feature_tag.retrieve_feature_data(2, 1)
 
         self.assertRaises(IndexError,  out_of_bounds)
+
+
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
+class TestMultiTagCPP(_TestMultiTag):
+
+    backend = "hdf5"
+
+
+class TestMultiTagPy(_TestMultiTag):
+
+    backend = "h5py"

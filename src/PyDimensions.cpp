@@ -90,15 +90,8 @@ std::vector<double> getRangeDimensionAxis2(RangeDimension& dim, const size_t cou
 
 void PyDimensions::do_export() {
 
-    enum_<DimensionType>("DimensionType")
-        .value("Sample", DimensionType::Sample)
-        .value("Range" , DimensionType::Range)
-        .value("Set"   , DimensionType::Set)
-        ;
-
     class_<SampledDimension>("SampledDimension")
         .add_property("index", &SampledDimension::index)
-        .add_property("dimension_type", &SampledDimension::dimensionType)
         .add_property("label",
                       OPT_GETTER(std::string, SampledDimension, label),
                       setSampledDimensionLabel)
@@ -119,7 +112,6 @@ void PyDimensions::do_export() {
 
     class_<RangeDimension>("RangeDimension")
         .add_property("index", &RangeDimension::index)
-        .add_property("dimension_type", &RangeDimension::dimensionType)
         .add_property("label",
                       OPT_GETTER(std::string, RangeDimension, label),
                       setRangeDimensionLabel)
@@ -137,7 +129,6 @@ void PyDimensions::do_export() {
 
     class_<SetDimension>("SetDimension")
         .add_property("index", &SetDimension::index)
-        .add_property("dimension_type", &SetDimension::dimensionType)
         .add_property("labels",
                       GETTER(std::vector<std::string>, SetDimension, labels),
                       setSetDimensionLabels)

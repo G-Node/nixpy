@@ -13,6 +13,11 @@ import sys
 import numpy as np
 
 from nixio import *
+try:
+    import nixio.core
+    skip_cpp = False
+except ImportError:
+    skip_cpp = True
 
 try:
     basestring = basestring
@@ -20,10 +25,13 @@ except NameError:  # 'basestring' is undefined, must be Python 3
     basestring = (str,bytes)
 
 
-class TestDataArray(unittest.TestCase):
+class _TestDataArray(unittest.TestCase):
+
+    backend = None
 
     def setUp(self):
-        self.file  = File.open("unittest.h5", FileMode.Overwrite)
+        self.file  = File.open("unittest.h5", FileMode.Overwrite,
+                               backend=self.backend)
         self.block = self.file.create_block("test block", "recordingsession")
         self.array = self.block.create_data_array("test array", "signal", DataType.Double, (100, ))
         self.other = self.block.create_data_array("other array", "signal", DataType.Double, (100, ))
@@ -292,22 +300,26 @@ class TestDataArray(unittest.TestCase):
 
             assert(self.array.dimensions[i].index == self.array.dimensions[i - 3].index)
 
-        del self.array.dimensions[2]
-        del self.array.dimensions[1]
-        del self.array.dimensions[0]
+        self.array.delete_dimensions()
 
         assert(len(self.array.dimensions) == 0)
         self.array.append_alias_range_dimension()
         assert(len(self.array.dimensions) == 1)
-        del self.array.dimensions[0]
-        self.array.create_alias_range_dimension()
+        self.array.delete_dimensions()
+        self.array.append_alias_range_dimension()
         assert(len(self.array.dimensions) == 1)
 
-        self.assertRaises(ValueError, lambda : self.array.append_alias_range_dimension())
-        self.assertRaises(ValueError, lambda : self.array.create_alias_range_dimension())
-        string_array = self.block.create_data_array('string_array', 'nix.texts', dtype=DataType.String, shape=(10,))
-        self.assertRaises(ValueError, lambda : string_array.append_alias_range_dimension())
-        self.assertRaises(ValueError, lambda : string_array.create_alias_range_dimension())
+        self.assertRaises(ValueError,
+                          lambda: self.array.append_alias_range_dimension())
+        self.assertRaises(ValueError,
+                          lambda: self.array.append_alias_range_dimension())
+        string_array = self.block.create_data_array('string_array', 'nix.texts',
+                                                    dtype=DataType.String,
+                                                    shape=(10,))
+        self.assertRaises(ValueError,
+                          lambda : string_array.append_alias_range_dimension())
+        self.assertRaises(ValueError,
+                          lambda : string_array.create_alias_range_dimension())
         assert(len(string_array.dimensions) == 0)
         del self.block.data_arrays['string_array']
 
@@ -337,3 +349,14 @@ class TestDataArray(unittest.TestCase):
 
         del self.array.sources[source1]
         assert(len(self.array.sources) == 0)
+
+
+@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
+class TestDataArrayCPP(_TestDataArray):
+
+    backend = "hdf5"
+
+
+class TestDataArrayPy(_TestDataArray):
+
+    backend = "h5py"

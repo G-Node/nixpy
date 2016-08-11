@@ -36,8 +36,8 @@ def plot_data(data_array):
     y = np.zeros(data_array.data.shape)
     data_array.data.read_direct(y)
     for i, label in enumerate(set_dim.labels):
-        plt.plot(x, y[i,:], label=label)
-    
+        plt.plot(x, y[i, :], label=label)
+
     plt.xlabel(x_axis.label + " [" + x_axis.unit + "]")
     plt.ylabel(data_array.label + " [" + data_array.unit + "]")
     plt.title(data_array.name)
@@ -54,13 +54,13 @@ if __name__ == "__main__":
     frequency = 2
     stepsize = 0.02
     x, sine, cosine = create_data(duration, frequency, stepsize)
-    
+
     # create a new file overwriting any existing content
     file_name = 'multiple_regular_data_example.h5'
     file = nix.File.open(file_name, nix.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.
-    # it gets a name and a type 
+    # it gets a name and a type
     block = file.create_block("block name", "nix.session")
     # create a 'DataArray' to take the data, add some information about the signal
     y = np.vstack((sine, cosine))
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     dim.unit = "s"
     dim.label = "time"
     dim.offset = 0.0 # optional
-    
+
     # let's plot the data from the stored information
     plot_data(data)
     file.close()

@@ -29,12 +29,12 @@ def fake_neuron():
     t, v, spike_times = lif_model.run_const_stim(10000, 0.005)
     return t, v, spike_times
 
-    
+
 def plot_data(tag):
     data_array = tag.references[0]
     voltage = np.zeros(data_array.data.shape)
     data_array.data.read_direct(voltage)
-    
+
     x_axis = data_array.dimensions[0]
     time = x_axis.axis(data_array.data.shape[0])
 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     file = nix.File.open(file_name, nix.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.
-    # it gets a name and a type 
+    # it gets a name and a type
     block = file.create_block("block name", "nix.session")
 
     # create a 'DataArray' to take the membrane voltage
@@ -70,12 +70,12 @@ if __name__ == '__main__':
     time_dim = data.append_sampled_dimension(time[1]-time[0])
     time_dim.label = "time"
     time_dim.unit = "s"
-   
+
     # create the positions DataArray
     positions = block.create_data_array("times", "nix.positions", data=spike_times)
     positions.append_set_dimension() # these can be empty
     positions.append_set_dimension()
-    
+
     # create a MultiTag
     multi_tag = block.create_multi_tag("spike times", "nix.events.spike_times", positions)
     multi_tag.references.append(data)

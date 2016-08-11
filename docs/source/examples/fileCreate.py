@@ -24,7 +24,7 @@ file.create_block("test block", "test")
 file.close()
 
 # re-open for read-write access
-file  = nix.File.open(file_name, nix.FileMode.ReadWrite)
+file = nix.File.open(file_name, nix.FileMode.ReadWrite)
 
 # the following command now works fine
 file.create_block("test block", "test")

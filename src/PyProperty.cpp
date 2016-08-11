@@ -49,28 +49,121 @@ void setUnit(Property& prop, const boost::optional<std::string>& str) {
 }
 
 // Values
+struct value_transmogrify {
+    typedef boost::python::converter::rvalue_from_python_stage1_data py_s1_data;
+    typedef boost::python::converter::rvalue_from_python_storage<nix::Value> py_storage;
+
+    // nix::Value -> PyObject*
+    static PyObject* convert(const Value& value) {
+
+        PyObject* module = PyImport_ImportModule("nixio.value");
+        if (!module) return NULL;
+        static PyObject* PyValueClass = PyObject_GetAttrString(module, "Value");
+        PyObject* pyvalue;
+
+        DataType type = value.type();
+        switch(type) {
+            case DataType::Bool:
+                pyvalue = PyObject_CallFunction(PyValueClass, "O", value.get<bool>() ? Py_True: Py_False);
+                break;
+            case DataType::Float:
+            case DataType::Double:
+                pyvalue = PyObject_CallFunction(PyValueClass, "d", value.get<double>());
+                break;
+            case DataType::Char:
+            case DataType::Int8:
+            case DataType::Int16:
+            case DataType::Int32:
+            case DataType::Int64:
+                pyvalue = PyObject_CallFunction(PyValueClass, "l", value.get<int64_t>());
+                break;
+            case DataType::UInt8:
+            case DataType::UInt16:
+            case DataType::UInt32:
+            case DataType::UInt64:
+                pyvalue = PyObject_CallFunction(PyValueClass, "k", value.get<uint64_t>());
+                break;
+            case DataType::String:
+                pyvalue = PyObject_CallFunction(PyValueClass, "s", value.get<std::string>().c_str());
+                break;
+        }
+
+        PyObject_SetAttrString(pyvalue, "reference", PyUnicode_FromString(value.reference.c_str()));
+        PyObject_SetAttrString(pyvalue, "filename", PyUnicode_FromString(value.filename.c_str()));
+        PyObject_SetAttrString(pyvalue, "encoder", PyUnicode_FromString(value.encoder.c_str()));
+        PyObject_SetAttrString(pyvalue, "checksum", PyUnicode_FromString(value.checksum.c_str()));
+        PyObject_SetAttrString(pyvalue, "uncertainty", PyFloat_FromDouble(value.uncertainty));
+        return pyvalue;
+    }
+
+    static void register_from_python() {
+        boost::python::converter::registry::push_back(is_convertible,
+                                                      construct, boost::python::type_id<Value>());
+    }
+
+    static void* is_convertible(PyObject* obj) {
+        namespace bp = boost::python;
+
+        // For now, simply check if it has a "value" attribute
+        // TODO: Use PyObject_IsInstance
+
+        if (PyObject_HasAttrString(obj, "value")) {
+            return obj;
+        } else {
+            return nullptr;
+        }
+    }
+
+    // PyObject* -> nix::Value
+    static void construct(PyObject* obj, py_s1_data* data) {
+        namespace bp = boost::python;
+
+        void* storage = ((py_storage*)data)->storage.bytes;
+        new (storage) Value();
+        Value* nixvalue = static_cast<Value*>(storage);
+
+        PyObject* pyvalue = PyObject_GetAttrString(obj, "value");
+        PyObject* pytype = PyObject_GetAttrString(obj, "data_type");
+        std::string tname = extract<std::string>(PyObject_GetAttrString(pytype, "__name__"));
+
+        if (tname == "uint8") {
+            nixvalue->set(extract<uint8_t>(pyvalue));
+        } else if (tname == "uint16") {
+            nixvalue->set(extract<uint16_t>(pyvalue));
+        } else if (tname == "uint32") {
+            nixvalue->set(extract<uint32_t>(pyvalue));
+        } else if (tname == "uint64") {
+            nixvalue->set(extract<uint64_t>(pyvalue));
+        } else if (tname == "int8") {
+            nixvalue->set(extract<int8_t>(pyvalue));
+        } else if (tname == "int16") {
+            nixvalue->set(extract<int16_t>(pyvalue));
+        } else if (tname == "int32") {
+            nixvalue->set(extract<int32_t>(pyvalue));
+        } else if (tname == "int64") {
+            nixvalue->set(extract<int64_t>(pyvalue));
+        } else if (tname == "bytes_" || tname == "string_") {
+            nixvalue->set(extract<std::string>(pyvalue));
+        } else if (tname == "bool_") {
+            nixvalue->set(extract<bool>(pyvalue));
+        } else if (tname == "float32") {
+            nixvalue->set(extract<float>(pyvalue));
+        } else if (tname == "float64") {
+            nixvalue->set(extract<double>(pyvalue));
+        } else {
+            // TODO: Error
+        }
+        nixvalue->reference = extract<std::string>(PyObject_GetAttrString(obj, "reference"));
+        nixvalue->filename = extract<std::string>(PyObject_GetAttrString(obj, "filename"));
+        nixvalue->encoder = extract<std::string>(PyObject_GetAttrString(obj, "encoder"));
+        nixvalue->checksum = extract<std::string>(PyObject_GetAttrString(obj, "checksum"));
+        nixvalue->uncertainty = extract<double>(PyObject_GetAttrString(obj, "uncertainty"));
+
+        data->convertible = storage;
+    }
+};
 
 void PyProperty::do_export() {
-
-    enum_<DataType>("DataType")
-        .value("Bool"    , DataType::Bool)
-        .value("Char"    , DataType::Char)
-        .value("Float"   , DataType::Float)
-        .value("Double"  , DataType::Double)
-        .value("Int8"    , DataType::Int8)
-        .value("Int16"   , DataType::Int16)
-        .value("Int32"   , DataType::Int32)
-        .value("Int64"   , DataType::Int64)
-        .value("UInt8"   , DataType::UInt8)
-        .value("UInt16"  , DataType::UInt16)
-        .value("UInt32"  , DataType::UInt32)
-        .value("UInt64"  , DataType::UInt64)
-        .value("String"  , DataType::String)
-        .value("Nothing" , DataType::Nothing)
-        ;
-
-    to_python_converter<boost::optional<DataType>, option_transmogrify<DataType>>();
-    option_transmogrify<DataType>::register_from_python();
 
     PyEntity<base::IProperty>::do_export("Property");
     class_<Property, bases<base::Entity<base::IProperty>>>("Property")
@@ -98,6 +191,11 @@ void PyProperty::do_export() {
 
     to_python_converter<std::vector<Property>, vector_transmogrify<Property>>();
     to_python_converter<boost::optional<Property>, option_transmogrify<Property>>();
+
+    to_python_converter<Value, value_transmogrify>();
+    value_transmogrify::register_from_python();
+    to_python_converter<std::vector<Value>, vector_transmogrify<Value>>();
+    vector_transmogrify<Value>::register_from_python();
 }
 
 }

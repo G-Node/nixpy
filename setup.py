@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+from __future__ import absolute_import, division, print_function
 
 __author__ = 'gicmo'
 
@@ -82,7 +82,6 @@ else:
     nix_lnk_arg = ['/LIBPATH:'+nix_lib_dir, '/DEFAULTLIB:nix.lib']
 
 nixpy_sources = [
-    'src/PyUtil.cpp',
     'src/core.cc',
     'src/docstrings.cpp',
     'src/PyExceptions.cpp',
@@ -90,7 +89,6 @@ nixpy_sources = [
     'src/PyFile.cpp',
     'src/PySection.cpp',
     'src/PyProperty.cpp',
-    'src/PyValue.cpp',
     'src/PySource.cpp',
     'src/PyDataArray.cpp',
     'src/PyDataSet.cpp',
@@ -153,7 +151,7 @@ setup(name             = 'nixio',
       scripts          = [],
       tests_require    = ['nose'],
       test_suite       = 'nose.collector',
-      setup_requires   = ['numpy'],
+      setup_requires   = ['h5py', 'numpy'],
       package_data     = {'nixio': [license_text, description_text]},
       include_package_data = True,
       zip_safe         = False,

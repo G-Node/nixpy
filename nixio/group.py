@@ -6,10 +6,9 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
-from nixio.core import Group
-from nixio.util.inject import inject
 from nixio.util.proxy_list import RefProxyList
 
 
@@ -43,15 +42,16 @@ class MultiTagProxyList(RefProxyList):
         )
 
 
-class GroupMixin(Group):
+class GroupMixin(object):
 
     @property
     def data_arrays(self):
         """
-        A property containing all data arrays referenced by the group. Referenced data arrays
-        can be obtained by index or their id. References can be removed from the list, removing
-        a referenced DataArray will not remove it from the file. New references can be added using
-        the append method of the list.
+        A property containing all data arrays referenced by the group.
+        Referenced data arrays can be obtained by index or their id. References
+        can be removed from the list, removing a referenced DataArray will not
+        remove it from the file. New references can be added using the append
+        method of the list.
         This is a read only attribute.
 
         :type: DataArrayProxyList of DataArray
@@ -63,10 +63,10 @@ class GroupMixin(Group):
     @property
     def tags(self):
         """
-        A property containing all tags referenced by the group. Tags
-        can be obtained by index or their id. Tags can be removed from the list, removing
-        a referenced Tag will not remove it from the file. New Tags can be added using
-        the append method of the list.
+        A property containing all tags referenced by the group. Tags can be
+        obtained by index or their id. Tags can be removed from the list,
+        removing a referenced Tag will not remove it from the file. New Tags can
+        be added using the append method of the list.
         This is a read only attribute.
 
         :type: TagProxyList of Tags
@@ -79,9 +79,9 @@ class GroupMixin(Group):
     def multi_tags(self):
         """
         A property containing all MultiTags referenced by the group. MultiTags
-        can be obtained by index or their id. Tags can be removed from the list, removing
-        a referenced MultiTag will not remove it from the file. New MultiTags can be added using
-        the append method of the list.
+        can be obtained by index or their id. Tags can be removed from the list,
+        removing a referenced MultiTag will not remove it from the file. New
+        MultiTags can be added using the append method of the list.
         This is a read only attribute.
 
         :type: MultiTagProxyList of MultiTags
@@ -89,5 +89,3 @@ class GroupMixin(Group):
         if not hasattr(self, "_multi_tags"):
             setattr(self, "_multi_tags", MultiTagProxyList(self))
         return self._multi_tags
-
-inject((Group,), dict(GroupMixin.__dict__))
