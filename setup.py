@@ -123,19 +123,27 @@ classifiers   = [
                     'Topic :: Scientific/Engineering'
 ]
 
-native_ext    = Extension(
-                    'nixio.core',
-                    extra_compile_args = ['-std=c++11'] if not is_win else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
-                    extra_link_args=boost_lnk_arg + nix_lnk_arg,
-                    sources = nixpy_sources,
-                    runtime_library_dirs = [nix_lib_dir, boost_lib_dir] if not is_win else None,
-                    **pkg_config(
-                        "nixio",
-                        library_dirs=[boost_lib_dir, nix_lib_dir],
-                        include_dirs=[boost_inc_dir, nix_inc_dir, np.get_include(), 'src'],
-                        ignore_error=True
-                    )
-                )
+
+if "--pyonly" in sys.argv:
+    sys.argv.remove("--pyonly")
+    print("Skipping NIX C++ bindings.")
+    ext_modules = []
+else:
+    native_ext    = Extension(
+        'nixio.core',
+        extra_compile_args = ['-std=c++11'] if not is_win else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
+        extra_link_args=boost_lnk_arg + nix_lnk_arg,
+        sources = nixpy_sources,
+        runtime_library_dirs = [nix_lib_dir, boost_lib_dir] if not is_win else None,
+        **pkg_config(
+            "nixio",
+            library_dirs=[boost_lib_dir, nix_lib_dir],
+            include_dirs=[boost_inc_dir, nix_inc_dir, np.get_include(), 'src'],
+            ignore_error=False
+        )
+    )
+    ext_modules = [native_ext]
+    print("Done configuring")
 
 setup(name             = 'nixio',
       version          = VERSION,
@@ -146,7 +154,7 @@ setup(name             = 'nixio',
       long_description = description_text,
       classifiers      = classifiers,
       license          = 'BSD',
-      ext_modules      = [native_ext],
+      ext_modules      = ext_modules,
       packages         = ['nixio', 'nixio.pycore', 'nixio.util', 'nixio.pycore.util', 'nixio.pycore.exceptions'],
       scripts          = [],
       tests_require    = ['nose'],
@@ -156,3 +164,4 @@ setup(name             = 'nixio',
       include_package_data = True,
       zip_safe         = False,
 )
+
