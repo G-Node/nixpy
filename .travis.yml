@@ -7,18 +7,17 @@ env:
     global:
         - NIX_LIBDIR=./nix-build/inst/lib
         - NIX_INCDIR=./nix-build/inst/include
-    matrix:
-        - SETUP_ARGS=""
-        - SETUP_ARGS="--pyonly"
-
-python:
-    - 2.7_with_system_site_packages
-    - 3.4
 
 matrix:
-  include:
-    - python: "2.7_with_system_site_packages"
-      env: COVERALLS=1
+    include:
+        - python: "2.7_with_system_site_packages"
+          env: PYONLY="" COVERALLS=1
+        - python: "3.4"
+          env: PYONLY=""
+        - python: "2.7_with_system_site_packages"
+          env: PYONLY="--pyonly"
+        - python: "3.4"
+          env: PYONLY="--pyonly"
 
 addons:
   apt:
@@ -36,7 +35,7 @@ install:
     fi
   - pip install --upgrade numpy coveralls h5py
   #build NIX
-  - if [ -z "$SETUP_ARGS" ]; then
+  - if [ -z "$PYONLY" ]; then
       git clone https://github.com/G-Node/nix.git nix-build;
       pushd nix-build;
       cmake -DCMAKE_INSTALL_PREFIX=./inst -DBUILD_TESTING=OFF .;
@@ -46,11 +45,11 @@ install:
     fi
 
 script:
-- python setup.py build $SETUP_ARGS
+- python setup.py build $PYONLY
 - if [ $COVERALLS = 1 ]; then
-    coverage${PYVER} run --source=nixio setup.py test && coverage${PYVER} report -m;
+    coverage${PYVER} run --source=nixio setup.py test $PYONLY && coverage${PYVER} report -m;
   else
-    python setup.py test;
+    python setup.py test $PYONLY;
   fi;
 
 after_success:
