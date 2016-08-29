@@ -23,6 +23,7 @@ pip-log.txt
 *~
 *.log
 *.kate-swp
+*.swp
 
 # idea / pycharm files
 .idea
