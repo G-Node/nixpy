@@ -34,15 +34,19 @@ def check_nix(libdirs=(), incdirs=()):
     compiler.include_dirs.extend(incdirs)
     distutils.sysconfig.customize_compiler(compiler)
 
-    # stderr = os.dup(sys.stderr.fileno())
+    stderr = os.dup(sys.stderr.fileno())
     errfile = open(os.path.join(tmpdir, "check_nix.err"), 'w')
+    # redirect stderr to file
     # os.dup2(errfile.fileno(), sys.stderr.fileno())
     try:
-        compiler.compile([file_name], output_dir=tmpdir)
+        compiler.compile([file_name], output_dir=tmpdir,
+                         extra_postargs=["--std=c++11"])
     except (CompileError, LinkError):
         ret_val = False
     else:
         ret_val = True
+    # restore stderr
+    # os.dup2(stderr, sys.stderr.fileno())
     errfile.close()
     shutil.rmtree(tmpdir)
     return ret_val
