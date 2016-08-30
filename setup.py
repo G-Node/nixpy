@@ -19,10 +19,9 @@ import numpy as np
 import sys
 import os
 import re
-import distutils
-import platform
 
 from findboost import BoostPyLib
+from checknix import check_nix
 
 with open('README.md') as f:
     description_text = f.read()
@@ -127,7 +126,9 @@ classifiers   = [
 
 if "--pyonly" in sys.argv:
     sys.argv.remove("--pyonly")
-    print("Skipping NIX C++ bindings.")
+    ext_modules = []
+elif not check_nix([nix_lib_dir], [nix_inc_dir]):
+    print("NIX not found.")
     ext_modules = []
 else:
     native_ext    = Extension(
@@ -144,7 +145,9 @@ else:
         )
     )
     ext_modules = [native_ext]
-    print("Done configuring")
+
+if not ext_modules:
+    print("Skipping NIX C++ bindings.")
 
 setup(name             = 'nixio',
       version          = VERSION,
