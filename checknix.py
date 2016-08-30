@@ -1,4 +1,5 @@
-import os, sys
+import os, sys, shutil
+
 from textwrap import dedent
 import tempfile
 
@@ -19,29 +20,31 @@ def check_nix(libdirs=(), incdirs=()):
         return 0;
     }
     """)
-    with tempfile.TemporaryDirectory() as tmpdir:
-        bin_file_name = os.path.join(tmpdir, "check_nix")
-        file_name = bin_file_name + '.cpp'
-        with open(file_name, 'w') as cfile:
-            cfile.write(cpp_code)
 
-        compiler = distutils.ccompiler.new_compiler()
-        assert isinstance(compiler, distutils.ccompiler.CCompiler)
+    tmpdir = tempfile.mkdtemp()
+    bin_file_name = os.path.join(tmpdir, "check_nix")
+    file_name = bin_file_name + '.cpp'
+    with open(file_name, 'w') as cfile:
+        cfile.write(cpp_code)
 
-        compiler.library_dirs.extend(libdirs)
-        compiler.include_dirs.extend(incdirs)
-        distutils.sysconfig.customize_compiler(compiler)
+    compiler = distutils.ccompiler.new_compiler()
+    assert isinstance(compiler, distutils.ccompiler.CCompiler)
 
-        # stderr = os.dup(sys.stderr.fileno())
-        errfile = open(os.path.join(tmpdir, "check_nix.err"), 'w')
-        os.dup2(errfile.fileno(), sys.stderr.fileno())
-        try:
-            compiler.compile([file_name])
-        except (CompileError, LinkError):
-            ret_val = False
-        else:
-            ret_val = True
-        errfile.close()
+    compiler.library_dirs.extend(libdirs)
+    compiler.include_dirs.extend(incdirs)
+    distutils.sysconfig.customize_compiler(compiler)
+
+    # stderr = os.dup(sys.stderr.fileno())
+    errfile = open(os.path.join(tmpdir, "check_nix.err"), 'w')
+    os.dup2(errfile.fileno(), sys.stderr.fileno())
+    try:
+        compiler.compile([file_name], output_dir=tmpdir)
+    except (CompileError, LinkError):
+        ret_val = False
+    else:
+        ret_val = True
+    errfile.close()
+    shutil.rmtree(tmpdir)
     return ret_val
 
 
