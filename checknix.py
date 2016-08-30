@@ -37,7 +37,7 @@ def check_nix(libdirs=(), incdirs=()):
     stderr = os.dup(sys.stderr.fileno())
     errfile = open(os.path.join(tmpdir, "check_nix.err"), 'w')
     # redirect stderr to file
-    # os.dup2(errfile.fileno(), sys.stderr.fileno())
+    os.dup2(errfile.fileno(), sys.stderr.fileno())
     try:
         compiler.compile([file_name], output_dir=tmpdir,
                          extra_postargs=["--std=c++11"])
@@ -46,7 +46,7 @@ def check_nix(libdirs=(), incdirs=()):
     else:
         ret_val = True
     # restore stderr
-    # os.dup2(stderr, sys.stderr.fileno())
+    os.dup2(stderr, sys.stderr.fileno())
     errfile.close()
     shutil.rmtree(tmpdir)
     return ret_val
