@@ -6,7 +6,7 @@ language: python
 matrix:
     include:
         - python: "2.7_with_system_site_packages"
-          env: COVERALLS=1 NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include
+          env: COVERALLS=1 NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include SETUP_ARG=--with-nix
         - python: "3.4"
           env: NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include
         - python: "2.7_with_system_site_packages"
@@ -38,7 +38,7 @@ install:
     fi
 
 script:
-- python setup.py build
+- python setup.py build $SETUP_ARG
 - if [ $COVERALLS = 1 ]; then
     coverage${PYVER} run --source=nixio setup.py test && coverage${PYVER} report -m;
   else
