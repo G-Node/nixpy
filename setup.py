@@ -123,24 +123,28 @@ classifiers   = [
                     'Topic :: Scientific/Engineering'
 ]
 
+library_dirs = [boost_lib_dir, nix_lib_dir],
+include_dirs = [boost_inc_dir, nix_inc_dir, np.get_include(), 'src'],
+compile_args = ['-std=c++11'] if not is_win else ['/DBOOST_PYTHON_STATIC_LIB',
+                                                  '/EHsc']
 
 if "--pyonly" in sys.argv:
     sys.argv.remove("--pyonly")
     ext_modules = []
-elif not check_nix([nix_lib_dir], [nix_inc_dir]):
+elif not check_nix(library_dirs, include_dirs, compile_args):
     print("NIX not found.")
     ext_modules = []
 else:
-    native_ext    = Extension(
+    native_ext = Extension(
         'nixio.core',
-        extra_compile_args = ['-std=c++11'] if not is_win else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
+        extra_compile_args=compile_args,
         extra_link_args=boost_lnk_arg + nix_lnk_arg,
-        sources = nixpy_sources,
-        runtime_library_dirs = [nix_lib_dir, boost_lib_dir] if not is_win else None,
+        sources=nixpy_sources,
+        runtime_library_dirs=library_dirs if not is_win else None,
         **pkg_config(
             "nixio",
-            library_dirs=[boost_lib_dir, nix_lib_dir],
-            include_dirs=[boost_inc_dir, nix_inc_dir, np.get_include(), 'src'],
+            library_dirs=library_dirs,
+            include_dirs=include_dirs,
             ignore_error=False
         )
     )

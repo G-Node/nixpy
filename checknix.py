@@ -8,7 +8,7 @@ import distutils.ccompiler
 from distutils.errors import CompileError, LinkError
 
 
-def check_nix(libdirs=(), incdirs=()):
+def check_nix(library_dirs=(), include_dirs=(), compile_args=()):
     """
     Check if NIX is available by trying to compile a tiny program.
     """
@@ -30,8 +30,8 @@ def check_nix(libdirs=(), incdirs=()):
     compiler = distutils.ccompiler.new_compiler()
     assert isinstance(compiler, distutils.ccompiler.CCompiler)
 
-    compiler.library_dirs.extend(libdirs)
-    compiler.include_dirs.extend(incdirs)
+    compiler.library_dirs.extend(library_dirs)
+    compiler.include_dirs.extend(include_dirs)
     distutils.sysconfig.customize_compiler(compiler)
 
     stderr = os.dup(sys.stderr.fileno())
@@ -40,7 +40,7 @@ def check_nix(libdirs=(), incdirs=()):
     os.dup2(errfile.fileno(), sys.stderr.fileno())
     try:
         compiler.compile([file_name], output_dir=tmpdir,
-                         extra_postargs=["--std=c++11"])
+                         extra_postargs=compile_args)
     except (CompileError, LinkError):
         ret_val = False
     else:
