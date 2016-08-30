@@ -36,7 +36,7 @@ def check_nix(libdirs=(), incdirs=()):
 
     # stderr = os.dup(sys.stderr.fileno())
     errfile = open(os.path.join(tmpdir, "check_nix.err"), 'w')
-    os.dup2(errfile.fileno(), sys.stderr.fileno())
+    # os.dup2(errfile.fileno(), sys.stderr.fileno())
     try:
         compiler.compile([file_name], output_dir=tmpdir)
     except (CompileError, LinkError):
