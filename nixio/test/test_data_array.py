@@ -33,8 +33,10 @@ class _TestDataArray(unittest.TestCase):
         self.file  = File.open("unittest.h5", FileMode.Overwrite,
                                backend=self.backend)
         self.block = self.file.create_block("test block", "recordingsession")
-        self.array = self.block.create_data_array("test array", "signal", DataType.Double, (100, ))
-        self.other = self.block.create_data_array("other array", "signal", DataType.Double, (100, ))
+        self.array = self.block.create_data_array("test array", "signal",
+                                                  DataType.Double, (100, ))
+        self.other = self.block.create_data_array("other array", "signal",
+                                                  DataType.Double, (100, ))
 
     def tearDown(self):
         del self.file.blocks[self.block.id]
@@ -134,8 +136,8 @@ class _TestDataArray(unittest.TestCase):
         assert(len(self.array) == len(data))
 
         #indexing support in 1-d arrays
-        self.assertRaises(IndexError, lambda : self.array[1:4:5])
-        self.assertRaises(IndexError, lambda : self.array[[1,3,]])
+        self.assertRaises(IndexError, lambda: self.array[1:4:5])
+        self.assertRaises(IndexError, lambda: self.array[[1,3,]])
 
         dout = np.array([self.array[i] for i in range(100)])
         assert(np.array_equal(data, dout))
@@ -162,7 +164,8 @@ class _TestDataArray(unittest.TestCase):
 
         # TODO delete does not work
         data = np.eye(123)
-        a1 = self.block.create_data_array("double array", "signal", DataType.Double, (123, 123))
+        a1 = self.block.create_data_array("double array", "signal",
+                                          DataType.Double, (123, 123))
         dset = a1
         dset.write_direct(data)
         dout = np.empty_like(data)
@@ -170,7 +173,7 @@ class _TestDataArray(unittest.TestCase):
         assert(np.array_equal(data, dout))
 
         #indexing support in 2-d arrays
-        self.assertRaises(IndexError, lambda : self.array[[], [1,2]])
+        self.assertRaises(IndexError, lambda: self.array[[], [1,2]])
 
         dout = dset[12]
         assert(dout.shape == data[12].shape)
@@ -186,12 +189,14 @@ class _TestDataArray(unittest.TestCase):
         assert(np.array_equal(dset[1:10, 1:10], data[1:10, 1:10]))
         assert(np.array_equal(dset[1:-2, 1:-2], data[1:121, 1:121]))
 
-        a3 = self.block.create_data_array("int identity array", "signal", DataType.Int32, (123, 123))
+        a3 = self.block.create_data_array("int identity array", "signal",
+                                          DataType.Int32, (123, 123))
         assert(a3.shape == (123, 123))
         assert(a3.dtype == np.dtype('i4'))
 
         data = np.random.rand(3, 4, 5)
-        a4 = self.block.create_data_array("3d array", "signal", DataType.Double, (3, 4, 5))
+        a4 = self.block.create_data_array("3d array", "signal",
+                                          DataType.Double, (3, 4, 5))
         dset = a4
         dset.write_direct(data)
         assert(dset.shape == data.shape)
@@ -215,20 +220,25 @@ class _TestDataArray(unittest.TestCase):
         # by simulating a system with a really smal int
         savemaxsize = sys.maxsize
         sys.maxsize = len(dset) - 1
-        self.assertRaises(OverflowError, lambda : len(dset))
+        self.assertRaises(OverflowError, lambda: len(dset))
         sys.maxsize = savemaxsize
 
         # test inferring shape & dtype from data, and writing the data
         test_ten = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
         test_data = np.array(test_ten, dtype=int)
-        da = self.block.create_data_array('created_from_data', 'b', data=test_data)
+        da = self.block.create_data_array('created_from_data', 'b',
+                                          data=test_data)
         assert(da.shape == test_data.shape)
         assert(np.array_equal(test_data, da[:]))
         assert(test_ten == [x for x in da])
 
         #test for exceptions
-        self.assertRaises(ValueError, lambda: self.block.create_data_array('x', 'y'))
-        self.assertRaises(ValueError, lambda: self.block.create_data_array('x', 'y', data=test_data, shape=(1, 1, 1)))
+        self.assertRaises(ValueError,
+                          lambda: self.block.create_data_array('x', 'y'))
+        self.assertRaises(ValueError,
+                          lambda: self.block.create_data_array(
+                              'x', 'y', data=test_data, shape=(1, 1, 1)
+                          ))
 
         #test appending
         data = np.zeros((10, 5))
@@ -258,14 +268,16 @@ class _TestDataArray(unittest.TestCase):
         da = self.block.create_data_array('dtype_int', 'b', int, (10, 10))
         assert(da.dtype == np.dtype(int))
 
-        da = self.block.create_data_array('dtype_ndouble', 'b', DataType.Double, (10, 10))
+        da = self.block.create_data_array('dtype_ndouble', 'b',
+                                          DataType.Double, (10, 10))
         assert(da.dtype == np.dtype('f8'))
 
         da = self.block.create_data_array('dtype_auto', 'b', None, (10, 10))
         assert(da.dtype == np.dtype('f8'))
 
         test_data = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 0], dtype=int)
-        da = self.block.create_data_array('dtype_int_from_data', 'b', data=test_data)
+        da = self.block.create_data_array('dtype_int_from_data', 'b',
+                                          data=test_data)
         assert(da.dtype == test_data.dtype)
 
         bdata = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
@@ -286,19 +298,21 @@ class _TestDataArray(unittest.TestCase):
 
         assert(len(self.array.dimensions) == 3)
 
-        self.assertRaises(TypeError, lambda : self.array.dimensions["notexist"])
-        self.assertRaises(KeyError, lambda : self.array.dimensions[-4])
-        self.assertRaises(KeyError, lambda : self.array.dimensions[3])
+        self.assertRaises(TypeError, lambda: self.array.dimensions["notexist"])
+        self.assertRaises(KeyError, lambda: self.array.dimensions[-4])
+        self.assertRaises(KeyError, lambda: self.array.dimensions[3])
 
         assert(isinstance(str(self.array.dimensions), basestring))
         assert(isinstance(repr(self.array.dimensions), basestring))
 
-        dims   = list(self.array.dimensions)
+        dims = list(self.array.dimensions)
         for i in range(3):
             assert(dims[i].index == self.array.dimensions[i].index)
-            assert(dims[i].dimension_type == self.array.dimensions[i].dimension_type)
+            assert(dims[i].dimension_type ==
+                   self.array.dimensions[i].dimension_type)
 
-            assert(self.array.dimensions[i].index == self.array.dimensions[i - 3].index)
+            assert(self.array.dimensions[i].index ==
+                   self.array.dimensions[i-3].index)
 
         self.array.delete_dimensions()
 
@@ -317,15 +331,15 @@ class _TestDataArray(unittest.TestCase):
                                                     dtype=DataType.String,
                                                     shape=(10,))
         self.assertRaises(ValueError,
-                          lambda : string_array.append_alias_range_dimension())
-        self.assertRaises(ValueError,
-                          lambda : string_array.create_alias_range_dimension())
+                          lambda: string_array.append_alias_range_dimension())
         assert(len(string_array.dimensions) == 0)
         del self.block.data_arrays['string_array']
 
-        array_2D = self.block.create_data_array('array_2d', 'nix.2d', dtype=DataType.Double, shape=(10,10))
-        self.assertRaises(ValueError, lambda : array_2D.append_alias_range_dimension())
-        self.assertRaises(ValueError, lambda : array_2D.create_alias_range_dimension())
+        array_2D = self.block.create_data_array(
+            'array_2d', 'nix.2d', dtype=DataType.Double, shape=(10, 10)
+        )
+        self.assertRaises(ValueError,
+                          lambda: array_2D.append_alias_range_dimension())
         assert(len(array_2D.dimensions) == 0)
         del self.block.data_arrays['array_2d']
 
@@ -338,7 +352,7 @@ class _TestDataArray(unittest.TestCase):
         self.array.sources.append(source1)
         self.array.sources.append(source2)
 
-        self.assertRaises(TypeError, lambda : self.array.sources.append(100))
+        self.assertRaises(TypeError, lambda: self.array.sources.append(100))
 
         assert(len(self.array.sources) == 2)
         assert(source1 in self.array.sources)
