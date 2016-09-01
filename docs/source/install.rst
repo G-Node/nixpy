@@ -34,7 +34,7 @@ Therefore, the simplest way to install NIXPy is to use pip::
 
     pip install nixio
 
-.. _nixio: https://pypi.python.org/pypi/nixio/1.1.0
+.. _nixio: https://pypi.python.org/pypi/nixio/
 
 
 .. _advanced installation:
