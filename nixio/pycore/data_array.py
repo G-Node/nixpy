@@ -82,18 +82,6 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         else:
             super(DataArray, self)._read_data(data, count, offset)
 
-    def create_set_dimension(self, index):
-        warn("This function is deprecated and ignores the index argument")
-        return self.append_set_dimension()
-
-    def create_sampled_dimension(self, index, sample):
-        warn("This function is deprecated and ignores the index argument")
-        return self.append_sampled_dimension(sample)
-
-    def create_range_dimension(self, index, range_):
-        warn("This function is deprecated and ignores the index argument")
-        return self.append_range_dimension(range_)
-
     def append_set_dimension(self):
         """
         Append a new SetDimension to the list of existing dimension
@@ -136,11 +124,6 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         dimgroup = self._h5group.open_group("dimensions")
         index = len(dimgroup) + 1
         return RangeDimension._create_new(dimgroup, index, ticks)
-
-    def create_alias_range_dimension(self):
-        warn("This function is deprecated and will be removed. "
-             "Use append_alias_range_dimension instead.", DeprecationWarning)
-        return self.append_alias_range_dimension()
 
     def append_alias_range_dimension(self):
         """
