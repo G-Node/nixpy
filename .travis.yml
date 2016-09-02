@@ -3,17 +3,14 @@ dist: trusty
 
 language: python
 
-env:
-  global:
-    - NIX_LIBDIR=./nix-build/inst/lib
-    - NIX_INCDIR=./nix-build/inst/include
-
 matrix:
-  include:
-    - python: "2.7_with_system_site_packages"
-      env: COVERALLS=1
-    - python: "3.4"
-      env: COVERALLS=0
+    include:
+        - python: "2.7_with_system_site_packages"
+          env: COVERALLS=1 NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include SETUP_ARG=--with-nix
+        - python: "3.4"
+          env: NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include
+        - python: "2.7_with_system_site_packages"
+        - python: "3.4"
 
 addons:
   apt:
@@ -31,15 +28,17 @@ install:
     fi
   - pip install --upgrade numpy coveralls h5py
   #build NIX
-  - git clone https://github.com/G-Node/nix.git nix-build
-  - cd nix-build
-  - cmake -DCMAKE_INSTALL_PREFIX=./inst -DBUILD_TESTING=OFF .
-  - make
-  - make install
-  - cd ..
+  - if [ -n "$NIX_LIBDIR" ]; then
+      git clone https://github.com/G-Node/nix.git nix-build;
+      pushd nix-build;
+      cmake -DCMAKE_INSTALL_PREFIX=./inst -DBUILD_TESTING=OFF .;
+      make;
+      make install;
+      popd;
+    fi
 
 script:
-- python setup.py build
+- python setup.py build $SETUP_ARG
 - if [ $COVERALLS = 1 ]; then
     coverage${PYVER} run --source=nixio setup.py test && coverage${PYVER} report -m;
   else

@@ -19,10 +19,9 @@ import numpy as np
 import sys
 import os
 import re
-import distutils
-import platform
 
 from findboost import BoostPyLib
+from checknix import check_nix
 
 with open('README.md') as f:
     description_text = f.read()
@@ -120,22 +119,42 @@ classifiers   = [
                     'Programming Language :: Python :: 2.6',
                     'Programming Language :: Python :: 2.7',
                     'Programming Language :: Python :: 3.4',
+                    'Programming Language :: Python :: 3.5',
                     'Topic :: Scientific/Engineering'
 ]
 
-native_ext    = Extension(
-                    'nixio.core',
-                    extra_compile_args = ['-std=c++11'] if not is_win else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
-                    extra_link_args=boost_lnk_arg + nix_lnk_arg,
-                    sources = nixpy_sources,
-                    runtime_library_dirs = [nix_lib_dir, boost_lib_dir] if not is_win else None,
-                    **pkg_config(
-                        "nixio",
-                        library_dirs=[boost_lib_dir, nix_lib_dir],
-                        include_dirs=[boost_inc_dir, nix_inc_dir, np.get_include(), 'src'],
-                        ignore_error=True
-                    )
-                )
+library_dirs = [boost_lib_dir, nix_lib_dir]
+include_dirs = [boost_inc_dir, nix_inc_dir, np.get_include(), 'src']
+compile_args = ['--std=c++11'] if not is_win else ['/DBOOST_PYTHON_STATIC_LIB',
+                                                   '/EHsc']
+
+if "--without-nix" in sys.argv:
+    sys.argv.remove("--without-nix")
+    with_nix = False
+elif "--with-nix" in sys.argv:
+    sys.argv.remove("--with-nix")
+    with_nix = True
+else:
+    with_nix = check_nix(library_dirs, include_dirs, compile_args)
+
+if with_nix:
+    native_ext = Extension(
+        'nixio.core',
+        extra_compile_args=['-std=c++11'] if not is_win else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
+        extra_link_args=boost_lnk_arg + nix_lnk_arg,
+        sources=nixpy_sources,
+        runtime_library_dirs=library_dirs if not is_win else None,
+        **pkg_config(
+            "nixio",
+            library_dirs=library_dirs,
+            include_dirs=include_dirs,
+            ignore_error=False
+        )
+    )
+    ext_modules = [native_ext]
+else:
+    print("Skipping NIX C++ bindings.")
+    ext_modules = []
 
 setup(name             = 'nixio',
       version          = VERSION,
@@ -146,7 +165,7 @@ setup(name             = 'nixio',
       long_description = description_text,
       classifiers      = classifiers,
       license          = 'BSD',
-      ext_modules      = [native_ext],
+      ext_modules      = ext_modules,
       packages         = ['nixio', 'nixio.pycore', 'nixio.util', 'nixio.pycore.util', 'nixio.pycore.exceptions'],
       scripts          = [],
       tests_require    = ['nose'],
@@ -156,3 +175,4 @@ setup(name             = 'nixio',
       include_package_data = True,
       zip_safe         = False,
 )
+
