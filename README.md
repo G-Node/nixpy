@@ -5,7 +5,7 @@
 --
 
 About NIXPY
--------------
+-----------
 
 The *NIXPY* project is an extension to [NIX](https://github.com/G-Node/nix) and provides Python bindings for *NIX*.
 
@@ -14,8 +14,8 @@ Development Status
 
 The *NIXPY* project is now in a [Beta](https://github.com/G-Node/nixpy/releases) stage and should not be seen as a final product.
 
-Getting Started (All platforms)
--------------------------------
+Getting Started
+---------------
 
 The simplest way to install *NIXPY* is from PyPI using pip. The name of the package is [nixio](https://pypi.python.org/pypi/nixio).
 
@@ -23,94 +23,16 @@ The simplest way to install *NIXPY* is from PyPI using pip. The name of the pack
 pip install nixio
 ```
 
+Bindings for C++ NIX
+--------------------
+
 The setup script will automatically build the bindings for *NIX* if it is detected on the system, otherwise only the pure Python version will be installed.
 
+For instructions on building *NIX*, see the [NIX README](https://github.com/G-Node/nix/blob/master/README.md) file.
 
-Getting Started (Linux)
------------------------
 
-**Debian PPA**
-
-You can get a ready to install package for Ubuntu "trusty". You have to add & install the following software source to your system:
-
-```
-deb http://ppa.launchpad.net/gnode/nix/ubuntu trusty main
-deb-src http://ppa.launchpad.net/gnode/nix/ubuntu trusty main
-```
-by executing
-
-```
-sudo add-apt-repository ppa:gnode/nix
-sudo apt-get update
-sudo apt-get install python-nix
-```
-
-**Build NIXPY under Ubuntu 14.04**
-
-_Dependencies_
-
-In order to build the NIXPY library a compiler is needed (gcc, clang). Further nixpy depends on the following libraries:
-
-- Boost (version 1.56 or higher)
-- NIX (version 0.10.5 or higher, *optional*)
-- Python (version = 2.7.x) + python-setuptools + python-numpy (version >= 1.8.0), python-h5py
-
-_Instructions_
-
-```
-bash
-# install dependencies
-sudo apt-get install libboost-python-dev build-essential python-dev python-setuptools python-numpy
-
-# clone NIX
-git clone https://github.com/G-Node/nixpy
-cd nixpy
-
-# build nixpy
-python setup.py build
-
-# run the unit tests
-python setup.py test
-
-# install
-sudo python setup.py install
-```
-
-Getting Started (Mac OS X)
--------------------------
-**Getting the source code**
-
-Get the source code from GitHub using :
-
-`git clone https://github.com/G-Node/nixpy.git`
-
-**Build NIXPY under OS X**
-
-_Dependencies_
-
-- NIXPY requires the installation of [NIX](https://github.com/G-Node/nix). Make sure you install NIX first. Use `brew install homebrew/science/nixio`.
-- boost-python.
- Install it using homebrew. `brew install boost-python`
-- Python (version = 2.7.x) + python-setuptools + python-numpy (version >= 1.8.0).
-
-OS X default python works well.
-
-_Instructions to build_
-
-```
-bash
-
-# build
-python setup.py build
-
-# unit tests
-python setup.py test
-
-# install
-python setup.py install
-```
-
-**To check if installed properly**
+To check if installed properly
+------------------------------
 
 Try importing nixio.
 
@@ -123,14 +45,7 @@ If python successfully executes `import nixio`, the installation went well.
 Check out the API documentation for further tutorials.
 
 
-Getting Started (Windows)
--------------------------
-
-**Build NIXPY under Windows**
-
-To build NIXPY under windows follow the guide provided under: [Win32.md](https://github.com/G-Node/nixpy/blob/master/Win32.md)
-
 NIXPY API Documentation
 ---------------------
 
-The API documentation can be found [here](http://g-node.github.io/nixpy/)
+The API documentation can be found [here](http://g-node.github.io/nixpy/).
