@@ -14,6 +14,18 @@ Development Status
 
 The *NIXPY* project is now in a [Beta](https://github.com/G-Node/nixpy/releases) stage and should not be seen as a final product.
 
+Getting Started (All platforms)
+-------------------------------
+
+The simplest way to install *NIXPY* is from PyPI using pip. The name of the package is [nixio](https://pypi.python.org/pypi/nixio).
+
+```
+pip install nixio
+```
+
+The setup script will automatically build the bindings for *NIX* if it is detected on the system, otherwise only the pure Python version will be installed.
+
+
 Getting Started (Linux)
 -----------------------
 
@@ -22,10 +34,10 @@ Getting Started (Linux)
 You can get a ready to install package for Ubuntu "trusty". You have to add & install the following software source to your system:
 
 ```
-deb http://ppa.launchpad.net/gnode/nix/ubuntu trusty main 
-deb-src http://ppa.launchpad.net/gnode/nix/ubuntu trusty main 
+deb http://ppa.launchpad.net/gnode/nix/ubuntu trusty main
+deb-src http://ppa.launchpad.net/gnode/nix/ubuntu trusty main
 ```
-by executing 
+by executing
 
 ```
 sudo add-apt-repository ppa:gnode/nix
@@ -40,8 +52,8 @@ _Dependencies_
 In order to build the NIXPY library a compiler is needed (gcc, clang). Further nixpy depends on the following libraries:
 
 - Boost (version 1.56 or higher)
-- NIX (version 0.10.5 or higher)
-- Python (version = 2.7.x) + python-setuptools + python-numpy (version >= 1.8.0)
+- NIX (version 0.10.5 or higher, *optional*)
+- Python (version = 2.7.x) + python-setuptools + python-numpy (version >= 1.8.0), python-h5py
 
 _Instructions_
 
@@ -79,7 +91,7 @@ _Dependencies_
 - NIXPY requires the installation of [NIX](https://github.com/G-Node/nix). Make sure you install NIX first. Use `brew install homebrew/science/nixio`.
 - boost-python.
  Install it using homebrew. `brew install boost-python`
-- Python (version = 2.7.x) + python-setuptools + python-numpy (version >= 1.8.0). 
+- Python (version = 2.7.x) + python-setuptools + python-numpy (version >= 1.8.0).
 
 OS X default python works well.
 
@@ -94,7 +106,7 @@ python setup.py build
 # unit tests
 python setup.py test
 
-# install 
+# install
 python setup.py install
 ```
 
@@ -108,15 +120,11 @@ Try importing nixio.
 ```
 
 If python successfully executes `import nixio`, the installation went well.
-Check out the API documentation for further tutorials. 
+Check out the API documentation for further tutorials.
 
 
 Getting Started (Windows)
 -------------------------
-
-**Windows Installer**
-
-You can get a [windows installer](https://github.com/G-Node/nixpy/releases) for both, 32- and 64-bit.
 
 **Build NIXPY under Windows**
 
