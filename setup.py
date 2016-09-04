@@ -23,7 +23,7 @@ import re
 from findboost import BoostPyLib
 from checknix import check_nix
 
-with open('README.md') as f:
+with open('README.rst') as f:
     description_text = f.read()
 
 with open('LICENSE') as f:
