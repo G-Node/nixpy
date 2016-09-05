@@ -3,3 +3,4 @@ recursive-include docs *
 graft src
 include findboost.py
 include CMakeLists.txt
+include checknix.py
