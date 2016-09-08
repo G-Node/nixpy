@@ -99,20 +99,6 @@ nixpy_sources = [
     'src/PyGroup.cpp'
 ]
 
-boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
-boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
-
-lib_dirs = BoostPyLib.library_search_dirs([boost_lib_dir])
-boost_libs = BoostPyLib.list_in_dirs(lib_dirs)
-boost_lib = BoostPyLib.find_lib_for_current_python(boost_libs)
-
-if boost_lib is None:
-    print("Could not find boost python version for %s.%s" % sys.version_info[0:2])
-    print("Available boost python libs:\n" + "\n".join(map(str, boost_libs)))
-    sys.exit(-1)
-
-boost_lnk_arg = boost_lib.link_directive
-
 classifiers   = [
                     'Development Status :: 5 - Production/Stable',
                     'Programming Language :: Python',
@@ -123,6 +109,11 @@ classifiers   = [
                     'Topic :: Scientific/Engineering'
 ]
 
+boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
+boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
+lib_dirs = BoostPyLib.library_search_dirs([boost_lib_dir])
+boost_libs = BoostPyLib.list_in_dirs(lib_dirs)
+boost_lib = BoostPyLib.find_lib_for_current_python(boost_libs)
 library_dirs = [boost_lib_dir, nix_lib_dir]
 include_dirs = [boost_inc_dir, nix_inc_dir, np.get_include(), 'src']
 compile_args = ['--std=c++11'] if not is_win else ['/DBOOST_PYTHON_STATIC_LIB',
@@ -138,6 +129,13 @@ else:
     with_nix = check_nix(library_dirs, include_dirs, compile_args)
 
 if with_nix:
+    if boost_lib is None:
+        print("Could not find boost python version for %s.%s" % sys.version_info[0:2])
+        print("Available boost python libs:\n" + "\n".join(map(str, boost_libs)))
+        sys.exit(-1)
+
+    boost_lnk_arg = boost_lib.link_directive
+
     native_ext = Extension(
         'nixio.core',
         extra_compile_args=['-std=c++11'] if not is_win else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
