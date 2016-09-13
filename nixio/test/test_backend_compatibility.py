@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import numpy as np
 
-from nixio import *
+import nixio as nix
 try:
     import nixio.core
     skip = False
@@ -32,8 +32,9 @@ all_attrs = [
 class _TestBackendCompatibility(unittest.TestCase):
 
     def setUp(self):
-        self.write_file = File.open("compat_test.h5", FileMode.Overwrite,
-                                    backend=self.write_backend)
+        self.write_file = nix.File.open("compat_test.h5",
+                                        nix.FileMode.Overwrite,
+                                        backend=self.write_backend)
         self.read_file = None
 
     def tearDown(self):
@@ -80,8 +81,9 @@ class _TestBackendCompatibility(unittest.TestCase):
 
     def check_compatibility(self):
         if self.read_file is None:
-            self.read_file = File.open("compat_test.h5", FileMode.ReadOnly,
-                                       backend=self.read_backend)
+            self.read_file = nix.File.open("compat_test.h5",
+                                           nix.FileMode.ReadOnly,
+                                           backend=self.read_backend)
 
         self.check_recurse(self.write_file.blocks, self.read_file.blocks)
 
@@ -274,16 +276,16 @@ class _TestBackendCompatibility(unittest.TestCase):
     def test_tag_features(self):
         blk = self.write_file.create_block("testblock", "feattest")
         da_ref = blk.create_data_array("da for ref", "datype",
-                                       DataType.Double,
+                                       nix.DataType.Double,
                                        data=np.random.random(15))
         da_ref.append_sampled_dimension(0.2)
         tag_feat = blk.create_tag("tag for feat", "tagtype", [2])
         tag_feat.references.append(da_ref)
 
-        linktypes = [LinkType.Tagged, LinkType.Untagged, LinkType.Indexed]
+        linktypes = [nix.LinkType.Tagged, nix.LinkType.Untagged, nix.LinkType.Indexed]
         for idx in range(6):
             da_feat = blk.create_data_array("da for feat " + str(idx),
-                                            "datype", DataType.Float,
+                                            "datype", nix.DataType.Float,
                                             data=np.random.random(12))
             da_feat.append_sampled_dimension(1.0)
             tag_feat.create_feature(da_feat, linktypes[idx % 3])
@@ -314,7 +316,7 @@ class _TestBackendCompatibility(unittest.TestCase):
         blk = self.write_file.create_block("testblock", "mtfeattest")
         index_data = blk.create_data_array(
             "indexed feature data", "test",
-            dtype=DataType.Double, shape=(10, 10)
+            dtype=nix.DataType.Double, shape=(10, 10)
         )
         dim1 = index_data.append_sampled_dimension(1.0)
         dim1.unit = "ms"
@@ -335,7 +337,7 @@ class _TestBackendCompatibility(unittest.TestCase):
 
         tagged_data = blk.create_data_array(
             "tagged feature data", "test",
-            dtype=DataType.Double, shape=(10, 20, 10)
+            dtype=nix.DataType.Double, shape=(10, 20, 10)
         )
         dim1 = tagged_data.append_sampled_dimension(1.0)
         dim1.unit = "ms"
@@ -368,15 +370,15 @@ class _TestBackendCompatibility(unittest.TestCase):
         feature_tag = blk.create_multi_tag("feature_tag", "events",
                                            event_array)
         data_array = blk.create_data_array("featureTest", "test",
-                                           DataType.Double, (2, 10, 5))
+                                           nix.DataType.Double, (2, 10, 5))
         data = np.random.random((2, 10, 5))
         data_array[:, :, :] = data
 
         feature_tag.extents = extent_array
 
-        feature_tag.create_feature(index_data, LinkType.Indexed)
-        feature_tag.create_feature(tagged_data, LinkType.Tagged)
-        feature_tag.create_feature(index_data, LinkType.Untagged)
+        feature_tag.create_feature(index_data, nix.LinkType.Indexed)
+        feature_tag.create_feature(tagged_data, nix.LinkType.Tagged)
+        feature_tag.create_feature(index_data, nix.LinkType.Untagged)
 
         self.check_compatibility()
 
@@ -443,17 +445,17 @@ class _TestBackendCompatibility(unittest.TestCase):
 
     def test_properties(self):
         sec = self.write_file.create_section("test section", "proptest")
-        sec.create_property("test property", Value(0))
-        sec.create_property("test str", DataType.String)
-        sec.create_property("other property", DataType.Int64)
+        sec.create_property("test property", nix.Value(0))
+        sec.create_property("test str", nix.DataType.String)
+        sec.create_property("other property", nix.DataType.Int64)
 
-        sec.create_property("prop Int32", DataType.Int32)
-        sec.create_property("prop Int64", DataType.Int64)
-        sec.create_property("prop UInt32", DataType.UInt32)
-        sec.create_property("prop UInt64", DataType.UInt64)
-        sec.create_property("prop Float", DataType.Float)
-        sec.create_property("prop Double", DataType.Double)
-        sec.create_property("prop String", DataType.String)
+        sec.create_property("prop Int32", nix.DataType.Int32)
+        sec.create_property("prop Int64", nix.DataType.Int64)
+        sec.create_property("prop UInt32", nix.DataType.UInt32)
+        sec.create_property("prop UInt64", nix.DataType.UInt64)
+        sec.create_property("prop Float", nix.DataType.Float)
+        sec.create_property("prop Double", nix.DataType.Double)
+        sec.create_property("prop String", nix.DataType.String)
 
         sec.props[0].mapping = "mapping"
         sec.props[1].definition = "def"
@@ -467,11 +469,11 @@ class _TestBackendCompatibility(unittest.TestCase):
         for wprop, rprop in zip(wsec.props, rsec.props):
             self.check_attributes(wprop, rprop)
 
-        sec.props[0].values = [Value(101)]
+        sec.props[0].values = [nix.Value(101)]
         for wprop, rprop in zip(wsec.props, rsec.props):
             self.check_attributes(wprop, rprop)
 
-        sec.props[1].values = [Value("foo"), Value("bar"), Value("baz")]
+        sec.props[1].values = [nix.Value("foo"), nix.Value("bar"), nix.Value("baz")]
         for wprop, rprop in zip(wsec.props, rsec.props):
             self.check_attributes(wprop, rprop)
 
