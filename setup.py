@@ -15,7 +15,12 @@ try:
 except ImportError:
     from subprocess import getstatusoutput
 
-import numpy as np
+try:
+    import numpy as np
+    np_inc_dir = np.get_include()
+except ImportError:
+    np_inc_dir = ""
+
 import sys
 import os
 import re
@@ -115,7 +120,7 @@ lib_dirs = BoostPyLib.library_search_dirs([boost_lib_dir])
 boost_libs = BoostPyLib.list_in_dirs(lib_dirs)
 boost_lib = BoostPyLib.find_lib_for_current_python(boost_libs)
 library_dirs = [boost_lib_dir, nix_lib_dir]
-include_dirs = [boost_inc_dir, nix_inc_dir, np.get_include(), 'src']
+include_dirs = [boost_inc_dir, nix_inc_dir, np_inc_dir, 'src']
 compile_args = ['--std=c++11'] if not is_win else ['/DBOOST_PYTHON_STATIC_LIB',
                                                    '/EHsc']
 
@@ -168,7 +173,7 @@ setup(name             = 'nixio',
       scripts          = [],
       tests_require    = ['nose'],
       test_suite       = 'nose.collector',
-      setup_requires   = ['h5py', 'numpy'],
+      install_requires = ['numpy', 'h5py'],
       package_data     = {'nixio': [license_text, description_text]},
       include_package_data = True,
       zip_safe         = False,
