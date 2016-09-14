@@ -58,7 +58,8 @@ class H5DataSet(object):
 
     def set_attr(self, name, value):
         if value is None:
-            del self.dataset.attrs[name]
+            if name in self.dataset.attrs:
+                del self.dataset.attrs[name]
         else:
             self.dataset.attrs[name] = value
 
