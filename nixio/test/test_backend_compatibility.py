@@ -456,7 +456,7 @@ class _TestBackendCompatibility(unittest.TestCase):
         sec.create_property("prop Float", nix.DataType.Float)
         sec.create_property("prop Double", nix.DataType.Double)
         sec.create_property("prop String", nix.DataType.String)
-        sec.create_property("prop Bool", nix.DataType.Bool)
+        # sec.create_property("prop Bool", nix.DataType.Bool)
 
         sec.props[0].mapping = "mapping"
         sec.props[1].definition = "def"
