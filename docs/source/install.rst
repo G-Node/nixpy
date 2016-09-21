@@ -78,10 +78,10 @@ Build NIX from Source
 ---------------------
 
 In order to build and install NIX from source please follow the build instructions in the NIX repository.
-Comprehensive build instructions for Linux can be found in the `nix README.md`_.
+Comprehensive build instructions for Linux can be found in the `nix README.rst`_.
 For Windows this information can be found in the `nix Win32.md`_ file.
 
-.. _nix README.md: https://github.com/G-Node/nix/blob/master/README.md#getting-started-linux
+.. _nix README.rst: https://github.com/G-Node/nix/blob/master/README.rst#getting-started-linux
 .. _nix Win32.md: https://github.com/G-Node/nix/blob/master/Win32.md
 
 Install NIXPy
