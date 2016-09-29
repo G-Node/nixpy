@@ -1,4 +1,4 @@
-include LICENSE README.md Win32.md
+include LICENSE README.rst Win32.md
 recursive-include docs *
 graft src
 include findboost.py

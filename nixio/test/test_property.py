@@ -56,6 +56,7 @@ class _TestProperty(unittest.TestCase):
 
         self.prop.definition = None
         assert(self.prop.definition is None)
+        self.prop.definition = None
 
     def test_property_mapping(self):
         assert(self.prop.mapping is None)
@@ -65,6 +66,17 @@ class _TestProperty(unittest.TestCase):
 
         self.prop.mapping = None
         assert(self.prop.mapping is None)
+        self.prop.mapping = None
+
+    def test_property_unit(self):
+        assert(self.prop.unit is None)
+
+        self.prop.unit = "s"
+        assert(self.prop.unit == "s")
+
+        self.prop.unit = None
+        assert(self.prop.unit is None)
+        self.prop.unit = None
 
     def test_property_values(self):
         self.prop.values = [Value(10)]
