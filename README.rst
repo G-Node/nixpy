@@ -10,11 +10,6 @@ About NIXPY
 
 The *NIXPY* project is an extension to `NIX <https://github.com/G-Node/nix>`_ and provides Python bindings for *NIX*.
 
-Development Status
-------------------
-
-The *NIXPY* project is now in a `beta <https://github.com/G-Node/nixpy/releases>`_ stage and should not be seen as a final product.
-
 Getting Started
 ---------------
 
