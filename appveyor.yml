@@ -89,7 +89,7 @@ build_script:
 
     $under = "$env:BOOST_VERSION" -replace "\.", "_"
 
-    Invoke-WebRequest "http://pilotfiber.dl.sourceforge.net/project/boost/boost/$env:BOOST_VERSION/boost_$under.7z" -OutFile "boost.7z"
+    Invoke-WebRequest "http://heanet.dl.sourceforge.net/project/boost/boost/$env:BOOST_VERSION/boost_$under.7z" -OutFile "boost.7z"
 
     Check-Error
 
