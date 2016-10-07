@@ -1,0 +1,158 @@
+version: 1.0.{build}
+environment:
+  NIX_VERSION: 1.2.0
+  NIX_BUILD_DIR: C:\nix_build
+  DEPLOY_DIR: deploy
+  BOOST_VERSION: 1.56.0
+  BOOST_VERSION_SHORT: 1_56
+  matrix:
+  - PYVER: 27
+    BITTNESS: 64
+  - PYVER: 27
+    BITTNESS: 32
+  - PYVER: 34
+    BITTNESS: 64
+  - PYVER: 34
+    BITTNESS: 32
+  - PYVER: 35
+    BITTNESS: 64
+  - PYVER: 35
+    BITTNESS: 32
+build_script:
+- ps: >-
+    function Check-Error
+
+    {
+      param([int]$SuccessVal = 0)
+      if ($SuccessVal -ne $LastExitCode) {
+        throw "Failed with exit code $LastExitCode"
+      }
+    }
+
+
+    $old_path = "$env:PYTHONPATH"
+
+    $env:PYTHONPATH = "$env:APPVEYOR_BUILD_FOLDER;$env:PYTHONPATH"
+
+
+    if ($env:BITTNESS -eq "64") {
+      $PYTHON_ROOT = "C:\Python$env:PYVER-x64"
+      $BITS = "64"
+      $vcvars = "x86_amd64"
+    } else {
+      $PYTHON_ROOT = "C:\Python$env:PYVER"
+      $BITS = "32"
+      $vcvars = "x86"
+    }
+
+    $env:PATH = "$PYTHON_ROOT;$PYTHON_ROOT\Scripts;$env:PATH;C:\Program Files\7-Zip;$env:NIX_BUILD_DIR\nix\bin"
+
+
+    python -c "import sys;print('Python version is {}'.format(sys.version))"
+
+    Check-Error
+
+
+    mkdir "$env:NIX_BUILD_DIR"
+
+    Check-Error
+
+    mkdir "$env:DEPLOY_DIR"
+
+    Check-Error
+
+
+    cd "$env:NIX_BUILD_DIR"
+
+    mkdir nix
+
+    Check-Error
+
+    cd nix
+
+    Invoke-WebRequest "https://github.com/G-Node/nix/releases/download/$env:NIX_VERSION/nix-$env:NIX_VERSION-win$BITS.exe" -OutFile "nix.exe"
+
+    Check-Error
+
+    7z x nix.exe
+
+    Check-Error
+
+    cd ..\
+
+
+    mkdir boost
+
+    mkdir boost_build
+
+    cd boost
+
+    $under = "$env:BOOST_VERSION" -replace "\.", "_"
+
+    Invoke-WebRequest "http://pilotfiber.dl.sourceforge.net/project/boost/boost/$env:BOOST_VERSION/boost_$under.7z" -OutFile "boost.7z"
+
+    Check-Error
+
+    7z x boost.7z
+
+    Check-Error
+
+    cd boost_$under
+
+
+    echo "call ""\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"" $vcvars && bootstrap && .\b2 install -j4 -a --prefix=$env:NIX_BUILD_DIR\boost_build toolset=msvc-12.0 architecture=x86 address-model=$BITS threading=multi variant=release link=static runtime-link=shared --with-python" | out-file -filepath "nix_compile.bat" -encoding ASCII
+
+    .\nix_compile.bat
+
+    Check-Error
+
+
+    Copy-Item -Path "$env:NIX_BUILD_DIR\nix\COPYING","$env:NIX_BUILD_DIR\nix\LICENSE*" -Destination "$env:NIX_BUILD_DIR\nix\bin"
+
+    Check-Error
+
+
+    $env:BOOST_INCDIR = "$env:NIX_BUILD_DIR\boost_build\include\boost-$env:BOOST_VERSION_SHORT"
+
+    $env:BOOST_LIBDIR = "$env:NIX_BUILD_DIR\boost_build\lib"
+
+    $env:NIX_LIBDIR = "$env:NIX_BUILD_DIR\nix\lib"
+
+    $env:NIX_INCDIR = "$env:NIX_BUILD_DIR\nix\include"
+
+
+    python -m pip install pip wheel setuptools --upgrade
+
+    Check-Error
+
+    python -m pip install numpy --upgrade
+
+    Check-Error
+
+
+    $env:NIXPY_WHEEL_BINARIES = "$env:NIX_BUILD_DIR\nix\bin"
+
+    cd "$env:APPVEYOR_BUILD_FOLDER"
+
+
+    $env:DISTUTILS_USE_SDK = "1"
+
+    $env:MSSdk = "1"
+
+    echo "call ""\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"" $vcvars" | out-file -filepath "python_compile.bat" -encoding ASCII
+
+    echo "python setup.py bdist_wheel -d ""$env:DEPLOY_DIR"" --with-nix" | out-file -filepath "python_compile.bat" -append -encoding ASCII
+
+    if ($env:BITTNESS -eq "64" -and $env:PYVER -eq "27") {
+      echo "python setup.py sdist -d ""$env:DEPLOY_DIR"" --with-nix" | out-file -filepath "python_compile.bat" -append -encoding ASCII
+    }
+
+    .\python_compile.bat
+
+    Check-Error
+
+
+    $env:PYTHONPATH = "$old_path"
+artifacts:
+- path: $(DEPLOY_DIR)\*
+  name: wheels
