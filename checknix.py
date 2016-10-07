@@ -31,7 +31,6 @@ def check_nix(library_dirs=(), include_dirs=(), compile_args=()):
     assert isinstance(compiler, distutils.ccompiler.CCompiler)
 
     distutils.sysconfig.customize_compiler(compiler)
-    compiler.initialize()
     compiler.set_library_dirs(library_dirs)
     compiler.set_include_dirs(include_dirs)
 
