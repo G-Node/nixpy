@@ -32,6 +32,11 @@ class BoostPyLib(object):
         return self.major == major and self.minor == minor and (ignore_threading or self.threadsafe == threadsafe)
 
     @property
+    def library_name(self):
+        name, ext = os.path.splitext(self.filename)
+        return name if ext.endswith('lib') else name[3:]
+
+    @property
     def link_directive(self):
         name, ext = os.path.splitext(self.filename)
         if ext == 'lib':
@@ -126,6 +131,7 @@ class BoostPyLib(object):
             ('libboost_python.lib', (None, None, False)),
             ('libboost_python-mt.dylib', (None, None, True)),
             ('libboost_python-vc120-mt-1_57.lib', (None, None, True)),
+            ('libboost_python-vc120-mt-1_61.lib', (None, None, True)),
             ('/usr/lib/libboost_python.a', None)]
 
         try:
