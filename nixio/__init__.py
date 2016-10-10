@@ -20,7 +20,14 @@ try:
 except ImportError:
     pass
 
+import sys
+import os
+
 __all__ = ("File", "FileMode", "DataType", "Value", "LinkType", "DimensionType")
 
 __author__ = ('Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe,'
               ' Balint Morvai')
+
+_nixio_bin = os.path.join(sys.prefix, 'share', 'nixio', 'bin')
+if os.path.isdir(_nixio_bin):
+    os.environ["PATH"] += os.pathsep + _nixio_bin

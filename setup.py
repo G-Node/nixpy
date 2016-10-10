@@ -76,14 +76,20 @@ def pkg_config(*packages, **kw):
 
     return kw
 
+def get_wheel_data():
+    data = []
+    bin = os.environ.get('NIXPY_WHEEL_BINARIES', '')
+    if bin and os.path.isdir(bin):
+        data.append(
+            ('share/nixio/bin',
+             [os.path.join(bin, f) for f in os.listdir(bin)]))
+    return data
+
 is_win = os.name == 'nt'
 
 nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include')
 nix_lib_dir = os.getenv('NIX_LIBDIR', '/usr/local/lib')
-if not is_win:
-    nix_lnk_arg = ['-lnix']
-else:
-    nix_lnk_arg = ['/LIBPATH:'+nix_lib_dir, '/DEFAULTLIB:nix.lib']
+nix_lib = 'nix'
 
 nixpy_sources = [
     'src/core.cc',
@@ -121,6 +127,7 @@ boost_libs = BoostPyLib.list_in_dirs(lib_dirs)
 boost_lib = BoostPyLib.find_lib_for_current_python(boost_libs)
 library_dirs = [boost_lib_dir, nix_lib_dir]
 include_dirs = [boost_inc_dir, nix_inc_dir, np_inc_dir, 'src']
+libraries = [nix_lib]
 compile_args = ['--std=c++11'] if not is_win else ['/DBOOST_PYTHON_STATIC_LIB',
                                                    '/EHsc']
 
@@ -139,12 +146,12 @@ if with_nix:
         print("Available boost python libs:\n" + "\n".join(map(str, boost_libs)))
         sys.exit(-1)
 
-    boost_lnk_arg = boost_lib.link_directive
+    libraries.append(boost_lib.library_name)
 
     native_ext = Extension(
         'nixio.core',
         extra_compile_args=['-std=c++11'] if not is_win else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
-        extra_link_args=boost_lnk_arg + nix_lnk_arg,
+        libraries=libraries,
         sources=nixpy_sources,
         runtime_library_dirs=library_dirs if not is_win else None,
         **pkg_config(
@@ -177,5 +184,6 @@ setup(name             = 'nixio',
       package_data     = {'nixio': [license_text, description_text]},
       include_package_data = True,
       zip_safe         = False,
+      data_files=get_wheel_data()
 )
 

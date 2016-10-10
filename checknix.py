@@ -30,9 +30,9 @@ def check_nix(library_dirs=(), include_dirs=(), compile_args=()):
     compiler = distutils.ccompiler.new_compiler()
     assert isinstance(compiler, distutils.ccompiler.CCompiler)
 
-    compiler.library_dirs.extend(library_dirs)
-    compiler.include_dirs.extend(include_dirs)
     distutils.sysconfig.customize_compiler(compiler)
+    compiler.set_library_dirs(library_dirs)
+    compiler.set_include_dirs(include_dirs)
 
     stderr = os.dup(sys.stderr.fileno())
     errfile = open(os.path.join(tmpdir, "check_nix.err"), 'w')
