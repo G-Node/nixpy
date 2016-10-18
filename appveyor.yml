@@ -1,4 +1,4 @@
-version: 1.0.{build}
+version: 1.2.0-3.{build}
 environment:
   NIX_VERSION: 1.2.0
   NIX_BUILD_DIR: C:\nix_build
@@ -13,10 +13,6 @@ environment:
   - PYVER: 34
     BITTNESS: 64
   - PYVER: 34
-    BITTNESS: 32
-  - PYVER: 35
-    BITTNESS: 64
-  - PYVER: 35
     BITTNESS: 32
 build_script:
 - ps: >-
