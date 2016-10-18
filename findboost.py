@@ -34,12 +34,12 @@ class BoostPyLib(object):
     @property
     def library_name(self):
         name, ext = os.path.splitext(self.filename)
-        return name if ext.endswith('lib') else name[3:]
+        return name if ext == ".lib" else name[3:]
 
     @property
     def link_directive(self):
         name, ext = os.path.splitext(self.filename)
-        if ext == 'lib':
+        if ext == '.lib':
             return ["/DEFAULTLIB:" + self.filename, '/LIBPATH:' + self.path]
         else:
             return ['-l' + name[3:]]
@@ -170,7 +170,8 @@ if __name__ == '__main__':
         linked = BoostPyLib.find_lib_with_version(libs, (v_major, v_minor), unknown_is_match=v_major == 2)
         if linked is not None:
             print(' match: ' + str(linked), file=sys.stderr)
-            print(linked.link_directive)
+            print(' linker command: ' + str(linked.link_directive))
+            print(' library name: ' + linked.library_name)
         else:
             print('No usable boost python lib found! :(', file=sys.stderr)
             sys.exit(-1)
