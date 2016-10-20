@@ -43,6 +43,16 @@ CONTACT         = re.search(r"CONTACT\s*=\s*'([^']*)'", info).group(1)
 BRIEF           = re.search(r"BRIEF\s*=\s*'([^']*)'", info).group(1)
 HOMEPAGE        = re.search(r"HOMEPAGE\s*=\s*'([^']*)'", info).group(1)
 
+is_win = os.name == 'nt'
+
+if "dev" in VERSION:
+    if is_win:
+        colorcodes = ("", "")
+    else:
+        colorcodes = ("\033[93m", "\033[0m")
+    sys.stderr.write("{}WARNING: You are building a development version "
+                     "of nixpy.{}\n".format(*colorcodes))
+
 # Replaced StandardError with Exception since StandardError is removed in Py3.x
 class PackageNotFoundError(Exception):
     pass
@@ -84,8 +94,6 @@ def get_wheel_data():
             ('share/nixio/bin',
              [os.path.join(bin, f) for f in os.listdir(bin)]))
     return data
-
-is_win = os.name == 'nt'
 
 nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include')
 nix_lib_dir = os.getenv('NIX_LIBDIR', '/usr/local/lib')
