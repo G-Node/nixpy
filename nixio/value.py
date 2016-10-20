@@ -18,7 +18,7 @@ except NameError:
 
 bools = (bool, np.bool_)
 
-valid_types = (Number, strings)
+valid_types = (Number, strings, bools)
 
 
 class DataType(object):
