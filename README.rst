@@ -51,4 +51,4 @@ NIXPY API Documentation
 The API documentation can be found `here <http://g-node.github.io/nixpy/>`_.
 
 
-.. _nixio: https://pypi.python.org/pypi
+.. _nixio: https://pypi.python.org/pypi/nixio
