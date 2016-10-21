@@ -93,8 +93,13 @@ def check_entity_input(entity, raise_exception=True):
 
 
 def now_int():
-    now = datetime.now()
-    return int(now.strftime("%s"))
+    """
+    Returns the current POSIX time as an integer.
+
+    :return: integer POSIX time
+    """
+    now = datetime.now() - datetime(1970, 1, 1)
+    return int(now.total_seconds())
 
 
 def time_to_str(t):
