@@ -137,6 +137,10 @@ build_script:
 
     echo "call ""\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"" $vcvars" | out-file -filepath "python_compile.bat" -encoding ASCII
 
+    echo "python setup.py build --with-nix" | out-file -filepath "python_compile.bat" -append -encoding ASCII
+
+    echo "python setup.py test" | out-file -filepath "python_compile.bat" -append -encoding ASCII
+
     echo "python setup.py bdist_wheel -d ""$env:DEPLOY_DIR"" --with-nix" | out-file -filepath "python_compile.bat" -append -encoding ASCII
 
     if ($env:BITTNESS -eq "64" -and $env:PYVER -eq "27") {
