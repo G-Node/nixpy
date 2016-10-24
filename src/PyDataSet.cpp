@@ -78,6 +78,10 @@ static nix::DataType pyDtypeToNixDtype(const PyArray_Descr *dtype)
         return nix::DataType::String;
         break;
 
+    case 'b':
+        return nix::DataType::Bool;
+        break;
+
     default:
         break;
     }
@@ -87,18 +91,19 @@ static nix::DataType pyDtypeToNixDtype(const PyArray_Descr *dtype)
 static std::string nixDtypeToPyDtypeStr(nix::DataType nix_dtype)
 {
     switch (nix_dtype) {
-    case nix::DataType::UInt8:  return "<u1";
-    case nix::DataType::UInt16: return "<u2";
-    case nix::DataType::UInt32: return "<u4";
-    case nix::DataType::UInt64: return "<u8";
-    case nix::DataType::Int8:   return "<i1";
-    case nix::DataType::Int16:  return "<i2";
-    case nix::DataType::Int32:  return "<i4";
-    case nix::DataType::Int64:  return "<i8";
-    case nix::DataType::Float:  return "<f4";
-    case nix::DataType::Double: return "<f8";
-    case nix::DataType::Opaque: return "|V1";
-    default:                    return "";
+        case nix::DataType::Bool:   return "<b1";
+        case nix::DataType::UInt8:  return "<u1";
+        case nix::DataType::UInt16: return "<u2";
+        case nix::DataType::UInt32: return "<u4";
+        case nix::DataType::UInt64: return "<u8";
+        case nix::DataType::Int8:   return "<i1";
+        case nix::DataType::Int16:  return "<i2";
+        case nix::DataType::Int32:  return "<i4";
+        case nix::DataType::Int64:  return "<i8";
+        case nix::DataType::Float:  return "<f4";
+        case nix::DataType::Double: return "<f8";
+        case nix::DataType::Opaque: return "|V1";
+        default:                    return "";
     }
 }
 

@@ -7,8 +7,6 @@
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function, unicode_literals)
 
-import sys
-
 import nixio.util.find as finders
 from nixio.util.proxy_list import ProxyList
 
