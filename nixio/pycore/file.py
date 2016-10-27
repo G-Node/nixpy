@@ -67,13 +67,10 @@ class File(FileMixin):
 
     @classmethod
     def _open_existing(cls, path, h5mode):
-        if h5mode == h5py.h5f.ACC_TRUNC:
-            file = cls._create_new(path, h5mode)
-        else:
-            fid = h5py.h5f.open(path, flags=h5mode, fapl=make_fapl())
-            h5file = h5py.File(fid)
-            file = cls(h5file)
-        return file
+        fid = h5py.h5f.open(path, flags=h5mode, fapl=make_fapl())
+        h5file = h5py.File(fid)
+        nixfile = cls(h5file)
+        return nixfile
 
     @classmethod
     def _create_new(cls, path, h5mode):
@@ -90,16 +87,18 @@ class File(FileMixin):
             path = path.encode("utf-8")
         except (UnicodeError, LookupError):
             pass
-        if not os.path.exists(path):
+
+        if (not os.path.exists(path)) or (mode == FileMode.Overwrite):
             mode = FileMode.Overwrite
+            h5mode = map_file_mode(mode)
+            newfile = cls._create_new(path, h5mode)
+            newfile.mode = mode
+            return newfile
 
         h5mode = map_file_mode(mode)
-
-        if os.path.exists(path):
-            newfile = cls._open_existing(path, h5mode)
-        else:
-            newfile = cls._create_new(path, h5mode)
-
+        newfile = cls._open_existing(path, h5mode)
+        if not newfile._check_header(mode):
+            raise exceptions.InvalidFile()
         newfile.mode = mode
         return newfile
 
@@ -131,8 +130,20 @@ class File(FileMixin):
             raise ValueError("Valid backends are 'hdf5' and 'h5py'.")
 
     def _create_header(self):
-        self.format = "nix"
-        self.version = (1, 0, 0)
+        self.format = FILE_FORMAT
+        self.version = HDF_FF_VERSION
+
+    def _check_header(self, mode):
+        if self.format != FILE_FORMAT:
+            return False
+
+        if mode == FileMode.ReadWrite:
+            return can_write(self)
+        elif mode == FileMode.ReadOnly:
+            return can_read(self)
+        else:
+            return False
+
 
     @property
     def version(self):
