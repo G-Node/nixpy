@@ -39,7 +39,7 @@ def map_file_mode(mode):
     elif mode == FileMode.Overwrite:
         return h5py.h5f.ACC_TRUNC
     else:
-        ValueError("Invalid file mode specified.")
+        raise ValueError("Invalid file mode specified.")
 
 
 def make_fapl():
@@ -124,7 +124,6 @@ class File(FileMixin):
             if CFile:
                 return CFile.open(path, mode)
             else:
-                # TODO: Brief instructions or web URL for building C++ files?
                 raise RuntimeError("HDF5 backend is not available.")
         elif backend == "h5py":
             return cls._open(path, mode)
@@ -232,7 +231,7 @@ class File(FileMixin):
         :rtype: bool
         """
         try:
-            _ = self._h5file.mode
+            self._h5file.mode
             return True
         except ValueError:
             return False
