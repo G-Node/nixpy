@@ -26,7 +26,7 @@ except ImportError:
 
 
 FILE_FORMAT = "nix"
-HDF_FF_VERSION = (1, 0, 0)
+HDF_FF_VERSION = (1, 1, 0)
 
 
 def can_write(nixfile):
