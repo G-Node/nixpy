@@ -25,6 +25,32 @@ except ImportError:
     CFile = None
 
 
+FILE_FORMAT = "nix"
+HDF_FF_VERSION = (1, 0, 0)
+
+
+def can_write(nixfile):
+    filever = nixfile.version
+    if len(filever) != 3:
+        raise RuntimeError("Invalid version specified in file.")
+    if HDF_FF_VERSION == filever:
+        return True
+    else:
+        return False
+
+
+def can_read(nixfile):
+    filever = nixfile.version
+    if len(filever) != 3:
+        raise RuntimeError("Invalid version specified in file.")
+    vx, vy, vz = HDF_FF_VERSION
+    fx, fy, fz = filever
+    if vx == fx and vy >= fy:
+        return True
+    else:
+        return False
+
+
 class FileMode(object):
     ReadOnly = 'r'
     ReadWrite = 'a'
