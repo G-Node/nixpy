@@ -9,7 +9,6 @@
    Change the Travis, Appveyor, and Coverage badges in the readme to point to the status of the new branch.
 4. Change CI configurations  
    Travis and Appveyor configurations should be changed so that the new nixpy branch builds using the corresponding nix branch.
-
 5. Increment version number in info.py
 6. Upload to PyPI  
    Upload source archive using:
