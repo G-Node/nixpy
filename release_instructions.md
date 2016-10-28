@@ -1,8 +1,8 @@
 # Checklist for NIXPY release
 
 1. Create branch (if necessary)  
-   For major releases (e.g., 1.2.0, 1.3.0, etc) create a new branch called `vX.Y` (e.g., `v1.2`).
-   This is not necessary for point releases (e.g., `1.2.0 → 1.2.1`)
+   For releases with breaking changes (e.g., 1.2.0, 1.3.0, etc, see the [NIX API and file format versioning](https://github.com/G-Node/nix/blob/master/docs/versioning.md) guide) create a new branch called `vX.Y` (e.g., `v1.2`).
+   This is not necessary for minor releases with non-breaking changes (e.g., `1.2.0 → 1.2.1`)
 2. Tag with release version  
    Tag the latest commit with the full version number (e.g., `1.2.1`).
 3. Update readme  
