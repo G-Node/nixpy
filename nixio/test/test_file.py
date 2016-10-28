@@ -15,7 +15,10 @@ try:
     skip_cpp = False
 except ImportError:
     skip_cpp = True
+
+import h5py
 from nixio import *
+import nixio.pycore.file as filepy
 
 
 class _FileTest(unittest.TestCase):
@@ -111,4 +114,44 @@ class FileTestCPP(_FileTest):
 class FileTestPy(_FileTest):
 
     backend = "h5py"
+
+
+class FileVerTestPy(unittest.TestCase):
+
+    backend = "h5py"
+    filename = "versiontest.h5"
+    filever = filepy.HDF_FF_VERSION
+    format = filepy.FILE_FORMAT
+
+    def nix_open(self, mode):
+        return File.open(self.filename, mode, backend=self.backend)
+
+    def setUp(self):
+        self.h5file = h5py.File(self.filename, mode="w")
+
+    def tearDown(self):
+        self.h5file.close()
+
+    def test_read_write(self):
+        self.h5file.attrs["version"] = self.filever
+        self.h5file.attrs["format"] = self.format
+        self.assertTrue(self.nix_open(FileMode.ReadWrite))
+
+    def test_read_only(self):
+        vx, vy, vz = self.filever
+        roversion = (vx, vy, vz+2)
+        self.h5file.attrs["version"] = roversion
+        with self.assertRaises(RuntimeError):
+            self.nix_open(FileMode.ReadWrite)
+
+    def test_bad_version(self):
+        pass
+
+    def test_bad_tuple(self):
+        pass
+
+    def test_bad_format(self):
+        pass
+
+
 
