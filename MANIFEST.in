@@ -1,6 +1,5 @@
 include LICENSE README.rst Win32.md
 recursive-include docs *
 graft src
-include findboost.py
 include CMakeLists.txt
-include checknix.py
+recursive-include scripts *

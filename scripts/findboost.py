@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# coding=utf-8
-
 from __future__ import print_function
 from __future__ import division
 
@@ -8,6 +5,7 @@ import os
 import re
 import sys
 from operator import itemgetter
+
 
 try:
     from commands import getstatusoutput

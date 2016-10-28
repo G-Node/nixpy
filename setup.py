@@ -25,8 +25,8 @@ import sys
 import os
 import re
 
-from findboost import BoostPyLib
-from checknix import check_nix
+from scripts.findboost import BoostPyLib
+from scripts.checknix import check_nix
 
 with open('README.rst') as f:
     description_text = f.read()
