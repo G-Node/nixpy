@@ -19,6 +19,7 @@ except ImportError:
 import h5py
 from nixio import *
 import nixio.pycore.file as filepy
+from nixio.pycore.exceptions.exceptions import InvalidFile
 
 
 class _FileTest(unittest.TestCase):
@@ -121,37 +122,68 @@ class FileVerTestPy(unittest.TestCase):
     backend = "h5py"
     filename = "versiontest.h5"
     filever = filepy.HDF_FF_VERSION
-    format = filepy.FILE_FORMAT
+    fformat = filepy.FILE_FORMAT
 
-    def nix_open(self, mode):
-        return File.open(self.filename, mode, backend=self.backend)
+    def try_open(self, mode):
+        f = File.open(self.filename, mode, backend=self.backend)
+        f.close()
+
+    def set_header(self, fformat=None, version=None):
+        if fformat is None:
+            fformat = self.fformat
+        if version is None:
+            version = self.filever
+        self.h5root.attrs["format"] = fformat
+        self.h5root.attrs["version"] = version
 
     def setUp(self):
         self.h5file = h5py.File(self.filename, mode="w")
+        self.h5root = self.h5file["/"]
 
     def tearDown(self):
         self.h5file.close()
 
     def test_read_write(self):
-        self.h5file.attrs["version"] = self.filever
-        self.h5file.attrs["format"] = self.format
-        self.assertTrue(self.nix_open(FileMode.ReadWrite))
+        self.set_header()
+        self.try_open(FileMode.ReadWrite)
 
     def test_read_only(self):
         vx, vy, vz = self.filever
         roversion = (vx, vy, vz+2)
-        self.h5file.attrs["version"] = roversion
+        self.set_header(version=roversion)
+        self.try_open(FileMode.ReadOnly)
         with self.assertRaises(RuntimeError):
-            self.nix_open(FileMode.ReadWrite)
+            self.try_open(FileMode.ReadWrite)
 
-    def test_bad_version(self):
-        pass
+    def test_no_open(self):
+        vx, vy, vz = self.filever
+        noversion = (vx, vy+3, vz+2)
+        self.set_header(version=noversion)
+        with self.assertRaises(RuntimeError):
+            self.try_open(FileMode.ReadWrite)
+        with self.assertRaises(RuntimeError):
+            self.try_open(FileMode.ReadOnly)
+        noversion = (vx, vy+1, vz)
+        self.set_header(version=noversion)
+        with self.assertRaises(RuntimeError):
+            self.try_open(FileMode.ReadWrite)
+        with self.assertRaises(RuntimeError):
+            self.try_open(FileMode.ReadOnly)
+        noversion = (vx+1, vy, vz)
+        self.set_header(version=noversion)
+        with self.assertRaises(RuntimeError):
+            self.try_open(FileMode.ReadWrite)
+        with self.assertRaises(RuntimeError):
+            self.try_open(FileMode.ReadOnly)
 
     def test_bad_tuple(self):
-        pass
+        self.set_header(version=(-1, -1, -1))
+        with self.assertRaises(RuntimeError):
+            self.try_open(FileMode.ReadOnly)
+
 
     def test_bad_format(self):
-        pass
-
-
+        self.set_header(fformat="NOT_A_NIX_FILE")
+        with self.assertRaises(InvalidFile):
+            self.try_open(FileMode.ReadOnly)
 
