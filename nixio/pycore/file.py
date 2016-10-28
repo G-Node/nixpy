@@ -26,7 +26,7 @@ except ImportError:
 
 
 FILE_FORMAT = "nix"
-HDF_FF_VERSION = (1, 1, 0)
+HDF_FF_VERSION = (1, 0, 0)
 
 
 def can_write(nixfile):
@@ -179,14 +179,14 @@ class File(FileMixin):
 
         :type: tuple
         """
-        return tuple(self._h5file.attrs["version"])
+        return tuple(self._root.get_attr("version"))
 
     @version.setter
     def version(self, v):
         util.check_attr_type(v, tuple)
         for part in v:
             util.check_attr_type(part, int)
-        self._h5file.attrs["version"] = v
+        self._root.set_attr("version", v)
 
     @property
     def format(self):
@@ -196,12 +196,12 @@ class File(FileMixin):
 
         :type: str
         """
-        return self._h5file.attrs["format"].decode()
+        return self._root.get_attr("format")
 
     @format.setter
     def format(self, f):
         util.check_attr_type(f, str)
-        self._h5file.attrs["format"] = f.encode("utf-8")
+        self._root.set_attr("format", f)
 
     @property
     def created_at(self):
