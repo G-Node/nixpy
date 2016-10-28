@@ -123,8 +123,7 @@ class File(FileMixin):
 
         h5mode = map_file_mode(mode)
         newfile = cls._open_existing(path, h5mode)
-        if not newfile._check_header(mode):
-            raise exceptions.InvalidFile()
+        newfile._check_header(mode)
         newfile.mode = mode
         return newfile
 
@@ -161,14 +160,16 @@ class File(FileMixin):
 
     def _check_header(self, mode):
         if self.format != FILE_FORMAT:
-            return False
+            raise exceptions.InvalidFile()
 
         if mode == FileMode.ReadWrite:
-            return can_write(self)
+            if not can_write(self):
+                raise RuntimeError("Cannot open file for writing. "
+                                   "Incompatible version.")
         elif mode == FileMode.ReadOnly:
-            return can_read(self)
-        else:
-            return False
+            if not can_read(self):
+                raise RuntimeError("Cannot open file. "
+                                   "Incompatible version.")
 
 
     @property
