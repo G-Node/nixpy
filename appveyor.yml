@@ -96,7 +96,7 @@ build_script:
     cd boost_$under
 
 
-    echo "call ""\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"" $vcvars && bootstrap && .\b2 install -j4 -a --prefix=$env:NIX_BUILD_DIR\boost_build toolset=msvc-12.0 architecture=x86 address-model=$BITS threading=multi variant=release link=static runtime-link=shared --with-python" | out-file -filepath "nix_compile.bat" -encoding ASCII
+    echo "call ""\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat"" $vcvars && bootstrap && .\b2 install -d0 -j4 -a --prefix=$env:NIX_BUILD_DIR\boost_build toolset=msvc-12.0 architecture=x86 address-model=$BITS threading=multi variant=release link=static runtime-link=shared --with-python" | out-file -filepath "nix_compile.bat" -encoding ASCII
 
     .\nix_compile.bat
 
