@@ -114,6 +114,11 @@ class File(FileMixin):
         except (UnicodeError, LookupError):
             pass
 
+        if (not os.path.exists(path) and mode == FileMode.ReadOnly):
+            raise RuntimeError(
+                "Cannot open non-existent file in ReadOnly mode!"
+            )
+
         if (not os.path.exists(path)) or (mode == FileMode.Overwrite):
             mode = FileMode.Overwrite
             h5mode = map_file_mode(mode)
@@ -170,7 +175,6 @@ class File(FileMixin):
             if not can_read(self):
                 raise RuntimeError("Cannot open file. "
                                    "Incompatible version.")
-
 
     @property
     def version(self):
@@ -342,5 +346,3 @@ class File(FileMixin):
 
     def _section_count(self):
         return len(self.metadata)
-
-
