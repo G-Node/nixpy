@@ -11,6 +11,7 @@ matrix:
           env: NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include
         - python: "2.7_with_system_site_packages"
         - python: "3.4"
+        - python: "3.5"
 
 addons:
   apt:
