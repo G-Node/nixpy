@@ -135,6 +135,11 @@ class FileVerTestPy(unittest.TestCase):
             version = self.filever
         self.h5root.attrs["format"] = fformat
         self.h5root.attrs["version"] = version
+        self.h5root.attrs["created_at"] = 0
+        self.h5root.attrs["updated_at"] = 0
+        if "data" not in self.h5root:
+            self.h5root.create_group("data")
+            self.h5root.create_group("metadata")
 
     def setUp(self):
         self.h5file = h5py.File(self.filename, mode="w")
