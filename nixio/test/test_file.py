@@ -180,6 +180,9 @@ class FileVerTestPy(unittest.TestCase):
         self.set_header(version=(-1, -1, -1))
         with self.assertRaises(RuntimeError):
             self.try_open(FileMode.ReadOnly)
+        self.set_header(version=(1, 2))
+        with self.assertRaises(RuntimeError):
+            self.try_open(FileMode.ReadOnly)
 
 
     def test_bad_format(self):
