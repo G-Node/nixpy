@@ -69,7 +69,7 @@ def pkg_config(*packages, **kw):
     if status != 0:
         err_str = 'Some packages were not found: %s [%s]' % (pkg_string, out)
         if ignore_error:
-            sys.stderr.write('WARNING: ' + err_str)
+            sys.stderr.write('WARNING: ' + err_str + "\n")
             out = ''
         else:
             raise PackageNotFoundError(err_str)
@@ -130,7 +130,7 @@ classifiers   = [
 
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
 boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
-lib_dirs = BoostPyLib.library_search_dirs([boost_lib_dir])
+lib_dirs = BoostPyLib.library_search_dirs([boost_lib_dir]) if not is_win else []
 boost_libs = BoostPyLib.list_in_dirs(lib_dirs)
 boost_lib = BoostPyLib.find_lib_for_current_python(boost_libs)
 library_dirs = [boost_lib_dir, nix_lib_dir]
