@@ -114,12 +114,12 @@ class File(FileMixin):
         except (UnicodeError, LookupError):
             pass
 
-        if (not os.path.exists(path) and mode == FileMode.ReadOnly):
+        if not os.path.exists(path) and mode == FileMode.ReadOnly:
             raise RuntimeError(
                 "Cannot open non-existent file in ReadOnly mode!"
             )
 
-        if (not os.path.exists(path)) or (mode == FileMode.Overwrite):
+        if not os.path.exists(path) or mode == FileMode.Overwrite:
             mode = FileMode.Overwrite
             h5mode = map_file_mode(mode)
             newfile = cls._create_new(path, h5mode)
