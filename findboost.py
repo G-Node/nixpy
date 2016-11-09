@@ -4,13 +4,10 @@
 from __future__ import print_function
 from __future__ import division
 
-import functools
 import os
 import re
 import sys
 from operator import itemgetter
-
-import operator
 
 try:
     from commands import getstatusoutput
@@ -57,7 +54,7 @@ class BoostPyLib(object):
         cmd = "%s --print-search-dirs | grep ^libraries" % cc
         res, out = getstatusoutput(cmd)
         if res != 0:
-            print("Warning: \"%s\" failed with %d" % (cmd, res), file=sys.stderr)
+            print("WARNING: \"%s\" failed with %d" % (cmd, res), file=sys.stderr)
             return dirs
 
         start = out.find("=") + 1

@@ -6,7 +6,14 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+from __future__ import (absolute_import, division, print_function)
+
+import sys
+import os
+
+_nixio_bin = os.path.join(sys.prefix, 'share', 'nixio', 'bin')
+if os.path.isdir(_nixio_bin):
+    os.environ["PATH"] += os.pathsep + _nixio_bin
 
 import sys
 import os
@@ -27,7 +34,8 @@ try:
 except ImportError:
     pass
 
-__all__ = ("File", "FileMode", "DataType", "Value", "LinkType", "DimensionType")
+__all__ = ("File", "FileMode", "DataType", "Value",
+           "LinkType", "DimensionType")
 
 __author__ = ('Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe,'
               ' Balint Morvai')

@@ -86,6 +86,8 @@ struct value_transmogrify {
             case DataType::String:
                 pyvalue = PyObject_CallFunction(PyValueClass, "s", value.get<std::string>().c_str());
                 break;
+            default:
+                return nullptr;
         }
 
         PyObject_SetAttrString(pyvalue, "reference", PyUnicode_FromString(value.reference.c_str()));

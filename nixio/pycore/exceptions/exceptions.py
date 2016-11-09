@@ -51,3 +51,10 @@ class IncompatibleDimensions(ValueError):
         self.message = "IncompatibleDimensions: {} evoked at: {})".format(what,
                                                                           where)
         super(IncompatibleDimensions, self).__init__(self.message)
+
+
+class InvalidFile(Exception):
+
+    def __init__(self):
+        self.message = "Invalid file - file is not a nix file."
+        super(InvalidFile, self).__init__(self.message)

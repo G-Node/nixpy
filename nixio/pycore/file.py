@@ -25,6 +25,32 @@ except ImportError:
     CFile = None
 
 
+FILE_FORMAT = "nix"
+HDF_FF_VERSION = (1, 1, 0)
+
+
+def can_write(nixfile):
+    filever = nixfile.version
+    if len(filever) != 3:
+        raise RuntimeError("Invalid version specified in file.")
+    if HDF_FF_VERSION == filever:
+        return True
+    else:
+        return False
+
+
+def can_read(nixfile):
+    filever = nixfile.version
+    if len(filever) != 3:
+        raise RuntimeError("Invalid version specified in file.")
+    vx, vy, vz = HDF_FF_VERSION
+    fx, fy, fz = filever
+    if vx == fx and vy >= fy:
+        return True
+    else:
+        return False
+
+
 class FileMode(object):
     ReadOnly = 'r'
     ReadWrite = 'a'
@@ -39,7 +65,7 @@ def map_file_mode(mode):
     elif mode == FileMode.Overwrite:
         return h5py.h5f.ACC_TRUNC
     else:
-        ValueError("Invalid file mode specified.")
+        raise ValueError("Invalid file mode specified.")
 
 
 def make_fapl():
@@ -67,13 +93,10 @@ class File(FileMixin):
 
     @classmethod
     def _open_existing(cls, path, h5mode):
-        if h5mode == h5py.h5f.ACC_TRUNC:
-            file = cls._create_new(path, h5mode)
-        else:
-            fid = h5py.h5f.open(path, flags=h5mode, fapl=make_fapl())
-            h5file = h5py.File(fid)
-            file = cls(h5file)
-        return file
+        fid = h5py.h5f.open(path, flags=h5mode, fapl=make_fapl())
+        h5file = h5py.File(fid)
+        nixfile = cls(h5file)
+        return nixfile
 
     @classmethod
     def _create_new(cls, path, h5mode):
@@ -90,16 +113,22 @@ class File(FileMixin):
             path = path.encode("utf-8")
         except (UnicodeError, LookupError):
             pass
-        if not os.path.exists(path):
+
+        if not os.path.exists(path) and mode == FileMode.ReadOnly:
+            raise RuntimeError(
+                "Cannot open non-existent file in ReadOnly mode!"
+            )
+
+        if not os.path.exists(path) or mode == FileMode.Overwrite:
             mode = FileMode.Overwrite
+            h5mode = map_file_mode(mode)
+            newfile = cls._create_new(path, h5mode)
+            newfile.mode = mode
+            return newfile
 
         h5mode = map_file_mode(mode)
-
-        if os.path.exists(path):
-            newfile = cls._open_existing(path, h5mode)
-        else:
-            newfile = cls._create_new(path, h5mode)
-
+        newfile = cls._open_existing(path, h5mode)
+        newfile._check_header(mode)
         newfile.mode = mode
         return newfile
 
@@ -124,7 +153,6 @@ class File(FileMixin):
             if CFile:
                 return CFile.open(path, mode)
             else:
-                # TODO: Brief instructions or web URL for building C++ files?
                 raise RuntimeError("HDF5 backend is not available.")
         elif backend == "h5py":
             return cls._open(path, mode)
@@ -132,8 +160,21 @@ class File(FileMixin):
             raise ValueError("Valid backends are 'hdf5' and 'h5py'.")
 
     def _create_header(self):
-        self.format = "nix"
-        self.version = (1, 0, 0)
+        self.format = FILE_FORMAT
+        self.version = HDF_FF_VERSION
+
+    def _check_header(self, mode):
+        if self.format != FILE_FORMAT:
+            raise exceptions.InvalidFile()
+
+        if mode == FileMode.ReadWrite:
+            if not can_write(self):
+                raise RuntimeError("Cannot open file for writing. "
+                                   "Incompatible version.")
+        elif mode == FileMode.ReadOnly:
+            if not can_read(self):
+                raise RuntimeError("Cannot open file. "
+                                   "Incompatible version.")
 
     @property
     def version(self):
@@ -142,14 +183,14 @@ class File(FileMixin):
 
         :type: tuple
         """
-        return tuple(self._h5file.attrs["version"])
+        return tuple(self._root.get_attr("version"))
 
     @version.setter
     def version(self, v):
         util.check_attr_type(v, tuple)
         for part in v:
             util.check_attr_type(part, int)
-        self._h5file.attrs["version"] = v
+        self._root.set_attr("version", v)
 
     @property
     def format(self):
@@ -159,12 +200,12 @@ class File(FileMixin):
 
         :type: str
         """
-        return self._h5file.attrs["format"].decode()
+        return self._root.get_attr("format")
 
     @format.setter
     def format(self, f):
         util.check_attr_type(f, str)
-        self._h5file.attrs["format"] = f.encode("utf-8")
+        self._root.set_attr("format", f)
 
     @property
     def created_at(self):
@@ -232,7 +273,7 @@ class File(FileMixin):
         :rtype: bool
         """
         try:
-            _ = self._h5file.mode
+            self._h5file.mode
             return True
         except ValueError:
             return False
@@ -305,5 +346,3 @@ class File(FileMixin):
 
     def _section_count(self):
         return len(self.metadata)
-
-
