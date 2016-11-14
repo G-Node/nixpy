@@ -16,13 +16,14 @@ from . import util
 
 class EntityWithSources(EntityWithMetadata, EntityWithSourcesMixin):
 
-    def __init__(self, h5group):
-        super(EntityWithSources, self).__init__(h5group)
+    def __init__(self, nixparent, h5group):
+        super(EntityWithSources, self).__init__(nixparent, h5group)
 
     @classmethod
-    def _create_new(cls, parent, name, type_):
-        newentity = super(EntityWithSources, cls)._create_new(parent,
-                                                              name, type_)
+    def _create_new(cls, nixparent, h5parent, name, type_):
+        newentity = super(EntityWithSources, cls)._create_new(
+            nixparent, h5parent, name, type_
+        )
         return newentity
 
     # Source
@@ -38,11 +39,11 @@ class EntityWithSources(EntityWithMetadata, EntityWithSourcesMixin):
             else:
                 raise ValueError("No Source with name {} found {}.sources"
                                  .format(id_or_name, self.name))
-        return Source(sources.get_by_name(id_))
+        return Source(self, sources.get_by_name(id_))
 
     def _get_source_by_pos(self, pos):
         sources = self._h5group.open_group("sources")
-        return Source(sources.get_by_pos(pos))
+        return Source(self, sources.get_by_pos(pos))
 
     def _remove_source_by_id(self, id_):
         sources = self._h5group.open_group("sources")
@@ -53,7 +54,7 @@ class EntityWithSources(EntityWithMetadata, EntityWithSourcesMixin):
         return len(sources)
 
     def _add_source_by_id(self, id_):
-        parblock = self._h5group.root
+        parblock = self._parent
         target = parblock._h5group.find_children(
             filtr=lambda x: x.get_attr("entity_id") == id_
         )
@@ -66,7 +67,7 @@ class EntityWithSources(EntityWithMetadata, EntityWithSourcesMixin):
                                "Invalid data found in NIX file. "
                                "Multiple Sources found with the same ID."
                                .format(cls))
-        target = Source(target[0])
+        target = Source(parblock, target[0])
         sources = self._h5group.open_group("sources")
         sources.create_link(target, target.id)
 

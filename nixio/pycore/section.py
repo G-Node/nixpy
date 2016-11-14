@@ -18,14 +18,13 @@ from . import exceptions
 
 class Section(NamedEntity, SectionMixin):
 
-    def __init__(self, h5group, parent=None):
-        super(Section, self).__init__(h5group)
-        self._parent = parent
+    def __init__(self, nixparent, h5group):
+        super(Section, self).__init__(nixparent, h5group)
 
     @classmethod
-    def _create_new(cls, parent, parent_section, name, type_):
-        newentity = super(Section, cls)._create_new(parent, name, type_)
-        newentity._parent = parent_section
+    def _create_new(cls, nixparent, h5parent, name, type_):
+        newentity = super(Section, cls)._create_new(nixparent, h5parent,
+                                                    name, type_)
         return newentity
 
     # Section
@@ -45,16 +44,16 @@ class Section(NamedEntity, SectionMixin):
         sections = self._h5group.open_group("sections", True)
         if name in sections:
             raise exceptions.DuplicateName("create_section")
-        sec = Section._create_new(sections, self, name, type_)
+        sec = Section._create_new(self, sections, name, type_)
         return sec
 
     def _get_section_by_id(self, id_or_name):
         sections = self._h5group.open_group("sections")
-        return Section(sections.get_by_id_or_name(id_or_name), parent=self)
+        return Section(self, sections.get_by_id_or_name(id_or_name))
 
     def _get_section_by_pos(self, pos):
         sections = self._h5group.open_group("sections")
-        return Section(sections.get_by_pos(pos), parent=self)
+        return Section(self, sections.get_by_pos(pos))
 
     def _delete_section_by_id(self, id_):
         sections = self._h5group.open_group("sections")
@@ -88,7 +87,7 @@ class Section(NamedEntity, SectionMixin):
             else:
                 dtype = values.data_type
                 values = [values]
-        prop = Property._create_new(properties, name, dtype)
+        prop = Property._create_new(self, properties, name, dtype)
         prop.values = values
         return prop
 
@@ -118,19 +117,19 @@ class Section(NamedEntity, SectionMixin):
         """
         properties = self._h5group.open_group("properties")
         try:
-            p = Property(properties.get_by_name(name))
+            p = Property(self, properties.get_by_name(name))
         except ValueError:
             p = None
         return p
 
     def _get_property_by_id(self, id_or_name):
         properties = self._h5group.open_group("properties")
-        return Property(properties.get_by_id_or_name(id_or_name))
+        return Property(self, properties.get_by_id_or_name(id_or_name))
 
 
     def _get_property_by_pos(self, pos):
         properties = self._h5group.open_group("properties")
-        return Property(properties.get_by_pos(pos))
+        return Property(self, properties.get_by_pos(pos))
 
     def _delete_property_by_id(self, id_):
         properties = self._h5group.open_group("properties")
@@ -151,7 +150,7 @@ class Section(NamedEntity, SectionMixin):
         if "link" not in self._h5group:
             return None
         else:
-            return Section(self._h5group.open_group("link"))
+            return Section(self, self._h5group.open_group("link"))
 
     @link.setter
     def link(self, id_or_sec):
@@ -160,16 +159,16 @@ class Section(NamedEntity, SectionMixin):
         if isinstance(id_or_sec, Section):
             sec = id_or_sec
         else:
-            rootsec = Section(self._h5group.h5root)
+            rootsec = Section(self, self._h5group.h5root)
             sec = rootsec.find_sections(filtr=lambda x: x.id == id_or_sec)
 
         self._h5group.create_link(sec, "link")
 
     def inherited_properties(self):
         properties = self._h5group.open_group("properties")
-        inhprops = [Property(h5prop) for h5prop in properties]
+        inhprops = [Property(self, h5prop) for h5prop in properties]
         if self.link:
-            inhprops.append(self.link.inherited_properties)
+            inhprops.append(self.link.inherited_properties())
         return inhprops
 
     @property
@@ -210,7 +209,10 @@ class Section(NamedEntity, SectionMixin):
 
         :type: Section
         """
-        return self._parent
+        if isinstance(self._parent, Section):
+            return self._parent
+        # For NIX compatibility
+        return None
 
     @property
     def referring_objects(self):

@@ -15,13 +15,14 @@ from . import util
 
 class Source(EntityWithMetadata, SourceMixin):
 
-    def __init__(self, h5group):
-        super(Source, self).__init__(h5group)
+    def __init__(self, nixparent, h5group):
+        super(Source, self).__init__(nixparent, h5group)
         # TODO: Validate Source container
 
     @classmethod
-    def _create_new(cls, parent, name, type_):
-        newentity = super(Source, cls)._create_new(parent, name, type_)
+    def _create_new(cls, nixparent, h5parent, name, type_):
+        newentity = super(Source, cls)._create_new(nixparent, h5parent,
+                                                   name, type_)
         return newentity
 
     # Source
@@ -41,17 +42,17 @@ class Source(EntityWithMetadata, SourceMixin):
         sources = self._h5group.open_group("sources", True)
         if name in sources:
             raise exceptions.DuplicateName("create_source")
-        src = Source._create_new(sources, name, type_)
+        src = Source._create_new(self, sources, name, type_)
         return src
 
     # Source
     def _get_source_by_id(self, id_or_name):
         sources = self._h5group.open_group("sources")
-        return Source(sources.get_by_id_or_name(id_or_name))
+        return Source(self, sources.get_by_id_or_name(id_or_name))
 
     def _get_source_by_pos(self, pos):
         sources = self._h5group.open_group("sources")
-        return Source(sources.get_by_pos(pos))
+        return Source(self, sources.get_by_pos(pos))
 
     def _delete_source_by_id(self, id_):
         sources = self._h5group.open_group("sources")
