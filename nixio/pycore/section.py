@@ -215,6 +215,18 @@ class Section(NamedEntity, SectionMixin):
         return None
 
     @property
+    def file(self):
+        """
+        Root file object.
+
+        :type: File
+        """
+        par = self._parent
+        while isinstance(par, Section):
+            par = par._parent
+        return par
+
+    @property
     def referring_objects(self):
         objs = []
         objs.extend(self.referring_blocks)
@@ -227,8 +239,8 @@ class Section(NamedEntity, SectionMixin):
 
     @property
     def referring_blocks(self):
-        f = self._h5group.file
-        return list(blk for blk in f.blocks if blk.medatada.id == self.id)
+        f = self.file
+        return list(blk for blk in f.blocks if blk.metadata.id == self.id)
 
     @property
     def referring_groups(self):
