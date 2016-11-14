@@ -216,10 +216,38 @@ class _TestSection(unittest.TestCase):
         otherblock = self.file.create_block("b block", "block with metadata")
         otherblock.metadata = self.other
 
-        self.assertEqual(self.section.referring_blocks, 1)
-        self.assertEqual(self.other.referring_blocks, 1)
-        self.assertIs(self.section.referring_blocks[0], block)
-        self.assertIs(self.other.referring_blocks[0], otherblock)
+        self.assertEqual(len(self.section.referring_blocks), 1)
+        self.assertEqual(len(self.other.referring_blocks), 1)
+        self.assertEqual(self.section.referring_blocks[0], block)
+        self.assertEqual(self.other.referring_blocks[0], otherblock)
+
+        da_one = block.create_data_array("foo", "data_array", data=range(10))
+        da_one.metadata = self.other
+        da_two = block.create_data_array("foobar", "data_array", data=[1])
+        da_two.metadata = self.other
+
+        self.assertEqual(len(self.other.referring_data_arrays), 2)
+        refids = [da.id for da in self.other.referring_data_arrays]
+        self.assertIn(da_one, self.other.referring_data_arrays)
+        self.assertIn(da_two, self.other.referring_data_arrays)
+
+        tag = block.create_tag("tago", "tagtype", [1, 1])
+        tag.metadata = self.section
+        self.assertEqual(len(self.section.referring_tags), 1)
+        self.assertEqual(len(self.other.referring_tags), 0)
+        self.assertEqual(self.section.referring_tags[0].id, tag.id)
+
+        mtag = block.create_multi_tag("MultiTagName", "MultiTagType", da_one)
+        mtag.metadata = self.section
+        self.assertEqual(len(self.section.referring_multi_tags), 1)
+        self.assertEqual(len(self.other.referring_multi_tags), 0)
+        self.assertEqual(self.section.referring_multi_tags[0].id, mtag.id)
+
+        src = block.create_source("sauce", "stype")
+        src.metadata = self.other
+        self.assertEqual(len(self.other.referring_sources), 1)
+        self.assertEqual(len(self.section.referring_sources), 0)
+        self.assertEqual(self.other.referring_sources[0].id, src.id)
 
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
