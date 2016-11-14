@@ -212,3 +212,64 @@ class Section(NamedEntity, SectionMixin):
         """
         return self._parent
 
+    @property
+    def referring_objects(self):
+        objs = []
+        objs.extend(self.referring_blocks)
+        objs.extend(self.referring_groups)
+        objs.extend(self.referring_data_arrays)
+        objs.extend(self.referring_tags)
+        objs.extend(self.referring_multi_tags)
+        objs.extend(self.referring_sources)
+        return objs
+
+    @property
+    def referring_blocks(self):
+        f = self._h5group.file
+        return list(blk for blk in f.blocks if blk.medatada.id == self.id)
+
+    @property
+    def referring_groups(self):
+        f = self._h5group.file
+        groups = []
+        for blk in f.blocks:
+            groups.extend(grp for grp in blk.groups
+                          if grp.metadata.id == self.id)
+        return groups
+
+    @property
+    def referring_data_arrays(self):
+        f = self._h5group.file
+        data_arrays = []
+        for blk in f.blocks:
+            data_arrays.extend(da for da in blk.data_arrays
+                               if da.metadata.id == self.id)
+        return data_arrays
+
+    @property
+    def referring_tags(self):
+        f = self._h5group.file
+        tags = []
+        for blk in f.blocks:
+            tags.extend(tg for tg in blk.tags
+                        if tg.metadata.id == self.id)
+        return tags
+
+    @property
+    def referring_multi_tags(self):
+        f = self._h5group.file
+        multi_tags = []
+        for blk in f.blocks:
+            multi_tags.extend(mt for mt in blk.multi_tags
+                              if mt.metadata.id == self.id)
+        return multi_tags
+
+    @property
+    def referring_sources(self):
+        f = self._h5group.file
+        sources = []
+        for blk in f.blocks:
+            sources.extend(src for src in blk.sources
+                           if src.metadata.id == self.id)
+        return sources
+
