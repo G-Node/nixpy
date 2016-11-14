@@ -244,7 +244,7 @@ class Section(NamedEntity, SectionMixin):
 
     @property
     def referring_groups(self):
-        f = self._h5group.file
+        f = self.file
         groups = []
         for blk in f.blocks:
             groups.extend(grp for grp in blk.groups
@@ -253,7 +253,7 @@ class Section(NamedEntity, SectionMixin):
 
     @property
     def referring_data_arrays(self):
-        f = self._h5group.file
+        f = self.file
         data_arrays = []
         for blk in f.blocks:
             data_arrays.extend(da for da in blk.data_arrays
@@ -262,7 +262,7 @@ class Section(NamedEntity, SectionMixin):
 
     @property
     def referring_tags(self):
-        f = self._h5group.file
+        f = self.file
         tags = []
         for blk in f.blocks:
             tags.extend(tg for tg in blk.tags
@@ -271,7 +271,7 @@ class Section(NamedEntity, SectionMixin):
 
     @property
     def referring_multi_tags(self):
-        f = self._h5group.file
+        f = self.file
         multi_tags = []
         for blk in f.blocks:
             multi_tags.extend(mt for mt in blk.multi_tags
@@ -280,7 +280,7 @@ class Section(NamedEntity, SectionMixin):
 
     @property
     def referring_sources(self):
-        f = self._h5group.file
+        f = self.file
         sources = []
         for blk in f.blocks:
             sources.extend(src for src in blk.sources
