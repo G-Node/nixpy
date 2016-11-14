@@ -189,7 +189,6 @@ class FileVerTestPy(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             self.try_open(FileMode.ReadOnly)
 
-
     def test_bad_format(self):
         self.set_header(fformat="NOT_A_NIX_FILE")
         with self.assertRaises(InvalidFile):

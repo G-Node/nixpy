@@ -195,7 +195,6 @@ class _TestSection(unittest.TestCase):
 
         assert(len(self.section) == 0)
 
-    @unittest.skip
     def test_parent(self):
         self.assertIs(self.section.parent, None)
         child = self.section.create_section("child section", "sect")
