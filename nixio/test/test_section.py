@@ -209,6 +209,18 @@ class _TestSection(unittest.TestCase):
         grp.metadata = child
         self.assertEqual(grp.metadata.parent, self.section)
 
+    def test_inverse_search(self):
+        block = self.file.create_block("a block", "block with metadata")
+        block.metadata = self.section
+
+        otherblock = self.file.create_block("b block", "block with metadata")
+        otherblock.metadata = self.other
+
+        self.assertEqual(self.section.referring_blocks, 1)
+        self.assertEqual(self.other.referring_blocks, 1)
+        self.assertIs(self.section.referring_blocks[0], block)
+        self.assertIs(self.other.referring_blocks[0], otherblock)
+
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestSectionCPP(_TestSection):
