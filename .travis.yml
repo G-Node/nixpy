@@ -11,6 +11,7 @@ matrix:
           env: NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include
         - python: "2.7_with_system_site_packages"
         - python: "3.4"
+        - python: "3.5"
 
 addons:
   apt:
@@ -29,7 +30,7 @@ install:
   - pip install --upgrade numpy coveralls h5py
   #build NIX
   - if [ -n "$NIX_LIBDIR" ]; then
-      git clone https://github.com/G-Node/nix.git nix-build;
+      git clone --branch 1.2 https://github.com/G-Node/nix.git nix-build;
       pushd nix-build;
       cmake -DCMAKE_INSTALL_PREFIX=./inst -DBUILD_TESTING=OFF .;
       make;

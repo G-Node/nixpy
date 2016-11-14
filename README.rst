@@ -1,5 +1,7 @@
 .. image:: https://travis-ci.org/G-Node/nixpy.svg?branch=master
     :target: https://travis-ci.org/G-Node/nixpy
+.. image:: https://ci.appveyor.com/api/projects/status/8hi7323w3lijr16y/branch/master?svg=true
+    :target: https://ci.appveyor.com/project/achilleas-k/nixpy/branch/master
 .. image:: https://coveralls.io/repos/github/G-Node/nixpy/badge.svg?branch=master
     :target: https://coveralls.io/github/G-Node/nixpy?branch=master
 
