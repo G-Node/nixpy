@@ -17,12 +17,13 @@ from .exceptions import OutOfBounds, IncompatibleDimensions, UninitializedEntity
 
 class MultiTag(BaseTag, MultiTagMixin):
 
-    def __init__(self, h5group):
-        super(MultiTag, self).__init__(h5group)
+    def __init__(self, nixparent, h5group):
+        super(MultiTag, self).__init__(nixparent, h5group)
 
     @classmethod
-    def _create_new(cls, parent, name, type_, positions):
-        newentity = super(MultiTag, cls)._create_new(parent, name, type_)
+    def _create_new(cls, nixparent, h5parent, name, type_, positions):
+        newentity = super(MultiTag, cls)._create_new(nixparent, h5parent,
+                                                     name, type_)
         newentity.positions = positions
         return newentity
 
@@ -33,7 +34,7 @@ class MultiTag(BaseTag, MultiTagMixin):
 
         :type: DataArray
         """
-        return DataArray(self._h5group.open_group("positions"))
+        return DataArray(self._parent, self._h5group.open_group("positions"))
 
     @positions.setter
     def positions(self, da):
@@ -53,7 +54,7 @@ class MultiTag(BaseTag, MultiTagMixin):
         :type: DataArray or None
         """
         if "extents" in self._h5group:
-            return DataArray(self._h5group.open_group("extents"))
+            return DataArray(self._parent, self._h5group.open_group("extents"))
         else:
             return None
 

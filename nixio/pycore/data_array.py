@@ -61,12 +61,13 @@ class DataSet(DataSetMixin):
 
 class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
-    def __init__(self, h5group):
-        super(DataArray, self).__init__(h5group)
+    def __init__(self, nixparent, h5group):
+        super(DataArray, self).__init__(nixparent, h5group)
 
     @classmethod
-    def _create_new(cls, parent, name, type_, data_type, shape):
-        newentity = super(DataArray, cls)._create_new(parent, name, type_)
+    def _create_new(cls, nixparent, h5parent, name, type_, data_type, shape):
+        newentity = super(DataArray, cls)._create_new(nixparent, h5parent,
+                                                      name, type_)
         newentity._h5group.create_dataset("data", shape, data_type)
         return newentity
 

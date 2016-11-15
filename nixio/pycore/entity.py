@@ -12,16 +12,17 @@ from . import util
 
 class Entity(object):
 
-    def __init__(self, h5group):
+    def __init__(self, nixparent, h5group):
         util.check_entity_id(h5group.get_attr("entity_id"))
         self._h5group = h5group
+        self._parent = nixparent
 
     @classmethod
-    def _create_new(cls, parent):
+    def _create_new(cls, nixparent, h5parent):
         id_ = util.create_id()
-        h5group = parent.open_group(id_)
+        h5group = h5parent.open_group(id_)
         h5group.set_attr("entity_id", id_)
-        newentity = cls(h5group)
+        newentity = cls(nixparent, h5group)
         newentity.force_created_at()
         newentity.force_updated_at()
         return newentity
@@ -88,23 +89,23 @@ class Entity(object):
 
 class NamedEntity(Entity):
 
-    def __init__(self, h5group):
+    def __init__(self, nixparent, h5group):
         try:
             util.check_entity_name_and_type(h5group.get_attr("name"),
                                             h5group.get_attr("type"))
             util.check_entity_id(h5group.get_attr("entity_id"))
         except ValueError:
             ValueError("Invalid NIX object found in file.")
-        super(NamedEntity, self).__init__(h5group)
+        super(NamedEntity, self).__init__(nixparent, h5group)
 
     @classmethod
-    def _create_new(cls, parent, name, type_):
+    def _create_new(cls, nixparent, h5parent, name, type_):
         util.check_entity_name_and_type(name, type_)
-        h5group = parent.open_group(name)
+        h5group = h5parent.open_group(name)
         h5group.set_attr("name", name)
         h5group.set_attr("type", type_)
         h5group.set_attr("entity_id", util.create_id())
-        newentity = cls(h5group)
+        newentity = cls(nixparent, h5group)
         newentity.force_created_at()
         newentity.force_updated_at()
         return newentity
