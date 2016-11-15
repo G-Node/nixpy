@@ -47,6 +47,10 @@ void PySource::do_export() {
         .def("_get_source_by_id", getSourceById)
         .def("_get_source_by_pos", getSourceByPos)
         .def("_delete_source_by_id", REMOVER(std::string, Source, deleteSource))
+        // Inverse search
+        .add_property("referring_data_arrays", &Source::referringDataArrays)
+        .add_property("referring_tags", &Source::referringTags)
+        .add_property("referring_multi_tags", &Source::referringMultiTags)
         // Other
         .def("__str__", &toStr<Source>)
         .def("__repr__", &toStr<Source>)
