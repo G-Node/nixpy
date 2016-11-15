@@ -61,3 +61,24 @@ class Source(EntityWithMetadata, SourceMixin):
     def _source_count(self):
         sources = self._h5group.open_group("sources")
         return len(sources)
+
+    @property
+    def referring_objects(self):
+        objs = []
+        objs.extend(self.referring_data_arrays)
+        objs.extend(self.referring_tags)
+        objs.extend(self.referring_multi_tags)
+        return objs
+
+    @property
+    def referring_data_arrays(self):
+        return [da for da in self._parent.data_arrays if self in da.sources]
+
+
+    @property
+    def referring_tags(self):
+        return [tg for tg in self._parent.tags if self in tg.sources]
+
+    @property
+    def referring_multi_tags(self):
+        return [mt for mt in self._parent.multi_tags if self in mt.sources]
