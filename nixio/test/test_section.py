@@ -227,7 +227,6 @@ class _TestSection(unittest.TestCase):
         da_two.metadata = self.other
 
         self.assertEqual(len(self.other.referring_data_arrays), 2)
-        refids = [da.id for da in self.other.referring_data_arrays]
         self.assertIn(da_one, self.other.referring_data_arrays)
         self.assertIn(da_two, self.other.referring_data_arrays)
 
