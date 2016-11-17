@@ -3,6 +3,10 @@ dist: trusty
 
 language: python
 
+env:
+    global:
+        - NIX_BRANCH=master
+
 matrix:
     include:
         - python: "2.7_with_system_site_packages"
@@ -30,7 +34,7 @@ install:
   - pip install --upgrade numpy coveralls h5py
   #build NIX
   - if [ -n "$NIX_LIBDIR" ]; then
-      git clone --branch master https://github.com/G-Node/nix.git nix-build;
+      git clone --branch ${NIX_BRANCH} https://github.com/G-Node/nix.git nix-build;
       pushd nix-build;
       cmake -DCMAKE_INSTALL_PREFIX=./inst -DBUILD_TESTING=OFF .;
       make;
