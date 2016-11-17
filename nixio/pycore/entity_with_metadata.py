@@ -12,14 +12,15 @@ from .section import Section
 
 class EntityWithMetadata(NamedEntity):
 
-    def __init__(self, h5group):
-        super(EntityWithMetadata, self).__init__(h5group)
+    def __init__(self, nixparent, h5group):
+        super(EntityWithMetadata, self).__init__(nixparent, h5group)
         # TODO: Additional validation for metadata
 
     @classmethod
-    def _create_new(cls, parent, name, type_):
-        newentity = super(EntityWithMetadata, cls)._create_new(parent,
-                                                               name, type_)
+    def _create_new(cls, nixparent, h5parent, name, type_):
+        newentity = super(EntityWithMetadata, cls)._create_new(
+            nixparent, h5parent, name, type_
+        )
         return newentity
 
     @property
@@ -33,13 +34,13 @@ class EntityWithMetadata(NamedEntity):
         :type: Section
         """
         if "metadata" in self._h5group:
-            mdsection = Section(self._h5group.open_group("metadata"))
+            mdsection = Section(None, self._h5group.open_group("metadata"))
             sectionid = mdsection.id
 
             rootmd = self._h5group.file.open_group("metadata")
             results = []
             for sectgroup in rootmd:
-                sect = Section(sectgroup)
+                sect = Section(None, sectgroup)
                 results.extend(
                     sect.find_sections(filtr=lambda x: x.id == sectionid)
                 )

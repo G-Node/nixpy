@@ -20,13 +20,14 @@ from . import util
 
 class Block(EntityWithMetadata, BlockMixin):
 
-    def __init__(self, h5group):
-        super(Block, self).__init__(h5group)
+    def __init__(self, nixparent, h5group):
+        super(Block, self).__init__(nixparent, h5group)
         # TODO: Validation for containers
 
     @classmethod
-    def _create_new(cls, parent, name, type_):
-        newentity = super(Block, cls)._create_new(parent, name, type_)
+    def _create_new(cls, nixparent, h5parent, name, type_):
+        newentity = super(Block, cls)._create_new(nixparent, h5parent,
+                                                  name, type_)
         return newentity
 
     # DataArray
@@ -35,16 +36,16 @@ class Block(EntityWithMetadata, BlockMixin):
         data_arrays = self._h5group.open_group("data_arrays")
         if name in data_arrays:
             raise exceptions.DuplicateName("create_data_array")
-        da = DataArray._create_new(data_arrays, name, type_, data_type, shape)
+        da = DataArray._create_new(self, data_arrays, name, type_, data_type, shape)
         return da
 
     def _get_data_array_by_id(self, id_or_name):
         data_arrays = self._h5group.open_group("data_arrays")
-        return DataArray(data_arrays.get_by_id_or_name(id_or_name))
+        return DataArray(self, data_arrays.get_by_id_or_name(id_or_name))
 
     def _get_data_array_by_pos(self, pos):
         data_arrays = self._h5group.open_group("data_arrays")
-        return DataArray(data_arrays.get_by_pos(pos))
+        return DataArray(self, data_arrays.get_by_pos(pos))
 
     def _delete_data_array_by_id(self, id_):
         data_arrays = self._h5group.open_group("data_arrays")
@@ -76,16 +77,16 @@ class Block(EntityWithMetadata, BlockMixin):
         multi_tags = self._h5group.open_group("multi_tags")
         if name in multi_tags:
             raise exceptions.DuplicateName("create_multi_tag")
-        mtag = MultiTag._create_new(multi_tags, name, type_, positions)
+        mtag = MultiTag._create_new(self, multi_tags, name, type_, positions)
         return mtag
 
     def _get_multi_tag_by_id(self, id_or_name):
         multi_tags = self._h5group.open_group("multi_tags")
-        return MultiTag(multi_tags.get_by_id_or_name(id_or_name))
+        return MultiTag(self, multi_tags.get_by_id_or_name(id_or_name))
 
     def _get_multi_tag_by_pos(self, pos):
         multi_tags = self._h5group.open_group("multi_tags")
-        return MultiTag(multi_tags.get_by_pos(pos))
+        return MultiTag(self, multi_tags.get_by_pos(pos))
 
     def _delete_multi_tag_by_id(self, id_):
         multi_tags = self._h5group.open_group("multi_tags")
@@ -114,16 +115,16 @@ class Block(EntityWithMetadata, BlockMixin):
         tags = self._h5group.open_group("tags")
         if name in tags:
             raise exceptions.DuplicateName("create_tag")
-        tag = Tag._create_new(tags, name, type_, position)
+        tag = Tag._create_new(self, tags, name, type_, position)
         return tag
 
     def _get_tag_by_id(self, id_or_name):
         tags = self._h5group.open_group("tags")
-        return Tag(tags.get_by_id_or_name(id_or_name))
+        return Tag(self, tags.get_by_id_or_name(id_or_name))
 
     def _get_tag_by_pos(self, pos):
         tags = self._h5group.open_group("tags")
-        return Tag(tags.get_by_pos(pos))
+        return Tag(self, tags.get_by_pos(pos))
 
     def _delete_tag_by_id(self, id_):
         tags = self._h5group.open_group("tags")
@@ -150,16 +151,16 @@ class Block(EntityWithMetadata, BlockMixin):
         sources = self._h5group.open_group("sources")
         if name in sources:
             raise exceptions.DuplicateName("create_source")
-        src = Source._create_new(sources, name, type_)
+        src = Source._create_new(self, sources, name, type_)
         return src
 
     def _get_source_by_id(self, id_or_name):
         sources = self._h5group.open_group("sources")
-        return Source(sources.get_by_id_or_name(id_or_name))
+        return Source(self, sources.get_by_id_or_name(id_or_name))
 
     def _get_source_by_pos(self, pos):
         sources = self._h5group.open_group("sources")
-        return Source(sources.get_by_pos(pos))
+        return Source(self, sources.get_by_pos(pos))
 
     def _delete_source_by_id(self, id_):
         sources = self._h5group.open_group("sources")
@@ -186,16 +187,16 @@ class Block(EntityWithMetadata, BlockMixin):
         groups = self._h5group.open_group("groups")
         if name in groups:
             raise exceptions.DuplicateName("open_group")
-        grp = Group._create_new(groups, name, type_)
+        grp = Group._create_new(self, groups, name, type_)
         return grp
 
     def _get_group_by_id(self, id_or_name):
         groups = self._h5group.open_group("groups")
-        return Group(groups.get_by_id_or_name(id_or_name))
+        return Group(self, groups.get_by_id_or_name(id_or_name))
 
     def _get_group_by_pos(self, pos):
         groups = self._h5group.open_group("groups")
-        return Group(groups.get_by_pos(pos))
+        return Group(self, groups.get_by_pos(pos))
 
     def _delete_group_by_id(self, id_):
         groups = self._h5group.open_group("groups")

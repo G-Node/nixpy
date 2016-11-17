@@ -17,18 +17,18 @@ from . import util
 
 class Property(Entity, PropertyMixin):
 
-    def __init__(self, h5dataset):
-        super(Property, self).__init__(h5dataset)
+    def __init__(self, nixparent, h5dataset):
+        super(Property, self).__init__(nixparent, h5dataset)
         self._h5dataset = self._h5group
 
     @classmethod
-    def _create_new(cls, parent, name, dtype):
+    def _create_new(cls, nixparent, h5parent, name, dtype):
         util.check_entity_name(name)
         dtype = cls._make_h5_dtype(dtype)
-        h5dataset = parent.create_dataset(name, shape=(0,), dtype=dtype)
+        h5dataset = h5parent.create_dataset(name, shape=(0,), dtype=dtype)
         h5dataset.set_attr("name", name)
         h5dataset.set_attr("entity_id", util.create_id())
-        newentity = cls(h5dataset)
+        newentity = cls(nixparent, h5dataset)
         newentity.force_created_at()
         newentity.force_updated_at()
         return newentity

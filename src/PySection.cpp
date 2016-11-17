@@ -101,6 +101,23 @@ boost::optional<Section> getParent(const Section& sec) {
     return parent ? boost::optional<Section>(parent) : boost::none;
 }
 
+// Inverse search functions
+
+std::vector<DataArray> referringDataArrays(const Section& sec){
+    return sec.referringDataArrays();
+}
+
+std::vector<Tag> referringTags(const Section& sec){
+    return sec.referringTags();
+}
+
+std::vector<MultiTag> referringMultiTags(const Section& sec){
+    return sec.referringMultiTags();
+}
+
+std::vector<Source> referringSources(const Section& sec){
+    return sec.referringSources();
+}
 
 void PySection::do_export() {
 
@@ -137,6 +154,12 @@ void PySection::do_export() {
         .def("_get_property_by_pos", &getPropertyByPos)
         .def("_delete_property_by_id", REMOVER(std::string, nix::Section, deleteProperty))
         .def("inherited_properties", &Section::inheritedProperties)
+        // Inverse search
+        .add_property("referring_blocks", &Section::referringBlocks)
+        .add_property("referring_data_arrays", referringDataArrays)
+        .add_property("referring_tags", referringTags)
+        .add_property("referring_multi_tags", referringMultiTags)
+        .add_property("referring_sources", referringSources)
         // Other
         .def("__str__", &toStr<Section>)
         .def("__repr__", &toStr<Section>)

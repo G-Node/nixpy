@@ -114,6 +114,28 @@ class _TestSource(unittest.TestCase):
         self.array.sources.extend(self.third)
         assert(len(self.array.sources) == 3)
 
+    def test_inverse_search(self):
+        da_one = self.block.create_data_array("foo", "data_array", data=range(10))
+        da_one.sources.append(self.other)
+        da_two = self.block.create_data_array("foobar", "data_array", data=[1])
+        da_two.sources.append(self.other)
+
+        self.assertEqual(len(self.other.referring_data_arrays), 2)
+        self.assertIn(da_one, self.other.referring_data_arrays)
+        self.assertIn(da_two, self.other.referring_data_arrays)
+
+        tag = self.block.create_tag("tago", "tagtype", [1, 1])
+        tag.sources.append(self.source)
+        self.assertEqual(len(self.source.referring_tags), 1)
+        self.assertEqual(len(self.other.referring_tags), 0)
+        self.assertEqual(self.source.referring_tags[0].id, tag.id)
+
+        mtag = self.block.create_multi_tag("MultiTagName", "MultiTagType", da_one)
+        mtag.sources.append(self.source)
+        self.assertEqual(len(self.source.referring_multi_tags), 1)
+        self.assertEqual(len(self.other.referring_multi_tags), 0)
+        self.assertEqual(self.source.referring_multi_tags[0].id, mtag.id)
+
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestSourceCPP(_TestSource):

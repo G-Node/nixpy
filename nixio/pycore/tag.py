@@ -61,12 +61,11 @@ class BaseTag(EntityWithSources):
             self.force_updated_at()
 
     def _add_reference_by_id(self, id_or_name):
-        parblock = self._h5group.root
-        if id_or_name not in parblock.data_arrays:
+        if id_or_name not in self._parent.data_arrays:
             cls = type(self).__name__
             raise RuntimeError("{}._add_reference_by_id: "
                                "Reference not found in Block!".format(cls))
-        target = parblock.data_arrays[id_or_name]
+        target = self._parent.data_arrays[id_or_name]
         references = self._h5group.open_group("references")
         references.create_link(target, target.id)
 
@@ -82,13 +81,12 @@ class BaseTag(EntityWithSources):
         if util.is_uuid(id_or_name):
             id_ = id_or_name
         else:
-            parblock = self._h5group.root
-            id_ = parblock.data_arrays[id_or_name].id
-        return DataArray(references.get_by_id(id_))
+            id_ = self._parent.data_arrays[id_or_name].id
+        return DataArray(self._parent, references.get_by_id(id_))
 
     def _get_reference_by_pos(self, pos):
         references = self._h5group.open_group("references")
-        return DataArray(references.get_by_pos(pos))
+        return DataArray(self, references.get_by_pos(pos))
 
     def _delete_reference_by_id(self, id_):
         references = self._h5group.open_group("references")
@@ -107,7 +105,7 @@ class BaseTag(EntityWithSources):
         :rtype: Feature
         """
         features = self._h5group.open_group("features")
-        feat = Feature._create_new(features, data, link_type)
+        feat = Feature._create_new(self, features, data, link_type)
         return feat
 
     def _has_feature_by_id(self, id_or_name):
@@ -119,11 +117,11 @@ class BaseTag(EntityWithSources):
 
     def _get_feature_by_id(self, id_or_name):
         features = self._h5group.open_group("features")
-        return Feature(features.get_by_id(id_or_name))
+        return Feature(self, features.get_by_id(id_or_name))
 
     def _get_feature_by_pos(self, pos):
         features = self._h5group.open_group("features")
-        return Feature(features.get_by_pos(pos))
+        return Feature(self, features.get_by_pos(pos))
 
     def _delete_feature_by_id(self, id_):
         features = self._h5group.open_group("features")
@@ -187,12 +185,13 @@ class BaseTag(EntityWithSources):
 
 class Tag(BaseTag, TagMixin):
 
-    def __init__(self, h5group):
-        super(Tag, self).__init__(h5group)
+    def __init__(self, nixparent, h5group):
+        super(Tag, self).__init__(nixparent, h5group)
 
     @classmethod
-    def _create_new(cls, parent, name, type_, position):
-        newentity = super(Tag, cls)._create_new(parent, name, type_)
+    def _create_new(cls, nixparent, h5parent, name, type_, position):
+        newentity = super(Tag, cls)._create_new(nixparent, h5parent,
+                                                name, type_)
         newentity.position = position
         return newentity
 
