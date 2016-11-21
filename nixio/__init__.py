@@ -15,13 +15,6 @@ _nixio_bin = os.path.join(sys.prefix, 'share', 'nixio', 'bin')
 if os.path.isdir(_nixio_bin):
     os.environ["PATH"] += os.pathsep + _nixio_bin
 
-import sys
-import os
-
-_nixio_bin = os.path.join(sys.prefix, 'share', 'nixio', 'bin')
-if os.path.isdir(_nixio_bin):
-    os.environ["PATH"] += os.pathsep + _nixio_bin
-
 from nixio.pycore.file import File, FileMode
 from nixio.value import Value, DataType
 from nixio.dimension_type import DimensionType
@@ -36,6 +29,5 @@ except ImportError:
 
 __all__ = ("File", "FileMode", "DataType", "Value",
            "LinkType", "DimensionType")
-
 __author__ = ('Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe,'
               ' Balint Morvai')
