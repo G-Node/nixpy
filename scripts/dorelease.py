@@ -83,7 +83,7 @@ def update_readme():
 
     diff = diff_lines(oldrmtext, newrmtext)
 
-    if len(diff) == 0:
+    if not diff:
         print("No changes required in README.")
         wait_for_ret()
         return False
