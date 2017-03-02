@@ -8,6 +8,7 @@
 from __future__ import (absolute_import, division, print_function)
 from numbers import Number, Integral, Real
 
+from enum import Enum
 import numpy as np
 
 strings = (str, bytes)
@@ -21,7 +22,7 @@ bools = (bool, np.bool_)
 valid_types = (Number, strings, bools)
 
 
-class DataType(object):
+class DataType(Enum):
     UInt8 = np.uint8
     UInt16 = np.uint16
     UInt32 = np.uint32
