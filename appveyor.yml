@@ -2,7 +2,7 @@ version: 1.3.{build}
 
 environment:
 
-  NIX_VERSION: 1.3.0
+  NIX_VERSION: 1.3.2
   NIX_BUILD_DIR: C:\nix_build
   DEPLOY_DIR: deploy
   BOOST_ROOT: C:\Libraries\boost_1_62_0
