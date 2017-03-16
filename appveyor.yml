@@ -91,6 +91,8 @@ install:
 
     - conda install --yes h5py
 
+    - conda install --yes boost
+
     - ps: cd "$env:APPVEYOR_BUILD_FOLDER"
 
     - ps: $env:DISTUTILS_USE_SDK = "1"
