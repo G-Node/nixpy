@@ -27,11 +27,19 @@ addons:
 
 install:
   - export PYVER=${TRAVIS_PYTHON_VERSION:0:1}
+  - export PYMAJOR=${TRAVIS_PYTHON_VERSION:0:1}
+  - export PYMINOR=${TRAVIS_PYTHON_VERSION:2:1}
+  
   # install dependencies
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       g++ --version;
     fi
-  - pip install --upgrade numpy coveralls h5py
+  - if [ "$PYMAJOR" == "3" ] && [ "$PYMINOR" == "4" ]; then
+      pip install --upgrade --no-use-wheel numpy cython h5py;
+      pip install --upgrade coveralls;
+    else
+      pip install --upgrade numpy coveralls h5py;
+    fi
   #build NIX
   - if [ -n "$NIX_LIBDIR" ]; then
       git clone --branch ${NIX_BRANCH} https://github.com/G-Node/nix.git nix-build;
