@@ -131,8 +131,8 @@ Build NIXPy from Source
 
 If you want to use the latest development version or in cases where the provided installers or packages can't be used,
 it is possible to build and install NIXPy from sources.
-Instructions for building NIX on Linux can be found in the `NIXPy README.md`_ file.
+Instructions for building NIX on Linux can be found in the `NIXPy README.rst`_ file.
 For the Windows platform those instructions are described in the `NIXPy Win32.md`_ file.
 
-.. _NIXPy README.md: https://github.com/G-Node/nixpy/blob/master/README.md#getting-started-linux
+.. _NIXPy README.rst: https://github.com/G-Node/nixpy/blob/master/README.rst#getting-started-linux
 .. _NIXPy Win32.md: https://github.com/G-Node/nixpy/blob/master/Win32.md
