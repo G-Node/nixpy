@@ -23,10 +23,12 @@ except ImportError:
 
 import sys
 import os
-import re
+
+from nixio.info import VERSION, AUTHOR, CONTACT, BRIEF, HOMEPAGE
 
 from scripts.findboost import BoostPyLib
 from scripts.checknix import check_nix
+
 
 with open('README.rst') as f:
     description_text = f.read()
@@ -34,14 +36,6 @@ with open('README.rst') as f:
 with open('LICENSE') as f:
     license_text = f.read()
 
-with open('nixio/info.py') as f:
-    info = f.read()
-
-VERSION         = re.search(r"VERSION\s*=\s*'([^']*)'", info).group(1)
-AUTHOR          = re.search(r"AUTHOR\s*=\s*'([^']*)'", info).group(1)
-CONTACT         = re.search(r"CONTACT\s*=\s*'([^']*)'", info).group(1)
-BRIEF           = re.search(r"BRIEF\s*=\s*'([^']*)'", info).group(1)
-HOMEPAGE        = re.search(r"HOMEPAGE\s*=\s*'([^']*)'", info).group(1)
 
 is_win = os.name == 'nt'
 
