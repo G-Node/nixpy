@@ -35,20 +35,28 @@ class EntityWithMetadata(NamedEntity):
         """
         if "metadata" in self._h5group:
             mdsection = Section(None, self._h5group.open_group("metadata"))
-            sectionid = mdsection.id
+            return mdsection
+            # This is extremely inefficient and makes writing and reading of
+            # files which contain a large number of objects very slow.
+            # In fact, it makes things increasingly slow, which amplifies
+            # the existing issue https://github.com/G-Node/nixpy/issues/165
 
-            rootmd = self._h5group.file.open_group("metadata")
-            results = []
-            for sectgroup in rootmd:
-                sect = Section(None, sectgroup)
-                results.extend(
-                    sect.find_sections(filtr=lambda x: x.id == sectionid)
-                )
-            if results:
-                return results[0]
-            else:
-                raise RuntimeError("Invalid metadata found in {}".
-                                   format(self))
+            # Disabling parent reference temporarily
+
+            # sectionid = mdsection.id
+
+            # rootmd = self._h5group.file.open_group("metadata")
+            # results = []
+            # for sectgroup in rootmd:
+            #     sect = Section(None, sectgroup)
+            #     results.extend(
+            #         sect.find_sections(filtr=lambda x: x.id == sectionid)
+            #     )
+            # if results:
+            #     return results[0]
+            # else:
+            #     raise RuntimeError("Invalid metadata found in {}".
+            #                        format(self))
         else:
             return None
 
