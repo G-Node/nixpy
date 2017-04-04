@@ -136,4 +136,3 @@ class TestDimensionsCPP(_TestDimensions):
 class TestDimensionsPy(_TestDimensions):
 
     backend = "h5py"
-

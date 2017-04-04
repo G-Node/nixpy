@@ -12,5 +12,3 @@ class LinkType(object):
     Tagged = "Tagged"
     Untagged = "Untagged"
     Indexed = "Indexed"
-
-

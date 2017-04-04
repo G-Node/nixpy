@@ -118,4 +118,3 @@ class Group(EntityWithSources, GroupMixin):
     def _has_tag_by_id(self, id_or_name):
         tags = self._h5group.open_group("tags")
         return tags.has_by_id(id_or_name)
-

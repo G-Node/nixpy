@@ -145,7 +145,8 @@ class BaseTag(EntityWithSources):
         if dimtype == DimensionType.Sample:
             if not dimunit and unit is not None:
                 raise IncompatibleDimensions(
-                    "Units of position and SampledDimension must both be given!",
+                    "Units of position and SampledDimension "
+                    "must both be given!",
                     "Tag._pos_to_idx"
                 )
             if dimunit and unit is not None:
@@ -283,7 +284,9 @@ class Tag(BaseTag, TagMixin):
 
     def retrieve_feature_data(self, featidx):
         if self._feature_count() == 0:
-            raise OutOfBounds("There are no features associated with this tag!")
+            raise OutOfBounds(
+                "There are no features associated with this tag!"
+            )
         if featidx > self._feature_count():
             raise OutOfBounds("Feature index out of bounds.")
         feat = self.features[featidx]
@@ -300,4 +303,3 @@ class Tag(BaseTag, TagMixin):
         count = da.data_extent
         offset = (0,) * len(count)
         return DataView(da, count, offset)
-

@@ -146,4 +146,3 @@ class TestSourceCPP(_TestSource):
 class TestSourcePy(_TestSource):
 
     backend = "h5py"
-

@@ -68,7 +68,7 @@ class _TestMultiTag(unittest.TestCase):
         event_extents[0, 0] = 0.0
         event_extents[0, 1] = 6.0
         event_extents[0, 2] = 2.3
-        
+
         event_extents[1, 0] = 0.0
         event_extents[1, 1] = 3.0
         event_extents[1, 2] = 2.0

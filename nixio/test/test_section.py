@@ -258,4 +258,3 @@ class TestSectionCPP(_TestSection):
 class TestSectionPy(_TestSection):
 
     backend = "h5py"
-

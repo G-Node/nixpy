@@ -127,8 +127,6 @@ class SampledDimension(Dimension):
         util.check_attr_type(interval, Number)
         self._h5group.set_attr("sampling_interval", interval)
 
-
-
     @property
     def unit(self):
         return self._h5group.get_attr("unit")
@@ -270,4 +268,3 @@ class SetDimension(Dimension):
         labelsds = self._h5group.create_dataset("labels", shape=lshape,
                                                 dtype=dt)
         labelsds.write_data(labels)
-

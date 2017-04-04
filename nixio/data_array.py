@@ -34,8 +34,8 @@ class DataArrayMixin(object):
     def dimensions(self):
         """
         A property containing all dimensions of a DataArray. Dimensions can be
-        obtained via their index. Adding dimensions is done using the respective
-        append methods for dimension descriptors.
+        obtained via their index. Adding dimensions is done using the
+        respective append methods for dimension descriptors.
         This is a read only attribute.
 
         :type: ProxyList of dimension descriptors.
@@ -52,8 +52,9 @@ class DataArrayMixin(object):
 
     def __hash__(self):
         """
-        overwriting method __eq__ blocks inheritance of __hash__ in Python 3
-        hash has to be either explicitly inherited from parent class, implemented or escaped
+        Overwriting method __eq__ blocks inheritance of __hash__ in Python 3
+        hash has to be either explicitly inherited from parent class,
+        implemented or escaped
         """
         return hash(self.id)
 
@@ -198,11 +199,11 @@ class DataSetMixin(object):
 
     def write_direct(self, data):
         """
-        Directly write all of ``data`` to the :class:`~nixio.data_array.DataSet`.
-        The supplied data must be a :class:`numpy.ndarray` that matches the
-        DataSet's shape and must have C-style contiguous memory layout (see
-        :attr:`numpy.ndarray.flags` and :class:`~numpy.ndarray` for more
-        information).
+        Directly write all of ``data`` to the
+        :class:`~nixio.data_array.DataSet`.  The supplied data must be a
+        :class:`numpy.ndarray` that matches the DataSet's shape and must have
+        C-style contiguous memory layout (see :attr:`numpy.ndarray.flags` and
+        :class:`~numpy.ndarray` for more information).
 
         :param data: The array which contents is being written
         :type data: :class:`numpy.ndarray`

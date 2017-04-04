@@ -126,7 +126,6 @@ class Section(NamedEntity, SectionMixin):
         properties = self._h5group.open_group("properties")
         return Property(self, properties.get_by_id_or_name(id_or_name))
 
-
     def _get_property_by_pos(self, pos):
         properties = self._h5group.open_group("properties")
         return Property(self, properties.get_by_pos(pos))
@@ -286,4 +285,3 @@ class Section(NamedEntity, SectionMixin):
             sources.extend(src for src in blk.sources
                            if src.metadata.id == self.id)
         return sources
-

@@ -192,4 +192,3 @@ class MultiTag(BaseTag, MultiTagMixin):
         count = da.data_extent
         offset = (0,) * len(count)
         return DataView(da, count, offset)
-

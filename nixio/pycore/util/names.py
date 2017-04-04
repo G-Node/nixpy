@@ -37,5 +37,3 @@ def check(name):
     if isinstance(name, bytes):
         name = name.decode()
     return "/" not in name
-
-

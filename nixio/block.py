@@ -71,7 +71,8 @@ class BlockMixin(object):
         """
         Create a new data array for this block. Either ``shape``
         or ``data`` must be given. If both are given their shape must agree.
-        If ``dtype`` is not specified it will default to 64-bit floating points.
+        If ``dtype`` is not specified it will default to 64-bit floating
+        points.
 
         :param name: The name of the data array to create.
         :type name: str
@@ -112,9 +113,9 @@ class BlockMixin(object):
         Get all sources in this block recursively.
 
         This method traverses the tree of all sources in the block. The
-        traversal is accomplished via breadth first and can be limited in depth.
-        On each node or source a filter is applied. If the filter returns true
-        the respective source will be added to the result list.
+        traversal is accomplished via breadth first and can be limited in
+        depth.  On each node or source a filter is applied. If the filter
+        returns true the respective source will be added to the result list.
         By default a filter is used that accepts all sources.
 
         :param filtr: A filter function
@@ -147,8 +148,8 @@ class BlockMixin(object):
     def multi_tags(self):
         """
         A property containing all multi tags of a block. MultiTag entities can
-        be obtained via their index or by their id. Tags can be deleted from the
-        list. Adding tags is done using the Blocks create_multi_tag method.
+        be obtained via their index or by their id. Tags can be deleted from
+        the list. Adding tags is done using the Blocks create_multi_tag method.
         This is a read only attribute.
 
         :type: ProxyList of MultiTag entities.
@@ -174,9 +175,9 @@ class BlockMixin(object):
     @property
     def data_arrays(self):
         """
-        A property containing all data arrays of a block. DataArray entities can
-        be obtained via their index or by their id. Data arrays can be deleted
-        from the list. Adding a data array is done using the Blocks
+        A property containing all data arrays of a block. DataArray entities
+        can be obtained via their index or by their id. Data arrays can be
+        deleted from the list. Adding a data array is done using the Blocks
         create_data_array method.
         This is a read only attribute.
 
@@ -216,4 +217,3 @@ class BlockMixin(object):
         implemented or escaped
         """
         return hash(self.id)
-

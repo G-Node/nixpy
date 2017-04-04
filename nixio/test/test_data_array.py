@@ -255,7 +255,6 @@ class _TestDataArray(unittest.TestCase):
         self.assertRaises(ValueError, lambda: da.append(np.zeros((3, 3, 3))))
         self.assertRaises(ValueError, lambda: da.append(np.zeros((5, 5))))
 
-
     def test_data_array_dtype(self):
         da = self.block.create_data_array('dtype_f8', 'b', 'f8', (10, 10))
         assert(da.dtype == np.dtype('f8'))
