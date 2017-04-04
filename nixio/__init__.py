@@ -22,6 +22,8 @@ from nixio.link_type import LinkType
 
 from nixio.section import S
 
+from nixio.info import VERSION as __version__
+
 try:
     import nixio.util.inject
 except ImportError:
