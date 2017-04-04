@@ -6,15 +6,15 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from nixio import *
+import nixio as nix
 try:
-    import nixio.core
+    nix.core
     skip_cpp = False
-except ImportError:
+except AttributeError:
     skip_cpp = True
 
 
@@ -23,15 +23,16 @@ class _TestProperty(unittest.TestCase):
     backend = None
 
     def setUp(self):
-        self.file    = File.open("unittest.h5", FileMode.Overwrite,
-                                 backend=self.backend)
+        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
+                                  backend=self.backend)
         self.section = self.file.create_section("test section",
                                                 "recordingsession")
-        self.prop    = self.section.create_property("test property", Value(0))
-        self.prop_s  = self.section.create_property("test str",
-                                                    DataType.String)
-        self.other   = self.section.create_property("other property",
-                                                    DataType.Int64)
+        self.prop = self.section.create_property("test property",
+                                                 nix.Value(0))
+        self.prop_s = self.section.create_property("test str",
+                                                   nix.DataType.String)
+        self.other = self.section.create_property("other property",
+                                                  nix.DataType.Int64)
 
     def tearDown(self):
         del self.file.sections[self.section.id]
@@ -40,7 +41,7 @@ class _TestProperty(unittest.TestCase):
     def test_property_eq(self):
         assert(self.prop == self.prop)
         assert(not self.prop == self.other)
-        assert(not self.prop == None)
+        assert(self.prop is not None)
 
     def test_property_id(self):
         assert(self.prop.id is not None)
@@ -79,33 +80,33 @@ class _TestProperty(unittest.TestCase):
         self.prop.unit = None
 
     def test_property_values(self):
-        self.prop.values = [Value(10)]
+        self.prop.values = [nix.Value(10)]
 
-        assert(self.prop.data_type == DataType.Int64)
+        assert(self.prop.data_type == nix.DataType.Int64)
         assert(len(self.prop.values) == 1)
 
-        assert(self.prop.values[0] == Value(10))
-        assert(Value(10) in self.prop.values)
+        assert(self.prop.values[0] == nix.Value(10))
+        assert(nix.Value(10) in self.prop.values)
         assert(self.prop.values[0] == 10)
         assert(10 in self.prop.values)
-        assert(self.prop.values[0] != Value(1337))
-        assert(Value(1337) not in self.prop.values)
+        assert(self.prop.values[0] != nix.Value(1337))
+        assert(nix.Value(1337) not in self.prop.values)
         assert(self.prop.values[0] != 42)
         assert(42 not in self.prop.values)
 
         self.prop.delete_values()
         assert(len(self.prop.values) == 0)
 
-        self.prop_s.values = [Value("foo"), Value("bar")]
-        assert(self.prop_s.data_type == DataType.String)
+        self.prop_s.values = [nix.Value("foo"), nix.Value("bar")]
+        assert(self.prop_s.data_type == nix.DataType.String)
         assert(len(self.prop_s.values) == 2)
 
-        assert(self.prop_s.values[0] == Value("foo"))
-        assert(Value("foo") in self.prop_s.values)
+        assert(self.prop_s.values[0] == nix.Value("foo"))
+        assert(nix.Value("foo") in self.prop_s.values)
         assert(self.prop_s.values[0] == "foo")
         assert("foo" in self.prop_s.values)
-        assert(self.prop_s.values[0] != Value("bla"))
-        assert(Value("bla") not in self.prop_s.values)
+        assert(self.prop_s.values[0] != nix.Value("bla"))
+        assert(nix.Value("bla") not in self.prop_s.values)
         assert(self.prop_s.values[0] != "bla")
         assert("bla" not in self.prop_s.values)
 
@@ -113,10 +114,10 @@ class _TestProperty(unittest.TestCase):
 class TestValue(unittest.TestCase):
 
     def test_value_int(self):
-        value = Value(10)
-        other = Value(11)
+        value = nix.Value(10)
+        other = nix.Value(11)
 
-        assert(value.data_type == DataType.Int64)
+        assert(value.data_type == nix.DataType.Int64)
 
         assert(value == value)
         assert(value == 10)
@@ -125,15 +126,15 @@ class TestValue(unittest.TestCase):
         assert(value != 11)
 
         value.value = 20
-        assert(value == Value(20))
+        assert(value == nix.Value(20))
         assert(value == 20)
         assert(value.value == 20)
 
     def test_value_float(self):
-        value = Value(47.11)
-        other = Value(3.14)
+        value = nix.Value(47.11)
+        other = nix.Value(3.14)
 
-        assert(value.data_type == DataType.Double)
+        assert(value.data_type == nix.DataType.Double)
 
         assert(value == value)
         assert(value == 47.11)
@@ -142,30 +143,28 @@ class TestValue(unittest.TestCase):
         assert(value != 3.14)
 
         value.value = 66.6
-        assert(value == Value(66.6))
+        assert(value == nix.Value(66.6))
         assert(value == 66.6)
         assert(value.value == 66.6)
 
     def test_value_bool(self):
-        value = Value(True)
-        other = Value(False)
+        value = nix.Value(True)
+        other = nix.Value(False)
 
-        assert(value.data_type == DataType.Bool)
+        assert(value.data_type == nix.DataType.Bool)
 
         assert(value == value)
-        assert(value == True)
-
         assert(value != other)
-        assert(value != False)
+        assert(value)
 
         value.value = False
         assert(value == other)
 
     def test_value_str(self):
-        value = Value("foo")
-        other = Value("bar")
+        value = nix.Value("foo")
+        other = nix.Value("bar")
 
-        assert(value.data_type == DataType.String)
+        assert(value.data_type == nix.DataType.String)
 
         assert(value == value)
         assert(value == "foo")
@@ -174,12 +173,12 @@ class TestValue(unittest.TestCase):
         assert(value != "bar")
 
         value.value = "wrtlbrmpft"
-        assert(value == Value("wrtlbrmpft"))
+        assert(value == nix.Value("wrtlbrmpft"))
         assert(value == "wrtlbrmpft")
         assert(value.value == "wrtlbrmpft")
 
     def test_value_attrs(self):
-        value = Value(0)
+        value = nix.Value(0)
 
         value.reference = "a"
         assert(value.reference == "a")
@@ -206,4 +205,3 @@ class TestPropertyCPP(_TestProperty):
 class TestPropertyPy(_TestProperty):
 
     backend = "h5py"
-

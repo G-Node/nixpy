@@ -11,7 +11,8 @@ class UninitializedEntity(Exception):
 
     def __init__(self, *args, **kwargs):
         self.message = "The Entity being accessed is uninitialized or empty."
-        super(UninitializedEntity, self).__init__(self.message, *args, **kwargs)
+        super(UninitializedEntity, self).__init__(self.message,
+                                                  *args, **kwargs)
 
 
 class InvalidUnit(Exception):
@@ -48,8 +49,9 @@ class OutOfBounds(IndexError):
 class IncompatibleDimensions(ValueError):
 
     def __init__(self, what, where):
-        self.message = "IncompatibleDimensions: {} evoked at: {})".format(what,
-                                                                          where)
+        self.message = "IncompatibleDimensions: {} evoked at: {})".format(
+            what, where
+        )
         super(IncompatibleDimensions, self).__init__(self.message)
 
 

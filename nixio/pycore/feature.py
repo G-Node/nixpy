@@ -36,7 +36,8 @@ class Feature(Entity):
 
     @property
     def data(self):
-        return DataArray(self._parent._parent, self._h5group.open_group("data"))
+        return DataArray(self._parent._parent,
+                         self._h5group.open_group("data"))
 
     @data.setter
     def data(self, da):

@@ -32,9 +32,10 @@ def inject(bases, dct):
     methods from the given dict 'dct'.
     """
     for base in bases:
-        for k,v in dct.items():
+        for k, v in dct.items():
             if k not in excludes:
                 setattr(base, k, v)
+
 
 inject((nixio.core.File,),  dict(FileMixin.__dict__))
 inject((nixio.core.Section,), dict(SectionMixin.__dict__))

@@ -158,7 +158,8 @@ class SectionMixin(object):
         if not isinstance(data, list):
             data = [data]
 
-        val = list(map(lambda x: x if isinstance(x, Value) else Value(x), data))
+        val = list(map(lambda x: x if isinstance(x, Value) else Value(x),
+                       data))
         dtypes = functools.reduce(
             lambda x, y: x if y.data_type in x else x + [y.data_type],
             val, [val[0].data_type]

@@ -23,7 +23,8 @@ class Group(EntityWithSources, GroupMixin):
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_):
-        newentity = super(Group, cls)._create_new(nixparent, h5parent, name, type_)
+        newentity = super(Group, cls)._create_new(nixparent, h5parent,
+                                                  name, type_)
         return newentity
 
     # DataArray

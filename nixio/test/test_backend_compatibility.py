@@ -12,9 +12,9 @@ import numpy as np
 
 import nixio as nix
 try:
-    import nixio.core
+    nix.core
     skip = False
-except ImportError:
+except AttributeError:
     skip = True
 
 
@@ -45,8 +45,8 @@ class _TestBackendCompatibility(unittest.TestCase):
     def check_attributes(self, writeitem, readitem):
         for attr in all_attrs:
             # skip deprecated data attribute for DataArrays
-            if (isinstance(writeitem, (nixio.pycore.data_array.DataArray,
-                                       nixio.core.DataArray)) and
+            if (isinstance(writeitem, (nix.pycore.data_array.DataArray,
+                                       nix.core.DataArray)) and
                     attr == "data"):
                 continue
             if hasattr(writeitem, attr) or hasattr(readitem, attr):
@@ -282,7 +282,8 @@ class _TestBackendCompatibility(unittest.TestCase):
         tag_feat = blk.create_tag("tag for feat", "tagtype", [2])
         tag_feat.references.append(da_ref)
 
-        linktypes = [nix.LinkType.Tagged, nix.LinkType.Untagged, nix.LinkType.Indexed]
+        linktypes = [nix.LinkType.Tagged, nix.LinkType.Untagged,
+                     nix.LinkType.Indexed]
         for idx in range(6):
             da_feat = blk.create_data_array("da for feat " + str(idx),
                                             "datype", nix.DataType.Float,
@@ -330,8 +331,8 @@ class _TestBackendCompatibility(unittest.TestCase):
             value = 100 * i
             for j in range(10):
                 value += 1
-                data1[i,j] = value
-                total += data1[i,j]
+                data1[i, j] = value
+                total += data1[i, j]
 
         index_data[:, :] = data1
 
@@ -474,7 +475,8 @@ class _TestBackendCompatibility(unittest.TestCase):
         for wprop, rprop in zip(wsec.props, rsec.props):
             self.check_attributes(wprop, rprop)
 
-        sec.props[1].values = [nix.Value("foo"), nix.Value("bar"), nix.Value("baz")]
+        sec.props[1].values = [nix.Value("foo"), nix.Value("bar"),
+                               nix.Value("baz")]
         for wprop, rprop in zip(wsec.props, rsec.props):
             self.check_attributes(wprop, rprop)
 

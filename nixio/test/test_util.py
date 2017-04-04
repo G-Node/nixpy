@@ -80,7 +80,8 @@ class TestUtil(unittest.TestCase):
         assert(units.scalable([base_unit], [scalable_2]))
         assert(units.scalable([base_unit], [base_unit]))
         assert(not units.scalable([base_unit], [inscalable]))
-        assert(units.scalable([base_unit, scalable_1], [base_unit, scalable_2]))
+        assert(units.scalable([base_unit, scalable_1],
+                              [base_unit, scalable_2]))
 
     def test_unit_scaling(self):
         base_unit = 'V'

@@ -12,7 +12,8 @@ from .tag import BaseTag
 from .data_array import DataArray
 from .data_view import DataView
 from ..link_type import LinkType
-from .exceptions import OutOfBounds, IncompatibleDimensions, UninitializedEntity
+from .exceptions import (OutOfBounds, IncompatibleDimensions,
+                         UninitializedEntity)
 
 
 class MultiTag(BaseTag, MultiTagMixin):
@@ -95,7 +96,7 @@ class MultiTag(BaseTag, MultiTagMixin):
             )
 
         if (extents and len(ext_size) > 1 and
-                    ext_size[1] > len(data.dimensions)):
+                ext_size[1] > len(data.dimensions)):
             raise IncompatibleDimensions(
                 "Number of dimensions in extents does not match "
                 "dimensionality of data",
@@ -162,7 +163,9 @@ class MultiTag(BaseTag, MultiTagMixin):
 
     def retrieve_feature_data(self, posidx, featidx):
         if self._feature_count() == 0:
-            raise OutOfBounds("There are no features associated with this tag!")
+            raise OutOfBounds(
+                "There are no features associated with this tag!"
+            )
         if featidx > self._feature_count():
             raise OutOfBounds("Feature index out of bounds.")
         feat = self.features[featidx]

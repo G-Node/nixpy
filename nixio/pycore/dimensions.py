@@ -155,7 +155,8 @@ class RangeDimension(Dimension):
     def _create_new(cls, parent, index, ticks):
         newdim = super(RangeDimension, cls)._create_new(parent, index)
         newdim.dimension_type = DimensionType.Range
-        ticksds = newdim._h5group.create_dataset("ticks", shape=np.shape(ticks),
+        ticksds = newdim._h5group.create_dataset("ticks",
+                                                 shape=np.shape(ticks),
                                                  dtype=DataType.Double)
         ticksds.write_data(ticks)
         return newdim

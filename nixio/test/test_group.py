@@ -6,14 +6,14 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 
 import unittest
-from nixio import *
+import nixio as nix
 try:
-    import nixio.core
+    nix.core
     skip_cpp = False
-except ImportError:
+except AttributeError:
     skip_cpp = True
 
 
@@ -22,13 +22,13 @@ class _TestGroup(unittest.TestCase):
     backend = None
 
     def setUp(self):
-        self.file  = File.open("unittest.h5", FileMode.Overwrite,
-                               backend=self.backend)
+        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
+                                  backend=self.backend)
         self.block = self.file.create_block("test block", "recordingsession")
 
         self.my_array = self.block.create_data_array("my array", "test",
-                                                     DataType.Int16, (1, ))
-        self.my_tag   = self.block.create_tag("my tag", "test", [0.25])
+                                                     nix.DataType.Int16, (1, ))
+        self.my_tag = self.block.create_tag("my tag", "test", [0.25])
         self.my_group = self.block.create_group("my group", "group")
         self.my_multiTag = self.block.create_multi_tag("my_mt", "test",
                                                        self.my_array)
@@ -38,7 +38,8 @@ class _TestGroup(unittest.TestCase):
         self.my_group.multi_tags.append(self.my_multiTag)
 
         self.your_array = self.block.create_data_array("your array", "test",
-                                                       DataType.Int16, (1, ))
+                                                       nix.DataType.Int16,
+                                                       (1, ))
         self.your_group = self.block.create_group("your group", "group")
         self.your_group.data_arrays.append(self.your_array)
 
@@ -93,9 +94,9 @@ class _TestGroup(unittest.TestCase):
                           lambda _: self.my_group.data_arrays.append(100))
 
         a1 = self.block.create_data_array("reference1", "stimuli",
-                                          DataType.Int16, (1, ))
+                                          nix.DataType.Int16, (1, ))
         a2 = self.block.create_data_array("reference2", "stimuli",
-                                          DataType.Int16, (1, ))
+                                          nix.DataType.Int16, (1, ))
 
         self.my_group.data_arrays.append(a1)
         self.my_group.data_arrays.append(a2)
