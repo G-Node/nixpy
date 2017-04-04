@@ -13,11 +13,10 @@ import sys
 import numpy as np
 
 import nixio as nix
-try:
-    nix.core
-    skip_cpp = False
-except AttributeError:
-    skip_cpp = True
+
+
+skip_cpp = not hasattr(nix, "core")
+
 
 try:
     basestring = basestring

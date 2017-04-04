@@ -11,11 +11,9 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 import nixio as nix
-try:
-    nix.core
-    skip_cpp = False
-except AttributeError:
-    skip_cpp = True
+
+
+skip_cpp = not hasattr(nix, "core")
 
 
 class _TestBlock(unittest.TestCase):

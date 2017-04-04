@@ -11,17 +11,15 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 import nixio as nix
-try:
-    nix.core
-    skip_cpp = False
-except AttributeError:
-    skip_cpp = True
 from nixio.util.proxy_list import ProxyList
 
 try:
     basestring = basestring
 except NameError:  # 'basestring' is undefined, must be Python 3
     basestring = (str, bytes)
+
+
+skip_cpp = not hasattr(nix, "core")
 
 
 class WithIdMock(object):

@@ -14,11 +14,9 @@ import unittest
 
 import nixio as nix
 import numpy as np
-try:
-    nix.core
-    skip_cpp = False
-except AttributeError:
-    skip_cpp = True
+
+
+skip_cpp = not hasattr(nix, "core")
 
 
 class _TestMultiTag(unittest.TestCase):

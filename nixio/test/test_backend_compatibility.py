@@ -11,11 +11,9 @@ import unittest
 import numpy as np
 
 import nixio as nix
-try:
-    nix.core
-    skip = False
-except AttributeError:
-    skip = True
+
+
+skip = not hasattr(nix, "core")
 
 
 all_attrs = [

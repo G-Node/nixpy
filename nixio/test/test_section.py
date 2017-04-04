@@ -11,12 +11,9 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 
 import nixio as nix
-try:
-    nix.core
-    skip_cpp = False
-except AttributeError:
-    skip_cpp = True
-import nixio
+
+
+skip_cpp = not hasattr(nix, "core")
 
 
 class _TestSection(unittest.TestCase):
@@ -103,8 +100,8 @@ class _TestSection(unittest.TestCase):
 
         assert(len(self.section.sections) == 0)
 
-        self.section['easy subsection'] = nixio.S('electrode')
-        subject = self.section['subject'] = nixio.S('subject')
+        self.section['easy subsection'] = nix.S('electrode')
+        subject = self.section['subject'] = nix.S('subject')
 
         assert(self.section['subject'] == subject)
         assert(self.section['subject'].id == subject.id)

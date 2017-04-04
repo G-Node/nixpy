@@ -11,11 +11,9 @@ from __future__ import (absolute_import, division, print_function)
 import unittest
 import numpy as np
 import nixio as nix
-try:
-    nix.core
-    skip_cpp = False
-except AttributeError:
-    skip_cpp = True
+
+
+skip_cpp = not hasattr(nix, "core")
 
 test_range = tuple([float(i) for i in range(10)])
 test_sampl = 0.1

@@ -9,17 +9,14 @@
 from __future__ import (absolute_import, division, print_function)
 
 import unittest
+import h5py
 
 import nixio as nix
-try:
-    nix.core
-    skip_cpp = False
-except AttributeError:
-    skip_cpp = True
-
-import h5py
 import nixio.pycore.file as filepy
 from nixio.pycore.exceptions.exceptions import InvalidFile
+
+
+skip_cpp = not hasattr(nix, "core")
 
 
 class _FileTest(unittest.TestCase):
