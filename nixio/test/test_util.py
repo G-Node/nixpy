@@ -62,7 +62,8 @@ class TestUtil(unittest.TestCase):
 
         atomics = units.split_compound(unit_1)
         assert(len(atomics) == 2)
-        # FIXME the following is not entirely correct should be Hz^-1, needs to be fixed in nix!
+        # FIXME the following is not entirely correct should be Hz^-1
+        # needs to be fixed in nix!
         assert(atomics[0] == "mV^2" and atomics[1] == "Hz^-1")
 
         atomics = units.split_compound(unit_2)
@@ -79,7 +80,8 @@ class TestUtil(unittest.TestCase):
         assert(units.scalable([base_unit], [scalable_2]))
         assert(units.scalable([base_unit], [base_unit]))
         assert(not units.scalable([base_unit], [inscalable]))
-        assert(units.scalable([base_unit, scalable_1], [base_unit, scalable_2]))
+        assert(units.scalable([base_unit, scalable_1],
+                              [base_unit, scalable_2]))
 
     def test_unit_scaling(self):
         base_unit = 'V'
@@ -102,5 +104,3 @@ class TestUtil(unittest.TestCase):
 
         p, u, po = units.split(unit_3)
         assert(p == '' and u == 'Hz' and po == '-1')
-
-

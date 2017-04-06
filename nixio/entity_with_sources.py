@@ -20,6 +20,7 @@ class RefSourceProxyList(RefProxyList):
             "_remove_source_by_id", "_add_source_by_id"
         )
 
+
 _sources_doc = """
 Getter for sources.
 """

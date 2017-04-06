@@ -6,20 +6,17 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 
 import unittest
-
-try:
-    import nixio.core
-    skip_cpp = False
-except ImportError:
-    skip_cpp = True
-
 import h5py
-from nixio import *
+
+import nixio as nix
 import nixio.pycore.file as filepy
 from nixio.pycore.exceptions.exceptions import InvalidFile
+
+
+skip_cpp = not hasattr(nix, "core")
 
 
 class _FileTest(unittest.TestCase):
@@ -27,8 +24,8 @@ class _FileTest(unittest.TestCase):
     backend = None
 
     def setUp(self):
-        self.file = File.open("unittest.h5", FileMode.Overwrite,
-                              backend=self.backend)
+        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
+                                  backend=self.backend)
 
     def tearDown(self):
         self.file.close()
@@ -54,8 +51,8 @@ class _FileTest(unittest.TestCase):
 
         assert(len(self.file.blocks) == 1)
 
-        assert(block      in self.file.blocks)
-        assert(block.id   in self.file.blocks)
+        assert(block in self.file.blocks)
+        assert(block.id in self.file.blocks)
         assert("notexist" not in self.file.blocks)
 
         assert(block.id == self.file.blocks[0].id)
@@ -72,8 +69,8 @@ class _FileTest(unittest.TestCase):
 
         assert(len(self.file.sections) == 1)
 
-        assert(section      in self.file.sections)
-        assert(section.id   in self.file.sections)
+        assert(section in self.file.sections)
+        assert(section.id in self.file.sections)
         assert("notexist" not in self.file.sections)
 
         assert(section.id == self.file.sections[0].id)
@@ -125,7 +122,7 @@ class FileVerTestPy(unittest.TestCase):
     fformat = filepy.FILE_FORMAT
 
     def try_open(self, mode):
-        f = File.open(self.filename, mode, backend=self.backend)
+        f = nix.File.open(self.filename, mode, backend=self.backend)
         f.close()
 
     def set_header(self, fformat=None, version=None):
@@ -150,47 +147,46 @@ class FileVerTestPy(unittest.TestCase):
 
     def test_read_write(self):
         self.set_header()
-        self.try_open(FileMode.ReadWrite)
+        self.try_open(nix.FileMode.ReadWrite)
 
     def test_read_only(self):
         vx, vy, vz = self.filever
         roversion = (vx, vy, vz+2)
         self.set_header(version=roversion)
-        self.try_open(FileMode.ReadOnly)
+        self.try_open(nix.FileMode.ReadOnly)
         with self.assertRaises(RuntimeError):
-            self.try_open(FileMode.ReadWrite)
+            self.try_open(nix.FileMode.ReadWrite)
 
     def test_no_open(self):
         vx, vy, vz = self.filever
         noversion = (vx, vy+3, vz+2)
         self.set_header(version=noversion)
         with self.assertRaises(RuntimeError):
-            self.try_open(FileMode.ReadWrite)
+            self.try_open(nix.FileMode.ReadWrite)
         with self.assertRaises(RuntimeError):
-            self.try_open(FileMode.ReadOnly)
+            self.try_open(nix.FileMode.ReadOnly)
         noversion = (vx, vy+1, vz)
         self.set_header(version=noversion)
         with self.assertRaises(RuntimeError):
-            self.try_open(FileMode.ReadWrite)
+            self.try_open(nix.FileMode.ReadWrite)
         with self.assertRaises(RuntimeError):
-            self.try_open(FileMode.ReadOnly)
+            self.try_open(nix.FileMode.ReadOnly)
         noversion = (vx+1, vy, vz)
         self.set_header(version=noversion)
         with self.assertRaises(RuntimeError):
-            self.try_open(FileMode.ReadWrite)
+            self.try_open(nix.FileMode.ReadWrite)
         with self.assertRaises(RuntimeError):
-            self.try_open(FileMode.ReadOnly)
+            self.try_open(nix.FileMode.ReadOnly)
 
     def test_bad_tuple(self):
         self.set_header(version=(-1, -1, -1))
         with self.assertRaises(RuntimeError):
-            self.try_open(FileMode.ReadOnly)
+            self.try_open(nix.FileMode.ReadOnly)
         self.set_header(version=(1, 2))
         with self.assertRaises(RuntimeError):
-            self.try_open(FileMode.ReadOnly)
+            self.try_open(nix.FileMode.ReadOnly)
 
     def test_bad_format(self):
         self.set_header(fformat="NOT_A_NIX_FILE")
         with self.assertRaises(InvalidFile):
-            self.try_open(FileMode.ReadOnly)
-
+            self.try_open(nix.FileMode.ReadOnly)

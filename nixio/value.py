@@ -88,4 +88,3 @@ class Value(object):
             return self.value == other.value
         else:
             return self.value == other
-

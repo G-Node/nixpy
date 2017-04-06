@@ -23,7 +23,8 @@ class Group(EntityWithSources, GroupMixin):
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_):
-        newentity = super(Group, cls)._create_new(nixparent, h5parent, name, type_)
+        newentity = super(Group, cls)._create_new(nixparent, h5parent,
+                                                  name, type_)
         return newentity
 
     # DataArray
@@ -118,4 +119,3 @@ class Group(EntityWithSources, GroupMixin):
     def _has_tag_by_id(self, id_or_name):
         tags = self._h5group.open_group("tags")
         return tags.has_by_id(id_or_name)
-

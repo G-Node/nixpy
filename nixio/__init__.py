@@ -31,5 +31,5 @@ except ImportError:
 
 __all__ = ("File", "FileMode", "DataType", "Value",
            "LinkType", "DimensionType")
-__author__ = ('Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe,'
-              ' Balint Morvai')
+__author__ = ('Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, '
+              'Balint Morvai, Achilleas Koutsou')

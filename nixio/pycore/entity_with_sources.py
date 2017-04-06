@@ -74,4 +74,3 @@ class EntityWithSources(EntityWithMetadata, EntityWithSourcesMixin):
     def _has_source_by_id(self, id_or_name):
         sources = self._h5group.open_group("sources")
         sources.has_by_id(id_or_name)
-

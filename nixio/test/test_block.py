@@ -10,12 +10,10 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from nixio import *
-try:
-    import nixio.core
-    skip_cpp = False
-except ImportError:
-    skip_cpp = True
+import nixio as nix
+
+
+skip_cpp = not hasattr(nix, "core")
 
 
 class _TestBlock(unittest.TestCase):
@@ -29,8 +27,8 @@ class _TestBlock(unittest.TestCase):
         #  the c++ function can handle the string # but is not able to create
         #  the file any longer. Should this somehow be adressed on the c++ side
         #  of the code?
-        self.file  = File.open('unittest.h5', FileMode.Overwrite,
-                               backend=self.backend)
+        self.file = nix.File.open('unittest.h5', nix.FileMode.Overwrite,
+                                  backend=self.backend)
         self.block = self.file.create_block("test block", "recordingsession")
         self.other = self.file.create_block("other block", "recordingsession")
 
@@ -42,7 +40,7 @@ class _TestBlock(unittest.TestCase):
     def test_block_eq(self):
         assert(self.block == self.block)
         assert(not self.block == self.other)
-        assert(not self.block == None)
+        assert(self.block is not None)
 
     def test_block_id(self):
         assert(self.block.id is not None)
@@ -84,13 +82,12 @@ class _TestBlock(unittest.TestCase):
 
         data_array = self.block.create_data_array("test data_array",
                                                   "recordingsession",
-                                                  DataType.Int32, (0, ))
+                                                  nix.DataType.Int32, (0, ))
 
         assert(len(self.block.data_arrays) == 1)
 
         # TODO implement __eq__ for DataArray
-        #assert(data_array      in self.block.data_arrays)
-        assert(data_array.id   in self.block.data_arrays)
+        assert(data_array.id in self.block.data_arrays)
         assert("notexist" not in self.block.data_arrays)
 
         assert(data_array.id == self.block.data_arrays[0].id)
@@ -105,15 +102,15 @@ class _TestBlock(unittest.TestCase):
 
         data_array = self.block.create_data_array("test array",
                                                   "recording",
-                                                  DataType.Int32, (0, ))
+                                                  nix.DataType.Int32, (0, ))
         multi_tag = self.block.create_multi_tag("test multi_tag",
                                                 "recordingsession", data_array)
 
         assert(len(self.block.multi_tags) == 1)
 
         # TODO implement __eq__ for MultiTag
-        #assert(multi_tag      in self.block.multi_tags)
-        assert(multi_tag.id   in self.block.multi_tags)
+        # assert(multi_tag in self.block.multi_tags)
+        assert(multi_tag.id in self.block.multi_tags)
         assert("notexist" not in self.block.multi_tags)
 
         assert(multi_tag.id == self.block.multi_tags[0].id)
@@ -130,8 +127,8 @@ class _TestBlock(unittest.TestCase):
 
         assert(len(self.block.tags) == 1)
 
-        assert(tag      in self.block.tags)
-        assert(tag.id   in self.block.tags)
+        assert(tag in self.block.tags)
+        assert(tag.id in self.block.tags)
         assert("notexist" not in self.block.tags)
 
         assert(tag.id == self.block.tags[0].id)
@@ -148,8 +145,8 @@ class _TestBlock(unittest.TestCase):
 
         assert(len(self.block.sources) == 1)
 
-        assert(source      in self.block.sources)
-        assert(source.id   in self.block.sources)
+        assert(source in self.block.sources)
+        assert(source.id in self.block.sources)
         assert("notexist" not in self.block.sources)
 
         assert(source.id == self.block.sources[0].id)
@@ -163,9 +160,11 @@ class _TestBlock(unittest.TestCase):
         for i in range(2):
             self.block.create_source("level1-p0-s" + str(i), "dummy")
         for i in range(2):
-            self.block.sources[0].create_source("level2-p1-s" + str(i), "dummy")
+            self.block.sources[0].create_source("level2-p1-s" + str(i),
+                                                "dummy")
         for i in range(2):
-            self.block.sources[1].create_source("level2-p2-s" + str(i), "dummy")
+            self.block.sources[1].create_source("level2-p2-s" + str(i),
+                                                "dummy")
         for i in range(2):
             self.block.sources[0].sources[0].create_source(
                 "level3-p1-s" + str(i), "dummy"
@@ -186,8 +185,8 @@ class _TestBlock(unittest.TestCase):
 
         assert(len(self.block.groups) == 1)
 
-        assert(group      in self.block.groups)
-        assert(group.id   in self.block.groups)
+        assert(group in self.block.groups)
+        assert(group.id in self.block.groups)
         assert("notexist" not in self.block.groups)
 
         assert(group.id == self.block.groups[0].id)
@@ -207,4 +206,3 @@ class TestBlockCPP(_TestBlock):
 class TestBlockPy(_TestBlock):
 
     backend = "h5py"
-

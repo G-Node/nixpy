@@ -74,7 +74,6 @@ class Source(EntityWithMetadata, SourceMixin):
     def referring_data_arrays(self):
         return [da for da in self._parent.data_arrays if self in da.sources]
 
-
     @property
     def referring_tags(self):
         return [tg for tg in self._parent.tags if self in tg.sources]

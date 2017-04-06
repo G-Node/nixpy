@@ -69,4 +69,3 @@ class SourceMixin(object):
         implemented or escaped
         """
         return hash(self.id)
-

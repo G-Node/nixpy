@@ -59,9 +59,9 @@ class H5Group(object):
 
     def open_group(self, name, create=False):
         """
-        Returns a new H5Group with the given name contained in the current group.
-        If the current group does not exist in the file, it is automatically
-        created.
+        Returns a new H5Group with the given name contained in the current
+        group.  If the current group does not exist in the file,
+        it is automatically created.
 
         :param name: the name of the group
         :param create: creates the child group in the file if it does not exist
@@ -101,8 +101,8 @@ class H5Group(object):
 
     def write_data(self, name, data, dtype=None):
         """
-        Writes the data to a Dataset contained in the group with the given name.
-        Creates the Dataset if necessary.
+        Writes the data to a Dataset contained in the group with the
+        given name.  Creates the Dataset if necessary.
 
         :param name: name of the Dataset object
         :param data: the data to write
@@ -202,7 +202,8 @@ class H5Group(object):
         try:
             del self.group[name]
         except Exception:
-            raise ValueError("Error deleting {} from {}".format(name, self.name))
+            raise ValueError("Error deleting {} from {}".format(name,
+                                                                self.name))
         # Delete if empty and non-root container
         groupdepth = len(self.group.name.split("/")) - 1
         if not len(self.group) and groupdepth > 1:
@@ -256,8 +257,8 @@ class H5Group(object):
     def h5root(self):
         """
         Returns the H5Group of the Block or top-level Section which contains
-        this object. Returns None if requested on the file root '/' or the /data
-        or /metadata groups.
+        this object. Returns None if requested on the file root '/' or the
+        /data or /metadata groups.
 
         :return: Top level object containing this group (H5Group)
         """
@@ -275,8 +276,8 @@ class H5Group(object):
     def root(self):
         """
         Returns the Block or top-level Section which contains this object.
-        Returns None if requested on the file root '/' or the /data or /metadata
-        groups.
+        Returns None if requested on the file root '/' or the /data or
+        /metadata groups.
 
         :return: Top level object containing this group (Block or Section)
         """
@@ -316,4 +317,3 @@ class H5Group(object):
 
     def __str__(self):
         return "<H5Group object: {}>".format(self.group.name)
-

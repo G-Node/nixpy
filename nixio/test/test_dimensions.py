@@ -6,20 +6,18 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 
 import unittest
 import numpy as np
-from nixio import *
-try:
-    import nixio.core
-    skip_cpp = False
-except ImportError:
-    skip_cpp = True
+import nixio as nix
 
-test_range  = tuple([float(i) for i in range(10)])
-test_sampl  = 0.1
-test_label  = "test label"
+
+skip_cpp = not hasattr(nix, "core")
+
+test_range = tuple([float(i) for i in range(10)])
+test_sampl = 0.1
+test_label = "test label"
 test_labels = tuple([str(i) + "_label" for i in range(10)])
 
 
@@ -28,14 +26,15 @@ class _TestDimensions(unittest.TestCase):
     backend = None
 
     def setUp(self):
-        self.file  = File.open("unittest.h5", FileMode.Overwrite,
-                               backend=self.backend)
+        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
+                                  backend=self.backend)
         self.block = self.file.create_block("test block", "recordingsession")
-        self.array = self.block.create_data_array("test array", "signal", DataType.Float, (0, ))
+        self.array = self.block.create_data_array("test array", "signal",
+                                                  nix.DataType.Float, (0, ))
 
-        self.set_dim    = self.array.append_set_dimension()
+        self.set_dim = self.array.append_set_dimension()
         self.sample_dim = self.array.append_sampled_dimension(test_sampl)
-        self.range_dim  = self.array.append_range_dimension(test_range)
+        self.range_dim = self.array.append_range_dimension(test_range)
 
     def tearDown(self):
         del self.file.blocks[self.block.id]
@@ -43,7 +42,7 @@ class _TestDimensions(unittest.TestCase):
 
     def test_set_dimension(self):
         assert(self.set_dim.index == 1)
-        assert(self.set_dim.dimension_type == DimensionType.Set)
+        assert(self.set_dim.dimension_type == nix.DimensionType.Set)
 
         assert(self.set_dim.labels == ())
         self.set_dim.labels = test_labels
@@ -51,7 +50,7 @@ class _TestDimensions(unittest.TestCase):
 
     def test_sample_dimension(self):
         assert(self.sample_dim.index == 2)
-        assert(self.sample_dim.dimension_type == DimensionType.Sample)
+        assert(self.sample_dim.dimension_type == nix.DimensionType.Sample)
 
         assert(self.sample_dim.label is None)
         self.sample_dim.label = test_label
@@ -90,7 +89,7 @@ class _TestDimensions(unittest.TestCase):
 
     def test_range_dimension(self):
         assert(self.range_dim.index == 3)
-        assert(self.range_dim.dimension_type == DimensionType.Range)
+        assert(self.range_dim.dimension_type == nix.DimensionType.Range)
 
         assert(self.range_dim.label is None)
         self.range_dim.label = test_label
@@ -136,4 +135,3 @@ class TestDimensionsCPP(_TestDimensions):
 class TestDimensionsPy(_TestDimensions):
 
     backend = "h5py"
-

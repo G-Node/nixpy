@@ -7,8 +7,6 @@
 # LICENSE file in the root of the Project.
 from numbers import Number
 
-from warnings import warn
-
 from .entity_with_sources import EntityWithSources
 from ..data_array import DataArrayMixin, DataSetMixin
 from ..value import DataType

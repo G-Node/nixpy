@@ -58,4 +58,3 @@ class EntityWithMetadata(NamedEntity):
             raise TypeError("Error setting metadata to {}. Not a Section."
                             .format(sect))
         self._h5group.create_link(sect, "metadata")
-
