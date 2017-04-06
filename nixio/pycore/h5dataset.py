@@ -43,7 +43,7 @@ class H5DataSet(object):
             self.dataset[:] = data
 
     def read_data(self, data, count=None, offset=None):
-        if 0 in data.shape or len(data.shape) == 0:
+        if 0 in self.dataset.shape or len(self.dataset.shape) == 0:
             return
         if count and offset:
             if sum(count) == 0 and len(data) == 0:
