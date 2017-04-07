@@ -34,21 +34,7 @@ class EntityWithMetadata(NamedEntity):
         :type: Section
         """
         if "metadata" in self._h5group:
-            mdsection = Section(None, self._h5group.open_group("metadata"))
-            sectionid = mdsection.id
-
-            rootmd = self._h5group.file.open_group("metadata")
-            results = []
-            for sectgroup in rootmd:
-                sect = Section(None, sectgroup)
-                results.extend(
-                    sect.find_sections(filtr=lambda x: x.id == sectionid)
-                )
-            if results:
-                return results[0]
-            else:
-                raise RuntimeError("Invalid metadata found in {}".
-                                   format(self))
+            return Section(None, self._h5group.open_group("metadata"))
         else:
             return None
 
