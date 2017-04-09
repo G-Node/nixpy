@@ -20,6 +20,7 @@ class Section(NamedEntity, SectionMixin):
 
     def __init__(self, nixparent, h5group):
         super(Section, self).__init__(nixparent, h5group)
+        self._sec_parent = None
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_):
@@ -45,6 +46,7 @@ class Section(NamedEntity, SectionMixin):
         if name in sections:
             raise exceptions.DuplicateName("create_section")
         sec = Section._create_new(self, sections, name, type_)
+        sec._sec_parent = self
         return sec
 
     def _get_section_by_id(self, id_or_name):
@@ -206,11 +208,26 @@ class Section(NamedEntity, SectionMixin):
         The parent section. This is a read-only property. For root sections
         this property is always None.
 
+        Accessing this property can be slow when the metadata tree is large.
+
         :type: Section
         """
-        if isinstance(self._parent, Section):
-            return self._parent
-        # For NIX compatibility
+        if self._sec_parent is not None:
+            return self._sec_parent
+        rootmd = self._h5group.file.open_group("metadata")
+        # Assuming most metadata trees are shallow---doing BFS
+        sections = [Section(None, sg) for sg in rootmd]
+        if self in sections:
+            # Top-level section
+            return None
+
+        while sections:
+            sect = sections.pop(0)
+            if self in sect.sections:
+                self._sec_parent = sect
+                return sect
+            sections.extend(sect.sections)
+
         return None
 
     @property
@@ -221,7 +238,7 @@ class Section(NamedEntity, SectionMixin):
         :type: File
         """
         par = self._parent
-        while isinstance(par, Section):
+        while isinstance(par, NamedEntity):
             par = par._parent
         return par
 
