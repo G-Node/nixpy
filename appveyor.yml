@@ -2,55 +2,21 @@ version: 1.4.{build}
 
 environment:
 
-  NIX_VERSION: 1.4.0
-  NIX_BUILD_DIR: C:\nix_build
   DEPLOY_DIR: deploy
-  BOOST_ROOT: C:\Libraries\boost_1_62_0
-
-  NIX_APPVEYOR_ROOT: https://ci.appveyor.com/api/projects/stoewer/nix/artifacts/build
-
 
   matrix:
-    # Python 2.7 32 bit
-    - PYTHON: "C:\\Python27"
+    - MINICONDA: "C:\\Miniconda"
       bits: 32
-      withnix: "--without-nix"
-    # - PYTHON: "C:\\Python27"
-    #   bits: 32
-    #   withnix: "--with-nix"
-
-    # Python 3.6 32 bit
-    - PYTHON: "C:\\Python36"
+    - MINICONDA: "C:\\Miniconda35"
       bits: 32
-      withnix: "--without-nix"
-    # - PYTHON: "C:\\Python36"
-    #   bits: 32
-    #   withnix: "--with-nix"
-
-    # Python 2.7 64 bit
-    - PYTHON: "C:\\Python27-x64"
+    - MINICONDA: "C:\\Miniconda-x64"
       bits: 64
-      withnix: "--without-nix"
-    # - PYTHON: "C:\\Python27-x64"
-    #   bits: 64
-    #   withnix: "--with-nix"
-
-    # Python 3.6 64 bit
-    - PYTHON: "C:\\Python36-x64"
+    - MINICONDA: "C:\\Miniconda35-x64"
       bits: 64
-      withnix: "--without-nix"
-      RDP: "no"
-    # - PYTHON: "C:\\Python36-x64"
-    #   bits: 64
-    #   withnix: "--with-nix"
-
-matrix:
-    allow_failures:
-        - withnix: "--with-nix"
 
 init:
-  - "ECHO %PYTHON% %vcvars% (%bits%)"
-  - ps: $env:PATH = "$env:PYTHON;$env:PATH;C:\Program Files\7-Zip;$env:NIX_BUILD_DIR\nix\bin"
+  - "ECHO %MINICONDA% %vcvars% (%bits%)"
+  - ps: $env:PATH = "$env:MINICONDA;$env:MINICONDA\Scripts;$env:PATH"
   - python -c "import sys;print('Python version is {}'.format(sys.version))"
 
 install:
@@ -59,34 +25,16 @@ install:
         if ($env:bits -eq "64") {
             $env:vcvars = "x86_amd64"
             $env:avjob = "job=Environment%3A%20PLATFORM%3Dx64%2C%20CONFIGURATION%3DRelease"
-            $env:avfname = "nix-$env:NIX_VERSION-win64.exe"
         } else {
             $env:vcvars = "x86"
             $env:avjob = "job=Environment%3A%20PLATFORM%3Dx86%2C%20CONFIGURATION%3DRelease"
-            $env:avfname = "nix-$env:NIX_VERSION-win32.exe"
         }
 
-    - ps: |
-        if ($env:withnix -eq "--with-nix") {
-            mkdir "$env:NIX_BUILD_DIR"
-            cd "$env:NIX_BUILD_DIR"
-            mkdir nix
-            cd nix
+    - conda update --all --yes
 
-            $env:nix_exe_url = "$env:NIX_APPVEYOR_ROOT/$env:avfname`?$env:avjob"
-            Write-Host "Downloading $env:nix_exe_url"
+    - conda install --yes numpy
 
-            Invoke-WebRequest -URI $env:nix_exe_url -OutFile "nix.exe"
-
-            7z x nix.exe
-
-            cd ..
-
-            $env:BOOST_INC_DIR = "$env:BOOST_ROOT\include"
-            $env:BOOST_LIB_DIR = "$env:BOOST_ROOT\lib"
-        }
-
-    - python -m pip install numpy h5py wheel
+    - conda install --yes h5py
 
     - ps: cd "$env:APPVEYOR_BUILD_FOLDER"
 
@@ -95,7 +43,7 @@ install:
     - ps: $env:MSSdk = "1"
 
 build_script:
-    - python setup.py build %withnix%
+    - python setup.py build
 
 test_script:
     - python setup.py test
