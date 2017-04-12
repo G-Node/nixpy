@@ -11,23 +11,42 @@ import gc
 from warnings import warn
 import numpy as np
 
+import nixio.util.find as finders
+from nixio.util.proxy_list import ProxyList
+
+try:
+    from sys import maxint
+except:
+    from sys import maxsize as maxint
 import h5py
 
 from .h5group import H5Group
 from .block import Block
 from .exceptions import exceptions
 from .section import Section
-from ..file import FileMixin
 from . import util
-
-try:
-    from ..core import File as CFile
-except ImportError:
-    CFile = None
 
 
 FILE_FORMAT = "nix"
 HDF_FF_VERSION = (1, 1, 0)
+
+
+class BlockProxyList(ProxyList):
+
+    def __init__(self, obj):
+        super(BlockProxyList, self).__init__(obj, "_block_count",
+                                             "_get_block_by_id",
+                                             "_get_block_by_pos",
+                                             "_delete_block_by_id")
+
+
+class SectionProxyList(ProxyList):
+
+    def __init__(self, obj):
+        super(SectionProxyList, self).__init__(obj, "_section_count",
+                                               "_get_section_by_id",
+                                               "_get_section_by_pos",
+                                               "_delete_section_by_id")
 
 
 def can_write(nixfile):
@@ -80,37 +99,17 @@ def make_fcpl():
     return fcpl
 
 
-class File(FileMixin):
+class File(object):
 
-    def __init__(self, h5file):
-        self._h5file = h5file
-        self._root = H5Group(self._h5file, "/", create=True)
-        self._h5group = self._root  # to match behaviour of other objects
-        self._data = self._root.open_group("data", create=True)
-        self.metadata = self._root.open_group("metadata", create=True)
-        if "created_at" not in self._h5file.attrs:
-            self.force_created_at()
-        if "updated_at" not in self._h5file.attrs:
-            self.force_updated_at()
+    def __init__(self, path, mode=FileMode.ReadWrite):
+        """
+        Open a NIX file, or create it if it does not exist.
 
-    @classmethod
-    def _open_existing(cls, path, h5mode):
-        fid = h5py.h5f.open(path, flags=h5mode, fapl=make_fapl())
-        h5file = h5py.File(fid)
-        nixfile = cls(h5file)
-        return nixfile
-
-    @classmethod
-    def _create_new(cls, path, h5mode):
-        fid = h5py.h5f.create(path, flags=h5mode, fapl=make_fapl(),
-                              fcpl=make_fcpl())
-        h5file = h5py.File(fid)
-        newfile = cls(h5file)
-        newfile._create_header()
-        return newfile
-
-    @classmethod
-    def _open(cls, path, mode=FileMode.ReadWrite):
+        :param path: Path to file
+        :param mode: FileMode ReadOnly, ReadWrite, or Overwrite.
+                    (default: ReadWrite)
+        :return: nixio.File object
+        """
         try:
             path = path.encode("utf-8")
         except (UnicodeError, LookupError):
@@ -121,18 +120,30 @@ class File(FileMixin):
                 "Cannot open non-existent file in ReadOnly mode!"
             )
 
+        new = False
         if not os.path.exists(path) or mode == FileMode.Overwrite:
             mode = FileMode.Overwrite
             h5mode = map_file_mode(mode)
-            newfile = cls._create_new(path, h5mode)
-            newfile.mode = mode
-            return newfile
+            fid = h5py.h5f.create(path, flags=h5mode, fapl=make_fapl(),
+                                  fcpl=make_fcpl())
+            new = True
+        else:
+            h5mode = map_file_mode(mode)
+            fid = h5py.h5f.open(path, flags=h5mode, fapl=make_fapl())
 
-        h5mode = map_file_mode(mode)
-        newfile = cls._open_existing(path, h5mode)
-        newfile._check_header(mode)
-        newfile.mode = mode
-        return newfile
+        self._h5file = h5py.File(fid)
+        self._root = H5Group(self._h5file, "/", create=True)
+        self._h5group = self._root  # to match behaviour of other objects
+        if new:
+            self._create_header()
+        self._check_header(mode)
+        self.mode = mode
+        self._data = self._root.open_group("data", create=True)
+        self.metadata = self._root.open_group("metadata", create=True)
+        if "created_at" not in self._h5file.attrs:
+            self.force_created_at()
+        if "updated_at" not in self._h5file.attrs:
+            self.force_updated_at()
 
     @classmethod
     def open(cls, path, mode=FileMode.ReadWrite, backend=None):
@@ -142,26 +153,9 @@ class File(FileMixin):
         :param path: Path to file
         :param mode: FileMode ReadOnly, ReadWrite, or Overwrite.
                     (default: ReadWrite)
-        :param backend: Either "hdf5" or "h5py".
-                        Defaults to "hdf5" if available, or "h5py" otherwise
         :return: nixio.File object
         """
-        if backend is None:
-            backend = os.getenv("NIXPY_H5_BACKEND")
-        if backend is None:
-            if CFile is None:
-                backend = "h5py"
-            else:
-                backend = "hdf5"
-        if backend == "hdf5":
-            if CFile:
-                return CFile.open(path, mode)
-            else:
-                raise RuntimeError("HDF5 backend is not available.")
-        elif backend == "h5py":
-            return cls._open(path, mode)
-        else:
-            raise ValueError("Valid backends are 'hdf5' and 'h5py'.")
+        return cls(path, mode)
 
     def _create_header(self):
         self.format = FILE_FORMAT
@@ -355,3 +349,56 @@ class File(FileMixin):
 
     def _section_count(self):
         return len(self.metadata)
+
+    @property
+    def blocks(self):
+        """
+        A property containing all blocks of a file. Blocks can be obtained by
+        their id or their index. Blocks can be deleted from the list, when a
+        block is deleted all its content (data arrays, tags and sources) will
+        be also deleted from the file. Adding new Block is done via the
+        create_block method of File. This is a read-only attribute.
+
+        :type: ProxyList of Block entities.
+        """
+        if not hasattr(self, "_blocks"):
+            setattr(self, "_blocks", BlockProxyList(self))
+        return self._blocks
+
+    def find_sections(self, filtr=lambda _: True, limit=None):
+        """
+        Get all sections and their child sections recursively.
+
+        This method traverses the trees of all sections. The traversal is
+        accomplished via breadth first and can be limited in depth. On each
+        node or section a filter is applied. If the filter returns true the
+        respective section will be added to the result list.
+        By default a filter is used that accepts all sections.
+
+        :param filtr: A filter function
+        :type filtr:  function
+        :param limit: The maximum depth of traversal
+        :type limit:  int
+
+        :returns: A list containing the matching sections.
+        :rtype: list of Section
+        """
+        if limit is None:
+            limit = maxint
+        return finders._find_sections(self, filtr, limit)
+
+    @property
+    def sections(self):
+        """
+        A property containing all root sections of a file. Specific root
+        sections can be obtained by their id or their index. Sections can be
+        deleted from this list. Notice: when a section is deleted all its child
+        section and properties will be removed too. Adding a new Section is
+        done via the crate_section method of File.
+        This is a read-only property.
+
+        :type: ProxyList of Section entities.
+        """
+        if not hasattr(self, "_sections"):
+            setattr(self, "_sections", SectionProxyList(self))
+        return self._sections
