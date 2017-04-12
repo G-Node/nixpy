@@ -15,14 +15,22 @@ import nixio.util.find as finders
 from nixio.util.proxy_list import ProxyList
 from nixio.value import Value
 
-from nixio.file import SectionProxyList
-
 from operator import attrgetter
 
 try:
     from sys import maxint
 except:
     from sys import maxsize as maxint
+
+
+# NOTE: Temporary duplicate
+class SectionProxyList(ProxyList):
+
+    def __init__(self, obj):
+        super(SectionProxyList, self).__init__(obj, "_section_count",
+                                               "_get_section_by_id",
+                                               "_get_section_by_pos",
+                                               "_delete_section_by_id")
 
 
 class S(object):
