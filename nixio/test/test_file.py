@@ -7,27 +7,17 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
-import os
-
+import nixio as nix
 import unittest
 import h5py
-
-import nixio as nix
 import nixio.pycore.file as filepy
 from nixio.pycore.exceptions.exceptions import InvalidFile
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
-class FileTestBase(unittest.TestCase):
-
-    backend = None
-    testfilename = "filetest.h5"
+class FileTest(unittest.TestCase):
 
     def setUp(self):
-        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite)
 
     def tearDown(self):
         self.file.close()
@@ -133,26 +123,14 @@ class FileTestBase(unittest.TestCase):
             self.assertEqual(danames[idx], datablock.data_arrays[idx].name)
 
 
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestFileCPP(FileTestBase):
+class FileVerTestPy(unittest.TestCase):
 
-    backend = "hdf5"
-
-
-class TestFilePy(FileTestBase):
-
-    backend = "h5py"
-
-
-class TestFileVerPy(unittest.TestCase):
-
-    backend = "h5py"
-    testfilename = "versiontest.h5"
+    filename = "versiontest.h5"
     filever = filepy.HDF_FF_VERSION
     fformat = filepy.FILE_FORMAT
 
     def try_open(self, mode):
-        f = nix.File.open(self.testfilename, mode, backend=self.backend)
+        f = nix.File.open(self.filename, mode)
         f.close()
 
     def set_header(self, fformat=None, version=None):

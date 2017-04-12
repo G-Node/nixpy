@@ -7,16 +7,9 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
-import os
-import sys
-
 import unittest
 import numpy as np
-
 import nixio as nix
-
-
-skip_cpp = not hasattr(nix, "core")
 
 
 try:
@@ -25,14 +18,10 @@ except NameError:  # 'basestring' is undefined, must be Python 3
     basestring = (str, bytes)
 
 
-class DataArrayTestBase(unittest.TestCase):
-
-    backend = None
-    testfilename = "dataarraytest.h5"
+class TestDataArray(unittest.TestCase):
 
     def setUp(self):
-        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         self.array = self.block.create_data_array("test array", "signal",
                                                   nix.DataType.Double, (100, ))
@@ -372,14 +361,3 @@ class DataArrayTestBase(unittest.TestCase):
 
         del self.array.sources[source1]
         assert(len(self.array.sources) == 0)
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestDataArrayCPP(DataArrayTestBase):
-
-    backend = "hdf5"
-
-
-class TestDataArrayPy(DataArrayTestBase):
-
-    backend = "h5py"

@@ -7,23 +7,14 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
-import os
-
-import unittest
 import nixio as nix
+import unittest
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
-class GroupTestBase(unittest.TestCase):
-
-    backend = None
-    testfilename = "grouptest.h5"
+class TestGroup(unittest.TestCase):
 
     def setUp(self):
-        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
 
         self.my_array = self.block.create_data_array("my array", "test",
@@ -202,14 +193,3 @@ class GroupTestBase(unittest.TestCase):
         self.assertRaises(RuntimeError, newgroup.tags.append, tg)
 
         del self.file.blocks[newblock.id]
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestGroupCPP(GroupTestBase):
-
-    backend = "hdf5"
-
-
-class TestGroupPy(GroupTestBase):
-
-    backend = "h5py"

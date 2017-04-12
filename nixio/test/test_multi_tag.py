@@ -7,30 +7,16 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
-import os
-
+from __future__ import print_function
+import nixio as nix
 import unittest
 import numpy as np
 
-import nixio as nix
 
-
-skip_cpp = not hasattr(nix, "core")
-
-
-class MultiTagTestBase(unittest.TestCase):
-
-    backend = None
-
-    testfilename = "mtagtest.h5"
+class _TestMultiTag(unittest.TestCase):
 
     def setUp(self):
-        iv = 1.0
-        ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
-        unit = "ms"
-
-        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
 
         self.my_array = self.block.create_data_array("my array", "test",
@@ -415,14 +401,3 @@ class MultiTagTestBase(unittest.TestCase):
             self.feature_tag.retrieve_feature_data(2, 1)
 
         self.assertRaises(IndexError,  out_of_bounds)
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestMultiTagCPP(MultiTagTestBase):
-
-    backend = "hdf5"
-
-
-class TestMultiTagPy(MultiTagTestBase):
-
-    backend = "h5py"
