@@ -13,16 +13,10 @@ import numpy as np
 import nixio as nix
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
-class _TestTag(unittest.TestCase):
-
-    backend = None
+class TestTag(unittest.TestCase):
 
     def setUp(self):
-        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
 
         self.my_array = self.block.create_data_array("my array", "test",
@@ -189,14 +183,3 @@ class _TestTag(unittest.TestCase):
         assert(data1.size == 1)
         assert(data2.size == 2)
         assert(data3.size == len(ramp_data))
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestTagCPP(_TestTag):
-
-    backend = "hdf5"
-
-
-class TestTagPy(_TestTag):
-
-    backend = "h5py"

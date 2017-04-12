@@ -7,22 +7,14 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
-
-import unittest
-
 import nixio as nix
-
-
-skip_cpp = not hasattr(nix, "core")
+import unittest
 
 
 class _TestProperty(unittest.TestCase):
 
-    backend = None
-
     def setUp(self):
-        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite)
         self.section = self.file.create_section("test section",
                                                 "recordingsession")
         self.prop = self.section.create_property("test property",
@@ -192,14 +184,3 @@ class TestValue(unittest.TestCase):
 
         value.uncertainty = 0.5
         assert(value.uncertainty == 0.5)
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestPropertyCPP(_TestProperty):
-
-    backend = "hdf5"
-
-
-class TestPropertyPy(_TestProperty):
-
-    backend = "h5py"

@@ -7,28 +7,14 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
-
 import unittest
-
 import nixio as nix
-
-
-skip_cpp = not hasattr(nix, "core")
 
 
 class _TestBlock(unittest.TestCase):
 
-    backend = None
-
     def setUp(self):
-        # TODO: unittest.h5 is a unicode string and is handed over to a c++
-        #  function expecting a string. This leads to an error.
-        #  if "unittest.h5".encode("utf-8") or b'unittest.h5' is used,
-        #  the c++ function can handle the string # but is not able to create
-        #  the file any longer. Should this somehow be adressed on the c++ side
-        #  of the code?
-        self.file = nix.File.open('unittest.h5', nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open('unittest.h5', nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         self.other = self.file.create_block("other block", "recordingsession")
 
@@ -195,14 +181,3 @@ class _TestBlock(unittest.TestCase):
         del self.block.groups[0]
 
         assert(len(self.block.groups) == 0)
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestBlockCPP(_TestBlock):
-
-    backend = "hdf5"
-
-
-class TestBlockPy(_TestBlock):
-
-    backend = "h5py"

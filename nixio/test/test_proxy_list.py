@@ -7,10 +7,8 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
-
-import unittest
-
 import nixio as nix
+import unittest
 from nixio.util.proxy_list import ProxyList
 
 try:
@@ -62,7 +60,6 @@ class WithListMock(object):
         return self.__list
 
 
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestProxyList(unittest.TestCase):
 
     def setUp(self):

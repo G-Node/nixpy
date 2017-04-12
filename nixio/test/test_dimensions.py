@@ -13,21 +13,16 @@ import numpy as np
 import nixio as nix
 
 
-skip_cpp = not hasattr(nix, "core")
-
 test_range = tuple([float(i) for i in range(10)])
 test_sampl = 0.1
 test_label = "test label"
 test_labels = tuple([str(i) + "_label" for i in range(10)])
 
 
-class _TestDimensions(unittest.TestCase):
-
-    backend = None
+class TestDimensions(unittest.TestCase):
 
     def setUp(self):
-        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         self.array = self.block.create_data_array("test array", "signal",
                                                   nix.DataType.Float, (0, ))
@@ -124,14 +119,3 @@ class _TestDimensions(unittest.TestCase):
         with self.assertRaises(IndexError):
             self.range_dim.axis(10, 2)
             self.range_dim.axis(100)
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestDimensionsCPP(_TestDimensions):
-
-    backend = "hdf5"
-
-
-class TestDimensionsPy(_TestDimensions):
-
-    backend = "h5py"

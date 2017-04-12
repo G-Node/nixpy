@@ -7,22 +7,14 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
-
+import nixio as nix
 import unittest
 
-import nixio as nix
 
-
-skip_cpp = not hasattr(nix, "core")
-
-
-class _TestFeature(unittest.TestCase):
-
-    backend = None
+class TestFeature(unittest.TestCase):
 
     def setUp(self):
-        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
 
         self.signal = self.block.create_data_array("output", "analogsignal",
@@ -76,14 +68,3 @@ class _TestFeature(unittest.TestCase):
                                                     nix.DataType.Float, (0, ))
         self.feature_1.data = new_data_ref
         assert(self.feature_1.data == new_data_ref)
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestFeatureCPP(_TestFeature):
-
-    backend = "hdf5"
-
-
-class TestFeaturePy(_TestFeature):
-
-    backend = "h5py"

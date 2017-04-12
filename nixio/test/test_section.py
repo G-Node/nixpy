@@ -7,22 +7,15 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
-
+import nixio as nix
 import unittest
 
-import nixio as nix
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
-class _TestSection(unittest.TestCase):
-
-    backend = None
+class TestSection(unittest.TestCase):
 
     def setUp(self):
-        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite)
         self.section = self.file.create_section("test section",
                                                 "recordingsession")
         self.other = self.file.create_section("other section",
@@ -243,14 +236,3 @@ class _TestSection(unittest.TestCase):
         self.assertEqual(len(self.other.referring_sources), 1)
         self.assertEqual(len(self.section.referring_sources), 0)
         self.assertEqual(self.other.referring_sources[0].id, src.id)
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestSectionCPP(_TestSection):
-
-    backend = "hdf5"
-
-
-class TestSectionPy(_TestSection):
-
-    backend = "h5py"

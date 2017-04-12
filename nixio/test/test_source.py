@@ -7,22 +7,14 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
-
-import unittest
-
 import nixio as nix
-
-
-skip_cpp = not hasattr(nix, "core")
+import unittest
 
 
 class _TestSource(unittest.TestCase):
 
-    backend = None
-
     def setUp(self):
-        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         self.source = self.block.create_source("test source",
                                                "recordingchannel")
@@ -147,14 +139,3 @@ class _TestSource(unittest.TestCase):
         self.assertEqual(len(self.source.referring_multi_tags), 1)
         self.assertEqual(len(self.other.referring_multi_tags), 0)
         self.assertEqual(self.source.referring_multi_tags[0].id, mtag.id)
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestSourceCPP(_TestSource):
-
-    backend = "hdf5"
-
-
-class TestSourcePy(_TestSource):
-
-    backend = "h5py"
