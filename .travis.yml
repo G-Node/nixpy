@@ -3,57 +3,26 @@ dist: trusty
 
 language: python
 
-env:
-    global:
-        - NIX_BRANCH=master
-
 matrix:
     include:
         - python: "2.7_with_system_site_packages"
-          env: COVERALLS=1 NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include SETUP_ARG=--with-nix
-        - python: "3.4"
-          env: NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include
-        - python: "2.7_with_system_site_packages"
         - python: "3.4"
         - python: "3.5"
+        - python: "3.6"
+          env: COVERALLS=1
 
 addons:
   apt:
     packages:
-      - cmake
-      - libcppunit-dev
       - libhdf5-serial-dev
-      - libboost-all-dev
 
 install:
-  - export PYVER=${TRAVIS_PYTHON_VERSION:0:1}
-  - export PYMAJOR=${TRAVIS_PYTHON_VERSION:0:1}
-  - export PYMINOR=${TRAVIS_PYTHON_VERSION:2:1}
-  
-  # install dependencies
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      g++ --version;
-    fi
-  - if [ "$PYMAJOR" == "3" ] && [ "$PYMINOR" == "4" ]; then
-      pip install --upgrade --no-use-wheel numpy cython h5py;
-      pip install --upgrade coveralls;
-    else
-      pip install --upgrade numpy coveralls h5py;
-    fi
-  #build NIX
-  - if [ -n "$NIX_LIBDIR" ]; then
-      git clone --branch ${NIX_BRANCH} https://github.com/G-Node/nix.git nix-build;
-      pushd nix-build;
-      cmake -DCMAKE_INSTALL_PREFIX=./inst -DBUILD_TESTING=OFF .;
-      make;
-      make install;
-      popd;
-    fi
+  - pip install --upgrade numpy coveralls h5py;
 
 script:
-- python setup.py build $SETUP_ARG
+- python setup.py build
 - if [ $COVERALLS = 1 ]; then
-    coverage${PYVER} run --source=nixio setup.py test && coverage${PYVER} report -m;
+    coverage run --source=nixio setup.py test && coverage report -m;
   else
     python setup.py test;
   fi;
