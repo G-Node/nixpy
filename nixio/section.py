@@ -22,7 +22,6 @@ from . import util
 from . import exceptions
 
 
-# NOTE: Temporary duplicate
 class SectionProxyList(ProxyList):
 
     def __init__(self, obj):
