@@ -7,7 +7,7 @@
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
 
-from .pycore.entity_with_metadata import EntityWithMetadata
+from .entity_with_metadata import EntityWithMetadata
 from .util.proxy_list import ProxyList
 from .pycore import exceptions
 from .pycore import util

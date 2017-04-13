@@ -9,7 +9,7 @@ from numbers import Number
 import numpy as np
 import sys
 
-from .pycore.entity_with_sources import EntityWithSources
+from .entity_with_sources import EntityWithSources
 from .value import DataType
 from .pycore.dimensions import (SampledDimension, RangeDimension, SetDimension,
                                 DimensionType)

@@ -7,7 +7,7 @@
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
 
-from .pycore.entity_with_metadata import EntityWithMetadata
+from .entity_with_metadata import EntityWithMetadata
 from .pycore.exceptions import exceptions
 from .group import Group
 from .data_array import DataArray

@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 from ..property import PropertyMixin
-from .entity import Entity
+from ..entity import Entity
 from ..value import Value, DataType
 from . import util
 

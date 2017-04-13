@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 from collections import Sequence
 
 from ..section import SectionMixin
-from .entity import NamedEntity
+from ..entity import NamedEntity
 from .property import Property
 from . import util
 from . import exceptions
