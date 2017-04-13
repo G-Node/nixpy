@@ -8,9 +8,9 @@
 from __future__ import (absolute_import, division, print_function)
 
 from .pycore.entity_with_sources import EntityWithSources
-from .pycore.data_array import DataArray
-from .pycore.tag import Tag
-from .pycore.multi_tag import MultiTag
+from .data_array import DataArray
+from .tag import Tag
+from .multi_tag import MultiTag
 
 from .pycore import util
 from .util.proxy_list import RefProxyList
