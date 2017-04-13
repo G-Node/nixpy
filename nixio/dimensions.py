@@ -10,9 +10,9 @@ from numbers import Number
 
 import numpy as np
 
-from ..value import DataType
-from ..dimension_type import DimensionType
-from .. import util
+from .value import DataType
+from .dimension_type import DimensionType
+from . import util
 
 
 class Dimension(object):

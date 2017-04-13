@@ -5,24 +5,12 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
-from __future__ import (absolute_import, division, print_function)
-
-import sys
-import os
-
-_nixio_bin = os.path.join(sys.prefix, 'share', 'nixio', 'bin')
-if os.path.isdir(_nixio_bin):
-    os.environ["PATH"] += os.pathsep + _nixio_bin
-
-from nixio.file import File, FileMode
-from nixio.value import Value, DataType
-from nixio.dimension_type import DimensionType
-from nixio.link_type import LinkType
-
-from nixio.section import S
-
-from nixio.info import VERSION as __version__
+from .file import File, FileMode
+from .value import Value, DataType
+from .dimension_type import DimensionType
+from .link_type import LinkType
+from .info import VERSION as __version__
+from .section import S
 
 __all__ = ("File", "FileMode", "DataType", "Value",
            "LinkType", "DimensionType")
