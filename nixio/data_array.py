@@ -11,7 +11,7 @@ import sys
 
 from .entity_with_sources import EntityWithSources
 from .value import DataType
-from .pycore.dimensions import (SampledDimension, RangeDimension, SetDimension,
+from .dimensions import (SampledDimension, RangeDimension, SetDimension,
                                 DimensionType)
 from . import util
 

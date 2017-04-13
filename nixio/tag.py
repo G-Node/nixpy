@@ -13,7 +13,7 @@ from .value import DataType
 from .data_array import DataArray
 from .entity_with_sources import EntityWithSources
 from .data_view import DataView
-from .pycore.feature import Feature
+from .feature import Feature
 from .exceptions import (OutOfBounds, IncompatibleDimensions,
                          UninitializedEntity, InvalidUnit)
 from .dimension_type import DimensionType
