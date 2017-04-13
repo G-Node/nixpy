@@ -10,9 +10,9 @@ from __future__ import (absolute_import, division, print_function)
 from .pycore.entity_with_metadata import EntityWithMetadata
 from .pycore.exceptions import exceptions
 from .group import Group
-from .pycore.data_array import DataArray
-from .pycore.multi_tag import MultiTag
-from .pycore.tag import Tag
+from .data_array import DataArray
+from .tag import Tag
+from .multi_tag import MultiTag
 from .source import Source
 from .pycore import util
 

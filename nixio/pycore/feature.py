@@ -6,7 +6,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 from .entity import Entity
-from .data_array import DataArray
+from ..data_array import DataArray
 from .util import util
 
 
