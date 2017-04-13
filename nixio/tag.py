@@ -12,7 +12,7 @@ import numpy as np
 from .value import DataType
 from .data_array import DataArray
 from .pycore.entity_with_sources import EntityWithSources
-from .pycore.data_view import DataView
+from .data_view import DataView
 from .pycore.feature import Feature
 from .pycore.exceptions import (OutOfBounds, IncompatibleDimensions,
                                 UninitializedEntity, InvalidUnit)
