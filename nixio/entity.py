@@ -7,7 +7,7 @@
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
 
-from . import util
+from .pycore import util
 
 
 class Entity(object):

@@ -7,7 +7,7 @@
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
 
-from .pycore.entity_with_sources import EntityWithSources
+from .entity_with_sources import EntityWithSources
 from .data_array import DataArray
 from .tag import Tag
 from .multi_tag import MultiTag
