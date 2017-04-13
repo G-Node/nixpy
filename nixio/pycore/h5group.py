@@ -15,8 +15,8 @@ from ..value import DataType
 from ..block import Block
 from .section import Section
 
-from . import util
-from .exceptions import InvalidEntity
+from .. import util
+from ..exceptions import InvalidEntity
 
 
 class H5Group(object):

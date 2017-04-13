@@ -8,7 +8,7 @@
 import numpy as np
 
 from .data_array import DataSet
-from .pycore.exceptions import OutOfBounds
+from .exceptions import OutOfBounds
 
 
 class DataView(DataSet):

@@ -8,13 +8,13 @@
 from __future__ import (absolute_import, division, print_function)
 
 from .entity_with_metadata import EntityWithMetadata
-from .pycore.exceptions import exceptions
+from .exceptions import exceptions
 from .group import Group
 from .data_array import DataArray
 from .tag import Tag
 from .multi_tag import MultiTag
 from .source import Source
-from .pycore import util
+from . import util
 
 from .util import find as finders
 from .util.proxy_list import ProxyList

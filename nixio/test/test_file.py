@@ -11,7 +11,7 @@ import nixio as nix
 import unittest
 import h5py
 import nixio.file as filepy
-from nixio.pycore.exceptions.exceptions import InvalidFile
+from nixio.exceptions.exceptions import InvalidFile
 
 
 class FileTest(unittest.TestCase):

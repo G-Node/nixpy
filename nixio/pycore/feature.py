@@ -7,7 +7,7 @@
 # LICENSE file in the root of the Project.
 from ..entity import Entity
 from ..data_array import DataArray
-from .util import util
+from .. import util
 
 
 class Feature(Entity):
