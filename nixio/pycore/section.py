@@ -12,8 +12,8 @@ from collections import Sequence
 from ..section import SectionMixin
 from ..entity import NamedEntity
 from .property import Property
-from . import util
-from . import exceptions
+from .. import util
+from .. import exceptions
 
 
 class Section(NamedEntity, SectionMixin):

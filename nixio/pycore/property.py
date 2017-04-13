@@ -12,7 +12,7 @@ import numpy as np
 from ..property import PropertyMixin
 from ..entity import Entity
 from ..value import Value, DataType
-from . import util
+from .. import util
 
 
 class Property(Entity, PropertyMixin):

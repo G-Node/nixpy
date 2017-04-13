@@ -13,9 +13,9 @@ from .entity_with_sources import EntityWithSources
 from .value import DataType
 from .pycore.dimensions import (SampledDimension, RangeDimension, SetDimension,
                                 DimensionType)
-from .pycore import util
+from . import util
 
-from .pycore.exceptions import InvalidUnit
+from .exceptions import InvalidUnit
 
 
 class DataArrayMixin(object):

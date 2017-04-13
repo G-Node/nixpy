@@ -12,7 +12,7 @@ from .data_array import DataArray
 from .tag import Tag
 from .multi_tag import MultiTag
 
-from .pycore import util
+from . import util
 from .util.proxy_list import RefProxyList
 
 

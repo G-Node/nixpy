@@ -21,9 +21,9 @@ import h5py
 
 from .pycore.h5group import H5Group
 from .block import Block
-from .pycore.exceptions import exceptions
+from .exceptions import exceptions
 from .pycore.section import Section
-from .pycore import util
+from . import util
 
 
 FILE_FORMAT = "nix"

@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 from ..value import DataType
-from . import util
+from .. import util
 
 
 class H5DataSet(object):

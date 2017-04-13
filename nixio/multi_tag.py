@@ -11,8 +11,8 @@ from .tag import BaseTag
 from .data_array import DataArray
 from .data_view import DataView
 from .link_type import LinkType
-from .pycore.exceptions import (OutOfBounds, IncompatibleDimensions,
-                                UninitializedEntity)
+from .exceptions import (OutOfBounds, IncompatibleDimensions,
+                         UninitializedEntity)
 
 from .tag import ReferenceProxyList, FeatureProxyList
 

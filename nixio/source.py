@@ -9,8 +9,8 @@ from __future__ import (absolute_import, division, print_function)
 
 from .entity_with_metadata import EntityWithMetadata
 from .util.proxy_list import ProxyList
-from .pycore import exceptions
-from .pycore import util
+from . import exceptions
+from . import util
 from .util import find as finders
 
 from sys import maxsize as maxint
