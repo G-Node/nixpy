@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from .entity_with_metadata import EntityWithMetadata
 from ..entity_with_sources import EntityWithSourcesMixin
-from .source import Source
+from ..source import Source
 
 from . import util
 

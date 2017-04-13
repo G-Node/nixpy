@@ -29,13 +29,7 @@ def _find_sources(with_sources, filtr, limit):
     result = []
     level = 0
 
-    sourcecls = (nixio.pycore.Source,)
-    try:
-        sourcecls += (nixio.core.Source,)
-    except AttributeError:
-        pass
-
-    if isinstance(with_sources, sourcecls):
+    if isinstance(with_sources, nixio.source.Source):
         fifo.append(Cont(with_sources, level))
     else:
         level += 1

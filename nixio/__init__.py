@@ -26,11 +26,6 @@ from nixio.section import S
 
 from nixio.info import VERSION as __version__
 
-try:
-    import nixio.util.inject
-except ImportError:
-    pass
-
 __all__ = ("File", "FileMode", "DataType", "Value",
            "LinkType", "DimensionType")
 __author__ = ('Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, '
