@@ -12,7 +12,7 @@ import numpy as np
 
 from .h5dataset import H5DataSet
 from ..value import DataType
-from .block import Block
+from ..block import Block
 from .section import Section
 
 from . import util

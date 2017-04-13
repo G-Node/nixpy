@@ -20,7 +20,7 @@ except:
 import h5py
 
 from .pycore.h5group import H5Group
-from .pycore.block import Block
+from .block import Block
 from .pycore.exceptions import exceptions
 from .pycore.section import Section
 from .pycore import util
