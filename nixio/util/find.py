@@ -58,13 +58,7 @@ def _find_sections(with_sections, filtr, limit):
     result = []
     level = 0
 
-    sectioncls = (nixio.pycore.Section,)
-    try:
-        sectioncls += (nixio.core.Section,)
-    except AttributeError:
-        pass
-
-    if isinstance(with_sections, sectioncls):
+    if isinstance(with_sections, nixio.section.Section):
         fifo.append(Cont(with_sections, level))
     else:
         level += 1

@@ -7,7 +7,6 @@
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
 from numbers import Number
-
 import numpy as np
 
 from .value import DataType
@@ -18,10 +17,6 @@ from . import util
 class Dimension(object):
 
     def __init__(self, h5group, index):
-        from nixio.pycore.h5group import H5Group
-        if not isinstance(h5group, H5Group):
-            print(h5group)
-            raise Exception
         self._h5group = h5group
         self.dim_index = index
 

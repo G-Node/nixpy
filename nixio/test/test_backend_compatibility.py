@@ -43,8 +43,7 @@ class _TestBackendCompatibility(unittest.TestCase):
     def check_attributes(self, writeitem, readitem):
         for attr in all_attrs:
             # skip deprecated data attribute for DataArrays
-            if (isinstance(writeitem, (nix.pycore.data_array.DataArray,
-                                       nix.core.DataArray)) and
+            if (isinstance(writeitem, nix.data_array.DataArray) and
                     attr == "data"):
                 continue
             if hasattr(writeitem, attr) or hasattr(readitem, attr):
