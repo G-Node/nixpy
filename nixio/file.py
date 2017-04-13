@@ -18,7 +18,7 @@ from .util.proxy_list import ProxyList
 from .hdf5.h5group import H5Group
 from .block import Block
 from .exceptions import exceptions
-from .section import Section
+from .section import Section, SectionProxyList
 from . import util
 
 
@@ -33,15 +33,6 @@ class BlockProxyList(ProxyList):
                                              "_get_block_by_id",
                                              "_get_block_by_pos",
                                              "_delete_block_by_id")
-
-
-class SectionProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(SectionProxyList, self).__init__(obj, "_section_count",
-                                               "_get_section_by_id",
-                                               "_get_section_by_pos",
-                                               "_delete_section_by_id")
 
 
 def can_write(nixfile):
