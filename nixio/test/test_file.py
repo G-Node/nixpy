@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 import nixio as nix
 import unittest
 import h5py
-import nixio.pycore.file as filepy
+import nixio.file as filepy
 from nixio.pycore.exceptions.exceptions import InvalidFile
 
 
