@@ -9,7 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 
 from .tag import BaseTag
 from .data_array import DataArray
-from .pycore.data_view import DataView
+from .data_view import DataView
 from .link_type import LinkType
 from .pycore.exceptions import (OutOfBounds, IncompatibleDimensions,
                                 UninitializedEntity)
@@ -232,5 +232,3 @@ class MultiTag(BaseTag):
         if not hasattr(self, "_features"):
             setattr(self, "_features", FeatureProxyList(self))
         return self._features
-
-

@@ -7,8 +7,8 @@
 # LICENSE file in the root of the Project.
 import numpy as np
 
-from ..data_array import DataSet
-from .exceptions import OutOfBounds
+from .data_array import DataSet
+from .pycore.exceptions import OutOfBounds
 
 
 class DataView(DataSet):
