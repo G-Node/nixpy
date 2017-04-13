@@ -84,7 +84,7 @@ setup(
     long_description=description_text,
     classifiers=classifiers,
     license='BSD',
-    packages=['nixio', 'nixio.pycore', 'nixio.util', 'nixio.exceptions'],
+    packages=['nixio', 'nixio.hdf5', 'nixio.util', 'nixio.exceptions'],
     scripts=[],
     tests_require=['pytest'],
     test_suite='pytest',
