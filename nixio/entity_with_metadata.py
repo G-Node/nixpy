@@ -7,7 +7,7 @@
 # LICENSE file in the root of the Project.
 
 from .entity import NamedEntity
-from .pycore.section import Section
+from .section import Section
 
 
 class EntityWithMetadata(NamedEntity):
