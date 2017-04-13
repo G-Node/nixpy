@@ -15,7 +15,7 @@ _nixio_bin = os.path.join(sys.prefix, 'share', 'nixio', 'bin')
 if os.path.isdir(_nixio_bin):
     os.environ["PATH"] += os.pathsep + _nixio_bin
 
-from nixio.pycore.file import File, FileMode
+from nixio.file import File, FileMode
 from nixio.value import Value, DataType
 from nixio.dimension_type import DimensionType
 from nixio.link_type import LinkType

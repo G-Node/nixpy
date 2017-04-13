@@ -14,7 +14,7 @@ import h5py
 import numpy as np
 
 import nixio as nix
-import nixio.pycore.file as filepy
+import nixio.file as filepy
 from nixio.pycore.exceptions.exceptions import InvalidFile
 
 
