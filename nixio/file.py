@@ -6,20 +6,16 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
-import os
 import gc
+import os
+from sys import maxsize as maxint
 from warnings import warn
+import h5py
 
 from .util import find as finders
 from .util.proxy_list import ProxyList
 
-try:
-    from sys import maxint
-except:
-    from sys import maxsize as maxint
-import h5py
-
-from .pycore.h5group import H5Group
+from .hdf5.h5group import H5Group
 from .block import Block
 from .exceptions import exceptions
 from .section import Section
