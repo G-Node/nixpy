@@ -19,7 +19,7 @@ from .compression import Compression
 
 from .pycore.entity_with_metadata import EntityWithMetadata
 from .pycore.exceptions import exceptions
-from .pycore.group import Group
+from .group import Group
 from .pycore.data_array import DataArray
 from .pycore.multi_tag import MultiTag
 from .pycore.tag import Tag
