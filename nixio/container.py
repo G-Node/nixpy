@@ -20,13 +20,13 @@ class Container(object):
         Source.sources
 
     :param name: Name of the container
-    :param parent: Parent H5Group where this container will be created
+    :param parent: Parent NIX object where this container will be created
     :param itemclass: The class of the objects this container holds (for
     checking and instantiations)
     """
 
     def __init__(self, name, parent, itemclass):
-        self._backend = parent.open_group(name)
+        self._backend = parent._h5group.open_group(name)
         self._itemclass = itemclass
         self._parent = parent
 
@@ -116,13 +116,13 @@ class LinkContainer(Container):
         if util.is_uuid(item):
             item = self._inst_item(self._backend.get_by_id(item))
 
+        if not hasattr(item, "id"):
+            raise TypeError("NIX entity or id string required for append")
+
         if item not in self._itemstore:
             raise RuntimeError("This item cannot be appended here.")
 
-        if hasattr(item, "id"):
-            self._backend.create_link(item, item.id)
-        else:
-            raise TypeError("NIX entity or id string required for append")
+        self._backend.create_link(item, item.id)
 
     def extend(self, items):
         if not isinstance(items, Iterable):
@@ -132,7 +132,7 @@ class LinkContainer(Container):
 
     def __getitem__(self, item):
         if isinstance(item, int):
-            super(LinkContainer, self).__getitem__(item)
+            return super(LinkContainer, self).__getitem__(item)
         else:
             if util.is_uuid(item):
                 # name is key for LinkContainer

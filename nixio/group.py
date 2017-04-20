@@ -134,7 +134,7 @@ class Group(EntityWithSources):
         This is a read only attribute.
         """
         if self._data_arrays is None:
-            self._data_arrays = LinkContainer("data_arrays", self._h5group,
+            self._data_arrays = LinkContainer("data_arrays", self,
                                               DataArray,
                                               self._parent.data_arrays)
         return self._data_arrays
@@ -149,7 +149,7 @@ class Group(EntityWithSources):
         This is a read only attribute.
         """
         if self._tags is None:
-            self._tags = LinkContainer("tags", self._h5group, Tag,
+            self._tags = LinkContainer("tags", self, Tag,
                                        self._parent.tags)
         return self._tags
 
@@ -163,6 +163,6 @@ class Group(EntityWithSources):
         This is a read only attribute.
         """
         if self._multi_tags is None:
-            self._multi_tags = LinkContainer("multi_tags", self._h5group,
+            self._multi_tags = LinkContainer("multi_tags", self,
                                              MultiTag, self._parent.multi_tags)
         return self._multi_tags

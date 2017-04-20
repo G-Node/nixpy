@@ -309,7 +309,7 @@ class File(object):
         create_block method of File. This is a read-only attribute.
         """
         if self._blocks is None:
-            self._blocks = Container("data", self._h5group, Block)
+            self._blocks = Container("data", self, Block)
         return self._blocks
 
     def find_sections(self, filtr=lambda _: True, limit=None):
@@ -345,7 +345,7 @@ class File(object):
         This is a read-only property.
         """
         if self._sections is None:
-            self._sections = Container("metadata", self._h5group, Section)
+            self._sections = Container("metadata", self, Section)
         return self._sections
 
 
