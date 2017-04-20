@@ -141,6 +141,8 @@ class File(object):
                     (default: ReadWrite)
         :return: nixio.File object
         """
+        if backend is not None:
+            warn("Backend selection is deprecated. Ignoring value.")
         return cls(path, mode)
 
     def _create_header(self):
