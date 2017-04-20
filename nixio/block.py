@@ -312,9 +312,6 @@ class Block(EntityWithMetadata):
         if self._data_arrays is None:
             self._data_arrays = Container("data_arrays", self._h5group,
                                           DataArray)
-        print("Got dataarrays")
-        print(self._data_arrays)
-        print(len(self._data_arrays))
         return self._data_arrays
 
     @property
