@@ -20,13 +20,13 @@ class Container(object):
         Source.sources
 
     :param name: Name of the container
-    :param parent: Parent H5Group where this container will be created
+    :param parent: Parent NIX object where this container will be created
     :param itemclass: The class of the objects this container holds (for
     checking and instantiations)
     """
 
     def __init__(self, name, parent, itemclass):
-        self._backend = parent.open_group(name)
+        self._backend = parent._h5group.open_group(name)
         self._itemclass = itemclass
         self._parent = parent
 
