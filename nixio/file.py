@@ -13,26 +13,17 @@ from warnings import warn
 import h5py
 
 from .util import find as finders
-from .util.proxy_list import ProxyList
 
 from .hdf5.h5group import H5Group
 from .block import Block
+from .section import Section
+from .container import Container
 from .exceptions import exceptions
-from .section import Section, SectionProxyList
 from . import util
 
 
 FILE_FORMAT = "nix"
 HDF_FF_VERSION = (1, 1, 0)
-
-
-class BlockProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(BlockProxyList, self).__init__(obj, "_block_count",
-                                             "_get_block_by_id",
-                                             "_get_block_by_pos",
-                                             "_delete_block_by_id")
 
 
 def can_write(nixfile):
@@ -130,6 +121,10 @@ class File(object):
             self.force_created_at()
         if "updated_at" not in self._h5file.attrs:
             self.force_updated_at()
+
+        # make container props but don't initialise
+        self._blocks = None
+        self._sections = None
 
     @classmethod
     def open(cls, path, mode=FileMode.ReadWrite, backend=None):
@@ -337,15 +332,13 @@ class File(object):
     def blocks(self):
         """
         A property containing all blocks of a file. Blocks can be obtained by
-        their id or their index. Blocks can be deleted from the list, when a
+        their name, id or index. Blocks can be deleted from the list, when a
         block is deleted all its content (data arrays, tags and sources) will
         be also deleted from the file. Adding new Block is done via the
         create_block method of File. This is a read-only attribute.
-
-        :type: ProxyList of Block entities.
         """
-        if not hasattr(self, "_blocks"):
-            setattr(self, "_blocks", BlockProxyList(self))
+        if self._blocks is None:
+            self._blocks = Container("data", self._h5group, Block)
         return self._blocks
 
     def find_sections(self, filtr=lambda _: True, limit=None):
@@ -374,14 +367,12 @@ class File(object):
     def sections(self):
         """
         A property containing all root sections of a file. Specific root
-        sections can be obtained by their id or their index. Sections can be
+        sections can be obtained by their name, id or index. Sections can be
         deleted from this list. Notice: when a section is deleted all its child
         section and properties will be removed too. Adding a new Section is
         done via the crate_section method of File.
         This is a read-only property.
-
-        :type: ProxyList of Section entities.
         """
-        if not hasattr(self, "_sections"):
-            setattr(self, "_sections", SectionProxyList(self))
+        if self._sections is None:
+            self._sections = Container("metadata", self._h5group, Section)
         return self._sections
