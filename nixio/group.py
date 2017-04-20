@@ -11,45 +11,18 @@ from .entity_with_sources import EntityWithSources
 from .data_array import DataArray
 from .tag import Tag
 from .multi_tag import MultiTag
+from .container import LinkContainer
 
 from . import util
-from .util.proxy_list import RefProxyList
-
-
-class DataArrayProxyList(RefProxyList):
-
-    def __init__(self, obj):
-        super(DataArrayProxyList, self).__init__(
-            obj, "_data_array_count", "_get_data_array_by_id",
-            "_get_data_array_by_pos", "_delete_data_array_by_id",
-            "_add_data_array_by_id"
-        )
-
-
-class TagProxyList(RefProxyList):
-
-    def __init__(self, obj):
-        super(TagProxyList, self).__init__(
-            obj, "_tag_count", "_get_tag_by_id",
-            "_get_tag_by_pos", "_delete_tag_by_id",
-            "_add_tag_by_id"
-        )
-
-
-class MultiTagProxyList(RefProxyList):
-
-    def __init__(self, obj):
-        super(MultiTagProxyList, self).__init__(
-            obj, "_multi_tag_count", "_get_multi_tag_by_id",
-            "_get_multi_tag_by_pos", "_delete_multi_tag_by_id",
-            "_add_multi_tag_by_id"
-        )
 
 
 class Group(EntityWithSources):
 
     def __init__(self, nixparent, h5group):
         super(Group, self).__init__(nixparent, h5group)
+        self._data_arrays = None
+        self._tags = None
+        self._multi_tags = None
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_):
@@ -159,11 +132,11 @@ class Group(EntityWithSources):
         remove it from the file. New references can be added using the append
         method of the list.
         This is a read only attribute.
-
-        :type: DataArrayProxyList of DataArray
         """
-        if not hasattr(self, "_data_arrays"):
-            setattr(self, "_data_arrays", DataArrayProxyList(self))
+        if self._data_arrays is None:
+            self._data_arrays = LinkContainer("data_arrays", self._h5group,
+                                              DataArray,
+                                              self._parent.data_arrays)
         return self._data_arrays
 
     @property
@@ -174,11 +147,10 @@ class Group(EntityWithSources):
         removing a referenced Tag will not remove it from the file.
         New Tags can be added using the append method of the list.
         This is a read only attribute.
-
-        :type: TagProxyList of Tags
         """
-        if not hasattr(self, "_tags"):
-            setattr(self, "_tags", TagProxyList(self))
+        if self._tags is None:
+            self._tags = LinkContainer("tags", self._h5group, Tag,
+                                       self._parent.tags)
         return self._tags
 
     @property
@@ -189,10 +161,8 @@ class Group(EntityWithSources):
         list, removing a referenced MultiTag will not remove it from the file.
         New MultiTags can be added using the append method of the list.
         This is a read only attribute.
-
-        :type: MultiTagProxyList of MultiTags
         """
-        if not hasattr(self, "_multi_tags"):
-            setattr(self, "_multi_tags", MultiTagProxyList(self))
+        if self._multi_tags is None:
+            self._multi_tags = LinkContainer("multi_tags", self._h5group,
+                                             MultiTag, self._parent.multi_tags)
         return self._multi_tags
-
