@@ -14,7 +14,6 @@ except ImportError:
 import numpy as np
 
 from .util import find as finders
-from .util.proxy_list import ProxyList
 from .compression import Compression
 
 from .entity_with_metadata import EntityWithMetadata
@@ -25,57 +24,18 @@ from .multi_tag import MultiTag
 from .tag import Tag
 from .source import Source
 from . import util
-
-
-class SourceProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(SourceProxyList, self).__init__(obj, "_source_count",
-                                              "_get_source_by_id",
-                                              "_get_source_by_pos",
-                                              "_delete_source_by_id")
-
-
-class DataArrayProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(DataArrayProxyList, self).__init__(obj, "_data_array_count",
-                                                 "_get_data_array_by_id",
-                                                 "_get_data_array_by_pos",
-                                                 "_delete_data_array_by_id")
-
-
-class MultiTagProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(MultiTagProxyList, self).__init__(obj, "_multi_tag_count",
-                                                "_get_multi_tag_by_id",
-                                                "_get_multi_tag_by_pos",
-                                                "_delete_multi_tag_by_id")
-
-
-class TagProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(TagProxyList, self).__init__(obj, "_tag_count", "_get_tag_by_id",
-                                           "_get_tag_by_pos",
-                                           "_delete_tag_by_id")
-
-
-class GroupProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(GroupProxyList, self).__init__(obj, "_group_count",
-                                             "_get_group_by_id",
-                                             "_get_group_by_pos",
-                                             "_delete_group_by_id")
+from .container import Container
 
 
 class Block(EntityWithMetadata):
 
     def __init__(self, nixparent, h5group, compression=Compression.Auto):
         super(Block, self).__init__(nixparent, h5group)
-        # TODO: Validation for containers
+        self._groups = None
+        self._data_arrays = None
+        self._tags = None
+        self._multi_tags = None
+        self._sources = None
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, compression):
@@ -93,22 +53,6 @@ class Block(EntityWithMetadata):
         da = DataArray._create_new(self, data_arrays, name, type_,
                                    data_type, shape, compression)
         return da
-
-    def _get_data_array_by_id(self, id_or_name):
-        data_arrays = self._h5group.open_group("data_arrays")
-        return DataArray(self, data_arrays.get_by_id_or_name(id_or_name))
-
-    def _get_data_array_by_pos(self, pos):
-        data_arrays = self._h5group.open_group("data_arrays")
-        return DataArray(self, data_arrays.get_by_pos(pos))
-
-    def _delete_data_array_by_id(self, id_):
-        data_arrays = self._h5group.open_group("data_arrays")
-        data_arrays.delete(id_)
-
-    def _data_array_count(self):
-        data_arrays = self._h5group.open_group("data_arrays")
-        return len(data_arrays)
 
     # MultiTag
     def create_multi_tag(self, name, type_, positions):
@@ -335,11 +279,9 @@ class Block(EntityWithMetadata):
         via their index or by their id. Sources can be deleted from the list.
         Adding sources is done using the Blocks create_source method.
         This is a read only attribute.
-
-        :type: ProxyList of Source entities.
         """
-        if not hasattr(self, "_sources"):
-            setattr(self, "_sources", SourceProxyList(self))
+        if self._sources is None:
+            self._sources = Container("sources", self._h5group, Source)
         return self._sources
 
     @property
@@ -349,11 +291,9 @@ class Block(EntityWithMetadata):
         be obtained via their index or by their id. Tags can be deleted from
         the list. Adding tags is done using the Blocks create_multi_tag method.
         This is a read only attribute.
-
-        :type: ProxyList of MultiTag entities.
         """
-        if not hasattr(self, "_multi_tags"):
-            setattr(self, "_multi_tags", MultiTagProxyList(self))
+        if self._multi_tags is None:
+            self._multi_tags = Container("multi_tags", self._h5group, MultiTag)
         return self._multi_tags
 
     @property
@@ -363,11 +303,9 @@ class Block(EntityWithMetadata):
         via their index or by their id. Tags can be deleted from the list.
         Adding tags is done using the Blocks create_tag method.
         This is a read only attribute.
-
-        :type: ProxyList of Tag entities.
         """
-        if not hasattr(self, "_tags"):
-            setattr(self, "_tags", TagProxyList(self))
+        if self._tags is None:
+            self._tags = Container("tags", self._h5group, Tag)
         return self._tags
 
     @property
@@ -378,11 +316,10 @@ class Block(EntityWithMetadata):
         deleted from the list. Adding a data array is done using the Blocks
         create_data_array method.
         This is a read only attribute.
-
-        :type: ProxyList of DataArray entities.
         """
-        if not hasattr(self, "_data_arrays"):
-            setattr(self, "_data_arrays", DataArrayProxyList(self))
+        if self._data_arrays is None:
+            self._data_arrays = Container("data_arrays", self._h5group,
+                                          DataArray)
         return self._data_arrays
 
     @property
@@ -392,11 +329,10 @@ class Block(EntityWithMetadata):
         obtained via their index or by their id. Groups can be deleted from the
         list. Adding a Group is done using the Blocks create_group method.
         This is a read only attribute.
-
-        :type: ProxyList of Group entities.
         """
-        if not hasattr(self, "_groups"):
-            setattr(self, "_groups", GroupProxyList(self))
+        if self._groups is None:
+            self._groups = Container("groups", self._h5group,
+                                     Group)
         return self._groups
 
     def __eq__(self, other):
