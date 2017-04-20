@@ -38,6 +38,19 @@ class H5Group(object):
             gid = h5py.h5g.create(self._parent.id, name, gcpl=gcpl)
             self.group = h5py.Group(gid)
 
+    @property
+    def group(self):
+        if self._group is None:
+            if self.name in self._parent:
+                self._group = self._parent[self.name]
+            else:
+                return None
+        return self._group
+
+    @group.setter
+    def group(self, grp):
+        self._group = grp
+
     def create_link(self, target, name):
         self._create_h5obj()
         if name in self.group:
