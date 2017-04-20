@@ -28,6 +28,9 @@ class Container(object):
         self._itemclass = itemclass
         self._parent = parent
 
+    def _inst_item(self, item):
+        return self._itemclass(self._parent, item)
+
     def __len__(self):
         return len(self._backend)
 
@@ -40,7 +43,7 @@ class Container(object):
             item = self._backend.get_by_pos(item)
         else:
             item = self._backend.get_by_id_or_name(item)
-        return self._itemclass(self._parent, item)
+        return self._inst_item(item)
 
     def __delitem__(self, item):
         if isinstance(item, int):
@@ -49,7 +52,7 @@ class Container(object):
 
     def __iter__(self):
         for group in self._backend:
-            yield self._itemclass(self._parent, group)
+            yield self._inst_item(group)
 
     def __contains__(self, item):
         if isinstance(item, strtype):
