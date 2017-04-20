@@ -313,6 +313,8 @@ class H5Group(object):
         return self.create_from_h5obj(self._parent)
 
     def __iter__(self):
+        if not len(self):
+            raise StopIteration
         for grp in self.group.values():
             yield self.create_from_h5obj(grp)
 
