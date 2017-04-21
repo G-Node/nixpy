@@ -115,13 +115,13 @@ class LinkContainer(Container):
         if util.is_uuid(item):
             item = self._inst_item(self._backend.get_by_id(item))
 
+        if not hasattr(item, "id"):
+            raise TypeError("NIX entity or id string required for append")
+
         if item not in self._itemstore:
             raise RuntimeError("This item cannot be appended here.")
 
-        if hasattr(item, "id"):
-            self._backend.create_link(item, item.id)
-        else:
-            raise TypeError("NIX entity or id string required for append")
+        self._backend.create_link(item, item.id)
 
     def extend(self, items):
         if not isinstance(items, Iterable):
