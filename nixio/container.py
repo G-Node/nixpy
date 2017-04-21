@@ -124,10 +124,13 @@ class LinkContainer(Container):
         self._backend.create_link(item, item.id)
 
     def extend(self, items):
-        if not isinstance(items, Iterable):
-            raise TypeError("{} object is not iterable".format(type(items)))
-        for item in items:
-            self.append(item)
+        if isinstance(items, Iterable):
+            for item in items:
+                self.append(item)
+        else:
+            # TODO: Should we raise error or just append the item?
+            # raise TypeError("{} object is not iterable".format(type(items)))
+            self.append(items)
 
     def __getitem__(self, item):
         if isinstance(item, int):
