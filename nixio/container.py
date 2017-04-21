@@ -131,7 +131,7 @@ class LinkContainer(Container):
 
     def __getitem__(self, item):
         if isinstance(item, int):
-            super(LinkContainer, self).__getitem__(item)
+            return super(LinkContainer, self).__getitem__(item)
         else:
             if util.is_uuid(item):
                 # name is key for LinkContainer
