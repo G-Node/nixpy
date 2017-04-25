@@ -137,9 +137,6 @@ class MultiTag(BaseTag, MultiTagMixin):
                 extents and posidx >= extents.data_extent[0]):
             raise OutOfBounds("Index out of bounds of positions or extents!")
 
-        if refidx >= len(references):
-            raise OutOfBounds("Reference index out of bounds.")
-
         ref = references[refidx]
         dimcount = len(ref.dimensions)
         if len(positions.data_extent) == 1 and dimcount != 1:
@@ -166,9 +163,17 @@ class MultiTag(BaseTag, MultiTagMixin):
             raise OutOfBounds(
                 "There are no features associated with this tag!"
             )
-        if featidx > self._feature_count():
-            raise OutOfBounds("Feature index out of bounds.")
-        feat = self.features[featidx]
+
+        try:
+            feat = self.features[featidx]
+        except KeyError:
+            feat = None
+            for f in self.features:
+                if f.data.name == featidx or f.data.id == featidx:
+                    feat = f
+                    break
+            if feat is None:
+                raise
         da = feat.data
         if da is None:
             raise UninitializedEntity()
