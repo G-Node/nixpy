@@ -79,6 +79,22 @@ boost::optional<Feature> getFeatureByPos(const Tag& st, size_t index) {
     return f ? boost::optional<Feature>(f) : boost::none;
 }
 
+DataView retrieveDataIdx(const Tag& st, size_t reference_index) {
+    return st.retrieveData(reference_index);
+}
+
+DataView retrieveDataStr(const Tag& st, const std::string &name_or_id) {
+    return st.retrieveData(name_or_id);
+}
+
+DataView retrieveFeatureDataIdx(const Tag& st, size_t feature_index) {
+    return st.retrieveFeatureData(feature_index);
+}
+
+DataView retrieveFeatureDataStr(const Tag& st, const std::string &name_or_id) {
+    return st.retrieveFeatureData(name_or_id);
+}
+
 void PyTag::do_export() {
 
     PyEntityWithSources<base::ITag>::do_export("Tag");
@@ -114,8 +130,10 @@ void PyTag::do_export() {
         .def("_get_feature_by_pos", &getFeatureByPos)
         .def("_delete_feature_by_id", REMOVER(std::string, Tag, deleteFeature))
         // Data access
-        .def("retrieve_data", &Tag::retrieveData)
-        .def("retrieve_feature_data", &Tag::retrieveFeatureData)
+        .def("retrieve_data", &retrieveDataIdx)
+        .def("retrieve_data", &retrieveDataStr)
+        .def("retrieve_feature_data", &retrieveFeatureDataIdx)
+        .def("retrieve_feature_data", &retrieveFeatureDataStr)
         // Other
         .def("__str__", &toStr<Tag>)
         .def("__repr__", &toStr<Tag>)
