@@ -287,9 +287,17 @@ class Tag(BaseTag, TagMixin):
             raise OutOfBounds(
                 "There are no features associated with this tag!"
             )
-        if featidx > self._feature_count():
-            raise OutOfBounds("Feature index out of bounds.")
-        feat = self.features[featidx]
+
+        try:
+            feat = self.features[featidx]
+        except KeyError:
+            feat = None
+            for f in self.features:
+                if f.data.name == featidx or f.data.id == featidx:
+                    feat = f
+                    break
+            if feat is None:
+                raise
         da = feat.data
         if da is None:
             raise UninitializedEntity()
