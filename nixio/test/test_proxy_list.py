@@ -6,22 +6,20 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from nixio import *
-try:
-    import nixio.core
-    skip_cpp = False
-except ImportError:
-    skip_cpp = True
+import nixio as nix
 from nixio.util.proxy_list import ProxyList
 
 try:
     basestring = basestring
 except NameError:  # 'basestring' is undefined, must be Python 3
-    basestring = (str,bytes)
+    basestring = (str, bytes)
+
+
+skip_cpp = not hasattr(nix, "core")
 
 
 class WithIdMock(object):
@@ -38,7 +36,8 @@ class WithIdMock(object):
     def __hash__(self):
         """
         overwriting method __eq__ blocks inheritance of __hash__ in Python 3
-        hash has to be either explicitly inherited from parent class, implemented or escaped
+        hash has to be either explicitly inherited from parent class,
+        implemented or escaped.
         """
         return hash(self.id)
 
@@ -79,10 +78,14 @@ class TestProxyList(unittest.TestCase):
             assert(self.mock.list[i] == self.mock.list[i - length])
             assert(self.mock.list[str(i)] == self.mock.list[i])
 
-        self.assertRaises(KeyError, lambda : self.mock.list["notexist"])
-        self.assertRaises(KeyError, lambda : self.mock.list[-1 - length])
-        self.assertRaises(KeyError, lambda : self.mock.list[length])
-        self.assertRaises(TypeError, lambda : self.mock.list[3.14])
+        self.assertRaises(KeyError, lambda:
+                          self.mock.list["notexist"])
+        self.assertRaises(KeyError, lambda:
+                          self.mock.list[-1 - length])
+        self.assertRaises(KeyError, lambda:
+                          self.mock.list[length])
+        self.assertRaises(TypeError, lambda:
+                          self.mock.list[3.14])
 
     def test_proxy_list_delitem(self):
         del self.mock.list["4"]

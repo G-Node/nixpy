@@ -42,8 +42,8 @@ class FileMixin(object):
         """
         A property containing all blocks of a file. Blocks can be obtained by
         their id or their index. Blocks can be deleted from the list, when a
-        block is deleted all its content (data arrays, tags and sources) will be
-        also deleted from the file. Adding new Block is done via the
+        block is deleted all its content (data arrays, tags and sources) will
+        be also deleted from the file. Adding new Block is done via the
         create_block method of File. This is a read-only attribute.
 
         :type: ProxyList of Block entities.
@@ -57,8 +57,8 @@ class FileMixin(object):
         Get all sections and their child sections recursively.
 
         This method traverses the trees of all sections. The traversal is
-        accomplished via breadth first and can be limited in depth. On each node
-        or section a filter is applied. If the filter returns true the
+        accomplished via breadth first and can be limited in depth. On each
+        node or section a filter is applied. If the filter returns true the
         respective section will be added to the result list.
         By default a filter is used that accepts all sections.
 
@@ -80,8 +80,9 @@ class FileMixin(object):
         A property containing all root sections of a file. Specific root
         sections can be obtained by their id or their index. Sections can be
         deleted from this list. Notice: when a section is deleted all its child
-        section and properties will be removed too. Adding a new Section is done
-        via the crate_section method of File. This is a read-only property.
+        section and properties will be removed too. Adding a new Section is
+        done via the crate_section method of File.
+        This is a read-only property.
 
         :type: ProxyList of Section entities.
         """

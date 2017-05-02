@@ -34,8 +34,8 @@ class DataArrayMixin(object):
     def dimensions(self):
         """
         A property containing all dimensions of a DataArray. Dimensions can be
-        obtained via their index. Adding dimensions is done using the respective
-        append methods for dimension descriptors.
+        obtained via their index. Adding dimensions is done using the
+        respective append methods for dimension descriptors.
         This is a read only attribute.
 
         :type: ProxyList of dimension descriptors.
@@ -52,8 +52,9 @@ class DataArrayMixin(object):
 
     def __hash__(self):
         """
-        overwriting method __eq__ blocks inheritance of __hash__ in Python 3
-        hash has to be either explicitly inherited from parent class, implemented or escaped
+        Overwriting method __eq__ blocks inheritance of __hash__ in Python 3
+        hash has to be either explicitly inherited from parent class,
+        implemented or escaped
         """
         return hash(self.id)
 
@@ -198,11 +199,11 @@ class DataSetMixin(object):
 
     def write_direct(self, data):
         """
-        Directly write all of ``data`` to the :class:`~nixio.data_array.DataSet`.
-        The supplied data must be a :class:`numpy.ndarray` that matches the
-        DataSet's shape and must have C-style contiguous memory layout (see
-        :attr:`numpy.ndarray.flags` and :class:`~numpy.ndarray` for more
-        information).
+        Directly write all of ``data`` to the
+        :class:`~nixio.data_array.DataSet`.  The supplied data must be a
+        :class:`numpy.ndarray` that matches the DataSet's shape and must have
+        C-style contiguous memory layout (see :attr:`numpy.ndarray.flags` and
+        :class:`~numpy.ndarray` for more information).
 
         :param data: The array which contents is being written
         :type data: :class:`numpy.ndarray`
@@ -226,20 +227,27 @@ class DataSetMixin(object):
     def append(self, data, axis=0):
         """
         Append ``data`` to the DataSet along the ``axis`` specified.
-        :param data: The data to append. Shape must agree except for the specified axis
+
+        :param data: The data to append. Shape must agree except for the
+        specified axis
         :param axis: Along which axis to append the data to
         """
         data = np.ascontiguousarray(data)
 
         if len(self.shape) != len(data.shape):
-            raise ValueError("Data and DataArray must have the same dimensionality")
+            raise ValueError(
+                "Data and DataArray must have the same dimensionality"
+            )
 
-        if any([s != ds for i, (s, ds) in enumerate(zip(self.shape, data.shape)) if i != axis]):
-            raise ValueError("Shape of data and shape of DataArray must match in all dimension but axis!")
+        if any([s != ds for i, (s, ds) in
+                enumerate(zip(self.shape, data.shape)) if i != axis]):
+            raise ValueError("Shape of data and shape of DataArray must match "
+                             "in all dimension but axis!")
 
         offset = tuple(0 if i != axis else x for i, x in enumerate(self.shape))
         count = data.shape
-        enlarge = tuple(self.shape[i] + (0 if i != axis else x) for i, x in enumerate(data.shape))
+        enlarge = tuple(self.shape[i] + (0 if i != axis else x)
+                        for i, x in enumerate(data.shape))
         self.data_extent = enlarge
         self._write_data(data, count, offset)
 
@@ -322,7 +330,8 @@ class DataSetMixin(object):
         # NB: special case when we only have ints, e.g. (int, ) then
         # we get back the empty tuple and this is what we want,
         # because it indicates a scalar result
-        squeezed = map(lambda i, c: c if type(i) != int else None, index, count)
+        squeezed = map(lambda i, c: c if type(i) != int
+                       else None, index, count)
         shape = list(filter(lambda x: x is not None, squeezed))
 
         return count, offset, shape

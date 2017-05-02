@@ -6,23 +6,22 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 
 import unittest
 import sys
 import numpy as np
 
-from nixio import *
-try:
-    import nixio.core
-    skip_cpp = False
-except ImportError:
-    skip_cpp = True
+import nixio as nix
+
+
+skip_cpp = not hasattr(nix, "core")
+
 
 try:
     basestring = basestring
 except NameError:  # 'basestring' is undefined, must be Python 3
-    basestring = (str,bytes)
+    basestring = (str, bytes)
 
 
 class _TestDataArray(unittest.TestCase):
@@ -30,13 +29,13 @@ class _TestDataArray(unittest.TestCase):
     backend = None
 
     def setUp(self):
-        self.file  = File.open("unittest.h5", FileMode.Overwrite,
-                               backend=self.backend)
+        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
+                                  backend=self.backend)
         self.block = self.file.create_block("test block", "recordingsession")
         self.array = self.block.create_data_array("test array", "signal",
-                                                  DataType.Double, (100, ))
+                                                  nix.DataType.Double, (100, ))
         self.other = self.block.create_data_array("other array", "signal",
-                                                  DataType.Double, (100, ))
+                                                  nix.DataType.Double, (100, ))
 
     def tearDown(self):
         del self.file.blocks[self.block.id]
@@ -45,7 +44,7 @@ class _TestDataArray(unittest.TestCase):
     def test_data_array_eq(self):
         assert(self.array == self.array)
         assert(not self.array == self.other)
-        assert(not self.array == None)
+        assert(self.array is not None)
 
     def test_data_array_id(self):
         assert(self.array.id is not None)
@@ -135,9 +134,9 @@ class _TestDataArray(unittest.TestCase):
 
         assert(len(self.array) == len(data))
 
-        #indexing support in 1-d arrays
+        # indexing support in 1-d arrays
         self.assertRaises(IndexError, lambda: self.array[1:4:5])
-        self.assertRaises(IndexError, lambda: self.array[[1,3,]])
+        self.assertRaises(IndexError, lambda: self.array[[1, 3, ]])
 
         dout = np.array([self.array[i] for i in range(100)])
         assert(np.array_equal(data, dout))
@@ -145,7 +144,7 @@ class _TestDataArray(unittest.TestCase):
         dout = self.array[...]
         assert(np.array_equal(data, dout))
 
-        #indexed writing (1-d)
+        # indexed writing (1-d)
         data = np.array([float(-i) for i in range(100)])
         self.array[()] = data
         assert(np.array_equal(self.array[...], data))
@@ -158,22 +157,22 @@ class _TestDataArray(unittest.TestCase):
         self.array[0] = 42
         assert(self.array[0] == 42.0)
 
-        #changing shape via data_extent property
+        # changing shape via data_extent property
         self.array.data_extent = (200, )
         assert(self.array.data_extent == (200, ))
 
         # TODO delete does not work
         data = np.eye(123)
         a1 = self.block.create_data_array("double array", "signal",
-                                          DataType.Double, (123, 123))
+                                          nix.DataType.Double, (123, 123))
         dset = a1
         dset.write_direct(data)
         dout = np.empty_like(data)
         dset.read_direct(dout)
         assert(np.array_equal(data, dout))
 
-        #indexing support in 2-d arrays
-        self.assertRaises(IndexError, lambda: self.array[[], [1,2]])
+        # indexing support in 2-d arrays
+        self.assertRaises(IndexError, lambda: self.array[[], [1, 2]])
 
         dout = dset[12]
         assert(dout.shape == data[12].shape)
@@ -190,13 +189,13 @@ class _TestDataArray(unittest.TestCase):
         assert(np.array_equal(dset[1:-2, 1:-2], data[1:121, 1:121]))
 
         a3 = self.block.create_data_array("int identity array", "signal",
-                                          DataType.Int32, (123, 123))
+                                          nix.DataType.Int32, (123, 123))
         assert(a3.shape == (123, 123))
         assert(a3.dtype == np.dtype('i4'))
 
         data = np.random.rand(3, 4, 5)
         a4 = self.block.create_data_array("3d array", "signal",
-                                          DataType.Double, (3, 4, 5))
+                                          nix.DataType.Double, (3, 4, 5))
         dset = a4
         dset.write_direct(data)
         assert(dset.shape == data.shape)
@@ -211,8 +210,8 @@ class _TestDataArray(unittest.TestCase):
         assert(np.array_equal(dset[1:2, ..., 3:5], data[1:2, ..., 3:5]))
         assert(np.array_equal(dset[1:2, ..., 3:-1], data[1:2, ..., 3:4]))
 
-        #indexed writing (n-d)
-        d2 = np.random.rand(2,2)
+        # indexed writing (n-d)
+        d2 = np.random.rand(2, 2)
         dset[1, 0:2, 0:2] = d2
         assert(np.array_equal(dset[1, 0:2, 0:2], d2))
 
@@ -232,7 +231,7 @@ class _TestDataArray(unittest.TestCase):
         assert(np.array_equal(test_data, da[:]))
         assert(test_ten == [x for x in da])
 
-        #test for exceptions
+        # test for exceptions
         self.assertRaises(ValueError,
                           lambda: self.block.create_data_array('x', 'y'))
         self.assertRaises(ValueError,
@@ -240,7 +239,7 @@ class _TestDataArray(unittest.TestCase):
                               'x', 'y', data=test_data, shape=(1, 1, 1)
                           ))
 
-        #test appending
+        # test appending
         data = np.zeros((10, 5))
         da = self.block.create_data_array('append', 'double', data=data)
         to_append = np.zeros((2, 5))
@@ -255,7 +254,6 @@ class _TestDataArray(unittest.TestCase):
         self.assertRaises(ValueError, lambda: da.append(np.zeros((3, 3, 3))))
         self.assertRaises(ValueError, lambda: da.append(np.zeros((5, 5))))
 
-
     def test_data_array_dtype(self):
         da = self.block.create_data_array('dtype_f8', 'b', 'f8', (10, 10))
         assert(da.dtype == np.dtype('f8'))
@@ -269,7 +267,7 @@ class _TestDataArray(unittest.TestCase):
         assert(da.dtype == np.dtype(int))
 
         da = self.block.create_data_array('dtype_ndouble', 'b',
-                                          DataType.Double, (10, 10))
+                                          nix.DataType.Double, (10, 10))
         assert(da.dtype == np.dtype('f8'))
 
         da = self.block.create_data_array('dtype_auto', 'b', None, (10, 10))
@@ -292,9 +290,9 @@ class _TestDataArray(unittest.TestCase):
     def test_data_array_dimensions(self):
         assert(len(self.array.dimensions) == 0)
 
-        setd    = self.array.append_set_dimension()
-        ranged  = self.array.append_range_dimension(range(10))
-        sampled = self.array.append_sampled_dimension(0.1)
+        self.array.append_set_dimension()
+        self.array.append_range_dimension(range(10))
+        self.array.append_sampled_dimension(0.1)
 
         assert(len(self.array.dimensions) == 3)
 
@@ -327,8 +325,9 @@ class _TestDataArray(unittest.TestCase):
                           lambda: self.array.append_alias_range_dimension())
         self.assertRaises(ValueError,
                           lambda: self.array.append_alias_range_dimension())
-        string_array = self.block.create_data_array('string_array', 'nix.texts',
-                                                    dtype=DataType.String,
+        string_array = self.block.create_data_array('string_array',
+                                                    'nix.texts',
+                                                    dtype=nix.DataType.String,
                                                     shape=(10,))
         self.assertRaises(ValueError,
                           lambda: string_array.append_alias_range_dimension())
@@ -336,7 +335,7 @@ class _TestDataArray(unittest.TestCase):
         del self.block.data_arrays['string_array']
 
         array_2D = self.block.create_data_array(
-            'array_2d', 'nix.2d', dtype=DataType.Double, shape=(10, 10)
+            'array_2d', 'nix.2d', dtype=nix.DataType.Double, shape=(10, 10)
         )
         self.assertRaises(ValueError,
                           lambda: array_2D.append_alias_range_dimension())

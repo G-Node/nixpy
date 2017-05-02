@@ -12,12 +12,12 @@ from .util import util
 
 class Feature(Entity):
 
-    def __init__(self, h5group):
-        super(Feature, self).__init__(h5group)
+    def __init__(self, nixparent, h5group):
+        super(Feature, self).__init__(nixparent, h5group)
 
     @classmethod
-    def _create_new(cls, parent, data, link_type):
-        newentity = super(Feature, cls)._create_new(parent)
+    def _create_new(cls, nixparent, h5parent, data, link_type):
+        newentity = super(Feature, cls)._create_new(nixparent, h5parent)
         newentity.link_type = link_type
         newentity.data = data
         return newentity
@@ -36,13 +36,14 @@ class Feature(Entity):
 
     @property
     def data(self):
-        return DataArray(self._h5group.open_group("data"))
+        return DataArray(self._parent._parent,
+                         self._h5group.open_group("data"))
 
     @data.setter
     def data(self, da):
         if da is None:
             raise TypeError("Feature.data cannot be None.")
-        parblock = self._h5group.root
+        parblock = self._parent._parent
         if da not in parblock.data_arrays:
             raise RuntimeError("Feature.data: DataArray not found in Block!")
         if "data" in self._h5group:

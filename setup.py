@@ -23,10 +23,17 @@ except ImportError:
 
 import sys
 import os
-import re
 
-from findboost import BoostPyLib
-from checknix import check_nix
+from nixio.info import VERSION, AUTHOR, CONTACT, BRIEF, HOMEPAGE
+
+from scripts.findboost import BoostPyLib
+from scripts.checknix import check_nix
+
+
+# Replaced StandardError with Exception since StandardError is removed in Py3.x
+class PackageNotFoundError(Exception):
+    pass
+
 
 with open('README.rst') as f:
     description_text = f.read()
@@ -34,14 +41,6 @@ with open('README.rst') as f:
 with open('LICENSE') as f:
     license_text = f.read()
 
-with open('nixio/info.py') as f:
-    info = f.read()
-
-VERSION         = re.search(r"VERSION\s*=\s*'([^']*)'", info).group(1)
-AUTHOR          = re.search(r"AUTHOR\s*=\s*'([^']*)'", info).group(1)
-CONTACT         = re.search(r"CONTACT\s*=\s*'([^']*)'", info).group(1)
-BRIEF           = re.search(r"BRIEF\s*=\s*'([^']*)'", info).group(1)
-HOMEPAGE        = re.search(r"HOMEPAGE\s*=\s*'([^']*)'", info).group(1)
 
 is_win = os.name == 'nt'
 
@@ -53,9 +52,6 @@ if "dev" in VERSION:
     sys.stderr.write("{}WARNING: You are building a development version "
                      "of nixpy.{}\n".format(*colorcodes))
 
-# Replaced StandardError with Exception since StandardError is removed in Py3.x
-class PackageNotFoundError(Exception):
-    pass
 
 def pkg_config(*packages, **kw):
     flag_map = {'-I': 'include_dirs', '-L': 'library_dirs', '-l': 'libraries'}
@@ -69,7 +65,7 @@ def pkg_config(*packages, **kw):
     if status != 0:
         err_str = 'Some packages were not found: %s [%s]' % (pkg_string, out)
         if ignore_error:
-            sys.stderr.write('WARNING: ' + err_str + "\n")
+            sys.stderr.write('WARNING: {}\n'.format(err_str))
             out = ''
         else:
             raise PackageNotFoundError(err_str)
@@ -78,13 +74,13 @@ def pkg_config(*packages, **kw):
         kw.setdefault(flag_map.get(token[:2]), []).append(token[2:])
 
     # remove duplicated
-    # replaced .iteritems() with .items, since .iteritems() is not available in Py3.x
     # could lead to increased memory usage and computation time.
     for k, v in kw.items():
         del kw[k]
         kw[k] = list(set(v))
 
     return kw
+
 
 def get_wheel_data():
     data = []
@@ -94,6 +90,7 @@ def get_wheel_data():
             ('share/nixio/bin',
              [os.path.join(bin, f) for f in os.listdir(bin)]))
     return data
+
 
 nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include')
 nix_lib_dir = os.getenv('NIX_LIBDIR', '/usr/local/lib')
@@ -118,19 +115,21 @@ nixpy_sources = [
     'src/PyGroup.cpp'
 ]
 
-classifiers   = [
-                    'Development Status :: 5 - Production/Stable',
-                    'Programming Language :: Python',
-                    'Programming Language :: Python :: 2.6',
-                    'Programming Language :: Python :: 2.7',
-                    'Programming Language :: Python :: 3.4',
-                    'Programming Language :: Python :: 3.5',
-                    'Topic :: Scientific/Engineering'
+classifiers = [
+    'Development Status :: 5 - Production/Stable',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 2.6',
+    'Programming Language :: Python :: 2.7',
+    'Programming Language :: Python :: 3.4',
+    'Programming Language :: Python :: 3.5',
+    'Programming Language :: Python :: 3.6',
+    'Topic :: Scientific/Engineering'
 ]
 
 boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
 boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
-lib_dirs = BoostPyLib.library_search_dirs([boost_lib_dir]) if not is_win else []
+lib_dirs = BoostPyLib.library_search_dirs([boost_lib_dir])\
+    if not is_win else []
 boost_libs = BoostPyLib.list_in_dirs(lib_dirs)
 boost_lib = BoostPyLib.find_lib_for_current_python(boost_libs)
 library_dirs = [boost_lib_dir, nix_lib_dir]
@@ -150,15 +149,18 @@ else:
 
 if with_nix:
     if boost_lib is None:
-        print("Could not find boost python version for %s.%s" % sys.version_info[0:2])
-        print("Available boost python libs:\n" + "\n".join(map(str, boost_libs)))
+        print("Could not find boost python version for {}.{}".format(
+            sys.version_info[0:2]))
+        print("Available boost python libs:")
+        print("\n".join(map(str, boost_libs)))
         sys.exit(-1)
 
     libraries.append(boost_lib.library_name)
 
     native_ext = Extension(
         'nixio.core',
-        extra_compile_args=['-std=c++11'] if not is_win else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
+        extra_compile_args=['-std=c++11']
+        if not is_win else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
         libraries=libraries,
         sources=nixpy_sources,
         runtime_library_dirs=library_dirs if not is_win else None,
@@ -174,24 +176,25 @@ else:
     print("Skipping NIX C++ bindings.")
     ext_modules = []
 
-setup(name             = 'nixio',
-      version          = VERSION,
-      author           = AUTHOR,
-      author_email     = CONTACT,
-      url              = HOMEPAGE,
-      description      = BRIEF,
-      long_description = description_text,
-      classifiers      = classifiers,
-      license          = 'BSD',
-      ext_modules      = ext_modules,
-      packages         = ['nixio', 'nixio.pycore', 'nixio.util', 'nixio.pycore.util', 'nixio.pycore.exceptions'],
-      scripts          = [],
-      tests_require    = ['nose'],
-      test_suite       = 'nose.collector',
-      install_requires = ['numpy', 'h5py'],
-      package_data     = {'nixio': [license_text, description_text]},
-      include_package_data = True,
-      zip_safe         = False,
-      data_files=get_wheel_data()
+setup(
+    name='nixio',
+    version=VERSION,
+    author=AUTHOR,
+    author_email=CONTACT,
+    url=HOMEPAGE,
+    description=BRIEF,
+    long_description=description_text,
+    classifiers=classifiers,
+    license='BSD',
+    ext_modules=ext_modules,
+    packages=['nixio', 'nixio.pycore', 'nixio.util',
+              'nixio.pycore.util', 'nixio.pycore.exceptions'],
+    scripts=[],
+    tests_require=['nose'],
+    test_suite='nose.collector',
+    install_requires=['numpy', 'h5py'],
+    package_data={'nixio': [license_text, description_text]},
+    include_package_data=True,
+    zip_safe=False,
+    data_files=get_wheel_data()
 )
-

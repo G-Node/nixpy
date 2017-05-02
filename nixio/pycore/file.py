@@ -84,6 +84,7 @@ class File(FileMixin):
     def __init__(self, h5file):
         self._h5file = h5file
         self._root = H5Group(self._h5file, "/", create=True)
+        self._h5group = self._root  # to match behaviour of other objects
         self._data = self._root.open_group("data", create=True)
         self.metadata = self._root.open_group("metadata", create=True)
         if "created_at" not in self._h5file.attrs:
@@ -302,14 +303,14 @@ class File(FileMixin):
         """
         if name in self._data:
             raise ValueError("Block with the given name already exists!")
-        block = Block._create_new(self._data, name, type_)
+        block = Block._create_new(self, self._data, name, type_)
         return block
 
     def _get_block_by_id(self, id_or_name):
-        return Block(self._data.get_by_id_or_name(id_or_name))
+        return Block(self, self._data.get_by_id_or_name(id_or_name))
 
     def _get_block_by_pos(self, pos):
-        return Block(self._data.get_by_pos(pos))
+        return Block(self, self._data.get_by_pos(pos))
 
     def _delete_block_by_id(self, id_):
         self._data.delete(id_)
@@ -332,14 +333,14 @@ class File(FileMixin):
         """
         if name in self.metadata:
             raise exceptions.DuplicateName("create_section")
-        sec = Section._create_new(self.metadata, None, name, type_)
+        sec = Section._create_new(self, self.metadata, name, type_)
         return sec
 
     def _get_section_by_id(self, id_or_name):
-        return Section(self.metadata.get_by_id_or_name(id_or_name))
+        return Section(self, self.metadata.get_by_id_or_name(id_or_name))
 
     def _get_section_by_pos(self, pos):
-        return Section(self.metadata.get_by_pos(pos))
+        return Section(self, self.metadata.get_by_pos(pos))
 
     def _delete_section_by_id(self, id_):
         self.metadata.delete(id_)

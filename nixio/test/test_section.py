@@ -6,17 +6,14 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function)#, unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from nixio import *
-try:
-    import nixio.core
-    skip_cpp = False
-except ImportError:
-    skip_cpp = True
-import nixio
+import nixio as nix
+
+
+skip_cpp = not hasattr(nix, "core")
 
 
 class _TestSection(unittest.TestCase):
@@ -24,12 +21,12 @@ class _TestSection(unittest.TestCase):
     backend = None
 
     def setUp(self):
-        self.file    = File.open("unittest.h5", FileMode.Overwrite,
-                                 backend=self.backend)
+        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
+                                  backend=self.backend)
         self.section = self.file.create_section("test section",
                                                 "recordingsession")
-        self.other   = self.file.create_section("other section",
-                                                "recordingsession")
+        self.other = self.file.create_section("other section",
+                                              "recordingsession")
 
     def tearDown(self):
         del self.file.sections[self.section.id]
@@ -39,7 +36,7 @@ class _TestSection(unittest.TestCase):
     def test_section_eq(self):
         assert(self.section == self.section)
         assert(not self.section == self.other)
-        assert(not self.section == None)
+        assert(self.section is not None)
 
     def test_section_id(self):
         assert(self.section.id is not None)
@@ -92,8 +89,8 @@ class _TestSection(unittest.TestCase):
 
         assert(len(self.section.sections) == 1)
 
-        assert(child      in self.section.sections)
-        assert(child.id   in self.section.sections)
+        assert(child in self.section.sections)
+        assert(child.id in self.section.sections)
         assert("notexist" not in self.section.sections)
 
         assert(child.id == self.section.sections[0].id)
@@ -103,16 +100,15 @@ class _TestSection(unittest.TestCase):
 
         assert(len(self.section.sections) == 0)
 
-        self.section['easy subsection'] = nixio.S('electrode')
-        subject = self.section['subject'] = nixio.S('subject')
-        
+        self.section['easy subsection'] = nix.S('electrode')
+        subject = self.section['subject'] = nix.S('subject')
+
         assert(self.section['subject'] == subject)
         assert(self.section['subject'].id == subject.id)
         assert('easy subsection' in
                [v.name for k, v in self.section.sections.items()])
         assert('easy subsection' in self.section.sections)
         assert(self.section['easy subsection'].name == 'easy subsection')
-        #assert('easy subsection' in self.section)
 
     def test_section_find_sections(self):
         for i in range(2):
@@ -143,7 +139,7 @@ class _TestSection(unittest.TestCase):
     def test_section_properties(self):
         assert(len(self.section) == 0)
 
-        prop = self.section.create_property("test prop", DataType.String)
+        prop = self.section.create_property("test prop", nix.DataType.String)
 
         assert(len(self.section) == 1)
 
@@ -168,12 +164,12 @@ class _TestSection(unittest.TestCase):
         assert(prop.id == self.section.props[0].id)
         assert(prop.id == self.section.props[-1].id)
 
-        #easy prop creation
+        # easy prop creation
         self.section['ep_str'] = 'str'
         self.section['ep_int'] = 23
         self.section['ep_float'] = 42.0
         self.section['ep_list'] = [1, 2, 3]
-        self.section['ep_val'] = Value(1.0)
+        self.section['ep_val'] = nix.Value(1.0)
 
         self.section['ep_val'] = 2.0
 
@@ -195,7 +191,6 @@ class _TestSection(unittest.TestCase):
 
         assert(len(self.section) == 0)
 
-    @unittest.skip
     def test_parent(self):
         self.assertIs(self.section.parent, None)
         child = self.section.create_section("child section", "sect")
@@ -210,6 +205,45 @@ class _TestSection(unittest.TestCase):
         grp.metadata = child
         self.assertEqual(grp.metadata.parent, self.section)
 
+    def test_inverse_search(self):
+        block = self.file.create_block("a block", "block with metadata")
+        block.metadata = self.section
+
+        otherblock = self.file.create_block("b block", "block with metadata")
+        otherblock.metadata = self.other
+
+        self.assertEqual(len(self.section.referring_blocks), 1)
+        self.assertEqual(len(self.other.referring_blocks), 1)
+        self.assertEqual(self.section.referring_blocks[0], block)
+        self.assertEqual(self.other.referring_blocks[0], otherblock)
+
+        da_one = block.create_data_array("foo", "data_array", data=range(10))
+        da_one.metadata = self.other
+        da_two = block.create_data_array("foobar", "data_array", data=[1])
+        da_two.metadata = self.other
+
+        self.assertEqual(len(self.other.referring_data_arrays), 2)
+        self.assertIn(da_one, self.other.referring_data_arrays)
+        self.assertIn(da_two, self.other.referring_data_arrays)
+
+        tag = block.create_tag("tago", "tagtype", [1, 1])
+        tag.metadata = self.section
+        self.assertEqual(len(self.section.referring_tags), 1)
+        self.assertEqual(len(self.other.referring_tags), 0)
+        self.assertEqual(self.section.referring_tags[0].id, tag.id)
+
+        mtag = block.create_multi_tag("MultiTagName", "MultiTagType", da_one)
+        mtag.metadata = self.section
+        self.assertEqual(len(self.section.referring_multi_tags), 1)
+        self.assertEqual(len(self.other.referring_multi_tags), 0)
+        self.assertEqual(self.section.referring_multi_tags[0].id, mtag.id)
+
+        src = block.create_source("sauce", "stype")
+        src.metadata = self.other
+        self.assertEqual(len(self.other.referring_sources), 1)
+        self.assertEqual(len(self.section.referring_sources), 0)
+        self.assertEqual(self.other.referring_sources[0].id, src.id)
+
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestSectionCPP(_TestSection):
@@ -220,4 +254,3 @@ class TestSectionCPP(_TestSection):
 class TestSectionPy(_TestSection):
 
     backend = "h5py"
-

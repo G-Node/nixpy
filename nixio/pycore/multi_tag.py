@@ -12,17 +12,19 @@ from .tag import BaseTag
 from .data_array import DataArray
 from .data_view import DataView
 from ..link_type import LinkType
-from .exceptions import OutOfBounds, IncompatibleDimensions, UninitializedEntity
+from .exceptions import (OutOfBounds, IncompatibleDimensions,
+                         UninitializedEntity)
 
 
 class MultiTag(BaseTag, MultiTagMixin):
 
-    def __init__(self, h5group):
-        super(MultiTag, self).__init__(h5group)
+    def __init__(self, nixparent, h5group):
+        super(MultiTag, self).__init__(nixparent, h5group)
 
     @classmethod
-    def _create_new(cls, parent, name, type_, positions):
-        newentity = super(MultiTag, cls)._create_new(parent, name, type_)
+    def _create_new(cls, nixparent, h5parent, name, type_, positions):
+        newentity = super(MultiTag, cls)._create_new(nixparent, h5parent,
+                                                     name, type_)
         newentity.positions = positions
         return newentity
 
@@ -33,7 +35,7 @@ class MultiTag(BaseTag, MultiTagMixin):
 
         :type: DataArray
         """
-        return DataArray(self._h5group.open_group("positions"))
+        return DataArray(self._parent, self._h5group.open_group("positions"))
 
     @positions.setter
     def positions(self, da):
@@ -53,7 +55,7 @@ class MultiTag(BaseTag, MultiTagMixin):
         :type: DataArray or None
         """
         if "extents" in self._h5group:
-            return DataArray(self._h5group.open_group("extents"))
+            return DataArray(self._parent, self._h5group.open_group("extents"))
         else:
             return None
 
@@ -94,7 +96,7 @@ class MultiTag(BaseTag, MultiTagMixin):
             )
 
         if (extents and len(ext_size) > 1 and
-                    ext_size[1] > len(data.dimensions)):
+                ext_size[1] > len(data.dimensions)):
             raise IncompatibleDimensions(
                 "Number of dimensions in extents does not match "
                 "dimensionality of data",
@@ -135,9 +137,6 @@ class MultiTag(BaseTag, MultiTagMixin):
                 extents and posidx >= extents.data_extent[0]):
             raise OutOfBounds("Index out of bounds of positions or extents!")
 
-        if refidx >= len(references):
-            raise OutOfBounds("Reference index out of bounds.")
-
         ref = references[refidx]
         dimcount = len(ref.dimensions)
         if len(positions.data_extent) == 1 and dimcount != 1:
@@ -161,10 +160,20 @@ class MultiTag(BaseTag, MultiTagMixin):
 
     def retrieve_feature_data(self, posidx, featidx):
         if self._feature_count() == 0:
-            raise OutOfBounds("There are no features associated with this tag!")
-        if featidx > self._feature_count():
-            raise OutOfBounds("Feature index out of bounds.")
-        feat = self.features[featidx]
+            raise OutOfBounds(
+                "There are no features associated with this tag!"
+            )
+
+        try:
+            feat = self.features[featidx]
+        except KeyError:
+            feat = None
+            for f in self.features:
+                if f.data.name == featidx or f.data.id == featidx:
+                    feat = f
+                    break
+            if feat is None:
+                raise
         da = feat.data
         if da is None:
             raise UninitializedEntity()
@@ -191,4 +200,3 @@ class MultiTag(BaseTag, MultiTagMixin):
         count = da.data_extent
         offset = (0,) * len(count)
         return DataView(da, count, offset)
-

@@ -6,7 +6,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function, unicode_literals)
+from __future__ import (absolute_import, division, print_function)
 
 try:
     basestring = basestring
@@ -22,7 +22,7 @@ class ProxyList(object):
 
     def __init__(self, obj, counter, getter, index_getter, deleter):
         self.__counter = getattr(obj, counter)
-        self.__getter  = getattr(obj, getter)
+        self.__getter = getattr(obj, getter)
         self.__index_getter = getattr(obj, index_getter)
         self.__deleter = getattr(obj, deleter)
 
@@ -48,11 +48,15 @@ class ProxyList(object):
                 key = count + key
 
             if key >= count or key < 0:
-                raise KeyError("Index out of bounds: " + str(key))
+                raise KeyError("Index out of bounds: {}".format(key))
 
             return self.__index_getter(key)
         else:
-            raise TypeError("The key must be an int or a string but was: " + type(key))
+            raise TypeError(
+                "The key must be an int or a string but was: {}".format(
+                    type(key)
+                )
+            )
 
     def __delitem__(self, key):
         if hasattr(key, "id"):
@@ -94,7 +98,8 @@ class ProxyList(object):
 class RefProxyList(ProxyList):
 
     def __init__(self, obj, counter, getter, index_getter, deleter, appender):
-        super(RefProxyList, self).__init__(obj, counter, getter, index_getter, deleter)
+        super(RefProxyList, self).__init__(obj, counter, getter,
+                                           index_getter, deleter)
         self.__appender = getattr(obj, appender)
 
     def append(self, key):

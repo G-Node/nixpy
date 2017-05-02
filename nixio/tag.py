@@ -39,8 +39,8 @@ class TagMixin(object):
         A property containing all data arrays referenced by the tag. Referenced
         data arrays can be obtained by index or their id. References can be
         removed from the list, removing a referenced DataArray will not remove
-        it from the file. New references can be added using the append method of
-        the list.
+        it from the file. New references can be added using the append method
+        of the list.
         This is a read only attribute.
 
         :type: RefProxyList of DataArray
@@ -62,4 +62,3 @@ class TagMixin(object):
         if not hasattr(self, "_features"):
             setattr(self, "_features", FeatureProxyList(self))
         return self._features
-
