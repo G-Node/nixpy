@@ -89,22 +89,6 @@ boost::optional<Feature> getFeatureByPos(const MultiTag& st, size_t index) {
     return f ? boost::optional<Feature>(f) : boost::none;
 }
 
-DataView retrieveDataIdx(const MultiTag& st, size_t position_index, size_t reference_index) {
-    return st.retrieveData(position_index, reference_index);
-}
-
-DataView retrieveDataStr(const MultiTag& st, size_t position_index, const std::string &name_or_id) {
-    return st.retrieveData(position_index, name_or_id);
-}
-
-DataView retrieveFeatureDataIdx(const MultiTag& st, size_t position_index, size_t feature_index) {
-    return st.retrieveFeatureData(position_index, feature_index);
-}
-
-DataView retrieveFeatureDataStr(const MultiTag& st, size_t position_index, const std::string &name_or_id) {
-    return st.retrieveFeatureData(position_index, name_or_id);
-}
-
 void PyMultiTag::do_export() {
 
     PyEntityWithSources<base::IMultiTag>::do_export("MultiTag");
@@ -141,10 +125,8 @@ void PyMultiTag::do_export() {
         .def("_delete_feature_by_id", REMOVER(std::string, MultiTag, deleteFeature))
 
         // Data access
-        .def("retrieve_data", &retrieveDataIdx)
-        .def("retrieve_data", &retrieveDataStr)
-        .def("retrieve_feature_data", &retrieveFeatureDataIdx)
-        .def("retrieve_feature_data", &retrieveFeatureDataStr)
+        .def("retrieve_data", &MultiTag::retrieveData)
+        .def("retrieve_feature_data", &MultiTag::retrieveFeatureData)
 
         // Other
         .def("__str__", &toStr<MultiTag>)
