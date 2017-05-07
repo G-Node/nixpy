@@ -250,11 +250,6 @@ class _TestMultiTag(unittest.TestCase):
         assert(tag.retrieve_data(0, 0).shape == (2000,))
         assert(np.array_equal(y[:2000], tag.retrieve_data(0, 0)[:]))
 
-        # get by name
-        data = tag.retrieve_data(0, da.name)
-        assert(data.shape == (2000,))
-        assert(np.array_equal(y[:2000], data[:]))
-
     def test_multi_tag_feature_data(self):
         index_data = self.block.create_data_array("indexed feature data",
                                                   "test",
@@ -328,23 +323,6 @@ class _TestMultiTag(unittest.TestCase):
         assert(len(data_view.shape) == 3)
 
         data_view = self.feature_tag.retrieve_feature_data(1, 1)
-        assert(len(data_view.shape) == 3)
-
-        # === retrieve by name ===
-        # indexed feature
-        feat_data = self.feature_tag.retrieve_feature_data(0, index_data.name)
-        assert(len(feat_data.shape) == 2)
-        assert(feat_data.size == 10)
-        assert(np.sum(feat_data) == 55)
-
-        data_view = self.feature_tag.retrieve_feature_data(9, index_data.name)
-        assert(np.sum(data_view[:, :]) == 9055)
-
-        # tagged feature
-        data_view = self.feature_tag.retrieve_feature_data(0, tagged_data.name)
-        assert(len(data_view.shape) == 3)
-
-        data_view = self.feature_tag.retrieve_feature_data(1, tagged_data.name)
         assert(len(data_view.shape) == 3)
 
         def out_of_bounds():

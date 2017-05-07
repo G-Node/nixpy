@@ -190,13 +190,6 @@ class _TestTag(unittest.TestCase):
         assert(data2.size == 2)
         assert(data3.size == len(ramp_data))
 
-        # get by name
-        data1 = pos_tag.retrieve_feature_data(number_feat.name)
-        data2 = pos_tag.retrieve_feature_data(ramp_feat.name)
-
-        assert(data1.size == 1)
-        assert(data2.size == 2)
-
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestTagCPP(_TestTag):
