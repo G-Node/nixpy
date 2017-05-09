@@ -177,7 +177,7 @@ class BaseTag(EntityWithSources):
         else:  # dimtype == DimensionType.Range:
             if dimunit and unit is not None:
                 try:
-                    scaling = util.scaling(unit, dimunit)
+                    scaling = util.units.scaling(unit, dimunit)
                 except InvalidUnit:
                     raise IncompatibleDimensions(
                         "Provided units are not scalable!",
@@ -254,8 +254,7 @@ class Tag(BaseTag, TagMixin):
             if idx < len(extent):
                 ext = extent[idx]
                 c = self._pos_to_idx(pos + ext, unit, dim) - o
-                if c > 1:
-                    count.append(c if c > 1 else 1)
+                count.append(c if c > 1 else 1)
             else:
                 count.append(1)
         return tuple(offset), tuple(count)
