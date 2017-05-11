@@ -24,6 +24,10 @@ class _TestMultiTag(unittest.TestCase):
     backend = None
 
     def setUp(self):
+        iv = 1.0
+        ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
+        unit = "ms"
+
         self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
                                   backend=self.backend)
         self.block = self.file.create_block("test block", "recordingsession")
@@ -56,6 +60,13 @@ class _TestMultiTag(unittest.TestCase):
                     data[i, j, k] = value
 
         self.data_array[:, :, :] = data
+
+        set_dim = self.data_array.append_set_dimension()
+        set_dim.labels = ["label_a", "label_b"]
+        sampled_dim = self.data_array.append_sampled_dimension(iv)
+        sampled_dim.unit = unit
+        range_dim = self.data_array.append_range_dimension(ticks)
+        range_dim.unit = unit
 
         event_positions = np.zeros((2, 3))
         event_positions[0, 0] = 0.0
@@ -254,6 +265,12 @@ class _TestMultiTag(unittest.TestCase):
         data = tag.retrieve_data(0, da.name)
         assert(data.shape == (2000,))
         assert(np.array_equal(y[:2000], data[:]))
+
+        # multi dimensional data (created in setUp)
+        mtag = self.feature_tag
+        rdata = mtag.retrieve_data(0, 0)
+        assert(len(rdata.shape) == 3)
+        assert(rdata.shape == (1, 6, 2))
 
     def test_multi_tag_feature_data(self):
         index_data = self.block.create_data_array("indexed feature data",
