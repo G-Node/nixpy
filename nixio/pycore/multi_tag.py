@@ -73,7 +73,7 @@ class MultiTag(BaseTag, MultiTagMixin):
         extents = self.extents
 
         pos_size = positions.data_extent if positions else tuple()
-        ext_size = extents.data_extent if extents else tuple
+        ext_size = extents.data_extent if extents else tuple()
 
         if not positions or index >= pos_size[0]:
             raise OutOfBounds("Index out of bounds of positions!")
