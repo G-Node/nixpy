@@ -253,24 +253,59 @@ class _TestMultiTag(unittest.TestCase):
         ext.append_set_dimension()
         ext.unit = 'ms'
 
-        tag = block.create_multi_tag("sin1", "tag", pos)
-        tag.extents = ext
-        tag.units = ['ms']
-        tag.references.append(da)
+        mtag = block.create_multi_tag("sin1", "tag", pos)
+        mtag.extents = ext
+        mtag.units = ['ms']
+        mtag.references.append(da)
 
-        assert(tag.retrieve_data(0, 0).shape == (2000,))
-        assert(np.array_equal(y[:2000], tag.retrieve_data(0, 0)[:]))
+        assert(mtag.retrieve_data(0, 0).shape == (2000,))
+        assert(np.array_equal(y[:2000], mtag.retrieve_data(0, 0)[:]))
 
         # get by name
-        data = tag.retrieve_data(0, da.name)
+        data = mtag.retrieve_data(0, da.name)
         assert(data.shape == (2000,))
         assert(np.array_equal(y[:2000], data[:]))
 
-        # multi dimensional data (created in setUp)
-        mtag = self.feature_tag
-        rdata = mtag.retrieve_data(0, 0)
-        assert(len(rdata.shape) == 3)
-        assert(rdata.shape == (1, 6, 2))
+        # multi dimensional data
+        ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
+        unit = "ms"
+        pos = self.block.create_data_array("pos", "test",
+                                           data=np.random.random((2, 3, 2)))
+        pos.append_set_dimension()
+        pos.append_set_dimension()
+        pos.append_set_dimension()
+        ext = self.block.create_data_array("ext", "test",
+                                           data=np.random.random((2, 3, 2)))
+        ext.append_set_dimension()
+        ext.append_set_dimension()
+        ext.append_set_dimension()
+        units = ["none", "ms", "ms"]
+        data = np.random.random((2, 10, 5))
+        da = self.block.create_data_array("dimtest", "test",
+                                          data=data)
+        setdim = da.append_set_dimension()
+        setdim.labels = ["Label A", "Label B"]
+        samdim = da.append_sampled_dimension(sample_iv)
+        samdim.unit = unit
+        randim = da.append_range_dimension(ticks)
+        randim.unit = unit
+
+        postag = self.block.create_multi_tag("postag", "event", pos)
+        postag.references.append(da)
+        postag.units = units
+
+        segtag = self.block.create_multi_tag("region", "segment", pos)
+        segtag.references.append(da)
+        segtag.extent = ext
+        segtag.units = units
+
+        posdata = postag.retrieve_data(0, 0)
+        assert(len(posdata.shape) == 3)
+        assert(posdata.shape == (1, 1, 1))
+
+        segdata = segtag.retrieve_data(0, 0)
+        assert(len(segdata.shape) == 3)
+        assert(segdata.shape == (1, 6, 2))
 
     def test_multi_tag_feature_data(self):
         index_data = self.block.create_data_array("indexed feature data",
