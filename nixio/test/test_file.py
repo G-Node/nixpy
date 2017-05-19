@@ -31,7 +31,7 @@ class _FileTest(unittest.TestCase):
         self.file.close()
 
     def test_file_format(self):
-        assert(self.file.format == "nix")
+        assert(self.file.format == "nix".encode("ascii"))
         assert(self.file.version == filepy.HDF_FF_VERSION)
 
     def test_file_timestamps(self):
