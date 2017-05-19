@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import gc
 from warnings import warn
+import numpy as np
 
 import h5py
 
@@ -25,7 +26,8 @@ except ImportError:
     CFile = None
 
 
-FILE_FORMAT = "nix"
+# always encode to ascii for python2 and nix compatibility
+FILE_FORMAT = "nix".encode("ascii")
 HDF_FF_VERSION = (1, 1, 0)
 
 
@@ -193,6 +195,8 @@ class File(FileMixin):
         util.check_attr_type(v, tuple)
         for part in v:
             util.check_attr_type(part, int)
+        # convert to np.int32 since py3 defaults to 64
+        v = np.array(v, dtype=np.int32)
         self._root.set_attr("version", v)
 
     @property
@@ -203,7 +207,7 @@ class File(FileMixin):
 
         :type: str
         """
-        return self._root.get_attr("format")
+        return self._root.get_attr("format").encode("ascii")
 
     @format.setter
     def format(self, f):
