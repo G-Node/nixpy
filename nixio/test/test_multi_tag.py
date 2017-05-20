@@ -270,12 +270,12 @@ class _TestMultiTag(unittest.TestCase):
         ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
         unit = "ms"
         pos = self.block.create_data_array("pos", "test",
-                                           data=np.random.random((2, 3, 2)))
+                                           data=np.random.random((2, 3)))
         pos.append_set_dimension()
         pos.append_set_dimension()
         pos.append_set_dimension()
         ext = self.block.create_data_array("ext", "test",
-                                           data=np.random.random((2, 3, 2)))
+                                           data=np.random.random((2, 3)))
         ext.append_set_dimension()
         ext.append_set_dimension()
         ext.append_set_dimension()
