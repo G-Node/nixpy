@@ -14,7 +14,7 @@ from .data_view import DataView
 from ..link_type import LinkType
 from .exceptions import (OutOfBounds, IncompatibleDimensions,
                          UninitializedEntity)
-import numpy as np
+
 
 class MultiTag(BaseTag, MultiTagMixin):
 
@@ -102,7 +102,7 @@ class MultiTag(BaseTag, MultiTagMixin):
                 "dimensionality of data",
                 "MultiTag._get_offset_and_count"
             )
-        
+
         offset = positions[index, 0:len(data.dimensions)]
         units = self.units
         for idx in range(offset.size):
