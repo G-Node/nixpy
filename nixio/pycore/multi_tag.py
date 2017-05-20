@@ -73,7 +73,7 @@ class MultiTag(BaseTag, MultiTagMixin):
         extents = self.extents
 
         pos_size = positions.data_extent if positions else tuple()
-        ext_size = extents.data_extent if extents else tuple
+        ext_size = extents.data_extent if extents else tuple()
 
         if not positions or index >= pos_size[0]:
             raise OutOfBounds("Index out of bounds of positions!")
@@ -104,25 +104,26 @@ class MultiTag(BaseTag, MultiTagMixin):
             )
 
         offset = positions[index, 0:len(data.dimensions)]
-
         units = self.units
-        for idx in range(len(offset)):
+        for idx in range(offset.size):
             dim = data.dimensions[idx]
             unit = None
             if idx <= len(units) and len(units):
                 unit = units[idx]
-            offsets.append(self._pos_to_idx(offset[idx], unit, dim))
+            offsets.append(self._pos_to_idx(offset.item(idx), unit, dim))
 
         if extents:
             extent = extents[index, 0:len(data.dimensions)]
-            for idx in range(len(extent)):
+            for idx in range(extent.size):
                 dim = data.dimensions[idx]
                 unit = None
                 if idx <= len(units) and len(units):
                     unit = units[idx]
-                c = self._pos_to_idx(offset[idx] + extent[idx],
+                c = self._pos_to_idx(offset.item(idx) + extent.item(idx),
                                      unit, dim) - offsets[idx]
                 counts.append(c if c > 1 else 1)
+        else:
+            counts = [1]*len(data.dimensions)
 
         return offsets, counts
 

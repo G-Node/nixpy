@@ -153,6 +153,40 @@ class _TestTag(unittest.TestCase):
 
         assert(len(self.my_tag.features) == 0)
 
+    def test_tag_retrieve_data(self):
+        sample_iv = 1.0
+        ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
+        unit = "ms"
+        pos = [0.0, 2.0, 3.4]
+        ext = [0.0, 6.0, 2.3]
+        units = ["none", "ms", "ms"]
+        data = np.random.random((2, 10, 5))
+        da = self.block.create_data_array("dimtest", "test",
+                                          data=data)
+        setdim = da.append_set_dimension()
+        setdim.labels = ["Label A", "Label B"]
+        samdim = da.append_sampled_dimension(sample_iv)
+        samdim.unit = unit
+        randim = da.append_range_dimension(ticks)
+        randim.unit = unit
+
+        postag = self.block.create_tag("postag", "event", pos)
+        postag.references.append(da)
+        postag.units = units
+
+        segtag = self.block.create_tag("region", "segment", pos)
+        segtag.references.append(da)
+        segtag.extent = ext
+        segtag.units = units
+
+        posdata = postag.retrieve_data(0)
+        assert(len(posdata.shape) == 3)
+        assert(posdata.shape == (1, 1, 1))
+
+        segdata = segtag.retrieve_data(0)
+        assert(len(segdata.shape) == 3)
+        assert(segdata.shape == (1, 6, 2))
+
     def test_tag_retrieve_feature_data(self):
         number_feat = self.block.create_data_array("number feature", "test",
                                                    data=10.)
