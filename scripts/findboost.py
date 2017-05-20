@@ -89,7 +89,8 @@ class BoostPyLib(object):
     @classmethod
     def find_lib_for_current_python(cls, libs):
         v_major, v_minor = sys.version_info[:2]
-        match = cls.find_lib_with_version(libs, (v_major, v_minor), unknown_is_match=v_major == 2)
+        match = cls.find_lib_with_version(libs, (v_major, v_minor),
+                                          unknown_is_match=v_major == 2)
         return match
 
     @staticmethod
