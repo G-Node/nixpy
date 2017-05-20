@@ -146,6 +146,8 @@ class File(FileMixin):
         :return: nixio.File object
         """
         if backend is None:
+            backend = os.getenv("NIXPY_H5_BACKEND")
+        if backend is None:
             if CFile is None:
                 backend = "h5py"
             else:
