@@ -35,7 +35,7 @@ install:
       g++ --version;
     fi
   - if [ "$PYMAJOR" == "3" ] && [ "$PYMINOR" == "4" ]; then
-      pip install --upgrade --no-use-wheel numpy cython h5py;
+      pip install --upgrade --no-binary :all: numpy cython h5py;
       pip install --upgrade coveralls;
     else
       pip install --upgrade numpy coveralls h5py;
