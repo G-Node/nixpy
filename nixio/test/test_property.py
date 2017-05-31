@@ -7,6 +7,7 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
+import os
 
 import unittest
 
@@ -19,9 +20,10 @@ skip_cpp = not hasattr(nix, "core")
 class _TestProperty(unittest.TestCase):
 
     backend = None
+    testfilename = "proptest.h5"
 
     def setUp(self):
-        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
                                   backend=self.backend)
         self.section = self.file.create_section("test section",
                                                 "recordingsession")
@@ -35,6 +37,7 @@ class _TestProperty(unittest.TestCase):
     def tearDown(self):
         del self.file.sections[self.section.id]
         self.file.close()
+        os.remove(self.testfilename)
 
     def test_property_eq(self):
         assert(self.prop == self.prop)
