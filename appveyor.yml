@@ -39,6 +39,7 @@ environment:
     - PYTHON: "C:\\Python36-x64"
       bits: 64
       withnix: "--without-nix"
+      RDP: "yes"
     # - PYTHON: "C:\\Python36-x64"
     #   bits: 64
     #   withnix: "--with-nix"
@@ -107,6 +108,8 @@ artifacts:
 - path: $(DEPLOY_DIR)\*
   name: wheels
 
-# Uncomment on_finish block to enable RDP
 on_finish:
-  - ps: $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+  - ps: |
+      if ($env:RDP -eq "yes") {
+          $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+      }
