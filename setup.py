@@ -159,20 +159,21 @@ if with_nix:
 
     libraries.append(boost_lib.library_name)
 
-    native_ext = Extension(
-        'nixio.core',
+    extargs = dict(
         extra_compile_args=['-std=c++11']
         if not is_win else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
         libraries=libraries,
         sources=nixpy_sources,
         runtime_library_dirs=library_dirs if not is_win else None,
-        **pkg_config(
-            "nixio",
-            library_dirs=library_dirs,
-            include_dirs=include_dirs,
-            ignore_error=False
-        )
     )
+
+    pc = pkg_config("nix", library_dirs=library_dirs,
+                    include_dirs=include_dirs, ignore_error=False)
+    for k in pc:
+        if k in extargs:
+            pc[k] = list(set(pc[k] + extargs[k]))
+    extargs.update(pc)
+    native_ext = Extension('nixio.core', **extargs)
     ext_modules = [native_ext]
 else:
     print("Skipping NIX C++ bindings.")
