@@ -63,7 +63,9 @@ def pkg_config(*packages, **kw):
     pkg_string = ' '.join(packages)
     status, out = getstatusoutput("pkg-config --libs --cflags " + pkg_string)
     if status != 0:
-        err_str = 'Some packages were not found: %s [%s]' % (pkg_string, out)
+        err_str = 'Some packages were not found: %s\n\t%s' % (
+            pkg_string, out.replace("\n", "\n\t")
+        )
         if ignore_error:
             sys.stderr.write('WARNING: {}\n'.format(err_str))
             out = ''
