@@ -9,6 +9,7 @@ from __future__ import (absolute_import, division, print_function)
 import os
 import gc
 from warnings import warn
+import numpy as np
 
 import h5py
 
@@ -168,7 +169,7 @@ class File(FileMixin):
 
     def _check_header(self, mode):
         if self.format != FILE_FORMAT:
-            raise exceptions.InvalidFile()
+            raise exceptions.InvalidFile
 
         if mode == FileMode.ReadWrite:
             if not can_write(self):
@@ -193,6 +194,8 @@ class File(FileMixin):
         util.check_attr_type(v, tuple)
         for part in v:
             util.check_attr_type(part, int)
+        # convert to np.int32 since py3 defaults to 64
+        v = np.array(v, dtype=np.int32)
         self._root.set_attr("version", v)
 
     @property
@@ -208,7 +211,7 @@ class File(FileMixin):
     @format.setter
     def format(self, f):
         util.check_attr_type(f, str)
-        self._root.set_attr("format", f)
+        self._root.set_attr("format", f.encode("ascii"))
 
     @property
     def created_at(self):

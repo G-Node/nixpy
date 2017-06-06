@@ -24,6 +24,10 @@ class _TestMultiTag(unittest.TestCase):
     backend = None
 
     def setUp(self):
+        iv = 1.0
+        ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
+        unit = "ms"
+
         self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
                                   backend=self.backend)
         self.block = self.file.create_block("test block", "recordingsession")
@@ -56,6 +60,13 @@ class _TestMultiTag(unittest.TestCase):
                     data[i, j, k] = value
 
         self.data_array[:, :, :] = data
+
+        set_dim = self.data_array.append_set_dimension()
+        set_dim.labels = ["label_a", "label_b"]
+        sampled_dim = self.data_array.append_sampled_dimension(iv)
+        sampled_dim.unit = unit
+        range_dim = self.data_array.append_range_dimension(ticks)
+        range_dim.unit = unit
 
         event_positions = np.zeros((2, 3))
         event_positions[0, 0] = 0.0
@@ -220,7 +231,6 @@ class _TestMultiTag(unittest.TestCase):
         assert(len(self.my_tag.features) == 0)
 
     def test_multi_tag_retrieve_data(self):
-
         sample_iv = 0.001
         x = np.arange(0, 10, sample_iv)
         y = np.sin(2*np.pi*x)
@@ -242,18 +252,70 @@ class _TestMultiTag(unittest.TestCase):
         ext.append_set_dimension()
         ext.unit = 'ms'
 
-        tag = block.create_multi_tag("sin1", "tag", pos)
-        tag.extents = ext
-        tag.units = ['ms']
-        tag.references.append(da)
+        mtag = block.create_multi_tag("sin1", "tag", pos)
+        mtag.extents = ext
+        mtag.units = ['ms']
+        mtag.references.append(da)
 
-        assert(tag.retrieve_data(0, 0).shape == (2000,))
-        assert(np.array_equal(y[:2000], tag.retrieve_data(0, 0)[:]))
+        assert(mtag.retrieve_data(0, 0).shape == (2000,))
+        assert(np.array_equal(y[:2000], mtag.retrieve_data(0, 0)[:]))
 
         # get by name
-        data = tag.retrieve_data(0, da.name)
+        data = mtag.retrieve_data(0, da.name)
         assert(data.shape == (2000,))
         assert(np.array_equal(y[:2000], data[:]))
+
+        # multi dimensional data
+        sample_iv = 1.0
+        ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
+        unit = "ms"
+        pos = self.block.create_data_array("pos", "test",
+                                           data=[[1, 1, 1],
+                                                 [1, 1, 1]])
+        pos.append_set_dimension()
+        pos.append_set_dimension()
+        ext = self.block.create_data_array("ext", "test",
+                                           data=[[2, 5, 2],
+                                                 [0, 4, 1]])
+        ext.append_set_dimension()
+        ext.append_set_dimension()
+        units = ["none", "ms", "ms"]
+        data = np.random.random((3, 10, 5))
+        da = self.block.create_data_array("dimtest", "test",
+                                          data=data)
+        setdim = da.append_set_dimension()
+        setdim.labels = ["Label A", "Label B", "Label D"]
+        samdim = da.append_sampled_dimension(sample_iv)
+        samdim.unit = unit
+        randim = da.append_range_dimension(ticks)
+        randim.unit = unit
+
+        postag = self.block.create_multi_tag("postag", "event", pos)
+        postag.references.append(da)
+        postag.units = units
+
+        segtag = self.block.create_multi_tag("region", "segment", pos)
+        segtag.references.append(da)
+        segtag.extents = ext
+        segtag.units = units
+
+        posdata = postag.retrieve_data(0, 0)
+        assert(len(posdata.shape) == 3)
+        assert(posdata.shape == (1, 1, 1))
+        assert(np.isclose(posdata[0, 0, 0], data[1, 1, 0]))
+
+        posdata = postag.retrieve_data(1, 0)
+        assert(len(posdata.shape) == 3)
+        assert(posdata.shape == (1, 1, 1))
+        assert(np.isclose(posdata[0, 0, 0], data[1, 1, 0]))
+
+        segdata = segtag.retrieve_data(0, 0)
+        assert(len(segdata.shape) == 3)
+        assert(segdata.shape == (2, 5, 2))
+
+        segdata = segtag.retrieve_data(1, 0)
+        assert(len(segdata.shape) == 3)
+        assert(segdata.shape == (1, 4, 1))
 
     def test_multi_tag_feature_data(self):
         index_data = self.block.create_data_array("indexed feature data",

@@ -150,7 +150,7 @@ else:
 if with_nix:
     if boost_lib is None:
         print("Could not find boost python version for {}.{}".format(
-            sys.version_info[0:2]))
+            *sys.version_info[0:2]))
         print("Available boost python libs:")
         print("\n".join(map(str, boost_libs)))
         sys.exit(-1)

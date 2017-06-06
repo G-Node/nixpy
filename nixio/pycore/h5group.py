@@ -190,7 +190,7 @@ class H5Group(object):
         # Using low level interface to specify iteration order
         name, _ = self.group.id.links.iterate(lambda n: n,
                                               idx_type=h5py.h5.INDEX_CRT_ORDER,
-                                              order=h5py.h5.ITER_NATIVE,
+                                              order=h5py.h5.ITER_INC,
                                               idx=pos)
         return self.get_by_name(name)
 

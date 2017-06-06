@@ -49,7 +49,8 @@ class BaseTag(EntityWithSources):
             for u in units:
                 util.check_attr_type(u, str)
                 u = util.units.sanitizer(u)
-                if not (util.units.is_si(u) or util.units.is_compound(u)):
+                if not (util.units.is_si(u) or util.units.is_compound(u)
+                        or u == "none"):
                     raise InvalidUnit(
                         "{} is not SI or composite of SI units".format(u),
                         "{}.units".format(type(self).__name__)
@@ -140,7 +141,10 @@ class BaseTag(EntityWithSources):
     @staticmethod
     def _pos_to_idx(pos, unit, dim):
         dimtype = dim.dimension_type
-        dimunit = dim.unit
+        if dimtype == DimensionType.Set:
+            dimunit = None
+        else:
+            dimunit = dim.unit
         scaling = 1.0
         if dimtype == DimensionType.Sample:
             if not dimunit and unit is not None:
@@ -160,7 +164,7 @@ class BaseTag(EntityWithSources):
 
             index = dim.index_of(pos * scaling)
         elif dimtype == DimensionType.Set:
-            if unit:
+            if unit and unit != "none":
                 raise IncompatibleDimensions(
                     "Cannot apply a position with unit to a SetDimension",
                     "Tag._pos_to_idx"
@@ -173,7 +177,7 @@ class BaseTag(EntityWithSources):
         else:  # dimtype == DimensionType.Range:
             if dimunit and unit is not None:
                 try:
-                    scaling = util.scaling(unit, dimunit)
+                    scaling = util.units.scaling(unit, dimunit)
                 except InvalidUnit:
                     raise IncompatibleDimensions(
                         "Provided units are not scalable!",
@@ -250,8 +254,7 @@ class Tag(BaseTag, TagMixin):
             if idx < len(extent):
                 ext = extent[idx]
                 c = self._pos_to_idx(pos + ext, unit, dim) - o
-                if c > 1:
-                    count.append(c if c > 1 else 1)
+                count.append(c if c > 1 else 1)
             else:
                 count.append(1)
         return tuple(offset), tuple(count)

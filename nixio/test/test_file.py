@@ -22,9 +22,10 @@ skip_cpp = not hasattr(nix, "core")
 class _FileTest(unittest.TestCase):
 
     backend = None
+    fname = "testfile.h5"
 
     def setUp(self):
-        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
+        self.file = nix.File.open(self.fname, nix.FileMode.Overwrite,
                                   backend=self.backend)
 
     def tearDown(self):
@@ -101,6 +102,33 @@ class _FileTest(unittest.TestCase):
         assert(len(self.file.find_sections(filtr=lambda x: "level2-p1-s" in
                                                            x.name,
                                            limit=1)) == 0)
+
+    def test_order_tracking(self):
+        blknames = []
+        for idx in range(10):
+            name = "block_" + str(idx)
+            self.file.create_block(name, "ordertest")
+            blknames.append(name)
+
+        danames = []
+        datablockname = blknames[0]
+        datablock = self.file.blocks[datablockname]
+        for idx in range(7):
+            name = "data_" + str(idx)
+            da = datablock.create_data_array(name, "thedata", data=[0])
+            da.definition = "da definition"
+            danames.append(name)
+        self.file.close()
+
+        self.file = nix.File.open(self.fname, nix.FileMode.ReadOnly,
+                                  backend=self.backend)
+
+        for idx in range(len(self.file.blocks)):
+            self.assertEqual(blknames[idx], self.file.blocks[idx].name)
+
+        datablock = self.file.blocks[datablockname]
+        for idx in range(len(datablock.data_arrays)):
+            self.assertEqual(danames[idx], datablock.data_arrays[idx].name)
 
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
