@@ -83,6 +83,11 @@ class _TestBackendCompatibility(unittest.TestCase):
             self.check_sections(wsec, rsec)
 
     def check_compatibility(self):
+        # Close writefile and reopen readonly
+        self.write_file.close()
+        self.write_file = nix.File.open(self.testfilename,
+                                        nix.FileMode.ReadOnly,
+                                        backend=self.write_backend)
         if self.read_file is None:
             self.read_file = nix.File.open(self.testfilename,
                                            nix.FileMode.ReadOnly,
@@ -104,6 +109,14 @@ class _TestBackendCompatibility(unittest.TestCase):
                 self.check_recurse(wgrp.tags, rgrp.tags)
                 self.check_recurse(wgrp.multi_tags, rgrp.multi_tags)
         self.check_sections(self.write_file, self.read_file)
+
+        # Restore write mode for writefile
+        self.read_file.close()
+        self.read_file = None
+        self.write_file.close()
+        self.write_file = nix.File.open(self.testfilename,
+                                        nix.FileMode.ReadWrite,
+                                        backend=self.write_backend)
 
     def test_blocks(self):
         for idx in range(10):
