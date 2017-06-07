@@ -39,7 +39,7 @@ environment:
     - PYTHON: "C:\\Python36-x64"
       bits: 64
       withnix: "--without-nix"
-      RDP: "yes"
+      RDP: "no"
     # - PYTHON: "C:\\Python36-x64"
     #   bits: 64
     #   withnix: "--with-nix"
