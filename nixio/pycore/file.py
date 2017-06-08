@@ -26,7 +26,8 @@ except ImportError:
     CFile = None
 
 
-FILE_FORMAT = "nix"
+# always encode to ascii for python2 and nix compatibility
+FILE_FORMAT = "nix".encode("ascii")
 HDF_FF_VERSION = (1, 1, 0)
 
 
@@ -206,7 +207,7 @@ class File(FileMixin):
 
         :type: str
         """
-        return self._root.get_attr("format")
+        return self._root.get_attr("format").encode("ascii")
 
     @format.setter
     def format(self, f):

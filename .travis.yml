@@ -12,10 +12,11 @@ matrix:
         - python: "2.7_with_system_site_packages"
           env: COVERALLS=1 NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include SETUP_ARG=--with-nix
         - python: "3.4"
-          env: NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include
         - python: "2.7_with_system_site_packages"
-        - python: "3.4"
         - python: "3.5"
+          env: NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include
+        - python: "3.5"
+        - python: "3.6"
 
 addons:
   apt:
