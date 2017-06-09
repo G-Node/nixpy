@@ -146,3 +146,9 @@ class _TestSource(unittest.TestCase):
 
         group = self.block.create_group("group", "source-test")
         group.sources.append(lvl3)
+
+        self.assertEqual(lvl3._parent, lvl2)
+        self.assertEqual(lvl2.sources["lvl3"], lvl3)
+        self.assertEqual(lvl2.sources["lvl3"]._parent, lvl3._parent)
+        # TODO: Uncomment once fixed
+        # self.assertEqual(group.sources["lvl3"]._parent, lvl3._parent)
