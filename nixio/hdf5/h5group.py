@@ -182,18 +182,14 @@ class H5Group(object):
         if self.group and name in self.group:
             return self.create_from_h5obj(self.group[name])
         else:
-            raise KeyError("No item with name {} found in {}".format(
-                name, self.group.name
-            ))
+            raise KeyError("Item not found '{}'".format(name))
 
     def get_by_id(self, id_):
         if self.group:
             for item in self:
                 if item.get_attr("entity_id") == id_:
                     return item
-        raise KeyError("No item with ID {} found in {}".format(
-            id_, self.name
-        ))
+        raise KeyError("Item not found '{}'".format(id_))
 
     def get_by_pos(self, pos):
         if not self.group:
@@ -214,8 +210,7 @@ class H5Group(object):
         try:
             del self.group[name]
         except Exception:
-            raise ValueError("Error deleting {} from {}".format(name,
-                                                                self.name))
+            raise ValueError("Error deleting {} ".format(name))
         # Delete if empty and non-root container
         groupdepth = len(self.group.name.split("/")) - 1
         if not len(self.group) and groupdepth > 1:
