@@ -65,7 +65,7 @@ class Container(object):
             try:
                 self._backend.get_by_id(item)
                 return True
-            except ValueError:
+            except KeyError:
                 return False
         else:
             return item in self._backend
