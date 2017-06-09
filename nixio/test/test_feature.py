@@ -17,6 +17,8 @@ class TestFeature(unittest.TestCase):
         self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
 
+        self.group = self.block.create_group("test group", "feature test")
+
         self.signal = self.block.create_data_array("output", "analogsignal",
                                                    nix.DataType.Float, (0, ))
         self.stimuli_tag = self.block.create_tag(
@@ -69,3 +71,10 @@ class TestFeature(unittest.TestCase):
                                                     nix.DataType.Float, (0, ))
         self.feature_1.data = new_data_ref
         assert(self.feature_1.data == new_data_ref)
+
+    def test_feature_on_group(self):
+        grouptag = self.block.create_tag("I am tag", "grouptest", [0])
+        self.group.tags.append(grouptag)
+
+        grouptag = self.group.tags[-1]
+        grouptag.create_feature(self.movie1, nix.LinkType.Tagged)
