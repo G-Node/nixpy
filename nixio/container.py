@@ -132,19 +132,20 @@ class LinkContainer(Container):
             # raise TypeError("{} object is not iterable".format(type(items)))
             self.append(items)
 
-    def __getitem__(self, item):
-        if isinstance(item, int):
-            return super(LinkContainer, self).__getitem__(item)
+    def __getitem__(self, identifier):
+        if isinstance(identifier, int):
+            return super(LinkContainer, self).__getitem__(identifier)
         else:
-            if util.is_uuid(item):
-                # name is key for LinkContainer
-                item = self._backend.get_by_name(item)
+            if util.is_uuid(identifier):
+                # For LinkContainer, name is id
+                item = self._backend.get_by_name(identifier)
+                return self._inst_item(item)
             else:
                 for grp in self._backend:
-                    if item == grp.get_attr("name"):
-                        item = grp
-                        break
-        return self._inst_item(item)
+                    if identifier == grp.get_attr("name"):
+                        return self._inst_item(grp)
+                else:
+                    raise KeyError("Item not found '{}'".format(identifier))
 
     def __contains__(self, item):
         # need to redefine because of id indexing/linking
