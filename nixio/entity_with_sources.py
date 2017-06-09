@@ -10,6 +10,28 @@
 from .entity_with_metadata import EntityWithMetadata
 from .source import Source
 from .container import LinkContainer
+from . import util
+
+
+class SourceLinkContainer(LinkContainer):
+
+    # TODO: Sources returned from this container have an incorrect _parent
+    # This is the same issue that we have with Sections. It should probably be
+    # solved the same way
+
+    def append(self, item):
+        if util.is_uuid(item):
+            item = self._inst_item(self._backend.get_by_id(item))
+
+        if not hasattr(item, "id"):
+            raise TypeError("NIX entity or id string required for append")
+
+        if not self._itemstore._parent.find_sources(
+                filtr=lambda x: x.id == item.id
+        ):
+            raise RuntimeError("This item cannot be appended here.")
+
+        self._backend.create_link(item, item.id)
 
 
 class EntityWithSources(EntityWithMetadata):
@@ -35,6 +57,6 @@ class EntityWithSources(EntityWithMetadata):
         This is a read only attribute.
         """
         if self._sources is None:
-            self._sources = LinkContainer("sources", self, Source,
-                                          self._parent.sources)
+            self._sources = SourceLinkContainer("sources", self, Source,
+                                                self._parent.sources)
         return self._sources
