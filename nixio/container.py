@@ -158,6 +158,9 @@ class LinkContainer(Container):
                 return True
         return False
 
+    def _inst_item(self, item):
+        return self._itemclass(self._itemstore._parent, item)
+
     @staticmethod
     def _item_key(item):
         return item.id
