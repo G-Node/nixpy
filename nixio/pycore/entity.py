@@ -86,6 +86,15 @@ class Entity(object):
             util.check_attr_type(t, int)
         self._h5group.set_attr("updated_at", util.time_to_str(t))
 
+    def __eq__(self, other):
+        if hasattr(other, "id"):
+            return self.id == other.id
+        else:
+            return False
+
+    def __hash__(self):
+        return hash(self.id)
+
 
 class NamedEntity(Entity):
 
