@@ -182,7 +182,7 @@ class H5Group(object):
         if self.group and name in self.group:
             return self.create_from_h5obj(self.group[name])
         else:
-            raise ValueError("No item with name {} found in {}".format(
+            raise KeyError("No item with name {} found in {}".format(
                 name, self.group.name
             ))
 
@@ -191,13 +191,13 @@ class H5Group(object):
             for item in self:
                 if item.get_attr("entity_id") == id_:
                     return item
-        raise ValueError("No item with ID {} found in {}".format(
+        raise KeyError("No item with ID {} found in {}".format(
             id_, self.name
         ))
 
     def get_by_pos(self, pos):
         if not self.group:
-            raise ValueError
+            raise IndexError
 
         # Using low level interface to specify iteration order
         name, _ = self.group.id.links.iterate(lambda n: n,
