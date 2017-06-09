@@ -167,7 +167,7 @@ class Section(NamedEntity):
         properties = self._h5group.open_group("properties")
         try:
             p = Property(self, properties.get_by_name(name))
-        except ValueError:
+        except KeyError:
             p = None
         return p
 
