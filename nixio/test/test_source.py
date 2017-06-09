@@ -139,3 +139,10 @@ class _TestSource(unittest.TestCase):
         self.assertEqual(len(self.source.referring_multi_tags), 1)
         self.assertEqual(len(self.other.referring_multi_tags), 0)
         self.assertEqual(self.source.referring_multi_tags[0].id, mtag.id)
+
+    def test_deep_linking(self):
+        lvl2 = self.third.create_source("lvl2", "source-test")
+        lvl3 = lvl2.create_source("lvl3", "source-test")
+
+        group = self.block.create_group("group", "source-test")
+        group.sources.append(lvl3)
