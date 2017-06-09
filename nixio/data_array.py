@@ -12,7 +12,7 @@ import sys
 from .entity_with_sources import EntityWithSources
 from .value import DataType
 from .dimensions import (SampledDimension, RangeDimension, SetDimension,
-                                DimensionType)
+                         DimensionType)
 from . import util
 
 from .exceptions import InvalidUnit
@@ -337,6 +337,7 @@ class DataSetMixin(object):
         shape = list(filter(lambda x: x is not None, squeezed))
 
         return count, offset, shape
+
 
 class DataSet(DataSetMixin):
 
