@@ -7,9 +7,11 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
+import os
 
 import unittest
 import numpy as np
+
 import nixio as nix
 
 
@@ -24,9 +26,10 @@ test_labels = tuple([str(i) + "_label" for i in range(10)])
 class _TestDimensions(unittest.TestCase):
 
     backend = None
+    testfilename = "dimtest.h5"
 
     def setUp(self):
-        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
                                   backend=self.backend)
         self.block = self.file.create_block("test block", "recordingsession")
         self.array = self.block.create_data_array("test array", "signal",
@@ -39,6 +42,7 @@ class _TestDimensions(unittest.TestCase):
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
+        os.remove(self.testfilename)
 
     def test_set_dimension(self):
         assert(self.set_dim.index == 1)

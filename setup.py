@@ -63,7 +63,9 @@ def pkg_config(*packages, **kw):
     pkg_string = ' '.join(packages)
     status, out = getstatusoutput("pkg-config --libs --cflags " + pkg_string)
     if status != 0:
-        err_str = 'Some packages were not found: %s [%s]' % (pkg_string, out)
+        err_str = 'Some packages were not found: %s\n\t%s' % (
+            pkg_string, out.replace("\n", "\n\t")
+        )
         if ignore_error:
             sys.stderr.write('WARNING: {}\n'.format(err_str))
             out = ''
@@ -157,20 +159,21 @@ if with_nix:
 
     libraries.append(boost_lib.library_name)
 
-    native_ext = Extension(
-        'nixio.core',
+    extargs = dict(
         extra_compile_args=['-std=c++11']
         if not is_win else ['/DBOOST_PYTHON_STATIC_LIB', '/EHsc'],
         libraries=libraries,
         sources=nixpy_sources,
         runtime_library_dirs=library_dirs if not is_win else None,
-        **pkg_config(
-            "nixio",
-            library_dirs=library_dirs,
-            include_dirs=include_dirs,
-            ignore_error=False
-        )
     )
+
+    pc = pkg_config("nix", library_dirs=library_dirs,
+                    include_dirs=include_dirs, ignore_error=False)
+    for k in pc:
+        if k in extargs:
+            pc[k] = list(set(pc[k] + extargs[k]))
+    extargs.update(pc)
+    native_ext = Extension('nixio.core', **extargs)
     ext_modules = [native_ext]
 else:
     print("Skipping NIX C++ bindings.")
@@ -190,8 +193,9 @@ setup(
     packages=['nixio', 'nixio.pycore', 'nixio.util',
               'nixio.pycore.util', 'nixio.pycore.exceptions'],
     scripts=[],
-    tests_require=['nose'],
-    test_suite='nose.collector',
+    tests_require=['pytest'],
+    test_suite='pytest',
+    setup_requires=['pytest-runner'],
     install_requires=['numpy', 'h5py'],
     package_data={'nixio': [license_text, description_text]},
     include_package_data=True,

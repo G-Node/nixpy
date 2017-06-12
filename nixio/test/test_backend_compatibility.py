@@ -5,7 +5,9 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+
 from __future__ import (absolute_import, division, print_function)
+import os
 
 import unittest
 import numpy as np
@@ -29,8 +31,10 @@ all_attrs = [
 @unittest.skipIf(skip, "HDF5 backend not available.")
 class _TestBackendCompatibility(unittest.TestCase):
 
+    testfilename = "compattest.h5"
+
     def setUp(self):
-        self.write_file = nix.File.open("compat_test.h5",
+        self.write_file = nix.File.open(self.testfilename,
                                         nix.FileMode.Overwrite,
                                         backend=self.write_backend)
         self.read_file = None
@@ -39,6 +43,7 @@ class _TestBackendCompatibility(unittest.TestCase):
         self.write_file.close()
         if self.read_file:
             self.read_file.close()
+        os.remove(self.testfilename)
 
     def check_attributes(self, writeitem, readitem):
         for attr in all_attrs:
@@ -79,7 +84,7 @@ class _TestBackendCompatibility(unittest.TestCase):
 
     def check_compatibility(self):
         if self.read_file is None:
-            self.read_file = nix.File.open("compat_test.h5",
+            self.read_file = nix.File.open(self.testfilename,
                                            nix.FileMode.ReadOnly,
                                            backend=self.read_backend)
 
