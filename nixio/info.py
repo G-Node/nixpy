@@ -6,12 +6,12 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-VERSION = '1.3dev'
+VERSION = '1.4.dev'
 STATUS = 'Release'
 RELEASE = '%s %s' % (VERSION, STATUS)
 AUTHOR = 'Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe,\
 Balint Morvai, Achilleas Koutsou'
 COPYRIGHT = '2014, German Neuroinformatics Node, ' + AUTHOR
-CONTACT = 'kellner@bio.lmu.de'
+CONTACT = 'dev@g-node.org'
 BRIEF = 'Python bindings for NIX'
 HOMEPAGE = 'https://github.com/G-Node/nixpy'
