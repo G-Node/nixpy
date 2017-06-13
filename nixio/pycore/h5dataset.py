@@ -50,10 +50,13 @@ class H5DataSet(object):
                 return data
             datashape = data.shape
             sl = util.co_to_slice(count, offset)
-            if isinstance(sl, tuple) and np.ndim(data) != len(sl):
-                if count[-1] == 1:
+            if (isinstance(sl, tuple) and
+                    np.ndim(data) != len(sl) and
+                    count[-1] == 1):
+                    # data needs an extra dimension of size 1 to match slice
                     data.resize(datashape + (1,))
             self.dataset.read_direct(data, sl)
+            # if data was resized, it should be returned to its original shape
             data.resize(datashape)
         else:
             self.dataset.read_direct(data)

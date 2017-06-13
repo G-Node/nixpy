@@ -7,6 +7,7 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
+import os
 
 import unittest
 import nixio as nix
@@ -18,9 +19,10 @@ skip_cpp = not hasattr(nix, "core")
 class _TestGroup(unittest.TestCase):
 
     backend = None
+    testfilename = "grouptest.h5"
 
     def setUp(self):
-        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
                                   backend=self.backend)
         self.block = self.file.create_block("test block", "recordingsession")
 
@@ -44,6 +46,7 @@ class _TestGroup(unittest.TestCase):
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
+        os.remove(self.testfilename)
 
     def test_group_eq(self):
         assert(self.my_group == self.my_group)

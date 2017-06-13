@@ -7,6 +7,7 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
+import os
 
 import unittest
 
@@ -19,9 +20,10 @@ skip_cpp = not hasattr(nix, "core")
 class _TestFeature(unittest.TestCase):
 
     backend = None
+    testfilename = "featuretest.h5"
 
     def setUp(self):
-        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite,
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
                                   backend=self.backend)
         self.block = self.file.create_block("test block", "recordingsession")
 
@@ -46,6 +48,7 @@ class _TestFeature(unittest.TestCase):
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
+        os.remove(self.testfilename)
 
     def test_feature_eq(self):
         assert(self.feature_1 == self.feature_1)

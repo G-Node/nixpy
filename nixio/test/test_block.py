@@ -7,6 +7,7 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
+import os
 
 import unittest
 
@@ -19,15 +20,10 @@ skip_cpp = not hasattr(nix, "core")
 class _TestBlock(unittest.TestCase):
 
     backend = None
+    testfilename = "blocktest.h5"
 
     def setUp(self):
-        # TODO: unittest.h5 is a unicode string and is handed over to a c++
-        #  function expecting a string. This leads to an error.
-        #  if "unittest.h5".encode("utf-8") or b'unittest.h5' is used,
-        #  the c++ function can handle the string # but is not able to create
-        #  the file any longer. Should this somehow be adressed on the c++ side
-        #  of the code?
-        self.file = nix.File.open('unittest.h5', nix.FileMode.Overwrite,
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
                                   backend=self.backend)
         self.block = self.file.create_block("test block", "recordingsession")
         self.other = self.file.create_block("other block", "recordingsession")
@@ -36,6 +32,7 @@ class _TestBlock(unittest.TestCase):
         del self.file.blocks[self.block.id]
         del self.file.blocks[self.other.id]
         self.file.close()
+        os.remove(self.testfilename)
 
     def test_block_eq(self):
         assert(self.block == self.block)

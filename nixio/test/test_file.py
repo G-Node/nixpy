@@ -7,6 +7,7 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
+import os
 
 import unittest
 import h5py
@@ -22,14 +23,15 @@ skip_cpp = not hasattr(nix, "core")
 class _FileTest(unittest.TestCase):
 
     backend = None
-    fname = "testfile.h5"
+    testfilename = "filetest.h5"
 
     def setUp(self):
-        self.file = nix.File.open(self.fname, nix.FileMode.Overwrite,
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
                                   backend=self.backend)
 
     def tearDown(self):
         self.file.close()
+        os.remove(self.testfilename)
 
     def test_file_format(self):
         assert(self.file.format == "nix")
@@ -120,7 +122,7 @@ class _FileTest(unittest.TestCase):
             danames.append(name)
         self.file.close()
 
-        self.file = nix.File.open(self.fname, nix.FileMode.ReadOnly,
+        self.file = nix.File.open(self.testfilename, nix.FileMode.ReadOnly,
                                   backend=self.backend)
 
         for idx in range(len(self.file.blocks)):
@@ -145,12 +147,12 @@ class FileTestPy(_FileTest):
 class FileVerTestPy(unittest.TestCase):
 
     backend = "h5py"
-    filename = "versiontest.h5"
+    testfilename = "versiontest.h5"
     filever = filepy.HDF_FF_VERSION
     fformat = filepy.FILE_FORMAT
 
     def try_open(self, mode):
-        f = nix.File.open(self.filename, mode, backend=self.backend)
+        f = nix.File.open(self.testfilename, mode, backend=self.backend)
         f.close()
 
     def set_header(self, fformat=None, version=None):
@@ -167,11 +169,12 @@ class FileVerTestPy(unittest.TestCase):
             self.h5root.create_group("metadata")
 
     def setUp(self):
-        self.h5file = h5py.File(self.filename, mode="w")
+        self.h5file = h5py.File(self.testfilename, mode="w")
         self.h5root = self.h5file["/"]
 
     def tearDown(self):
         self.h5file.close()
+        os.remove(self.testfilename)
 
     def test_read_write(self):
         self.set_header()
