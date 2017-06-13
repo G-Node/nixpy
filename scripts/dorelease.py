@@ -129,15 +129,16 @@ def update_info(newver):
 
 def update_ci_confs(newver):
     change = False
+    nixbranch = ".".join(newver.split(".")[:-1])
     travisfn = os.path.join(gitroot, ".travis.yml")
     with open(travisfn) as travisconf:
         oldconf = travisconf.readlines()
 
     newconf = []
     for line in oldconf:
-        if "NIX_VERSION" in line:
-            line = re.sub("'[1-9\.a-z]+'", "'" + newver + "'", line)
-            line = line.replace("master", newver)
+        if "NIX_BRANCH" in line:
+            line = re.sub("1\.[0-9\.]+[0-9\.a-z]+(dev){0,1}", nixbranch, line)
+            line = line.replace("master", nixbranch)
         newconf.append(line)
 
     diff = diff_lines(oldconf, newconf)
@@ -152,33 +153,35 @@ def update_ci_confs(newver):
         ))
         wait_for_ret()
         with open(travisfn, "w") as travisconf:
-            travisconf.writelines()
+            travisconf.writelines(newconf)
         change = True
 
-    appveyorfn = os.path.join(gitroot, "appveyor.yml")
-    with open(appveyorfn) as avconf:
-        oldconf = avconf.readlines()
+    # Appveyor is currently not building NIX so let's not bother changing
 
-    newconf = []
-    for line in oldconf:
-        if "NIX_VERSION" in line:
-            line = re.sub("'[1-9\.a-z]+'", "'" + newver + "'", line)
-        newconf.append(line)
+    # appveyorfn = os.path.join(gitroot, "appveyor.yml")
+    # with open(appveyorfn) as avconf:
+    #     oldconf = avconf.readlines()
 
-    diff = diff_lines(oldconf, newconf)
+    # newconf = []
+    # for line in oldconf:
+    #     if "NIX_VERSION" in line:
+    #         line = re.sub("'[1-9\.a-z]+'", "'" + newver + "'", line)
+    #     newconf.append(line)
 
-    if len(diff) == 0:
-        print("No changes required in appveyor.yml")
-        wait_for_ret()
-    else:
-        print("".join(diff))
-        print("{}The above changes will be written to appveyor.yml{}".format(
-            red_begin, red_end
-        ))
-        wait_for_ret()
-        with open(appveyorfn, "w") as avconf:
-            avconf.writelines()
-        change = True
+    # diff = diff_lines(oldconf, newconf)
+
+    # if len(diff) == 0:
+    #     print("No changes required in appveyor.yml")
+    #     wait_for_ret()
+    # else:
+    #     print("".join(diff))
+    #     print("{}The above changes will be written to appveyor.yml{}".format(
+    #         red_begin, red_end
+    #     ))
+    #     wait_for_ret()
+    #     with open(appveyorfn, "w") as avconf:
+    #         avconf.writelines(newconf)
+    #     change = True
 
     return change
 
