@@ -86,7 +86,7 @@ install:
             $env:BOOST_LIB_DIR = "$env:BOOST_ROOT\lib"
         }
 
-    - python -m pip install numpy h5py
+    - python -m pip install numpy h5py wheel
 
     - ps: cd "$env:APPVEYOR_BUILD_FOLDER"
 
@@ -102,7 +102,7 @@ test_script:
 
 after_test:
     - ps: mkdir "$env:DEPLOY_DIR"
-    - python setup.py sdist -d %DEPLOY_DIR% %withnix%
+    - python setup.py bdist_wheel -d %DEPLOY_DIR% %withnix%
 
 artifacts:
 - path: $(DEPLOY_DIR)\*
