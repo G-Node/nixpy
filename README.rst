@@ -1,9 +1,9 @@
-.. image:: https://travis-ci.org/G-Node/nixpy.svg?branch=master
+.. image:: https://travis-ci.org/G-Node/nixpy.svg?branch=v1.4
     :target: https://travis-ci.org/G-Node/nixpy
-.. image:: https://ci.appveyor.com/api/projects/status/nrsgupr9ura3vli3?svg=true
-    :target: https://ci.appveyor.com/project/achilleas-k/nixpy-um2sy
-.. image:: https://coveralls.io/repos/github/G-Node/nixpy/badge.svg?branch=master
-    :target: https://coveralls.io/github/G-Node/nixpy?branch=master
+.. image:: https://ci.appveyor.com/api/projects/status/q4rcgtw7rmn5lex9/branch/master?svg=true
+    :target: https://ci.appveyor.com/project/gicmo/nixpy/branch/master
+.. image:: https://coveralls.io/repos/github/G-Node/nixpy/badge.svg?branch=v1.4
+    :target: https://coveralls.io/github/G-Node/nixpy?branch=v1.4
 
 
 ----
