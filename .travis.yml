@@ -5,7 +5,7 @@ language: python
 
 env:
     global:
-        - NIX_BRANCH=master
+        - NIX_BRANCH=1.4
 
 matrix:
     include:
