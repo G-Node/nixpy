@@ -23,7 +23,7 @@ test_label = "test label"
 test_labels = tuple([str(i) + "_label" for i in range(10)])
 
 
-class _TestDimensions(unittest.TestCase):
+class DimensionTestBase(unittest.TestCase):
 
     backend = None
     testfilename = "dimtest.h5"
@@ -131,11 +131,11 @@ class _TestDimensions(unittest.TestCase):
 
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestDimensionsCPP(_TestDimensions):
+class TestDimensionsCPP(DimensionTestBase):
 
     backend = "hdf5"
 
 
-class TestDimensionsPy(_TestDimensions):
+class TestDimensionsPy(DimensionTestBase):
 
     backend = "h5py"

@@ -17,7 +17,7 @@ import nixio as nix
 skip_cpp = not hasattr(nix, "core")
 
 
-class _TestSource(unittest.TestCase):
+class SourceTestBase(unittest.TestCase):
 
     backend = None
     testfilename = "sourcetest.h5"
@@ -153,11 +153,11 @@ class _TestSource(unittest.TestCase):
 
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestSourceCPP(_TestSource):
+class TestSourceCPP(SourceTestBase):
 
     backend = "hdf5"
 
 
-class TestSourcePy(_TestSource):
+class TestSourcePy(SourceTestBase):
 
     backend = "h5py"

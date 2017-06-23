@@ -17,7 +17,7 @@ import nixio as nix
 skip_cpp = not hasattr(nix, "core")
 
 
-class _TestTag(unittest.TestCase):
+class TagTestBase(unittest.TestCase):
 
     backend = None
     testfilename = "tagtest.h5"
@@ -236,11 +236,11 @@ class _TestTag(unittest.TestCase):
 
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestTagCPP(_TestTag):
+class TestTagCPP(TagTestBase):
 
     backend = "hdf5"
 
 
-class TestTagPy(_TestTag):
+class TestTagPy(TagTestBase):
 
     backend = "h5py"
