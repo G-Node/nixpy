@@ -158,6 +158,15 @@ class RangeDimension(Dimension):
                                                  shape=np.shape(ticks),
                                                  dtype=DataType.Double)
         ticksds.write_data(ticks)
+        newdim._alias = False
+        return newdim
+
+    @classmethod
+    def _create_new_alias(cls, parent, index, da):
+        newdim = super(RangeDimension, cls)._create_new(parent, index)
+        newdim.dimension_type = DimensionType.Range
+        newdim._h5group.create_link(da, da.id)
+        newdim._alias = True
         return newdim
 
     @property
