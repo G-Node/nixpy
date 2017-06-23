@@ -244,7 +244,7 @@ class _TestBackendCompatibility(unittest.TestCase):
     def test_dimensions(self):
         blk = self.write_file.create_block("testblock", "dimtest")
 
-        da_set = blk.create_data_array("da with seet", "datype",
+        da_set = blk.create_data_array("da with set", "datype",
                                        data=np.random.random(20))
         da_set.append_set_dimension()
         da_set.dimensions[0].labels = ["label one", "label two"]
@@ -262,6 +262,12 @@ class _TestBackendCompatibility(unittest.TestCase):
         smpldim.unit = "mV"
 
         da_sample.dimensions[0].label = "sample dim label"
+
+        da_alias = blk.create_data_array("da with alias", "datype",
+                                         data=np.random.random(19))
+        da_alias.unit = "F"
+        da_alias.label = "fee fi fo fum"
+        da_alias.append_alias_range_dimension()
 
         da_multi_dim = blk.create_data_array("da with multiple", "datype",
                                              data=np.random.random(30))
