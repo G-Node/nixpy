@@ -29,7 +29,7 @@ all_attrs = [
 
 
 @unittest.skipIf(skip, "HDF5 backend not available.")
-class _TestBackendCompatibility(unittest.TestCase):
+class BackendCompatibilityTestBase(unittest.TestCase):
 
     testfilename = "compattest.h5"
 
@@ -527,13 +527,13 @@ class _TestBackendCompatibility(unittest.TestCase):
         self.assertEqual(wfile.updated_at, rfile.updated_at)
 
 
-class TestWriteCPPReadPy(_TestBackendCompatibility):
+class TestWriteCPPReadPy(BackendCompatibilityTestBase):
 
     write_backend = "hdf5"
     read_backend = "h5py"
 
 
-class TestWritePyReadCPP(_TestBackendCompatibility):
+class TestWritePyReadCPP(BackendCompatibilityTestBase):
 
     write_backend = "h5py"
     read_backend = "hdf5"
