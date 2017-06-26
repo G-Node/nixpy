@@ -177,8 +177,6 @@ class RangeDimension(Dimension):
     def ticks(self, ticks):
         if np.any(np.diff(ticks) < 0):
             raise ValueError("Ticks are not given in an ascending order.")
-        # tshape = np.shape(ticks)
-        # dt = DataType.Double
         ticksds = self._h5group.get_dataset("ticks")
         ticksds.write_data(ticks)
 
