@@ -183,6 +183,14 @@ class RangeDimension(Dimension):
         ticksds.write_data(ticks)
 
     @property
+    def _group(self):
+        return self._intgroup
+
+    @_group.setter
+    def _group(self, grp):
+        self._intgroup = grp
+
+    @property
     def label(self):
         return self._h5group.get_attr("label")
 
