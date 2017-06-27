@@ -158,7 +158,6 @@ class RangeDimension(Dimension):
                                                  shape=np.shape(ticks),
                                                  dtype=DataType.Double)
         ticksds.write_data(ticks)
-        newdim._alias = False
         return newdim
 
     @classmethod
@@ -166,12 +165,28 @@ class RangeDimension(Dimension):
         newdim = super(RangeDimension, cls)._create_new(parent, index)
         newdim.dimension_type = DimensionType.Range
         newdim._h5group.create_link(da, da.id)
-        newdim._alias = True
         return newdim
 
     @property
+    def _alias(self):
+        """
+        Return True if this dimension is an Alias Range dimension.
+        Read-only property.
+        """
+        if self._h5group.has_data("ticks"):
+            return False
+        return True
+
+    @property
     def ticks(self):
-        return tuple(self._h5group.get_data("ticks"))
+        g = self._redirgrp
+        if g.has_data("ticks"):
+            ticks = g.get_data("ticks")
+        elif g.has_data("data"):
+            ticks = g.get_data("data")
+        else:
+            raise AttributeError("Attribute 'ticks' is not set.")
+        return tuple(ticks)
 
     @ticks.setter
     def ticks(self, ticks):
@@ -181,30 +196,34 @@ class RangeDimension(Dimension):
         ticksds.write_data(ticks)
 
     @property
-    def _group(self):
-        return self._intgroup
-
-    @_group.setter
-    def _group(self, grp):
-        self._intgroup = grp
+    def _redirgrp(self):
+        """
+        If the dimension is an Alias Range dimension, this property returns
+        the H5Group of the linked DataArray. Otherwise, it returns the H5Group
+        representing the dimension.
+        """
+        if self._alias:
+            gname = self._h5group.get_by_pos(0).name
+            return self._h5group.open_group(gname)
+        return self._h5group
 
     @property
     def label(self):
-        return self._h5group.get_attr("label")
+        return self._redirgrp.get_attr("label")
 
     @label.setter
     def label(self, l):
         util.check_attr_type(l, str)
-        self._h5group.set_attr("label", l)
+        self._redirgrp.set_attr("label", l)
 
     @property
     def unit(self):
-        return self._h5group.get_attr("unit")
+        return self._redirgrp.get_attr("unit")
 
     @unit.setter
     def unit(self, u):
         util.check_attr_type(u, str)
-        self._h5group.set_attr("unit", u)
+        self._redirgrp.set_attr("unit", u)
 
     def index_of(self, position):
         """
