@@ -138,7 +138,7 @@ class DimensionTestBase(unittest.TestCase):
         assert(len(da.dimensions) == 1)
         assert(da.dimensions[0].label == da.label)
         assert(da.dimensions[0].unit == da.unit)
-        assert(np.all(da.dimensions[0].ticks == da))
+        assert(np.all(da.dimensions[0].ticks == da[:]))
 
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
