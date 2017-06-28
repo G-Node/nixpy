@@ -101,6 +101,7 @@ void PyFile::do_export() {
         // Open and close
         .def("is_open", &File::isOpen, doc::file_is_open)
         .def("close", &File::close, doc::file_close)
+        .def("flush", &File::flush)
         .def("open", open, open_overloads())
         .staticmethod("open")
         // Other
