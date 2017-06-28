@@ -111,6 +111,7 @@ class BackendCompatibilityTestBase(unittest.TestCase):
             blk.definition = "definition block " + str(idx)
             blk.force_created_at(np.random.randint(1000000000))
 
+        self.write_file.flush()
         self.check_compatibility()
 
     def test_groups(self):
@@ -120,6 +121,7 @@ class BackendCompatibilityTestBase(unittest.TestCase):
             grp.definition = "group definition " + str(idx*10)
             grp.force_created_at(np.random.randint(1000000000))
 
+        self.write_file.flush()
         self.check_compatibility()
 
     def test_data_arrays(self):
@@ -140,6 +142,7 @@ class BackendCompatibilityTestBase(unittest.TestCase):
             if (idx % 3) == 0:
                 da.polynom_coefficients = tuple(np.random.random(3))
 
+        self.write_file.flush()
         self.check_compatibility()
         wdata = blk.data_arrays
         rdata = self.read_file.blocks[0].data_arrays
@@ -183,6 +186,7 @@ class BackendCompatibilityTestBase(unittest.TestCase):
             if (idx % 3) == 0:
                 grp.tags.append(tag)
 
+        self.write_file.flush()
         self.check_compatibility()
         wtags = blk.tags
         rtags = self.read_file.blocks[0].tags
@@ -206,6 +210,7 @@ class BackendCompatibilityTestBase(unittest.TestCase):
             if (idx % 2) == 0:
                 grp.multi_tags.append(mtag)
 
+        self.write_file.flush()
         self.check_compatibility()
         wmts = blk.multi_tags
         rmts = self.read_file.blocks[0].multi_tags
@@ -238,6 +243,7 @@ class BackendCompatibilityTestBase(unittest.TestCase):
 
         # TODO: Nested sources
 
+        self.write_file.flush()
         self.check_compatibility()
 
     def test_dimensions(self):
@@ -274,6 +280,7 @@ class BackendCompatibilityTestBase(unittest.TestCase):
         da_multi_dim.append_set_dimension()
         da_multi_dim.append_range_dimension(np.random.random(10))
 
+        self.write_file.flush()
         self.check_compatibility()
 
         for idx in range(len(blk.data_arrays)):
@@ -299,6 +306,7 @@ class BackendCompatibilityTestBase(unittest.TestCase):
             da_feat.append_sampled_dimension(1.0)
             tag_feat.create_feature(da_feat, linktypes[idx % 3])
 
+        self.write_file.flush()
         self.check_compatibility()
 
         wtag = self.write_file.blocks[0].tags[0]
@@ -319,6 +327,7 @@ class BackendCompatibilityTestBase(unittest.TestCase):
         self.check_attributes(wfdata, rfdata)
         np.testing.assert_almost_equal(wfdata[:], rfdata[:])
 
+        self.write_file.flush()
         self.check_recurse(wtag.references, rtag.references)
 
     def test_multi_tag_features(self):
@@ -389,6 +398,7 @@ class BackendCompatibilityTestBase(unittest.TestCase):
         feature_tag.create_feature(tagged_data, nix.LinkType.Tagged)
         feature_tag.create_feature(index_data, nix.LinkType.Untagged)
 
+        self.write_file.flush()
         self.check_compatibility()
 
         wmtag = self.write_file.blocks[0].multi_tags[0]
@@ -445,6 +455,7 @@ class BackendCompatibilityTestBase(unittest.TestCase):
         mtag.units = ["ms"]
         mtag.references.append(da)
 
+        self.write_file.flush()
         self.check_compatibility()
 
         for wmtag, rmtag in zip(self.write_file.blocks[0].multi_tags,
@@ -470,6 +481,7 @@ class BackendCompatibilityTestBase(unittest.TestCase):
         sec.props[0].mapping = "mapping"
         sec.props[1].definition = "def"
 
+        self.write_file.flush()
         self.check_compatibility()
 
         wsec = self.write_file.sections[0]
@@ -480,11 +492,13 @@ class BackendCompatibilityTestBase(unittest.TestCase):
             self.check_attributes(wprop, rprop)
 
         sec.props[0].values = [nix.Value(101)]
+        self.write_file.flush()
         for wprop, rprop in zip(wsec.props, rsec.props):
             self.check_attributes(wprop, rprop)
 
         sec.props[1].values = [nix.Value("foo"), nix.Value("bar"),
                                nix.Value("baz")]
+        self.write_file.flush()
         for wprop, rprop in zip(wsec.props, rsec.props):
             self.check_attributes(wprop, rprop)
 
@@ -506,6 +520,7 @@ class BackendCompatibilityTestBase(unittest.TestCase):
         block = self.write_file.create_block("block", "section test")
         block.metadata = self.write_file.sections[0].sections[0].sections[0]
 
+        self.write_file.flush()
         self.check_compatibility()
 
         wblock = self.write_file.blocks[0]
@@ -515,6 +530,7 @@ class BackendCompatibilityTestBase(unittest.TestCase):
         self.assertEqual(wblock.metadata.parent, rblock.metadata.parent)
 
     def test_file(self):
+        self.write_file.flush()
         self.check_compatibility()
 
         wfile = self.write_file
