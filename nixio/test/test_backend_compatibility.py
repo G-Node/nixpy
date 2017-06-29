@@ -5,8 +5,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
-from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division)
 import os
 
 import unittest
@@ -29,7 +28,7 @@ all_attrs = [
 
 
 @unittest.skipIf(skip, "HDF5 backend not available.")
-class _TestBackendCompatibility(unittest.TestCase):
+class BackendCompatibilityTestBase(unittest.TestCase):
 
     testfilename = "compattest.h5"
 
@@ -83,10 +82,12 @@ class _TestBackendCompatibility(unittest.TestCase):
             self.check_sections(wsec, rsec)
 
     def check_compatibility(self):
-        if self.read_file is None:
-            self.read_file = nix.File.open(self.testfilename,
-                                           nix.FileMode.ReadOnly,
-                                           backend=self.read_backend)
+        self.read_file = nix.File.open(self.testfilename,
+                                       nix.FileMode.ReadOnly,
+                                       backend=self.read_backend)
+        self.write_file = nix.File.open(self.testfilename,
+                                        nix.FileMode.ReadOnly,
+                                        backend=self.write_backend)
 
         self.check_recurse(self.write_file.blocks, self.read_file.blocks)
 
@@ -112,6 +113,7 @@ class _TestBackendCompatibility(unittest.TestCase):
             blk.definition = "definition block " + str(idx)
             blk.force_created_at(np.random.randint(1000000000))
 
+        self.write_file.close()
         self.check_compatibility()
 
     def test_groups(self):
@@ -121,6 +123,7 @@ class _TestBackendCompatibility(unittest.TestCase):
             grp.definition = "group definition " + str(idx*10)
             grp.force_created_at(np.random.randint(1000000000))
 
+        self.write_file.close()
         self.check_compatibility()
 
     def test_data_arrays(self):
@@ -141,8 +144,10 @@ class _TestBackendCompatibility(unittest.TestCase):
             if (idx % 3) == 0:
                 da.polynom_coefficients = tuple(np.random.random(3))
 
+        self.write_file.close()
         self.check_compatibility()
-        wdata = blk.data_arrays
+
+        wdata = self.write_file.blocks[0].data_arrays
         rdata = self.read_file.blocks[0].data_arrays
         self.assertEqual(len(wdata), len(rdata))
         for wda, rda in zip(wdata, rdata):
@@ -184,8 +189,9 @@ class _TestBackendCompatibility(unittest.TestCase):
             if (idx % 3) == 0:
                 grp.tags.append(tag)
 
+        self.write_file.close()
         self.check_compatibility()
-        wtags = blk.tags
+        wtags = self.write_file.blocks[0].tags
         rtags = self.read_file.blocks[0].tags
         for wtag, rtag in zip(rtags, wtags):
             np.testing.assert_almost_equal(wtag.position, rtag.position)
@@ -207,8 +213,9 @@ class _TestBackendCompatibility(unittest.TestCase):
             if (idx % 2) == 0:
                 grp.multi_tags.append(mtag)
 
+        self.write_file.close()
         self.check_compatibility()
-        wmts = blk.multi_tags
+        wmts = self.write_file.blocks[0].multi_tags
         rmts = self.read_file.blocks[0].multi_tags
         for wmt, rmt in zip(wmts, rmts):
             np.testing.assert_almost_equal(wmt.positions[:], rmt.positions[:])
@@ -239,12 +246,13 @@ class _TestBackendCompatibility(unittest.TestCase):
 
         # TODO: Nested sources
 
+        self.write_file.close()
         self.check_compatibility()
 
     def test_dimensions(self):
         blk = self.write_file.create_block("testblock", "dimtest")
 
-        da_set = blk.create_data_array("da with seet", "datype",
+        da_set = blk.create_data_array("da with set", "datype",
                                        data=np.random.random(20))
         da_set.append_set_dimension()
         da_set.dimensions[0].labels = ["label one", "label two"]
@@ -263,14 +271,22 @@ class _TestBackendCompatibility(unittest.TestCase):
 
         da_sample.dimensions[0].label = "sample dim label"
 
+        da_alias = blk.create_data_array("da with alias", "datype",
+                                         data=np.random.random(19))
+        da_alias.unit = "F"
+        da_alias.label = "fee fi fo fum"
+        da_alias.append_alias_range_dimension()
+
         da_multi_dim = blk.create_data_array("da with multiple", "datype",
                                              data=np.random.random(30))
         da_multi_dim.append_sampled_dimension(0.1)
         da_multi_dim.append_set_dimension()
         da_multi_dim.append_range_dimension(np.random.random(10))
 
+        self.write_file.close()
         self.check_compatibility()
 
+        blk = self.write_file.blocks[0]
         for idx in range(len(blk.data_arrays)):
             wda = self.write_file.blocks[0].data_arrays[idx]
             rda = self.read_file.blocks[0].data_arrays[idx]
@@ -294,6 +310,7 @@ class _TestBackendCompatibility(unittest.TestCase):
             da_feat.append_sampled_dimension(1.0)
             tag_feat.create_feature(da_feat, linktypes[idx % 3])
 
+        self.write_file.close()
         self.check_compatibility()
 
         wtag = self.write_file.blocks[0].tags[0]
@@ -314,6 +331,7 @@ class _TestBackendCompatibility(unittest.TestCase):
         self.check_attributes(wfdata, rfdata)
         np.testing.assert_almost_equal(wfdata[:], rfdata[:])
 
+        self.write_file.flush()
         self.check_recurse(wtag.references, rtag.references)
 
     def test_multi_tag_features(self):
@@ -384,6 +402,7 @@ class _TestBackendCompatibility(unittest.TestCase):
         feature_tag.create_feature(tagged_data, nix.LinkType.Tagged)
         feature_tag.create_feature(index_data, nix.LinkType.Untagged)
 
+        self.write_file.close()
         self.check_compatibility()
 
         wmtag = self.write_file.blocks[0].multi_tags[0]
@@ -440,6 +459,7 @@ class _TestBackendCompatibility(unittest.TestCase):
         mtag.units = ["ms"]
         mtag.references.append(da)
 
+        self.write_file.flush()
         self.check_compatibility()
 
         for wmtag, rmtag in zip(self.write_file.blocks[0].multi_tags,
@@ -465,23 +485,14 @@ class _TestBackendCompatibility(unittest.TestCase):
         sec.props[0].mapping = "mapping"
         sec.props[1].definition = "def"
 
-        self.check_compatibility()
-
-        wsec = self.write_file.sections[0]
-        rsec = self.read_file.sections[0]
-        self.check_attributes(wsec, rsec)
-
-        for wprop, rprop in zip(wsec.props, rsec.props):
-            self.check_attributes(wprop, rprop)
-
         sec.props[0].values = [nix.Value(101)]
-        for wprop, rprop in zip(wsec.props, rsec.props):
-            self.check_attributes(wprop, rprop)
-
         sec.props[1].values = [nix.Value("foo"), nix.Value("bar"),
                                nix.Value("baz")]
-        for wprop, rprop in zip(wsec.props, rsec.props):
-            self.check_attributes(wprop, rprop)
+        sec.props["prop Float"].values = [nix.Value(10.0), nix.Value(33.3),
+                                          nix.Value(1.345), nix.Value(90.2)]
+
+        self.write_file.close()
+        self.check_compatibility()
 
     def test_sections(self):
         for idx in range(30):
@@ -501,6 +512,7 @@ class _TestBackendCompatibility(unittest.TestCase):
         block = self.write_file.create_block("block", "section test")
         block.metadata = self.write_file.sections[0].sections[0].sections[0]
 
+        self.write_file.close()
         self.check_compatibility()
 
         wblock = self.write_file.blocks[0]
@@ -510,6 +522,7 @@ class _TestBackendCompatibility(unittest.TestCase):
         self.assertEqual(wblock.metadata.parent, rblock.metadata.parent)
 
     def test_file(self):
+        self.write_file.close()
         self.check_compatibility()
 
         wfile = self.write_file
@@ -521,13 +534,13 @@ class _TestBackendCompatibility(unittest.TestCase):
         self.assertEqual(wfile.updated_at, rfile.updated_at)
 
 
-class TestWriteCPPReadPy(_TestBackendCompatibility):
+class TestWriteCPPReadPy(BackendCompatibilityTestBase):
 
     write_backend = "hdf5"
     read_backend = "h5py"
 
 
-class TestWritePyReadCPP(_TestBackendCompatibility):
+class TestWritePyReadCPP(BackendCompatibilityTestBase):
 
     write_backend = "h5py"
     read_backend = "hdf5"

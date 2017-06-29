@@ -18,7 +18,7 @@ import nixio as nix
 skip_cpp = not hasattr(nix, "core")
 
 
-class _TestMultiTag(unittest.TestCase):
+class MultiTagTestBase(unittest.TestCase):
 
     backend = None
 
@@ -418,11 +418,11 @@ class _TestMultiTag(unittest.TestCase):
 
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestMultiTagCPP(_TestMultiTag):
+class TestMultiTagCPP(MultiTagTestBase):
 
     backend = "hdf5"
 
 
-class TestMultiTagPy(_TestMultiTag):
+class TestMultiTagPy(MultiTagTestBase):
 
     backend = "h5py"

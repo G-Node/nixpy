@@ -25,7 +25,7 @@ except NameError:  # 'basestring' is undefined, must be Python 3
     basestring = (str, bytes)
 
 
-class _TestDataArray(unittest.TestCase):
+class DataArrayTestBase(unittest.TestCase):
 
     backend = None
     testfilename = "dataarraytest.h5"
@@ -368,11 +368,11 @@ class _TestDataArray(unittest.TestCase):
 
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestDataArrayCPP(_TestDataArray):
+class TestDataArrayCPP(DataArrayTestBase):
 
     backend = "hdf5"
 
 
-class TestDataArrayPy(_TestDataArray):
+class TestDataArrayPy(DataArrayTestBase):
 
     backend = "h5py"
