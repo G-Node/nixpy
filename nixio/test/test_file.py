@@ -20,7 +20,7 @@ from nixio.pycore.exceptions.exceptions import InvalidFile
 skip_cpp = not hasattr(nix, "core")
 
 
-class _FileTest(unittest.TestCase):
+class FileTestBase(unittest.TestCase):
 
     backend = None
     testfilename = "filetest.h5"
@@ -134,17 +134,17 @@ class _FileTest(unittest.TestCase):
 
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class FileTestCPP(_FileTest):
+class TestFileCPP(FileTestBase):
 
     backend = "hdf5"
 
 
-class FileTestPy(_FileTest):
+class TestFilePy(FileTestBase):
 
     backend = "h5py"
 
 
-class FileVerTestPy(unittest.TestCase):
+class TestFileVerPy(unittest.TestCase):
 
     backend = "h5py"
     testfilename = "versiontest.h5"

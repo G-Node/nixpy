@@ -284,6 +284,9 @@ class File(FileMixin):
         except ValueError:
             return False
 
+    def flush(self):
+        self._h5file.flush()
+
     def close(self):
         """
         Closes an open file.

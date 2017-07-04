@@ -141,8 +141,7 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
             raise ValueError("Cannot append additional alias dimension. "
                              "There must only be one!")
         dimgroup = self._h5group.open_group("dimensions")
-        data = self._h5group.group["data"]
-        return RangeDimension._create_new(dimgroup, 1, data)
+        return RangeDimension._create_new_alias(dimgroup, 1, self)
 
     def delete_dimensions(self):
         """
