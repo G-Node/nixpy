@@ -107,7 +107,7 @@ def update_info(newver):
     newinfo = []
     for line in oldinfo:
         if line.startswith("VERSION"):
-            line = re.sub("'[1-9\.a-z]+'", "'" + newver + "'", line)
+            line = re.sub("'[0-9\.a-z]+'", "'" + newver + "'", line)
         newinfo.append(line)
 
     diff = diff_lines(oldinfo, newinfo)
