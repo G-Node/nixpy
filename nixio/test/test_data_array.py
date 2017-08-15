@@ -117,6 +117,13 @@ class DataArrayTestBase(unittest.TestCase):
         self.array.polynom_coefficients = (1.1, 2.2)
         assert(self.array.polynom_coefficients == (1.1, 2.2))
 
+        data = [10, 29, 33]
+        intarray = self.block.create_data_array("intarray", "array",
+                                                nix.DataType.Int64,
+                                                data=data)
+        intarray.polynom_coefficients = (0.0, 0.1)
+        np.testing.assert_almost_equal(intarray[:], np.array(data) * 0.1)
+
         # TODO delete does not work
 
     def test_data_array_data(self):
