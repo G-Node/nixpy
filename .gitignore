@@ -24,6 +24,7 @@ pip-log.txt
 *.log
 *.kate-swp
 *.swp
+*cache
 
 # idea / pycharm files
 .idea

@@ -216,7 +216,7 @@ def print_appveyor_urls():
     wait_for_ret()
 
     apiurl = "https://ci.appveyor.com/api/"
-    account = "gicmo"
+    account = "achilleas-k"
     project_name = "nixpy"
 
     url = os.path.join(apiurl, "projects", account, project_name)

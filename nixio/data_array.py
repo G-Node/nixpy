@@ -129,6 +129,10 @@ class DataSetMixin(object):
         count, offset, shape = self.__tuple_to_count_offset_shape(index)
         raw = np.empty(shape, dtype=self.dtype)
 
+        if hasattr(self, "polynom_coefficients") and self.polynom_coefficients:
+            # if there are coefficients, convert the dtype of the returned data
+            # array to double
+            raw.dtype = np.float64
         self._read_data(raw, count, offset)
 
         return raw
