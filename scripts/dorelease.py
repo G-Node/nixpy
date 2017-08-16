@@ -217,7 +217,7 @@ def print_appveyor_urls():
 
     apiurl = "https://ci.appveyor.com/api/"
     account = "achilleas-k"
-    project_name = "nixpy"
+    project_name = "nixpy-um2sy"
 
     url = os.path.join(apiurl, "projects", account, project_name)
     r = requests.get(url)
