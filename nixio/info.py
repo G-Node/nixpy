@@ -6,7 +6,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-VERSION = '1.4.1'
+VERSION = '1.4.2'
 STATUS = 'Release'
 RELEASE = '%s %s' % (VERSION, STATUS)
 AUTHOR = 'Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe,\
