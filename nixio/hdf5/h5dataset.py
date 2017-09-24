@@ -7,8 +7,6 @@
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
 
-import numpy as np
-
 from ..value import DataType
 from .. import util
 
@@ -24,10 +22,10 @@ class H5DataSet(object):
             maxshape = (None,) * len(shape)
             if dtype == DataType.String:
                 dtype = util.vlen_str_dtype
-            self.dataset = self._parent.require_dataset(name, shape=shape,
-                                                        dtype=dtype,
-                                                        chunks=True,
-                                                        maxshape=maxshape)
+            self.dataset = self._parent.require_dataset(
+                name, shape=shape, dtype=dtype,
+                chunks=True, maxshape=maxshape
+            )
 
     @classmethod
     def create_from_h5obj(cls, h5obj):
@@ -35,28 +33,16 @@ class H5DataSet(object):
         name = h5obj.name.split("/")[-1]
         return cls(parent, name)
 
-    def write_data(self, data, count=None, offset=None):
-        if count and offset:
-            sl = util.co_to_slice(count, offset)
-            self.dataset[sl] = data
-        else:
+    def write_data(self, data, sl=None):
+        if sl is None:
             self.dataset[:] = data
-
-    def read_data(self, data, count=None, offset=None):
-        if 0 in self.dataset.shape or len(self.dataset.shape) == 0:
-            return
-        if count and offset:
-            if sum(count) == 0 and len(data) == 0:
-                return data
-            datashape = data.shape
-            sl = util.co_to_slice(count, offset)
-            if isinstance(sl, tuple) and np.ndim(data) != len(sl):
-                if count[-1] == 1:
-                    data.resize(datashape + (1,))
-            self.dataset.read_direct(data, sl)
-            data.resize(datashape)
         else:
-            self.dataset.read_direct(data)
+            self.dataset[sl] = data
+
+    def read_data(self, sl=None):
+        if sl is None:
+            return self.dataset[:]
+        return self.dataset[sl]
 
     def set_attr(self, name, value):
         if value is None:

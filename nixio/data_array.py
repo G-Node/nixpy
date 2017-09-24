@@ -119,34 +119,15 @@ class DataSetMixin(object):
     """
 
     def __array__(self):
-        raw = np.empty(self.shape, dtype=self.dtype)
-        self.read_direct(raw)
-        return raw
+        # raw = np.empty(self.shape, dtype=self.dtype)
+        # self.read_direct(raw)
+        return self._read_data()[:]
 
     def __getitem__(self, index):
-        index = self.__index_to_tuple(index)
-        if len(index) < 1:
-            return np.array(self)
-        # if we got to here we have a tuple with len >= 1
-        count, offset, shape = self.__tuple_to_count_offset_shape(index)
-        raw = np.empty(shape, dtype=self.dtype)
-
-        self._read_data(raw, count, offset)
-
-        return raw
+        return self._read_data(index)
 
     def __setitem__(self, index, value):
-        index = self.__index_to_tuple(index)
-        if len(index) < 1:
-            shape = self.shape
-            count, offset = shape, tuple([0]*len(shape))
-        else:
-            count, offset, _ = self.__tuple_to_count_offset_shape(index)
-
-        # NB: np.ascontiguousarray does not copy the array if it is
-        # already in c-contiguous form
-        raw = np.ascontiguousarray(value)
-        self._write_data(raw, count, offset)
+        self._write_data(value, index)
 
     def __len__(self):
         s = self.len()
@@ -210,7 +191,7 @@ class DataSetMixin(object):
         :param data: The array which contents is being written
         :type data: :class:`numpy.ndarray`
         """
-        self._write_data(data, (), ())
+        self._write_data(data)
 
     def read_direct(self, data):
         """
@@ -223,8 +204,7 @@ class DataSetMixin(object):
         :param data: The array where data is being read into
         :type data: :class:`numpy.ndarray`
         """
-
-        self._read_data(data, (), ())
+        data[:] = self._read_data()
 
     def append(self, data, axis=0):
         """
@@ -251,7 +231,8 @@ class DataSetMixin(object):
         enlarge = tuple(self.shape[i] + (0 if i != axis else x)
                         for i, x in enumerate(data.shape))
         self.data_extent = enlarge
-        self._write_data(data, count, offset)
+        sl = tuple(slice(o, c+o) for o, c in zip(offset, count))
+        self._write_data(data, sl)
 
     @staticmethod
     def __index_to_tuple(index):
@@ -341,13 +322,13 @@ class DataSetMixin(object):
 
 class DataSet(DataSetMixin):
 
-    def _write_data(self, data, count, offset):
+    def _write_data(self, data, sl=None):
         dataset = self._h5group.get_dataset("data")
-        dataset.write_data(data, count, offset)
+        dataset.write_data(data,  sl)
 
-    def _read_data(self, data, count, offset):
+    def _read_data(self, sl=None):
         dataset = self._h5group.get_dataset("data")
-        dataset.read_data(data, count, offset)
+        return dataset.read_data(sl)
 
     @property
     def data_extent(self):
@@ -391,17 +372,18 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         newentity._h5group.create_dataset("data", shape, data_type)
         return newentity
 
-    def _read_data(self, data, count, offset):
+    def _read_data(self, sl=None):
         coeff = self.polynom_coefficients
         origin = self.expansion_origin
         if len(coeff) or origin:
             if not origin:
                 origin = 0.0
 
-            super(DataArray, self)._read_data(data, count, offset)
+            data = super(DataArray, self)._read_data(sl)
             util.apply_polynomial(coeff, origin, data)
         else:
-            super(DataArray, self)._read_data(data, count, offset)
+            data = super(DataArray, self)._read_data(sl)
+        return data
 
     def append_set_dimension(self):
         """
