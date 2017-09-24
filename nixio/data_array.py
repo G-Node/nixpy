@@ -80,17 +80,18 @@ class DataArray(Entity, DataSet):
                                           compression)
         return newentity
 
-    def _read_data(self, data, count, offset):
+    def _read_data(self, sl=None):
         coeff = self.polynom_coefficients
         origin = self.expansion_origin
         if len(coeff) or origin:
             if not origin:
                 origin = 0.0
 
-            super(DataArray, self)._read_data(data, count, offset)
+            data = super(DataArray, self)._read_data(sl)
             util.apply_polynomial(coeff, origin, data)
         else:
-            super(DataArray, self)._read_data(data, count, offset)
+            data = super(DataArray, self)._read_data(sl)
+        return data
 
     @property
     def sources(self):
@@ -305,7 +306,8 @@ class DataArray(Entity, DataSet):
                                  len(extents), datadim
                              ))
         if mode == DataSliceMode.Index:
-            return DataView(self, extents, positions)
+            sl = tuple(slice(p, p+e) for p, e in zip(positions, extents))
+            return DataView(self, sl)
         elif mode == DataSliceMode.Data:
             return self._get_slice_bydim(positions, extents)
         else:
@@ -323,7 +325,8 @@ class DataArray(Entity, DataSet):
             elif dim.dimension_type == DimensionType.Set:
                 dpos.append(int(pos))
                 dext.append(int(ext))
-        return DataView(self, dext, dpos)
+        sl = tuple(slice(p, p+e) for p, e in zip(dpos, dext))
+        return DataView(self, sl)
 
     @property
     def data(self):

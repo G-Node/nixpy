@@ -139,23 +139,6 @@ def check_attr_type(value, type_):
         raise exceptions.InvalidAttrType(type_, value)
 
 
-def co_to_slice(count, offset):
-    """
-    Converts an offset-count pair to an h5py compatible slice
-
-    :param count: number of items
-    :param offset: offset from start
-    :return: slice-like tuple or single index
-    """
-    sl = []
-    for c, o in zip(count, offset):
-        sl.append(slice(o, c+o))
-    if len(sl) == 1:
-        return sl[0]
-    else:
-        return tuple(sl)
-
-
 def apply_polynomial(coefficients, origin, data):
     data[:] = data[:] - origin
     if coefficients:
