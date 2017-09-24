@@ -11,6 +11,7 @@ import numpy as np
 
 from .entity import Entity
 from .metadata_reference import create_metadata_prop
+from .source_link_container import SourceLinkContainer
 
 from .value import DataType
 from .data_array import DataArray
@@ -148,15 +149,11 @@ class BaseTag(Entity):
         features = self._h5group.open_group("features")
         features.delete(id_)
 
-    @classmethod
-    def _position_and_extent_in_data(cls, data, offset, count):
-        pos = tuple(np.add(offset, count) - 1)
-        return cls._position_in_data(data, pos)
-
     @staticmethod
-    def _position_in_data(data, pos):
+    def _slices_in_data(data, slices):
         dasize = data.data_extent
-        return np.all(np.less(pos, dasize))
+        stops = tuple(sl.stop for sl in slices)
+        return np.all(np.less_equal(stops, dasize))
 
     @staticmethod
     def _pos_to_idx(pos, unit, dim):
@@ -189,7 +186,7 @@ class BaseTag(Entity):
                     "Cannot apply a position with unit to a SetDimension",
                     "Tag._pos_to_idx"
                 )
-            index = round(pos)
+            index = np.round(pos)
             nlabels = len(dim.labels)
             if nlabels and index > nlabels:
                 raise OutOfBounds("Position is out of bounds in SetDimension",
@@ -259,27 +256,24 @@ class Tag(BaseTag):
             dtype = DataType.Double
             self._h5group.write_data("extent", ext, dtype)
 
-    def _get_offset_and_count(self, data):
-        offset = []
-        count = []
+    def _calc_data_slices(self, data):
+        refslice = list()
         position = self.position
         extent = self.extent
-        for idx in range(len(position)):
-            dim = data.dimensions[idx]
-            pos = position[idx]
+        for idx, (pos, dim) in enumerate(zip(position, data.dimensions)):
             if self.units:
                 unit = self.units[idx]
             else:
                 unit = None
-            o = self._pos_to_idx(pos, unit, dim)
-            offset.append(o)
+            start = self._pos_to_idx(pos, unit, dim)
+            stop = 0
             if idx < len(extent):
                 ext = extent[idx]
-                c = self._pos_to_idx(pos + ext, unit, dim) - o
-                count.append(c + 1 if c >= 1 else 1)
-            else:
-                count.append(1)
-        return tuple(offset), tuple(count)
+                stop = self._pos_to_idx(pos + ext, unit, dim)
+            if stop == 0:
+                stop = start + 1
+            refslice.append(slice(start, stop))
+        return tuple(refslice)
 
     def retrieve_data(self, refidx):
         references = self.references
@@ -300,12 +294,11 @@ class Tag(BaseTag):
                 "dimensionality of data",
                 "Tag.retrieve_data")
 
-        offset, count = self._get_offset_and_count(ref)
-
-        if not self._position_and_extent_in_data(ref, offset, count):
+        slices = self._calc_data_slices(ref)
+        if not self._slices_in_data(ref, slices):
             raise OutOfBounds("References data slice out of the extent of the "
                               "DataArray!")
-        return DataView(ref, count, offset)
+        return DataView(ref, slices)
 
     def retrieve_feature_data(self, featidx):
         if self._feature_count() == 0:
@@ -327,15 +320,14 @@ class Tag(BaseTag):
         if da is None:
             raise UninitializedEntity()
         if feat.link_type == LinkType.Tagged:
-            offset, count = self._get_offset_and_count(da)
-            if not self._position_and_extent_in_data(da, offset, count):
+            slices = self._calc_data_slices(da)
+            if not self._slices_in_data(da, slices):
                 raise OutOfBounds("Requested data slice out of the extent "
                                   "of the Feature!")
-            return DataView(da, count, offset)
+            return DataView(da, slices)
         # For untagged and indexed return the full data
-        count = da.data_extent
-        offset = (0,) * len(count)
-        return DataView(da, count, offset)
+        fullslices = tuple(slice(0, stop) for stop in da.shape)
+        return DataView(da, fullslices)
 
     @property
     def references(self):

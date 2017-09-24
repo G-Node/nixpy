@@ -385,7 +385,6 @@ class TestMultiTags(unittest.TestCase):
         self.feature_tag.create_feature(index_data, nix.LinkType.Untagged)
 
         # preparations done, actually test
-        # print(self.feature_tag.features)
         assert(len(self.feature_tag.features) == 3)
 
         # indexed feature

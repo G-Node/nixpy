@@ -98,9 +98,12 @@ class MultiTag(BaseTag):
             setattr(self, "_features", FeatureProxyList(self))
         return self._features
 
-    def _get_offset_and_count(self, data, index):
-        offsets = []
-        counts = []
+    def _get_slice(self, data, index):
+        offset, count = self._get_offset_and_count(data, index)
+        sl = tuple(slice(o, o+c) for o, c in zip(offset, count))
+        return sl
+
+    def _calc_data_slices(self, data, index):
         positions = self.positions
         extents = self.extents
 
@@ -113,36 +116,31 @@ class MultiTag(BaseTag):
         if extents and index >= ext_size[0]:
             raise OutOfBounds("Index out of bounds of extents!")
 
-        if len(pos_size) == 1 and len(data.dimensions) != 1:
-            raise IncompatibleDimensions(
+        incdim_exception = IncompatibleDimensions(
                 "Number of dimensions in positions does not match "
                 "dimensionality of data",
-                "MultiTag._get_offset_and_count"
+                "MultiTag._calc_data_slices"
             )
 
+        if len(pos_size) == 1 and len(data.dimensions) != 1:
+            raise incdim_exception
+
         if len(pos_size) > 1 and pos_size[1] > len(data.dimensions):
-            raise IncompatibleDimensions(
-                "Number of dimensions in positions does not match "
-                "dimensionality of data",
-                "MultiTag._get_offset_and_count"
-            )
+            raise incdim_exception
 
         if (extents and len(ext_size) > 1 and
                 ext_size[1] > len(data.dimensions)):
-            raise IncompatibleDimensions(
-                "Number of dimensions in extents does not match "
-                "dimensionality of data",
-                "MultiTag._get_offset_and_count"
-            )
+            raise incdim_exception
 
-        offset = positions[index, 0:len(data.dimensions)]
+        dimpos = positions[index, 0:len(data.dimensions)]
         units = self.units
-        for idx in range(offset.size):
+        starts, stops = list(), list()
+        for idx in range(dimpos.size):
             dim = data.dimensions[idx]
             unit = None
             if idx <= len(units) and len(units):
                 unit = units[idx]
-            offsets.append(self._pos_to_idx(offset.item(idx), unit, dim))
+            starts.append(self._pos_to_idx(dimpos.item(idx), unit, dim))
 
         if extents:
             extent = extents[index, 0:len(data.dimensions)]
@@ -151,13 +149,14 @@ class MultiTag(BaseTag):
                 unit = None
                 if idx <= len(units) and len(units):
                     unit = units[idx]
-                c = self._pos_to_idx(offset.item(idx) + extent.item(idx),
-                                     unit, dim) - offsets[idx]
-                counts.append(c + 1 if c >= 1 else 1)
+                stop = self._pos_to_idx(dimpos.item(idx) + extent[idx],
+                                        unit, dim)
+                minstop = starts[idx] + 1
+                stops.append(max(stop, minstop))
         else:
-            counts = [1]*len(data.dimensions)
+            stops = [start+1 for start in starts]
 
-        return offsets, counts
+        return tuple(slice(start, stop) for start, stop in zip(starts, stops))
 
     def retrieve_data(self, posidx, refidx):
         references = self.references
@@ -184,12 +183,12 @@ class MultiTag(BaseTag):
                     "Number of dimensions in position or extent do not match "
                     "dimensionality of data",
                     "MultiTag.retrieve_data")
-        offset, count = self._get_offset_and_count(ref, posidx)
+        slices = self._calc_data_slices(ref, posidx)
 
-        if not self._position_and_extent_in_data(ref, offset, count):
+        if not self._slices_in_data(ref, slices):
             raise OutOfBounds("References data slice out of the extent of the "
                               "DataArray!")
-        return DataView(ref, count, offset)
+        return DataView(ref, slices)
 
     def retrieve_feature_data(self, posidx, featidx):
         if self._feature_count() == 0:
@@ -211,27 +210,25 @@ class MultiTag(BaseTag):
         if da is None:
             raise UninitializedEntity()
         if feat.link_type == LinkType.Tagged:
-            offset, count = self._get_offset_and_count(da, posidx)
-            if not self._position_and_extent_in_data(da, offset, count):
+            slices = self._calc_data_slices(da, posidx)
+            if not self._slices_in_data(da, slices):
                 raise OutOfBounds("Requested data slice out of the extent "
                                   "of the Feature!")
-            return DataView(da, count, offset)
+            return DataView(da, slices)
         elif feat.link_type == LinkType.Indexed:
             if posidx > da.data_extent[0]:
                 raise OutOfBounds("Position is larger than the data stored "
                                   "in the Feature!")
-            offset = [0] * len(da.data_extent)
-            offset[0] = posidx
-            count = list(da.data_extent)
-            count[0] = 1
+            slices = [slice(posidx, posidx+1)]
+            slices.extend(slice(0, stop) for stop in da.data_extent[1:])
 
-            if not self._position_and_extent_in_data(da, offset, count):
+            if not self._slices_in_data(da, slices):
                 OutOfBounds("Requested data slice out of the extent of the "
                             "Feature!")
-            return DataView(da, count, offset)
+            return DataView(da, slices)
         # For untagged return the full data
-        sl = tuple(slice(0, c) for c in da.data_extent)
-        return DataView(da, sl)
+        slices = tuple(slice(0, stop) for stop in da.data_extent)
+        return DataView(da, slices)
 
     @property
     def sources(self):

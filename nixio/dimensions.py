@@ -84,7 +84,7 @@ class SampledDimension(Dimension):
         """
         offset = self.offset if self.offset else 0
         sample = self.sampling_interval
-        index = int(round((position - offset) / sample))
+        index = np.round((position - offset) / sample)
         if index < 0:
             raise IndexError("Position is out of bounds of this dimension!")
         return int(index)
