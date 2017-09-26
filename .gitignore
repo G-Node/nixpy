@@ -40,6 +40,7 @@ pip-log.txt
 *kdev*
 Makefile
 
-# test file
-nixpy.py
-
+.DS_Store
+.cache
+.eggs
+.mypy_cache
