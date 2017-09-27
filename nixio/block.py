@@ -16,7 +16,7 @@ import numpy as np
 from .util import find as finders
 from .compression import Compression
 
-from .entity_with_metadata import EntityWithMetadata
+from .entity import Entity
 from .exceptions import exceptions
 from .group import Group
 from .data_array import DataArray
@@ -28,7 +28,7 @@ from . import util
 from .container import Container
 
 
-class Block(EntityWithMetadata):
+class Block(Entity):
 
     def __init__(self, nixparent, h5group, compression=Compression.Auto):
         super(Block, self).__init__(nixparent, h5group)

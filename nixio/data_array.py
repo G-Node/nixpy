@@ -9,9 +9,9 @@
 from numbers import Number
 from enum import Enum
 
-from .entity_with_sources import EntityWithSources
 from .data_view import DataView
 from .data_set import DataSet
+from .entity import Entity
 from .value import DataType
 from .dimensions import (SampledDimension, RangeDimension, SetDimension,
                          DimensionType)
@@ -62,7 +62,7 @@ class DimensionProxyList(object):
         return str(self)
 
 
-class DataArray(EntityWithSources, DataSet):
+class DataArray(Entity, DataSet):
 
     def __init__(self, nixparent, h5group):
         super(DataArray, self).__init__(nixparent, h5group)
