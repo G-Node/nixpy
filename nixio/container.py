@@ -42,6 +42,7 @@ class Container(object):
         return self._inst_item(item)
 
     def __delitem__(self, item):
+        # TODO: Delete from everywhere
         if isinstance(item, int):
             item = self._inst_item(self._backend.get_by_pos(item))
         if isinstance(item, self._itemclass):
