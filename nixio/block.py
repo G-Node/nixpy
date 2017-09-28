@@ -23,6 +23,7 @@ from .data_array import DataArray
 from .multi_tag import MultiTag
 from .tag import Tag
 from .source import Source
+from .section import Section
 from . import util
 from .container import Container
 
@@ -326,6 +327,28 @@ class Block(EntityWithMetadata):
         if self._groups is None:
             self._groups = Container("groups", self, Group)
         return self._groups
+
+    @property
+    def metadata(self):
+        """
+        Associated metadata of the entity. Sections attached to the entity
+        via this attribute can provide additional annotations. This is an
+        optional read-write property, and can be None if no metadata is
+        available.
+
+        :type: Section
+        """
+        if "metadata" in self._h5group:
+            return Section(None, self._h5group.open_group("metadata"))
+        else:
+            return None
+
+    @metadata.setter
+    def metadata(self, sect):
+        if not isinstance(sect, Section):
+            raise TypeError("Error setting metadata to {}. Not a Section."
+                            .format(sect))
+        self._h5group.create_link(sect, "metadata")
 
     def __eq__(self, other):
         """
