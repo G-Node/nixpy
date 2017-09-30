@@ -6,12 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
-
-try:
-    basestring = basestring
-except NameError:  # 'basestring' is undefined, must be Python 3
-    basestring = (str, bytes)
+from six import string_types
 
 
 class ProxyList(object):
@@ -30,7 +25,7 @@ class ProxyList(object):
         return self.__counter()
 
     def __getitem__(self, key):
-        if isinstance(key, basestring):
+        if isinstance(key, string_types):
             val = None
             try:
                 val = self.__getter(key)
@@ -78,7 +73,7 @@ class ProxyList(object):
         if hasattr(key, "id"):
             key = key.id
 
-        if isinstance(key, basestring):
+        if isinstance(key, string_types):
             try:
                 elem = self.__getter(key)
                 return elem is not None
@@ -106,7 +101,7 @@ class RefProxyList(ProxyList):
         if hasattr(key, "id"):
             key = key.id
 
-        if isinstance(key, basestring):
+        if isinstance(key, string_types):
             self.__appender(key)
         else:
             raise TypeError("The only id strings or entities can be appended")

@@ -7,17 +7,12 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import os
+from six import string_types
 import sys
 import unittest
 import numpy as np
 import nixio as nix
 from .tmp import TempDir
-
-
-try:
-    basestring = basestring
-except NameError:  # 'basestring' is undefined, must be Python 3
-    basestring = (str, bytes)
 
 
 class TestDataArray(unittest.TestCase):
@@ -306,8 +301,8 @@ class TestDataArray(unittest.TestCase):
         self.assertRaises(KeyError, lambda: self.array.dimensions[-4])
         self.assertRaises(KeyError, lambda: self.array.dimensions[3])
 
-        assert(isinstance(str(self.array.dimensions), basestring))
-        assert(isinstance(repr(self.array.dimensions), basestring))
+        assert(isinstance(str(self.array.dimensions), string_types))
+        assert(isinstance(repr(self.array.dimensions), string_types))
 
         dims = list(self.array.dimensions)
         for i in range(3):
