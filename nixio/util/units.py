@@ -7,6 +7,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
+from six import string_types
 import re
 try:
     from collections.abc import Sequence
@@ -14,12 +15,6 @@ except ImportError:
     from collections import Sequence
 from ..exceptions import InvalidUnit
 
-
-strings = (str, bytes)
-try:
-    strings += (basestring,)
-except NameError:
-    pass
 
 # Base32hex alphabet (RFC 4648)
 ID_ALPHABET = "0123456789abcdefghijklmnopqrstuv"
@@ -130,8 +125,8 @@ def scalable(unit_a, unit_b):
     :rtype: bool
     """
     if (isinstance(unit_a, Sequence) and isinstance(unit_b, Sequence) and
-            not isinstance(unit_a, strings) and
-            not isinstance(unit_b, strings)):
+            not isinstance(unit_a, string_types) and
+            not isinstance(unit_b, string_types)):
         if len(unit_a) != len(unit_b):
             return False
         for a, b in zip(unit_a, unit_b):

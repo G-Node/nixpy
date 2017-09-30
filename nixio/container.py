@@ -2,12 +2,6 @@ from collections import Iterable
 from . import util
 
 
-try:
-    strtype = basestring
-except NameError:
-    strtype = str
-
-
 class Container(object):
     """
     Container acts as an interface to container groups in the backend. In the

@@ -6,19 +6,14 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from six import string_types
 from numbers import Number, Integral, Real
 
 import numpy as np
 
-strings = (str, bytes)
-try:
-    strings += (basestring,)
-except NameError:
-    pass
 
 bools = (bool, np.bool_)
-
-valid_types = (Number, strings, bools)
+valid_types = (Number, string_types, bools)
 
 
 class DataType(object):
@@ -43,7 +38,7 @@ class DataType(object):
             return cls.Int64
         elif isinstance(value, Real):
             return cls.Float
-        elif isinstance(value, strings):
+        elif isinstance(value, string_types):
             return cls.String
         else:
             raise ValueError("Unknown type for value {}".format(value))
