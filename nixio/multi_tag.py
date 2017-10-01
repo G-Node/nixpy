@@ -7,6 +7,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 from .tag import BaseTag, ReferenceProxyList, FeatureProxyList
+from .source_link_container import SourceLinkContainer
 from .metadata_reference import create_metadata_prop
 from .data_array import DataArray
 from .data_view import DataView
@@ -229,6 +230,18 @@ class MultiTag(BaseTag):
                             "Feature!")
             return DataView(da, count, offset)
         # For untagged return the full data
-        count = da.data_extent
-        offset = (0,) * len(count)
-        return DataView(da, count, offset)
+        sl = tuple(slice(0, c) for c in da.data_extent)
+        return DataView(da, sl)
+
+    @property
+    def sources(self):
+        """
+        A property containing all Sources referenced by the MultiTag. Sources
+        can be obtained by index or their id. Sources can be removed from the
+        list, but removing a referenced Source will not remove it from the
+        file. New Sources can be added using the append method of the list.
+        This is a read only attribute.
+        """
+        if self._sources is None:
+            self._sources = SourceLinkContainer(self)
+        return self._sources
