@@ -337,8 +337,8 @@ class File(object):
     @property
     def sections(self):
         """
-        A property containing all root sections of a file. Specific root
-        sections can be obtained by their name, id or index. Sections can be
+        A property containing all root Sections of a file. Specific root
+        Sections can be obtained by their name, id or index. Sections can be
         deleted from this list. Notice: when a section is deleted all its child
         section and properties will be removed too. Adding a new Section is
         done via the crate_section method of File.
