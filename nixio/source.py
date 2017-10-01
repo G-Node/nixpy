@@ -8,27 +8,20 @@
 # LICENSE file in the root of the Project.
 from sys import maxsize as maxint
 
-from .entity_with_metadata import EntityWithMetadata
-from .util.proxy_list import ProxyList
 from .import exceptions
+from .entity import Entity
+from .container import Container
+from .metadata_reference import create_metadata_prop
 from . import util
 from .util import find as finders
 
 
-class SourceProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(SourceProxyList, self).__init__(obj, "_source_count",
-                                              "_get_source_by_id",
-                                              "_get_source_by_pos",
-                                              "_delete_source_by_id")
-
-
-class Source(EntityWithMetadata):
+class Source(Entity):
 
     def __init__(self, nixparent, h5group):
         super(Source, self).__init__(nixparent, h5group)
-        # TODO: Validate Source container
+        self.metadata = create_metadata_prop()
+        self._sources = None
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_):
@@ -118,15 +111,13 @@ class Source(EntityWithMetadata):
     @property
     def sources(self):
         """
-        A property containing all sources of a block. Sources can be obtained
-        via their index or by their id. Sources can be deleted from the list.
-        Adding sources is done using the Blocks create_source method.
+        A property containing child sources of a Source. Sources can be
+        obtained via their name, index, id. Sources can be deleted from the
+        list.  Adding sources is done using the Blocks create_source method.
         This is a read only attribute.
-
-        :type: ProxyList of Source entities.
         """
-        if not hasattr(self, "_sources"):
-            setattr(self, "_sources", SourceProxyList(self))
+        if self._sources is None:
+            self._sources = Container("sources", self, Source)
         return self._sources
 
     def __eq__(self, other):
