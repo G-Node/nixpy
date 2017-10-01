@@ -30,6 +30,10 @@ class DataView(DataSet):
     def data_extent(self):
         return self._count
 
+    @data_extent.setter
+    def data_extent(self, v):
+        raise AttributeError("can't set attribute")
+
     @property
     def data_type(self):
         return self.array.data_type
