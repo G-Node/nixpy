@@ -44,16 +44,6 @@ class Block(EntityWithMetadata):
         newentity._compr = compression
         return newentity
 
-    # DataArray
-    def _create_data_array(self, name, type_, data_type, shape, compression):
-        util.check_entity_name_and_type(name, type_)
-        data_arrays = self._h5group.open_group("data_arrays")
-        if name in data_arrays:
-            raise exceptions.DuplicateName("create_data_array")
-        da = DataArray._create_new(self, data_arrays, name, type_,
-                                   data_type, shape, compression)
-        return da
-
     # MultiTag
     def create_multi_tag(self, name, type_, positions):
         """
@@ -244,8 +234,12 @@ class Block(EntityWithMetadata):
                     raise ValueError("Shape must equal data.shape")
             else:
                 shape = data.shape
-        da = self._create_data_array(name, array_type, dtype, shape,
-                                     compression)
+        util.check_entity_name_and_type(name, array_type)
+        data_arrays = self._h5group.open_group("data_arrays")
+        if name in data_arrays:
+            raise exceptions.DuplicateName("create_data_array")
+        da = DataArray._create_new(self, data_arrays, name, array_type,
+                                   dtype, shape, compression)
         if data is not None:
             da.write_direct(data)
         return da
