@@ -77,6 +77,11 @@ class Container(object):
     def _item_key(item):
         return item.name
 
+    def items(self):
+        for group in self._backend:
+            item = self._inst_item(group)
+            yield item.id, item
+
 
 class LinkContainer(Container):
     """
