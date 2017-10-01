@@ -6,8 +6,8 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
 from .tag import BaseTag, ReferenceProxyList, FeatureProxyList
+from .metadata_reference import create_metadata_prop
 from .data_array import DataArray
 from .data_view import DataView
 from .link_type import LinkType
@@ -19,6 +19,8 @@ class MultiTag(BaseTag):
 
     def __init__(self, nixparent, h5group):
         super(MultiTag, self).__init__(nixparent, h5group)
+        self.metadata = create_metadata_prop()
+        self._sources = None
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, positions):

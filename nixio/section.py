@@ -15,21 +15,12 @@ from operator import attrgetter
 from collections import Sequence
 
 from .entity import Entity
+from .container import Container
 from .property import Property
+from .util import find as finders
+from .value import Value
 from . import util
 from . import exceptions
-from .value import Value
-from .util import find as finders
-from .util.proxy_list import ProxyList
-
-
-class SectionProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(SectionProxyList, self).__init__(obj, "_section_count",
-                                               "_get_section_by_id",
-                                               "_get_section_by_pos",
-                                               "_delete_section_by_id")
 
 
 class S(object):
@@ -51,16 +42,6 @@ class S(object):
             return object.__getattribute__(self, item)
         else:
             return getattr(self.section, item)
-
-
-class PropertyProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(PropertyProxyList, self).__init__(obj,
-                                                "_property_count",
-                                                "_get_property_by_id_or_name",
-                                                "_get_property_by_pos",
-                                                "_delete_property_by_id")
 
 
 class Section(Entity):
@@ -409,6 +390,9 @@ class Section(Entity):
         if not hasattr(self, "_sections"):
             setattr(self, "_sections", SectionProxyList(self))
         return self._sections
+        if self._sections is None:
+            self._sections = Container("sections", self, Section)
+        return self._sources
 
     def __eq__(self, other):
         if hasattr(other, "id"):

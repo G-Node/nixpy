@@ -23,9 +23,9 @@ from .data_array import DataArray
 from .multi_tag import MultiTag
 from .tag import Tag
 from .source import Source
-from .section import Section
 from . import util
 from .container import Container
+from .metadata_reference import create_metadata_prop
 
 
 class Block(Entity):
@@ -37,6 +37,7 @@ class Block(Entity):
         self._tags = None
         self._multi_tags = None
         self._sources = None
+        self.metadata = create_metadata_prop()
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, compression):
@@ -328,36 +329,13 @@ class Block(Entity):
             self._groups = Container("groups", self, Group)
         return self._groups
 
-    @property
-    def metadata(self):
-        """
-        Associated metadata of the entity. Sections attached to the entity
-        via this attribute can provide additional annotations. This is an
-        optional read-write property, and can be None if no metadata is
-        available.
-
-        :type: Section
-        """
-        if "metadata" in self._h5group:
-            return Section(None, self._h5group.open_group("metadata"))
-        else:
-            return None
-
-    @metadata.setter
-    def metadata(self, sect):
-        if not isinstance(sect, Section):
-            raise TypeError("Error setting metadata to {}. Not a Section."
-                            .format(sect))
-        self._h5group.create_link(sect, "metadata")
-
     def __eq__(self, other):
         """
-        Two blocks are considered equal when they have the same id.
+        Two Blocks are considered equal when they have the same id.
         """
         if hasattr(other, "id"):
             return self.id == other.id
-        else:
-            return False
+        return False
 
     def __hash__(self):
         """

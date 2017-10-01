@@ -8,7 +8,6 @@
 # LICENSE file in the root of the Project.
 
 from . import util
-from .section import Section
 from .source import Source
 from .container import LinkContainer
 
@@ -155,28 +154,6 @@ class Entity(object):
                                                 self._parent.sources)
         return self._sources
 
-    @property
-    def metadata(self):
-        """
-        Associated metadata of the entity. Sections attached to the entity
-        via this attribute can provide additional annotations. This is an
-        optional read-write property, and can be None if no metadata is
-        available.
-
-        :type: Section
-        """
-        if "metadata" in self._h5group:
-            return Section(None, self._h5group.open_group("metadata"))
-        else:
-            return None
-
-    @metadata.setter
-    def metadata(self, sect):
-        if not isinstance(sect, Section):
-            raise TypeError("Error setting metadata to {}. Not a Section."
-                            .format(sect))
-        self._h5group.create_link(sect, "metadata")
-
     def __eq__(self, other):
         if hasattr(other, "id"):
             return self.id == other.id
@@ -208,9 +185,8 @@ class SourceLinkContainer(LinkContainer):
         if not hasattr(item, "id"):
             raise TypeError("NIX entity or id string required for append")
 
-        if not self._itemstore._parent.find_sources(
-                filtr=lambda x: x.id == item.id
-        ):
+        if not self._itemstore._parent.find_sources(filtr=lambda x:
+                                                    x.id == item.id):
             raise RuntimeError("This item cannot be appended here.")
 
         self._backend.create_link(item, item.id)

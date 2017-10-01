@@ -9,7 +9,9 @@
 
 import numpy as np
 
-from .entity_with_sources import EntityWithSources
+from .entity import Entity
+from .metadata_reference import create_metadata_prop
+
 from .value import DataType
 from .data_array import DataArray
 from .data_view import DataView
@@ -41,7 +43,7 @@ class FeatureProxyList(ProxyList):
         )
 
 
-class BaseTag(EntityWithSources):
+class BaseTag(Entity):
     """
     Base class for Tag and MultiTag
     """
@@ -210,6 +212,8 @@ class Tag(BaseTag):
 
     def __init__(self, nixparent, h5group):
         super(Tag, self).__init__(nixparent, h5group)
+        self.metadata = create_metadata_prop()
+        self._sources = None
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, position):
