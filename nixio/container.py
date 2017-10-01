@@ -103,6 +103,7 @@ class LinkContainer(Container):
     :param itemstore: The location (Container) where the original objects
     are stored and linked to.
     """
+
     def __init__(self, name, parent, itemclass, itemstore):
         super(LinkContainer, self).__init__(name, parent, itemclass)
         self._itemstore = itemstore

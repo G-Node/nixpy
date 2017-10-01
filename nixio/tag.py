@@ -366,3 +366,16 @@ class Tag(BaseTag):
         if not hasattr(self, "_features"):
             setattr(self, "_features", FeatureProxyList(self))
         return self._features
+
+    @property
+    def sources(self):
+        """
+        A property containing all Sources referenced by the Tag. Sources
+        can be obtained by index or their id. Sources can be removed from the
+        list, but removing a referenced Source will not remove it from the
+        file. New Sources can be added using the append method of the list.
+        This is a read only attribute.
+        """
+        if self._sources is None:
+            self._sources = SourceLinkContainer(self)
+        return self._sources

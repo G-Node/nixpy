@@ -12,6 +12,8 @@ from enum import Enum
 from .data_view import DataView
 from .data_set import DataSet
 from .entity import Entity
+from .source import Source
+from .container import LinkContainer
 from .value import DataType
 from .dimensions import (SampledDimension, RangeDimension, SetDimension,
                          DimensionType)
@@ -90,6 +92,19 @@ class DataArray(Entity, DataSet):
             util.apply_polynomial(coeff, origin, data)
         else:
             super(DataArray, self)._read_data(data, count, offset)
+
+    @property
+    def sources(self):
+        """
+        A property containing all Sources referenced by the DataArray. Sources
+        can be obtained by index or their id. Sources can be removed from the
+        list, but removing a referenced Source will not remove it from the
+        file. New Sources can be added using the append method of the list.
+        This is a read only attribute.
+        """
+        if self._sources is None:
+            self._sources = SourceLinkContainer(self)
+        return self._sources
 
     def append_set_dimension(self):
         """
