@@ -7,16 +7,22 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
-from __future__ import print_function
-import nixio as nix
+import os
+
 import unittest
 import numpy as np
 
+import nixio as nix
 
 class _TestMultiTag(unittest.TestCase):
+    testfilename = "mtagtest.h5"
 
     def setUp(self):
-        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite)
+        iv = 1.0
+        ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
+        unit = "ms"
+
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
 
         self.my_array = self.block.create_data_array("my array", "test",

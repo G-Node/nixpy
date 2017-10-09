@@ -131,6 +131,10 @@ class DataSetMixin(object):
         count, offset, shape = self.__tuple_to_count_offset_shape(index)
         raw = np.empty(shape, dtype=self.dtype)
 
+        if hasattr(self, "polynom_coefficients") and self.polynom_coefficients:
+            # if there are coefficients, convert the dtype of the returned data
+            # array to double
+            raw.dtype = np.float64
         self._read_data(raw, count, offset)
 
         return raw
@@ -463,8 +467,7 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
             raise ValueError("Cannot append additional alias dimension. "
                              "There must only be one!")
         dimgroup = self._h5group.open_group("dimensions")
-        data = self._h5group.group["data"]
-        return RangeDimension._create_new(dimgroup, 1, data)
+        return RangeDimension._create_new_alias(dimgroup, 1, self)
 
     def delete_dimensions(self):
         """

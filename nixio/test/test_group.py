@@ -7,14 +7,19 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
-import nixio as nix
+import os
 import unittest
+
+import nixio as nix
+
 
 
 class TestGroup(unittest.TestCase):
 
+    testfilename = "grouptest.h5"
+
     def setUp(self):
-        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite)
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
 
         self.my_array = self.block.create_data_array("my array", "test",

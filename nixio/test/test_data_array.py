@@ -7,8 +7,12 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
+import os
+import sys
+
 import unittest
 import numpy as np
+
 import nixio as nix
 
 
@@ -20,8 +24,10 @@ except NameError:  # 'basestring' is undefined, must be Python 3
 
 class TestDataArray(unittest.TestCase):
 
+    testfilename = "dataarraytest.h5"
+
     def setUp(self):
-        self.file = nix.File.open("unittest.h5", nix.FileMode.Overwrite)
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         self.array = self.block.create_data_array("test array", "signal",
                                                   nix.DataType.Double, (100, ))

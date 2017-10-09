@@ -7,14 +7,17 @@
 # LICENSE file in the root of the Project.
 
 from __future__ import (absolute_import, division, print_function)
+import os
 import unittest
 import nixio as nix
 
 
 class _TestBlock(unittest.TestCase):
 
+    testfilename = "unittest.h5"
+
     def setUp(self):
-        self.file = nix.File.open('unittest.h5', nix.FileMode.Overwrite)
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         self.other = self.file.create_block("other block", "recordingsession")
 
