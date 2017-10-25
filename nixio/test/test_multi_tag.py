@@ -288,6 +288,11 @@ class MultiTagTestBase(unittest.TestCase):
         assert(data.shape == (2000,))
         assert(np.array_equal(y[:2000], data[:]))
 
+        # get by id
+        data = mtag.retrieve_data(0, da.id)
+        assert(data.shape == (2000,))
+        assert(np.array_equal(y[:2000], data[:]))
+
         # multi dimensional data
         sample_iv = 1.0
         ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
