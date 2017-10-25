@@ -213,6 +213,21 @@ class TagTestBase(unittest.TestCase):
         assert(len(segdata.shape) == 3)
         assert(segdata.shape == (1, 6, 2))
 
+        # retrieve data by id and name
+        posdata = postag.retrieve_data(da.name)
+        assert(len(posdata.shape) == 3)
+        assert(posdata.shape == (1, 1, 1))
+        segdata = segtag.retrieve_data(da.name)
+        assert(len(segdata.shape) == 3)
+        assert(segdata.shape == (1, 6, 2))
+
+        posdata = postag.retrieve_data(da.id)
+        assert(len(posdata.shape) == 3)
+        assert(posdata.shape == (1, 1, 1))
+        segdata = segtag.retrieve_data(da.id)
+        assert(len(segdata.shape) == 3)
+        assert(segdata.shape == (1, 6, 2))
+
     def test_tag_retrieve_feature_data(self):
         number_feat = self.block.create_data_array("number feature", "test",
                                                    data=10.)

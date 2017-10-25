@@ -271,7 +271,7 @@ class Tag(BaseTag, TagMixin):
         if len(references) == 0:
             raise OutOfBounds("There are no references in this tag!")
 
-        if refidx >= len(references):
+        if isinstance(refidx, int) and refidx >= len(references):
             raise OutOfBounds("Reference index out of bounds.")
 
         ref = references[refidx]
