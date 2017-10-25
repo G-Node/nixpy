@@ -206,6 +206,17 @@ class MultiTagTestBase(unittest.TestCase):
         assert(reference1 in self.my_tag.references)
         assert(reference2 in self.my_tag.references)
 
+        # id and name access
+        assert(reference1 == self.my_tag.references[reference1.name])
+        assert(reference1 == self.my_tag.references[reference1.id])
+        assert(reference2 == self.my_tag.references[reference2.name])
+        assert(reference2 == self.my_tag.references[reference2.id])
+
+        assert(reference1.name in self.my_tag.references)
+        assert(reference2.name in self.my_tag.references)
+        assert(reference1.id in self.my_tag.references)
+        assert(reference2.id in self.my_tag.references)
+
         del self.my_tag.references[reference2]
         assert(self.my_tag.references[0] == reference1)
 
