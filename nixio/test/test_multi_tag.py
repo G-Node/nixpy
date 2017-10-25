@@ -239,6 +239,16 @@ class MultiTagTestBase(unittest.TestCase):
         assert(feature.id == self.my_tag.features[0].id)
         assert(feature.id == self.my_tag.features[-1].id)
 
+        # id and name access
+        assert(feature.id == self.my_tag.features[feature.id].id)
+        assert(feature.id == self.my_tag.features[data_array.id].id)
+        assert(feature.id == self.my_tag.features[data_array.name].id)
+        assert(data_array == self.my_tag.features[data_array.id].data)
+        assert(data_array == self.my_tag.features[data_array.name].data)
+
+        assert(data_array.id in self.my_tag.features)
+        assert(data_array.name in self.my_tag.features)
+
         del self.my_tag.features[0]
 
         assert(len(self.my_tag.features) == 0)
