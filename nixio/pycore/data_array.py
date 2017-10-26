@@ -141,6 +141,16 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
             raise ValueError("Cannot append additional alias dimension. "
                              "There must only be one!")
         dimgroup = self._h5group.open_group("dimensions")
+        # check if existing unit is SI
+        if self.unit:
+            u = self.unit
+            if not (util.units.is_si(u) or util.units.is_compound(u)):
+                raise InvalidUnit(
+                    "AliasRangeDimensions are only allowed when SI or "
+                    "composites of SI units are used. "
+                    "Current SI unit is {}".format(u),
+                    "DataArray.append_alias_range_dimension"
+                )
         return RangeDimension._create_new_alias(dimgroup, 1, self)
 
     def delete_dimensions(self):
@@ -242,12 +252,18 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
 
     @unit.setter
     def unit(self, u):
-        util.check_attr_type(u, str)
-        if u is not None:
+        if u:
             u = util.units.sanitizer(u)
+        if u == "":
+            u = None
+        util.check_attr_type(u, str)
+        if (self._dimension_count() == 1 and
+                self.dimensions[0].dimension_type == DimensionType.Range and
+                self.dimensions[0].is_alias and u is not None):
             if not (util.units.is_si(u) or util.units.is_compound(u)):
                 raise InvalidUnit(
-                    "{} is not SI or composite of SI units".format(u),
+                    "[{}]: Non-SI units are not allowed if the DataArray "
+                    "has an AliasRangeDimension.".format(u),
                     "DataArray.unit"
                 )
         self._h5group.set_attr("unit", u)

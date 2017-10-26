@@ -14,7 +14,7 @@ import unittest
 import numpy as np
 
 import nixio as nix
-
+from nixio.pycore.exceptions import InvalidUnit
 
 skip_cpp = not hasattr(nix, "core")
 
@@ -98,6 +98,9 @@ class DataArrayTestBase(unittest.TestCase):
 
         self.array.unit = "mV"
         assert(self.array.unit == "mV")
+
+        self.array.unit = "0.5*ms"
+        assert(self.array.unit == "0.5*ms")
 
         self.array.unit = None
         assert(self.array.unit is None)
@@ -351,6 +354,18 @@ class DataArrayTestBase(unittest.TestCase):
                           lambda: array_2D.append_alias_range_dimension())
         assert(len(array_2D.dimensions) == 0)
         del self.block.data_arrays['array_2d']
+
+        # alias range dimension with non-SI unit
+        self.array.delete_dimensions()
+        self.array.unit = "10 * ms"
+        with self.assertRaises(ValueError):
+            self.array.append_alias_range_dimension()
+
+        self.array.delete_dimensions()
+        self.array.unit = None
+        self.array.append_alias_range_dimension()
+        with self.assertRaises(ValueError):
+            self.array.unit = "10 * ms"
 
     def test_data_array_sources(self):
         source1 = self.block.create_source("source1", "channel")
