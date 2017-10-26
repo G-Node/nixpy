@@ -15,7 +15,7 @@ class UninitializedEntity(Exception):
                                                   *args, **kwargs)
 
 
-class InvalidUnit(Exception):
+class InvalidUnit(ValueError):
 
     def __init__(self, what, where):
         self.message = "InvalidUnit: {} evoked at: {}".format(what, where)

@@ -60,6 +60,10 @@ static void translateInvalidDimension(const nix::InvalidDimension &e) {
     PyErr_SetString(PyExc_ValueError, e.what());
 }
 
+static void translateInvalidUnit(const nix::InvalidUnit &e) {
+    PyErr_SetString(PyExc_ValueError, e.what());
+}
+
 static void translateInvalidRank(const nix::InvalidRank &e) {
     PyErr_SetString(PyExc_IndexError, e.what());
 }
@@ -71,6 +75,7 @@ void PyException::do_export() {
     register_exception_translator<nix::EmptyString>(&translateEmptyString);
     register_exception_translator<nix::InvalidRank>(&translateInvalidRank);
     register_exception_translator<nix::InvalidDimension>(&translateInvalidDimension);
+    register_exception_translator<nix::InvalidUnit>(&translateInvalidUnit);
     register_exception_translator<nix::IncompatibleDimensions>(&translateIncompatibleDimensions);
     register_exception_translator<nix::UnsortedTicks>(&translateUnsortedTicks);
     register_exception_translator<nix::UninitializedEntity>(&translateUninitializedEntity);
