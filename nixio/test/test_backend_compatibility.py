@@ -31,6 +31,8 @@ all_attrs = [
 class BackendCompatibilityTestBase(unittest.TestCase):
 
     testfilename = "compattest.h5"
+    write_backend = None
+    read_backend = None
 
     def setUp(self):
         self.write_file = nix.File.open(self.testfilename,
