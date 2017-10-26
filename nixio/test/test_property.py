@@ -80,6 +80,18 @@ class PropertyTestBase(unittest.TestCase):
         assert(self.prop.unit is None)
         self.prop.unit = None
 
+        # empty string units
+        self.prop.unit = ""
+        assert(self.prop.unit is None)
+        self.prop.unit = " "
+        assert(self.prop.unit is None)
+
+        # non-si units
+        self.prop.unit = "deg"
+        assert(self.prop.unit == "deg")
+        self.prop.unit = "mV/30"
+        assert(self.prop.unit == "mV/30")
+
     def test_property_values(self):
         self.prop.values = [nix.Value(10)]
 
