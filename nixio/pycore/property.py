@@ -61,6 +61,10 @@ class Property(Entity, PropertyMixin):
 
     @unit.setter
     def unit(self, u):
+        if u:
+            u = util.units.sanitizer(u)
+        if u == "":
+            u = None
         util.check_attr_type(u, str)
         self._h5dataset.set_attr("unit", u)
 

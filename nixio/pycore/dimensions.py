@@ -168,7 +168,7 @@ class RangeDimension(Dimension):
         return newdim
 
     @property
-    def _alias(self):
+    def is_alias(self):
         """
         Return True if this dimension is an Alias Range dimension.
         Read-only property.
@@ -202,7 +202,7 @@ class RangeDimension(Dimension):
         the H5Group of the linked DataArray. Otherwise, it returns the H5Group
         representing the dimension.
         """
-        if self._alias:
+        if self.is_alias:
             gname = self._h5group.get_by_pos(0).name
             return self._h5group.open_group(gname)
         return self._h5group
