@@ -41,8 +41,8 @@ def plot_data(data_array):
 
 if __name__ == "__main__":
     # fake some data
-    duration = 2
-    frequency = 20
+    duration = 1.
+    frequency = 5
     stepsize = 0.02
     x, y = create_sinewave(duration, frequency, stepsize)
 
