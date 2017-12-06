@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+scriptloc="$( cd "$( dirname "${BASH_SOURCE[0]}"  )" && pwd  )"
+cd $scriptloc
+cd "../nixio/test/xcompat"
+export LD_LIBRARY_PATH="/usr/local/lib"
+tmpdir="/tmp/nix-xcompat-${RANDOM}"
+mkdir "$tmpdir"
+
+cppcompile() {
+    srcfile=$1
+    pushd $(dirname "$srcfile")
+    srcfile=$(basename "$srcfile")
+    execfile=${srcfile%.*}
+
+    dest="$tmpdir/$execfile"
+    echo "Compiling $srcfile to $dest"
+    g++ "$srcfile" -o "$dest" -lnix
+}
+
+
+for cppfile in *.cpp
+do
+    cppcompile $cppfile
+done
