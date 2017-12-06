@@ -11,6 +11,7 @@ import os
 
 import unittest
 import h5py
+import numpy as np
 
 import nixio as nix
 import nixio.pycore.file as filepy
@@ -117,7 +118,8 @@ class FileTestBase(unittest.TestCase):
         datablock = self.file.blocks[datablockname]
         for idx in range(7):
             name = "data_" + str(idx)
-            da = datablock.create_data_array(name, "thedata", data=[0])
+            da = datablock.create_data_array(name, "thedata",
+                                             data=np.array([0]))
             da.definition = "da definition"
             danames.append(name)
         self.file.close()
