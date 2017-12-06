@@ -1,21 +1,30 @@
 #!/usr/bin/env bash
 
+set -e
+
+if [ $# -lt 1 ]
+then
+    echo "Need a target dir"
+    exit 1
+fi
+
+binloc="$1"
+binloc="$( cd "$1" && pwd )"
 scriptloc="$( cd "$( dirname "${BASH_SOURCE[0]}"  )" && pwd  )"
 cd $scriptloc
 cd "../nixio/test/xcompat"
 export LD_LIBRARY_PATH="/usr/local/lib"
-tmpdir="/tmp/nix-xcompat-${RANDOM}"
-mkdir "$tmpdir"
 
 cppcompile() {
     srcfile=$1
-    pushd $(dirname "$srcfile")
+    pushd $(dirname "$srcfile") > /dev/null
     srcfile=$(basename "$srcfile")
     execfile=${srcfile%.*}
 
-    dest="$tmpdir/$execfile"
+    dest="$binloc/$execfile"
     echo "Compiling $srcfile to $dest"
     g++ "$srcfile" -o "$dest" -lnix
+    popd > /dev/null
 }
 
 
