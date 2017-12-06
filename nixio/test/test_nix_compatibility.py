@@ -6,8 +6,30 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import os
+from subprocess import run, PIPE
 import numpy as np
+import tempfile
+import pytest
+
 import nixio as nix
+
+
+BINDIR = tempfile.TemporaryDirectory()
+
+
+@pytest.fixture(scope="module", autouse=True)
+def compcppfiles():
+    # call compile script
+    scriptloc = "scripts/compile_xcompat"
+    run([scriptloc, BINDIR.name])
+
+
+def validate(fname):
+    rfbin = os.path.join(BINDIR.name, "readfile")
+    res = run([rfbin, fname], stdout=PIPE, stderr=PIPE)
+    stdout = res.stdout.decode()
+    if res.returncode:
+        raise ValueError(stdout)
 
 
 def test_blocks(tmpdir):
@@ -21,10 +43,11 @@ def test_blocks(tmpdir):
         blk.force_created_at(np.random.randint(1000000000))
 
     nix_file.close()
+    validate(nixfilepath)
 
 
 def test_groups(tmpdir):
-    nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
+    nixfilepath = os.path.join(str(tmpdir), "grouptest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
                              backend="h5py")
     blk = nix_file.create_block("test_block", "blocktype")
@@ -34,10 +57,11 @@ def test_groups(tmpdir):
         grp.force_created_at(np.random.randint(1000000000))
 
     nix_file.close()
+    validate(nixfilepath)
 
 
 def test_data_arrays(tmpdir):
-    nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
+    nixfilepath = os.path.join(str(tmpdir), "arraytest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
                              backend="h5py")
     blk = nix_file.create_block("testblock", "blocktype")
@@ -58,10 +82,11 @@ def test_data_arrays(tmpdir):
             da.polynom_coefficients = tuple(np.random.random(3))
 
     nix_file.close()
+    validate(nixfilepath)
 
 
 def test_tags(tmpdir):
-    nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
+    nixfilepath = os.path.join(str(tmpdir), "tagtest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
                              backend="h5py")
     blk = nix_file.create_block("testblock", "blocktype")
@@ -80,10 +105,11 @@ def test_tags(tmpdir):
             grp.tags.append(tag)
 
     nix_file.close()
+    validate(nixfilepath)
 
 
 def test_multi_tags(tmpdir):
-    nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
+    nixfilepath = os.path.join(str(tmpdir), "mtagtest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
                              backend="h5py")
     blk = nix_file.create_block("testblock", "blocktype")
@@ -102,10 +128,11 @@ def test_multi_tags(tmpdir):
             grp.multi_tags.append(mtag)
 
     nix_file.close()
+    validate(nixfilepath)
 
 
 def test_sources(tmpdir):
-    nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
+    nixfilepath = os.path.join(str(tmpdir), "sourcetest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
                              backend="h5py")
     blk = nix_file.create_block("testblock", "sourcetest")
@@ -133,10 +160,11 @@ def test_sources(tmpdir):
     # TODO: Nested sources
 
     nix_file.close()
+    validate(nixfilepath)
 
 
 def test_dimensions(tmpdir):
-    nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
+    nixfilepath = os.path.join(str(tmpdir), "dimtest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
                              backend="h5py")
     blk = nix_file.create_block("testblock", "dimtest")
@@ -173,10 +201,11 @@ def test_dimensions(tmpdir):
     da_multi_dim.append_range_dimension(np.random.random(10))
 
     nix_file.close()
+    validate(nixfilepath)
 
 
 def test_tag_features(tmpdir):
-    nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
+    nixfilepath = os.path.join(str(tmpdir), "feattest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
                              backend="h5py")
     blk = nix_file.create_block("testblock", "feattest")
@@ -197,10 +226,11 @@ def test_tag_features(tmpdir):
         tag_feat.create_feature(da_feat, linktypes[idx % 3])
 
     nix_file.close()
+    validate(nixfilepath)
 
 
 def test_multi_tag_features(tmpdir):
-    nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
+    nixfilepath = os.path.join(str(tmpdir), "mtagfeattest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
                              backend="h5py")
     blk = nix_file.create_block("testblock", "mtfeattest")
@@ -271,6 +301,7 @@ def test_multi_tag_features(tmpdir):
     feature_tag.create_feature(index_data, nix.LinkType.Untagged)
 
     nix_file.close()
+    validate(nixfilepath)
 
 
 def test_multi_tag_references(tmpdir):
@@ -302,10 +333,11 @@ def test_multi_tag_references(tmpdir):
     mtag.references.append(da)
 
     nix_file.close()
+    validate(nixfilepath)
 
 
 def test_properties(tmpdir):
-    nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
+    nixfilepath = os.path.join(str(tmpdir), "proptest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
                              backend="h5py")
     sec = nix_file.create_section("test section", "proptest")
@@ -332,10 +364,11 @@ def test_properties(tmpdir):
                                       nix.Value(1.345), nix.Value(90.2)]
 
     nix_file.close()
+    validate(nixfilepath)
 
 
 def test_sections(tmpdir):
-    nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
+    nixfilepath = os.path.join(str(tmpdir), "sectiontest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
                              backend="h5py")
     for idx in range(30):
@@ -356,10 +389,77 @@ def test_sections(tmpdir):
     block.metadata = nix_file.sections[0].sections[0].sections[0]
 
     nix_file.close()
+    validate(nixfilepath)
+
+
+def test_full_write(tmpdir):
+    # Create a fully-featured nix file
+    nixfilepath = os.path.join(str(tmpdir), "fulltest.nix")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
+                             backend="h5py")
+    for idx in range(30):
+        sec = nix_file.create_section("test section" + str(idx),
+                                      "sectiontest")
+        sec.definition = "sec definition " + str(idx)
+        sec.mapping = "sec mapping " + str(idx)
+        sec.repository = "sec repo" + str(idx * 3)
+
+        nested_sec = sec.create_section("nested_section", "sec")
+        if (idx % 3) == 0:
+            lvl2 = nested_sec.create_section("level 2", "sec")
+
+            if (idx % 12) == 0:
+                lvl2.create_section("level 3", "sec")
+
+    block = nix_file.create_block("block", "section test")
+    block.metadata = nix_file.sections[0].sections[0].sections[0]
+
+    nix_file.close()
+    validate(nixfilepath)
 
 
 def test_file(tmpdir):
-    nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
+    nixfilepath = os.path.join(str(tmpdir), "filetest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
                              backend="h5py")
-    print(nix_file.version)
+
+    block = nix_file.create_block("blockyblock", "ablocktype of thing")
+    block.description = "I am a test block"
+
+    group = block.create_group("group", "group type of thing")
+    group.description = "I am a test group"
+    da = block.create_data_array("bunchodata", "recordings",
+                                 dtype=nix.DataType.Float,
+                                 data=[[1, 2, 10], [9, 1, 3]])
+    da.description = "A silly little data array"
+    smpldim = da.append_sampled_dimension(0.1)
+    smpldim.unit = "ms"
+    smpldim.label = "time"
+    setdim = da.append_set_dimension()
+    setdim.label = "#"
+
+    group.data_arrays.append(da)
+
+    tag = block.create_tag("tagu", "tagging", position=[1, 0])
+    tag.extent = [1, 1]
+    tag.description = "tags ahoy"
+    tag.references.append(da)
+
+    group.tags.append(tag)
+
+    mtag = block.create_multi_tag("mtagu", "multi tagging",
+                                  positions=block.create_data_array(
+                                      "tag-data", "multi-tagger",
+                                      data=[[0, 0.1, 10.1]]
+                                  ))
+    block.data_arrays["tag-data"].append_sampled_dimension(0.01)
+    block.data_arrays["tag-data"].dimensions[0].unit = "s"
+    block.data_arrays["tag-data"].append_set_dimension()
+    mtag.extents = block.create_data_array("tag-extents", "multi-tagger",
+                                           data=[[0.5, 0.5, 0.5]])
+    block.data_arrays["tag-extents"].append_sampled_dimension(0.01)
+    block.data_arrays["tag-data"].dimensions[0].unit = "s"
+    block.data_arrays["tag-extents"].append_set_dimension()
+
+    nix_file.close()
+    validate(nixfilepath)
