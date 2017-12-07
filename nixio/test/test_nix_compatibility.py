@@ -12,9 +12,14 @@ import tempfile
 import pytest
 
 import nixio as nix
+from scripts.checknix import check_nix
 
 
 BINDIR = tempfile.mkdtemp()
+
+# skip these tests if nix isn't available
+skip = not check_nix(["/usr/local/include"], ["/usr/local/lib"])
+pytestmark = pytest.mark.skipif(skip, reason="Compatibility test required NIX")
 
 
 @pytest.fixture(scope="module", autouse=True)
