@@ -6,7 +6,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import os
-from subprocess import run, PIPE
+from subprocess import Popen, PIPE
 import numpy as np
 import tempfile
 import pytest
@@ -14,21 +14,24 @@ import pytest
 import nixio as nix
 
 
-BINDIR = tempfile.TemporaryDirectory()
+BINDIR = tempfile.mkdtemp()
 
 
 @pytest.fixture(scope="module", autouse=True)
 def compcppfiles():
     # call compile script
     scriptloc = "scripts/compile_xcompat"
-    run([scriptloc, BINDIR.name])
+    proc = Popen([scriptloc, BINDIR], stdout=PIPE, stderr=PIPE)
+    proc.wait()
 
 
 def validate(fname):
-    rfbin = os.path.join(BINDIR.name, "readfile")
-    res = run([rfbin, fname], stdout=PIPE, stderr=PIPE)
-    stdout = res.stdout.decode()
-    if res.returncode:
+    rfbin = os.path.join(BINDIR, "readfile")
+    proc = Popen([rfbin, fname], stdout=PIPE, stderr=PIPE,
+                 env={"LD_LIBRARY_PATH": "/usr/local/lib"})
+    proc.wait()
+    stdout = proc.stdout.read().decode()
+    if proc.returncode:
         raise ValueError(stdout)
 
 
