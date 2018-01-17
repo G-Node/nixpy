@@ -97,8 +97,8 @@ signals, turn to series of such signals and end with images stacks.
 
 .. _regularly_sampled_data:
 
-Regularly sampled data 
-"""""""""""""""""""""" 
+Regularly sampled data
+""""""""""""""""""""""
 
 Regularly sampled data is everything which is sampled in regular
 intervals in space, time, or something else. Let's consider a signal
@@ -114,14 +114,13 @@ specified. The following code illustrates how this is stored in nix
 files.
 
 .. literalinclude:: examples/regularlySampledData.py
-		    :lines: 53-66    
+		    :lines: 53-66
 
 .. image:: examples/regular_sampled.png
 	   :width: 240
 
-Source code for this example: `regularlySampledData.py`_.
+Source code for this example :download:`regularlySampledData.py <examples/regularlySampledData.py>`.
 
-.. _regularlySampledData.py: examples/regularlySampledData.py
 
 :ref:`toc`
 
@@ -137,15 +136,12 @@ dimension which is sampled in this way has to be described using a
 instances at which the samples were taken.
 
 .. literalinclude:: examples/irregularlySampledData.py
-		    :lines: 57-63 
-
+		    :lines: 57-63
 
 .. image:: examples/irregular.png
 	   :width: 240
 
-Source code for this example: `irregularlySampledData.py`_.
-
-.. _irregularlySampledData.py: examples/irregularlySampledData.py
+Source code for this example :download:`irregularlySampledData.py <examples/irregularlySampledData.py>`.
 
 :ref:`toc`
 
@@ -177,9 +173,7 @@ this dimension of the data.
 .. image:: examples/multiple_time_series.png
 	   :width: 240
 
-Source code for this example: `multipleTimeSeries.py`_.
-
-.. _multipleTimeSeries.py: examples/irregularlySampledData.py
+Source code for this example: :download:`multipleTimeSeries.py <examples/multipleTimeSeries.py>`.
 
 :ref:`toc`
 
@@ -204,9 +198,7 @@ attribution in the code.
 	   :width: 240
 
 if the image is not shown install *imagemagick* or *xv* tools (Linux)
-Source code for this example: `imageData.py`_.
-
-.. _imageData.py: examples/imageData.py
+Source code for this example: :download:`imageData.py <examples/imageData.py>`.
 
 :ref:`toc`
 
@@ -242,9 +234,7 @@ data. The same Tag can be applied to many references as long as
 .. image:: examples/single_roi.png
 	   :width: 240
 
-Source code for this example: `singleROI.py`_.
-
-.. _singleROI.py: examples/singleROI.py
+Source code for this example :download:`singleROI.py <examples/singleROI.py>`.
 
 :ref:`toc`
 
@@ -276,9 +266,7 @@ of action potentials in a recorded membrane potential.
 .. image:: examples/multi_roi.png
 	   :width: 240
 
-Source code for this example: `multipleROIs.py`_.
-
-.. _multipleROIs.py: examples/multipleROIs.py
+Source code for this example :download:`multipleROIs.py <examples/multipleROIs.py>`.
 
 :ref:`toc`
 
@@ -297,11 +285,9 @@ neuron's membrane potential.
 .. image:: examples/spike_tagging.png
 	   :width: 240
 
-Source code for this example: `spikeTagging.py`_.
+Source code for this example: :download:`spikeTagging.py <examples/spikeTagging.py>`.
 
-.. _spikeTagging.py: examples/spikeTagging.py
-
-:ref:`toc` 
+:ref:`toc`
 
 
 .. _retrieve_tagged_data:
@@ -325,10 +311,7 @@ following code has to be executed:
 .. image:: examples/retrieved_rois.png
 	   :width: 240
 
-Source code for this example: `multipleROIs.py`_.
-
-.. _multipleROIs.py: examples/multipleROIs.py
-		
+Source code for this example: :download:`multipleROIs.py <examples/multipleROIs.py>`.
 
 :ref:`toc`
 
@@ -378,11 +361,9 @@ be linked to the stimulus interval as an *untagged* **Feature** of it.
 .. image:: examples/untagged_feature.png
 	   :width: 240
 
-Source code for this example: `untaggedFeature.py`_.
+Source code for this example: :download:`untaggedFeature.py <examples/untaggedFeature.py>`.
 
-.. _untaggedFeature.py: examples/untaggedFeature.py
-
-:ref:`toc` 
+:ref:`toc`
 
 .. _tagged_feature:
 
@@ -397,17 +378,14 @@ additional **DataArray** and is linked to the spike times as a
 **Feature** setting the **LinkType** to *tagged*.
 
 .. literalinclude:: examples/taggedFeature.py
-		    :lines: 108-122
+		    :lines: 108-121
 
 .. image:: examples/tagged_feature.png
 	   :width: 240
 
-Source code for this example: `taggedFeature.py`_.
+Source code for this example: :download:`taggedFeature.py <examples/taggedFeature.py>`.
 
-.. _taggedFeature.py: examples/taggedFeature.py
-
-:ref:`toc` 
-
+:ref:`toc`
 
 .. _indexed_feature:
 
@@ -433,10 +411,7 @@ Feature data. The **LinkType** has to be set to *indexed*.
 .. image:: examples/spike_feature.png
 	   :width: 240
 
-Source code for this example: `spikeFeatures.py`_.
-
-.. _spikeFeatures.py: examples/spikeFeatures.py
-
+Source code for this example: :download:`spikeFeatures.py <examples/spikeFeatures.py>`.
 
 :ref:`toc`
 
@@ -448,8 +423,7 @@ Retrieving feature data
 
 The above sections have shown how to attach features to tagged
 regions. To get the feature data back there are two ways. (i) You can
-access the data via the selected feature as it is shown in the
-`spikeFeatures.py`_. example (line 61).
+access the data via the selected feature as it is shown in the example above (:download: `spikeFeatures.py <examples/spikeFeatures.py>`) (line 61).
 
 .. literalinclude:: examples/spikeFeatures.py
 		    :lines: 61
@@ -514,9 +488,8 @@ attaching information about the 'Lenna' image used above.
 		    :lines: 48-58, 82
 
 
-Source code for this example: `imageWithMetadata.py`_.
+Source code for this example: :download:`imageWithMetadata.py <examples/imageWithMetadata.py>`.
 
-.. _imageWithMetadata.py: examples/imageWithMetadata.py
 
 .. image:: examples/image_with_metadata.png
 	   :width: 240

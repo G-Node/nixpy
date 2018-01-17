@@ -206,6 +206,17 @@ class MultiTagTestBase(unittest.TestCase):
         assert(reference1 in self.my_tag.references)
         assert(reference2 in self.my_tag.references)
 
+        # id and name access
+        assert(reference1 == self.my_tag.references[reference1.name])
+        assert(reference1 == self.my_tag.references[reference1.id])
+        assert(reference2 == self.my_tag.references[reference2.name])
+        assert(reference2 == self.my_tag.references[reference2.id])
+
+        assert(reference1.name in self.my_tag.references)
+        assert(reference2.name in self.my_tag.references)
+        assert(reference1.id in self.my_tag.references)
+        assert(reference2.id in self.my_tag.references)
+
         del self.my_tag.references[reference2]
         assert(self.my_tag.references[0] == reference1)
 
@@ -227,6 +238,16 @@ class MultiTagTestBase(unittest.TestCase):
 
         assert(feature.id == self.my_tag.features[0].id)
         assert(feature.id == self.my_tag.features[-1].id)
+
+        # id and name access
+        assert(feature.id == self.my_tag.features[feature.id].id)
+        assert(feature.id == self.my_tag.features[data_array.id].id)
+        assert(feature.id == self.my_tag.features[data_array.name].id)
+        assert(data_array == self.my_tag.features[data_array.id].data)
+        assert(data_array == self.my_tag.features[data_array.name].data)
+
+        assert(data_array.id in self.my_tag.features)
+        assert(data_array.name in self.my_tag.features)
 
         del self.my_tag.features[0]
 
@@ -264,6 +285,11 @@ class MultiTagTestBase(unittest.TestCase):
 
         # get by name
         data = mtag.retrieve_data(0, da.name)
+        assert(data.shape == (2000,))
+        assert(np.array_equal(y[:2000], data[:]))
+
+        # get by id
+        data = mtag.retrieve_data(0, da.id)
         assert(data.shape == (2000,))
         assert(np.array_equal(y[:2000], data[:]))
 

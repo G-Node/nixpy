@@ -125,9 +125,22 @@ class TagTestBase(unittest.TestCase):
         self.my_tag.references.append(reference1)
         self.my_tag.references.append(reference2)
 
+        assert(reference1.name in self.my_tag.references)
+
         assert(len(self.my_tag.references) == 3)
         assert(reference1 in self.my_tag.references)
         assert(reference2 in self.my_tag.references)
+
+        # id and name access
+        assert(reference1 == self.my_tag.references[reference1.name])
+        assert(reference1 == self.my_tag.references[reference1.id])
+        assert(reference2 == self.my_tag.references[reference2.name])
+        assert(reference2 == self.my_tag.references[reference2.id])
+
+        assert(reference1.name in self.my_tag.references)
+        assert(reference2.name in self.my_tag.references)
+        assert(reference1.id in self.my_tag.references)
+        assert(reference2.id in self.my_tag.references)
 
         del self.my_tag.references[reference2]
         assert(self.my_array in self.my_tag.references)
@@ -151,6 +164,16 @@ class TagTestBase(unittest.TestCase):
 
         assert(feature.id == self.my_tag.features[0].id)
         assert(feature.id == self.my_tag.features[-1].id)
+
+        # id and name access
+        assert(feature.id == self.my_tag.features[feature.id].id)
+        assert(feature.id == self.my_tag.features[data_array.id].id)
+        assert(feature.id == self.my_tag.features[data_array.name].id)
+        assert(data_array == self.my_tag.features[data_array.id].data)
+        assert(data_array == self.my_tag.features[data_array.name].data)
+
+        assert(data_array.id in self.my_tag.features)
+        assert(data_array.name in self.my_tag.features)
 
         del self.my_tag.features[0]
 
@@ -187,6 +210,21 @@ class TagTestBase(unittest.TestCase):
         assert(posdata.shape == (1, 1, 1))
 
         segdata = segtag.retrieve_data(0)
+        assert(len(segdata.shape) == 3)
+        assert(segdata.shape == (1, 6, 2))
+
+        # retrieve data by id and name
+        posdata = postag.retrieve_data(da.name)
+        assert(len(posdata.shape) == 3)
+        assert(posdata.shape == (1, 1, 1))
+        segdata = segtag.retrieve_data(da.name)
+        assert(len(segdata.shape) == 3)
+        assert(segdata.shape == (1, 6, 2))
+
+        posdata = postag.retrieve_data(da.id)
+        assert(len(posdata.shape) == 3)
+        assert(posdata.shape == (1, 1, 1))
+        segdata = segtag.retrieve_data(da.id)
         assert(len(segdata.shape) == 3)
         assert(segdata.shape == (1, 6, 2))
 

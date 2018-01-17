@@ -118,7 +118,12 @@ class BaseTag(EntityWithSources):
 
     def _get_feature_by_id(self, id_or_name):
         features = self._h5group.open_group("features")
-        return Feature(self, features.get_by_id(id_or_name))
+        try:
+            return Feature(self, features.get_by_id(id_or_name))
+        except ValueError:
+            for feat in self.features:
+                if feat.data.id == id_or_name or feat.data.name == id_or_name:
+                    return feat
 
     def _get_feature_by_pos(self, pos):
         features = self._h5group.open_group("features")
@@ -266,7 +271,7 @@ class Tag(BaseTag, TagMixin):
         if len(references) == 0:
             raise OutOfBounds("There are no references in this tag!")
 
-        if refidx >= len(references):
+        if isinstance(refidx, int) and refidx >= len(references):
             raise OutOfBounds("Reference index out of bounds.")
 
         ref = references[refidx]
