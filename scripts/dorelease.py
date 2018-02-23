@@ -1,7 +1,7 @@
 import os
 import sys
 import re
-from subprocess import check_output, call, CalledProcessError
+from subprocess import check_output, call, CalledProcessError, DEVNULL
 from difflib import Differ
 import requests
 import json
@@ -188,7 +188,7 @@ def update_ci_confs(newver):
 
 def tag_head(newverstr):
     try:
-        tagrev = check_output(["git", "rev-parse", newverstr])
+        tagrev = check_output(["git", "rev-parse", newverstr], stderr=DEVNULL)
         headrev = check_output(["git", "rev-parse", "HEAD"])
         if tagrev != headrev:
             die("Tag or object named {} already exists "
