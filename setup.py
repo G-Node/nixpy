@@ -44,7 +44,7 @@ with open('LICENSE') as f:
 is_win = os.name == 'nt'
 
 # load info from nixio/info.json
-with open(os.path.join("nixio/info.json")) as infofile:
+with open(os.path.join("nixio", "info.json")) as infofile:
     infodict = json.load(infofile)
 
 VERSION = infodict["VERSION"]
