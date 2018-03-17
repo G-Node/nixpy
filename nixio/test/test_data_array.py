@@ -14,7 +14,6 @@ import unittest
 import numpy as np
 
 import nixio as nix
-from nixio.pycore.exceptions import InvalidUnit
 
 skip_cpp = not hasattr(nix, "core")
 
@@ -388,6 +387,20 @@ class DataArrayTestBase(unittest.TestCase):
         del self.array.sources[source1]
         assert(len(self.array.sources) == 0)
 
+    def test_data_array_indexing(self):
+        data = np.random.rand(50)
+        da = self.block.create_data_array("random", "DataArray",
+                                          data=data)
+
+        np.testing.assert_almost_equal(data[:], da[:])
+
+        def check_idx(idx):
+            np.testing.assert_almost_equal(da[idx], data[idx])
+
+        check_idx(10)
+        check_idx(Ellipsis)
+        check_idx(slice(10, 15))
+
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestDataArrayCPP(DataArrayTestBase):
@@ -398,3 +411,16 @@ class TestDataArrayCPP(DataArrayTestBase):
 class TestDataArrayPy(DataArrayTestBase):
 
     backend = "h5py"
+
+    def test_data_array_numpy_indexing(self):
+        data = np.random.rand(50)
+        da = self.block.create_data_array("random", "DataArray",
+                                          data=data)
+
+        def check_idx(idx):
+            np.testing.assert_almost_equal(da[idx], data[idx])
+
+        check_idx(np.int8(10))
+        check_idx(np.int16(20))
+        check_idx(np.int32(42))
+        check_idx(np.int64(9))
