@@ -12,7 +12,7 @@ import tempfile
 import pytest
 
 import nixio as nix
-from scripts.checknix import check_nix
+from .xcompat.checknix import check_nix
 
 
 BINDIR = tempfile.mkdtemp()
