@@ -27,8 +27,7 @@ int main(int argc, char* argv[]) {
             std::cout << wrn.msg << std::endl;
         }
         return 1;
-    } else {
-        std::cout << fname << " is a valid NIX file." << std::endl;
     }
+    std::cout << fname << " is a valid NIX file." << std::endl;
     return 0;
 }

@@ -28,16 +28,29 @@ def compcppfiles():
     scriptloc = "scripts/compile_xcompat"
     proc = Popen([scriptloc, BINDIR], stdout=PIPE, stderr=PIPE)
     proc.wait()
+    print(proc.stdout.read())
 
 
 def validate(fname):
-    rfbin = os.path.join(BINDIR, "readfile")
-    proc = Popen([rfbin, fname], stdout=PIPE, stderr=PIPE,
+    """
+    Runs the nix validation function on the given file.
+    """
+    run_cpp("readfile", fname)
+
+
+def run_cpp(command, *args):
+    cmdbin = os.path.join(BINDIR, command)
+    cmdargs = [cmdbin]
+    cmdargs.extend(args)
+    proc = Popen(cmdargs, stdout=PIPE, stderr=PIPE,
                  env={"LD_LIBRARY_PATH": "/usr/local/lib"})
     proc.wait()
     stdout = proc.stdout.read().decode()
+    stderr = proc.stderr.read().decode()
+    print(stdout)
+    print(stderr)
     if proc.returncode:
-        raise ValueError(stdout)
+        raise ValueError(stdout+stderr)
 
 
 def test_blocks(tmpdir):
@@ -52,6 +65,7 @@ def test_blocks(tmpdir):
 
     nix_file.close()
     # validate(nixfilepath)
+    run_cpp("readblocks", nixfilepath)
 
 
 def test_groups(tmpdir):
@@ -66,6 +80,7 @@ def test_groups(tmpdir):
 
     nix_file.close()
     # validate(nixfilepath)
+    run_cpp("readgroups", nixfilepath)
 
 
 def test_data_arrays(tmpdir):
@@ -470,4 +485,4 @@ def test_file(tmpdir):
     block.data_arrays["tag-extents"].append_set_dimension()
 
     nix_file.close()
-    validate(nixfilepath)
+    # validate(nixfilepath)
