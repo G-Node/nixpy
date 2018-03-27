@@ -18,8 +18,12 @@ from .xcompat.compile import maketests
 BINDIR = tempfile.mkdtemp(prefix="nixpy-tests-")
 
 # skip these tests if nix isn't available
-skip = not maketests(BINDIR)
-pytestmark = pytest.mark.skipif(skip, reason="Compatibility test required NIX")
+pytestmark = pytest.mark.skipif("skip()",
+                                reason="Compatibility tests require NIX")
+
+
+def skip():
+    return not maketests(BINDIR)
 
 
 def validate(fname):
