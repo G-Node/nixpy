@@ -12,23 +12,14 @@ import tempfile
 import pytest
 
 import nixio as nix
-from .xcompat.checknix import check_nix
+from .xcompat.compile import maketests
 
 
-BINDIR = tempfile.mkdtemp()
+BINDIR = tempfile.mkdtemp(prefix="nixpy-tests-")
 
 # skip these tests if nix isn't available
-skip = not check_nix(["/usr/local/include"], ["/usr/local/lib"])
+skip = not maketests(BINDIR)
 pytestmark = pytest.mark.skipif(skip, reason="Compatibility test required NIX")
-
-
-@pytest.fixture(scope="module", autouse=True)
-def compcppfiles():
-    # call compile script
-    scriptloc = "scripts/compile_xcompat"
-    proc = Popen([scriptloc, BINDIR], stdout=PIPE, stderr=PIPE)
-    proc.wait()
-    print(proc.stdout.read())
 
 
 def validate(fname):
@@ -47,8 +38,8 @@ def run_cpp(command, *args):
     proc.wait()
     stdout = proc.stdout.read().decode()
     stderr = proc.stderr.read().decode()
-    print(stdout)
-    print(stderr)
+    # print(stdout)
+    # print(stderr)
     if proc.returncode:
         raise ValueError(stdout+stderr)
 
