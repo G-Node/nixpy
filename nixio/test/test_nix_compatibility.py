@@ -30,10 +30,10 @@ def validate(fname):
     """
     Runs the nix validation function on the given file.
     """
-    run_cpp("readfile", fname)
+    runcpp("validate", fname)
 
 
-def run_cpp(command, *args):
+def runcpp(command, *args):
     cmdbin = os.path.join(BINDIR, command)
     cmdargs = [cmdbin]
     cmdargs.extend(args)
@@ -59,7 +59,7 @@ def test_blocks(tmpdir):
 
     nix_file.close()
     # validate(nixfilepath)
-    run_cpp("readblocks", nixfilepath)
+    runcpp("readblocks", nixfilepath)
 
 
 def test_groups(tmpdir):
@@ -74,7 +74,7 @@ def test_groups(tmpdir):
 
     nix_file.close()
     # validate(nixfilepath)
-    run_cpp("readgroups", nixfilepath)
+    runcpp("readgroups", nixfilepath)
 
 
 def test_data_arrays(tmpdir):
@@ -441,27 +441,29 @@ def test_file(tmpdir):
                              backend="h5py")
 
     block = nix_file.create_block("blockyblock", "ablocktype of thing")
-    block.description = "I am a test block"
+    block.definition = "I am a test block"
+
+    scndblk = nix_file.create_block("I am another block", "void")
+    scndblk.definition = "No one will use me for anything"
 
     group = block.create_group("group", "group type of thing")
-    group.description = "I am a test group"
+    group.definition = "I am a test group"
+
     da = block.create_data_array("bunchodata", "recordings",
                                  dtype=nix.DataType.Float,
                                  data=[[1, 2, 10], [9, 1, 3]])
-    da.description = "A silly little data array"
+    da.definition = "A silly little data array"
     smpldim = da.append_sampled_dimension(0.1)
     smpldim.unit = "ms"
     smpldim.label = "time"
     setdim = da.append_set_dimension()
     setdim.label = "#"
-
     group.data_arrays.append(da)
 
     tag = block.create_tag("tagu", "tagging", position=[1, 0])
     tag.extent = [1, 1]
-    tag.description = "tags ahoy"
+    tag.definition = "tags ahoy"
     tag.references.append(da)
-
     group.tags.append(tag)
 
     mtag = block.create_multi_tag("mtagu", "multi tagging",
@@ -479,4 +481,4 @@ def test_file(tmpdir):
     block.data_arrays["tag-extents"].append_set_dimension()
 
     nix_file.close()
-    # validate(nixfilepath)
+    runcpp("readfile", nixfilepath)
