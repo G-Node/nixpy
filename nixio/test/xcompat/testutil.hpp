@@ -16,3 +16,21 @@ template <typename T>
 int compare(const std::string &a, boost::optional<T> b) {
     return compare(a, nix::util::deRef(b));
 }
+
+template <typename T>
+int compare(const std::vector<T> &a, const std::vector<T> &b) {
+    if (a != b) {
+        std::cout << "Expected {";
+        for (const auto& i : a) {
+            std::cout << i << " ";
+        }
+        std::cout << "} got {";
+        for (const auto& i : b) {
+            std::cout << i << " ";
+
+        }
+        std::cout << "}" << std::endl;
+        return 1;
+    }
+    return 0;
+}
