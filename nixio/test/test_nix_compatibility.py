@@ -435,20 +435,32 @@ def test_full_write(tmpdir):
     # validate(nixfilepath)
 
 
-def test_file(tmpdir):
+def test_full_file(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "filetest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
                              backend="h5py")
 
     block = nix_file.create_block("blockyblock", "ablocktype of thing")
     block.definition = "I am a test block"
+    block.force_created_at(1500001000)
 
     scndblk = nix_file.create_block("I am another block", "void")
-    scndblk.definition = "No one will use me for anything"
+    scndblk.definition = "Void block of stuff"
+    scndblk.force_created_at(1500002000)
 
-    group = block.create_group("group", "group type of thing")
-    group.definition = "I am a test group"
+    thrdblk = nix_file.create_block("Block C", "a block of stuff")
+    thrdblk.definition = "The third block"
+    thrdblk.force_created_at(1500003000)
 
+    for idx, block in enumerate(nix_file.blocks):
+        group = block.create_group("grp{:02}0".format(idx), "grp")
+        group.definition = "grp{:02}0-grp".format(idx)
+        group.force_created_at(block.created_at)
+        group = block.create_group("grp{:02}1".format(idx), "grp")
+        group.definition = "grp{:02}1-grp".format(idx)
+        group.force_created_at(block.created_at)
+
+    block = nix_file.blocks[0]
     da = block.create_data_array("bunchodata", "recordings",
                                  dtype=nix.DataType.Float,
                                  data=[[1, 2, 10], [9, 1, 3]])
@@ -458,6 +470,7 @@ def test_file(tmpdir):
     smpldim.label = "time"
     setdim = da.append_set_dimension()
     setdim.label = "#"
+    group = block.groups[0]
     group.data_arrays.append(da)
 
     tag = block.create_tag("tagu", "tagging", position=[1, 0])
@@ -480,5 +493,11 @@ def test_file(tmpdir):
     block.data_arrays["tag-data"].dimensions[0].unit = "s"
     block.data_arrays["tag-extents"].append_set_dimension()
 
+    da = nix_file.blocks[0].create_data_array("FA001", "Primary data",
+                                              dtype=np.int64,
+                                              data=[100, 200, 210, 4])
+    da.definition = "Some random integers"
+
     nix_file.close()
-    runcpp("readfile", nixfilepath)
+    runcpp("readfullfile", nixfilepath)
+    # validate(nixfilepath)
