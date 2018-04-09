@@ -9,7 +9,8 @@ from distutils.errors import CompileError, LinkError
 
 def cc(filenames, dest,
        library_dirs=None, include_dirs=None,
-       libraries=None, compile_args=None):
+       libraries=None, compile_args=None,
+       runtime_lib_dirs=None):
     compiler = ccompiler.new_compiler()
 
     distutils.sysconfig.customize_compiler(compiler)
@@ -19,6 +20,8 @@ def cc(filenames, dest,
         [compiler.add_include_dir(incd) for incd in include_dirs]
     if libraries:
         [compiler.add_library(lib) for lib in libraries]
+    if runtime_lib_dirs:
+        [compiler.add_runtime_library_dir(rund) for rund in runtime_lib_dirs]
 
     try:
         for srcname in filenames:
@@ -45,6 +48,7 @@ def maketests(dest):
     boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
     library_dirs = [boost_lib_dir, nix_lib_dir]
     include_dirs = [boost_inc_dir, nix_inc_dir, 'src']
+    runtime_dirs = [os.getenv("LD_LIBRARY_PATH", ""), "/usr/local/lib"]
     libraries = [nix_lib]
     compile_args = ['--std=c++11']
 
@@ -53,7 +57,8 @@ def maketests(dest):
                  library_dirs=library_dirs,
                  include_dirs=include_dirs,
                  libraries=libraries,
-                 compile_args=compile_args)
+                 compile_args=compile_args,
+                 runtime_lib_dirs=runtime_dirs)
     if success:
         print("Done")
     else:
