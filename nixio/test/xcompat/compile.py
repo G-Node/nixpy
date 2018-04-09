@@ -1,5 +1,6 @@
 import sys
 import os
+import platform
 from glob import glob
 
 import distutils.sysconfig
@@ -20,7 +21,7 @@ def cc(filenames, dest,
         [compiler.add_include_dir(incd) for incd in include_dirs]
     if libraries:
         [compiler.add_library(lib) for lib in libraries]
-    if runtime_lib_dirs:
+    if runtime_lib_dirs and not platform.platform().startswith("Windows"):
         [compiler.add_runtime_library_dir(rund) for rund in runtime_lib_dirs]
 
     try:
