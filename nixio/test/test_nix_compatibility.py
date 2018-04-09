@@ -1,4 +1,4 @@
-# Copyright (c) 2017, German Neuroinformatics Node (G-Node)
+# Copyright (c) 2018, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
 #
