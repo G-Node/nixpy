@@ -474,7 +474,7 @@ def test_full_file(tmpdir):
     group.data_arrays.append(da)
 
     tag = block.create_tag("tagu", "tagging", position=[1, 0])
-    tag.extent = [1, 1]
+    tag.extent = [1, 10]
     tag.definition = "tags ahoy"
     tag.references.append(da)
     group.tags.append(tag)
@@ -493,7 +493,7 @@ def test_full_file(tmpdir):
     block.data_arrays["tag-data"].dimensions[0].unit = "s"
     block.data_arrays["tag-extents"].append_set_dimension()
 
-    da = nix_file.blocks[0].create_data_array("FA001", "Primary data",
+    da = nix_file.blocks[1].create_data_array("FA001", "Primary data",
                                               dtype=np.int64,
                                               data=[100, 200, 210, 4])
     da.definition = "Some random integers"
