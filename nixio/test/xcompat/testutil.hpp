@@ -12,7 +12,26 @@ int compare(const std::string &a, const std::string &b) {
     return 0;
 }
 
-int compare(const long a, const long b) {
+int compare(const std::vector<std::string> &a, const std::vector<std::string> &b) {
+    if (a != b) {
+        std::cout << "Mismatch in string vectors" << std::endl;
+        std::cout << "Expected {";
+        for (const auto& i : a) {
+            std::cout << i << " ";
+        }
+        std::cout << "} got {";
+        for (const auto& i : b) {
+            std::cout << i << " ";
+
+        }
+        std::cout << "}" << std::endl;
+        return 1;
+    }
+    return 0;
+}
+
+template <typename T>
+int compare(const T a, const T b) {
     if (a != b) {
         std::cout << "Expected '" << a << "' got '" << b << "'" << std::endl;
         return 1;
@@ -59,4 +78,11 @@ int compare(const nix::NDSize &a, const nix::NDSize &b, std::string name = "") {
         return 1;
     }
     return 0;
+}
+
+int istrue(bool cond, std::string message = "") {
+    if (!cond && message != "") {
+        std::cout << message << std::endl;
+    }
+    return !cond;
 }

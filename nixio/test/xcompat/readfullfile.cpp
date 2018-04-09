@@ -70,12 +70,28 @@ int main(int argc, char* argv[]) {
     errcount += compare("A silly little data array", da.definition());
 
     // Data
-    std::vector<int64_t> dadata(2*3, 1);
-    da.getData(nix::DataType::Int64, dadata.data(), {2, 3}, {});
+    std::vector<float_t> dadata(2*3, 1);
+    da.getData(nix::DataType::Float, dadata.data(), {2, 3}, {});
     errcount += compare(dadata, {1, 2, 10, 9, 1, 3});
+    errcount += compare(da.dataExtent(), nix::NDSize({2, 3}));
+    errcount += istrue(da.dataType() == nix::DataType::Double, "Array dataType mismatch");
 
     // DataArray dimensions
-    errcount += compare(da.dataExtent(), nix::NDSize({2, 3}));
+    auto dim = da.getDimension(1);
+    errcount += istrue(dim.dimensionType() ==  nix::DimensionType::Sample, "Dimension 1 should be Sample type");
+    nix::SampledDimension smpldim;
+    smpldim = dim;
+    errcount += compare(0.1, smpldim.samplingInterval());
+    errcount += compare("ms", smpldim.unit());
+    errcount += compare("time", smpldim.label());
+
+    dim = da.getDimension(2);
+    errcount += istrue(dim.dimensionType() ==  nix::DimensionType::Set, "Dimension 2 should be Set type");
+    nix::SetDimension setdim;
+    setdim = dim;
+    errcount += compare({"a", "b"}, setdim.labels());
+
+    // Tag and MultiTag
 
     return errcount;
 }

@@ -462,14 +462,14 @@ def test_full_file(tmpdir):
 
     block = nix_file.blocks[0]
     da = block.create_data_array("bunchodata", "recordings",
-                                 dtype=nix.DataType.Float,
+                                 dtype=nix.DataType.Double,
                                  data=[[1, 2, 10], [9, 1, 3]])
     da.definition = "A silly little data array"
     smpldim = da.append_sampled_dimension(0.1)
     smpldim.unit = "ms"
     smpldim.label = "time"
     setdim = da.append_set_dimension()
-    setdim.label = "#"
+    setdim.labels = ["a", "b"]
     group = block.groups[0]
     group.data_arrays.append(da)
 
