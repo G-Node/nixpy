@@ -37,8 +37,7 @@ def run_cpp(command, *args):
     cmdbin = os.path.join(BINDIR, command)
     cmdargs = [cmdbin]
     cmdargs.extend(args)
-    proc = Popen(cmdargs, stdout=PIPE, stderr=PIPE,
-                 env={"LD_LIBRARY_PATH": "/usr/local/lib"})
+    proc = Popen(cmdargs, stdout=PIPE, stderr=PIPE)
     proc.wait()
     stdout = proc.stdout.read().decode()
     stderr = proc.stderr.read().decode()
