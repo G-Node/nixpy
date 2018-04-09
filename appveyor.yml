@@ -14,39 +14,19 @@ environment:
     # Python 2.7 32 bit
     - PYTHON: "C:\\Python27"
       bits: 32
-      withnix: "--without-nix"
-    # - PYTHON: "C:\\Python27"
-    #   bits: 32
-    #   withnix: "--with-nix"
 
     # Python 3.6 32 bit
     - PYTHON: "C:\\Python36"
       bits: 32
-      withnix: "--without-nix"
-    # - PYTHON: "C:\\Python36"
-    #   bits: 32
-    #   withnix: "--with-nix"
 
     # Python 2.7 64 bit
     - PYTHON: "C:\\Python27-x64"
       bits: 64
-      withnix: "--without-nix"
-    # - PYTHON: "C:\\Python27-x64"
-    #   bits: 64
-    #   withnix: "--with-nix"
 
     # Python 3.6 64 bit
     - PYTHON: "C:\\Python36-x64"
       bits: 64
-      withnix: "--without-nix"
       RDP: "no"
-    # - PYTHON: "C:\\Python36-x64"
-    #   bits: 64
-    #   withnix: "--with-nix"
-
-matrix:
-    allow_failures:
-        - withnix: "--with-nix"
 
 init:
   - "ECHO %PYTHON% %vcvars% (%bits%)"
@@ -95,7 +75,7 @@ install:
     - ps: $env:MSSdk = "1"
 
 build_script:
-    - python setup.py build %withnix%
+    - python setup.py build
 
 test_script:
     - python setup.py test
