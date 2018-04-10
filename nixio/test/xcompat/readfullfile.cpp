@@ -187,5 +187,30 @@ int main(int argc, char* argv[]) {
     errcount += testassert(2 == da.sourceCount(), "Source count mismatch (Block 0; DataArray 0)");
     errcount += compare(da.getSource(1).id(), block.getSource(0).getSource(0).id());
 
+    // Metadata
+    // 3 root sections
+    errcount += testassert(3 == nf.sectionCount(), "Section count mismatch (root)");
+    errcount += compare(nf.getSection(0).name(), "mda");
+    errcount += compare(nf.getSection(1).name(), "mdb");
+    errcount += compare(nf.getSection(2).name(), "mdc");
+    for (auto s : nf.sections()) {
+        errcount += compare("root-section", s.type());
+    }
+
+    auto mdc = nf.getSection(2);
+    errcount += testassert(6 == mdc.sectionCount(), "Section count mismatch (mdc)");
+    char name [6];
+    for (int idx = 0; idx < 6; idx++) {
+        sprintf(name, "%03d-md", idx);
+        errcount += compare("d1-section", mdc.getSection(name).type());
+    }
+
+    auto mdb = nf.getSection(1);
+    errcount += compare(nf.getBlock(0).metadata().id(), mdb.id());
+    errcount += compare(nf.getBlock(2).metadata().id(), mdb.id());
+
+    errcount += compare(nf.getBlock(1).getDataArray(0).metadata().id(), nf.getSection("mda").id());
+    errcount += compare(nf.getBlock(0).getTag(0).metadata().id(), nf.getSection("mdc").getSection(3).id());
+
     return errcount;
 }
