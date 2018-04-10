@@ -507,6 +507,18 @@ def test_full_file(tmpdir):
                                               data=[100, 200, 210, 4])
     da.definition = "Some random integers"
 
+    # Source tree
+    block = nix_file.blocks[0]
+    src = block.create_source("root-source", "top-level-source")
+    # point all (block's) data arrays to root-source
+    for da in block.data_arrays:
+        da.sources.append(src)
+
+    srcd1 = src.create_source("d1-source", "second-level-source")
+    src.create_source("d1-source-2", "second-level-source")
+    # point first da to d1-source
+    block.data_arrays[0].sources.append(srcd1)
+
     nix_file.close()
     runcpp("readfullfile", nixfilepath)
     # validate(nixfilepath)
