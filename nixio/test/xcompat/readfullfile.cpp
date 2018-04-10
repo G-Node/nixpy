@@ -46,17 +46,10 @@ int main(int argc, char* argv[]) {
     block = nf.getBlock(0);
     auto group = block.getGroup(0);
 
-    if (block.dataArrayCount() != 3) {
-        std::cout << "Expected 3 DataArrays, got " << block.dataArrayCount() << std::endl;
-        errcount++;
-    }
+    errcount += testassert(block.dataArrayCount() == 3, "DataArray count mismatch in first Block");
+    errcount += testassert(group.dataArrayCount() == 1, "DataArray count mismatch in first Group");
 
-    if (group.dataArrayCount() != 1) {
-        std::cout << "Expected 1 DataArray, got " << group.dataArrayCount() << std::endl;
-        errcount++;
-    }
-
-    nix::DataArray da = block.getDataArray(0);
+    auto da = block.getDataArray(0);
     errcount += compare(da.id(), group.getDataArray(0).id());
     errcount += compare("bunchodata", da.name());
     errcount += compare("recordings", da.type());
@@ -153,6 +146,14 @@ int main(int argc, char* argv[]) {
         errcount += testassert(!block.getGroup(idx).hasTag(tag.id()), "Tag found in incorrect Group");
         errcount += testassert(!block.getGroup(idx).hasMultiTag(mtag.id()), "MultiTag found in incorrect Group");
     }
+
+    // Second Block DataArray
+    block = nf.getBlock(1);
+    errcount += testassert(block.dataArrayCount() == 1, "DataArray count mismatch in second Block");
+    da = block.getDataArray(0);
+    errcount += compare("FA001", da.name());
+    errcount += compare("Primary data", da.type());
+    errcount += testassert(nix::DataType::Int64 == da.dataType(), "Array DataType mismatch (Block 1; DataArray 0)");
 
     return errcount;
 }
