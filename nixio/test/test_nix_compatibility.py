@@ -473,11 +473,17 @@ def test_full_file(tmpdir):
     group = block.groups[0]
     group.data_arrays.append(da)
 
+    featda = block.create_data_array("feat-da", "tag-feature",
+                                     data=[0.4, 0.41, 0.49, 0.1, 0.1, 0.1])
+
     tag = block.create_tag("tagu", "tagging", position=[1, 0])
     tag.extent = [1, 10]
+    tag.units = ["mV", "s"]
     tag.definition = "tags ahoy"
     tag.references.append(da)
     group.tags.append(tag)
+    # TODO: Every other kind of link
+    tag.create_feature(featda, nix.LinkType.Untagged)
 
     mtag = block.create_multi_tag("mtagu", "multi tagging",
                                   positions=block.create_data_array(

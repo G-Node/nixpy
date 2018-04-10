@@ -46,7 +46,7 @@ int main(int argc, char* argv[]) {
     block = nf.getBlock(0);
     auto group = block.getGroup(0);
 
-    errcount += testassert(block.dataArrayCount() == 3, "DataArray count mismatch in first Block");
+    errcount += testassert(block.dataArrayCount() == 4, "DataArray count mismatch in first Block");
     errcount += testassert(group.dataArrayCount() == 1, "DataArray count mismatch in first Group");
 
     auto da = block.getDataArray(0);
@@ -85,8 +85,17 @@ int main(int argc, char* argv[]) {
     errcount += compare("tags ahoy", tag.definition());
     errcount += compare({1, 0}, tag.position());
     errcount += compare({1, 10}, tag.extent());
+    errcount += compare({"mV", "s"}, tag.units());
     errcount += compare(da.id(), tag.getReference(0).id());
     errcount += compare(group.getTag(0).id(), tag.id());
+    auto feature = tag.getFeature("feat-da");
+    errcount += compare(feature.linkType(), nix::LinkType::Untagged);
+    errcount += compare(feature.data().id(), block.getDataArray(1).id());
+    errcount += compare("feat-da", feature.data().name());
+    errcount += compare(nix::NDSize({6}), feature.data().dataExtent());
+    std::vector<float_t> featdata(6);
+    feature.data().getData(nix::DataType::Float, featdata.data(), {6}, {});
+    errcount += compare({0.4, 0.41, 0.49, 0.1, 0.1, 0.1}, featdata);
 
     // MultiTag
     errcount += testassert(1 == block.multiTagCount(), "MultiTag count mismatch");
