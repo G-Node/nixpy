@@ -164,5 +164,28 @@ int main(int argc, char* argv[]) {
     errcount += compare("Primary data", da.type());
     errcount += testassert(nix::DataType::Int64 == da.dataType(), "Array DataType mismatch (Block 1; DataArray 0)");
 
+    // Sources
+    block = nf.getBlock(0);
+    errcount += testassert(1 == block.sourceCount(), "Source count mismatch (Block 0)");
+    auto src = block.getSource("root-source");
+    errcount += compare("top-level-source", src.type());
+    for (auto da : block.dataArrays()) {
+        errcount += compare(da.getSource(0).id(), src.id());
+    }
+
+    errcount += testassert(2 == src.sourceCount(), "Source count mismatch (Block 0; Source 0)");
+    errcount += compare("d1-source", src.getSource(0).name());
+    errcount += compare("d1-source-2", src.getSource(1).name());
+    errcount += compare("second-level-source", src.getSource(0).type());
+    errcount += compare("second-level-source", src.getSource(1).type());
+
+    for (auto s : src.sources()) {
+        errcount += testassert(0 == s.sourceCount());
+    }
+
+    da = block.getDataArray(0);
+    errcount += testassert(2 == da.sourceCount(), "Source count mismatch (Block 0; DataArray 0)");
+    errcount += compare(da.getSource(1).id(), block.getSource(0).getSource(0).id());
+
     return errcount;
 }
