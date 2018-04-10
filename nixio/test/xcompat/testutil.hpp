@@ -80,7 +80,7 @@ int compare(const nix::NDSize &a, const nix::NDSize &b, std::string name = "") {
     return 0;
 }
 
-int istrue(bool cond, std::string message = "") {
+int testassert(bool cond, std::string message = "") {
     if (!cond && message != "") {
         std::cout << message << std::endl;
     }

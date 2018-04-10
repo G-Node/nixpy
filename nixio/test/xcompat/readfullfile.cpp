@@ -11,7 +11,7 @@ int main(int argc, char* argv[]) {
     nix::File nf = nix::File::open(fname, nix::FileMode::ReadOnly);
 
     int errcount = 0;
-    errcount += istrue(3 == nf.blockCount(), "Block count mismatch");
+    errcount += testassert(3 == nf.blockCount(), "Block count mismatch");
 
     // Check first block attrs before descending
     auto block = nf.getBlock(0);
@@ -28,7 +28,7 @@ int main(int argc, char* argv[]) {
     std::string expname, expdef;
     size_t bidx = 0, gidx = 0;
     for (auto block : nf.blocks()) {
-        errcount += istrue(2 == block.groupCount(), "Group count mismatch");
+        errcount += testassert(2 == block.groupCount(), "Group count mismatch");
         for (const auto &group : block.groups()) {
             expname = "grp0" + nix::util::numToStr(bidx) + nix::util::numToStr(gidx);
             expdef = expname + "-grp";
@@ -67,11 +67,11 @@ int main(int argc, char* argv[]) {
     da.getData(nix::DataType::Float, dadata.data(), {2, 3}, {});
     errcount += compare({1, 2, 10, 9, 1, 3}, dadata);
     errcount += compare({2, 3}, da.dataExtent());
-    errcount += istrue(da.dataType() == nix::DataType::Double, "Array dataType mismatch");
+    errcount += testassert(da.dataType() == nix::DataType::Double, "Array dataType mismatch");
 
     // DataArray dimensions
     auto dim = da.getDimension(1);
-    errcount += istrue(dim.dimensionType() ==  nix::DimensionType::Sample, "Dimension 1 should be Sample type");
+    errcount += testassert(dim.dimensionType() ==  nix::DimensionType::Sample, "Dimension 1 should be Sample type");
     nix::SampledDimension smpldim;
     smpldim = dim;
     errcount += compare(0.1, smpldim.samplingInterval());
@@ -79,13 +79,13 @@ int main(int argc, char* argv[]) {
     errcount += compare("time", smpldim.label());
 
     dim = da.getDimension(2);
-    errcount += istrue(dim.dimensionType() ==  nix::DimensionType::Set, "Dimension 2 should be Set type");
+    errcount += testassert(dim.dimensionType() ==  nix::DimensionType::Set, "Dimension 2 should be Set type");
     nix::SetDimension setdim;
     setdim = dim;
     errcount += compare({"a", "b"}, setdim.labels());
 
     // Tag
-    errcount += istrue(1 == block.tagCount(), "Tag count mismatch");
+    errcount += testassert(1 == block.tagCount(), "Tag count mismatch");
     auto tag = block.getTag(0);
     errcount += compare("tagu", tag.name());
     errcount += compare("tagging", tag.type());
@@ -96,7 +96,7 @@ int main(int argc, char* argv[]) {
     errcount += compare(group.getTag(0).id(), tag.id());
 
     // MultiTag
-    errcount += istrue(1 == block.multiTagCount(), "MultiTag count mismatch");
+    errcount += testassert(1 == block.multiTagCount(), "MultiTag count mismatch");
     auto mtag = block.getMultiTag(0);
     errcount += compare("mtagu", mtag.name());
     errcount += compare("multi tagging", mtag.type());
@@ -111,26 +111,26 @@ int main(int argc, char* argv[]) {
     std::vector<float_t> posdata(3*1, 1);
     posmt.getData(nix::DataType::Float, posdata.data(), {1, 3}, {});
     errcount += compare({0, 0.1, 10.1}, posdata);
-    errcount += istrue(posmt.dataType() == nix::DataType::Double, "Array dataType mismatch");
+    errcount += testassert(posmt.dataType() == nix::DataType::Double, "Array dataType mismatch");
 
     errcount += compare(nix::NDSize({1, 3}), extmt.dataExtent());
     std::vector<float_t> extdata(3*1, 1);
     extmt.getData(nix::DataType::Float, extdata.data(), {1, 3}, {});
     errcount += compare({0.5, 0.5, 0.5}, extdata);
-    errcount += istrue(extmt.dataType() == nix::DataType::Double, "Array dataType mismatch");
+    errcount += testassert(extmt.dataType() == nix::DataType::Double, "Array dataType mismatch");
 
     // MultiTag Position and Extent dimensions
 
     // Tag and MultiTag Block and Group membership
     for (size_t idx = 1; idx < nf.blockCount(); idx++) {
-        errcount += istrue(!nf.getBlock(idx).hasTag(tag.id()), "Tag found in incorrect Block");
-        errcount += istrue(!nf.getBlock(idx).hasMultiTag(mtag.id()), "MultiTag found in incorrect Block");
+        errcount += testassert(!nf.getBlock(idx).hasTag(tag.id()), "Tag found in incorrect Block");
+        errcount += testassert(!nf.getBlock(idx).hasMultiTag(mtag.id()), "MultiTag found in incorrect Block");
     }
 
-    errcount += istrue(!group.hasMultiTag(mtag.id()), "MultiTag found in incorrect Group");
+    errcount += testassert(!group.hasMultiTag(mtag.id()), "MultiTag found in incorrect Group");
     for (size_t idx = 1; idx < block.groupCount(); idx++) {
-        errcount += istrue(!block.getGroup(idx).hasTag(tag.id()), "Tag found in incorrect Group");
-        errcount += istrue(!block.getGroup(idx).hasMultiTag(mtag.id()), "MultiTag found in incorrect Group");
+        errcount += testassert(!block.getGroup(idx).hasTag(tag.id()), "Tag found in incorrect Group");
+        errcount += testassert(!block.getGroup(idx).hasMultiTag(mtag.id()), "MultiTag found in incorrect Group");
     }
 
     return errcount;
