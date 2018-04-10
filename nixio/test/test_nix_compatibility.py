@@ -484,13 +484,16 @@ def test_full_file(tmpdir):
                                       "tag-data", "multi-tagger",
                                       data=[[0, 0.1, 10.1]]
                                   ))
+    # MultiTag positions array
     block.data_arrays["tag-data"].append_sampled_dimension(0.01)
     block.data_arrays["tag-data"].dimensions[0].unit = "s"
     block.data_arrays["tag-data"].append_set_dimension()
+
+    # MultiTag extents array
     mtag.extents = block.create_data_array("tag-extents", "multi-tagger",
                                            data=[[0.5, 0.5, 0.5]])
     block.data_arrays["tag-extents"].append_sampled_dimension(0.01)
-    block.data_arrays["tag-data"].dimensions[0].unit = "s"
+    block.data_arrays["tag-extents"].dimensions[0].unit = "s"
     block.data_arrays["tag-extents"].append_set_dimension()
 
     da = nix_file.blocks[1].create_data_array("FA001", "Primary data",

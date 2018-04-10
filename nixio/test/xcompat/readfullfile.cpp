@@ -107,6 +107,11 @@ int main(int argc, char* argv[]) {
     errcount += compare(block.getDataArray(extmt.name()).id(), extmt.id());
 
     // MultiTag data
+    errcount += compare("tag-data", posmt.name());
+    errcount += compare("multi-tagger", posmt.type());
+    errcount += compare("tag-extents", extmt.name());
+    errcount += compare("multi-tagger", extmt.type());
+
     errcount += compare(nix::NDSize({1, 3}), posmt.dataExtent());
     std::vector<float_t> posdata(3*1, 1);
     posmt.getData(nix::DataType::Float, posdata.data(), {1, 3}, {});
@@ -120,6 +125,22 @@ int main(int argc, char* argv[]) {
     errcount += testassert(extmt.dataType() == nix::DataType::Double, "Array dataType mismatch");
 
     // MultiTag Position and Extent dimensions
+    errcount += testassert(2 == posmt.dimensionCount(), "Dimension count mismatch in posmt");
+    dim = posmt.getDimension(2);
+    errcount += testassert(dim.dimensionType() == nix::DimensionType::Set, "Dimension 2 should be Set type");
+
+    dim = posmt.getDimension(1);
+    errcount += testassert(dim.dimensionType() == nix::DimensionType::Sample, "Dimension 1 should be Sample type");
+    smpldim = dim;
+    errcount += compare(0.01, smpldim.samplingInterval());
+    errcount += compare("s", smpldim.unit());
+
+    errcount += testassert(2 == extmt.dimensionCount(), "Dimension count mismatch in extmt");
+    dim = extmt.getDimension(1);
+    errcount += testassert(dim.dimensionType() == nix::DimensionType::Sample, "Dimension 1 should be Sample type");
+    smpldim = dim;
+    errcount += compare(0.01, smpldim.samplingInterval());
+    errcount += compare("s", smpldim.unit());
 
     // Tag and MultiTag Block and Group membership
     for (size_t idx = 1; idx < nf.blockCount(); idx++) {
