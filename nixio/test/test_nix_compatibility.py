@@ -452,6 +452,7 @@ def test_full_file(tmpdir):
     thrdblk.definition = "The third block"
     thrdblk.force_created_at(1500003000)
 
+    # TODO: Add all kinds of objects (Tag, MultiTag) to Group
     for idx, block in enumerate(nix_file.blocks):
         group = block.create_group("grp{:02}0".format(idx), "grp")
         group.definition = "grp{:02}0-grp".format(idx)
@@ -518,6 +519,23 @@ def test_full_file(tmpdir):
     src.create_source("d1-source-2", "second-level-source")
     # point first da to d1-source
     block.data_arrays[0].sources.append(srcd1)
+
+    # Metadata
+    # 3 root sections
+    for name in ["mda", "mdb", "mdc"]:
+        nix_file.create_section(name, "root-section")
+
+    sec = nix_file.sections["mdc"]
+    # 6 sections under third root section
+    for idx in range(6):
+        sec.create_section("{:03}-md".format(idx), "d1-section")
+
+    # Point existing objects to metadata sections
+    nix_file.blocks[0].metadata = nix_file.sections["mdb"]
+    nix_file.blocks[2].metadata = nix_file.sections["mdb"]
+
+    nix_file.blocks[1].data_arrays[0].metadata = nix_file.sections["mda"]
+    nix_file.blocks[0].tags[0].metadata = nix_file.sections["mdc"].sections[3]
 
     nix_file.close()
     runcpp("readfullfile", nixfilepath)
