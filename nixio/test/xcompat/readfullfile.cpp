@@ -1,6 +1,45 @@
 #include "testutil.hpp"
 #include <nix.hpp>
 
+int checkChildrenCounts(const nix::Block &bl, size_t ngrp, size_t nda, size_t nt, size_t nmt) {
+    int errcount = 0;
+    errcount += testassert(ngrp == bl.groupCount(), "Group count mismatch in Block " + bl.name());
+    errcount += testassert(nda  == bl.dataArrayCount(), "DataArray count mismatch in Block " + bl.name());
+    errcount += testassert(nt   == bl.tagCount(), "Tag count mismatch in Block " + bl.name());
+    errcount += testassert(nmt  == bl.multiTagCount(), "MultiTag count mismatch in Block " + bl.name());
+
+    return errcount;
+}
+
+int checkChildrenCounts(const nix::Group &grp, size_t nda, size_t nt, size_t nmt) {
+    int errcount = 0;
+    errcount += testassert(nda  == grp.dataArrayCount(), "DataArray count mismatch in Group " + grp.name());
+    errcount += testassert(nt   == grp.tagCount(), "Tag count mismatch in Group " + grp.name());
+    errcount += testassert(nmt  == grp.multiTagCount(), "MultiTag count mismatch in Group " + grp.name());
+
+    return errcount;
+}
+
+int checkObjectCounts(const nix::File &nf) {
+    int errcount = 0;
+    // Check object counts (Group, DataArray, Tag, MultiTag)
+    errcount += testassert(3 == nf.blockCount(), "Block count mismatch");
+
+    errcount += checkChildrenCounts(nf.getBlock(0), 2, 4, 1, 1);
+    errcount += checkChildrenCounts(nf.getBlock(1), 2, 1, 0, 0);
+    errcount += checkChildrenCounts(nf.getBlock(2), 2, 0, 1, 0);
+
+    errcount += checkChildrenCounts(nf.getBlock(0).getGroup(0), 1, 1, 0);
+    errcount += checkChildrenCounts(nf.getBlock(0).getGroup(1), 0, 0, 0);
+
+    errcount += checkChildrenCounts(nf.getBlock(1).getGroup(0), 0, 0, 0);
+    errcount += checkChildrenCounts(nf.getBlock(1).getGroup(1), 0, 0, 0);
+
+    errcount += checkChildrenCounts(nf.getBlock(2).getGroup(0), 0, 0, 0);
+    errcount += checkChildrenCounts(nf.getBlock(2).getGroup(1), 0, 0, 0);
+
+    return errcount;
+}
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -11,10 +50,10 @@ int main(int argc, char* argv[]) {
     nix::File nf = nix::File::open(fname, nix::FileMode::ReadOnly);
 
     int errcount = 0;
-    errcount += testassert(3 == nf.blockCount(), "Block count mismatch");
+    errcount += checkObjectCounts(nf);
 
-    // Check first block attrs before descending
     auto block = nf.getBlock(0);
+    // Check first block attrs before descending
     errcount += compare("blockyblock", block.name());
     errcount += compare("ablocktype of thing", block.type());
     errcount += compare("I am a test block", block.definition());
@@ -28,7 +67,6 @@ int main(int argc, char* argv[]) {
     std::string expname, expdef;
     size_t bidx = 0, gidx = 0;
     for (auto block : nf.blocks()) {
-        errcount += testassert(2 == block.groupCount(), "Group count mismatch");
         for (const auto &group : block.groups()) {
             expname = "grp0" + nix::util::numToStr(bidx) + nix::util::numToStr(gidx);
             expdef = expname + "-grp";
@@ -45,9 +83,6 @@ int main(int argc, char* argv[]) {
     // DataArray
     block = nf.getBlock(0);
     auto group = block.getGroup(0);
-
-    errcount += testassert(block.dataArrayCount() == 4, "DataArray count mismatch in first Block");
-    errcount += testassert(group.dataArrayCount() == 1, "DataArray count mismatch in first Group");
 
     auto da = block.getDataArray(0);
     errcount += compare(da.id(), group.getDataArray(0).id());
@@ -78,7 +113,6 @@ int main(int argc, char* argv[]) {
     errcount += compare({"a", "b"}, setdim.labels());
 
     // Tag
-    errcount += testassert(1 == block.tagCount(), "Tag count mismatch");
     auto tag = block.getTag(0);
     errcount += compare("tagu", tag.name());
     errcount += compare("tagging", tag.type());
@@ -98,7 +132,6 @@ int main(int argc, char* argv[]) {
     errcount += compare({0.4, 0.41, 0.49, 0.1, 0.1, 0.1}, featdata);
 
     // MultiTag
-    errcount += testassert(1 == block.multiTagCount(), "MultiTag count mismatch");
     auto mtag = block.getMultiTag(0);
     errcount += compare("mtagu", mtag.name());
     errcount += compare("multi tagging", mtag.type());
@@ -158,7 +191,6 @@ int main(int argc, char* argv[]) {
 
     // Second Block DataArray
     block = nf.getBlock(1);
-    errcount += testassert(block.dataArrayCount() == 1, "DataArray count mismatch in second Block");
     da = block.getDataArray(0);
     errcount += compare("FA001", da.name());
     errcount += compare("Primary data", da.type());

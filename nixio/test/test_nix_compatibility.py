@@ -537,6 +537,13 @@ def test_full_file(tmpdir):
     nix_file.blocks[1].data_arrays[0].metadata = nix_file.sections["mda"]
     nix_file.blocks[0].tags[0].metadata = nix_file.sections["mdc"].sections[3]
 
+    # Add Tag and MultiTag to Block 2, Group 0
+    block = nix_file.blocks[2]
+    group = block.groups[0]
+    tag = block.create_tag("POI", "TAG", position=[0, 0])
+    tag.extent = [1920, 1080]
+    tag.units = ["mm", "mm"]
+
     nix_file.close()
     runcpp("readfullfile", nixfilepath)
     # validate(nixfilepath)
