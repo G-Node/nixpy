@@ -27,7 +27,7 @@ int checkObjectCounts(const nix::File &nf) {
 
     errcount += checkChildrenCounts(nf.getBlock(0), 2, 4, 1, 1);
     errcount += checkChildrenCounts(nf.getBlock(1), 2, 1, 0, 0);
-    errcount += checkChildrenCounts(nf.getBlock(2), 2, 0, 1, 0);
+    errcount += checkChildrenCounts(nf.getBlock(2), 2, 2, 1, 1);
 
     errcount += checkChildrenCounts(nf.getBlock(0).getGroup(0), 1, 1, 0);
     errcount += checkChildrenCounts(nf.getBlock(0).getGroup(1), 0, 0, 0);
@@ -35,7 +35,7 @@ int checkObjectCounts(const nix::File &nf) {
     errcount += checkChildrenCounts(nf.getBlock(1).getGroup(0), 0, 0, 0);
     errcount += checkChildrenCounts(nf.getBlock(1).getGroup(1), 0, 0, 0);
 
-    errcount += checkChildrenCounts(nf.getBlock(2).getGroup(0), 0, 0, 0);
+    errcount += checkChildrenCounts(nf.getBlock(2).getGroup(0), 0, 1, 1);
     errcount += checkChildrenCounts(nf.getBlock(2).getGroup(1), 0, 0, 0);
 
     return errcount;
@@ -243,6 +243,32 @@ int main(int argc, char* argv[]) {
 
     errcount += compare(nf.getBlock(1).getDataArray(0).metadata().id(), nf.getSection("mda").id());
     errcount += compare(nf.getBlock(0).getTag(0).metadata().id(), nf.getSection("mdc").getSection(3).id());
+
+    block = nf.getBlock(2);
+    tag = block.getTag(0);
+    errcount += compare("POI", tag.name());
+    errcount += compare("TAG", tag.type());
+    errcount += compare({0, 0}, tag.position());
+    errcount += compare({1920, 1080}, tag.extent());
+    errcount += compare({"mm", "mm"}, tag.units());
+    errcount += compare(tag.id(), block.getGroup(0).getTag(0).id());
+
+    feature = tag.getFeature("some-sort-of-image?");
+    errcount += compare(feature.linkType(), nix::LinkType::Indexed);
+    errcount += compare(feature.data().id(), block.getDataArray(0).id());
+    errcount += compare("some-sort-of-image?", feature.data().name());
+    errcount += compare(nix::NDSize({3840, 2160}), feature.data().dataExtent());
+
+    mtag = block.getMultiTag(0);
+    errcount += compare("nu-mt", mtag.name());
+    errcount += compare("multi-tag (new)", mtag.type());
+    posmt = mtag.positions();
+    errcount += compare("nu-pos", posmt.name());
+    errcount += compare("multi-tag-positions", posmt.type());
+    errcount += compare({10, 3}, posmt.dataExtent());
+    errcount += testassert(nix::DataType::Bool == posmt.dataType(), "DataType mismatch in nu-pos DataArray");
+    errcount += compare(posmt.id(), block.getDataArray(1).id());
+    errcount += compare(mtag.id(), block.getGroup(0).getMultiTag(0).id());
 
     return errcount;
 }

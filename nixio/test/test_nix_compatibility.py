@@ -452,7 +452,6 @@ def test_full_file(tmpdir):
     thrdblk.definition = "The third block"
     thrdblk.force_created_at(1500003000)
 
-    # TODO: Add all kinds of objects (Tag, MultiTag) to Group
     for idx, block in enumerate(nix_file.blocks):
         group = block.create_group("grp{:02}0".format(idx), "grp")
         group.definition = "grp{:02}0-grp".format(idx)
@@ -543,6 +542,18 @@ def test_full_file(tmpdir):
     tag = block.create_tag("POI", "TAG", position=[0, 0])
     tag.extent = [1920, 1080]
     tag.units = ["mm", "mm"]
+
+    png = block.create_data_array("some-sort-of-image?", "png",
+                                  shape=(3840, 2160))
+    tag.create_feature(png, nix.LinkType.Indexed)
+
+    newmtpositions = block.create_data_array("nu-pos", "multi-tag-positions",
+                                             shape=(10, 3),
+                                             dtype=nix.DataType.Bool)
+    newmtag = block.create_multi_tag("nu-mt", "multi-tag (new)",
+                                     positions=newmtpositions)
+    group.tags.append(tag)
+    group.multi_tags.append(newmtag)
 
     nix_file.close()
     runcpp("readfullfile", nixfilepath)
