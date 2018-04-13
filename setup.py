@@ -23,8 +23,7 @@ except ImportError:
 
 import sys
 import os
-
-from nixio.info import VERSION, AUTHOR, CONTACT, BRIEF, HOMEPAGE
+import json
 
 from scripts.findboost import BoostPyLib
 from scripts.checknix import check_nix
@@ -43,6 +42,17 @@ with open('LICENSE') as f:
 
 
 is_win = os.name == 'nt'
+
+# load info from nixio/info.json
+with open(os.path.join("nixio", "info.json")) as infofile:
+    infodict = json.load(infofile)
+
+VERSION = infodict["VERSION"]
+AUTHOR = infodict["AUTHOR"]
+CONTACT = infodict["CONTACT"]
+BRIEF = infodict["BRIEF"]
+HOMEPAGE = infodict["HOMEPAGE"]
+
 
 if "dev" in VERSION:
     if is_win:

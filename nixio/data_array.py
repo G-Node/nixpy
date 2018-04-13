@@ -10,6 +10,7 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 
 import sys
+from numbers import Integral
 
 from nixio.dimension_type import DimensionType
 
@@ -257,20 +258,18 @@ class DataSetMixin(object):
 
     @staticmethod
     def __index_to_tuple(index):
-        tidx = type(index)
-
-        if tidx == tuple:
+        if isinstance(index, tuple):
             return index
-        elif tidx == int or tidx == slice:
+        elif isinstance(index, Integral) or isinstance(index, slice):
             return (index, )
-        elif tidx == type(Ellipsis):
+        elif isinstance(index, type(Ellipsis)):
             return ()
         else:
             raise IndexError("Unsupported index")
 
     @staticmethod
     def __complete_slices(shape, index):
-        if type(index) is slice:
+        if isinstance(index, slice):
             if index.step is not None:
                 raise IndexError('Invalid index, stepping unsupported')
             start = index.start
@@ -284,7 +283,7 @@ class DataSetMixin(object):
             elif stop < 0:
                 stop = shape + stop
             index = slice(start, stop, index.step)
-        elif type(index) is int:
+        elif isinstance(index, Integral):
             if index < 0:
                 index = shape + index
                 index = slice(index, index+1)
