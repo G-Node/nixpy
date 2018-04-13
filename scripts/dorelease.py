@@ -99,31 +99,27 @@ def update_readme():
 
 
 def update_info(newver):
-
-    infofn = os.path.join(gitroot, "nixio/info.py")
+    infofn = os.path.join(gitroot, "nixio", "info.json")
     with open(infofn) as infofile:
-        oldinfo = infofile.readlines()
+        infodict = json.load(infofile)
 
-    newinfo = []
-    for line in oldinfo:
-        if line.startswith("VERSION"):
-            line = re.sub("'[0-9\.a-z]+'", "'" + newver + "'", line)
-        newinfo.append(line)
+    verstring = infodict["VERSION"]
+    newverstring = re.sub("'[0-9\.a-z]+'", "'" + newver + "'", verstring)
 
-    diff = diff_lines(oldinfo, newinfo)
-
-    if len(diff) == 0:
+    if newverstring != verstring:
         print("No changes required in info.py")
         wait_for_ret()
         return False
 
-    print("".join(diff))
+    print("VERSION: {} → {}".format(verstring, newverstring))
     print("{}The above changes will be written to info.py{}".format(
         red_begin, red_end
     ))
     wait_for_ret()
     with open(infofn, "w") as infofile:
-        infofile.writelines(newinfo)
+        infodict["VERSION"] = newverstring
+        json.dump(infodict, infofile)
+
     return True
 
 
