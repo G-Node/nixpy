@@ -104,15 +104,15 @@ def update_info(newver):
         infodict = json.load(infofile)
 
     verstring = infodict["VERSION"]
-    newverstring = re.sub("'[0-9\.a-z]+'", "'" + newver + "'", verstring)
+    newverstring = re.sub("[0-9\.a-z]+", newver, verstring)
 
-    if newverstring != verstring:
-        print("No changes required in info.py")
+    if newverstring == verstring:
+        print("No changes required in info.json")
         wait_for_ret()
         return False
 
     print("VERSION: {} → {}".format(verstring, newverstring))
-    print("{}The above changes will be written to info.py{}".format(
+    print("{}The above changes will be written to info.json{}".format(
         red_begin, red_end
     ))
     wait_for_ret()
