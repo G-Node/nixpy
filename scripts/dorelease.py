@@ -111,13 +111,18 @@ def update_info(newver):
         wait_for_ret()
         return False
 
-    print("VERSION: {} → {}".format(verstring, newverstring))
+    oldrelstring = infodict["RELEASE"]
+    newrelstring = "{} Release".format(newverstring)
+
+    print("VERSION: '{}' → '{}'".format(verstring, newverstring))
+    print("RELEASE: '{}' → '{}'".format(oldrelstring, newrelstring))
     print("{}The above changes will be written to info.json{}".format(
         red_begin, red_end
     ))
     wait_for_ret()
     with open(infofn, "w") as infofile:
         infodict["VERSION"] = newverstring
+        infodict["RELEASE"] = newrelstring
         json.dump(infodict, infofile)
 
     return True
