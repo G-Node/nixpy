@@ -49,12 +49,6 @@ class BaseTag(EntityWithSources):
             for u in units:
                 util.check_attr_type(u, str)
                 u = util.units.sanitizer(u)
-                if not (util.units.is_si(u) or util.units.is_compound(u)
-                        or u == "none"):
-                    raise InvalidUnit(
-                        "{} is not SI or composite of SI units".format(u),
-                        "{}.units".format(type(self).__name__)
-                    )
                 sanitized.append(u)
 
             dtype = DataType.String
