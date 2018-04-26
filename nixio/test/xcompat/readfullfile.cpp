@@ -26,8 +26,8 @@ int checkObjectCounts(const nix::File &nf) {
     errcount += testassert(3 == nf.blockCount(), "Block count mismatch");
 
     errcount += checkChildrenCounts(nf.getBlock(0), 2, 4, 1, 1);
-    errcount += checkChildrenCounts(nf.getBlock(1), 2, 1, 0, 0);
-    errcount += checkChildrenCounts(nf.getBlock(2), 2, 2, 1, 1);
+    errcount += checkChildrenCounts(nf.getBlock(1), 2, 2, 0, 0);
+    errcount += checkChildrenCounts(nf.getBlock(2), 2, 3, 1, 1);
 
     errcount += checkChildrenCounts(nf.getBlock(0).getGroup(0), 1, 1, 0);
     errcount += checkChildrenCounts(nf.getBlock(0).getGroup(1), 0, 0, 0);
@@ -269,6 +269,42 @@ int main(int argc, char* argv[]) {
     errcount += testassert(nix::DataType::Bool == posmt.dataType(), "DataType mismatch in nu-pos DataArray");
     errcount += compare(posmt.id(), block.getDataArray(1).id());
     errcount += compare(mtag.id(), block.getGroup(0).getMultiTag(0).id());
+
+    // Data with range dimension
+    block = nf.getBlock(2);
+    da = block.getDataArray("the ticker");
+    std::vector<int32_t> tickerdata(3);
+    da.getData(nix::DataType::Int32, tickerdata.data(), nix::NDSize({3}), nix::NDSize({0}));
+    errcount += compare({0, 1, 23}, tickerdata);
+    errcount += compare({3}, da.dataExtent());
+    errcount += compare("range-dim-array", da.type());
+    errcount += compare("uA", da.unit());
+    errcount += testassert(da.dataType() == nix::DataType::Int32, "Array DataType mismatch");
+    dim = da.getDimension(1);
+    nix::RangeDimension rdim;
+    rdim = dim;
+    errcount += testassert(rdim.dimensionType() ==  nix::DimensionType::Range, "Dimension 1 should be Range type");
+
+    auto tickdata = rdim.ticks();
+    errcount += compare(size_t{50}, tickdata.size());
+    errcount += compare("a range dimension", rdim.label());
+    errcount += compare("s", rdim.unit());
+
+    // Alias range dimension
+    block = nf.getBlock(1);
+    da = block.getDataArray("alias da");
+    errcount += compare("dimticks", da.type());
+    errcount += compare("F", da.unit());
+    errcount += compare("alias dimension label", da.label());
+    errcount += compare({24}, da.dataExtent());
+    std::vector<double> aliasdata(24);
+    da.getData(nix::DataType::Double, aliasdata.data(), nix::NDSize({24}), nix::NDSize({0}));
+    dim = da.getDimension(1);
+    rdim = dim;
+    errcount += testassert(rdim.dimensionType() ==  nix::DimensionType::Range, "Dimension 1 should be Range type");
+    errcount += testassert(rdim.alias(), "Dimension 1 should be alias Range dimension");
+
+    errcount += compare(aliasdata, rdim.ticks());
 
     return errcount;
 }
