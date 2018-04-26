@@ -555,6 +555,29 @@ def test_full_file(tmpdir):
     group.tags.append(tag)
     group.multi_tags.append(newmtag)
 
+    # Data with RangeDimension
+    block = nix_file.blocks[2]
+    da = block.create_data_array("the ticker", "range-dim-array",
+                                 dtype=nix.DataType.Int32,
+                                 data=[0, 1, 23])
+    da.unit = "µA"
+    ticks = np.arange(10, 15, 0.1)
+    rdim = da.append_range_dimension(ticks)
+    rdim.label = "a range dimension"
+    rdim.unit = "s"
+
+    # Alias RangeDimension
+    block = nix_file.blocks[1]
+    da = block.create_data_array("alias da", "dimticks",
+                                 data=np.arange(3, 15, 0.5))
+    da.label = "alias dimension label"
+    da.unit = "F"
+    da.append_alias_range_dimension()
+
+    # TODO: All types of metadata
+
+    # TODO: All types of data
+
     nix_file.close()
     runcpp("readfullfile", nixfilepath)
     # validate(nixfilepath)
