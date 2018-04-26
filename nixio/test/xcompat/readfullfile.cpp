@@ -1,6 +1,25 @@
 #include "testutil.hpp"
 #include <nix.hpp>
 
+
+std::vector<nix::DataType> dtypes = {
+    nix::DataType::UInt8,
+    nix::DataType::UInt16,
+    nix::DataType::UInt32,
+    nix::DataType::UInt64,
+    nix::DataType::Int8,
+    nix::DataType::Int16,
+    nix::DataType::Int32,
+    nix::DataType::Int64,
+    // NOTE: NIXPy doesn't do 'Float' (32)
+    // It will probably be easier to add when the bindings are removed
+    nix::DataType::Double,
+    nix::DataType::Double,
+    nix::DataType::String,
+    nix::DataType::Bool
+};
+
+
 int checkChildrenCounts(const nix::Block &bl, size_t ngrp, size_t nda, size_t nt, size_t nmt) {
     int errcount = 0;
     errcount += testassert(ngrp == bl.groupCount(), "Group count mismatch in Block " + bl.name());
@@ -23,11 +42,12 @@ int checkChildrenCounts(const nix::Group &grp, size_t nda, size_t nt, size_t nmt
 int checkObjectCounts(const nix::File &nf) {
     int errcount = 0;
     // Check object counts (Group, DataArray, Tag, MultiTag)
-    errcount += testassert(3 == nf.blockCount(), "Block count mismatch");
+    errcount += testassert(4 == nf.blockCount(), "Block count mismatch");
 
     errcount += checkChildrenCounts(nf.getBlock(0), 2, 4, 1, 1);
     errcount += checkChildrenCounts(nf.getBlock(1), 2, 2, 0, 0);
     errcount += checkChildrenCounts(nf.getBlock(2), 2, 3, 1, 1);
+    errcount += checkChildrenCounts(nf.getBlock(3), 0, 12, 0, 0);
 
     errcount += checkChildrenCounts(nf.getBlock(0).getGroup(0), 1, 1, 0);
     errcount += checkChildrenCounts(nf.getBlock(0).getGroup(1), 0, 0, 0);
@@ -362,7 +382,15 @@ int main(int argc, char* argv[]) {
     errcount += compare(nix::ndsize_t{3}, prop.valueCount());
     errcount += compare({nix::Value{"one"}, nix::Value{"two"}, nix::Value{"twenty"}}, prop.values());
 
+    block = nf.getBlock("datablock");
+    errcount += compare("block of data", block.type());
 
+    for (size_t idx = 0; idx < dtypes.size(); idx++) {
+        da = block.getDataArray(idx);
+        auto dt = dtypes[idx];
+        errcount += compare(dt, da.dataType());
+        errcount += compare({1}, da.dataExtent());
+    }
 
     return errcount;
 }

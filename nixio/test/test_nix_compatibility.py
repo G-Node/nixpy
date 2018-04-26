@@ -21,6 +21,21 @@ BINDIR = tempfile.mkdtemp(prefix="nixpy-tests-")
 pytestmark = pytest.mark.skipif("skip()",
                                 reason="Compatibility tests require NIX")
 
+dtypes = (
+    nix.DataType.UInt8,
+    nix.DataType.UInt16,
+    nix.DataType.UInt32,
+    nix.DataType.UInt64,
+    nix.DataType.Int8,
+    nix.DataType.Int16,
+    nix.DataType.Int32,
+    nix.DataType.Int64,
+    nix.DataType.Float,
+    nix.DataType.Double,
+    nix.DataType.String,
+    nix.DataType.Bool
+)
+
 
 def skip():
     return not maketests(BINDIR)
@@ -593,7 +608,12 @@ def test_full_file(tmpdir):
     othermd["string"] = "I am a string. Rawr."
     othermd["strings"] = ["one", "two", "twenty"]
 
-    # TODO: All types of data
+    # All types of data
+    dtypeblock = nix_file.create_block("datablock", "block of data")
+
+    for n, dt in enumerate(dtypes):
+        dtypeblock.create_data_array(str(n), "dtype-test-array",
+                                     dtype=dt, data=dt(0))
 
     nix_file.close()
     runcpp("readfullfile", nixfilepath)
