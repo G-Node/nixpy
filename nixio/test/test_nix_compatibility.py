@@ -560,7 +560,7 @@ def test_full_file(tmpdir):
     da = block.create_data_array("the ticker", "range-dim-array",
                                  dtype=nix.DataType.Int32,
                                  data=[0, 1, 23])
-    da.unit = "µA"
+    da.unit = "uA"
     ticks = np.arange(10, 15, 0.1)
     rdim = da.append_range_dimension(ticks)
     rdim.label = "a range dimension"
@@ -574,7 +574,24 @@ def test_full_file(tmpdir):
     da.unit = "F"
     da.append_alias_range_dimension()
 
-    # TODO: All types of metadata
+    # All types of metadata
+    mdb = nix_file.sections["mdb"]
+    proptypesmd = mdb.create_section("prop-test-parent",
+                                     "test metadata section")
+    numbermd = proptypesmd.create_section("numerical metadata",
+                                          "test metadata section")
+    numbermd["integer"] = 42
+    numbermd["float"] = 4.2
+    numbermd["integers"] = [40, 41, 42, 43, 44, 45]
+    numbermd["floats"] = [1.1, 10.10]
+
+    othermd = proptypesmd.create_section("other metadata",
+                                         "test metadata section")
+    othermd["bool"] = True
+    othermd["false bool"] = False
+    othermd["bools"] = [True, False, True]
+    othermd["string"] = "I am a string. Rawr."
+    othermd["strings"] = ["one", "two", "twenty"]
 
     # TODO: All types of data
 
