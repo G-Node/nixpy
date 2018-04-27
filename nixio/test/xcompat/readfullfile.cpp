@@ -146,7 +146,7 @@ int main(int argc, char* argv[]) {
     errcount += compare(feature.linkType(), nix::LinkType::Untagged);
     errcount += compare(feature.data().id(), block.getDataArray(1).id());
     errcount += compare("feat-da", feature.data().name());
-    errcount += compare(nix::NDSize({6}), feature.data().dataExtent());
+    errcount += compare(nix::NDSize{6}, feature.data().dataExtent());
     std::vector<float_t> featdata(6);
     feature.data().getData(nix::DataType::Float, featdata.data(), {6}, {});
     errcount += compare({0.4, 0.41, 0.49, 0.1, 0.1, 0.1}, featdata);
@@ -167,13 +167,13 @@ int main(int argc, char* argv[]) {
     errcount += compare("tag-extents", extmt.name());
     errcount += compare("multi-tagger", extmt.type());
 
-    errcount += compare(nix::NDSize({1, 3}), posmt.dataExtent());
+    errcount += compare(nix::NDSize{1, 3}, posmt.dataExtent());
     std::vector<float_t> posdata(3*1, 1);
     posmt.getData(nix::DataType::Float, posdata.data(), {1, 3}, {});
     errcount += compare({0, 0.1, 10.1}, posdata);
     errcount += testassert(posmt.dataType() == nix::DataType::Double, "Array dataType mismatch");
 
-    errcount += compare(nix::NDSize({1, 3}), extmt.dataExtent());
+    errcount += compare(nix::NDSize{1, 3}, extmt.dataExtent());
     std::vector<float_t> extdata(3*1, 1);
     extmt.getData(nix::DataType::Float, extdata.data(), {1, 3}, {});
     errcount += compare({0.5, 0.5, 0.5}, extdata);
@@ -277,7 +277,7 @@ int main(int argc, char* argv[]) {
     errcount += compare(feature.linkType(), nix::LinkType::Indexed);
     errcount += compare(feature.data().id(), block.getDataArray(0).id());
     errcount += compare("some-sort-of-image?", feature.data().name());
-    errcount += compare(nix::NDSize({3840, 2160}), feature.data().dataExtent());
+    errcount += compare(nix::NDSize{3840, 2160}, feature.data().dataExtent());
 
     mtag = block.getMultiTag(0);
     errcount += compare("nu-mt", mtag.name());
@@ -294,7 +294,7 @@ int main(int argc, char* argv[]) {
     block = nf.getBlock(2);
     da = block.getDataArray("the ticker");
     std::vector<int32_t> tickerdata(3);
-    da.getData(nix::DataType::Int32, tickerdata.data(), nix::NDSize({3}), nix::NDSize({0}));
+    da.getData(nix::DataType::Int32, tickerdata.data(), nix::NDSize{3}, nix::NDSize{0});
     errcount += compare({0, 1, 23}, tickerdata);
     errcount += compare({3}, da.dataExtent());
     errcount += compare("range-dim-array", da.type());
@@ -318,7 +318,7 @@ int main(int argc, char* argv[]) {
     errcount += compare("alias dimension label", da.label());
     errcount += compare({24}, da.dataExtent());
     std::vector<double> aliasdata(24);
-    da.getData(nix::DataType::Double, aliasdata.data(), nix::NDSize({24}), nix::NDSize({0}));
+    da.getData(nix::DataType::Double, aliasdata.data(), nix::NDSize{24}, nix::NDSize{0});
     dim = da.getDimension(1);
     rdim = dim;
     errcount += testassert(rdim.dimensionType() ==  nix::DimensionType::Range, "Dimension 1 should be Range type");
