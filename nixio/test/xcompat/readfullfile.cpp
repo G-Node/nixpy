@@ -191,6 +191,9 @@ int main(int argc, char* argv[]) {
     errcount += compare("s", smpldim.unit());
 
     errcount += testassert(2 == extmt.dimensionCount(), "Dimension count mismatch in extmt");
+    dim = extmt.getDimension(2);
+    errcount += testassert(dim.dimensionType() == nix::DimensionType::Set, "Dimension 2 should be Set type");
+
     dim = extmt.getDimension(1);
     errcount += testassert(dim.dimensionType() == nix::DimensionType::Sample, "Dimension 1 should be Sample type");
     smpldim = dim;

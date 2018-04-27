@@ -170,6 +170,7 @@ int main(int argc, char* argv[]) {
         datadbl.push_back(3+(idx*0.5));
     da.label("alias dimension label");
     da.unit("F");
+    da.appendAliasRangeDimension();
 
     // All types of metadata
     std::vector<nix::Value> values;
