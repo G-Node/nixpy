@@ -564,7 +564,7 @@ def test_full_file(tmpdir):
 
     newmtpositions = block.create_data_array("nu-pos", "multi-tag-positions",
                                              shape=(10, 3),
-                                             dtype=nix.DataType.Bool)
+                                             dtype=nix.DataType.Double)
     newmtag = block.create_multi_tag("nu-mt", "multi-tag (new)",
                                      positions=newmtpositions)
     group.tags.append(tag)
