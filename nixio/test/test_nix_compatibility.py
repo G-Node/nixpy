@@ -6,6 +6,8 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import os
+from collections import Iterable
+from six import string_types
 from subprocess import Popen, PIPE
 import numpy as np
 import tempfile
@@ -451,7 +453,7 @@ def test_full_write(tmpdir):
 
 
 def test_full_file(tmpdir):
-    nixfilepath = os.path.join(str(tmpdir), "filetest.nix")
+    nixfilepath = os.path.join(str(tmpdir), "filetest-writepy.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
                              backend="h5py")
 
@@ -617,4 +619,342 @@ def test_full_file(tmpdir):
 
     nix_file.close()
     runcpp("readfullfile", nixfilepath)
+    # validate(nixfilepath)
+
+
+def check_block_children_counts(block, ngrp, nda, nt, nmt):
+    assert ngrp == len(block.groups),\
+        "Group count mismatch in Block {}".format(block.name)
+    assert nda == len(block.data_arrays),\
+        "DataArray count mismatch in Block {}".format(block.name)
+    assert nt == len(block.tags),\
+        "Tag count mismatch in Block {}".format(block.name)
+    assert nmt == len(block.multi_tags),\
+        "MultiTag count mismatch in Block {}".format(block.name)
+
+
+def check_group_children_counts(group, nda, nt, nmt):
+    assert nda == len(group.data_arrays),\
+        "DataArray count mismatch in Group {}".format(group.name)
+    assert nt == len(group.tags),\
+        "Tag count mismatch in Group {}".format(group.name)
+    assert nmt == len(group.multi_tags),\
+        "MultiTag count mismatch in Group {}".format(group.name)
+
+
+def compare(exp, actual):
+    if (isinstance(exp, Iterable) and
+            isinstance(actual, Iterable) and not
+            isinstance(exp, string_types)):
+        assert len(exp) == len(actual),\
+            "Expected {}, got {}".format(exp, actual)
+        [compare(e, a) for e, a in zip(exp, actual)]
+        return
+    assert exp == actual, "Expected {}, got {}".format(exp, actual)
+
+
+def test_full_file_read(tmpdir):
+    nixfilepath = os.path.join(str(tmpdir), "filetest-readpy.nix")
+    runcpp("writefullfile", nixfilepath)
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.ReadOnly,
+                             backend="h5py")
+
+    # Check object counts
+    assert 4 == len(nix_file.blocks), "Block count mismatch"
+    check_block_children_counts(nix_file.blocks[0], 2, 4, 1, 1)
+    check_block_children_counts(nix_file.blocks[1], 2, 2, 0, 0)
+    check_block_children_counts(nix_file.blocks[2], 2, 3, 1, 1)
+    check_block_children_counts(nix_file.blocks[3], 0, 12, 0, 0)
+
+    check_group_children_counts(nix_file.blocks[0].groups[0], 1, 1, 0)
+    check_group_children_counts(nix_file.blocks[0].groups[1], 0, 0, 0)
+
+    check_group_children_counts(nix_file.blocks[1].groups[0], 0, 0, 0)
+    check_group_children_counts(nix_file.blocks[1].groups[1], 0, 0, 0)
+
+    check_group_children_counts(nix_file.blocks[2].groups[0], 0, 1, 1)
+    check_group_children_counts(nix_file.blocks[2].groups[1], 0, 0, 0)
+
+    block = nix_file.blocks[0]
+    # Check first block attrs before descending
+    compare("blockyblock", block.name)
+    compare("ablocktype of thing", block.type)
+    compare("I am a test block", block.definition)
+
+    block = nix_file.blocks[1]
+    # Check second block attrs (no children)
+    compare("I am another block", block.name)
+    compare("void", block.type)
+    compare("Void block of stuff", block.definition)
+
+    for bidx, block in enumerate(nix_file.blocks):
+        for gidx, group in enumerate(block.groups):
+            compare("grp0{}{}".format(bidx, gidx), group.name)
+            compare("grp", group.type)
+            compare("group {}".format(gidx), group.definition)
+            compare(block.created_at, group.created_at)
+
+    # DataArray
+    block = nix_file.blocks[0]
+    group = block.groups[0]
+
+    da = block.data_arrays[0]
+    compare(da.id, group.data_arrays[0].id)
+    compare("bunchodata", da.name)
+    compare("recordings", da.type)
+    compare("A silly little data array", da.definition)
+
+    # Data
+    compare([[1., 2., 10.], [9., 1., 3.]], da[:])
+    compare([2, 3], da.shape)
+    compare(nix.DataType.Double, da.data_type)
+
+    # DataArray dimensions
+    dim = da.dimensions[0]
+    compare(nix.DimensionType.Sample, dim.dimension_type)
+    compare(0.1, dim.sampling_interval)
+    compare("ms", dim.unit)
+    compare("time", dim.label)
+
+    dim = da.dimensions[1]
+    compare(nix.DimensionType.Set, dim.dimension_type)
+    compare(["a", "b"], dim.labels)
+
+    # Tag
+    tag = block.tags[0]
+    compare("tagu", tag.name)
+    compare("tagging", tag.type)
+    compare("tags ahoy", tag.definition)
+    compare([1, 0], tag.position)
+    compare([1, 10], tag.extent)
+    compare(["mV", "s"], tag.units)
+    compare(da.id, tag.references[0].id)
+    compare(group.tags[0].id, tag.id)
+    feature = tag.features["feat-da"]
+    compare(nix.LinkType.Untagged, feature.link_type)
+    compare(feature.data.id, block.data_arrays[1].id)
+    compare("feat-da", feature.data.name)
+    compare((6,), feature.data.shape)
+    compare([0.4, 0.41, 0.49, 0.1, 0.1, 0.1], feature.data[:])
+
+    # MultiTag
+    mtag = block.multi_tags[0]
+    compare("mtagu", mtag.name)
+    compare("multi tagging", mtag.type)
+    compare(None, mtag.definition)
+    posmt = mtag.positions
+    extmt = mtag.extents
+    compare(posmt.id, block.data_arrays[posmt.name].id)
+    compare(extmt.id, block.data_arrays[extmt.name].id)
+
+    # MultiTag data
+    compare("tag-data", posmt.name)
+    compare("multi-tagger", posmt.type)
+    compare("tag-extents", extmt.name)
+    compare("multi-tagger", extmt.type)
+
+    compare([1, 3], posmt.shape)
+    compare([[0, 0.1, 10.1]], posmt[:])
+    compare(nix.DataType.Double, posmt.data_type)
+
+    compare([1, 3], extmt.shape)
+    compare([[0.5, 0.5, 0.5]], extmt[:])
+    compare(nix.DataType.Double, extmt.data_type)
+
+    # MultiTag Position and Extent dimensions
+    compare(2, len(posmt.dimensions))
+    dim = posmt.dimensions[1]
+    compare(nix.DimensionType.Set, dim.dimension_type)
+
+    dim = posmt.dimensions[0]
+    compare(nix.DimensionType.Sample, dim.dimension_type)
+    compare(0.01, dim.sampling_interval)
+    compare("s", dim.unit)
+
+    compare(2, len(extmt.dimensions))
+    dim = extmt.dimensions[1]
+    compare(nix.DimensionType.Set, dim.dimension_type)
+
+    dim = extmt.dimensions[0]
+    compare(nix.DimensionType.Sample, dim.dimension_type)
+    compare(0.01, dim.sampling_interval)
+    compare("s", dim.unit)
+
+    # Tag and MultiTag Block and Group membership
+    for idx in range(1, len(nix_file.blocks)):
+        assert tag.id not in nix_file.blocks[idx].tags,\
+            "Tag found in incorrect Block"
+        assert mtag.id not in nix_file.blocks[idx].multi_tags,\
+            "MultiTag found in incorrect Block"
+
+    group = block.groups[0]
+    assert mtag.id not in group.multi_tags, "MultiTag found in incorrect Group"
+    for idx in range(1, len(block.groups)):
+        tag.id not in block.groups[idx].tags, "Tag found in incorrect Group"
+        mtag.id not in block.groups[idx].multi_tags,\
+            "MultiTag found in incorrect Group"
+
+    # Second block DataArray
+    block = nix_file.blocks[1]
+    da = block.data_arrays[0]
+    compare("FA001", da.name)
+    compare("Primary data", da.type)
+    compare(nix.DataType.Int64, da.data_type)
+
+    # Sources
+    block = nix_file.blocks[0]
+    compare(1, len(block.sources))
+    src = block.sources["root-source"]
+    compare("top-level-source", src.type)
+    for da in block.data_arrays:
+        compare(da.sources[0].id, src.id)
+
+    compare(2, len(src.sources))
+    compare("d1-source", src.sources[0].name)
+    compare("d1-source-2", src.sources[1].name)
+    compare("second-level-source", src.sources[0].type)
+    compare("second-level-source", src.sources[1].type)
+
+    for s in src.sources:
+        compare(0, len(s.sources))
+
+    da = block.data_arrays[0]
+    compare(2, len(da.sources))
+    compare(da.sources[1].id, block.sources[0].sources[0].id)
+
+    # Metadata
+    # 3 root sections
+    compare(3, len(nix_file.sections))
+    compare("mda", nix_file.sections[0].name)
+    compare("mdb", nix_file.sections[1].name)
+    compare("mdc", nix_file.sections[2].name)
+    for s in nix_file.sections:
+        compare("root-section", s.type)
+
+    mdc = nix_file.sections[2]
+    compare(6, len(mdc.sections))
+    for idx in range(6):
+        compare("d1-section", mdc.sections["{:03d}-md".format(idx)].type)
+
+    mdb = nix_file.sections[1]
+    compare(nix_file.blocks[0].metadata.id, mdb.id)
+    compare(nix_file.blocks[2].metadata.id, mdb.id)
+
+    compare(nix_file.blocks[1].data_arrays[0].metadata.id,
+            nix_file.sections["mda"].id)
+    compare(nix_file.blocks[0].tags[0].metadata.id,
+            nix_file.sections["mdc"].sections[3].id)
+
+    block = nix_file.blocks[2]
+    tag = block.tags[0]
+    compare("POI", tag.name)
+    compare("TAG", tag.type)
+    compare([0, 0], tag.position)
+    compare([1920, 1080], tag.extent)
+    compare(["mm", "mm"], tag.units)
+    compare(tag.id, block.groups[0].tags[0].id)
+
+    feature = tag.features["some-sort-of-image?"]
+    compare(nix.LinkType.Indexed, feature.link_type)
+    compare(feature.data.id, block.data_arrays[0].id)
+    compare("some-sort-of-image?", feature.data.name)
+    compare([3840, 2160], feature.data.shape)
+
+    mtag = block.multi_tags[0]
+    compare("nu-mt", mtag.name)
+    compare("multi-tag (new)", mtag.type)
+    posmt = mtag.positions
+    compare("nu-pos", posmt.name)
+    compare("multi-tag-positions", posmt.type)
+    compare([10, 3], posmt.shape)
+    compare(nix.DataType.Double, posmt.data_type)
+    compare(posmt.id, block.data_arrays[1].id)
+    compare(mtag.id, block.groups[0].multi_tags[0].id)
+
+    # Data with range dimension
+    block = nix_file.blocks[2]
+    da = block.data_arrays["the ticker"]
+    compare([0, 1, 23], da[:])
+    compare([3], da.shape)
+    compare("range-dim-array", da.type)
+    compare("uA", da.unit)
+    compare(nix.DataType.Int32, da.data_type)
+    dim = da.dimensions[0]
+    compare(nix.DimensionType.Range, dim.dimension_type)
+
+    # Alias range dimension
+    block = nix_file.blocks[1]
+    da = block.data_arrays["alias da"]
+    compare("dimticks", da.type)
+    compare("F", da.unit)
+    compare("alias dimension label", da.label)
+    compare([24], da.shape)
+    dim = da.dimensions[0]
+    compare(nix.DimensionType.Range, dim.dimension_type)
+    assert dim.is_alias
+    compare(da[:], dim.ticks)
+
+    # Metadata types
+    mdb = nix_file.sections["mdb"]
+    compare(1, len(mdb.sections))
+    proptypesmd = mdb.sections["prop-test-parent"]
+    compare("test metadata section", proptypesmd.type)
+    compare(2, len(proptypesmd.sections))
+
+    numbermd = proptypesmd.sections[0]
+    compare("numerical metadata", numbermd.name)
+    compare("test metadata section", numbermd.type)
+    compare(4, len(numbermd.props))
+
+    prop = numbermd.props["integer"]
+    compare(1, len(prop.values))
+    compare([nix.Value(42)], prop.values)
+
+    prop = numbermd.props["float"]
+    compare(1, len(prop.values))
+    # TODO: Almost equal
+    # compare([nix.Value(4.2)], prop.values)
+
+    prop = numbermd.props["integers"]
+    compare(6, len(prop.values))
+    compare([nix.Value(40+v) for v in range(6)], prop.values)
+
+    prop = numbermd.props["floats"]
+    compare(2, len(prop.values))
+    # TODO: Almost equal
+
+    othermd = proptypesmd.sections[1]
+    compare("other metadata", othermd.name)
+    compare("test metadata section", othermd.type)
+    compare(5, len(othermd.props))
+
+    prop = othermd.props["bool"]
+    compare(1, len(prop.values))
+    compare([nix.Value(True)], prop.values)
+
+    prop = othermd.props["false bool"]
+    compare(1, len(prop.values))
+    compare([nix.Value(False)], prop.values)
+
+    prop = othermd.props["bools"]
+    compare(3, len(prop.values))
+    compare([nix.Value(True), nix.Value(False), nix.Value(True)],
+            prop.values)
+
+    prop = othermd.props["string"]
+    compare(1, len(prop.values))
+    compare([nix.Value("I am a string. Rawr.")], prop.values)
+
+    prop = othermd.props["strings"]
+    compare(3, len(prop.values))
+    compare([nix.Value(v) for v in ["one", "two", "twenty"]], prop.values)
+
+    # TODO: Check type compatibilities
+    # for idx in range(len(dtypes)):
+    #     da = block.data_arrays[idx]
+    #     dt = dtypes[idx]
+    #     compare(dt, da.data_type)
+    #     compare([1], da.shape)
+
+    nix_file.close()
     # validate(nixfilepath)
