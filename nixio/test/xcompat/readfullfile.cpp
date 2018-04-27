@@ -286,7 +286,7 @@ int main(int argc, char* argv[]) {
     errcount += compare("nu-pos", posmt.name());
     errcount += compare("multi-tag-positions", posmt.type());
     errcount += compare({10, 3}, posmt.dataExtent());
-    errcount += testassert(nix::DataType::Bool == posmt.dataType(), "DataType mismatch in nu-pos DataArray");
+    errcount += testassert(nix::DataType::Double == posmt.dataType(), "DataType mismatch in nu-pos DataArray");
     errcount += compare(posmt.id(), block.getDataArray(1).id());
     errcount += compare(mtag.id(), block.getGroup(0).getMultiTag(0).id());
 
