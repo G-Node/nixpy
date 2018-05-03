@@ -21,6 +21,21 @@ BINDIR = tempfile.mkdtemp(prefix="nixpy-tests-")
 pytestmark = pytest.mark.skipif("skip()",
                                 reason="Compatibility tests require NIX")
 
+dtypes = (
+    nix.DataType.UInt8,
+    nix.DataType.UInt16,
+    nix.DataType.UInt32,
+    nix.DataType.UInt64,
+    nix.DataType.Int8,
+    nix.DataType.Int16,
+    nix.DataType.Int32,
+    nix.DataType.Int64,
+    nix.DataType.Float,
+    nix.DataType.Double,
+    nix.DataType.String,
+    nix.DataType.Bool
+)
+
 
 def skip():
     return not maketests(BINDIR)
@@ -30,10 +45,10 @@ def validate(fname):
     """
     Runs the nix validation function on the given file.
     """
-    run_cpp("readfile", fname)
+    runcpp("validate", fname)
 
 
-def run_cpp(command, *args):
+def runcpp(command, *args):
     cmdbin = os.path.join(BINDIR, command)
     cmdargs = [cmdbin]
     cmdargs.extend(args)
@@ -59,7 +74,7 @@ def test_blocks(tmpdir):
 
     nix_file.close()
     # validate(nixfilepath)
-    run_cpp("readblocks", nixfilepath)
+    runcpp("readblocks", nixfilepath)
 
 
 def test_groups(tmpdir):
@@ -74,7 +89,7 @@ def test_groups(tmpdir):
 
     nix_file.close()
     # validate(nixfilepath)
-    run_cpp("readgroups", nixfilepath)
+    runcpp("readgroups", nixfilepath)
 
 
 def test_data_arrays(tmpdir):
@@ -435,48 +450,171 @@ def test_full_write(tmpdir):
     # validate(nixfilepath)
 
 
-def test_file(tmpdir):
+def test_full_file(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "filetest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
                              backend="h5py")
 
     block = nix_file.create_block("blockyblock", "ablocktype of thing")
-    block.description = "I am a test block"
+    block.definition = "I am a test block"
+    block.force_created_at(1500001000)
 
-    group = block.create_group("group", "group type of thing")
-    group.description = "I am a test group"
+    scndblk = nix_file.create_block("I am another block", "void")
+    scndblk.definition = "Void block of stuff"
+    scndblk.force_created_at(1500002000)
+
+    thrdblk = nix_file.create_block("Block C", "a block of stuff")
+    thrdblk.definition = "The third block"
+    thrdblk.force_created_at(1500003000)
+
+    for idx, block in enumerate(nix_file.blocks):
+        group = block.create_group("grp{:02}0".format(idx), "grp")
+        group.definition = "grp{:02}0-grp".format(idx)
+        group.force_created_at(block.created_at)
+        group = block.create_group("grp{:02}1".format(idx), "grp")
+        group.definition = "grp{:02}1-grp".format(idx)
+        group.force_created_at(block.created_at)
+
+    block = nix_file.blocks[0]
     da = block.create_data_array("bunchodata", "recordings",
-                                 dtype=nix.DataType.Float,
+                                 dtype=nix.DataType.Double,
                                  data=[[1, 2, 10], [9, 1, 3]])
-    da.description = "A silly little data array"
+    da.definition = "A silly little data array"
     smpldim = da.append_sampled_dimension(0.1)
     smpldim.unit = "ms"
     smpldim.label = "time"
     setdim = da.append_set_dimension()
-    setdim.label = "#"
-
+    setdim.labels = ["a", "b"]
+    group = block.groups[0]
     group.data_arrays.append(da)
 
-    tag = block.create_tag("tagu", "tagging", position=[1, 0])
-    tag.extent = [1, 1]
-    tag.description = "tags ahoy"
-    tag.references.append(da)
+    featda = block.create_data_array("feat-da", "tag-feature",
+                                     data=[0.4, 0.41, 0.49, 0.1, 0.1, 0.1])
 
+    tag = block.create_tag("tagu", "tagging", position=[1, 0])
+    tag.extent = [1, 10]
+    tag.units = ["mV", "s"]
+    tag.definition = "tags ahoy"
+    tag.references.append(da)
     group.tags.append(tag)
+    # TODO: Every other kind of link
+    tag.create_feature(featda, nix.LinkType.Untagged)
 
     mtag = block.create_multi_tag("mtagu", "multi tagging",
                                   positions=block.create_data_array(
                                       "tag-data", "multi-tagger",
                                       data=[[0, 0.1, 10.1]]
                                   ))
+    # MultiTag positions array
     block.data_arrays["tag-data"].append_sampled_dimension(0.01)
     block.data_arrays["tag-data"].dimensions[0].unit = "s"
     block.data_arrays["tag-data"].append_set_dimension()
+
+    # MultiTag extents array
     mtag.extents = block.create_data_array("tag-extents", "multi-tagger",
                                            data=[[0.5, 0.5, 0.5]])
     block.data_arrays["tag-extents"].append_sampled_dimension(0.01)
-    block.data_arrays["tag-data"].dimensions[0].unit = "s"
+    block.data_arrays["tag-extents"].dimensions[0].unit = "s"
     block.data_arrays["tag-extents"].append_set_dimension()
 
+    da = nix_file.blocks[1].create_data_array("FA001", "Primary data",
+                                              dtype=np.int64,
+                                              data=[100, 200, 210, 4])
+    da.definition = "Some random integers"
+
+    # Source tree
+    block = nix_file.blocks[0]
+    src = block.create_source("root-source", "top-level-source")
+    # point all (block's) data arrays to root-source
+    for da in block.data_arrays:
+        da.sources.append(src)
+
+    srcd1 = src.create_source("d1-source", "second-level-source")
+    src.create_source("d1-source-2", "second-level-source")
+    # point first da to d1-source
+    block.data_arrays[0].sources.append(srcd1)
+
+    # Metadata
+    # 3 root sections
+    for name in ["mda", "mdb", "mdc"]:
+        nix_file.create_section(name, "root-section")
+
+    sec = nix_file.sections["mdc"]
+    # 6 sections under third root section
+    for idx in range(6):
+        sec.create_section("{:03}-md".format(idx), "d1-section")
+
+    # Point existing objects to metadata sections
+    nix_file.blocks[0].metadata = nix_file.sections["mdb"]
+    nix_file.blocks[2].metadata = nix_file.sections["mdb"]
+
+    nix_file.blocks[1].data_arrays[0].metadata = nix_file.sections["mda"]
+    nix_file.blocks[0].tags[0].metadata = nix_file.sections["mdc"].sections[3]
+
+    # Add Tag and MultiTag to Block 2, Group 0
+    block = nix_file.blocks[2]
+    group = block.groups[0]
+    tag = block.create_tag("POI", "TAG", position=[0, 0])
+    tag.extent = [1920, 1080]
+    tag.units = ["mm", "mm"]
+
+    png = block.create_data_array("some-sort-of-image?", "png",
+                                  shape=(3840, 2160))
+    tag.create_feature(png, nix.LinkType.Indexed)
+
+    newmtpositions = block.create_data_array("nu-pos", "multi-tag-positions",
+                                             shape=(10, 3),
+                                             dtype=nix.DataType.Double)
+    newmtag = block.create_multi_tag("nu-mt", "multi-tag (new)",
+                                     positions=newmtpositions)
+    group.tags.append(tag)
+    group.multi_tags.append(newmtag)
+
+    # Data with RangeDimension
+    block = nix_file.blocks[2]
+    da = block.create_data_array("the ticker", "range-dim-array",
+                                 dtype=nix.DataType.Int32,
+                                 data=[0, 1, 23])
+    da.unit = "uA"
+    ticks = np.arange(10, 15, 0.1)
+    rdim = da.append_range_dimension(ticks)
+    rdim.label = "a range dimension"
+    rdim.unit = "s"
+
+    # Alias RangeDimension
+    block = nix_file.blocks[1]
+    da = block.create_data_array("alias da", "dimticks",
+                                 data=np.arange(3, 15, 0.5))
+    da.label = "alias dimension label"
+    da.unit = "F"
+    da.append_alias_range_dimension()
+
+    # All types of metadata
+    mdb = nix_file.sections["mdb"]
+    proptypesmd = mdb.create_section("prop-test-parent",
+                                     "test metadata section")
+    numbermd = proptypesmd.create_section("numerical metadata",
+                                          "test metadata section")
+    numbermd["integer"] = 42
+    numbermd["float"] = 4.2
+    numbermd["integers"] = [40, 41, 42, 43, 44, 45]
+    numbermd["floats"] = [1.1, 10.10]
+
+    othermd = proptypesmd.create_section("other metadata",
+                                         "test metadata section")
+    othermd["bool"] = True
+    othermd["false bool"] = False
+    othermd["bools"] = [True, False, True]
+    othermd["string"] = "I am a string. Rawr."
+    othermd["strings"] = ["one", "two", "twenty"]
+
+    # All types of data
+    dtypeblock = nix_file.create_block("datablock", "block of data")
+
+    for n, dt in enumerate(dtypes):
+        dtypeblock.create_data_array(str(n), "dtype-test-array",
+                                     dtype=dt, data=dt(0))
+
     nix_file.close()
+    runcpp("readfullfile", nixfilepath)
     # validate(nixfilepath)

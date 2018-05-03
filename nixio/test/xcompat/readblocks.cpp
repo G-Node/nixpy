@@ -12,8 +12,8 @@ int main(int argc, char* argv[]) {
     int idx = 0, errcount = 0;
     std::string expname, expdef;
     for (const auto &block : nf.blocks()) {
-        expname= "test_block" + nix::util::numToStr(idx);
-        expdef= "definition block " + nix::util::numToStr(idx++);
+        expname = "test_block" + nix::util::numToStr(idx);
+        expdef = "definition block " + nix::util::numToStr(idx++);
         errcount += compare(expname, block.name());
         errcount += compare("blocktype", block.type());
         errcount += compare(expdef, block.definition());
