@@ -401,6 +401,29 @@ class DataArrayTestBase(unittest.TestCase):
         check_idx(Ellipsis)
         check_idx(slice(10, 15))
 
+    def test_data_array_multi_slicing(self):
+        shape = (5, 10, 15, 20)
+        da = self.block.create_data_array(
+            'test', 'test',
+            data=np.random.randint(65000, size=shape)
+        )
+        self.assertEqual(da[0, 0, 0, 0].shape, ())
+        self.assertEqual(da[0, 0, 0, :].shape, (20,))
+        self.assertEqual(da[0, 0, :, 0].shape, (15,))
+        self.assertEqual(da[0, 0, :, :].shape, (15, 20))
+        self.assertEqual(da[0, :, 0, 0].shape, (10,))
+        self.assertEqual(da[0, :, 0, :].shape, (10, 20))
+        self.assertEqual(da[0, :, :, 0].shape, (10, 15))
+        self.assertEqual(da[0, :, :, :].shape, (10, 15, 20))
+        self.assertEqual(da[:, 0, 0, 0].shape, (5,))
+        self.assertEqual(da[:, 0, 0, :].shape, (5, 20))
+        self.assertEqual(da[:, 0, :, 0].shape, (5, 15))
+        self.assertEqual(da[:, 0, :, :].shape, (5, 15, 20))
+        self.assertEqual(da[:, :, 0, 0].shape, (5, 10))
+        self.assertEqual(da[:, :, 0, :].shape, (5, 10, 20))
+        self.assertEqual(da[:, :, :, 0].shape, (5, 10, 15))
+        self.assertEqual(da[:, :, :, :].shape, shape)
+
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestDataArrayCPP(DataArrayTestBase):
