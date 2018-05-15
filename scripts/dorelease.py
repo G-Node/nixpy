@@ -77,7 +77,8 @@ def update_readme():
 
     newrmtext = []
     for line in oldrmtext:
-        if "travis-ci.org" in line or "coveralls.io" in line:
+        if any(("travis-ci.org" in line, "coveralls.io" in line,
+                "ci.appveyor.com" in line)):
             line = line.replace("master", branch)
         newrmtext.append(line)
 
