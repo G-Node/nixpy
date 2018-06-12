@@ -11,6 +11,8 @@ NIX PR: [#695](https://github.com/G-Node/nix/pull/695)
 
 NIXPy Issue: [#277](https://github.com/G-Node/nixpy/issues/277)
 
+Introduced in [NIX Version 1.4.1](https://github.com/G-Node/nix/releases/tag/1.4.1)
+
 Description: Exposes HD5's dataset compression support through the NIX DataArray creation API.
 
 Note: NIXPy can currently load files with compressed datasets and writing to an existing compressed dataset should work without issues, since H5Py supports this. However, there is no way to create a compressed dataset through NIXPy since the options aren't exposed anywhere in the NIXPy API.
