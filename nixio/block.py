@@ -8,13 +8,13 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-import nixio.util.find as finders
-from nixio.util.proxy_list import ProxyList
+from .util import find as finders
+from .util.proxy_list import ProxyList
 import numpy as np
 
 try:
     from sys import maxint
-except:
+except ImportError:
     from sys import maxsize as maxint
 
 
