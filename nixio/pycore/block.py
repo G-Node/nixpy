@@ -31,7 +31,7 @@ class Block(EntityWithMetadata, BlockMixin):
         return newentity
 
     # DataArray
-    def _create_data_array(self, name, type_, data_type, shape):
+    def _create_data_array(self, name, type_, data_type, shape, compression):
         util.check_entity_name_and_type(name, type_)
         data_arrays = self._h5group.open_group("data_arrays")
         if name in data_arrays:

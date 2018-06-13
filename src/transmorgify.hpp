@@ -190,6 +190,20 @@ struct ndsize_transmogrify {
     }
 };
 
+// One-way converter function from Python Compression enum to nix::Compression
+// No magic
+
+static nix::Compression pyCompressionToNix(const std::string &compression)
+{
+    if (compression == "Auto")
+        return nix::Compression::Auto;
+    if (compression == "DeflateNormal")
+        return nix::Compression::DeflateNormal;
+    if (compression == "None")
+        return nix::Compression::None;
+    throw std::runtime_error("Invalid string for Compression.");
+};
+
 }
 
 #endif // NIXPY_TRANSMORGIFY_H
