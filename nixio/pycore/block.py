@@ -37,7 +37,7 @@ class Block(EntityWithMetadata, BlockMixin):
         if name in data_arrays:
             raise exceptions.DuplicateName("create_data_array")
         da = DataArray._create_new(self, data_arrays, name, type_,
-                                   data_type, shape)
+                                   data_type, shape, compression)
         return da
 
     def _get_data_array_by_id(self, id_or_name):

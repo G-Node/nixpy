@@ -15,7 +15,8 @@ from . import util
 
 class H5DataSet(object):
 
-    def __init__(self, parent, name, dtype=None, shape=None):
+    def __init__(self, parent, name, dtype=None, shape=None,
+                 compression=False):
         self._parent = parent
         self.name = name
         if (dtype is None) or (shape is None):
@@ -24,10 +25,13 @@ class H5DataSet(object):
             maxshape = (None,) * len(shape)
             if dtype == DataType.String:
                 dtype = util.vlen_str_dtype
-            self.dataset = self._parent.require_dataset(name, shape=shape,
-                                                        dtype=dtype,
-                                                        chunks=True,
-                                                        maxshape=maxshape)
+            comprargs = dict()
+            if compression:
+                comprargs = {"compression": "gzip", "compression_opts": 6}
+            self.dataset = self._parent.require_dataset(
+                name, shape=shape, dtype=dtype, chunks=True, maxshape=maxshape,
+                **comprargs
+            )
 
     @classmethod
     def create_from_h5obj(cls, h5obj):
