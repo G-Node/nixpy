@@ -23,11 +23,7 @@ using namespace boost::python;
 namespace nixpy {
 
 
-//File open(std::string path, FileMode mode = FileMode::ReadWrite) {
-//    return File::open(path, mode);
-//}
-
-File open(std::string path, std::string mode = "a") {
+File open(std::string path, std::string mode = "a", std::string compression = "Auto") {
     FileMode nixmode;
     if (mode == "a") {
         nixmode = FileMode::ReadWrite;
@@ -38,10 +34,10 @@ File open(std::string path, std::string mode = "a") {
     } else {
         // TODO: Raise error
     }
-    return File::open(path, nixmode);
+    return File::open(path, nixmode, "hdf5", pyCompressionToNix(compression));
 }
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(open_overloads, open, 1, 2)
+BOOST_PYTHON_FUNCTION_OVERLOADS(open_overloads, open, 1, 3)
 
 // getter for Block
 
