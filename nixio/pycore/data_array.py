@@ -10,6 +10,7 @@ from numbers import Number
 from .entity_with_sources import EntityWithSources
 from ..data_array import DataArrayMixin, DataSetMixin
 from ..value import DataType
+from ..compression import Compression
 from .dimensions import (SampledDimension, RangeDimension, SetDimension,
                          DimensionType)
 from . import util
@@ -63,10 +64,12 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         super(DataArray, self).__init__(nixparent, h5group)
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, data_type, shape):
+    def _create_new(cls, nixparent, h5parent, name, type_, data_type, shape,
+                    compression):
         newentity = super(DataArray, cls)._create_new(nixparent, h5parent,
                                                       name, type_)
-        newentity._h5group.create_dataset("data", shape, data_type)
+        newentity._h5group.create_dataset("data", shape, data_type,
+                                          compression)
         return newentity
 
     def _read_data(self, data, count, offset):

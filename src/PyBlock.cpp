@@ -40,8 +40,9 @@ boost::optional<DataArray> getDataArrayByPos(const Block& block, size_t index) {
 }
 
 DataArray createDataArray(Block& block, const std::string &name, const std::string &type,
-                          DataType data_type, const NDSize &shape) {
-    return block.createDataArray(name, type, data_type, shape);
+                          DataType data_type, const NDSize &shape,
+                          const std::string &compression) {
+    return block.createDataArray(name, type, data_type, shape, pyCompressionToNix(compression));
 }
 
 // getter for MultiTag
