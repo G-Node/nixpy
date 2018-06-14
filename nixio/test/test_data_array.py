@@ -424,6 +424,17 @@ class DataArrayTestBase(unittest.TestCase):
         self.assertEqual(da[:, :, :, 0].shape, (5, 10, 15))
         self.assertEqual(da[:, :, :, :].shape, shape)
 
+    def test_outofbounds_indexing(self):
+        # test out of bounds IndexError exception
+        oobtestda = self.block.create_data_array("oobdatatest",
+                                                 "data", data=[1, 2, 10])
+        with self.assertRaises(IndexError):
+            oobtestda[3]
+        with self.assertRaises(IndexError):
+            oobtestda[10]
+        with self.assertRaises(IndexError):
+            oobtestda[1:4]
+
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestDataArrayCPP(DataArrayTestBase):
