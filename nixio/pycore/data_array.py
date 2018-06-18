@@ -252,9 +252,7 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
                                  len(extents), datadim
                              ))
         if mode == DataSliceMode.Index:
-            data = np.empty(extents)
-            self._read_data(data, extents, positions)
-            return data
+            return DataView(self, extents, positions)
         elif mode == DataSliceMode.Data:
             return self._get_slice_bydim(positions, extents)
         else:
@@ -272,6 +270,4 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
             elif dim.dimension_type == DimensionType.Set:
                 dpos.append(int(pos))
                 dext.append(int(ext))
-        data = np.empty(dext)
-        self._read_data(data, dext, dpos)
-        return data
+        return DataView(self, dext, dpos)
