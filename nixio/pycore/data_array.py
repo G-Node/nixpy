@@ -6,16 +6,22 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 from numbers import Number
+import numpy as np
+from enum import Enum
 
 from .entity_with_sources import EntityWithSources
 from ..data_array import DataArrayMixin, DataSetMixin
 from ..value import DataType
-from ..compression import Compression
 from .dimensions import (SampledDimension, RangeDimension, SetDimension,
                          DimensionType)
 from . import util
 
 from .exceptions import InvalidUnit
+
+
+class DataSliceMode(Enum):
+    Index = 1
+    Data = 2
 
 
 class DataSet(DataSetMixin):
@@ -270,3 +276,40 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
                     "DataArray.unit"
                 )
         self._h5group.set_attr("unit", u)
+
+    def get_slice(self, positions, extents=None, mode=DataSliceMode.Index):
+        datadim = len(self.shape)
+        if not len(positions) == datadim:
+            raise IndexError("Number of positions given ({}) does not match "
+                             "number of data dimensions ({})".format(
+                                 len(positions), datadim
+                             ))
+        if extents and not len(extents) == datadim:
+            raise IndexError("Number of extents given ({}) does not match "
+                             "number of data dimensions ({})".format(
+                                 len(extents), datadim
+                             ))
+        if mode == DataSliceMode.Index:
+            data = np.empty(extents)
+            self._read_data(data, extents, positions)
+            return data
+        elif mode == DataSliceMode.Data:
+            return self._get_slice_bydim(positions, extents)
+        else:
+            raise ValueError("Invalid slice mode specified. "
+                             "Supported modes are DataSliceMode.Index and "
+                             "DataSliceMode.Data")
+
+    def _get_slice_bydim(self, positions, extents):
+        dpos, dext = [], []
+        for dim, pos, ext in zip(self.dimensions, positions, extents):
+            if dim.dimension_type in (DimensionType.Sample,
+                                      DimensionType.Range):
+                dpos.append(dim.index_of(pos))
+                dext.append(dim.index_of(pos+ext)-dpos[-1])
+            elif dim.dimension_type == DimensionType.Set:
+                dpos.append(int(pos))
+                dext.append(int(ext))
+        data = np.empty(dext)
+        self._read_data(data, dext, dpos)
+        return data

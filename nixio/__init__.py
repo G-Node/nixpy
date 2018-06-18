@@ -20,6 +20,7 @@ from nixio.value import Value, DataType
 from nixio.dimension_type import DimensionType
 from nixio.link_type import LinkType
 from nixio.compression import Compression
+from nixio.pycore.data_array import DataSliceMode
 
 from nixio.section import S
 
