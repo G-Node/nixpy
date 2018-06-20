@@ -206,7 +206,7 @@ setup(
     tests_require=['pytest'],
     test_suite='pytest',
     setup_requires=['pytest-runner'],
-    install_requires=['numpy', 'h5py'],
+    install_requires=['numpy', 'h5py', 'enum34;python_version<"3.4"'],
     package_data={'nixio': [license_text, description_text]},
     include_package_data=True,
     zip_safe=False,
