@@ -16,28 +16,33 @@ from .multi_tag import MultiTag
 from .tag import Tag
 from .source import Source
 from . import util
+from ..compression import Compression
 
 
 class Block(EntityWithMetadata, BlockMixin):
 
-    def __init__(self, nixparent, h5group):
+    def __init__(self, nixparent, h5group, compression=Compression.Auto):
         super(Block, self).__init__(nixparent, h5group)
+        self._compr = compression
         # TODO: Validation for containers
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_):
+    def _create_new(cls, nixparent, h5parent, name, type_, compression):
         newentity = super(Block, cls)._create_new(nixparent, h5parent,
                                                   name, type_)
+        newentity._compr = compression
         return newentity
 
     # DataArray
-    def _create_data_array(self, name, type_, data_type, shape):
+    def _create_data_array(self, name, type_, data_type, shape, compression):
         util.check_entity_name_and_type(name, type_)
         data_arrays = self._h5group.open_group("data_arrays")
         if name in data_arrays:
             raise exceptions.DuplicateName("create_data_array")
+        if compression == Compression.Auto:
+            compression = self._compr
         da = DataArray._create_new(self, data_arrays, name, type_,
-                                   data_type, shape)
+                                   data_type, shape, compression)
         return da
 
     def _get_data_array_by_id(self, id_or_name):

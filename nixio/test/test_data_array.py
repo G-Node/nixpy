@@ -401,6 +401,40 @@ class DataArrayTestBase(unittest.TestCase):
         check_idx(Ellipsis)
         check_idx(slice(10, 15))
 
+    def test_data_array_multi_slicing(self):
+        shape = (5, 10, 15, 20)
+        da = self.block.create_data_array(
+            'test', 'test',
+            data=np.random.randint(65000, size=shape)
+        )
+        self.assertEqual(da[0, 0, 0, 0].shape, ())
+        self.assertEqual(da[0, 0, 0, :].shape, (20,))
+        self.assertEqual(da[0, 0, :, 0].shape, (15,))
+        self.assertEqual(da[0, 0, :, :].shape, (15, 20))
+        self.assertEqual(da[0, :, 0, 0].shape, (10,))
+        self.assertEqual(da[0, :, 0, :].shape, (10, 20))
+        self.assertEqual(da[0, :, :, 0].shape, (10, 15))
+        self.assertEqual(da[0, :, :, :].shape, (10, 15, 20))
+        self.assertEqual(da[:, 0, 0, 0].shape, (5,))
+        self.assertEqual(da[:, 0, 0, :].shape, (5, 20))
+        self.assertEqual(da[:, 0, :, 0].shape, (5, 15))
+        self.assertEqual(da[:, 0, :, :].shape, (5, 15, 20))
+        self.assertEqual(da[:, :, 0, 0].shape, (5, 10))
+        self.assertEqual(da[:, :, 0, :].shape, (5, 10, 20))
+        self.assertEqual(da[:, :, :, 0].shape, (5, 10, 15))
+        self.assertEqual(da[:, :, :, :].shape, shape)
+
+    def test_outofbounds_indexing(self):
+        # test out of bounds IndexError exception
+        oobtestda = self.block.create_data_array("oobdatatest",
+                                                 "data", data=[1, 2, 10])
+        with self.assertRaises(IndexError):
+            oobtestda[3]
+        with self.assertRaises(IndexError):
+            oobtestda[10]
+        with self.assertRaises(IndexError):
+            oobtestda[1:4]
+
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestDataArrayCPP(DataArrayTestBase):
@@ -424,3 +458,42 @@ class TestDataArrayPy(DataArrayTestBase):
         check_idx(np.int16(20))
         check_idx(np.int32(42))
         check_idx(np.int64(9))
+
+    def test_get_slice(self):
+        data2d = np.random.random((100, 2))
+        da2d = self.block.create_data_array("get_slice 2d", "Data",
+                                            data=data2d)
+        da2d.append_range_dimension(np.linspace(10, 19.8, 50))
+        da2d.append_set_dimension()
+        data = da2d[10:30, 1:2]
+        islice = da2d.get_slice((10, 1), (20, 1),
+                                mode=nix.DataSliceMode.Index)
+        np.testing.assert_almost_equal(data, islice)
+        dslice = da2d.get_slice((12.0, 1), (4.0, 1),
+                                mode=nix.DataSliceMode.Data)
+        np.testing.assert_almost_equal(data, dslice)
+
+        data3d = np.random.random((30, 30, 5))
+        da3d = self.block.create_data_array("get_slice 3d", "Data",
+                                            data=data3d)
+        sd = da3d.append_sampled_dimension(0.1)
+        sd.offset = 0.5
+        da3d.append_sampled_dimension(2.0)
+        da3d.append_set_dimension()
+
+        data = data3d[5:15, 20:25, 3:5]
+        islice = da3d.get_slice((5, 20, 3), (10, 5, 2),
+                                mode=nix.DataSliceMode.Index)
+        np.testing.assert_almost_equal(data, islice)
+        dslice = da3d.get_slice((1.0, 40.0, 3), (1.0, 10.0, 2),
+                                mode=nix.DataSliceMode.Data)
+        np.testing.assert_almost_equal(data, dslice)
+
+        with self.assertRaises(IndexError):
+            da2d.get_slice((0, 0, 0), (10, 10, 10))
+
+        with self.assertRaises(IndexError):
+            da2d.get_slice((0, 0), (10,))
+
+        with self.assertRaises(IndexError):
+            da3d.get_slice((0, 0, 0), (3, 9, 40, 1))

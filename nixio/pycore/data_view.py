@@ -7,7 +7,7 @@
 # LICENSE file in the root of the Project.
 import numpy as np
 
-from .data_array import DataSet
+from .data_set import DataSet
 from .exceptions import OutOfBounds
 
 

@@ -13,7 +13,7 @@ from nixio.util.proxy_list import ProxyList
 
 try:
     from sys import maxint
-except:
+except ImportError:
     from sys import maxsize as maxint
 
 

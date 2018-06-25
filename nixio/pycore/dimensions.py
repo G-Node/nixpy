@@ -90,7 +90,7 @@ class SampledDimension(Dimension):
         index = round((position - offset) / sample)
         if index < 0:
             raise IndexError("Position is out of bounds of this dimension!")
-        return index
+        return int(index)
 
     def axis(self, count, start=0):
         """
@@ -242,7 +242,7 @@ class RangeDimension(Dimension):
 
         ticks = np.array(ticks)
         pidxs = np.flatnonzero((ticks - position) >= 0)
-        return pidxs[0]
+        return int(pidxs[0])
 
     def tick_at(self, index):
         """
