@@ -6,9 +6,13 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 from numbers import Number
+import numpy as np
+from enum import Enum
 
 from .entity_with_sources import EntityWithSources
-from ..data_array import DataArrayMixin, DataSetMixin
+from ..data_array import DataArrayMixin
+from .data_view import DataView
+from .data_set import DataSet
 from ..value import DataType
 from .dimensions import (SampledDimension, RangeDimension, SetDimension,
                          DimensionType)
@@ -17,44 +21,9 @@ from . import util
 from .exceptions import InvalidUnit
 
 
-class DataSet(DataSetMixin):
-
-    def _write_data(self, data, count, offset):
-        dataset = self._h5group.get_dataset("data")
-        dataset.write_data(data, count, offset)
-
-    def _read_data(self, data, count, offset):
-        dataset = self._h5group.get_dataset("data")
-        dataset.read_data(data, count, offset)
-
-    @property
-    def data_extent(self):
-        """
-        The size of the data.
-
-        :type: set of int
-        """
-        dataset = self._h5group.get_dataset("data")
-        return dataset.shape
-
-    @data_extent.setter
-    def data_extent(self, extent):
-        dataset = self._h5group.get_dataset("data")
-        dataset.shape = extent
-
-    @property
-    def data_type(self):
-        """
-        The data type of the data stored in the DataArray. This is a read only
-        property.
-
-        :type: DataType
-        """
-        return self._get_dtype()
-
-    def _get_dtype(self):
-        dataset = self._h5group.get_dataset("data")
-        return dataset.dtype
+class DataSliceMode(Enum):
+    Index = 1
+    Data = 2
 
 
 class DataArray(EntityWithSources, DataSet, DataArrayMixin):
@@ -63,10 +32,12 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
         super(DataArray, self).__init__(nixparent, h5group)
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, data_type, shape):
+    def _create_new(cls, nixparent, h5parent, name, type_, data_type, shape,
+                    compression):
         newentity = super(DataArray, cls)._create_new(nixparent, h5parent,
                                                       name, type_)
-        newentity._h5group.create_dataset("data", shape, data_type)
+        newentity._h5group.create_dataset("data", shape, data_type,
+                                          compression)
         return newentity
 
     def _read_data(self, data, count, offset):
@@ -267,3 +238,36 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
                     "DataArray.unit"
                 )
         self._h5group.set_attr("unit", u)
+
+    def get_slice(self, positions, extents=None, mode=DataSliceMode.Index):
+        datadim = len(self.shape)
+        if not len(positions) == datadim:
+            raise IndexError("Number of positions given ({}) does not match "
+                             "number of data dimensions ({})".format(
+                                 len(positions), datadim
+                             ))
+        if extents and not len(extents) == datadim:
+            raise IndexError("Number of extents given ({}) does not match "
+                             "number of data dimensions ({})".format(
+                                 len(extents), datadim
+                             ))
+        if mode == DataSliceMode.Index:
+            return DataView(self, extents, positions)
+        elif mode == DataSliceMode.Data:
+            return self._get_slice_bydim(positions, extents)
+        else:
+            raise ValueError("Invalid slice mode specified. "
+                             "Supported modes are DataSliceMode.Index and "
+                             "DataSliceMode.Data")
+
+    def _get_slice_bydim(self, positions, extents):
+        dpos, dext = [], []
+        for dim, pos, ext in zip(self.dimensions, positions, extents):
+            if dim.dimension_type in (DimensionType.Sample,
+                                      DimensionType.Range):
+                dpos.append(dim.index_of(pos))
+                dext.append(dim.index_of(pos+ext)-dpos[-1])
+            elif dim.dimension_type == DimensionType.Set:
+                dpos.append(int(pos))
+                dext.append(int(ext))
+        return DataView(self, dext, dpos)

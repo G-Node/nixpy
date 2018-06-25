@@ -19,6 +19,7 @@ from .exceptions import exceptions
 from .section import Section
 from ..file import FileMixin
 from . import util
+from ..compression import Compression
 
 try:
     from ..core import File as CFile
@@ -82,7 +83,7 @@ def make_fcpl():
 
 class File(FileMixin):
 
-    def __init__(self, h5file):
+    def __init__(self, h5file, compression):
         self._h5file = h5file
         self._root = H5Group(self._h5file, "/", create=True)
         self._h5group = self._root  # to match behaviour of other objects
@@ -92,25 +93,27 @@ class File(FileMixin):
             self.force_created_at()
         if "updated_at" not in self._h5file.attrs:
             self.force_updated_at()
+        self._compr = compression
 
     @classmethod
-    def _open_existing(cls, path, h5mode):
+    def _open_existing(cls, path, h5mode, compression):
         fid = h5py.h5f.open(path, flags=h5mode, fapl=make_fapl())
         h5file = h5py.File(fid)
-        nixfile = cls(h5file)
+        nixfile = cls(h5file, compression)
         return nixfile
 
     @classmethod
-    def _create_new(cls, path, h5mode):
+    def _create_new(cls, path, h5mode, compression):
         fid = h5py.h5f.create(path, flags=h5mode, fapl=make_fapl(),
                               fcpl=make_fcpl())
         h5file = h5py.File(fid)
-        newfile = cls(h5file)
+        newfile = cls(h5file, compression)
         newfile._create_header()
         return newfile
 
     @classmethod
-    def _open(cls, path, mode=FileMode.ReadWrite):
+    def _open(cls, path, mode=FileMode.ReadWrite,
+              compression=Compression.Auto):
         try:
             path = path.encode("utf-8")
         except (UnicodeError, LookupError):
@@ -124,18 +127,19 @@ class File(FileMixin):
         if not os.path.exists(path) or mode == FileMode.Overwrite:
             mode = FileMode.Overwrite
             h5mode = map_file_mode(mode)
-            newfile = cls._create_new(path, h5mode)
+            newfile = cls._create_new(path, h5mode, compression)
             newfile.mode = mode
             return newfile
 
         h5mode = map_file_mode(mode)
-        newfile = cls._open_existing(path, h5mode)
+        newfile = cls._open_existing(path, h5mode, compression)
         newfile._check_header(mode)
         newfile.mode = mode
         return newfile
 
     @classmethod
-    def open(cls, path, mode=FileMode.ReadWrite, backend=None):
+    def open(cls, path, mode=FileMode.ReadWrite, backend=None,
+             compression=Compression.Auto):
         """
         Open a NIX file, or create it if it does not exist.
 
@@ -155,11 +159,11 @@ class File(FileMixin):
                 backend = "hdf5"
         if backend == "hdf5":
             if CFile:
-                return CFile.open(path, mode)
+                return CFile.open(path, mode, compression)
             else:
                 raise RuntimeError("HDF5 backend is not available.")
         elif backend == "h5py":
-            return cls._open(path, mode)
+            return cls._open(path, mode, compression)
         else:
             raise ValueError("Valid backends are 'hdf5' and 'h5py'.")
 
@@ -311,14 +315,18 @@ class File(FileMixin):
         """
         if name in self._data:
             raise ValueError("Block with the given name already exists!")
-        block = Block._create_new(self, self._data, name, type_)
+        block = Block._create_new(self, self._data, name, type_, self._compr)
         return block
 
     def _get_block_by_id(self, id_or_name):
-        return Block(self, self._data.get_by_id_or_name(id_or_name))
+        return Block(self,
+                     self._data.get_by_id_or_name(id_or_name),
+                     self._compr)
 
     def _get_block_by_pos(self, pos):
-        return Block(self, self._data.get_by_pos(pos))
+        return Block(self,
+                     self._data.get_by_pos(pos),
+                     self._compr)
 
     def _delete_block_by_id(self, id_):
         self._data.delete(id_)

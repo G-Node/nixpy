@@ -8,13 +8,14 @@
 
 from __future__ import (absolute_import, division, print_function)
 
-import nixio.util.find as finders
-from nixio.util.proxy_list import ProxyList
+from .util import find as finders
+from .util.proxy_list import ProxyList
+from .compression import Compression
 import numpy as np
 
 try:
     from sys import maxint
-except:
+except ImportError:
     from sys import maxsize as maxint
 
 
@@ -64,8 +65,8 @@ class GroupProxyList(ProxyList):
 
 class BlockMixin(object):
 
-    def create_data_array(self, name, array_type,
-                          dtype=None, shape=None, data=None):
+    def create_data_array(self, name, array_type, dtype=None, shape=None,
+                          data=None, compression=Compression.Auto):
         """
         Create a new data array for this block. Either ``shape``
         or ``data`` must be given. If both are given their shape must agree.
@@ -82,6 +83,8 @@ class BlockMixin(object):
         :type shape: tuple of int or long
         :param data: Data to write after storage has been created
         :type data: array-like data
+        :param compression: En-/disable dataset compression.
+        :type compression: :class:`~nixio.Compression`
 
         :returns: The newly created data array.
         :rtype: :class:`~nixio.DataArray`
@@ -101,7 +104,8 @@ class BlockMixin(object):
                     raise ValueError("Shape must equal data.shape")
             else:
                 shape = data.shape
-        da = self._create_data_array(name, array_type, dtype, shape)
+        da = self._create_data_array(name, array_type, dtype, shape,
+                                     compression)
         if data is not None:
             da.write_direct(data)
         return da

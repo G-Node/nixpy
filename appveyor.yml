@@ -13,18 +13,22 @@ environment:
   matrix:
     # Python 2.7 32 bit
     - PYTHON: "C:\\Python27"
+      pyver: 2
       bits: 32
 
     # Python 3.6 32 bit
     - PYTHON: "C:\\Python36"
+      pyver: 3
       bits: 32
 
     # Python 2.7 64 bit
     - PYTHON: "C:\\Python27-x64"
+      pyver: 2
       bits: 64
 
     # Python 3.6 64 bit
     - PYTHON: "C:\\Python36-x64"
+      pyver: 3
       bits: 64
       RDP: "no"
 
@@ -44,6 +48,10 @@ install:
             $env:vcvars = "x86"
             $env:avjob = "job=Environment%3A%20PLATFORM%3Dx86%2C%20CONFIGURATION%3DRelease"
             $env:avfname = "nix-$env:NIX_VERSION-win32.exe"
+        }
+    - ps: |
+        if ($env:pyver -eq "2") {
+            python -m pip install enum34
         }
 
     - ps: |

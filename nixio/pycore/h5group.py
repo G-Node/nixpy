@@ -70,7 +70,7 @@ class H5Group(object):
         self._create_h5obj()
         return H5Group(self.group, name, create)
 
-    def create_dataset(self, name, shape, dtype):
+    def create_dataset(self, name, shape, dtype, compression=False):
         """
         Creates a dataset object under the current group with a given name,
         shape, and type.
@@ -78,10 +78,11 @@ class H5Group(object):
         :param name: the name of the dataset
         :param shape: tuple representing the shape of the dataset
         :param dtype: the type of the data for this dataset (DataType)
+        :param compression: whether to compress the data (default: False)
         :return: a new H5DataSet object
         """
         self._create_h5obj()
-        return H5DataSet(self.group, name, dtype, shape)
+        return H5DataSet(self.group, name, dtype, shape, compression)
 
     def get_dataset(self, name):
         """
@@ -99,15 +100,16 @@ class H5Group(object):
         else:
             raise notfound
 
-    def write_data(self, name, data, dtype=None):
+    def write_data(self, name, data, dtype=None, compression=False):
         """
         Writes the data to a Dataset contained in the group with the
-        given name.  Creates the Dataset if necessary.
+        given name. Creates the Dataset if necessary.
 
         :param name: name of the Dataset object
         :param data: the data to write
         :param dtype: optionally specify the data type, otherwise it will be
         automatically determined by the data
+        :param compression: whether to compress the data (default: False)
         """
         shape = np.shape(data)
         if self.has_data(name):
@@ -116,7 +118,7 @@ class H5Group(object):
         else:
             if dtype is None:
                 dtype = DataType.get_dtype(data[0])
-            dset = self.create_dataset(name, shape, dtype)
+            dset = self.create_dataset(name, shape, dtype, compression)
 
         dset.write_data(data)
 

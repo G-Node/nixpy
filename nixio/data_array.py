@@ -128,6 +128,9 @@ class DataSetMixin(object):
             return np.array(self)
         # if we got to here we have a tuple with len >= 1
         count, offset, shape = self.__tuple_to_count_offset_shape(index)
+        if any(o+c > s for o, c, s in zip(offset, count, self.shape)):
+            raise IndexError("index is out of bounds")
+
         raw = np.empty(shape, dtype=self.dtype)
 
         if hasattr(self, "polynom_coefficients") and self.polynom_coefficients:
