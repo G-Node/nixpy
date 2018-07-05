@@ -20,8 +20,12 @@ from .xcompat.compile import maketests
 BINDIR = tempfile.mkdtemp(prefix="nixpy-tests-")
 
 # skip these tests if nix isn't available
-pytestmark = pytest.mark.skipif("skip()",
-                                reason="Compatibility tests require NIX")
+if pytest.config.getoption("--force-compat"):
+    print("Forcing compatibility tests")
+    maketests(BINDIR)
+else:
+    pytestmark = pytest.mark.skipif("skip()",
+                                    reason="Compatibility tests require NIX")
 
 dtypes = (
     nix.DataType.UInt8,
