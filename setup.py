@@ -1,33 +1,10 @@
 #!/usr/bin/env python
-from __future__ import absolute_import, division, print_function
-
-__author__ = 'gicmo'
-
-try:
-    from setuptools import setup, Extension
-except ImportError:
-    from distutils.core import setup, Extension
-
-# python version dependent import of getstatusoutput
-try:
-    from commands import getstatusoutput
-except ImportError:
-    from subprocess import getstatusoutput
-
-try:
-    import numpy as np
-    np_inc_dir = np.get_include()
-except ImportError:
-    np_inc_dir = ""
-
 import sys
 import os
 import json
+from setuptools import setup
 
-
-# Replaced StandardError with Exception since StandardError is removed in Py3.x
-class PackageNotFoundError(Exception):
-    pass
+__author__ = 'Christian Kellner, Achilleas Koutsou'
 
 
 with open('README.rst') as f:
@@ -83,6 +60,7 @@ classifiers = [
     'Programming Language :: Python :: 3.6',
     'Topic :: Scientific/Engineering'
 ]
+
 
 setup(
     name='nixio',
