@@ -4,25 +4,23 @@ dist: trusty
 language: python
 
 env:
-    global:
-        - NIX_BRANCH=1.4
+  global:
+    - NIX_BRANCH=1.4
 
 matrix:
-    include:
-        - python: "2.7_with_system_site_packages"
-          env: COVERALLS=1 NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include
-          os: linux
-        - python: "3.4"
-          env: NIX_LIBDIR=./nix-build/inst/lib NIX_INCDIR=./nix-build/inst/include
-          os: linux
-        - python: "3.5"
-          os: linux
-        - python: "3.6"
-          os: linux
-        - python: "3.7"
-          os: linux
-          dist: xenial
-          sudo: true
+  include:
+    - python: "2.7"
+      os: linux
+      env: pymajor=2
+    - python: "3.6"
+      os: linux
+      env: pymajor=3 coveralls=1
+    - language: generic
+      os: osx
+      env: pymajor=2
+    - language: generic
+      os: osx
+      env: pymajor=3
 
 addons:
   apt:
@@ -32,38 +30,42 @@ addons:
       - libhdf5-serial-dev
       - libboost-all-dev
 
-install:
-  - export PYVER=${TRAVIS_PYTHON_VERSION:0:1}
-  - export PYMAJOR=${TRAVIS_PYTHON_VERSION:0:1}
-  - export PYMINOR=${TRAVIS_PYTHON_VERSION:2:1}
+before_install:
+  - export NIX_INCDIR=${nixprefix}/include
+  - export NIX_LIBDIR=${nixprefix}/lib
+  - export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:${nixprefix}/lib/pkgconfig
+  - if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+      brew upgrade cmake boost;
+      brew install cppunit hdf5;
+      if [[ "${pymajor}" == "3" ]]; then
+        brew upgrade python${pymajor} || true;
+      else
+        alias pip2='pip';
+      fi;
+    fi
+  - git clone --branch ${NIX_BRANCH} https://github.com/G-Node/nix /tmp/libnix
+  - pushd /tmp/libnix
+  - mkdir build
+  - pushd build
+  - nixprefix="/usr/local"
+  - cmake -DCMAKE_INSTALL_PREFIX=/usr/local ..
+  - make
+  - sudo make install
+  - popd
+  - popd
+  - which pip${pymajor}
+  - pip${pymajor} install --upgrade --no-binary ":all:" numpy coveralls h5py
+  - which python${pymajor}
+  - python${pymajor} --version
 
-  # install dependencies
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      g++ --version;
-    fi
-  - if [ "$PYMAJOR" == "3" ] && [ "$PYMINOR" == "4" ]; then
-      pip install --upgrade --no-binary ":all:" numpy cython h5py;
-      pip install --upgrade coveralls;
-    else
-      pip install --upgrade numpy coveralls h5py;
-    fi
-  #build NIX
-  - if [ -n "$NIX_LIBDIR" ]; then
-      git clone --branch ${NIX_BRANCH} https://github.com/G-Node/nix.git nix-build;
-      pushd nix-build;
-      cmake -DCMAKE_INSTALL_PREFIX=./inst -DBUILD_TESTING=OFF .;
-      make;
-      make install;
-      popd;
-    fi
+install:
+  - python${pymajor} setup.py build
 
 script:
-- python setup.py build
-- if [ $COVERALLS = 1 ]; then
-    coverage${PYVER} run --source=nixio setup.py test && coverage${PYVER} report -m;
-  else
-    python setup.py test;
-  fi;
-
-after_success:
-- if [ $COVERALLS = 1 ]; then coveralls; fi;
+  - if [[ "${coveralls}" == 1 ]]; then
+      coverage run --source=nixio setup.py test --addopts "--force-compat -s" && coverage report -m;
+    elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
+      python${pymajor} setup.py test --addopts "-k 'not test_nix_compatibility'";
+    else
+      python${pymajor} setup.py test --addopts "--force-compat -s";
+    fi
