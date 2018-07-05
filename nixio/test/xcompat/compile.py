@@ -8,6 +8,11 @@ from distutils import ccompiler
 from distutils.errors import CompileError, LinkError
 
 
+WINDOWS = False
+if platform.platform().startswith("Windows"):
+    WINDOWS = True
+
+
 def cc(filenames, dest,
        library_dirs=None, include_dirs=None,
        libraries=None, compile_args=None,
@@ -21,7 +26,7 @@ def cc(filenames, dest,
         [compiler.add_include_dir(incd) for incd in include_dirs]
     if libraries:
         [compiler.add_library(lib) for lib in libraries]
-    if runtime_lib_dirs and not platform.platform().startswith("Windows"):
+    if runtime_lib_dirs and not WINDOWS:
         [compiler.add_runtime_library_dir(rund) for rund in runtime_lib_dirs]
 
     try:
@@ -43,15 +48,20 @@ def maketests(dest):
     filenames = glob("*.cpp")
     nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include')
     nix_lib_dir = os.getenv('NIX_LIBDIR', '/usr/local/lib')
-    nix_lib = 'nix'
 
     boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
     boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
     library_dirs = [boost_lib_dir, nix_lib_dir]
     include_dirs = [boost_inc_dir, nix_inc_dir, 'src']
-    runtime_dirs = [os.getenv("LD_LIBRARY_PATH", ""), "/usr/local/lib"]
-    libraries = [nix_lib]
-    compile_args = ['--std=c++11']
+    runtime_dirs = ["/usr/local/lib"]
+    llp = os.getenv("LD_LIBRARY_PATH", None)
+    if llp is not None:
+        runtime_dirs.append(llp)
+    libraries = ["nix"]
+    compile_args = ["--std=c++11"]
+    if WINDOWS:
+        compile_args = []
+        libraries = ["nixio"]
 
     print("Compiling {}".format(" ".join(filenames)))
     success = cc(filenames, dest,
@@ -73,4 +83,4 @@ if __name__ == '__main__':
         sys.exit(1)
 
     dest = sys.argv[1]
-    sys.exit(maketests(dest))
+    sys.exit(not maketests(dest))
