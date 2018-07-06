@@ -15,10 +15,7 @@ import numpy as np
 import nixio as nix
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
-class MultiTagTestBase(unittest.TestCase):
+class TestMultiTags(unittest.TestCase):
 
     backend = None
 
@@ -441,14 +438,3 @@ class MultiTagTestBase(unittest.TestCase):
             self.feature_tag.retrieve_feature_data(2, 1)
 
         self.assertRaises(IndexError,  out_of_bounds)
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestMultiTagCPP(MultiTagTestBase):
-
-    backend = "hdf5"
-
-
-class TestMultiTagPy(MultiTagTestBase):
-
-    backend = "h5py"

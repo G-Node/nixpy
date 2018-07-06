@@ -15,16 +15,13 @@ import numpy as np
 
 import nixio as nix
 
-skip_cpp = not hasattr(nix, "core")
-
-
 try:
     basestring = basestring
 except NameError:  # 'basestring' is undefined, must be Python 3
     basestring = (str, bytes)
 
 
-class DataArrayTestBase(unittest.TestCase):
+class TestDataArray(unittest.TestCase):
 
     backend = None
     testfilename = "dataarraytest.h5"
@@ -434,17 +431,6 @@ class DataArrayTestBase(unittest.TestCase):
             oobtestda[10]
         with self.assertRaises(IndexError):
             oobtestda[1:4]
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestDataArrayCPP(DataArrayTestBase):
-
-    backend = "hdf5"
-
-
-class TestDataArrayPy(DataArrayTestBase):
-
-    backend = "h5py"
 
     def test_data_array_numpy_indexing(self):
         data = np.random.rand(50)

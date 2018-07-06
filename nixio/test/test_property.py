@@ -14,10 +14,7 @@ import unittest
 import nixio as nix
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
-class PropertyTestBase(unittest.TestCase):
+class TestProperties(unittest.TestCase):
 
     backend = None
     testfilename = "proptest.h5"
@@ -207,14 +204,3 @@ class TestValue(unittest.TestCase):
 
         value.uncertainty = 0.5
         assert(value.uncertainty == 0.5)
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestPropertyCPP(PropertyTestBase):
-
-    backend = "hdf5"
-
-
-class TestPropertyPy(PropertyTestBase):
-
-    backend = "h5py"
