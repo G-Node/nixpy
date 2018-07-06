@@ -14,10 +14,7 @@ import unittest
 import nixio as nix
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
-class BlockTestBase(unittest.TestCase):
+class TestBlock(unittest.TestCase):
 
     backend = None
     testfilename = "blocktest.h5"
@@ -192,14 +189,3 @@ class BlockTestBase(unittest.TestCase):
         del self.block.groups[0]
 
         assert(len(self.block.groups) == 0)
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestBlockCPP(BlockTestBase):
-
-    backend = "hdf5"
-
-
-class TestBlockPy(BlockTestBase):
-
-    backend = "h5py"

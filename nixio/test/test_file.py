@@ -18,10 +18,7 @@ import nixio.pycore.file as filepy
 from nixio.pycore.exceptions.exceptions import InvalidFile
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
-class FileTestBase(unittest.TestCase):
+class TestFile(unittest.TestCase):
 
     backend = None
     testfilename = "filetest.h5"
@@ -145,18 +142,7 @@ class FileTestBase(unittest.TestCase):
             self.assertEqual(nf.blocks[0].name, "blocky")
 
 
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestFileCPP(FileTestBase):
-
-    backend = "hdf5"
-
-
-class TestFilePy(FileTestBase):
-
-    backend = "h5py"
-
-
-class TestFileVerPy(unittest.TestCase):
+class TestFileVer(unittest.TestCase):
 
     backend = "h5py"
     testfilename = "versiontest.h5"

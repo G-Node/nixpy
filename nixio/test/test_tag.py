@@ -14,10 +14,7 @@ import numpy as np
 import nixio as nix
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
-class TagTestBase(unittest.TestCase):
+class TestTags(unittest.TestCase):
 
     backend = None
     testfilename = "tagtest.h5"
@@ -270,15 +267,4 @@ class TagTestBase(unittest.TestCase):
         data2 = pos_tag.retrieve_feature_data(ramp_feat.name)
 
         assert(data1.size == 1)
-        assert(data2.size == 3)
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestTagCPP(TagTestBase):
-
-    backend = "hdf5"
-
-
-class TestTagPy(TagTestBase):
-
-    backend = "h5py"
+        assert(data2.size == 2)
