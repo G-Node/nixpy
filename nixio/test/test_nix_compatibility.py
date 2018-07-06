@@ -24,8 +24,9 @@ if pytest.config.getoption("--force-compat"):
     print("Forcing compatibility tests")
     maketests(BINDIR)
 else:
-    pytestmark = pytest.mark.skipif("skip()",
-                                    reason="Compatibility tests require NIX")
+    pytestmark = pytest.mark.skipif(
+        "skip()",
+        reason="Compatibility tests require the C++ NIX library")
 
 dtypes = (
     nix.DataType.UInt8,
