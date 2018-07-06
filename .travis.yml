@@ -64,8 +64,6 @@ install:
 script:
   - if [[ "${coveralls}" == 1 ]]; then
       coverage run --source=nixio setup.py test --addopts "--force-compat -s" && coverage report -m;
-    elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-      python${pymajor} setup.py test --addopts "-k 'not test_nix_compatibility'";
     else
       python${pymajor} setup.py test --addopts "--force-compat -s";
     fi
