@@ -16,11 +16,11 @@ except ImportError:
     from sys import maxsize as maxint
 import h5py
 
-from .pycore.h5group import H5Group
+from .hdf5.h5group import H5Group
 from .block import Block
-from .pycore.exceptions import exceptions
-from .pycore.section import Section, SectionProxyList
-from .pycore import util
+from .exceptions import exceptions
+from .section import Section, SectionProxyList
+from . import util
 from .util import find as finders
 from .util.proxy_list import ProxyList
 

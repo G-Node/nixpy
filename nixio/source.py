@@ -6,14 +6,13 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
-
-from .pycore.entity_with_metadata import EntityWithMetadata
-from .util.proxy_list import ProxyList
-from .pycore import exceptions
-from .pycore import util
-from .util import find as finders
-
 from sys import maxsize as maxint
+
+from .entity_with_metadata import EntityWithMetadata
+from .util.proxy_list import ProxyList
+from .import exceptions
+from . import util
+from .util import find as finders
 
 
 class SourceProxyList(ProxyList):

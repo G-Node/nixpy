@@ -17,14 +17,14 @@ from .util import find as finders
 from .util.proxy_list import ProxyList
 from .compression import Compression
 
-from .pycore.entity_with_metadata import EntityWithMetadata
-from .pycore.exceptions import exceptions
+from .entity_with_metadata import EntityWithMetadata
+from .exceptions import exceptions
 from .group import Group
-from .pycore.data_array import DataArray
-from .pycore.multi_tag import MultiTag
-from .pycore.tag import Tag
+from .data_array import DataArray
+from .multi_tag import MultiTag
+from .tag import Tag
 from .source import Source
-from .pycore import util
+from . import util
 
 
 class SourceProxyList(ProxyList):

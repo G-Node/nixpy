@@ -15,7 +15,7 @@ import numpy as np
 
 import nixio as nix
 import nixio.file as filepy
-from nixio.pycore.exceptions.exceptions import InvalidFile
+from nixio.exceptions import InvalidFile
 
 
 skip_cpp = not hasattr(nix, "core")
