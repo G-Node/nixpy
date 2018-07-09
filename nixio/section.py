@@ -18,9 +18,9 @@ from .entity import NamedEntity
 from .property import Property
 from . import util
 from . import exceptions
-from ..value import Value
-from ..util import find as finders
-from ..util.proxy_list import ProxyList
+from .value import Value
+from .util import find as finders
+from .util.proxy_list import ProxyList
 
 
 class SectionProxyList(ProxyList):

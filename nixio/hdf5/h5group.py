@@ -13,10 +13,10 @@ import numpy as np
 from .h5dataset import H5DataSet
 from ..value import DataType
 from ..block import Block
-from .section import Section
+from ..section import Section
 
-from . import util
-from .exceptions import InvalidEntity
+from .. import util
+from ..exceptions import InvalidEntity
 
 
 class H5Group(object):

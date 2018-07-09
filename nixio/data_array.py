@@ -11,7 +11,7 @@ from enum import Enum
 from .entity_with_sources import EntityWithSources
 from .data_view import DataView
 from .data_set import DataSet
-from ..value import DataType
+from .value import DataType
 from .dimensions import (SampledDimension, RangeDimension, SetDimension,
                          DimensionType)
 from . import util

@@ -12,7 +12,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import unittest
 
-from nixio.pycore.util import names, units
+from nixio.util import names, units
 
 
 class TestUtil(unittest.TestCase):

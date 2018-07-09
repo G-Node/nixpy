@@ -10,16 +10,16 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 from .entity_with_sources import EntityWithSources
-from ..value import DataType
+from .value import DataType
 from .data_array import DataArray
 from .data_view import DataView
 from .feature import Feature
 from .exceptions import (OutOfBounds, IncompatibleDimensions,
                          UninitializedEntity, InvalidUnit)
-from ..dimension_type import DimensionType
-from ..link_type import LinkType
+from .dimension_type import DimensionType
+from .link_type import LinkType
 from . import util
-from ..util.proxy_list import ProxyList, RefProxyList
+from .util.proxy_list import ProxyList, RefProxyList
 
 
 class ReferenceProxyList(RefProxyList):

@@ -10,7 +10,7 @@ from __future__ import (absolute_import, division, print_function)
 from .tag import BaseTag, ReferenceProxyList, FeatureProxyList
 from .data_array import DataArray
 from .data_view import DataView
-from ..link_type import LinkType
+from .link_type import LinkType
 from .exceptions import (OutOfBounds, IncompatibleDimensions,
                          UninitializedEntity)
 

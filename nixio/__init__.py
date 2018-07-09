@@ -10,9 +10,8 @@ from .value import Value, DataType
 from .dimension_type import DimensionType
 from .link_type import LinkType
 from .compression import Compression
-from .pycore.data_array import DataSliceMode
-
-from .pycore.section import S
+from .data_array import DataSliceMode
+from .section import S, Section
 
 from .info import VERSION as __version__
 

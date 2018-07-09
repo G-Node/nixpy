@@ -8,10 +8,10 @@
 from __future__ import (absolute_import, division, print_function)
 
 from .entity_with_metadata import EntityWithMetadata
-from ..source import Source
+from .source import Source
 
 from . import util
-from ..util.proxy_list import RefProxyList
+from .util.proxy_list import RefProxyList
 
 
 class RefSourceProxyList(RefProxyList):
