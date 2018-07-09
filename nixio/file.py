@@ -19,7 +19,7 @@ import h5py
 from .pycore.h5group import H5Group
 from .block import Block
 from .pycore.exceptions import exceptions
-from .pycore.section import Section
+from .pycore.section import Section, SectionProxyList
 from .pycore import util
 from .util import find as finders
 from .util.proxy_list import ProxyList
@@ -38,15 +38,6 @@ class BlockProxyList(ProxyList):
                                              "_get_block_by_id",
                                              "_get_block_by_pos",
                                              "_delete_block_by_id")
-
-
-class SectionProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(SectionProxyList, self).__init__(obj, "_section_count",
-                                               "_get_section_by_id",
-                                               "_get_section_by_pos",
-                                               "_delete_section_by_id")
 
 
 def can_write(nixfile):

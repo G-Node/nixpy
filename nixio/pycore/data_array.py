@@ -24,21 +24,6 @@ class DataSliceMode(Enum):
     Data = 2
 
 
-class SetDimensionMixin(object):
-
-    dimension_type = DimensionType.Set
-
-
-class RangeDimensionMixin(object):
-
-    dimension_type = DimensionType.Range
-
-
-class SampleDimensionMixin(object):
-
-    dimension_type = DimensionType.Sample
-
-
 class DimensionProxyList(object):
     """
     List proxy for the dimensions of a data array.
