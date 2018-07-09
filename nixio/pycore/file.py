@@ -8,7 +8,6 @@
 from __future__ import (absolute_import, division, print_function)
 import os
 import gc
-from warnings import warn
 import numpy as np
 
 import nixio.util.find as finders
@@ -252,15 +251,6 @@ class File(object):
         else:
             util.check_attr_type(t, int)
         self._h5file.attrs["updated_at"] = util.time_to_str(t)
-
-    def validate(self):
-        """
-        Checks if the File is a valid NIX file. This method is only available
-        when using the "hdf5" backend.
-
-        :return: Result object
-        """
-        warn("The h5py backend does not support validation.")
 
     def is_open(self):
         """
