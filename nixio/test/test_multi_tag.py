@@ -17,8 +17,6 @@ import nixio as nix
 
 class TestMultiTags(unittest.TestCase):
 
-    backend = None
-
     testfilename = "mtagtest.h5"
 
     def setUp(self):
@@ -26,8 +24,7 @@ class TestMultiTags(unittest.TestCase):
         ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
         unit = "ms"
 
-        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
 
         self.my_array = self.block.create_data_array("my array", "test",

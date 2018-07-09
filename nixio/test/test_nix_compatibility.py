@@ -71,8 +71,7 @@ def runcpp(command, *args):
 
 def test_blocks(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
-    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
-                             backend="h5py")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     for idx in range(10):
         blk = nix_file.create_block("test_block" + str(idx),
                                     "blocktype")
@@ -86,8 +85,7 @@ def test_blocks(tmpdir):
 
 def test_groups(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "grouptest.nix")
-    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
-                             backend="h5py")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("test_block", "blocktype")
     for idx in range(12):
         grp = blk.create_group("group_" + str(idx), "grouptype")
@@ -101,8 +99,7 @@ def test_groups(tmpdir):
 
 def test_data_arrays(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "arraytest.nix")
-    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
-                             backend="h5py")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "blocktype")
     grp = blk.create_group("testgroup", "grouptype")
 
@@ -126,8 +123,7 @@ def test_data_arrays(tmpdir):
 
 def test_tags(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "tagtest.nix")
-    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
-                             backend="h5py")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "blocktype")
     grp = blk.create_group("testgroup", "grouptype")
 
@@ -149,8 +145,7 @@ def test_tags(tmpdir):
 
 def test_multi_tags(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "mtagtest.nix")
-    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
-                             backend="h5py")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "blocktype")
     grp = blk.create_group("testgroup", "grouptype")
 
@@ -172,8 +167,7 @@ def test_multi_tags(tmpdir):
 
 def test_sources(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "sourcetest.nix")
-    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
-                             backend="h5py")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "sourcetest")
     grp = blk.create_group("testgroup", "sourcetest")
     da = blk.create_data_array("da", "sourcetest",
@@ -204,8 +198,7 @@ def test_sources(tmpdir):
 
 def test_dimensions(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "dimtest.nix")
-    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
-                             backend="h5py")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "dimtest")
 
     da_set = blk.create_data_array("da with set", "datype",
@@ -245,8 +238,7 @@ def test_dimensions(tmpdir):
 
 def test_tag_features(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "feattest.nix")
-    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
-                             backend="h5py")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "feattest")
     da_ref = blk.create_data_array("da for ref", "datype",
                                    nix.DataType.Double,
@@ -270,8 +262,7 @@ def test_tag_features(tmpdir):
 
 def test_multi_tag_features(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "mtagfeattest.nix")
-    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
-                             backend="h5py")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "mtfeattest")
     index_data = blk.create_data_array(
         "indexed feature data", "test",
@@ -345,8 +336,7 @@ def test_multi_tag_features(tmpdir):
 
 def test_multi_tag_references(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
-    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
-                             backend="h5py")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     interval = 0.001
     x = np.arange(0, 10, interval)
     y = np.sin(2*np.pi*x)
@@ -377,8 +367,7 @@ def test_multi_tag_references(tmpdir):
 
 def test_properties(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "proptest.nix")
-    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
-                             backend="h5py")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     sec = nix_file.create_section("test section", "proptest")
     sec.create_property("test property", nix.Value(0))
     sec.create_property("test str", nix.DataType.String)
@@ -408,8 +397,7 @@ def test_properties(tmpdir):
 
 def test_sections(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "sectiontest.nix")
-    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
-                             backend="h5py")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     for idx in range(30):
         sec = nix_file.create_section("test section" + str(idx),
                                       "sectiontest")
@@ -434,8 +422,7 @@ def test_sections(tmpdir):
 def test_full_write(tmpdir):
     # Create a fully-featured nix file
     nixfilepath = os.path.join(str(tmpdir), "fulltest.nix")
-    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
-                             backend="h5py")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     for idx in range(30):
         sec = nix_file.create_section("test section" + str(idx),
                                       "sectiontest")
@@ -459,8 +446,7 @@ def test_full_write(tmpdir):
 
 def test_full_file(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "filetest-writepy.nix")
-    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite,
-                             backend="h5py")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
 
     block = nix_file.create_block("blockyblock", "ablocktype of thing")
     block.definition = "I am a test block"
@@ -661,8 +647,7 @@ def compare(exp, actual):
 def test_full_file_read(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "filetest-readpy.nix")
     runcpp("writefullfile", nixfilepath)
-    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.ReadOnly,
-                             backend="h5py")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.ReadOnly)
 
     # Check object counts
     assert 4 == len(nix_file.blocks), "Block count mismatch"

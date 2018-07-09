@@ -23,12 +23,10 @@ except NameError:  # 'basestring' is undefined, must be Python 3
 
 class TestDataArray(unittest.TestCase):
 
-    backend = None
     testfilename = "dataarraytest.h5"
 
     def setUp(self):
-        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         self.array = self.block.create_data_array("test array", "signal",
                                                   nix.DataType.Double, (100, ))

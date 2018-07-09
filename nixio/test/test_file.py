@@ -20,12 +20,10 @@ from nixio.pycore.exceptions.exceptions import InvalidFile
 
 class TestFile(unittest.TestCase):
 
-    backend = None
     testfilename = "filetest.h5"
 
     def setUp(self):
-        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
 
     def tearDown(self):
         self.file.close()
@@ -121,8 +119,7 @@ class TestFile(unittest.TestCase):
             danames.append(name)
         self.file.close()
 
-        self.file = nix.File.open(self.testfilename, nix.FileMode.ReadOnly,
-                                  backend=self.backend)
+        self.file = nix.File.open(self.testfilename, nix.FileMode.ReadOnly)
 
         for idx in range(len(self.file.blocks)):
             self.assertEqual(blknames[idx], self.file.blocks[idx].name)
@@ -150,7 +147,7 @@ class TestFileVer(unittest.TestCase):
     fformat = filepy.FILE_FORMAT
 
     def try_open(self, mode):
-        f = nix.File.open(self.testfilename, mode, backend=self.backend)
+        f = nix.File.open(self.testfilename, mode)
         f.close()
 
     def set_header(self, fformat=None, version=None):

@@ -16,12 +16,10 @@ import nixio as nix
 
 class TestSections(unittest.TestCase):
 
-    backend = None
     testfilename = "sectiontest.h5"
 
     def setUp(self):
-        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.section = self.file.create_section("test section",
                                                 "recordingsession")
         self.other = self.file.create_section("other section",
