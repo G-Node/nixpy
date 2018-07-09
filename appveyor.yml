@@ -4,7 +4,7 @@ image: Visual Studio 2017
 
 environment:
 
-  NIX_VERSION: 1.5.0
+  NIX_VERSION: 1.4.1
   DEPLOY_DIR: deploy
   NIX_DIR: C:\nix
   NIX_INCDIR: C:\nix\include
