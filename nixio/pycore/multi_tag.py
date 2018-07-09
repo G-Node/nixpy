@@ -7,8 +7,7 @@
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
 
-from ..multi_tag import MultiTagMixin
-from .tag import BaseTag
+from .tag import BaseTag, ReferenceProxyList, FeatureProxyList
 from .data_array import DataArray
 from .data_view import DataView
 from ..link_type import LinkType
@@ -16,7 +15,7 @@ from .exceptions import (OutOfBounds, IncompatibleDimensions,
                          UninitializedEntity)
 
 
-class MultiTag(BaseTag, MultiTagMixin):
+class MultiTag(BaseTag):
 
     def __init__(self, nixparent, h5group):
         super(MultiTag, self).__init__(nixparent, h5group)
@@ -65,6 +64,36 @@ class MultiTag(BaseTag, MultiTagMixin):
             del self._h5group["extents"]
         else:
             self._h5group.create_link(da, "extents")
+
+    @property
+    def references(self):
+        """
+        A property containing all data arrays referenced by the tag. Referenced
+        data arrays can be obtained by index or their id. References can be
+        removed from the list, removing a referenced DataArray will not remove
+        it from the file. New references can be added using the append method
+        of the list.
+        This is a read only attribute.
+
+        :type: RefProxyList of DataArray
+        """
+        if not hasattr(self, "_references"):
+            setattr(self, "_references", ReferenceProxyList(self))
+        return self._references
+
+    @property
+    def features(self):
+        """
+        A property containing all features of the tag. Features can be obtained
+        via their index or their id. Features can be deleted from the list.
+        Adding new features to the tag is done using the create_feature method.
+        This is a read only attribute.
+
+        :type: ProxyList of Feature.
+        """
+        if not hasattr(self, "_features"):
+            setattr(self, "_features", FeatureProxyList(self))
+        return self._features
 
     def _get_offset_and_count(self, data, index):
         offsets = []
