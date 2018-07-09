@@ -8,13 +8,22 @@
 from __future__ import (absolute_import, division, print_function)
 
 from .entity_with_metadata import EntityWithMetadata
-from ..entity_with_sources import EntityWithSourcesMixin
 from ..source import Source
 
 from . import util
+from ..util.proxy_list import RefProxyList
 
 
-class EntityWithSources(EntityWithMetadata, EntityWithSourcesMixin):
+class RefSourceProxyList(RefProxyList):
+
+    def __init__(self, obj):
+        super(RefSourceProxyList, self).__init__(
+            obj, "_source_count", "_get_source_by_id", "_get_source_by_pos",
+            "_remove_source_by_id", "_add_source_by_id"
+        )
+
+
+class EntityWithSources(EntityWithMetadata):
 
     def __init__(self, nixparent, h5group):
         super(EntityWithSources, self).__init__(nixparent, h5group)
@@ -27,6 +36,15 @@ class EntityWithSources(EntityWithMetadata, EntityWithSourcesMixin):
         return newentity
 
     # Source
+    @property
+    def sources(self):
+        """
+        Getter for sources.
+        """
+        if not hasattr(self, "_sources"):
+            setattr(self, "_sources", RefSourceProxyList(self))
+        return self._sources
+
     def _get_source_by_id(self, id_or_name):
         sources = self._h5group.open_group("sources")
         if util.is_uuid(id_or_name):

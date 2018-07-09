@@ -5,26 +5,16 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from .file import File, FileMode
+from .value import Value, DataType
+from .dimension_type import DimensionType
+from .link_type import LinkType
+from .compression import Compression
+from .pycore.data_array import DataSliceMode
 
-from __future__ import (absolute_import, division, print_function)
+from .pycore.section import S
 
-import sys
-import os
-
-_nixio_bin = os.path.join(sys.prefix, 'share', 'nixio', 'bin')
-if os.path.isdir(_nixio_bin):
-    os.environ["PATH"] += os.pathsep + _nixio_bin
-
-from nixio.file import File, FileMode
-from nixio.value import Value, DataType
-from nixio.dimension_type import DimensionType
-from nixio.link_type import LinkType
-from nixio.compression import Compression
-from nixio.pycore.data_array import DataSliceMode
-
-from nixio.section import S
-
-from nixio.info import VERSION as __version__
+from .info import VERSION as __version__
 
 __all__ = ("File", "FileMode", "DataType", "Value",
            "LinkType", "DimensionType")

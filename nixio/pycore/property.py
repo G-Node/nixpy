@@ -9,13 +9,12 @@ from __future__ import (absolute_import, division, print_function)
 
 import numpy as np
 
-from ..property import PropertyMixin
 from .entity import Entity
 from ..value import Value, DataType
 from . import util
 
 
-class Property(Entity, PropertyMixin):
+class Property(Entity):
 
     def __init__(self, nixparent, h5dataset):
         super(Property, self).__init__(nixparent, h5dataset)
@@ -144,3 +143,17 @@ class Property(Entity, PropertyMixin):
 
     def __repr__(self):
         return self.__str__()
+
+    def __eq__(self, other):
+        if hasattr(other, "id"):
+            return self.id == other.id
+        else:
+            return False
+
+    def __hash__(self):
+        """
+        overwriting method __eq__ blocks inheritance of __hash__ in Python 3
+        hash has to be either explicitly inherited from parent class,
+        implemented or escaped
+        """
+        return hash(self.id)
