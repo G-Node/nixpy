@@ -6,11 +6,9 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 from numbers import Number
-import numpy as np
 from enum import Enum
 
 from .entity_with_sources import EntityWithSources
-from ..data_array import DataArrayMixin
 from .data_view import DataView
 from .data_set import DataSet
 from ..value import DataType
@@ -26,7 +24,59 @@ class DataSliceMode(Enum):
     Data = 2
 
 
-class DataArray(EntityWithSources, DataSet, DataArrayMixin):
+class SetDimensionMixin(object):
+
+    dimension_type = DimensionType.Set
+
+
+class RangeDimensionMixin(object):
+
+    dimension_type = DimensionType.Range
+
+
+class SampleDimensionMixin(object):
+
+    dimension_type = DimensionType.Sample
+
+
+class DimensionProxyList(object):
+    """
+    List proxy for the dimensions of a data array.
+    """
+
+    def __init__(self, obj):
+        self.__obj = obj
+
+    def __len__(self):
+        return self.__obj._dimension_count()
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            length = self.__obj._dimension_count()
+
+            if key < 0:
+                key = length + key
+
+            if key >= length or key < 0:
+                raise KeyError("Index out of bounds: " + str(key))
+
+            return self.__obj._get_dimension_by_pos(key + 1)
+        else:
+            raise TypeError("The key must be an int but was: " + type(key))
+
+    def __iter__(self):
+        for i in range(0, len(self)):
+            yield self.__obj._get_dimension_by_pos(i + 1)
+
+    def __str__(self):
+        str_list = [str(e) for e in list(self)]
+        return "[" + ", ".join(str_list) + "]"
+
+    def __repr__(self):
+        return str(self)
+
+
+class DataArray(EntityWithSources, DataSet):
 
     def __init__(self, nixparent, h5group):
         super(DataArray, self).__init__(nixparent, h5group)
@@ -271,3 +321,43 @@ class DataArray(EntityWithSources, DataSet, DataArrayMixin):
                 dpos.append(int(pos))
                 dext.append(int(ext))
         return DataView(self, dext, dpos)
+
+    @property
+    def data(self):
+        """
+        DEPRECATED DO NOT USE ANYMORE! Returns self
+
+        :type: :class:`~nixio.data_array.DataArray`
+        """
+        import warnings
+        warnings.warn("Call to deprecated property DataArray.data",
+                      category=DeprecationWarning)
+        return self
+
+    @property
+    def dimensions(self):
+        """
+        A property containing all dimensions of a DataArray. Dimensions can be
+        obtained via their index. Adding dimensions is done using the
+        respective append methods for dimension descriptors.
+        This is a read only attribute.
+
+        :type: ProxyList of dimension descriptors.
+        """
+        if not hasattr(self, "_dimensions"):
+            setattr(self, "_dimensions", DimensionProxyList(self))
+        return self._dimensions
+
+    def __eq__(self, other):
+        if hasattr(other, "id"):
+            return self.id == other.id
+        else:
+            return False
+
+    def __hash__(self):
+        """
+        Overwriting method __eq__ blocks inheritance of __hash__ in Python 3
+        hash has to be either explicitly inherited from parent class,
+        implemented or escaped
+        """
+        return hash(self.id)
