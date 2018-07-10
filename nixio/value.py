@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright © 2015, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
