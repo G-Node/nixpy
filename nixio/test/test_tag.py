@@ -6,19 +6,18 @@
 # Redistribution and use in section and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
 import os
-
 import unittest
 import numpy as np
 import nixio as nix
+from .tmp import TempDir
 
 
 class TestTags(unittest.TestCase):
 
-    testfilename = "tagtest.nix"
-
     def setUp(self):
+        self.tmpdir = TempDir("tagtest")
+        self.testfilename = os.path.join(self.tmpdir.path, "tagtest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
 
@@ -40,7 +39,7 @@ class TestTags(unittest.TestCase):
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_tag_eq(self):
         assert(self.my_tag == self.my_tag)
