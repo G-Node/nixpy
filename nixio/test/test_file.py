@@ -20,7 +20,7 @@ from nixio.exceptions import InvalidFile
 
 class TestFile(unittest.TestCase):
 
-    testfilename = "filetest.h5"
+    testfilename = "filetest.nix"
 
     def setUp(self):
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
@@ -132,7 +132,7 @@ class TestFile(unittest.TestCase):
 class TestFileVer(unittest.TestCase):
 
     backend = "h5py"
-    testfilename = "versiontest.h5"
+    testfilename = "versiontest.nix"
     filever = filepy.HDF_FF_VERSION
     fformat = filepy.FILE_FORMAT
 

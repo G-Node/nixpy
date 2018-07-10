@@ -23,7 +23,7 @@ except NameError:  # 'basestring' is undefined, must be Python 3
 
 class TestDataArray(unittest.TestCase):
 
-    testfilename = "dataarraytest.h5"
+    testfilename = "dataarraytest.nix"
 
     def setUp(self):
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)

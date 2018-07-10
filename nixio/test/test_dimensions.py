@@ -23,7 +23,7 @@ test_labels = tuple([str(i) + "_label" for i in range(10)])
 
 class TestDimension(unittest.TestCase):
 
-    testfilename = "dimtest.h5"
+    testfilename = "dimtest.nix"
 
     def setUp(self):
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)

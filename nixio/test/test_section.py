@@ -16,7 +16,7 @@ import nixio as nix
 
 class TestSections(unittest.TestCase):
 
-    testfilename = "sectiontest.h5"
+    testfilename = "sectiontest.nix"
 
     def setUp(self):
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)

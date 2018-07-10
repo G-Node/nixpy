@@ -16,7 +16,7 @@ import nixio as nix
 
 class TestTags(unittest.TestCase):
 
-    testfilename = "tagtest.h5"
+    testfilename = "tagtest.nix"
 
     def setUp(self):
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
