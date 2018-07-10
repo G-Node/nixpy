@@ -216,13 +216,6 @@ class TestDataArray(unittest.TestCase):
         dset[1, 0:2, 0:2] = d2
         assert(np.array_equal(dset[1, 0:2, 0:2], d2))
 
-        # test for the size check in DataSet.__len__
-        # by simulating a system with a really smal int
-        savemaxsize = sys.maxsize
-        sys.maxsize = len(dset) - 1
-        self.assertRaises(OverflowError, lambda: len(dset))
-        sys.maxsize = savemaxsize
-
         # test inferring shape & dtype from data, and writing the data
         test_ten = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
         test_data = np.array(test_ten, dtype=int)
