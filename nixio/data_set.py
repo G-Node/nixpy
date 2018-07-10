@@ -54,18 +54,7 @@ class DataSet(object):
         self._write_data(raw, count, offset)
 
     def __len__(self):
-        s = self.len()
-
-        # PyObject_Size returns a Py_ssize_t, which is the same as the
-        # systems size_t type but signed, i.e. ssize_t. (cf. PEP 0353)
-        # The maximum positive integer that Py_ssize_t can hold is
-        # exposed via sys.maxsize.
-        # Since self.shape can contain longs we need to check for that
-        if s > sys.maxsize:
-            estr = ("DataSet's shape[0] is too big for Python's __len__. "
-                    "Use DataSet.len() instead")
-            raise OverflowError(estr)
-        return s
+        return self.len()
 
     def __iter__(self):
         for idx in range(self.len()):
