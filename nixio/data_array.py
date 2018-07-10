@@ -83,14 +83,17 @@ class DataArray(Entity, DataSet):
     def _read_data(self, sl=None):
         coeff = self.polynom_coefficients
         origin = self.expansion_origin
+        sup = super(DataArray, self)
         if len(coeff) or origin:
             if not origin:
                 origin = 0.0
 
-            data = super(DataArray, self)._read_data(sl)
+            # when there are coefficients, convert the dtype of the returned
+            # data array to double
+            data = sup._read_data(sl).astype(DataType.Double)
             util.apply_polynomial(coeff, origin, data)
         else:
-            data = super(DataArray, self)._read_data(sl)
+            data = sup._read_data(sl)
         return data
 
     @property
