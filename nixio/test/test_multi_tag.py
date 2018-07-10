@@ -17,7 +17,7 @@ import nixio as nix
 
 class TestMultiTags(unittest.TestCase):
 
-    testfilename = "mtagtest.h5"
+    testfilename = "mtagtest.nix"
 
     def setUp(self):
         iv = 1.0

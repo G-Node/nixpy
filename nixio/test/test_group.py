@@ -15,7 +15,7 @@ import nixio as nix
 
 class TestGroups(unittest.TestCase):
 
-    testfilename = "grouptest.h5"
+    testfilename = "grouptest.nix"
 
     def setUp(self):
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)

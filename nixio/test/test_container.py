@@ -14,7 +14,7 @@ import unittest
 
 class TestContainer(unittest.TestCase):
 
-    testfilename = "containertest.h5"
+    testfilename = "containertest.nix"
 
     def setUp(self):
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)

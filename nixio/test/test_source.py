@@ -16,7 +16,7 @@ import nixio as nix
 
 class TestSources(unittest.TestCase):
 
-    testfilename = "sourcetest.h5"
+    testfilename = "sourcetest.nix"
 
     def setUp(self):
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
