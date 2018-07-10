@@ -19,9 +19,6 @@ except NameError:  # 'basestring' is undefined, must be Python 3
     basestring = (str, bytes)
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
 class WithIdMock(object):
 
     def __init__(self, id):
@@ -62,7 +59,6 @@ class WithListMock(object):
         return self.__list
 
 
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestProxyList(unittest.TestCase):
 
     def setUp(self):

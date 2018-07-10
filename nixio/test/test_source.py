@@ -14,10 +14,7 @@ import unittest
 import nixio as nix
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
-class SourceTestBase(unittest.TestCase):
+class TestSources(unittest.TestCase):
 
     backend = None
     testfilename = "sourcetest.h5"
@@ -150,14 +147,3 @@ class SourceTestBase(unittest.TestCase):
         self.assertEqual(len(self.source.referring_multi_tags), 1)
         self.assertEqual(len(self.other.referring_multi_tags), 0)
         self.assertEqual(self.source.referring_multi_tags[0].id, mtag.id)
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestSourceCPP(SourceTestBase):
-
-    backend = "hdf5"
-
-
-class TestSourcePy(SourceTestBase):
-
-    backend = "h5py"

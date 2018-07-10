@@ -13,10 +13,7 @@ import unittest
 import nixio as nix
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
-class GroupTestBase(unittest.TestCase):
+class TestGroups(unittest.TestCase):
 
     backend = None
     testfilename = "grouptest.h5"
@@ -202,14 +199,3 @@ class GroupTestBase(unittest.TestCase):
         self.assertRaises(RuntimeError, newgroup.tags.append, tg)
 
         del self.file.blocks[newblock.id]
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestGroupCPP(GroupTestBase):
-
-    backend = "hdf5"
-
-
-class TestGroupPy(GroupTestBase):
-
-    backend = "h5py"

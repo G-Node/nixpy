@@ -14,10 +14,7 @@ import unittest
 import nixio as nix
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
-class FeatureTestBase(unittest.TestCase):
+class TestFeatures(unittest.TestCase):
 
     backend = None
     testfilename = "featuretest.h5"
@@ -79,14 +76,3 @@ class FeatureTestBase(unittest.TestCase):
                                                     nix.DataType.Float, (0, ))
         self.feature_1.data = new_data_ref
         assert(self.feature_1.data == new_data_ref)
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestFeatureCPP(FeatureTestBase):
-
-    backend = "hdf5"
-
-
-class TestFeaturePy(FeatureTestBase):
-
-    backend = "h5py"

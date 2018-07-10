@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
     block.forceCreatedAt(1500003000);
 
     int idx = 0;
-    char name [6];
+    char name [7];
     nix::Group group;
     for (auto bl : nf.blocks()) {
         sprintf(name, "grp%02d0", idx);
