@@ -6,19 +6,17 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
 import os
-
 import unittest
-
 import nixio as nix
+from .tmp import TempDir
 
 
 class TestSources(unittest.TestCase):
 
-    testfilename = "sourcetest.nix"
-
     def setUp(self):
+        self.tmpdir = TempDir("sourcetest")
+        self.testfilename = os.path.join(self.tmpdir.path, "sourcetest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         self.source = self.block.create_source("test source",
@@ -32,7 +30,7 @@ class TestSources(unittest.TestCase):
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_source_eq(self):
         assert(self.source == self.source)

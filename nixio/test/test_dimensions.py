@@ -6,13 +6,12 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
 import os
-
 import unittest
 import numpy as np
 
 import nixio as nix
+from .tmp import TempDir
 
 
 test_range = tuple([float(i) for i in range(10)])
@@ -23,9 +22,9 @@ test_labels = tuple([str(i) + "_label" for i in range(10)])
 
 class TestDimension(unittest.TestCase):
 
-    testfilename = "dimtest.nix"
-
     def setUp(self):
+        self.tmpdir = TempDir("dimtest")
+        self.testfilename = os.path.join(self.tmpdir.path, "dimtest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         self.array = self.block.create_data_array("test array", "signal",
@@ -38,7 +37,7 @@ class TestDimension(unittest.TestCase):
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_set_dimension(self):
         assert(self.set_dim.index == 1)

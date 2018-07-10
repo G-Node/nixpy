@@ -6,14 +6,13 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
 import os
 import sys
-
 import unittest
 import numpy as np
-
 import nixio as nix
+from .tmp import TempDir
+
 
 try:
     basestring = basestring
@@ -23,9 +22,9 @@ except NameError:  # 'basestring' is undefined, must be Python 3
 
 class TestDataArray(unittest.TestCase):
 
-    testfilename = "dataarraytest.nix"
-
     def setUp(self):
+        self.tmpdir = TempDir("dataarraytest")
+        self.testfilename = os.path.join(self.tmpdir.path, "dataarraytest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         self.array = self.block.create_data_array("test array", "signal",
@@ -36,7 +35,7 @@ class TestDataArray(unittest.TestCase):
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_data_array_eq(self):
         assert(self.array == self.array)

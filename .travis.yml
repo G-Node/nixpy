@@ -54,7 +54,7 @@ before_install:
   - popd
   - popd
   - which pip${pymajor}
-  - pip${pymajor} install --upgrade --no-binary ":all:" numpy coveralls h5py
+  - pip${pymajor} install --upgrade --no-binary ":all:" numpy coveralls h5py pytest-xdist
   - which python${pymajor}
   - python${pymajor} --version
 
@@ -63,7 +63,7 @@ install:
 
 script:
   - if [[ "${coveralls}" == 1 ]]; then
-      coverage run --source=nixio setup.py test --addopts "--force-compat -s" && coverage report -m;
+      coverage run --source=nixio setup.py test --addopts "--force-compat -s -nauto" && coverage report -m;
     else
-      python${pymajor} setup.py test --addopts "--force-compat -s";
+      python${pymajor} setup.py test --addopts "--force-compat -s -nauto";
     fi

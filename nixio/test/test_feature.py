@@ -6,19 +6,17 @@
 # Redistribution and use in section and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
 import os
-
 import unittest
-
 import nixio as nix
+from .tmp import TempDir
 
 
 class TestFeatures(unittest.TestCase):
 
-    testfilename = "featuretest.nix"
-
     def setUp(self):
+        self.tmpdir = TempDir("featuretest")
+        self.testfilename = os.path.join(self.tmpdir.path, "featuretest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
 
@@ -45,7 +43,7 @@ class TestFeatures(unittest.TestCase):
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_feature_eq(self):
         assert(self.feature_1 == self.feature_1)

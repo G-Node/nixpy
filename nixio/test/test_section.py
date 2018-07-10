@@ -6,19 +6,17 @@
 # Redistribution and use in section and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
 import os
-
 import unittest
-
 import nixio as nix
+from .tmp import TempDir
 
 
 class TestSections(unittest.TestCase):
 
-    testfilename = "sectiontest.nix"
-
     def setUp(self):
+        self.tmpdir = TempDir("sectiontest")
+        self.testfilename = os.path.join(self.tmpdir.path, "sectiontest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.section = self.file.create_section("test section",
                                                 "recordingsession")
@@ -29,7 +27,7 @@ class TestSections(unittest.TestCase):
         del self.file.sections[self.section.id]
         del self.file.sections[self.other.id]
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_section_eq(self):
         assert(self.section == self.section)

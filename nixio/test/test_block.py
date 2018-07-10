@@ -6,19 +6,17 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
 import os
-
 import unittest
-
 import nixio as nix
+from .tmp import TempDir
 
 
 class TestBlock(unittest.TestCase):
 
-    testfilename = "blocktest.nix"
-
     def setUp(self):
+        self.tmpdir = TempDir("blocktest")
+        self.testfilename = os.path.join(self.tmpdir.path, "blocktest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         self.other = self.file.create_block("other block", "recordingsession")
@@ -27,7 +25,7 @@ class TestBlock(unittest.TestCase):
         del self.file.blocks[self.block.id]
         del self.file.blocks[self.other.id]
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_block_eq(self):
         assert(self.block == self.block)

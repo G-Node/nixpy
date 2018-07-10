@@ -67,7 +67,7 @@ install:
       Invoke-WebRequest -URI $env:nix_exe_url -OutFile "nix.exe"
   - 7z x nix.exe
   - cd ..
-  - python -m pip install numpy h5py wheel
+  - python -m pip install numpy h5py wheel pytest-xdist
   - ps: cd "$env:APPVEYOR_BUILD_FOLDER"
   - set DISTUTILS_USE_SDK="1"
   - set MSSdk="1"
@@ -78,7 +78,7 @@ build_script:
 test_script:
   # TODO: Force cross-compatibility tests
   # - python setup.py test --addopts "--force-compat"
-  - python setup.py test
+  - python setup.py test --addopts "-nauto"
 
 after_test:
   - ps: mkdir "$env:DEPLOY_DIR"
