@@ -35,7 +35,7 @@ before_install:
   - export NIX_LIBDIR=${nixprefix}/lib
   - export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:${nixprefix}/lib/pkgconfig
   - if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-      brew upgrade cmake boost;
+      brew upgrade cmake;
       brew install cppunit hdf5;
       if [[ "${pymajor}" == "3" ]]; then
         brew upgrade python${pymajor} || true;
