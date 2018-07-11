@@ -45,7 +45,12 @@ class H5DataSet(object):
     def read_data(self, sl=None):
         if sl is None:
             return self.dataset[:]
-        return self.dataset[sl]
+        try:
+            return self.dataset[sl]
+        except ValueError as ve:
+            # h5py throws ValueError for out-of-bounds index
+            # Let's change it to IndexError
+            raise IndexError(ve)
 
     def set_attr(self, name, value):
         if value is None:

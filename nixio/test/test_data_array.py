@@ -415,7 +415,7 @@ class TestDataArray(unittest.TestCase):
         with self.assertRaises(IndexError):
             oobtestda[10]
         with self.assertRaises(IndexError):
-            oobtestda[1:4]
+            oobtestda[-7]
 
     def test_data_array_numpy_indexing(self):
         data = np.random.rand(50)
