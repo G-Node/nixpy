@@ -1,4 +1,5 @@
-# Copyright (c) 2016, German Neuroinformatics Node (G-Node)
+# -*- coding: utf-8 -*-
+# Copyright © 2014, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
 #

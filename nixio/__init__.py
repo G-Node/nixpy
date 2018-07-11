@@ -1,4 +1,5 @@
-# Copyright (c) 2014, German Neuroinformatics Node (G-Node)
+# -*- coding: utf-8 -*-
+# Copyright © 2014, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
 #
@@ -6,32 +7,35 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function)
+# NIX object classes
+from .file import File
+from .block import Block
+from .group import Group
+from .data_array import DataArray
+from .tag import Tag
+from .multi_tag import MultiTag
+from .source import Source
+from .section import Section, S
+from .property import Property
+from .value import Value
+from .feature import Feature
+from .dimensions import SampledDimension, RangeDimension, SetDimension
 
-import sys
-import os
+# enums
+from .file import FileMode
+from .data_array import DataSliceMode
+from .value import DataType
+from .dimension_type import DimensionType
+from .link_type import LinkType
+from .compression import Compression
 
-_nixio_bin = os.path.join(sys.prefix, 'share', 'nixio', 'bin')
-if os.path.isdir(_nixio_bin):
-    os.environ["PATH"] += os.pathsep + _nixio_bin
+# version
+from .info import VERSION as __version__
 
-from nixio.pycore.file import File, FileMode
-from nixio.value import Value, DataType
-from nixio.dimension_type import DimensionType
-from nixio.link_type import LinkType
-from nixio.compression import Compression
-from nixio.pycore.data_array import DataSliceMode
-
-from nixio.section import S
-
-from nixio.info import VERSION as __version__
-
-try:
-    import nixio.util.inject
-except ImportError:
-    pass
-
-__all__ = ("File", "FileMode", "DataType", "Value",
-           "LinkType", "DimensionType")
+__all__ = ("File", "Block", "Group", "DataArray", "Tag", "MultiTag", "Source",
+           "Section", "S", "Value", "Feature", "Property",
+           "SampledDimension", "RangeDimension", "SetDimension",
+           "FileMode", "DataSliceMode", "DataType", "DimensionType",
+           "LinkType", "Compression")
 __author__ = ('Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, '
               'Balint Morvai, Achilleas Koutsou')

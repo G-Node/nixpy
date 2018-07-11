@@ -1,4 +1,5 @@
-# Copyright (c) 2015, German Neuroinformatics Node (G-Node)
+# -*- coding: utf-8 -*-
+# Copyright © 2015, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
 #
@@ -6,7 +7,6 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function)
 import os
 
 import unittest
@@ -15,12 +15,10 @@ import nixio as nix
 
 class TestGroups(unittest.TestCase):
 
-    backend = None
     testfilename = "grouptest.h5"
 
     def setUp(self):
-        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
 
         self.my_array = self.block.create_data_array("my array", "test",

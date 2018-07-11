@@ -1,4 +1,5 @@
-# Copyright (c) 2014, German Neuroinformatics Node (G-Node)
+# -*- coding: utf-8 -*-
+# Copyright © 2014, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
 #
@@ -6,7 +7,6 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function)
 import os
 
 import unittest
@@ -14,18 +14,16 @@ import h5py
 import numpy as np
 
 import nixio as nix
-import nixio.pycore.file as filepy
-from nixio.pycore.exceptions.exceptions import InvalidFile
+import nixio.file as filepy
+from nixio.exceptions import InvalidFile
 
 
 class TestFile(unittest.TestCase):
 
-    backend = None
     testfilename = "filetest.h5"
 
     def setUp(self):
-        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
 
     def tearDown(self):
         self.file.close()
@@ -121,8 +119,7 @@ class TestFile(unittest.TestCase):
             danames.append(name)
         self.file.close()
 
-        self.file = nix.File.open(self.testfilename, nix.FileMode.ReadOnly,
-                                  backend=self.backend)
+        self.file = nix.File.open(self.testfilename, nix.FileMode.ReadOnly)
 
         for idx in range(len(self.file.blocks)):
             self.assertEqual(blknames[idx], self.file.blocks[idx].name)
@@ -140,7 +137,7 @@ class TestFileVer(unittest.TestCase):
     fformat = filepy.FILE_FORMAT
 
     def try_open(self, mode):
-        f = nix.File.open(self.testfilename, mode, backend=self.backend)
+        f = nix.File.open(self.testfilename, mode)
         f.close()
 
     def set_header(self, fformat=None, version=None):
