@@ -79,6 +79,15 @@ class Property(Entity):
         self._h5dataset.set_attr("uncertainty", uncertainty)
 
     @property
+    def reference(self):
+        return self._h5dataset.get_attr("reference")
+
+    @reference.setter
+    def reference(self, ref):
+        util.check_attr_type(ref, str)
+        self._h5dataset.set_attr("reference", ref)
+
+    @property
     def values(self):
         dataset = self._h5dataset
         if not sum(dataset.shape):
