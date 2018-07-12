@@ -10,7 +10,6 @@
 import numpy as np
 
 from .entity import Entity
-from .metadata_reference import create_metadata_prop
 from .source_link_container import SourceLinkContainer
 from .container import Container, LinkContainer
 
@@ -23,6 +22,7 @@ from .exceptions import (OutOfBounds, IncompatibleDimensions,
 from .dimension_type import DimensionType
 from .link_type import LinkType
 from . import util
+from .section import Section
 
 
 class FeatureContainer(Container):
@@ -216,7 +216,6 @@ class Tag(BaseTag):
 
     def __init__(self, nixparent, h5group):
         super(Tag, self).__init__(nixparent, h5group)
-        self.metadata = create_metadata_prop()
         self._sources = None
         self._references = None
         self._features = None
@@ -381,3 +380,30 @@ class Tag(BaseTag):
         if self._sources is None:
             self._sources = SourceLinkContainer(self)
         return self._sources
+
+    # metadata
+    @property
+    def metadata(self):
+        """
+
+        Associated metadata of the entity. Sections attached to the entity via
+        this attribute can provide additional annotations. This is an optional
+        read-write property, and can be None if no metadata is available.
+
+        :type: Section
+        """
+        if "metadata" in self._h5group:
+            return Section(None, self._h5group.open_group("metadata"))
+        else:
+            return None
+
+    @metadata.setter
+    def metadata(self, sect):
+        if not isinstance(sect, Section):
+            raise TypeError("{} is not of type Section".format(sect))
+        self._h5group.create_link(sect, "metadata")
+
+    @metadata.deleter
+    def metadata(self):
+        if "metadata" in self._h5group:
+            self._h5group.delete("metadata")
