@@ -108,52 +108,6 @@ class Section(Entity):
         prop.values = values
         return prop
 
-    def has_property_by_name(self, name):
-        """
-        Checks whether a section has a property with a certain name.
-
-        :param name: The name to check.
-        :type name: str
-
-        :returns: True if the section has a property with the given name,
-                  False otherwise.
-        :rtype: bool
-        """
-        properties = self._h5group.open_group("properties")
-        return properties.has_by_id(name)
-
-    def get_property_by_name(self, name):
-        """
-        Get a property by its name.
-
-        :param name: The name to check.
-        :type name: str
-
-        :returns: The property with the given name.
-        :rtype: Property
-        """
-        properties = self._h5group.open_group("properties")
-        try:
-            p = Property(self, properties.get_by_name(name))
-        except KeyError:
-            p = None
-        return p
-
-    def _get_property_by_id(self, id_or_name):
-        properties = self._h5group.open_group("properties")
-        return Property(self, properties.get_by_id_or_name(id_or_name))
-
-    def _get_property_by_pos(self, pos):
-        properties = self._h5group.open_group("properties")
-        return Property(self, properties.get_by_pos(pos))
-
-    def _delete_property_by_id(self, id_):
-        properties = self._h5group.open_group("properties")
-        properties.delete(id_)
-
-    def _property_count(self):
-        return len(self._h5group.open_group("properties"))
-
     @property
     def link(self):
         """
@@ -460,12 +414,3 @@ class Section(Entity):
         if self._properties is None:
             self._properties = Container("properties", self, Property)
         return self._properties
-
-    def _get_property_by_id_or_name(self, ident):
-        """
-        Helper method that gets a property by id or name
-        """
-        p = self._get_property_by_id(ident)
-        if p is None and self.has_property_by_name(ident):
-            p = self.get_property_by_name(ident)
-        return p

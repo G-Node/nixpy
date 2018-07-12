@@ -48,23 +48,6 @@ class Source(Entity):
         src = Source._create_new(self, sources, name, type_)
         return src
 
-    # Source
-    def _get_source_by_id(self, id_or_name):
-        sources = self._h5group.open_group("sources")
-        return Source(self, sources.get_by_id_or_name(id_or_name))
-
-    def _get_source_by_pos(self, pos):
-        sources = self._h5group.open_group("sources")
-        return Source(self, sources.get_by_pos(pos))
-
-    def _delete_source_by_id(self, id_):
-        sources = self._h5group.open_group("sources")
-        sources.delete(id_)
-
-    def _source_count(self):
-        sources = self._h5group.open_group("sources")
-        return len(sources)
-
     @property
     def referring_objects(self):
         objs = []
