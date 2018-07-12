@@ -68,6 +68,17 @@ class Property(Entity):
         self._h5dataset.set_attr("unit", u)
 
     @property
+    def uncertainty(self):
+        return self._h5dataset.get_attr("uncertainty")
+
+    @uncertainty.setter
+    def uncertainty(self, uncertainty):
+        # Use int as type check for now but check whether
+        # it should be changed to float.
+        util.check_attr_type(uncertainty, int)
+        self._h5dataset.set_attr("uncertainty", uncertainty)
+
+    @property
     def values(self):
         dataset = self._h5dataset
         if not sum(dataset.shape):
