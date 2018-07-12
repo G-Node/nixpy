@@ -109,6 +109,15 @@ class Section(Entity):
         return prop
 
     @property
+    def reference(self):
+        return self._h5group.get_attr("reference")
+
+    @reference.setter
+    def reference(self, ref):
+        util.check_attr_type(ref, str)
+        self._h5group.set_attr("reference", ref)
+
+    @property
     def link(self):
         """
         Link to another section. If a section is linked to another section,
