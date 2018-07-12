@@ -40,6 +40,14 @@ class TestProperties(unittest.TestCase):
     def test_property_id(self):
         assert(self.prop.id is not None)
 
+        oid = "4a6e8483-0a9a-464d-bdd9-b39818334bcd"
+        aprop = self.section.create_property("assign id", nix.Value(0), oid)
+        assert (aprop.id == oid)
+
+        nonid = "I am not a proper uuid"
+        noprop = self.section.create_property("invalid id", nix.Value(0), nonid)
+        assert (noprop.id != nonid)
+
     def test_property_name(self):
         assert(self.prop.name is not None)
 
@@ -52,6 +60,56 @@ class TestProperties(unittest.TestCase):
         self.prop.definition = None
         assert(self.prop.definition is None)
         self.prop.definition = None
+
+    def test_property_uncertainty(self):
+        assert(self.prop.uncertainty is None)
+
+        self.prop.uncertainty = 5
+        assert(self.prop.uncertainty == 5)
+
+        self.prop.uncertainty = None
+        assert(self.prop.uncertainty is None)
+        self.prop.uncertainty = None
+
+    def test_property_reference(self):
+        assert(self.prop.reference is None)
+
+        self.prop.reference = "reference"
+        assert(self.prop.reference == "reference")
+
+        self.prop.reference = None
+        assert(self.prop.reference is None)
+        self.prop.reference = None
+
+    def test_property_dependency(self):
+        assert(self.prop.dependency is None)
+
+        self.prop.dependency = "dependency"
+        assert(self.prop.dependency == "dependency")
+
+        self.prop.dependency = None
+        assert(self.prop.dependency is None)
+        self.prop.dependency = None
+
+    def test_property_dependency_value(self):
+        assert(self.prop.dependency_value is None)
+
+        self.prop.dependency_value = "dependency value"
+        assert(self.prop.dependency_value == "dependency value")
+
+        self.prop.dependency_value = None
+        assert(self.prop.dependency_value is None)
+        self.prop.dependency_value = None
+
+    def test_property_value_origin(self):
+        assert(self.prop.value_origin is None)
+
+        self.prop.value_origin = "value origin"
+        assert(self.prop.value_origin == "value origin")
+
+        self.prop.value_origin = None
+        assert(self.prop.value_origin is None)
+        self.prop.value_origin = None
 
     def test_property_mapping(self):
         assert(self.prop.mapping is None)
