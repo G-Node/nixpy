@@ -80,7 +80,7 @@ class Section(Entity):
         return sec
 
     # Property
-    def create_property(self, name, values):
+    def create_property(self, name, values, oid=None):
         """
         Add a new property to the section.
 
@@ -88,6 +88,9 @@ class Section(Entity):
         :type name: str
         :param values: The values of the property.
         :type values: list of Value
+        :param oid: object id, UUID string as specified in RFC 4122. If no id is provided,
+                   an id will be generated and assigned.
+        :type oid: str
 
         :returns: The newly created property.
         :rtype: Property
@@ -104,7 +107,7 @@ class Section(Entity):
             else:
                 dtype = values.data_type
                 values = [values]
-        prop = Property._create_new(self, properties, name, dtype)
+        prop = Property._create_new(self, properties, name, dtype, oid)
         prop.values = values
         return prop
 
