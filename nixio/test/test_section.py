@@ -142,10 +142,11 @@ class TestSections(unittest.TestCase):
         for p in self.section:
             assert(p in self.section)
 
-        assert(self.section.has_property_by_name("test prop"))
-        assert(not self.section.has_property_by_name("notexist"))
-        assert(self.section.get_property_by_name("test prop") is not None)
-        assert(self.section.get_property_by_name("notexist") is None)
+        assert("test prop" in self.section)
+        assert("notexist" not in self.section)
+        assert(self.section["test prop"] is not None)
+        # NOTE: the following raises KeyError: Do we want it to return None?
+        # assert(self.section["notexist"] is None)
 
         assert(len(self.section.inherited_properties()) == 1)
 
