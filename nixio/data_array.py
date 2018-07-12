@@ -14,8 +14,8 @@ from .data_set import DataSet
 from .entity import Entity
 from .source_link_container import SourceLinkContainer
 from .value import DataType
-from .dimensions import (SampledDimension, RangeDimension, SetDimension,
-                         DimensionType)
+from .dimensions import (Dimension, SampledDimension, RangeDimension,
+                         SetDimension, DimensionType, DimensionContainer)
 from . import util
 
 from .exceptions import InvalidUnit
@@ -27,48 +27,12 @@ class DataSliceMode(Enum):
     Data = 2
 
 
-class DimensionProxyList(object):
-    """
-    List proxy for the dimensions of a data array.
-    """
-
-    def __init__(self, obj):
-        self.__obj = obj
-
-    def __len__(self):
-        return self.__obj._dimension_count()
-
-    def __getitem__(self, key):
-        if isinstance(key, int):
-            length = self.__obj._dimension_count()
-
-            if key < 0:
-                key = length + key
-
-            if key >= length or key < 0:
-                raise KeyError("Index out of bounds: " + str(key))
-
-            return self.__obj._get_dimension_by_pos(key + 1)
-        else:
-            raise TypeError("The key must be an int but was: " + type(key))
-
-    def __iter__(self):
-        for i in range(0, len(self)):
-            yield self.__obj._get_dimension_by_pos(i + 1)
-
-    def __str__(self):
-        str_list = [str(e) for e in list(self)]
-        return "[" + ", ".join(str_list) + "]"
-
-    def __repr__(self):
-        return str(self)
-
-
 class DataArray(Entity, DataSet):
 
     def __init__(self, nixparent, h5group):
         super(DataArray, self).__init__(nixparent, h5group)
         self._sources = None
+        self._dimensions = None
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, data_type, shape,
@@ -350,10 +314,11 @@ class DataArray(Entity, DataSet):
         respective append methods for dimension descriptors.
         This is a read only attribute.
 
-        :type: ProxyList of dimension descriptors.
+        :type: Container of dimension descriptors.
         """
-        if not hasattr(self, "_dimensions"):
-            setattr(self, "_dimensions", DimensionProxyList(self))
+        if self._dimensions is None:
+            self._dimensions = DimensionContainer("dimensions", self,
+                                                  Dimension)
         return self._dimensions
 
     def __eq__(self, other):

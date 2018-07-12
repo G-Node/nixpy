@@ -347,7 +347,7 @@ class Tag(BaseTag):
         of the list.
         This is a read only attribute.
 
-        :type: RefProxyList of DataArray
+        Link:type: Container of DataArray
         """
         if self._references is None:
             self._references = LinkContainer("references", self, DataArray,
@@ -362,7 +362,7 @@ class Tag(BaseTag):
         Adding new features to the tag is done using the create_feature method.
         This is a read only attribute.
 
-        :type: ProxyList of Feature.
+        :type: Container of Feature.
         """
         if self._features is None:
             self._features = FeatureContainer("features", self, Feature)
