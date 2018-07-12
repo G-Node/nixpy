@@ -11,9 +11,9 @@ from .entity import Entity
 from .data_array import DataArray
 from .tag import Tag
 from .multi_tag import MultiTag
-from .metadata_reference import create_metadata_prop
 from .container import LinkContainer
 from .source_link_container import SourceLinkContainer
+from .section import Section
 
 
 class Group(Entity):
@@ -24,7 +24,6 @@ class Group(Entity):
         self._tags = None
         self._multi_tags = None
         self._sources = None
-        self.metadata = create_metadata_prop()
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_):
@@ -86,3 +85,30 @@ class Group(Entity):
         if self._sources is None:
             self._sources = SourceLinkContainer(self)
         return self._sources
+
+    # metadata
+    @property
+    def metadata(self):
+        """
+
+        Associated metadata of the entity. Sections attached to the entity via
+        this attribute can provide additional annotations. This is an optional
+        read-write property, and can be None if no metadata is available.
+
+        :type: Section
+        """
+        if "metadata" in self._h5group:
+            return Section(None, self._h5group.open_group("metadata"))
+        else:
+            return None
+
+    @metadata.setter
+    def metadata(self, sect):
+        if not isinstance(sect, Section):
+            raise TypeError("{} is not of type Section".format(sect))
+        self._h5group.create_link(sect, "metadata")
+
+    @metadata.deleter
+    def metadata(self):
+        if "metadata" in self._h5group:
+            self._h5group.delete("metadata")
