@@ -88,6 +88,24 @@ class Property(Entity):
         self._h5dataset.set_attr("reference", ref)
 
     @property
+    def dependency(self):
+        return self._h5dataset.get_attr("dependency")
+
+    @dependency.setter
+    def dependency(self, dep):
+        util.check_attr_type(dep, str)
+        self._h5dataset.set_attr("dependency", dep)
+
+    @property
+    def dependency_value(self):
+        return self._h5dataset.get_attr("dependency_value")
+
+    @dependency_value.setter
+    def dependency_value(self, depval):
+        util.check_attr_type(depval, str)
+        self._h5dataset.set_attr("dependency_value", depval)
+
+    @property
     def value_origin(self):
         return self._h5dataset.get_attr("value_origin")
 
