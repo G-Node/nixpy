@@ -88,6 +88,15 @@ class Property(Entity):
         self._h5dataset.set_attr("reference", ref)
 
     @property
+    def value_origin(self):
+        return self._h5dataset.get_attr("value_origin")
+
+    @value_origin.setter
+    def value_origin(self, origin):
+        util.check_attr_type(origin, str)
+        self._h5dataset.set_attr("value_origin", origin)
+
+    @property
     def values(self):
         dataset = self._h5dataset
         if not sum(dataset.shape):
