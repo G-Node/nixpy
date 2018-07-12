@@ -157,8 +157,12 @@ class Property(Entity, PropertyMixin):
             value_str = "[ %s ... %s ]" % (value_str[0:split_length], value_str[-split_length:])
         return value_str
 
-    def pprint(self, current_depth=0, indent=2, max_length=80):
-        property_spaces = " " * ((current_depth + 2) * indent)
+    def pprint(self, current_depth=-1, indent=2, max_length=80):
+        property_spaces = ""
+        prefix = ""
+        if current_depth >= 0:
+            property_spaces = " " * ((current_depth + 2) * indent)
+            prefix = "|-"
         new_max = max_length - len(property_spaces) - len(self.name)
         value_string = self.__values_to_string(max_length=new_max)
-        print(("%s|- %s: %s" % (property_spaces, self.name, value_string)))
+        print(("%s%s %s: %s" % (property_spaces, prefix, self.name, value_string)))
