@@ -195,7 +195,7 @@ class MultiTag(BaseTag):
         return DataView(ref, slices)
 
     def retrieve_feature_data(self, posidx, featidx):
-        if self._feature_count() == 0:
+        if len(self.features) == 0:
             raise OutOfBounds(
                 "There are no features associated with this tag!"
             )

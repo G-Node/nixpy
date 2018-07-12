@@ -84,38 +84,6 @@ class BaseTag(Entity):
             self._h5group.write_data("units", sanitized, dtype)
             self.force_updated_at()
 
-    def _add_reference_by_id(self, id_or_name):
-        if id_or_name not in self._parent.data_arrays:
-            cls = type(self).__name__
-            raise RuntimeError("{}._add_reference_by_id: "
-                               "Reference not found in Block!".format(cls))
-        target = self._parent.data_arrays[id_or_name]
-        references = self._h5group.open_group("references")
-        references.create_link(target, target.id)
-
-    def _has_reference_by_id(self, id_or_name):
-        references = self._h5group.open_group("references")
-        return references.has_by_id(id_or_name)
-
-    def _reference_count(self):
-        return len(self._h5group.open_group("references"))
-
-    def _get_reference_by_id(self, id_or_name):
-        references = self._h5group.open_group("references")
-        if util.is_uuid(id_or_name):
-            id_ = id_or_name
-        else:
-            id_ = self._parent.data_arrays[id_or_name].id
-        return DataArray(self._parent, references.get_by_id(id_))
-
-    def _get_reference_by_pos(self, pos):
-        references = self._h5group.open_group("references")
-        return DataArray(self, references.get_by_pos(pos))
-
-    def _delete_reference_by_id(self, id_):
-        references = self._h5group.open_group("references")
-        references.delete(id_)
-
     def create_feature(self, data, link_type):
         """
         Create a new feature.
@@ -131,30 +99,6 @@ class BaseTag(Entity):
         features = self._h5group.open_group("features")
         feat = Feature._create_new(self, features, data, link_type)
         return feat
-
-    def _has_feature_by_id(self, id_or_name):
-        features = self._h5group.open_group("features")
-        return features.has_by_id(id_or_name)
-
-    def _feature_count(self):
-        return len(self._h5group.open_group("features"))
-
-    def _get_feature_by_id(self, id_or_name):
-        features = self._h5group.open_group("features")
-        try:
-            return Feature(self, features.get_by_id(id_or_name))
-        except ValueError:
-            for feat in self.features:
-                if feat.data.id == id_or_name or feat.data.name == id_or_name:
-                    return feat
-
-    def _get_feature_by_pos(self, pos):
-        features = self._h5group.open_group("features")
-        return Feature(self, features.get_by_pos(pos))
-
-    def _delete_feature_by_id(self, id_):
-        features = self._h5group.open_group("features")
-        features.delete(id_)
 
     @staticmethod
     def _slices_in_data(data, slices):
@@ -309,7 +253,7 @@ class Tag(BaseTag):
         return DataView(ref, slices)
 
     def retrieve_feature_data(self, featidx):
-        if self._feature_count() == 0:
+        if len(self.features) == 0:
             raise OutOfBounds(
                 "There are no features associated with this tag!"
             )

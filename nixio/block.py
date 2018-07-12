@@ -70,22 +70,6 @@ class Block(Entity):
         mtag = MultiTag._create_new(self, multi_tags, name, type_, positions)
         return mtag
 
-    def _get_multi_tag_by_id(self, id_or_name):
-        multi_tags = self._h5group.open_group("multi_tags")
-        return MultiTag(self, multi_tags.get_by_id_or_name(id_or_name))
-
-    def _get_multi_tag_by_pos(self, pos):
-        multi_tags = self._h5group.open_group("multi_tags")
-        return MultiTag(self, multi_tags.get_by_pos(pos))
-
-    def _delete_multi_tag_by_id(self, id_):
-        multi_tags = self._h5group.open_group("multi_tags")
-        multi_tags.delete(id_)
-
-    def _multi_tag_count(self):
-        multi_tags = self._h5group.open_group("multi_tags")
-        return len(multi_tags)
-
     # Tag
     def create_tag(self, name, type_, position):
         """
@@ -108,22 +92,6 @@ class Block(Entity):
         tag = Tag._create_new(self, tags, name, type_, position)
         return tag
 
-    def _get_tag_by_id(self, id_or_name):
-        tags = self._h5group.open_group("tags")
-        return Tag(self, tags.get_by_id_or_name(id_or_name))
-
-    def _get_tag_by_pos(self, pos):
-        tags = self._h5group.open_group("tags")
-        return Tag(self, tags.get_by_pos(pos))
-
-    def _delete_tag_by_id(self, id_):
-        tags = self._h5group.open_group("tags")
-        tags.delete(id_)
-
-    def _tag_count(self):
-        tags = self._h5group.open_group("tags")
-        return len(tags)
-
     # Source
     def create_source(self, name, type_):
         """
@@ -144,22 +112,6 @@ class Block(Entity):
         src = Source._create_new(self, sources, name, type_)
         return src
 
-    def _get_source_by_id(self, id_or_name):
-        sources = self._h5group.open_group("sources")
-        return Source(self, sources.get_by_id_or_name(id_or_name))
-
-    def _get_source_by_pos(self, pos):
-        sources = self._h5group.open_group("sources")
-        return Source(self, sources.get_by_pos(pos))
-
-    def _delete_source_by_id(self, id_):
-        sources = self._h5group.open_group("sources")
-        sources.delete(id_)
-
-    def _source_count(self):
-        sources = self._h5group.open_group("sources")
-        return len(sources)
-
     # Group
     def create_group(self, name, type_):
         """
@@ -179,22 +131,6 @@ class Block(Entity):
             raise exceptions.DuplicateName("open_group")
         grp = Group._create_new(self, groups, name, type_)
         return grp
-
-    def _get_group_by_id(self, id_or_name):
-        groups = self._h5group.open_group("groups")
-        return Group(self, groups.get_by_id_or_name(id_or_name))
-
-    def _get_group_by_pos(self, pos):
-        groups = self._h5group.open_group("groups")
-        return Group(self, groups.get_by_pos(pos))
-
-    def _delete_group_by_id(self, id_):
-        groups = self._h5group.open_group("groups")
-        groups.delete(id_)
-
-    def _group_count(self):
-        groups = self._h5group.open_group("groups")
-        return len(groups)
 
     def create_data_array(self, name, array_type, dtype=None, shape=None,
                           data=None, compression=Compression.Auto):
