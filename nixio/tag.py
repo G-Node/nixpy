@@ -12,6 +12,7 @@ import numpy as np
 from .entity import Entity
 from .metadata_reference import create_metadata_prop
 from .source_link_container import SourceLinkContainer
+from .container import Container, LinkContainer
 
 from .value import DataType
 from .data_array import DataArray
@@ -22,26 +23,32 @@ from .exceptions import (OutOfBounds, IncompatibleDimensions,
 from .dimension_type import DimensionType
 from .link_type import LinkType
 from . import util
-from .util.proxy_list import ProxyList, RefProxyList
 
 
-class ReferenceProxyList(RefProxyList):
+class FeatureContainer(Container):
+    """
+    The FeatureContainer has one minor difference from the regular Container:
+    A Feature can be retrieved by the ID or name of the linked DataArray as
+    well as the ID of the feature itself.
+    """
+    def __getitem__(self, item):
+        try:
+            return Container.__getitem__(self, item)
+        except KeyError as ke:
+            # item might be the ID of the referenced data; try it as well
+            for feat in self:
+                if feat.data.id == item or feat.data.name == item:
+                    return feat
+            raise ke
 
-    def __init__(self, obj):
-        super(ReferenceProxyList, self).__init__(
-            obj, "_reference_count", "_get_reference_by_id",
-            "_get_reference_by_pos", "_delete_reference_by_id",
-            "_add_reference_by_id"
-        )
-
-
-class FeatureProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(FeatureProxyList, self).__init__(
-            obj, "_feature_count", "_get_feature_by_id",
-            "_get_feature_by_pos", "_delete_feature_by_id"
-        )
+    def __contains__(self, item):
+        if not Container.__contains__(self, item):
+            # check if it contains a Feature whose data matches 'item'
+            for feat in self:
+                if feat.data.id == item or feat.data.name == item:
+                    return True
+            return False
+        return True
 
 
 class BaseTag(Entity):
@@ -211,6 +218,8 @@ class Tag(BaseTag):
         super(Tag, self).__init__(nixparent, h5group)
         self.metadata = create_metadata_prop()
         self._sources = None
+        self._references = None
+        self._features = None
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, position):
@@ -341,8 +350,9 @@ class Tag(BaseTag):
 
         :type: RefProxyList of DataArray
         """
-        if not hasattr(self, "_references"):
-            setattr(self, "_references", ReferenceProxyList(self))
+        if self._references is None:
+            self._references = LinkContainer("references", self, DataArray,
+                                             self._parent.data_arrays)
         return self._references
 
     @property
@@ -355,8 +365,8 @@ class Tag(BaseTag):
 
         :type: ProxyList of Feature.
         """
-        if not hasattr(self, "_features"):
-            setattr(self, "_features", FeatureProxyList(self))
+        if self._features is None:
+            self._features = FeatureContainer("features", self, Feature)
         return self._features
 
     @property

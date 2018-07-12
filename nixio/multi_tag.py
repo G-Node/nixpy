@@ -6,7 +6,9 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-from .tag import BaseTag, ReferenceProxyList, FeatureProxyList
+from .tag import BaseTag, FeatureContainer
+from .container import LinkContainer
+from .feature import Feature
 from .source_link_container import SourceLinkContainer
 from .metadata_reference import create_metadata_prop
 from .data_array import DataArray
@@ -22,6 +24,8 @@ class MultiTag(BaseTag):
         super(MultiTag, self).__init__(nixparent, h5group)
         self.metadata = create_metadata_prop()
         self._sources = None
+        self._references = None
+        self._features = None
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, positions):
@@ -78,10 +82,11 @@ class MultiTag(BaseTag):
         of the list.
         This is a read only attribute.
 
-        :type: RefProxyList of DataArray
+        :type: LinkContainer of DataArray
         """
-        if not hasattr(self, "_references"):
-            setattr(self, "_references", ReferenceProxyList(self))
+        if self._references is None:
+            self._references = LinkContainer("references", self, DataArray,
+                                             self._parent.data_arrays)
         return self._references
 
     @property
@@ -89,13 +94,13 @@ class MultiTag(BaseTag):
         """
         A property containing all features of the tag. Features can be obtained
         via their index or their id. Features can be deleted from the list.
-        Adding new features to the tag is done using the create_feature method.
-        This is a read only attribute.
+        Adding new features to the multitag is done using the create_feature
+        method. This is a read only attribute.
 
-        :type: ProxyList of Feature.
+        :type: Container of Feature.
         """
-        if not hasattr(self, "_features"):
-            setattr(self, "_features", FeatureProxyList(self))
+        if self._features is None:
+            self._features = FeatureContainer("features", self, Feature)
         return self._features
 
     def _get_slice(self, data, index):
