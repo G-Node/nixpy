@@ -148,8 +148,7 @@ class Property(Entity, PropertyMixin):
     def __values_to_string(self, max_length=80):
         unit = "" if self.unit is None else self.unit
         value_str = ""
-        for i, v in enumerate(self.values):
-            value_str += ("%s%s") % (", " if i > 0 else "", v.to_string(unit=unit))
+        value_str = ", ".join(v.to_string(unit=unit) for v in self.values)
 
         if len(value_str) <= max_length - 4:
             value_str = "[ %s ]" % (value_str)

@@ -316,6 +316,6 @@ class Section(NamedEntity, SectionMixin):
             child_sec_indent = spaces+" "*indent
             more_indent =  spaces+" "*(current_depth+2*indent)
             for s in self.sections:
-                print ("%s  %s [%s] --- %s\n%s[...]" % (child_sec_indent, s.name, s.type,
+                print("%s  %s [%s] --- %s\n%s[...]" % (child_sec_indent, s.name, s.type,
                                                         s.id, more_indent))
 
