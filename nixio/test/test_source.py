@@ -116,7 +116,10 @@ class TestSources(unittest.TestCase):
         assert(len(self.array.sources) == 0)
         self.array.sources.extend([self.source, self.other])
         assert(len(self.array.sources) == 2)
-        self.array.sources.extend(self.third)
+        with self.assertRaises(TypeError):
+            self.array.sources.extend(self.third)
+        assert(len(self.array.sources) == 2)
+        self.array.sources.extend([self.third])
         assert(len(self.array.sources) == 3)
 
     def test_inverse_search(self):
