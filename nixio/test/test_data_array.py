@@ -290,9 +290,9 @@ class TestDataArray(unittest.TestCase):
 
         assert(len(self.array.dimensions) == 3)
 
-        self.assertRaises(TypeError, lambda: self.array.dimensions["notexist"])
-        self.assertRaises(KeyError, lambda: self.array.dimensions[-4])
-        self.assertRaises(KeyError, lambda: self.array.dimensions[3])
+        self.assertRaises(KeyError, lambda: self.array.dimensions["notexist"])
+        self.assertRaises(IndexError, lambda: self.array.dimensions[-4])
+        self.assertRaises(IndexError, lambda: self.array.dimensions[3])
 
         assert(isinstance(str(self.array.dimensions), string_types))
         assert(isinstance(repr(self.array.dimensions), string_types))
