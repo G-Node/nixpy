@@ -56,6 +56,28 @@ class OdmlType(str, Enum):
 
         return False
 
+    @staticmethod
+    def get_odml_type(dtype):
+        """
+        get_odml_type returns the appropriate OdmlType
+        for a handed in nix value DataType.
+
+        :param dtype: nix DataType
+        :return: OdmlType
+        """
+
+        if dtype == DataType.Float:
+            return OdmlType.float
+        elif dtype == DataType.Int64:
+            return OdmlType.int
+        elif dtype == DataType.String:
+            return OdmlType.string
+        elif dtype == DataType.Bool:
+            return OdmlType.boolean
+
+        raise TypeError("No available OdmlType for type '%s'", dtype)
+
+
 class Property(Entity):
 
     def __init__(self, nixparent, h5dataset):
