@@ -16,9 +16,9 @@ from collections import Sequence
 
 from .entity import Entity
 from .container import Container
-from .property import Property
+from .property import Property, DataType
 from .util import find as finders
-from .value import Value, DataType
+from .value import Value
 from . import util
 from . import exceptions
 
