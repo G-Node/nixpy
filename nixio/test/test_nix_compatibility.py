@@ -383,7 +383,6 @@ def test_properties(tmpdir):
     sec.create_property("prop String", nix.DataType.String)
     sec.create_property("prop Bool", nix.DataType.Bool)
 
-    sec.props[0].mapping = "mapping"
     sec.props[1].definition = "def"
 
     sec.props[0].values = [101]
@@ -401,7 +400,6 @@ def test_sections(tmpdir):
         sec = nix_file.create_section("test section" + str(idx),
                                       "sectiontest")
         sec.definition = "sec definition " + str(idx)
-        sec.mapping = "sec mapping " + str(idx)
         sec.repository = "sec repo" + str(idx * 3)
 
         nested_sec = sec.create_section("nested_section", "sec")
@@ -426,7 +424,6 @@ def test_full_write(tmpdir):
         sec = nix_file.create_section("test section" + str(idx),
                                       "sectiontest")
         sec.definition = "sec definition " + str(idx)
-        sec.mapping = "sec mapping " + str(idx)
         sec.repository = "sec repo" + str(idx * 3)
 
         nested_sec = sec.create_section("nested_section", "sec")
