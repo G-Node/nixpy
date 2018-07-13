@@ -13,7 +13,7 @@ from .data_view import DataView
 from .data_set import DataSet
 from .entity import Entity
 from .source_link_container import SourceLinkContainer
-from .value import DataType
+from .datatype import DataType
 from .dimensions import (Dimension, SampledDimension, RangeDimension,
                          SetDimension, DimensionType, DimensionContainer)
 from . import util
