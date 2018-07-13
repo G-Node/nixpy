@@ -173,24 +173,24 @@ int main(int argc, char* argv[]) {
     da.appendAliasRangeDimension();
 
     // All types of metadata
-    std::vector<nix::Value> values;
+    std::vector<nix::Variant> values;
     sec = nf.getSection("mdb");
     auto proptypesmd = sec.createSection("prop-test-parent", "test metadata section");
     auto numbermd = proptypesmd.createSection("numerical metadata", "test metadata section");
-    numbermd.createProperty("integer", nix::Value(int32_t(42)));
-    numbermd.createProperty("float", nix::Value(float(4.2)));
+    numbermd.createProperty("integer", nix::Variant(int32_t(42)));
+    numbermd.createProperty("float", nix::Variant(float(4.2)));
     for (int32_t v : {40, 41, 42, 43, 44, 45})
-        values.push_back(nix::Value(v));
+        values.push_back(nix::Variant(v));
     numbermd.createProperty("integers", values);
-    values = {nix::Value(float(1.1)), nix::Value(float(10.10))};
+    values = {nix::Variant(float(1.1)), nix::Variant(float(10.10))};
     numbermd.createProperty("floats", values);
 
     auto othermd = proptypesmd.createSection("other metadata", "test metadata section");
-    othermd.createProperty("bool", nix::Value(true));
-    othermd.createProperty("false bool", nix::Value(false));
-    othermd.createProperty("bools", {nix::Value(true), nix::Value(false), nix::Value(true)});
-    othermd.createProperty("string", nix::Value("I am a string. Rawr."));
-    othermd.createProperty("strings", {nix::Value("one"), nix::Value("two"), nix::Value("twenty")});
+    othermd.createProperty("bool", nix::Variant(true));
+    othermd.createProperty("false bool", nix::Variant(false));
+    othermd.createProperty("bools", {nix::Variant(true), nix::Variant(false), nix::Variant(true)});
+    othermd.createProperty("string", nix::Variant("I am a string. Rawr."));
+    othermd.createProperty("strings", {nix::Variant("one"), nix::Variant("two"), nix::Variant("twenty")});
 
     // All types of data
     block = nf.createBlock("datablock", "block of data");

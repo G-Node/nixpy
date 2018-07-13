@@ -254,7 +254,7 @@ int main(int argc, char* argv[]) {
 
     auto mdc = nf.getSection(2);
     errcount += testassert(6 == mdc.sectionCount(), "Section count mismatch (mdc)");
-    char name [6];
+    char name [7];
     for (int idx = 0; idx < 6; idx++) {
         sprintf(name, "%03d-md", idx);
         errcount += compare("d1-section", mdc.getSection(name).type());
@@ -343,22 +343,22 @@ int main(int argc, char* argv[]) {
 
     auto prop = numbermd.getProperty("integer");
     errcount += compare(nix::ndsize_t{1}, prop.valueCount());
-    errcount += compare({nix::Value{int64_t(42)}}, prop.values());
+    errcount += compare({nix::Variant{int64_t(42)}}, prop.values());
 
     prop = numbermd.getProperty("float");
     errcount += compare(nix::ndsize_t{1}, prop.valueCount());
-    errcount += compare({nix::Value{double(4.2)}}, prop.values());
+    errcount += compare({nix::Variant{double(4.2)}}, prop.values());
 
     prop = numbermd.getProperty("integers");
     errcount += compare(nix::ndsize_t{6}, prop.valueCount());
-    std::vector<nix::Value> values(6);
+    std::vector<nix::Variant> values(6);
     for (auto idx = 0; idx < 6; idx++)
-        values[idx] = nix::Value{int64_t(40 + idx)};
+        values[idx] = nix::Variant{int64_t(40 + idx)};
     errcount += compare(values, prop.values());
 
     prop = numbermd.getProperty("floats");
     errcount += compare(nix::ndsize_t{2}, prop.valueCount());
-    errcount += compare({nix::Value{double(1.1)}, nix::Value{double(10.10)}}, prop.values());
+    errcount += compare({nix::Variant{double(1.1)}, nix::Variant{double(10.10)}}, prop.values());
 
     auto othermd = proptypesmd.getSection(1);
     errcount += compare("other metadata", othermd.name());
@@ -367,23 +367,23 @@ int main(int argc, char* argv[]) {
 
     prop = othermd.getProperty("bool");
     errcount += compare(nix::ndsize_t{1}, prop.valueCount());
-    errcount += compare({nix::Value{true}}, prop.values());
+    errcount += compare({nix::Variant{true}}, prop.values());
 
     prop = othermd.getProperty("false bool");
     errcount += compare(nix::ndsize_t{1}, prop.valueCount());
-    errcount += compare({nix::Value{false}}, prop.values());
+    errcount += compare({nix::Variant{false}}, prop.values());
 
     prop = othermd.getProperty("bools");
     errcount += compare(nix::ndsize_t{3}, prop.valueCount());
-    errcount += compare({nix::Value{true}, nix::Value{false}, nix::Value{true}}, prop.values());
+    errcount += compare({nix::Variant{true}, nix::Variant{false}, nix::Variant{true}}, prop.values());
 
     prop = othermd.getProperty("string");
     errcount += compare(nix::ndsize_t{1}, prop.valueCount());
-    errcount += compare({nix::Value{"I am a string. Rawr."}}, prop.values());
+    errcount += compare({nix::Variant{"I am a string. Rawr."}}, prop.values());
 
     prop = othermd.getProperty("strings");
     errcount += compare(nix::ndsize_t{3}, prop.valueCount());
-    errcount += compare({nix::Value{"one"}, nix::Value{"two"}, nix::Value{"twenty"}}, prop.values());
+    errcount += compare({nix::Variant{"one"}, nix::Variant{"two"}, nix::Variant{"twenty"}}, prop.values());
 
     block = nf.getBlock("datablock");
     errcount += compare("block of data", block.type());
