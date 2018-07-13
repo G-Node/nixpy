@@ -117,6 +117,23 @@ class Property(Entity):
         self._h5dataset.set_attr("value_origin", origin)
 
     @property
+    def newval(self):
+        dataset = self._h5dataset
+        if not sum(dataset.shape):
+            return tuple()
+
+        data = dataset.read_data()
+
+        def data_to_value(d):
+            if isinstance(d, bytes):
+                d = d.decode()
+            return d
+
+        values = tuple(map(data_to_value, data))
+
+        return values
+
+    @property
     def values(self):
         dataset = self._h5dataset
         if not sum(dataset.shape):
