@@ -211,6 +211,31 @@ class Property(Entity):
 
         return values
 
+    @property
+    def odml_type(self):
+        otype = self._h5dataset.get_attr("odml_type")
+        if not otype:
+            return
+
+        return OdmlType(otype)
+
+    @odml_type.setter
+    def odml_type(self, new_type):
+        """
+        odml_type can only be set if the handed in new type is a valid
+        OdmlType and if it is compatible with the value data type of
+        the property.
+
+        :param new_type: OdmlType
+        """
+        if not isinstance(new_type, OdmlType):
+            raise TypeError("'%s' is not a valid odml_type." % new_type)
+
+        if not new_type.compatible(self.newval[0]):
+            raise TypeError("Type '%s' is incompatible with property values" % new_type)
+
+        self._h5dataset.set_attr("odml_type", str(new_type))
+
     @newval.setter
     def newval(self, new_vals):
         """
