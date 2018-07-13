@@ -184,6 +184,14 @@ class Property(Entity):
         else:
             return dt
 
+    @property
+    def data_type_new(self):
+        dt = self._h5dataset.dtype
+        if dt == util.vlen_str_dtype:
+            return DataType.String
+        else:
+            return dt
+
     def delete_values(self):
         self._h5dataset.shape = (0,)
 
@@ -200,6 +208,13 @@ class Property(Entity):
             valuedtype = str_
 
         return np.dtype([("value", valuedtype)] + common)
+
+    @staticmethod
+    def _new_make_h5_dtype(valuedtype):
+        str_ = util.vlen_str_dtype
+        if valuedtype == DataType.String:
+            valuedtype = str_
+        return valuedtype
 
     def __str__(self):
         return "{}: {{name = {}}}".format(
