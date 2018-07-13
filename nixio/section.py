@@ -10,15 +10,13 @@ try:
     from sys import maxint
 except ImportError:
     from sys import maxsize as maxint
-import functools
-from operator import attrgetter
 from collections import Sequence
 
 from .entity import Entity
 from .container import Container
-from .property import Property, DataType
+from .datatype import DataType
+from .property import Property
 from .util import find as finders
-from .value import Value
 from . import util
 from . import exceptions
 
@@ -86,39 +84,7 @@ class Section(Entity):
         return sec
 
     # Property
-    def create_property(self, name, values, oid=None):
-        """
-        Add a new property to the section.
-
-        :param name: The name of the property to create.
-        :type name: str
-        :param values: The values of the property.
-        :type values: list of Value
-        :param oid: object id, UUID string as specified in RFC 4122. If no id is provided,
-                   an id will be generated and assigned.
-        :type oid: str
-
-        :returns: The newly created property.
-        :rtype: Property
-        """
-        properties = self._h5group.open_group("properties", True)
-        if name in properties:
-            raise exceptions.DuplicateName("create_property")
-        if isinstance(values, type):
-            dtype = values
-            values = []
-        else:
-            if isinstance(values, Sequence):
-                dtype = values[0].data_type
-            else:
-                dtype = values.data_type
-                values = [values]
-        prop = Property._create_new(self, properties, name, dtype, oid)
-        prop.values = values
-        return prop
-
-    # Property
-    def create_property_new(self, name, values_or_dtype, oid=None):
+    def create_property(self, name, values_or_dtype, oid=None):
         """
         Add a new property to the section.
 
@@ -474,7 +440,7 @@ class Section(Entity):
             return self.sections[key]
 
         prop = self.props[key]
-        values = list(map(attrgetter('value'), prop.values))
+        values = list(prop.values)
         if len(values) == 1:
             values = values[0]
         return values
@@ -491,20 +457,11 @@ class Section(Entity):
         if not isinstance(data, list):
             data = [data]
 
-        val = list(map(lambda x: x if isinstance(x, Value) else Value(x),
-                       data))
-        dtypes = functools.reduce(
-            lambda x, y: x if y.data_type in x else x + [y.data_type],
-            val, [val[0].data_type]
-        )
-        if len(dtypes) > 1:
-            raise ValueError('Not all input values are of the same type')
-
         if key not in self.props:
-            prop = self.create_property(key, dtypes[0])
+            prop = self.create_property(key, data)
         else:
             prop = self.props[key]
-        prop.values = val
+        prop.values = data
 
     def __iter__(self):
         for name, item in self.items():
