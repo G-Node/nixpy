@@ -10,57 +10,10 @@
 import numpy as np
 from collections import Sequence
 from enum import Enum
-from numbers import Number, Integral, Real
-from six import string_types
 
+from .datatype import DataType
 from .entity import Entity
-from .value import Value
 from . import util
-
-
-bools = (bool, np.bool_)
-valid_types = (Number, string_types, bools)
-
-
-class DataType(object):
-    UInt8 = np.uint8
-    UInt16 = np.uint16
-    UInt32 = np.uint32
-    UInt64 = np.uint64
-    Int8 = np.int8
-    Int16 = np.int16
-    Int32 = np.int32
-    Int64 = np.int64
-    Float = np.float_
-    Double = np.double
-    String = np.string_
-    Bool = np.bool_
-
-    @classmethod
-    def get_dtype(cls, value):
-        if isinstance(value, bools):
-            return cls.Bool
-        elif isinstance(value, Integral):
-            return cls.Int64
-        elif isinstance(value, Real):
-            return cls.Float
-        elif isinstance(value, string_types):
-            return cls.String
-        else:
-            raise ValueError("Unknown type for value {}".format(value))
-
-    @classmethod
-    def is_numeric_dtype(cls, dtype):
-        return (dtype == cls.Int8 or
-                dtype == cls.Int16 or
-                dtype == cls.Int32 or
-                dtype == cls.Int64 or
-                dtype == cls.UInt8 or
-                dtype == cls.UInt16 or
-                dtype == cls.UInt32 or
-                dtype == cls.UInt64 or
-                dtype == cls.Float or
-                dtype == cls.Double)
 
 
 class OdmlType(str, Enum):
@@ -130,20 +83,6 @@ class Property(Entity):
     def __init__(self, nixparent, h5dataset):
         super(Property, self).__init__(nixparent, h5dataset)
         self._h5dataset = self._h5group
-
-    @classmethod
-    def _create_new(cls, nixparent, h5parent, name, dtype, oid=None):
-        util.check_entity_name(name)
-        dtype = cls._make_h5_dtype(dtype)
-        h5dataset = h5parent.create_dataset(name, shape=(0,), dtype=dtype)
-        h5dataset.set_attr("name", name)
-        if not util.is_uuid(oid):
-            oid = util.create_id()
-        h5dataset.set_attr("entity_id", oid)
-        newentity = cls(nixparent, h5dataset)
-        newentity.force_created_at()
-        newentity.force_updated_at()
-        return newentity
 
     @classmethod
     def _create_new_new(cls, nixparent, h5parent, name, dtype, oid=None):
@@ -242,23 +181,6 @@ class Property(Entity):
         self._h5dataset.set_attr("value_origin", origin)
 
     @property
-    def newval(self):
-        dataset = self._h5dataset
-        if not sum(dataset.shape):
-            return tuple()
-
-        data = dataset.read_data()
-
-        def data_to_value(d):
-            if isinstance(d, bytes):
-                d = d.decode()
-            return d
-
-        values = tuple(map(data_to_value, data))
-
-        return values
-
-    @property
     def odml_type(self):
         otype = self._h5dataset.get_attr("odml_type")
         if not otype:
@@ -278,13 +200,30 @@ class Property(Entity):
         if not isinstance(new_type, OdmlType):
             raise TypeError("'%s' is not a valid odml_type." % new_type)
 
-        if not new_type.compatible(self.newval[0]):
+        if not new_type.compatible(self.values[0]):
             raise TypeError("Type '%s' is incompatible with property values" % new_type)
 
         self._h5dataset.set_attr("odml_type", str(new_type))
 
-    @newval.setter
-    def newval(self, new_vals):
+    @property
+    def values(self):
+        dataset = self._h5dataset
+        if not sum(dataset.shape):
+            return tuple()
+
+        data = dataset.read_data()
+
+        def data_to_value(d):
+            if isinstance(d, bytes):
+                d = d.decode()
+            return d
+
+        values = tuple(map(data_to_value, data))
+
+        return values
+
+    @values.setter
+    def values(self, new_vals):
         """
         Set the value of the property discarding any previous information.
 
@@ -305,9 +244,9 @@ class Property(Entity):
         vals_type = DataType.get_dtype(single_val)
 
         # Check if the datatype has changed and raise an exception otherwise.
-        if vals_type != self.data_type_new:
+        if vals_type != self.data_type:
             raise TypeError("New data type '%s' is inconsistent with the "
-                            "Properties data type '%s'" % (vals_type, self.data_type_new))
+                            "Properties data type '%s'" % (vals_type, self.data_type))
 
         # Check all values for data type consistency to ensure clean value add.
         # Will raise an exception otherwise.
@@ -323,58 +262,7 @@ class Property(Entity):
         self._h5dataset.write_data(data)
 
     @property
-    def values(self):
-        dataset = self._h5dataset
-        if not sum(dataset.shape):
-            return tuple()
-        data = dataset.read_data()
-
-        def data_to_value(d):
-            vitem = d["value"]
-            if isinstance(vitem, bytes):
-                vitem = vitem.decode()
-            v = Value(vitem)
-            v.uncertainty = d["uncertainty"]
-            v.reference = d["reference"]
-            v.filename = d["filename"]
-            v.encoder = d["encoder"]
-            v.checksum = d["checksum"]
-            return v
-
-        values = tuple(map(data_to_value, data))
-        return values
-
-    @values.setter
-    def values(self, values):
-        if not len(values):
-            self.delete_values()
-            return
-
-        for v in values:
-            util.check_attr_type(v, Value)
-
-        self._h5dataset.shape = np.shape(values)
-
-        dtype = self._h5dataset.dtype
-        data = np.array([], dtype=dtype)
-        for v in values:
-            d = np.array((v.value, v.uncertainty, v.reference,
-                          v.filename, v.encoder, v.checksum),
-                         dtype=dtype)
-            data = np.append(data, d)
-
-        self._h5dataset.write_data(data)
-
-    @property
     def data_type(self):
-        dt = self._h5dataset.dtype[0].type
-        if dt == util.vlen_str_dtype:
-            return DataType.String
-        else:
-            return dt
-
-    @property
-    def data_type_new(self):
         dt = self._h5dataset.dtype
         if dt == util.vlen_str_dtype:
             return DataType.String
@@ -383,20 +271,6 @@ class Property(Entity):
 
     def delete_values(self):
         self._h5dataset.shape = (0,)
-
-    @staticmethod
-    def _make_h5_dtype(valuedtype):
-        str_ = util.vlen_str_dtype
-        common = [("uncertainty", float),
-                  ("reference", str_),
-                  ("filename",  str_),
-                  ("encoder",   str_),
-                  ("checksum",  str_)]
-
-        if valuedtype == DataType.String:
-            valuedtype = str_
-
-        return np.dtype([("value", valuedtype)] + common)
 
     @staticmethod
     def _new_make_h5_dtype(valuedtype):
