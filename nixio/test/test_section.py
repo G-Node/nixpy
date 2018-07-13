@@ -77,15 +77,6 @@ class TestSections(unittest.TestCase):
         self.section.definition = None
         assert(self.section.definition is None)
 
-    def test_section_mapping(self):
-        assert(self.section.mapping is None)
-
-        self.section.mapping = "mapping"
-        assert(self.section.mapping == "mapping")
-
-        self.section.mapping = None
-        assert(self.section.mapping is None)
-
     def test_section_repository(self):
         assert(self.section.repository is None)
 

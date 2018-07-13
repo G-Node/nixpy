@@ -12,9 +12,9 @@ except ImportError:
     from sys import maxsize as maxint
 from collections import Sequence
 
-from .entity import Entity
 from .container import Container
 from .datatype import DataType
+from .entity import Entity
 from .property import Property
 from .util import find as finders
 from . import util
@@ -225,21 +225,6 @@ class Section(Entity):
         if self.link:
             inhprops.append(self.link.inherited_properties())
         return inhprops
-
-    @property
-    def mapping(self):
-        return self._h5group.get_attr("mapping")
-
-    @mapping.setter
-    def mapping(self, m):
-        """
-        The mapping information of the section.
-        This is an optional read-write property and may be set to None.
-
-        :type: str
-        """
-        util.check_attr_type(m, str)
-        self._h5group.set_attr("mapping", m)
 
     @property
     def repository(self):
