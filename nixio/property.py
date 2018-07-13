@@ -85,9 +85,9 @@ class Property(Entity):
         self._h5dataset = self._h5group
 
     @classmethod
-    def _create_new_new(cls, nixparent, h5parent, name, dtype, oid=None):
+    def _create_new(cls, nixparent, h5parent, name, dtype, oid=None):
         util.check_entity_name(name)
-        dtype = cls._new_make_h5_dtype(dtype)
+        dtype = cls._make_h5_dtype(dtype)
         h5dataset = h5parent.create_dataset(name, shape=(0,), dtype=dtype)
         h5dataset.set_attr("name", name)
         if not util.is_uuid(oid):
@@ -223,41 +223,40 @@ class Property(Entity):
         return values
 
     @values.setter
-    def values(self, new_vals):
+    def values(self, vals):
         """
         Set the value of the property discarding any previous information.
 
-        :param new_vals: a single value or list of values.
+        :param vals: a single value or list of values.
         """
         # Make sure boolean value 'False' gets through as well...
-        if new_vals is None or \
-                (isinstance(new_vals, (list, tuple, str)) and len(new_vals) == 0):
+        if vals is None or (isinstance(vals, Sequence) and len(vals) == 0):
             self.delete_values()
             return
 
         # Make sure all values are of the same data type
-        single_val = new_vals
-        if isinstance(new_vals, Sequence):
-            single_val = new_vals[0]
+        single_val = vals
+        if isinstance(vals, Sequence):
+            single_val = vals[0]
 
-        # Will raise an error, if the datatype of the first value is not valid.
-        vals_type = DataType.get_dtype(single_val)
+        # Will raise an error, if the data type of the first value is not valid.
+        vtype = DataType.get_dtype(single_val)
 
-        # Check if the datatype has changed and raise an exception otherwise.
-        if vals_type != self.data_type:
+        # Check if the data type has changed and raise an exception otherwise.
+        if vtype != self.data_type:
             raise TypeError("New data type '%s' is inconsistent with the "
-                            "Properties data type '%s'" % (vals_type, self.data_type))
+                            "Properties data type '%s'" % (vtype, self.data_type))
 
         # Check all values for data type consistency to ensure clean value add.
         # Will raise an exception otherwise.
-        for v in new_vals:
-            if DataType.get_dtype(v) != vals_type:
+        for v in vals:
+            if DataType.get_dtype(v) != vtype:
                 raise TypeError("Array contains inconsistent values. Only values of "
-                                "type '%s' can be assigned" % vals_type)
+                                "type '%s' can be assigned" % vtype)
 
-        self._h5dataset.shape = np.shape(new_vals)
+        self._h5dataset.shape = np.shape(vals)
 
-        data = np.array(new_vals, dtype=vals_type)
+        data = np.array(vals, dtype=vtype)
 
         self._h5dataset.write_data(data)
 
@@ -273,11 +272,11 @@ class Property(Entity):
         self._h5dataset.shape = (0,)
 
     @staticmethod
-    def _new_make_h5_dtype(valuedtype):
+    def _make_h5_dtype(valued_type):
         str_ = util.vlen_str_dtype
-        if valuedtype == DataType.String:
-            valuedtype = str_
-        return valuedtype
+        if valued_type == DataType.String:
+            valued_type = str_
+        return valued_type
 
     def __str__(self):
         return "{}: {{name = {}}}".format(
