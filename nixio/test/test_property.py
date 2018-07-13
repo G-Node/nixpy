@@ -108,16 +108,6 @@ class TestProperties(unittest.TestCase):
         assert(self.prop.value_origin is None)
         self.prop.value_origin = None
 
-    def test_property_mapping(self):
-        assert(self.prop.mapping is None)
-
-        self.prop.mapping = "mapping"
-        assert(self.prop.mapping == "mapping")
-
-        self.prop.mapping = None
-        assert(self.prop.mapping is None)
-        self.prop.mapping = None
-
     def test_property_unit(self):
         assert(self.prop.unit is None)
 
