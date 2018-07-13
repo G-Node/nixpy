@@ -18,7 +18,7 @@ from .entity import Entity
 from .container import Container
 from .property import Property
 from .util import find as finders
-from .value import Value
+from .value import Value, DataType
 from . import util
 from . import exceptions
 
@@ -116,6 +116,107 @@ class Section(Entity):
         prop = Property._create_new(self, properties, name, dtype, oid)
         prop.values = values
         return prop
+
+    # Property
+    def create_property_new(self, name, values_or_dtype, oid=None):
+        """
+        Add a new property to the section.
+
+        :param name: The name of the property to create.
+        :type name: str
+        :param values_or_dtype: The values of the property.
+        :type values_or_dtype: list of values
+        :param oid: object id, UUID string as specified in RFC 4122. If no id is provided,
+                   an id will be generated and assigned.
+        :type oid: str
+
+        :returns: The newly created property.
+        :rtype: Property
+        """
+        vals = values_or_dtype
+
+        properties = self._h5group.open_group("properties", True)
+        if name in properties:
+            raise exceptions.DuplicateName("create_property")
+
+        # Handle handed in DataType
+        if isinstance(vals, type):
+            dtype = vals
+            vals = []
+
+        # In case of values, make sure boolean value 'False' gets through as well,
+        # but ensure that empty values are not allowed, we need a DataType.
+        elif vals is None or (isinstance(vals, Sequence) and len(vals) == 0):
+            raise TypeError("Please provide either a non empty value or a DataType.")
+
+        else:
+            # Make sure all values are of the same data type
+            single_val = vals
+            if isinstance(vals, Sequence):
+                single_val = vals[0]
+            else:
+                # Make sure the data will always be created with an array.
+                vals = [vals]
+
+            # Will raise an error, if the datatype of the first value is not valid.
+            dtype = DataType.get_dtype(single_val)
+
+            # Check all values for data type consistency to ensure clean value add.
+            # Will raise an exception otherwise.
+            for v in vals:
+                if DataType.get_dtype(v) != dtype:
+                    raise exceptions.InvalidAttrType(single_val, DataType.get_dtype(v))
+
+        prop = Property._create_new_new(self, properties, name, dtype, oid)
+        prop.newval = vals
+
+        return prop
+
+    def has_property_by_name(self, name):
+        """
+        Checks whether a section has a property with a certain name.
+
+        :param name: The name to check.
+        :type name: str
+
+        :returns: True if the section has a property with the given name,
+                  False otherwise.
+        :rtype: bool
+        """
+        properties = self._h5group.open_group("properties")
+        return properties.has_by_id(name)
+
+    def get_property_by_name(self, name):
+        """
+        Get a property by its name.
+
+        :param name: The name to check.
+        :type name: str
+
+        :returns: The property with the given name.
+        :rtype: Property
+        """
+        properties = self._h5group.open_group("properties")
+        try:
+            p = Property(self, properties.get_by_name(name))
+        except KeyError:
+            p = None
+        return p
+
+    def _get_property_by_id(self, id_or_name):
+        properties = self._h5group.open_group("properties")
+        return Property(self, properties.get_by_id_or_name(id_or_name))
+
+    def _get_property_by_pos(self, pos):
+        properties = self._h5group.open_group("properties")
+        return Property(self, properties.get_by_pos(pos))
+
+    def _delete_property_by_id(self, id_):
+        properties = self._h5group.open_group("properties")
+        properties.delete(id_)
+
+    def _property_count(self):
+        return len(self._h5group.open_group("properties"))
 
     @property
     def reference(self):
