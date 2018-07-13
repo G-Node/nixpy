@@ -8,6 +8,7 @@
 # LICENSE file in the root of the Project.
 
 import numpy as np
+from collections import Sequence
 
 from .entity import Entity
 from .value import Value, DataType
@@ -132,6 +133,45 @@ class Property(Entity):
         values = tuple(map(data_to_value, data))
 
         return values
+
+    @newval.setter
+    def newval(self, new_vals):
+        """
+        Set the value of the property discarding any previous information.
+
+        :param new_vals: a single value or list of values.
+        """
+        # Make sure boolean value 'False' gets through as well...
+        if new_vals is None or \
+                (isinstance(new_vals, (list, tuple, str)) and len(new_vals) == 0):
+            self.delete_values()
+            return
+
+        # Make sure all values are of the same data type
+        single_val = new_vals
+        if isinstance(new_vals, Sequence):
+            single_val = new_vals[0]
+
+        # Will raise an error, if the datatype of the first value is not valid.
+        vals_type = DataType.get_dtype(single_val)
+
+        # Check if the datatype has changed and raise an exception otherwise.
+        if vals_type != self.data_type_new:
+            raise TypeError("New data type '%s' is inconsistent with the "
+                            "Properties data type '%s'" % (vals_type, self.data_type_new))
+
+        # Check all values for data type consistency to ensure clean value add.
+        # Will raise an exception otherwise.
+        for v in new_vals:
+            if DataType.get_dtype(v) != vals_type:
+                raise TypeError("Array contains inconsistent values. Only values of "
+                                "type '%s' can be assigned" % vals_type)
+
+        self._h5dataset.shape = np.shape(new_vals)
+
+        data = np.array(new_vals, dtype=vals_type)
+
+        self._h5dataset.write_data(data)
 
     @property
     def values(self):
