@@ -9,11 +9,27 @@
 
 import numpy as np
 from collections import Sequence
+from enum import Enum
 
 from .entity import Entity
 from .value import Value, DataType
 from . import util
 
+
+class OdmlType(str, Enum):
+    string = 'string'
+    text = 'text'
+    int = 'int'
+    float = 'float'
+    url = 'url'
+    datetime = 'datetime'
+    date = 'date'
+    time = 'time'
+    boolean = 'boolean'
+    person = 'person'
+
+    def __str__(self):
+        return self.name
 
 class Property(Entity):
 
