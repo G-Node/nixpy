@@ -124,8 +124,8 @@ class Section(Entity):
 
         :param name: The name of the property to create.
         :type name: str
-        :param values_or_dtype: The values of the property.
-        :type values_or_dtype: list of values
+        :param values_or_dtype: The values of the property or a valid DataType.
+        :type values_or_dtype: list of values or a DataType
         :param oid: object id, UUID string as specified in RFC 4122. If no id is provided,
                    an id will be generated and assigned.
         :type oid: str
