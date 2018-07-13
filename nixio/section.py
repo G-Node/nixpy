@@ -133,7 +133,7 @@ class Section(Entity):
                 if DataType.get_dtype(v) != dtype:
                     raise exceptions.InvalidAttrType(single_val, DataType.get_dtype(v))
 
-        prop = Property._create_new_new(self, properties, name, dtype, oid)
+        prop = Property._create_new(self, properties, name, dtype, oid)
         prop.values = vals
 
         return prop
