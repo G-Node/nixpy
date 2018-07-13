@@ -112,15 +112,6 @@ class Property(Entity):
         self._h5dataset.set_attr("definition", d)
 
     @property
-    def mapping(self):
-        return self._h5dataset.get_attr("mapping")
-
-    @mapping.setter
-    def mapping(self, mapping):
-        util.check_attr_type(mapping, str)
-        self._h5dataset.set_attr("mapping", mapping)
-
-    @property
     def unit(self):
         return self._h5dataset.get_attr("unit")
 
