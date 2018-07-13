@@ -31,6 +31,31 @@ class OdmlType(str, Enum):
     def __str__(self):
         return self.name
 
+    def compatible(self, value):
+        """
+        compatible returns True or False dependent on whether a
+        passed in value can be mapped to an OdmlType or not.
+
+        :param value: Any single value
+        :return: Boolean
+        """
+        if (self.name in ("string", "text", "url", "person") and
+                DataType.get_dtype(value) == DataType.String):
+            return True
+        elif self.name == "boolean" and DataType.get_dtype(value) == DataType.Bool:
+            return True
+        elif self.name == "float" and DataType.get_dtype(value) == DataType.Float:
+            return True
+        elif self.name == "int" and DataType.get_dtype(value) == DataType.Int64:
+            return True
+        elif (self.name in ("time", "date", "datetime") and
+            DataType.get_dtype(value) == DataType.String):
+            # This might need some extra work, treating as String for now, but keeping
+            # it separated from other String values.
+            return True
+
+        return False
+
 class Property(Entity):
 
     def __init__(self, nixparent, h5dataset):
