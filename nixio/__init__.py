@@ -17,14 +17,14 @@ from .multi_tag import MultiTag
 from .source import Source
 from .section import Section, S
 from .property import Property
-from .value import Value
+#from .datatype import Value
 from .feature import Feature
 from .dimensions import SampledDimension, RangeDimension, SetDimension
 
 # enums
 from .file import FileMode
 from .data_array import DataSliceMode
-from .value import DataType
+from .datatype import DataType
 from .dimension_type import DimensionType
 from .link_type import LinkType
 from .compression import Compression
@@ -33,7 +33,7 @@ from .compression import Compression
 from .info import VERSION as __version__
 
 __all__ = ("File", "Block", "Group", "DataArray", "Tag", "MultiTag", "Source",
-           "Section", "S", "Value", "Feature", "Property",
+           "Section", "S", "Feature", "Property",
            "SampledDimension", "RangeDimension", "SetDimension",
            "FileMode", "DataSliceMode", "DataType", "DimensionType",
            "LinkType", "Compression")

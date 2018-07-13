@@ -13,7 +13,7 @@ from .entity import Entity
 from .source_link_container import SourceLinkContainer
 from .container import Container, LinkContainer
 
-from .value import DataType
+from .datatype import DataType
 from .data_array import DataArray
 from .data_view import DataView
 from .feature import Feature

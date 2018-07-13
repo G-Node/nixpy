@@ -11,7 +11,7 @@ import h5py
 import numpy as np
 
 from .h5dataset import H5DataSet
-from ..value import DataType
+from ..datatype import DataType
 from ..block import Block
 from ..section import Section
 
