@@ -6,14 +6,13 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from numbers import Integral, Real
 from six import string_types
-from numbers import Number, Integral, Real
 
 import numpy as np
 
 
-bools = (bool, np.bool_)
-valid_types = (Number, string_types, bools)
+BOOLS = (bool, np.bool_)
 
 
 class DataType(object):
@@ -32,7 +31,7 @@ class DataType(object):
 
     @classmethod
     def get_dtype(cls, value):
-        if isinstance(value, bools):
+        if isinstance(value, BOOLS):
             return cls.Bool
         elif isinstance(value, Integral):
             return cls.Int64
