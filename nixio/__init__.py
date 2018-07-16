@@ -17,7 +17,6 @@ from .multi_tag import MultiTag
 from .source import Source
 from .section import Section, S
 from .property import Property
-#from .datatype import Value
 from .feature import Feature
 from .dimensions import SampledDimension, RangeDimension, SetDimension
 
