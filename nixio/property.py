@@ -17,16 +17,16 @@ from . import util
 
 
 class OdmlType(str, Enum):
-    string = 'string'
-    text = 'text'
+    boolean = 'boolean'
     int = 'int'
     float = 'float'
+    string = 'string'
+    text = 'text'
     url = 'url'
+    person = 'person'
     datetime = 'datetime'
     date = 'date'
     time = 'time'
-    boolean = 'boolean'
-    person = 'person'
 
     def __str__(self):
         return self.name
