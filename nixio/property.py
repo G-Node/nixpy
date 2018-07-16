@@ -7,9 +7,9 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-import numpy as np
 from collections import Sequence
 from enum import Enum
+import numpy as np
 
 from .datatype import DataType
 from .entity import Entity
@@ -17,6 +17,11 @@ from . import util
 
 
 class OdmlType(str, Enum):
+    """
+    OdmlType provides all types currently supported by the odML
+    data format. It provides additional information about the
+    nature of the values of an odML Property.
+    """
     boolean = 'boolean'
     int = 'int'
     float = 'float'
@@ -49,7 +54,7 @@ class OdmlType(str, Enum):
         elif self.name == "int" and DataType.get_dtype(value) == DataType.Int64:
             return True
         elif (self.name in ("time", "date", "datetime") and
-            DataType.get_dtype(value) == DataType.String):
+              DataType.get_dtype(value) == DataType.String):
             # This might need some extra work, treating as String for now, but keeping
             # it separated from other String values.
             return True
@@ -75,11 +80,11 @@ class OdmlType(str, Enum):
         elif dtype == DataType.Bool:
             return OdmlType.boolean
 
-        raise TypeError("No available OdmlType for type '%s'", dtype)
+        raise TypeError("No available OdmlType for type '%s'" % dtype)
 
 
 class Property(Entity):
-
+    """An odML Property"""
     def __init__(self, nixparent, h5dataset):
         super(Property, self).__init__(nixparent, h5dataset)
         self._h5dataset = self._h5group
@@ -88,14 +93,19 @@ class Property(Entity):
     def _create_new(cls, nixparent, h5parent, name, dtype, oid=None):
         util.check_entity_name(name)
         dtype = cls._make_h5_dtype(dtype)
+
         h5dataset = h5parent.create_dataset(name, shape=(0,), dtype=dtype)
         h5dataset.set_attr("name", name)
+
         if not util.is_uuid(oid):
             oid = util.create_id()
+
         h5dataset.set_attr("entity_id", oid)
+
         newentity = cls(nixparent, h5dataset)
         newentity.force_created_at()
         newentity.force_updated_at()
+
         return newentity
 
     @property
@@ -116,13 +126,15 @@ class Property(Entity):
         return self._h5dataset.get_attr("unit")
 
     @unit.setter
-    def unit(self, u):
-        if u:
-            u = util.units.sanitizer(u)
-        if u == "":
-            u = None
-        util.check_attr_type(u, str)
-        self._h5dataset.set_attr("unit", u)
+    def unit(self, new):
+        if new:
+            new = util.units.sanitizer(new)
+
+        if new == "":
+            new = None
+
+        util.check_attr_type(new, str)
+        self._h5dataset.set_attr("unit", new)
 
     @property
     def uncertainty(self):
@@ -175,7 +187,7 @@ class Property(Entity):
     def odml_type(self):
         otype = self._h5dataset.get_attr("odml_type")
         if not otype:
-            return
+            return None
 
         return OdmlType(otype)
 
@@ -204,10 +216,10 @@ class Property(Entity):
 
         data = dataset.read_data()
 
-        def data_to_value(d):
-            if isinstance(d, bytes):
-                d = d.decode()
-            return d
+        def data_to_value(dat):
+            if isinstance(dat, bytes):
+                dat = dat.decode()
+            return dat
 
         values = tuple(map(data_to_value, data))
 
@@ -221,7 +233,7 @@ class Property(Entity):
         :param vals: a single value or list of values.
         """
         # Make sure boolean value 'False' gets through as well...
-        if vals is None or (isinstance(vals, Sequence) and len(vals) == 0):
+        if vals is None or (isinstance(vals, Sequence) and not vals):
             self.delete_values()
             return
 
@@ -240,8 +252,8 @@ class Property(Entity):
 
         # Check all values for data type consistency to ensure clean value add.
         # Will raise an exception otherwise.
-        for v in vals:
-            if DataType.get_dtype(v) != vtype:
+        for val in vals:
+            if DataType.get_dtype(val) != vtype:
                 raise TypeError("Array contains inconsistent values. Only values of "
                                 "type '%s' can be assigned" % vtype)
 
@@ -253,11 +265,12 @@ class Property(Entity):
 
     @property
     def data_type(self):
-        dt = self._h5dataset.dtype
-        if dt == util.vlen_str_dtype:
+        dtype = self._h5dataset.dtype
+
+        if dtype == util.vlen_str_dtype:
             return DataType.String
-        else:
-            return dt
+
+        return dtype
 
     def delete_values(self):
         self._h5dataset.shape = (0,)
@@ -265,8 +278,10 @@ class Property(Entity):
     @staticmethod
     def _make_h5_dtype(valued_type):
         str_ = util.vlen_str_dtype
+
         if valued_type == DataType.String:
             valued_type = str_
+
         return valued_type
 
     def __str__(self):
@@ -280,8 +295,8 @@ class Property(Entity):
     def __eq__(self, other):
         if hasattr(other, "id"):
             return self.id == other.id
-        else:
-            return False
+
+        return False
 
     def __hash__(self):
         """
