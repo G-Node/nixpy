@@ -9,15 +9,17 @@
 from numbers import Number
 from enum import Enum
 
-from .entity_with_sources import EntityWithSources
 from .data_view import DataView
 from .data_set import DataSet
+from .entity import Entity
+from .source_link_container import SourceLinkContainer
 from .value import DataType
-from .dimensions import (SampledDimension, RangeDimension, SetDimension,
-                         DimensionType)
+from .dimensions import (Dimension, SampledDimension, RangeDimension,
+                         SetDimension, DimensionType, DimensionContainer)
 from . import util
 
 from .exceptions import InvalidUnit
+from .section import Section
 
 
 class DataSliceMode(Enum):
@@ -25,47 +27,12 @@ class DataSliceMode(Enum):
     Data = 2
 
 
-class DimensionProxyList(object):
-    """
-    List proxy for the dimensions of a data array.
-    """
-
-    def __init__(self, obj):
-        self.__obj = obj
-
-    def __len__(self):
-        return self.__obj._dimension_count()
-
-    def __getitem__(self, key):
-        if isinstance(key, int):
-            length = self.__obj._dimension_count()
-
-            if key < 0:
-                key = length + key
-
-            if key >= length or key < 0:
-                raise KeyError("Index out of bounds: " + str(key))
-
-            return self.__obj._get_dimension_by_pos(key + 1)
-        else:
-            raise TypeError("The key must be an int but was: " + type(key))
-
-    def __iter__(self):
-        for i in range(0, len(self)):
-            yield self.__obj._get_dimension_by_pos(i + 1)
-
-    def __str__(self):
-        str_list = [str(e) for e in list(self)]
-        return "[" + ", ".join(str_list) + "]"
-
-    def __repr__(self):
-        return str(self)
-
-
-class DataArray(EntityWithSources, DataSet):
+class DataArray(Entity, DataSet):
 
     def __init__(self, nixparent, h5group):
         super(DataArray, self).__init__(nixparent, h5group)
+        self._sources = None
+        self._dimensions = None
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, data_type, shape,
@@ -76,17 +43,34 @@ class DataArray(EntityWithSources, DataSet):
                                           compression)
         return newentity
 
-    def _read_data(self, data, count, offset):
+    def _read_data(self, sl=None):
         coeff = self.polynom_coefficients
         origin = self.expansion_origin
+        sup = super(DataArray, self)
         if len(coeff) or origin:
             if not origin:
                 origin = 0.0
 
-            super(DataArray, self)._read_data(data, count, offset)
+            # when there are coefficients, convert the dtype of the returned
+            # data array to double
+            data = sup._read_data(sl).astype(DataType.Double)
             util.apply_polynomial(coeff, origin, data)
         else:
-            super(DataArray, self)._read_data(data, count, offset)
+            data = sup._read_data(sl)
+        return data
+
+    @property
+    def sources(self):
+        """
+        A property containing all Sources referenced by the DataArray. Sources
+        can be obtained by index or their id. Sources can be removed from the
+        list, but removing a referenced Source will not remove it from the
+        file. New Sources can be added using the append method of the list.
+        This is a read only attribute.
+        """
+        if self._sources is None:
+            self._sources = SourceLinkContainer(self)
+        return self._sources
 
     def append_set_dimension(self):
         """
@@ -288,7 +272,8 @@ class DataArray(EntityWithSources, DataSet):
                                  len(extents), datadim
                              ))
         if mode == DataSliceMode.Index:
-            return DataView(self, extents, positions)
+            sl = tuple(slice(p, p+e) for p, e in zip(positions, extents))
+            return DataView(self, sl)
         elif mode == DataSliceMode.Data:
             return self._get_slice_bydim(positions, extents)
         else:
@@ -306,7 +291,8 @@ class DataArray(EntityWithSources, DataSet):
             elif dim.dimension_type == DimensionType.Set:
                 dpos.append(int(pos))
                 dext.append(int(ext))
-        return DataView(self, dext, dpos)
+        sl = tuple(slice(p, p+e) for p, e in zip(dpos, dext))
+        return DataView(self, sl)
 
     @property
     def data(self):
@@ -328,10 +314,11 @@ class DataArray(EntityWithSources, DataSet):
         respective append methods for dimension descriptors.
         This is a read only attribute.
 
-        :type: ProxyList of dimension descriptors.
+        :type: Container of dimension descriptors.
         """
-        if not hasattr(self, "_dimensions"):
-            setattr(self, "_dimensions", DimensionProxyList(self))
+        if self._dimensions is None:
+            self._dimensions = DimensionContainer("dimensions", self,
+                                                  Dimension)
         return self._dimensions
 
     def __eq__(self, other):
@@ -347,3 +334,30 @@ class DataArray(EntityWithSources, DataSet):
         implemented or escaped
         """
         return hash(self.id)
+
+    # metadata
+    @property
+    def metadata(self):
+        """
+
+        Associated metadata of the entity. Sections attached to the entity via
+        this attribute can provide additional annotations. This is an optional
+        read-write property, and can be None if no metadata is available.
+
+        :type: Section
+        """
+        if "metadata" in self._h5group:
+            return Section(None, self._h5group.open_group("metadata"))
+        else:
+            return None
+
+    @metadata.setter
+    def metadata(self, sect):
+        if not isinstance(sect, Section):
+            raise TypeError("{} is not of type Section".format(sect))
+        self._h5group.create_link(sect, "metadata")
+
+    @metadata.deleter
+    def metadata(self):
+        if "metadata" in self._h5group:
+            self._h5group.delete("metadata")

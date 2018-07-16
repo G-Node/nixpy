@@ -6,19 +6,17 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
 import os
-
 import unittest
-
 import nixio as nix
+from .tmp import TempDir
 
 
 class TestSources(unittest.TestCase):
 
-    testfilename = "sourcetest.h5"
-
     def setUp(self):
+        self.tmpdir = TempDir("sourcetest")
+        self.testfilename = os.path.join(self.tmpdir.path, "sourcetest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         self.source = self.block.create_source("test source",
@@ -32,7 +30,7 @@ class TestSources(unittest.TestCase):
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_source_eq(self):
         assert(self.source == self.source)
@@ -118,7 +116,10 @@ class TestSources(unittest.TestCase):
         assert(len(self.array.sources) == 0)
         self.array.sources.extend([self.source, self.other])
         assert(len(self.array.sources) == 2)
-        self.array.sources.extend(self.third)
+        with self.assertRaises(TypeError):
+            self.array.sources.extend(self.third)
+        assert(len(self.array.sources) == 2)
+        self.array.sources.extend([self.third])
         assert(len(self.array.sources) == 3)
 
     def test_inverse_search(self):
@@ -145,3 +146,16 @@ class TestSources(unittest.TestCase):
         self.assertEqual(len(self.source.referring_multi_tags), 1)
         self.assertEqual(len(self.other.referring_multi_tags), 0)
         self.assertEqual(self.source.referring_multi_tags[0].id, mtag.id)
+
+    def test_deep_linking(self):
+        lvl2 = self.third.create_source("lvl2", "source-test")
+        lvl3 = lvl2.create_source("lvl3", "source-test")
+
+        group = self.block.create_group("group", "source-test")
+        group.sources.append(lvl3)
+
+        self.assertEqual(lvl3._parent, lvl2)
+        self.assertEqual(lvl2.sources["lvl3"], lvl3)
+        self.assertEqual(lvl2.sources["lvl3"]._parent, lvl3._parent)
+        # TODO: Uncomment once fixed
+        # self.assertEqual(group.sources["lvl3"]._parent, lvl3._parent)

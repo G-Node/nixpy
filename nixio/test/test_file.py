@@ -6,9 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
 import os
-
 import unittest
 import h5py
 import numpy as np
@@ -16,18 +14,19 @@ import numpy as np
 import nixio as nix
 import nixio.file as filepy
 from nixio.exceptions import InvalidFile
+from .tmp import TempDir
 
 
 class TestFile(unittest.TestCase):
 
-    testfilename = "filetest.h5"
-
     def setUp(self):
+        self.tmpdir = TempDir("filetest")
+        self.testfilename = os.path.join(self.tmpdir.path, "filetest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
 
     def tearDown(self):
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_file_format(self):
         assert(self.file.format == "nix")
@@ -132,7 +131,6 @@ class TestFile(unittest.TestCase):
 class TestFileVer(unittest.TestCase):
 
     backend = "h5py"
-    testfilename = "versiontest.h5"
     filever = filepy.HDF_FF_VERSION
     fformat = filepy.FILE_FORMAT
 
@@ -154,12 +152,14 @@ class TestFileVer(unittest.TestCase):
             self.h5root.create_group("metadata")
 
     def setUp(self):
+        self.tmpdir = TempDir("vertest")
+        self.testfilename = os.path.join(self.tmpdir.path, "vertest.nix")
         self.h5file = h5py.File(self.testfilename, mode="w")
         self.h5root = self.h5file["/"]
 
     def tearDown(self):
         self.h5file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_read_write(self):
         self.set_header()

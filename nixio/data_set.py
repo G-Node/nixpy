@@ -6,8 +6,6 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-import sys
-from numbers import Integral
 import numpy as np
 
 
@@ -17,55 +15,16 @@ class DataSet(object):
     """
 
     def __array__(self):
-        raw = np.empty(self.shape, dtype=self.dtype)
-        self.read_direct(raw)
-        return raw
+        return self._read_data()[:]
 
     def __getitem__(self, index):
-        index = self.__index_to_tuple(index)
-        if len(index) < 1:
-            return np.array(self)
-        # if we got to here we have a tuple with len >= 1
-        count, offset, shape = self.__tuple_to_count_offset_shape(index)
-        if any(o+c > s for o, c, s in zip(offset, count, self.shape)):
-            raise IndexError("index is out of bounds")
-
-        raw = np.empty(shape, dtype=self.dtype)
-
-        if hasattr(self, "polynom_coefficients") and self.polynom_coefficients:
-            # if there are coefficients, convert the dtype of the returned data
-            # array to double
-            raw.dtype = np.float64
-        self._read_data(raw, count, offset)
-
-        return raw
+        return self._read_data(index)
 
     def __setitem__(self, index, value):
-        index = self.__index_to_tuple(index)
-        if len(index) < 1:
-            shape = self.shape
-            count, offset = shape, tuple([0]*len(shape))
-        else:
-            count, offset, _ = self.__tuple_to_count_offset_shape(index)
-
-        # NB: np.ascontiguousarray does not copy the array if it is
-        # already in c-contiguous form
-        raw = np.ascontiguousarray(value)
-        self._write_data(raw, count, offset)
+        self._write_data(value, index)
 
     def __len__(self):
-        s = self.len()
-
-        # PyObject_Size returns a Py_ssize_t, which is the same as the
-        # systems size_t type but signed, i.e. ssize_t. (cf. PEP 0353)
-        # The maximum positive integer that Py_ssize_t can hold is
-        # exposed via sys.maxsize.
-        # Since self.shape can contain longs we need to check for that
-        if s > sys.maxsize:
-            estr = ("DataSet's shape[0] is too big for Python's __len__. "
-                    "Use DataSet.len() instead")
-            raise OverflowError(estr)
-        return s
+        return self.len()
 
     def __iter__(self):
         for idx in range(self.len()):
@@ -115,7 +74,7 @@ class DataSet(object):
         :param data: The array which contents is being written
         :type data: :class:`numpy.ndarray`
         """
-        self._write_data(data, (), ())
+        self._write_data(data)
 
     def read_direct(self, data):
         """
@@ -128,8 +87,7 @@ class DataSet(object):
         :param data: The array where data is being read into
         :type data: :class:`numpy.ndarray`
         """
-
-        self._read_data(data, (), ())
+        data[:] = self._read_data()
 
     def append(self, data, axis=0):
         """
@@ -156,22 +114,25 @@ class DataSet(object):
         enlarge = tuple(self.shape[i] + (0 if i != axis else x)
                         for i, x in enumerate(data.shape))
         self.data_extent = enlarge
-        self._write_data(data, count, offset)
+        sl = tuple(slice(o, c+o) for o, c in zip(offset, count))
+        self._write_data(data, sl)
 
     @staticmethod
     def __index_to_tuple(index):
-        if isinstance(index, tuple):
+        tidx = type(index)
+
+        if tidx == tuple:
             return index
-        elif isinstance(index, Integral) or isinstance(index, slice):
+        elif tidx == int or tidx == slice:
             return (index, )
-        elif isinstance(index, type(Ellipsis)):
+        elif tidx == type(Ellipsis):
             return ()
         else:
             raise IndexError("Unsupported index")
 
     @staticmethod
     def __complete_slices(shape, index):
-        if isinstance(index, slice):
+        if type(index) is slice:
             if index.step is not None:
                 raise IndexError('Invalid index, stepping unsupported')
             start = index.start
@@ -185,7 +146,7 @@ class DataSet(object):
             elif stop < 0:
                 stop = shape + stop
             index = slice(start, stop, index.step)
-        elif isinstance(index, Integral):
+        elif type(index) is int:
             if index < 0:
                 index = shape + index
                 index = slice(index, index+1)
@@ -241,20 +202,20 @@ class DataSet(object):
 
         return count, offset, shape
 
-    def _write_data(self, data, count, offset):
+    def _write_data(self, data, sl=None):
         dataset = self._h5group.get_dataset("data")
-        dataset.write_data(data, count, offset)
+        dataset.write_data(data,  sl)
 
-    def _read_data(self, data, count, offset):
+    def _read_data(self, sl=None):
         dataset = self._h5group.get_dataset("data")
-        dataset.read_data(data, count, offset)
+        return dataset.read_data(sl)
 
     @property
     def data_extent(self):
         """
         The size of the data.
 
-        :type: set of int
+        :type: tuple of int
         """
         dataset = self._h5group.get_dataset("data")
         return dataset.shape

@@ -13,6 +13,23 @@ import numpy as np
 from .value import DataType
 from .dimension_type import DimensionType
 from . import util
+from .container import Container
+
+
+class DimensionContainer(Container):
+    """
+    DimensionContainer extends Container to support returning different types
+    of Dimension classes on return.
+    """
+
+    def _inst_item(self, item):
+        cls = {
+            DimensionType.Range: RangeDimension,
+            DimensionType.Sample: SampledDimension,
+            DimensionType.Set: SetDimension,
+        }[item.get_attr("dimension_type")]
+        idx = item.get_attr("index")
+        return cls(item, idx)
 
 
 class Dimension(object):
@@ -84,7 +101,7 @@ class SampledDimension(Dimension):
         """
         offset = self.offset if self.offset else 0
         sample = self.sampling_interval
-        index = round((position - offset) / sample)
+        index = np.round((position - offset) / sample)
         if index < 0:
             raise IndexError("Position is out of bounds of this dimension!")
         return int(index)

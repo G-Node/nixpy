@@ -14,22 +14,13 @@ import functools
 from operator import attrgetter
 from collections import Sequence
 
-from .entity import NamedEntity
+from .entity import Entity
+from .container import Container
 from .property import Property
+from .util import find as finders
+from .value import Value
 from . import util
 from . import exceptions
-from .value import Value
-from .util import find as finders
-from .util.proxy_list import ProxyList
-
-
-class SectionProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(SectionProxyList, self).__init__(obj, "_section_count",
-                                               "_get_section_by_id",
-                                               "_get_section_by_pos",
-                                               "_delete_section_by_id")
 
 
 class S(object):
@@ -53,21 +44,13 @@ class S(object):
             return getattr(self.section, item)
 
 
-class PropertyProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(PropertyProxyList, self).__init__(obj,
-                                                "_property_count",
-                                                "_get_property_by_id_or_name",
-                                                "_get_property_by_pos",
-                                                "_delete_property_by_id")
-
-
-class Section(NamedEntity):
+class Section(Entity):
 
     def __init__(self, nixparent, h5group):
         super(Section, self).__init__(nixparent, h5group)
         self._sec_parent = None
+        self._sections = None
+        self._properties = None
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_):
@@ -95,21 +78,6 @@ class Section(NamedEntity):
         sec = Section._create_new(self, sections, name, type_)
         sec._sec_parent = self
         return sec
-
-    def _get_section_by_id(self, id_or_name):
-        sections = self._h5group.open_group("sections")
-        return Section(self, sections.get_by_id_or_name(id_or_name))
-
-    def _get_section_by_pos(self, pos):
-        sections = self._h5group.open_group("sections")
-        return Section(self, sections.get_by_pos(pos))
-
-    def _delete_section_by_id(self, id_):
-        sections = self._h5group.open_group("sections")
-        sections.delete(id_)
-
-    def _section_count(self):
-        return len(self._h5group.open_group("sections"))
 
     # Property
     def create_property(self, name, values):
@@ -139,52 +107,6 @@ class Section(NamedEntity):
         prop = Property._create_new(self, properties, name, dtype)
         prop.values = values
         return prop
-
-    def has_property_by_name(self, name):
-        """
-        Checks whether a section has a property with a certain name.
-
-        :param name: The name to check.
-        :type name: str
-
-        :returns: True if the section has a property with the given name,
-                  False otherwise.
-        :rtype: bool
-        """
-        properties = self._h5group.open_group("properties")
-        return properties.has_by_id(name)
-
-    def get_property_by_name(self, name):
-        """
-        Get a property by its name.
-
-        :param name: The name to check.
-        :type name: str
-
-        :returns: The property with the given name.
-        :rtype: Property
-        """
-        properties = self._h5group.open_group("properties")
-        try:
-            p = Property(self, properties.get_by_name(name))
-        except ValueError:
-            p = None
-        return p
-
-    def _get_property_by_id(self, id_or_name):
-        properties = self._h5group.open_group("properties")
-        return Property(self, properties.get_by_id_or_name(id_or_name))
-
-    def _get_property_by_pos(self, pos):
-        properties = self._h5group.open_group("properties")
-        return Property(self, properties.get_by_pos(pos))
-
-    def _delete_property_by_id(self, id_):
-        properties = self._h5group.open_group("properties")
-        properties.delete(id_)
-
-    def _property_count(self):
-        return len(self._h5group.open_group("properties"))
 
     @property
     def link(self):
@@ -285,7 +207,7 @@ class Section(NamedEntity):
         :type: File
         """
         par = self._parent
-        while isinstance(par, NamedEntity):
+        while isinstance(par, Entity):
             par = par._parent
         return par
 
@@ -397,17 +319,17 @@ class Section(NamedEntity):
     @property
     def sections(self):
         """
-        A property providing all child sections of a section. Child sections
-        can be accessed by index or by their id. Sections can also be deleted:
-        if a section is deleted, all its properties and child sections are
-        removed from the file too. Adding new sections is achieved using the
+        A property providing all child Sections of a Section. Child sections
+        can be accessed by name, index, or id. Sections can also be deleted:
+        if a Section is deleted, all its properties and child Sections are
+        removed from the file too. Adding new Sections is achieved using the
         create_section method.
         This is a read-only attribute.
 
-        :type: ProxyList of Section
+        :type: Container of Section
         """
-        if not hasattr(self, "_sections"):
-            setattr(self, "_sections", SectionProxyList(self))
+        if self._sections is None:
+            self._sections = Container("sections", self, Section)
         return self._sections
 
     def __eq__(self, other):
@@ -482,22 +404,13 @@ class Section(NamedEntity):
     def props(self):
         """
         A property containing all Property entities associated with the
-        section.  Properties can be accessed by index of via their id.
-        Properties can be deleted from the list. Adding new properties is done
+        section. Properties can be accessed by name, index, or id.
+        Properties can be deleted from the list. Adding new Properties is done
         using the create_property method.
         This is a read-only attribute.
 
-        :type: ProxyList of Property
+        :type: Container of Property
         """
-        if not hasattr(self, "_properties_proxy"):
-            setattr(self, "_properties_proxy", PropertyProxyList(self))
-        return self._properties_proxy
-
-    def _get_property_by_id_or_name(self, ident):
-        """
-        Helper method that gets a property by id or name
-        """
-        p = self._get_property_by_id(ident)
-        if p is None and self.has_property_by_name(ident):
-            p = self.get_property_by_name(ident)
-        return p
+        if self._properties is None:
+            self._properties = Container("properties", self, Property)
+        return self._properties

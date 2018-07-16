@@ -6,6 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from six import string_types
 import numpy as np
 
 import h5py
@@ -16,18 +17,14 @@ from . import names
 
 from nixio.link_type import LinkType
 
-try:
-    unicode = unicode
-except NameError:
-    unicode = str
 
-strings = (str, bytes)
 try:
-    strings += (basestring,)
+    vstype = unicode
 except NameError:
-    pass
+    vstype = str
 
-vlen_str_dtype = h5py.special_dtype(vlen=unicode)
+
+vlen_str_dtype = h5py.special_dtype(vlen=vstype)
 
 
 def create_id():
@@ -137,26 +134,9 @@ def check_attr_type(value, type_):
     :param type_: the type to check against
     """
     if type_ is str:
-        type_ = strings
+        type_ = string_types
     if value is not None and not isinstance(value, type_):
         raise exceptions.InvalidAttrType(type_, value)
-
-
-def co_to_slice(count, offset):
-    """
-    Converts an offset-count pair to an h5py compatible slice
-
-    :param count: number of items
-    :param offset: offset from start
-    :return: slice-like tuple or single index
-    """
-    sl = []
-    for c, o in zip(count, offset):
-        sl.append(slice(o, c+o))
-    if len(sl) == 1:
-        return sl[0]
-    else:
-        return tuple(sl)
 
 
 def apply_polynomial(coefficients, origin, data):

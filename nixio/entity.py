@@ -18,9 +18,16 @@ class Entity(object):
         self._parent = nixparent
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent):
-        id_ = util.create_id()
-        h5group = h5parent.open_group(id_)
+    def _create_new(cls, nixparent, h5parent, name=None, type_=None):
+        if name and type_:
+            util.check_entity_name_and_type(name, type_)
+            id_ = util.create_id()
+        else:
+            name = util.create_id()
+            id_ = name
+        h5group = h5parent.open_group(name)
+        h5group.set_attr("name", name)
+        h5group.set_attr("type", type_)
         h5group.set_attr("entity_id", id_)
         newentity = cls(nixparent, h5group)
         newentity.force_created_at()
@@ -86,38 +93,21 @@ class Entity(object):
             util.check_attr_type(t, int)
         self._h5group.set_attr("updated_at", util.time_to_str(t))
 
-    def __eq__(self, other):
-        if hasattr(other, "id"):
-            return self.id == other.id
-        else:
-            return False
+    @property
+    def definition(self):
+        """
+        The definition of the entity. The definition can contain a textual
+        description of the entity. This is an optional read-write
+        property, and can be None if no definition is available.
 
-    def __hash__(self):
-        return hash(self.id)
+        :type: str
+        """
+        return self._h5group.get_attr("definition")
 
-
-class NamedEntity(Entity):
-
-    def __init__(self, nixparent, h5group):
-        try:
-            util.check_entity_name_and_type(h5group.get_attr("name"),
-                                            h5group.get_attr("type"))
-            util.check_entity_id(h5group.get_attr("entity_id"))
-        except ValueError:
-            ValueError("Invalid NIX object found in file.")
-        super(NamedEntity, self).__init__(nixparent, h5group)
-
-    @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_):
-        util.check_entity_name_and_type(name, type_)
-        h5group = h5parent.open_group(name)
-        h5group.set_attr("name", name)
-        h5group.set_attr("type", type_)
-        h5group.set_attr("entity_id", util.create_id())
-        newentity = cls(nixparent, h5group)
-        newentity.force_created_at()
-        newentity.force_updated_at()
-        return newentity
+    @definition.setter
+    def definition(self, d):
+        util.check_attr_type(d, str)
+        self._h5group.set_attr("definition", d)
 
     @property
     def name(self):
@@ -148,21 +138,14 @@ class NamedEntity(Entity):
         util.check_attr_type(t, str)
         self._h5group.set_attr("type", t)
 
-    @property
-    def definition(self):
-        """
-        The definition of the entity. The definition can contain a textual
-        description of the entity. This is an optional read-write
-        property, and can be None if no definition is available.
+    def __eq__(self, other):
+        if hasattr(other, "id"):
+            return self.id == other.id
+        else:
+            return False
 
-        :type: str
-        """
-        return self._h5group.get_attr("definition")
-
-    @definition.setter
-    def definition(self, d):
-        util.check_attr_type(d, str)
-        self._h5group.set_attr("definition", d)
+    def __hash__(self):
+        return hash(self.id)
 
     def __str__(self):
         return "{}: {{name = {}, type = {}, id = {}}}".format(

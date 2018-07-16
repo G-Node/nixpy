@@ -6,9 +6,6 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
-import numpy as np
-
 from ..value import DataType
 from .. import util
 
@@ -39,30 +36,21 @@ class H5DataSet(object):
         name = h5obj.name.split("/")[-1]
         return cls(parent, name)
 
-    def write_data(self, data, count=None, offset=None):
-        if count and offset:
-            sl = util.co_to_slice(count, offset)
-            self.dataset[sl] = data
-        else:
+    def write_data(self, data, sl=None):
+        if sl is None:
             self.dataset[:] = data
-
-    def read_data(self, data, count=None, offset=None):
-        if 0 in self.dataset.shape or len(self.dataset.shape) == 0:
-            return
-        if count and offset:
-            if sum(count) == 0 and len(data) == 0:
-                return data
-            datashape = data.shape
-            sl = util.co_to_slice(count, offset)
-            if isinstance(sl, tuple) and np.ndim(data) < len(sl):
-                # data shape needs dimension padding to match dataset
-                # dimensionality
-                data.resize(count)
-            self.dataset.read_direct(data, sl)
-            # if data was resized, it should be returned to its original shape
-            data.resize(datashape)
         else:
-            self.dataset.read_direct(data)
+            self.dataset[sl] = data
+
+    def read_data(self, sl=None):
+        if sl is None:
+            return self.dataset[:]
+        try:
+            return self.dataset[sl]
+        except ValueError as ve:
+            # h5py throws ValueError for out-of-bounds index
+            # Let's change it to IndexError
+            raise IndexError(ve)
 
     def set_attr(self, name, value):
         if value is None:

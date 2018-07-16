@@ -6,19 +6,17 @@
 # Redistribution and use in section and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
 import os
-
 import unittest
-
 import nixio as nix
+from .tmp import TempDir
 
 
 class TestSections(unittest.TestCase):
 
-    testfilename = "sectiontest.h5"
-
     def setUp(self):
+        self.tmpdir = TempDir("sectiontest")
+        self.testfilename = os.path.join(self.tmpdir.path, "sectiontest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.section = self.file.create_section("test section",
                                                 "recordingsession")
@@ -29,7 +27,7 @@ class TestSections(unittest.TestCase):
         del self.file.sections[self.section.id]
         del self.file.sections[self.other.id]
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_section_eq(self):
         assert(self.section == self.section)
@@ -144,10 +142,11 @@ class TestSections(unittest.TestCase):
         for p in self.section:
             assert(p in self.section)
 
-        assert(self.section.has_property_by_name("test prop"))
-        assert(not self.section.has_property_by_name("notexist"))
-        assert(self.section.get_property_by_name("test prop") is not None)
-        assert(self.section.get_property_by_name("notexist") is None)
+        assert("test prop" in self.section)
+        assert("notexist" not in self.section)
+        assert(self.section["test prop"] is not None)
+        # NOTE: the following raises KeyError: Do we want it to return None?
+        # assert(self.section["notexist"] is None)
 
         assert(len(self.section.inherited_properties()) == 1)
 

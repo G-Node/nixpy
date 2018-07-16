@@ -39,6 +39,19 @@ class H5Group(object):
             gid = h5py.h5g.create(self._parent.id, name, gcpl=gcpl)
             self.group = h5py.Group(gid)
 
+    @property
+    def group(self):
+        if self._group is None:
+            if self.name in self._parent:
+                self._group = self._parent[self.name]
+            else:
+                return None
+        return self._group
+
+    @group.setter
+    def group(self, grp):
+        self._group = grp
+
     def create_link(self, target, name):
         self._create_h5obj()
         if name in self.group:
@@ -172,22 +185,18 @@ class H5Group(object):
         if self.group and name in self.group:
             return self.create_from_h5obj(self.group[name])
         else:
-            raise ValueError("No item with name {} found in {}".format(
-                name, self.group.name
-            ))
+            raise KeyError("Item not found '{}'".format(name))
 
     def get_by_id(self, id_):
         if self.group:
             for item in self:
                 if item.get_attr("entity_id") == id_:
                     return item
-        raise ValueError("No item with ID {} found in {}".format(
-            id_, self.name
-        ))
+        raise KeyError("Item not found '{}'".format(id_))
 
     def get_by_pos(self, pos):
         if not self.group:
-            raise ValueError
+            raise IndexError
 
         # Using low level interface to specify iteration order
         name, _ = self.group.id.links.iterate(lambda n: n,
@@ -204,8 +213,7 @@ class H5Group(object):
         try:
             del self.group[name]
         except Exception:
-            raise ValueError("Error deleting {} from {}".format(name,
-                                                                self.name))
+            raise ValueError("Error deleting {} ".format(name))
         # Delete if empty and non-root container
         groupdepth = len(self.group.name.split("/")) - 1
         if not len(self.group) and groupdepth > 1:
@@ -300,6 +308,8 @@ class H5Group(object):
         return self.create_from_h5obj(self._parent)
 
     def __iter__(self):
+        if not len(self):
+            return
         for grp in self.group.values():
             yield self.create_from_h5obj(grp)
 

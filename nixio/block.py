@@ -14,10 +14,9 @@ except ImportError:
 import numpy as np
 
 from .util import find as finders
-from .util.proxy_list import ProxyList
 from .compression import Compression
 
-from .entity_with_metadata import EntityWithMetadata
+from .entity import Entity
 from .exceptions import exceptions
 from .group import Group
 from .data_array import DataArray
@@ -25,57 +24,19 @@ from .multi_tag import MultiTag
 from .tag import Tag
 from .source import Source
 from . import util
+from .container import Container
+from .section import Section
 
 
-class SourceProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(SourceProxyList, self).__init__(obj, "_source_count",
-                                              "_get_source_by_id",
-                                              "_get_source_by_pos",
-                                              "_delete_source_by_id")
-
-
-class DataArrayProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(DataArrayProxyList, self).__init__(obj, "_data_array_count",
-                                                 "_get_data_array_by_id",
-                                                 "_get_data_array_by_pos",
-                                                 "_delete_data_array_by_id")
-
-
-class MultiTagProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(MultiTagProxyList, self).__init__(obj, "_multi_tag_count",
-                                                "_get_multi_tag_by_id",
-                                                "_get_multi_tag_by_pos",
-                                                "_delete_multi_tag_by_id")
-
-
-class TagProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(TagProxyList, self).__init__(obj, "_tag_count", "_get_tag_by_id",
-                                           "_get_tag_by_pos",
-                                           "_delete_tag_by_id")
-
-
-class GroupProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(GroupProxyList, self).__init__(obj, "_group_count",
-                                             "_get_group_by_id",
-                                             "_get_group_by_pos",
-                                             "_delete_group_by_id")
-
-
-class Block(EntityWithMetadata):
+class Block(Entity):
 
     def __init__(self, nixparent, h5group, compression=Compression.Auto):
         super(Block, self).__init__(nixparent, h5group)
-        # TODO: Validation for containers
+        self._groups = None
+        self._data_arrays = None
+        self._tags = None
+        self._multi_tags = None
+        self._sources = None
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, compression):
@@ -83,32 +44,6 @@ class Block(EntityWithMetadata):
                                                   name, type_)
         newentity._compr = compression
         return newentity
-
-    # DataArray
-    def _create_data_array(self, name, type_, data_type, shape, compression):
-        util.check_entity_name_and_type(name, type_)
-        data_arrays = self._h5group.open_group("data_arrays")
-        if name in data_arrays:
-            raise exceptions.DuplicateName("create_data_array")
-        da = DataArray._create_new(self, data_arrays, name, type_,
-                                   data_type, shape, compression)
-        return da
-
-    def _get_data_array_by_id(self, id_or_name):
-        data_arrays = self._h5group.open_group("data_arrays")
-        return DataArray(self, data_arrays.get_by_id_or_name(id_or_name))
-
-    def _get_data_array_by_pos(self, pos):
-        data_arrays = self._h5group.open_group("data_arrays")
-        return DataArray(self, data_arrays.get_by_pos(pos))
-
-    def _delete_data_array_by_id(self, id_):
-        data_arrays = self._h5group.open_group("data_arrays")
-        data_arrays.delete(id_)
-
-    def _data_array_count(self):
-        data_arrays = self._h5group.open_group("data_arrays")
-        return len(data_arrays)
 
     # MultiTag
     def create_multi_tag(self, name, type_, positions):
@@ -135,22 +70,6 @@ class Block(EntityWithMetadata):
         mtag = MultiTag._create_new(self, multi_tags, name, type_, positions)
         return mtag
 
-    def _get_multi_tag_by_id(self, id_or_name):
-        multi_tags = self._h5group.open_group("multi_tags")
-        return MultiTag(self, multi_tags.get_by_id_or_name(id_or_name))
-
-    def _get_multi_tag_by_pos(self, pos):
-        multi_tags = self._h5group.open_group("multi_tags")
-        return MultiTag(self, multi_tags.get_by_pos(pos))
-
-    def _delete_multi_tag_by_id(self, id_):
-        multi_tags = self._h5group.open_group("multi_tags")
-        multi_tags.delete(id_)
-
-    def _multi_tag_count(self):
-        multi_tags = self._h5group.open_group("multi_tags")
-        return len(multi_tags)
-
     # Tag
     def create_tag(self, name, type_, position):
         """
@@ -173,22 +92,6 @@ class Block(EntityWithMetadata):
         tag = Tag._create_new(self, tags, name, type_, position)
         return tag
 
-    def _get_tag_by_id(self, id_or_name):
-        tags = self._h5group.open_group("tags")
-        return Tag(self, tags.get_by_id_or_name(id_or_name))
-
-    def _get_tag_by_pos(self, pos):
-        tags = self._h5group.open_group("tags")
-        return Tag(self, tags.get_by_pos(pos))
-
-    def _delete_tag_by_id(self, id_):
-        tags = self._h5group.open_group("tags")
-        tags.delete(id_)
-
-    def _tag_count(self):
-        tags = self._h5group.open_group("tags")
-        return len(tags)
-
     # Source
     def create_source(self, name, type_):
         """
@@ -209,22 +112,6 @@ class Block(EntityWithMetadata):
         src = Source._create_new(self, sources, name, type_)
         return src
 
-    def _get_source_by_id(self, id_or_name):
-        sources = self._h5group.open_group("sources")
-        return Source(self, sources.get_by_id_or_name(id_or_name))
-
-    def _get_source_by_pos(self, pos):
-        sources = self._h5group.open_group("sources")
-        return Source(self, sources.get_by_pos(pos))
-
-    def _delete_source_by_id(self, id_):
-        sources = self._h5group.open_group("sources")
-        sources.delete(id_)
-
-    def _source_count(self):
-        sources = self._h5group.open_group("sources")
-        return len(sources)
-
     # Group
     def create_group(self, name, type_):
         """
@@ -244,22 +131,6 @@ class Block(EntityWithMetadata):
             raise exceptions.DuplicateName("open_group")
         grp = Group._create_new(self, groups, name, type_)
         return grp
-
-    def _get_group_by_id(self, id_or_name):
-        groups = self._h5group.open_group("groups")
-        return Group(self, groups.get_by_id_or_name(id_or_name))
-
-    def _get_group_by_pos(self, pos):
-        groups = self._h5group.open_group("groups")
-        return Group(self, groups.get_by_pos(pos))
-
-    def _delete_group_by_id(self, id_):
-        groups = self._h5group.open_group("groups")
-        groups.delete(id_)
-
-    def _group_count(self):
-        groups = self._h5group.open_group("groups")
-        return len(groups)
 
     def create_data_array(self, name, array_type, dtype=None, shape=None,
                           data=None, compression=Compression.Auto):
@@ -300,8 +171,12 @@ class Block(EntityWithMetadata):
                     raise ValueError("Shape must equal data.shape")
             else:
                 shape = data.shape
-        da = self._create_data_array(name, array_type, dtype, shape,
-                                     compression)
+        util.check_entity_name_and_type(name, array_type)
+        data_arrays = self._h5group.open_group("data_arrays")
+        if name in data_arrays:
+            raise exceptions.DuplicateName("create_data_array")
+        da = DataArray._create_new(self, data_arrays, name, array_type,
+                                   dtype, shape, compression)
         if data is not None:
             da.write_direct(data)
         return da
@@ -335,11 +210,9 @@ class Block(EntityWithMetadata):
         via their index or by their id. Sources can be deleted from the list.
         Adding sources is done using the Blocks create_source method.
         This is a read only attribute.
-
-        :type: ProxyList of Source entities.
         """
-        if not hasattr(self, "_sources"):
-            setattr(self, "_sources", SourceProxyList(self))
+        if self._sources is None:
+            self._sources = Container("sources", self, Source)
         return self._sources
 
     @property
@@ -349,11 +222,9 @@ class Block(EntityWithMetadata):
         be obtained via their index or by their id. Tags can be deleted from
         the list. Adding tags is done using the Blocks create_multi_tag method.
         This is a read only attribute.
-
-        :type: ProxyList of MultiTag entities.
         """
-        if not hasattr(self, "_multi_tags"):
-            setattr(self, "_multi_tags", MultiTagProxyList(self))
+        if self._multi_tags is None:
+            self._multi_tags = Container("multi_tags", self, MultiTag)
         return self._multi_tags
 
     @property
@@ -363,11 +234,9 @@ class Block(EntityWithMetadata):
         via their index or by their id. Tags can be deleted from the list.
         Adding tags is done using the Blocks create_tag method.
         This is a read only attribute.
-
-        :type: ProxyList of Tag entities.
         """
-        if not hasattr(self, "_tags"):
-            setattr(self, "_tags", TagProxyList(self))
+        if self._tags is None:
+            self._tags = Container("tags", self, Tag)
         return self._tags
 
     @property
@@ -378,11 +247,9 @@ class Block(EntityWithMetadata):
         deleted from the list. Adding a data array is done using the Blocks
         create_data_array method.
         This is a read only attribute.
-
-        :type: ProxyList of DataArray entities.
         """
-        if not hasattr(self, "_data_arrays"):
-            setattr(self, "_data_arrays", DataArrayProxyList(self))
+        if self._data_arrays is None:
+            self._data_arrays = Container("data_arrays", self, DataArray)
         return self._data_arrays
 
     @property
@@ -392,21 +259,18 @@ class Block(EntityWithMetadata):
         obtained via their index or by their id. Groups can be deleted from the
         list. Adding a Group is done using the Blocks create_group method.
         This is a read only attribute.
-
-        :type: ProxyList of Group entities.
         """
-        if not hasattr(self, "_groups"):
-            setattr(self, "_groups", GroupProxyList(self))
+        if self._groups is None:
+            self._groups = Container("groups", self, Group)
         return self._groups
 
     def __eq__(self, other):
         """
-        Two blocks are considered equal when they have the same id.
+        Two Blocks are considered equal when they have the same id.
         """
         if hasattr(other, "id"):
             return self.id == other.id
-        else:
-            return False
+        return False
 
     def __hash__(self):
         """
@@ -415,3 +279,30 @@ class Block(EntityWithMetadata):
         implemented or escaped
         """
         return hash(self.id)
+
+    # metadata
+    @property
+    def metadata(self):
+        """
+
+        Associated metadata of the entity. Sections attached to the entity via
+        this attribute can provide additional annotations. This is an optional
+        read-write property, and can be None if no metadata is available.
+
+        :type: Section
+        """
+        if "metadata" in self._h5group:
+            return Section(None, self._h5group.open_group("metadata"))
+        else:
+            return None
+
+    @metadata.setter
+    def metadata(self, sect):
+        if not isinstance(sect, Section):
+            raise TypeError("{} is not of type Section".format(sect))
+        self._h5group.create_link(sect, "metadata")
+
+    @metadata.deleter
+    def metadata(self):
+        if "metadata" in self._h5group:
+            self._h5group.delete("metadata")

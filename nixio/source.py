@@ -8,27 +8,19 @@
 # LICENSE file in the root of the Project.
 from sys import maxsize as maxint
 
-from .entity_with_metadata import EntityWithMetadata
-from .util.proxy_list import ProxyList
 from .import exceptions
+from .entity import Entity
+from .container import Container
 from . import util
 from .util import find as finders
+from .section import Section
 
 
-class SourceProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(SourceProxyList, self).__init__(obj, "_source_count",
-                                              "_get_source_by_id",
-                                              "_get_source_by_pos",
-                                              "_delete_source_by_id")
-
-
-class Source(EntityWithMetadata):
+class Source(Entity):
 
     def __init__(self, nixparent, h5group):
         super(Source, self).__init__(nixparent, h5group)
-        # TODO: Validate Source container
+        self._sources = None
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_):
@@ -55,23 +47,6 @@ class Source(EntityWithMetadata):
             raise exceptions.DuplicateName("create_source")
         src = Source._create_new(self, sources, name, type_)
         return src
-
-    # Source
-    def _get_source_by_id(self, id_or_name):
-        sources = self._h5group.open_group("sources")
-        return Source(self, sources.get_by_id_or_name(id_or_name))
-
-    def _get_source_by_pos(self, pos):
-        sources = self._h5group.open_group("sources")
-        return Source(self, sources.get_by_pos(pos))
-
-    def _delete_source_by_id(self, id_):
-        sources = self._h5group.open_group("sources")
-        sources.delete(id_)
-
-    def _source_count(self):
-        sources = self._h5group.open_group("sources")
-        return len(sources)
 
     @property
     def referring_objects(self):
@@ -118,15 +93,13 @@ class Source(EntityWithMetadata):
     @property
     def sources(self):
         """
-        A property containing all sources of a block. Sources can be obtained
-        via their index or by their id. Sources can be deleted from the list.
-        Adding sources is done using the Blocks create_source method.
+        A property containing child sources of a Source. Sources can be
+        obtained via their name, index, id. Sources can be deleted from the
+        list.  Adding sources is done using the Blocks create_source method.
         This is a read only attribute.
-
-        :type: ProxyList of Source entities.
         """
-        if not hasattr(self, "_sources"):
-            setattr(self, "_sources", SourceProxyList(self))
+        if self._sources is None:
+            self._sources = Container("sources", self, Source)
         return self._sources
 
     def __eq__(self, other):
@@ -142,3 +115,30 @@ class Source(EntityWithMetadata):
         implemented or escaped
         """
         return hash(self.id)
+
+    # metadata
+    @property
+    def metadata(self):
+        """
+
+        Associated metadata of the entity. Sections attached to the entity via
+        this attribute can provide additional annotations. This is an optional
+        read-write property, and can be None if no metadata is available.
+
+        :type: Section
+        """
+        if "metadata" in self._h5group:
+            return Section(None, self._h5group.open_group("metadata"))
+        else:
+            return None
+
+    @metadata.setter
+    def metadata(self, sect):
+        if not isinstance(sect, Section):
+            raise TypeError("{} is not of type Section".format(sect))
+        self._h5group.create_link(sect, "metadata")
+
+    @metadata.deleter
+    def metadata(self):
+        if "metadata" in self._h5group:
+            self._h5group.delete("metadata")

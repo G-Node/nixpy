@@ -6,21 +6,21 @@
 # Redistribution and use in section and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
 import os
-
 import unittest
-
 import nixio as nix
+from .tmp import TempDir
 
 
 class TestFeatures(unittest.TestCase):
 
-    testfilename = "featuretest.h5"
-
     def setUp(self):
+        self.tmpdir = TempDir("featuretest")
+        self.testfilename = os.path.join(self.tmpdir.path, "featuretest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
+
+        self.group = self.block.create_group("test group", "feature test")
 
         self.signal = self.block.create_data_array("output", "analogsignal",
                                                    nix.DataType.Float, (0, ))
@@ -43,7 +43,7 @@ class TestFeatures(unittest.TestCase):
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_feature_eq(self):
         assert(self.feature_1 == self.feature_1)
@@ -74,3 +74,10 @@ class TestFeatures(unittest.TestCase):
                                                     nix.DataType.Float, (0, ))
         self.feature_1.data = new_data_ref
         assert(self.feature_1.data == new_data_ref)
+
+    def test_feature_on_group(self):
+        grouptag = self.block.create_tag("I am tag", "grouptest", [0])
+        self.group.tags.append(grouptag)
+
+        grouptag = self.group.tags[-1]
+        grouptag.create_feature(self.movie1, nix.LinkType.Tagged)

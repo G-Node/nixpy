@@ -72,8 +72,7 @@ class Property(Entity):
         dataset = self._h5dataset
         if not sum(dataset.shape):
             return tuple()
-        data = np.empty(dataset.shape, dtype=dataset.dtype)
-        self._h5dataset.read_data(data)
+        data = dataset.read_data()
 
         def data_to_value(d):
             vitem = d["value"]

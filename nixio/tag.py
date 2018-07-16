@@ -9,7 +9,10 @@
 
 import numpy as np
 
-from .entity_with_sources import EntityWithSources
+from .entity import Entity
+from .source_link_container import SourceLinkContainer
+from .container import Container, LinkContainer
+
 from .value import DataType
 from .data_array import DataArray
 from .data_view import DataView
@@ -19,29 +22,36 @@ from .exceptions import (OutOfBounds, IncompatibleDimensions,
 from .dimension_type import DimensionType
 from .link_type import LinkType
 from . import util
-from .util.proxy_list import ProxyList, RefProxyList
+from .section import Section
 
 
-class ReferenceProxyList(RefProxyList):
+class FeatureContainer(Container):
+    """
+    The FeatureContainer has one minor difference from the regular Container:
+    A Feature can be retrieved by the ID or name of the linked DataArray as
+    well as the ID of the feature itself.
+    """
+    def __getitem__(self, item):
+        try:
+            return Container.__getitem__(self, item)
+        except KeyError as ke:
+            # item might be the ID of the referenced data; try it as well
+            for feat in self:
+                if feat.data.id == item or feat.data.name == item:
+                    return feat
+            raise ke
 
-    def __init__(self, obj):
-        super(ReferenceProxyList, self).__init__(
-            obj, "_reference_count", "_get_reference_by_id",
-            "_get_reference_by_pos", "_delete_reference_by_id",
-            "_add_reference_by_id"
-        )
+    def __contains__(self, item):
+        if not Container.__contains__(self, item):
+            # check if it contains a Feature whose data matches 'item'
+            for feat in self:
+                if feat.data.id == item or feat.data.name == item:
+                    return True
+            return False
+        return True
 
 
-class FeatureProxyList(ProxyList):
-
-    def __init__(self, obj):
-        super(FeatureProxyList, self).__init__(
-            obj, "_feature_count", "_get_feature_by_id",
-            "_get_feature_by_pos", "_delete_feature_by_id"
-        )
-
-
-class BaseTag(EntityWithSources):
+class BaseTag(Entity):
     """
     Base class for Tag and MultiTag
     """
@@ -74,38 +84,6 @@ class BaseTag(EntityWithSources):
             self._h5group.write_data("units", sanitized, dtype)
             self.force_updated_at()
 
-    def _add_reference_by_id(self, id_or_name):
-        if id_or_name not in self._parent.data_arrays:
-            cls = type(self).__name__
-            raise RuntimeError("{}._add_reference_by_id: "
-                               "Reference not found in Block!".format(cls))
-        target = self._parent.data_arrays[id_or_name]
-        references = self._h5group.open_group("references")
-        references.create_link(target, target.id)
-
-    def _has_reference_by_id(self, id_or_name):
-        references = self._h5group.open_group("references")
-        return references.has_by_id(id_or_name)
-
-    def _reference_count(self):
-        return len(self._h5group.open_group("references"))
-
-    def _get_reference_by_id(self, id_or_name):
-        references = self._h5group.open_group("references")
-        if util.is_uuid(id_or_name):
-            id_ = id_or_name
-        else:
-            id_ = self._parent.data_arrays[id_or_name].id
-        return DataArray(self._parent, references.get_by_id(id_))
-
-    def _get_reference_by_pos(self, pos):
-        references = self._h5group.open_group("references")
-        return DataArray(self, references.get_by_pos(pos))
-
-    def _delete_reference_by_id(self, id_):
-        references = self._h5group.open_group("references")
-        references.delete(id_)
-
     def create_feature(self, data, link_type):
         """
         Create a new feature.
@@ -122,39 +100,11 @@ class BaseTag(EntityWithSources):
         feat = Feature._create_new(self, features, data, link_type)
         return feat
 
-    def _has_feature_by_id(self, id_or_name):
-        features = self._h5group.open_group("features")
-        return features.has_by_id(id_or_name)
-
-    def _feature_count(self):
-        return len(self._h5group.open_group("features"))
-
-    def _get_feature_by_id(self, id_or_name):
-        features = self._h5group.open_group("features")
-        try:
-            return Feature(self, features.get_by_id(id_or_name))
-        except ValueError:
-            for feat in self.features:
-                if feat.data.id == id_or_name or feat.data.name == id_or_name:
-                    return feat
-
-    def _get_feature_by_pos(self, pos):
-        features = self._h5group.open_group("features")
-        return Feature(self, features.get_by_pos(pos))
-
-    def _delete_feature_by_id(self, id_):
-        features = self._h5group.open_group("features")
-        features.delete(id_)
-
-    @classmethod
-    def _position_and_extent_in_data(cls, data, offset, count):
-        pos = tuple(np.add(offset, count) - 1)
-        return cls._position_in_data(data, pos)
-
     @staticmethod
-    def _position_in_data(data, pos):
+    def _slices_in_data(data, slices):
         dasize = data.data_extent
-        return np.all(np.less(pos, dasize))
+        stops = tuple(sl.stop for sl in slices)
+        return np.all(np.less_equal(stops, dasize))
 
     @staticmethod
     def _pos_to_idx(pos, unit, dim):
@@ -187,7 +137,7 @@ class BaseTag(EntityWithSources):
                     "Cannot apply a position with unit to a SetDimension",
                     "Tag._pos_to_idx"
                 )
-            index = round(pos)
+            index = np.round(pos)
             nlabels = len(dim.labels)
             if nlabels and index > nlabels:
                 raise OutOfBounds("Position is out of bounds in SetDimension",
@@ -210,6 +160,9 @@ class Tag(BaseTag):
 
     def __init__(self, nixparent, h5group):
         super(Tag, self).__init__(nixparent, h5group)
+        self._sources = None
+        self._references = None
+        self._features = None
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, position):
@@ -255,27 +208,24 @@ class Tag(BaseTag):
             dtype = DataType.Double
             self._h5group.write_data("extent", ext, dtype)
 
-    def _get_offset_and_count(self, data):
-        offset = []
-        count = []
+    def _calc_data_slices(self, data):
+        refslice = list()
         position = self.position
         extent = self.extent
-        for idx in range(len(position)):
-            dim = data.dimensions[idx]
-            pos = position[idx]
+        for idx, (pos, dim) in enumerate(zip(position, data.dimensions)):
             if self.units:
                 unit = self.units[idx]
             else:
                 unit = None
-            o = self._pos_to_idx(position[idx], unit, dim)
-            offset.append(o)
+            start = self._pos_to_idx(pos, unit, dim)
+            stop = 0
             if idx < len(extent):
                 ext = extent[idx]
-                c = self._pos_to_idx(pos + ext, unit, dim) - o
-                count.append(c if c > 1 else 1)
-            else:
-                count.append(1)
-        return tuple(offset), tuple(count)
+                stop = self._pos_to_idx(pos + ext, unit, dim)
+            if stop == 0:
+                stop = start + 1
+            refslice.append(slice(start, stop))
+        return tuple(refslice)
 
     def retrieve_data(self, refidx):
         references = self.references
@@ -296,15 +246,14 @@ class Tag(BaseTag):
                 "dimensionality of data",
                 "Tag.retrieve_data")
 
-        offset, count = self._get_offset_and_count(ref)
-
-        if not self._position_and_extent_in_data(ref, offset, count):
+        slices = self._calc_data_slices(ref)
+        if not self._slices_in_data(ref, slices):
             raise OutOfBounds("References data slice out of the extent of the "
                               "DataArray!")
-        return DataView(ref, count, offset)
+        return DataView(ref, slices)
 
     def retrieve_feature_data(self, featidx):
-        if self._feature_count() == 0:
+        if len(self.features) == 0:
             raise OutOfBounds(
                 "There are no features associated with this tag!"
             )
@@ -323,15 +272,14 @@ class Tag(BaseTag):
         if da is None:
             raise UninitializedEntity()
         if feat.link_type == LinkType.Tagged:
-            offset, count = self._get_offset_and_count(da)
-            if not self._position_and_extent_in_data(da, offset, count):
+            slices = self._calc_data_slices(da)
+            if not self._slices_in_data(da, slices):
                 raise OutOfBounds("Requested data slice out of the extent "
                                   "of the Feature!")
-            return DataView(da, count, offset)
+            return DataView(da, slices)
         # For untagged and indexed return the full data
-        count = da.data_extent
-        offset = (0,) * len(count)
-        return DataView(da, count, offset)
+        fullslices = tuple(slice(0, stop) for stop in da.shape)
+        return DataView(da, fullslices)
 
     @property
     def references(self):
@@ -343,10 +291,11 @@ class Tag(BaseTag):
         of the list.
         This is a read only attribute.
 
-        :type: RefProxyList of DataArray
+        Link:type: Container of DataArray
         """
-        if not hasattr(self, "_references"):
-            setattr(self, "_references", ReferenceProxyList(self))
+        if self._references is None:
+            self._references = LinkContainer("references", self, DataArray,
+                                             self._parent.data_arrays)
         return self._references
 
     @property
@@ -357,8 +306,48 @@ class Tag(BaseTag):
         Adding new features to the tag is done using the create_feature method.
         This is a read only attribute.
 
-        :type: ProxyList of Feature.
+        :type: Container of Feature.
         """
-        if not hasattr(self, "_features"):
-            setattr(self, "_features", FeatureProxyList(self))
+        if self._features is None:
+            self._features = FeatureContainer("features", self, Feature)
         return self._features
+
+    @property
+    def sources(self):
+        """
+        A property containing all Sources referenced by the Tag. Sources
+        can be obtained by index or their id. Sources can be removed from the
+        list, but removing a referenced Source will not remove it from the
+        file. New Sources can be added using the append method of the list.
+        This is a read only attribute.
+        """
+        if self._sources is None:
+            self._sources = SourceLinkContainer(self)
+        return self._sources
+
+    # metadata
+    @property
+    def metadata(self):
+        """
+
+        Associated metadata of the entity. Sections attached to the entity via
+        this attribute can provide additional annotations. This is an optional
+        read-write property, and can be None if no metadata is available.
+
+        :type: Section
+        """
+        if "metadata" in self._h5group:
+            return Section(None, self._h5group.open_group("metadata"))
+        else:
+            return None
+
+    @metadata.setter
+    def metadata(self, sect):
+        if not isinstance(sect, Section):
+            raise TypeError("{} is not of type Section".format(sect))
+        self._h5group.create_link(sect, "metadata")
+
+    @metadata.deleter
+    def metadata(self):
+        if "metadata" in self._h5group:
+            self._h5group.delete("metadata")

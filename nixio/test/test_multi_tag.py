@@ -6,24 +6,22 @@
 # Redistribution and use in section and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
 import os
-
 import unittest
 import numpy as np
-
 import nixio as nix
+from .tmp import TempDir
 
 
 class TestMultiTags(unittest.TestCase):
-
-    testfilename = "mtagtest.h5"
 
     def setUp(self):
         iv = 1.0
         ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
         unit = "ms"
 
+        self.tmpdir = TempDir("mtagtest")
+        self.testfilename = os.path.join(self.tmpdir.path, "mtagtest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
 
@@ -102,7 +100,7 @@ class TestMultiTags(unittest.TestCase):
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_multi_tag_eq(self):
         assert(self.my_tag == self.my_tag)
@@ -387,7 +385,6 @@ class TestMultiTags(unittest.TestCase):
         self.feature_tag.create_feature(index_data, nix.LinkType.Untagged)
 
         # preparations done, actually test
-        # print(self.feature_tag.features)
         assert(len(self.feature_tag.features) == 3)
 
         # indexed feature

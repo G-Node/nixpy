@@ -6,9 +6,7 @@
 # Redistribution and use in section and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
 import unittest
-
 from nixio.util import names, units
 
 
