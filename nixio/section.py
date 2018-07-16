@@ -38,8 +38,8 @@ class S(object):
     def __getattribute__(self, item):
         if item in ['section_type', 'section']:
             return object.__getattribute__(self, item)
-        else:
-            return getattr(self.section, item)
+
+        return getattr(self.section, item)
 
 
 class Section(Entity):
@@ -112,7 +112,7 @@ class Section(Entity):
 
         # In case of values, make sure boolean value 'False' gets through as well,
         # but ensure that empty values are not allowed, we need a DataType.
-        elif vals is None or (isinstance(vals, Sequence) and len(vals) == 0):
+        elif vals is None or (isinstance(vals, Sequence) and not vals):
             raise TypeError("Please provide either a non empty value or a DataType.")
 
         else:
@@ -204,8 +204,8 @@ class Section(Entity):
         """
         if "link" not in self._h5group:
             return None
-        else:
-            return Section(self, self._h5group.open_group("link"))
+
+        return Section(self, self._h5group.open_group("link"))
 
     @link.setter
     def link(self, id_or_sec):
@@ -405,8 +405,8 @@ class Section(Entity):
     def __eq__(self, other):
         if hasattr(other, "id"):
             return self.id == other.id
-        else:
-            return False
+
+        return False
 
     def __hash__(self):
         """
