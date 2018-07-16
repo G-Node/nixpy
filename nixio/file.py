@@ -9,6 +9,7 @@
 import os
 import gc
 import numpy as np
+from warnings import warn
 
 try:
     from sys import maxint
@@ -136,7 +137,10 @@ class File(object):
         self._sections = None
 
     @classmethod
-    def open(cls, path, mode=FileMode.ReadWrite, compression=Compression.Auto):
+    def open(cls, path, mode=FileMode.ReadWrite, compression=Compression.Auto,
+             backend=None):
+        if backend is not None:
+            warn("Backend selection is deprecated. Ignoring value.")
         return cls(path, mode, compression)
 
     def _create_header(self):
