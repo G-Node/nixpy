@@ -39,8 +39,8 @@ class OdmlType(Enum):
 
     def compatible(self, value):
         """
-        compatible returns True or False dependent on whether a
-        passed in value can be mapped to an OdmlType or not.
+        compatible returns True or False depending on whether a
+        passed value can be mapped to an OdmlType or not.
 
         :param value: Any single value
         :return: Boolean
