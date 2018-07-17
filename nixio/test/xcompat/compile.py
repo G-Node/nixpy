@@ -65,11 +65,10 @@ def maketests(dest):
     llp = os.getenv("LD_LIBRARY_PATH", None)
     if llp is not None:
         runtime_dirs.append(llp)
-    libraries = ["nix"]
+    libraries = ["nixio"]
     compile_args = ["--std=c++11"]
     if WINDOWS:
         compile_args = []
-        libraries = ["nixio"]
 
     print("Compiling {}".format(" ".join(filenames)))
     success = cc(filenames, dest,

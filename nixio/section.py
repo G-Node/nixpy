@@ -10,15 +10,13 @@ try:
     from sys import maxint
 except ImportError:
     from sys import maxsize as maxint
-import functools
-from operator import attrgetter
 from collections import Sequence
 
-from .entity import Entity
 from .container import Container
+from .datatype import DataType
+from .entity import Entity
 from .property import Property
 from .util import find as finders
-from .value import Value
 from . import util
 from . import exceptions
 
@@ -40,8 +38,8 @@ class S(object):
     def __getattribute__(self, item):
         if item in ['section_type', 'section']:
             return object.__getattribute__(self, item)
-        else:
-            return getattr(self.section, item)
+
+        return getattr(self.section, item)
 
 
 class Section(Entity):
@@ -53,13 +51,16 @@ class Section(Entity):
         self._properties = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_):
+    def _create_new(cls, nixparent, h5parent, name, type_, oid=None):
         newentity = super(Section, cls)._create_new(nixparent, h5parent,
                                                     name, type_)
+        if util.is_uuid(oid):
+            newentity._h5group.set_attr("entity_id", oid)
+
         return newentity
 
     # Section
-    def create_section(self, name, type_):
+    def create_section(self, name, type_, oid=None):
         """
         Creates a new subsection that is a child of this section entity.
 
@@ -67,6 +68,9 @@ class Section(Entity):
         :type name: str
         :param type_: The type of the section.
         :type type_: str
+        :param oid: object id, UUID string as specified in RFC 4122. If no id is provided,
+                   an id will be generated and assigned.
+        :type oid: str
 
         :returns: The newly created section.
         :rtype: Section
@@ -75,38 +79,73 @@ class Section(Entity):
         sections = self._h5group.open_group("sections", True)
         if name in sections:
             raise exceptions.DuplicateName("create_section")
-        sec = Section._create_new(self, sections, name, type_)
+        sec = Section._create_new(self, sections, name, type_, oid)
         sec._sec_parent = self
         return sec
 
     # Property
-    def create_property(self, name, values):
+    def create_property(self, name, values_or_dtype, oid=None):
         """
         Add a new property to the section.
 
         :param name: The name of the property to create.
         :type name: str
-        :param values: The values of the property.
-        :type values: list of Value
+        :param values_or_dtype: The values of the property or a valid DataType.
+        :type values_or_dtype: list of values or a DataType
+        :param oid: object id, UUID string as specified in RFC 4122. If no id is provided,
+                   an id will be generated and assigned.
+        :type oid: str
 
         :returns: The newly created property.
         :rtype: Property
         """
+        vals = values_or_dtype
+
         properties = self._h5group.open_group("properties", True)
         if name in properties:
             raise exceptions.DuplicateName("create_property")
-        if isinstance(values, type):
-            dtype = values
-            values = []
+
+        # Handle handed in DataType
+        if isinstance(vals, type):
+            dtype = vals
+            vals = []
+
+        # In case of values, make sure boolean value 'False' gets through as well,
+        # but ensure that empty values are not allowed, we need a DataType.
+        elif vals is None or (isinstance(vals, Sequence) and not vals):
+            raise TypeError("Please provide either a non empty value or a DataType.")
+
         else:
-            if isinstance(values, Sequence):
-                dtype = values[0].data_type
+            # Make sure all values are of the same data type
+            single_val = vals
+            if isinstance(vals, Sequence):
+                single_val = vals[0]
             else:
-                dtype = values.data_type
-                values = [values]
-        prop = Property._create_new(self, properties, name, dtype)
-        prop.values = values
+                # Make sure the data will always be created with an array.
+                vals = [vals]
+
+            # Will raise an error, if the datatype of the first value is not valid.
+            dtype = DataType.get_dtype(single_val)
+
+            # Check all values for data type consistency to ensure clean value add.
+            # Will raise an exception otherwise.
+            for v in vals:
+                if DataType.get_dtype(v) != dtype:
+                    raise exceptions.InvalidAttrType(single_val, DataType.get_dtype(v))
+
+        prop = Property._create_new(self, properties, name, dtype, oid)
+        prop.values = vals
+
         return prop
+
+    @property
+    def reference(self):
+        return self._h5group.get_attr("reference")
+
+    @reference.setter
+    def reference(self, ref):
+        util.check_attr_type(ref, str)
+        self._h5group.set_attr("reference", ref)
 
     @property
     def link(self):
@@ -119,8 +158,8 @@ class Section(Entity):
         """
         if "link" not in self._h5group:
             return None
-        else:
-            return Section(self, self._h5group.open_group("link"))
+
+        return Section(self, self._h5group.open_group("link"))
 
     @link.setter
     def link(self, id_or_sec):
@@ -140,21 +179,6 @@ class Section(Entity):
         if self.link:
             inhprops.append(self.link.inherited_properties())
         return inhprops
-
-    @property
-    def mapping(self):
-        return self._h5group.get_attr("mapping")
-
-    @mapping.setter
-    def mapping(self, m):
-        """
-        The mapping information of the section.
-        This is an optional read-write property and may be set to None.
-
-        :type: str
-        """
-        util.check_attr_type(m, str)
-        self._h5group.set_attr("mapping", m)
 
     @property
     def repository(self):
@@ -335,8 +359,8 @@ class Section(Entity):
     def __eq__(self, other):
         if hasattr(other, "id"):
             return self.id == other.id
-        else:
-            return False
+
+        return False
 
     def __hash__(self):
         """
@@ -355,7 +379,7 @@ class Section(Entity):
             return self.sections[key]
 
         prop = self.props[key]
-        values = list(map(attrgetter('value'), prop.values))
+        values = list(prop.values)
         if len(values) == 1:
             values = values[0]
         return values
@@ -372,20 +396,11 @@ class Section(Entity):
         if not isinstance(data, list):
             data = [data]
 
-        val = list(map(lambda x: x if isinstance(x, Value) else Value(x),
-                       data))
-        dtypes = functools.reduce(
-            lambda x, y: x if y.data_type in x else x + [y.data_type],
-            val, [val[0].data_type]
-        )
-        if len(dtypes) > 1:
-            raise ValueError('Not all input values are of the same type')
-
         if key not in self.props:
-            prop = self.create_property(key, dtypes[0])
+            prop = self.create_property(key, data)
         else:
             prop = self.props[key]
-        prop.values = val
+        prop.values = data
 
     def __iter__(self):
         for name, item in self.items():

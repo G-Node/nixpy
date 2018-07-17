@@ -37,6 +37,24 @@ class TestSections(unittest.TestCase):
     def test_section_id(self):
         assert(self.section.id is not None)
 
+        # Check setting id on section via file create
+        oid = "4a6e8483-0a9a-464d-bdd9-b39818334bcd"
+        sec = self.file.create_section("assign id", "sec type", oid)
+        assert (sec.id == oid)
+
+        nonid = "I am not a proper uuid"
+        sec = self.file.create_section("invalid id", "sec type", nonid)
+        assert (sec.id != nonid)
+
+        # Check setting id on section via section create
+        oid = "4a6e8483-0a9a-464d-bdd9-b39818334bcd"
+        sub_sec = sec.create_section("assign id", "sec type", oid)
+        assert (sub_sec.id == oid)
+
+        nonid = "I am not a proper uuid"
+        sub_sec = sec.create_section("invalid id", "sec type", nonid)
+        assert (sub_sec.id != nonid)
+
     def test_section_name(self):
         assert(self.section.name is not None)
 
@@ -59,15 +77,6 @@ class TestSections(unittest.TestCase):
         self.section.definition = None
         assert(self.section.definition is None)
 
-    def test_section_mapping(self):
-        assert(self.section.mapping is None)
-
-        self.section.mapping = "mapping"
-        assert(self.section.mapping == "mapping")
-
-        self.section.mapping = None
-        assert(self.section.mapping is None)
-
     def test_section_repository(self):
         assert(self.section.repository is None)
 
@@ -76,6 +85,16 @@ class TestSections(unittest.TestCase):
 
         self.section.repository = None
         assert(self.section.repository is None)
+
+    def test_property_reference(self):
+        assert(self.section.reference is None)
+
+        self.section.reference = "reference"
+        assert(self.section.reference == "reference")
+
+        self.section.reference = None
+        assert(self.section.reference is None)
+        self.section.reference = None
 
     def test_section_sections(self):
         assert(len(self.section.sections) == 0)
@@ -166,7 +185,7 @@ class TestSections(unittest.TestCase):
         self.section['ep_int'] = 23
         self.section['ep_float'] = 42.0
         self.section['ep_list'] = [1, 2, 3]
-        self.section['ep_val'] = nix.Value(1.0)
+        self.section['ep_val'] = 1.0
 
         self.section['ep_val'] = 2.0
 
@@ -180,7 +199,8 @@ class TestSections(unittest.TestCase):
 
         def create_hetero_section():
             self.section['ep_ex'] = [1, 1.0]
-        self.assertRaises(ValueError, create_hetero_section)
+
+        self.assertRaises(TypeError, create_hetero_section)
 
         sections = [x.id for x in self.section]
         for x in sections:

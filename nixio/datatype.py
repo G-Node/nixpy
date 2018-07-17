@@ -6,14 +6,13 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from numbers import Integral, Real
 from six import string_types
-from numbers import Number, Integral, Real
 
 import numpy as np
 
 
-bools = (bool, np.bool_)
-valid_types = (Number, string_types, bools)
+BOOLS = (bool, np.bool_)
 
 
 class DataType(object):
@@ -32,7 +31,7 @@ class DataType(object):
 
     @classmethod
     def get_dtype(cls, value):
-        if isinstance(value, bools):
+        if isinstance(value, BOOLS):
             return cls.Bool
         elif isinstance(value, Integral):
             return cls.Int64
@@ -55,31 +54,3 @@ class DataType(object):
                 dtype == cls.UInt64 or
                 dtype == cls.Float or
                 dtype == cls.Double)
-
-
-class Value(object):
-
-    def __init__(self, value):
-        if isinstance(value, valid_types):
-            self.value = value
-        else:
-            raise TypeError("Invalid value type: {}".format(type(value)))
-        self.uncertainty = 0
-        self.reference = ""
-        self.filename = ""
-        self.encoder = ""
-        self.checksum = ""
-        self.data_type = DataType.get_dtype(value)
-
-    def __str__(self):
-        return "Value{{[{dtype}] {value}}}".format(dtype=self.data_type,
-                                                   value=self.value)
-
-    def __repr__(self):
-        return self.__str__()
-
-    def __eq__(self, other):
-        if hasattr(other, "value"):
-            return self.value == other.value
-        else:
-            return self.value == other

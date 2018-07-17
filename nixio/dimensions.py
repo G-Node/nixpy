@@ -10,7 +10,7 @@ from numbers import Number
 
 import numpy as np
 
-from .value import DataType
+from .datatype import DataType
 from .dimension_type import DimensionType
 from . import util
 from .container import Container

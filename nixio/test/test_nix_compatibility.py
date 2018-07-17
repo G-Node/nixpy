@@ -370,7 +370,7 @@ def test_properties(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "proptest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     sec = nix_file.create_section("test section", "proptest")
-    sec.create_property("test property", nix.Value(0))
+    sec.create_property("test property", 0)
     sec.create_property("test str", nix.DataType.String)
     sec.create_property("other property", nix.DataType.Int64)
 
@@ -383,14 +383,11 @@ def test_properties(tmpdir):
     sec.create_property("prop String", nix.DataType.String)
     sec.create_property("prop Bool", nix.DataType.Bool)
 
-    sec.props[0].mapping = "mapping"
     sec.props[1].definition = "def"
 
-    sec.props[0].values = [nix.Value(101)]
-    sec.props[1].values = [nix.Value("foo"), nix.Value("bar"),
-                           nix.Value("baz")]
-    sec.props["prop Float"].values = [nix.Value(10.0), nix.Value(33.3),
-                                      nix.Value(1.345), nix.Value(90.2)]
+    sec.props[0].values = [101]
+    sec.props[1].values = ["foo", "bar", "baz"]
+    sec.props["prop Float"].values = [10.0, 33.3, 1.345, 90.2]
 
     nix_file.close()
     # validate(nixfilepath)
@@ -403,7 +400,6 @@ def test_sections(tmpdir):
         sec = nix_file.create_section("test section" + str(idx),
                                       "sectiontest")
         sec.definition = "sec definition " + str(idx)
-        sec.mapping = "sec mapping " + str(idx)
         sec.repository = "sec repo" + str(idx * 3)
 
         nested_sec = sec.create_section("nested_section", "sec")
@@ -428,7 +424,6 @@ def test_full_write(tmpdir):
         sec = nix_file.create_section("test section" + str(idx),
                                       "sectiontest")
         sec.definition = "sec definition " + str(idx)
-        sec.mapping = "sec mapping " + str(idx)
         sec.repository = "sec repo" + str(idx * 3)
 
         nested_sec = sec.create_section("nested_section", "sec")
@@ -899,16 +894,16 @@ def test_full_file_read(tmpdir):
 
     prop = numbermd.props["integer"]
     compare(1, len(prop.values))
-    compare([nix.Value(42)], prop.values)
+    compare([42], prop.values)
 
     prop = numbermd.props["float"]
     compare(1, len(prop.values))
     # TODO: Almost equal
-    # compare([nix.Value(4.2)], prop.values)
+    # compare([4.2], prop.values)
 
     prop = numbermd.props["integers"]
     compare(6, len(prop.values))
-    compare([nix.Value(40+v) for v in range(6)], prop.values)
+    compare([40+v for v in range(6)], prop.values)
 
     prop = numbermd.props["floats"]
     compare(2, len(prop.values))
@@ -921,24 +916,23 @@ def test_full_file_read(tmpdir):
 
     prop = othermd.props["bool"]
     compare(1, len(prop.values))
-    compare([nix.Value(True)], prop.values)
+    compare([True], prop.values)
 
     prop = othermd.props["false bool"]
     compare(1, len(prop.values))
-    compare([nix.Value(False)], prop.values)
+    compare([False], prop.values)
 
     prop = othermd.props["bools"]
     compare(3, len(prop.values))
-    compare([nix.Value(True), nix.Value(False), nix.Value(True)],
-            prop.values)
+    compare([True, False, True], prop.values)
 
     prop = othermd.props["string"]
     compare(1, len(prop.values))
-    compare([nix.Value("I am a string. Rawr.")], prop.values)
+    compare(["I am a string. Rawr."], prop.values)
 
     prop = othermd.props["strings"]
     compare(3, len(prop.values))
-    compare([nix.Value(v) for v in ["one", "two", "twenty"]], prop.values)
+    compare([v for v in ["one", "two", "twenty"]], prop.values)
 
     # TODO: Check type compatibilities
     # for idx in range(len(dtypes)):
