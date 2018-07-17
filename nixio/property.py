@@ -16,25 +16,25 @@ from .entity import Entity
 from . import util
 
 
-class OdmlType(str, Enum):
+class OdmlType(Enum):
     """
     OdmlType provides all types currently supported by the odML
     data format. It provides additional information about the
     nature of the values of an odML Property.
     """
-    boolean = 'boolean'
-    int = 'int'
-    float = 'float'
-    string = 'string'
-    text = 'text'
-    url = 'url'
-    person = 'person'
-    datetime = 'datetime'
-    date = 'date'
-    time = 'time'
+    Boolean = 'boolean'
+    Int = 'int'
+    Float = 'float'
+    String = 'string'
+    Text = 'text'
+    Url = 'url'
+    Person = 'person'
+    Datetime = 'datetime'
+    Date = 'date'
+    Time = 'time'
 
     def __str__(self):
-        return self.name
+        return self.value
 
     def compatible(self, value):
         """
@@ -44,16 +44,16 @@ class OdmlType(str, Enum):
         :param value: Any single value
         :return: Boolean
         """
-        if (self.name in ("string", "text", "url", "person") and
+        if (self.value in ("string", "text", "url", "person") and
                 DataType.get_dtype(value) == DataType.String):
             return True
-        elif self.name == "boolean" and DataType.get_dtype(value) == DataType.Bool:
+        elif self.value == "boolean" and DataType.get_dtype(value) == DataType.Bool:
             return True
-        elif self.name == "float" and DataType.get_dtype(value) == DataType.Float:
+        elif self.value == "float" and DataType.get_dtype(value) == DataType.Float:
             return True
-        elif self.name == "int" and DataType.get_dtype(value) == DataType.Int64:
+        elif self.value == "int" and DataType.get_dtype(value) == DataType.Int64:
             return True
-        elif (self.name in ("time", "date", "datetime") and
+        elif (self.value in ("time", "date", "datetime") and
               DataType.get_dtype(value) == DataType.String):
             # This might need some extra work, treating as String for now, but keeping
             # it separated from other String values.
@@ -61,8 +61,8 @@ class OdmlType(str, Enum):
 
         return False
 
-    @staticmethod
-    def get_odml_type(dtype):
+    @classmethod
+    def get_odml_type(cls, dtype):
         """
         get_odml_type returns the appropriate OdmlType
         for a handed in nix value DataType.
@@ -72,13 +72,13 @@ class OdmlType(str, Enum):
         """
 
         if dtype == DataType.Float:
-            return OdmlType.float
+            return cls.Float
         elif dtype == DataType.Int64:
-            return OdmlType.int
+            return cls.Int
         elif dtype == DataType.String:
-            return OdmlType.string
+            return cls.String
         elif dtype == DataType.Bool:
-            return OdmlType.boolean
+            return cls.Boolean
 
         raise TypeError("No available OdmlType for type '%s'" % dtype)
 
