@@ -9,6 +9,7 @@
 
 from collections import Sequence
 from enum import Enum
+from numbers import Number
 import numpy as np
 
 from .datatype import DataType
@@ -142,9 +143,7 @@ class Property(Entity):
 
     @uncertainty.setter
     def uncertainty(self, uncertainty):
-        # Use int as type check for now but check whether
-        # it should be changed to float.
-        util.check_attr_type(uncertainty, int)
+        util.check_attr_type(uncertainty, Number)
         self._h5dataset.set_attr("uncertainty", uncertainty)
 
     @property
