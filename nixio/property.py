@@ -27,7 +27,7 @@ class OdmlType(Enum):
     Float = 'float'
     String = 'string'
     Text = 'text'
-    Url = 'url'
+    URL = 'url'
     Person = 'person'
     Datetime = 'datetime'
     Date = 'date'
@@ -44,16 +44,16 @@ class OdmlType(Enum):
         :param value: Any single value
         :return: Boolean
         """
-        if (self.value in ("string", "text", "url", "person") and
+        if (self in (self.String, self.Text, self.URL, self.Person) and
                 DataType.get_dtype(value) == DataType.String):
             return True
-        elif self.value == "boolean" and DataType.get_dtype(value) == DataType.Bool:
+        elif self == self.Boolean and DataType.get_dtype(value) == DataType.Bool:
             return True
-        elif self.value == "float" and DataType.get_dtype(value) == DataType.Float:
+        elif self == self.Float and DataType.get_dtype(value) == DataType.Float:
             return True
-        elif self.value == "int" and DataType.get_dtype(value) == DataType.Int64:
+        elif self == self.Int and DataType.get_dtype(value) == DataType.Int64:
             return True
-        elif (self.value in ("time", "date", "datetime") and
+        elif (self in (self.Time, self.Date, self.Datetime) and
               DataType.get_dtype(value) == DataType.String):
             # This might need some extra work, treating as String for now, but keeping
             # it separated from other String values.
