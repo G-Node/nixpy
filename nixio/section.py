@@ -403,7 +403,7 @@ class Section(Entity):
             prop = self.create_property(key, data)
         else:
             prop = self.props[key]
-        prop.values = data
+            prop.values = data
 
     def __iter__(self):
         for name, item in self.items():
