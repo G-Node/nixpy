@@ -129,12 +129,10 @@ class TestFile(unittest.TestCase):
 
     def test_context_open(self):
         fname = "contextopen.nix"
-        with nix.File.open(fname, nix.FileMode.Overwrite,
-                           backend=self.backend) as nf:
+        with nix.File.open(fname, nix.FileMode.Overwrite) as nf:
             nf.create_block("blocky", "test-block")
 
-        with nix.File.open(fname, nix.FileMode.ReadOnly,
-                           backend=self.backend) as nf:
+        with nix.File.open(fname, nix.FileMode.ReadOnly) as nf:
             self.assertEqual(nf.blocks[0].name, "blocky")
 
 
