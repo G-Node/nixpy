@@ -7,7 +7,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from collections import Sequence
+from collections import Sequence, Iterable
 from enum import Enum
 from numbers import Number
 import numpy as np
@@ -235,13 +235,14 @@ class Property(Entity):
         :param vals: a single value or list of values.
         """
         # Make sure boolean value 'False' gets through as well...
-        if vals is None or (isinstance(vals, Sequence) and not vals):
+        if vals is None or (isinstance(vals, (Sequence, Iterable)) and
+                            not len(vals)):
             self.delete_values()
             return
 
         # Make sure all values are of the same data type
         single_val = vals
-        if isinstance(vals, Sequence):
+        if isinstance(vals, (Sequence, Iterable)):
             single_val = vals[0]
 
         # Will raise an error, if the data type of the first value is not valid

@@ -10,7 +10,7 @@ try:
     from sys import maxint
 except ImportError:
     from sys import maxsize as maxint
-from collections import Sequence
+from collections import Sequence, Iterable
 from six import string_types
 
 from .container import Container
@@ -114,7 +114,8 @@ class Section(Entity):
         # In case of values, make sure boolean value 'False' gets through as
         # well, but ensure that empty values are not allowed, we need a
         # DataType.
-        elif vals is None or (isinstance(vals, Sequence) and not vals):
+        elif vals is None or (isinstance(vals, (Sequence, Iterable)) and
+                              not len(vals)):
             raise TypeError(
                 "Please provide either a non empty value or a DataType."
             )
@@ -124,7 +125,7 @@ class Section(Entity):
             single_val = vals
             if isinstance(vals, string_types):
                 vals = [vals]
-            if isinstance(vals, Sequence):
+            if isinstance(vals, (Sequence, Iterable)):
                 single_val = vals[0]
             else:
                 # Make sure the data will always be created with an array.
