@@ -63,7 +63,6 @@ class DataType(object):
 
 
 class Value(object):
-
     def __init__(self, value):
         if isinstance(value, valid_types):
             self.value = value
@@ -88,3 +87,9 @@ class Value(object):
             return self.value == other.value
         else:
             return self.value == other
+
+    def to_string(self, unit=""):
+        value_str = ""
+        err = "" if self.uncertainty == 0.0 else "+- %.3f" % self.uncertainty
+        value_str = "%s%s%s" % (str(self.value), err, unit)
+        return value_str

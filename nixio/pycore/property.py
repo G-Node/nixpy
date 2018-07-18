@@ -144,3 +144,25 @@ class Property(Entity, PropertyMixin):
 
     def __repr__(self):
         return self.__str__()
+
+    def __values_to_string(self, max_length=80):
+        unit = "" if self.unit is None else self.unit
+        value_str = ""
+        value_str = ", ".join(v.to_string(unit=unit) for v in self.values)
+
+        if len(value_str) <= max_length - 4:
+            value_str = "[ %s ]" % (value_str)
+        elif len(value_str) > max_length - 4:
+            split_length = int((max_length - 4)/2)
+            value_str = "[ %s ... %s ]" % (value_str[0:split_length], value_str[-split_length:])
+        return value_str
+
+    def pprint(self, current_depth=-1, indent=2, max_length=80):
+        property_spaces = ""
+        prefix = ""
+        if current_depth >= 0:
+            property_spaces = " " * ((current_depth + 2) * indent)
+            prefix = "|-"
+        new_max = max_length - len(property_spaces) - len(self.name)
+        value_string = self.__values_to_string(max_length=new_max)
+        print(("%s%s %s: %s" % (property_spaces, prefix, self.name, value_string)))
