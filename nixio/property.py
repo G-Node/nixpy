@@ -48,16 +48,18 @@ class OdmlType(Enum):
         if (self in (self.String, self.Text, self.URL, self.Person) and
                 DataType.get_dtype(value) == DataType.String):
             return True
-        elif self == self.Boolean and DataType.get_dtype(value) == DataType.Bool:
+        elif (self == self.Boolean and
+              DataType.get_dtype(value) == DataType.Bool):
             return True
-        elif self == self.Float and DataType.get_dtype(value) == DataType.Float:
+        elif (self == self.Float and
+              DataType.get_dtype(value) == DataType.Float):
             return True
         elif self == self.Int and DataType.get_dtype(value) == DataType.Int64:
             return True
         elif (self in (self.Time, self.Date, self.Datetime) and
               DataType.get_dtype(value) == DataType.String):
-            # This might need some extra work, treating as String for now, but keeping
-            # it separated from other String values.
+            # This might need some extra work, treating as String for now, but
+            # keeping it separated from other String values.
             return True
 
         return False
@@ -200,10 +202,11 @@ class Property(Entity):
         :param new_type: OdmlType
         """
         if not isinstance(new_type, OdmlType):
-            raise TypeError("'%s' is not a valid odml_type." % new_type)
+            raise TypeError("'{}' is not a valid odml_type.".format(new_type))
 
         if not new_type.compatible(self.values[0]):
-            raise TypeError("Type '%s' is incompatible with property values" % new_type)
+            raise TypeError("Type '{}' is incompatible "
+                            "with property values".format(new_type))
 
         self._h5dataset.set_attr("odml_type", str(new_type))
 
@@ -241,20 +244,22 @@ class Property(Entity):
         if isinstance(vals, Sequence):
             single_val = vals[0]
 
-        # Will raise an error, if the data type of the first value is not valid.
+        # Will raise an error, if the data type of the first value is not valid
         vtype = DataType.get_dtype(single_val)
 
         # Check if the data type has changed and raise an exception otherwise.
         if vtype != self.data_type:
-            raise TypeError("New data type '%s' is inconsistent with the "
-                            "Properties data type '%s'" % (vtype, self.data_type))
+            raise TypeError("New data type '{}' is inconsistent with the "
+                            "Properties data type '{}'".format(vtype,
+                                                               self.data_type))
 
         # Check all values for data type consistency to ensure clean value add.
         # Will raise an exception otherwise.
         for val in vals:
             if DataType.get_dtype(val) != vtype:
-                raise TypeError("Array contains inconsistent values. Only values of "
-                                "type '%s' can be assigned" % vtype)
+                raise TypeError("Array contains inconsistent values. "
+                                "Only values of type '{}' can be "
+                                "assigned".format(vtype))
 
         self._h5dataset.shape = np.shape(vals)
 

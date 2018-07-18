@@ -69,8 +69,8 @@ class Section(Entity):
         :type name: str
         :param type_: The type of the section.
         :type type_: str
-        :param oid: object id, UUID string as specified in RFC 4122. If no id is provided,
-                   an id will be generated and assigned.
+        :param oid: object id, UUID string as specified in RFC 4122. If no id
+                    is provided, an id will be generated and assigned.
         :type oid: str
 
         :returns: The newly created section.
@@ -93,8 +93,8 @@ class Section(Entity):
         :type name: str
         :param values_or_dtype: The values of the property or a valid DataType.
         :type values_or_dtype: list of values or a DataType
-        :param oid: object id, UUID string as specified in RFC 4122. If no id is provided,
-                   an id will be generated and assigned.
+        :param oid: object id, UUID string as specified in RFC 4122. If no id
+                    is provided, an id will be generated and assigned.
         :type oid: str
 
         :returns: The newly created property.
@@ -111,10 +111,13 @@ class Section(Entity):
             dtype = vals
             vals = []
 
-        # In case of values, make sure boolean value 'False' gets through as well,
-        # but ensure that empty values are not allowed, we need a DataType.
+        # In case of values, make sure boolean value 'False' gets through as
+        # well, but ensure that empty values are not allowed, we need a
+        # DataType.
         elif vals is None or (isinstance(vals, Sequence) and not vals):
-            raise TypeError("Please provide either a non empty value or a DataType.")
+            raise TypeError(
+                "Please provide either a non empty value or a DataType."
+            )
 
         else:
             # Make sure all values are of the same data type
@@ -127,14 +130,16 @@ class Section(Entity):
                 # Make sure the data will always be created with an array.
                 vals = [vals]
 
-            # Will raise an error, if the datatype of the first value is not valid.
+            # Will raise an error, if the datatype of the first value is not
+            # valid.
             dtype = DataType.get_dtype(single_val)
 
-            # Check all values for data type consistency to ensure clean value add.
-            # Will raise an exception otherwise.
+            # Check all values for data type consistency to ensure clean value
+            # add. Will raise an exception otherwise.
             for v in vals:
                 if DataType.get_dtype(v) != dtype:
-                    raise exceptions.InvalidAttrType(single_val, DataType.get_dtype(v))
+                    raise exceptions.InvalidAttrType(single_val,
+                                                     DataType.get_dtype(v))
 
         prop = Property._create_new(self, properties, name, dtype, oid)
         prop.values = vals

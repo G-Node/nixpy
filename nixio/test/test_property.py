@@ -21,8 +21,10 @@ class TestProperties(unittest.TestCase):
         self.section = self.file.create_section("test section",
                                                 "recordingsession")
         self.prop = self.section.create_property("test property", 0)
-        self.prop_s = self.section.create_property("test str", nix.DataType.String)
-        self.other = self.section.create_property("other property", nix.DataType.Int64)
+        self.prop_s = self.section.create_property("test str",
+                                                   nix.DataType.String)
+        self.other = self.section.create_property("other property",
+                                                  nix.DataType.Int64)
 
     def tearDown(self):
         del self.file.sections[self.section.id]
