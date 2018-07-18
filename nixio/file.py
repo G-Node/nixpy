@@ -37,6 +37,12 @@ class SectionProxyList(ProxyList):
 
 class FileMixin(object):
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.close()
+
     @property
     def blocks(self):
         """
