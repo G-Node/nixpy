@@ -11,6 +11,7 @@ try:
 except ImportError:
     from sys import maxsize as maxint
 from collections import Sequence
+from six import string_types
 
 from .container import Container
 from .datatype import DataType
@@ -118,6 +119,8 @@ class Section(Entity):
         else:
             # Make sure all values are of the same data type
             single_val = vals
+            if isinstance(vals, string_types):
+                vals = [vals]
             if isinstance(vals, Sequence):
                 single_val = vals[0]
             else:
