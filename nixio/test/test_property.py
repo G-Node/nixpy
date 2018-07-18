@@ -154,3 +154,14 @@ class TestProperties(unittest.TestCase):
         assert("foo" in self.prop_s.values)
         assert(self.prop_s.values[0] != "bla")
         assert("bla" not in self.prop_s.values)
+
+    def test_empties(self):
+        self.prop.values = list()
+        assert(self.prop.values == tuple())  # comes back as tuple
+
+        self.prop.values = tuple()
+        assert(self.prop.values == tuple())
+
+        self.prop_s.values = ""
+        assert(self.prop_s.values == tuple())
+        assert(self.prop_s.data_type == nix.DataType.String)
