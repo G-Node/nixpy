@@ -189,6 +189,13 @@ class TestSections(unittest.TestCase):
 
         self.section['ep_val'] = 2.0
 
+        # prop creation through create_property
+        self.section.create_property('cp_str', 'str')
+        self.section.create_property('cp_int', 23)
+        self.section.create_property('cp_float', 42.0)
+        self.section.create_property('cp_list', [1, 2, 3])
+        self.section.create_property('cp_val', 1.0)
+
         res = [x in self.section for x in ['ep_str', 'ep_int', 'ep_float']]
         assert(all(res))
 
