@@ -132,6 +132,16 @@ class FileTestBase(unittest.TestCase):
         for idx in range(len(datablock.data_arrays)):
             self.assertEqual(danames[idx], datablock.data_arrays[idx].name)
 
+    def test_context_open(self):
+        fname = "contextopen.nix"
+        with nix.File.open(fname, nix.FileMode.Overwrite,
+                           backend=self.backend) as nf:
+            nf.create_block("blocky", "test-block")
+
+        with nix.File.open(fname, nix.FileMode.ReadOnly,
+                           backend=self.backend) as nf:
+            self.assertEqual(nf.blocks[0].name, "blocky")
+
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")
 class TestFileCPP(FileTestBase):
