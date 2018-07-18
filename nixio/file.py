@@ -160,6 +160,12 @@ class File(object):
                 raise RuntimeError("Cannot open file. "
                                    "Incompatible version.")
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.close()
+
     @property
     def version(self):
         """
