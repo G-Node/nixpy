@@ -138,8 +138,7 @@ class Section(Entity):
             # add. Will raise an exception otherwise.
             for v in vals:
                 if DataType.get_dtype(v) != dtype:
-                    raise exceptions.InvalidAttrType(single_val,
-                                                     DataType.get_dtype(v))
+                    raise TypeError("Array contains inconsistent values.")
 
         prop = Property._create_new(self, properties, name, dtype, oid)
         prop.values = vals
