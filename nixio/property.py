@@ -10,6 +10,7 @@
 from collections import Sequence, Iterable
 from enum import Enum
 from numbers import Number
+from six import string_types
 import numpy as np
 
 from .datatype import DataType
@@ -242,8 +243,11 @@ class Property(Entity):
 
         # Make sure all values are of the same data type
         single_val = vals
-        if isinstance(vals, (Sequence, Iterable)):
+        if (isinstance(vals, (Sequence, Iterable)) and
+                not isinstance(vals, string_types)):
             single_val = vals[0]
+        else:
+            vals = [vals]
 
         # Will raise an error, if the data type of the first value is not valid
         vtype = DataType.get_dtype(single_val)

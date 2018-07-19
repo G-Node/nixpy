@@ -123,9 +123,8 @@ class Section(Entity):
         else:
             # Make sure all values are of the same data type
             single_val = vals
-            if isinstance(vals, string_types):
-                vals = [vals]
-            if isinstance(vals, (Sequence, Iterable)):
+            if (isinstance(vals, (Sequence, Iterable)) and
+                    not isinstance(vals, string_types)):
                 single_val = vals[0]
             else:
                 # Make sure the data will always be created with an array.

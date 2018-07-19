@@ -196,6 +196,8 @@ class TestSections(unittest.TestCase):
         self.section.create_property('cp_list', [1, 2, 3])
         self.section.create_property('cp_val', 1.0)
 
+        self.section.props["cp_str"].values = "anotherstr"
+
         res = [x in self.section for x in ['ep_str', 'ep_int', 'ep_float']]
         assert(all(res))
 
