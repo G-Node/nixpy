@@ -183,4 +183,15 @@ class TestContainer(unittest.TestCase):
             nf.blocks[1].data_arrays[1] in nf.blocks[0].groups[0].tags
 
     def test_dangling_references(self):
-        pass
+        # delete data array from block and check group
+        daname = self.block.data_arrays[0].name
+        self.assertIn(self.block.data_arrays[0],
+                      self.block.groups[0].data_arrays)
+        self.assertIn(daname, self.block.groups[0].data_arrays)
+
+        self.assertEqual(self.block.groups[0].data_arrays[0].name,
+                         daname)
+
+        del self.block.data_arrays[daname]
+        self.assertNotIn(daname, self.block.data_arrays)
+        self.assertNotIn(daname, self.block.groups[0].data_arrays)
