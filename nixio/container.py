@@ -154,10 +154,19 @@ class LinkContainer(Container):
 
     def __contains__(self, item):
         # need to redefine because of id indexing/linking
-        if isinstance(item, self._itemclass):
-            return item.id in self._backend
+        if hasattr(item, "id"):
+            if isinstance(item, self._itemclass):
+                return item.id in self._backend
+            # looks like a NIX object, but wrong type
+            raise TypeError(
+                "Wrong item type: {} required or the name or ID of one".format(
+                    self._itemclass.__name__)
+            )
+
         if util.is_uuid(item):
             return item in self._backend
+
+        # assume it's a name and scan through LinkContainer
         for grp in self._backend:
             if item == grp.get_attr("name"):
                 return True
