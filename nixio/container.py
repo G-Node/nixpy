@@ -54,8 +54,14 @@ class Container(object):
             yield self._inst_item(group)
 
     def __contains__(self, item):
-        if isinstance(item, self._itemclass):
-            return item.name in self._backend
+        if hasattr(item, "id"):
+            if isinstance(item, self._itemclass):
+                return item.name in self._backend
+            # looks like a NIX object, but wrong type
+            raise TypeError(
+                "Wrong item type: {} required or the name or ID of one".format(
+                    self._itemclass.__name__)
+            )
         if util.is_uuid(item):
             try:
                 self._backend.get_by_id(item)
