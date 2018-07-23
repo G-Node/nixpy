@@ -207,6 +207,9 @@ class H5Group(object):
         return self.get_by_name(name)
 
     def delete(self, id_or_name):
+        """
+        Deletes the child HDF5 group that matches the given name or id.
+        """
         if util.is_uuid(id_or_name):
             name = self.get_by_id_or_name(id_or_name).name
         else:
@@ -221,6 +224,25 @@ class H5Group(object):
             del self.parent.group[self.name]
             # del self.group
             self.group = None
+
+    def delete_all(self, eid):
+        """
+        Deletes all references to a given object, identified by the entity_id,
+        below the current object.
+        """
+        # Manually traverse tree and check entity_id
+        # H5Py visit and visit_items only visit each item once, so they wont
+        # find all links to the same object. This function checks if each group
+        # object with a matching entity_id. We can't use the name because the
+        # name of the object in the path depends on what kind of link it is.
+        for grp in self:
+            if not isinstance(grp, type(self)):
+                continue
+            if grp.get_attr("entity_id") == eid:
+                del self._group[grp.name]
+                return
+            else:
+                grp.delete_all(eid)
 
     def set_attr(self, name, value):
         self._create_h5obj()
