@@ -29,6 +29,7 @@ class H5DataSet(object):
                 name, shape=shape, dtype=dtype, chunks=True, maxshape=maxshape,
                 **comprargs
             )
+        self.h5obj = self.dataset
 
     @classmethod
     def create_from_h5obj(cls, h5obj):

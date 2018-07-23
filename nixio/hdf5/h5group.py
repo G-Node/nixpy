@@ -27,6 +27,7 @@ class H5Group(object):
         self.group = None
         if create or name in self._parent:
             self._create_h5obj()
+        self.h5obj = self.group
 
     def _create_h5obj(self):
         if self.name in self._parent:
