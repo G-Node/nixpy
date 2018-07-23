@@ -239,17 +239,15 @@ class H5Group(object):
         return attr
 
     def find_children(self, filtr=None, limit=None):
-
         result = []
-        start_depth = len(self.group.name.split("/"))
 
         def match(name, obj):
-            curdepth = name.split("/")
-            if limit is not None and curdepth == start_depth + limit:
+            curdepth = len(name.split("/"))
+            if limit is not None and curdepth > limit:
                 return None
 
             h5grp = H5Group.create_from_h5obj(obj)
-            if filtr(h5grp):
+            if filtr is None or filtr(h5grp):
                 result.append(h5grp)
 
         self.group.visititems(match)
