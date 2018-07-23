@@ -1,3 +1,4 @@
+from .entity import Entity
 from collections import Iterable
 from . import util
 
@@ -23,6 +24,7 @@ class Container(object):
         self._backend = parent._h5group.open_group(name)
         self._itemclass = itemclass
         self._parent = parent
+        self._name = name
 
     def _inst_item(self, item):
         return self._itemclass(self._parent, item)
@@ -42,12 +44,10 @@ class Container(object):
         return self._inst_item(item)
 
     def __delitem__(self, item):
-        # TODO: Delete from everywhere
-        if isinstance(item, int):
-            item = self._inst_item(self._backend.get_by_pos(item))
-        if isinstance(item, self._itemclass):
-            item = self._item_key(item)
-        self._backend.delete(item)
+        if not isinstance(item, Entity):
+            item = self[item]
+
+        self._parent._h5group.delete_all(item.id)
 
     def __iter__(self):
         for group in self._backend:
@@ -118,6 +118,11 @@ class LinkContainer(Container):
     def __init__(self, name, parent, itemclass, itemstore):
         super(LinkContainer, self).__init__(name, parent, itemclass)
         self._itemstore = itemstore
+
+    def __delitem__(self, item):
+        if not isinstance(item, Entity):
+            item = self[item]
+        self._backend.delete(item.id)
 
     def append(self, item):
         if util.is_uuid(item):
