@@ -300,8 +300,8 @@ class File(object):
         :type name: str
         :param type_: The type of the section.
         :type type_: str
-        :param oid: object id, UUID string as specified in RFC 4122. If no id is provided,
-                   an id will be generated and assigned.
+        :param oid: object id, UUID string as specified in RFC 4122. If no id
+                    is provided, an id will be generated and assigned.
         :type oid: str
 
         :returns: The newly created section.
