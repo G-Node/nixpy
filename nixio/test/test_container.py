@@ -182,16 +182,63 @@ class TestContainer(unittest.TestCase):
         with self.assertRaises(TypeError):
             nf.blocks[1].data_arrays[1] in nf.blocks[0].groups[0].tags
 
-    def test_dangling_references(self):
-        # delete data array from block and check group
-        daname = self.block.data_arrays[0].name
-        self.assertIn(self.block.data_arrays[0],
-                      self.block.groups[0].data_arrays)
+    def test_delete_references_da(self):
+        # delete DataArray from Block and check Group
+        daname = "new-data-array"
+        da = self.block.create_data_array(daname, "to-be-deleted", data=[0])
+        self.block.groups[0].data_arrays.append(da)
+        self.assertIn(self.block.data_arrays[-1],
+                      self.block.groups[-1].data_arrays)
         self.assertIn(daname, self.block.groups[0].data_arrays)
 
-        self.assertEqual(self.block.groups[0].data_arrays[0].name,
+        self.assertEqual(self.block.groups[-1].data_arrays[-1].name,
                          daname)
 
         del self.block.data_arrays[daname]
         self.assertNotIn(daname, self.block.data_arrays)
         self.assertNotIn(daname, self.block.groups[0].data_arrays)
+
+    def test_delete_references_tag(self):
+        # delete Tag from Block and check Group
+        tagname = "new-tag"
+        tag = self.block.create_tag(tagname, "to-be-deleted", position=[0])
+        self.block.groups[0].tags.append(tag)
+        self.assertIn(self.block.tags[-1],
+                      self.block.groups[-1].tags)
+        self.assertIn(tagname, self.block.groups[0].tags)
+
+        self.assertEqual(self.block.groups[-1].tags[-1].name,
+                         tagname)
+
+        del self.block.tags[tagname]
+        self.assertNotIn(tagname, self.block.tags)
+        self.assertNotIn(tagname, self.block.groups[0].tags)
+
+    def test_delete_references_multitag(self):
+        # delete MultiTag DataArrays and check positions and extents
+        posname = "new-mt-positions"
+        pos = self.block.create_data_array(posname, "to-be-deleted", data=[0])
+        extname = "new-mt-extents"
+        ext = self.block.create_data_array(extname, "to-be-deleted", data=[0])
+
+        mtagname = "new-multi-tag"
+        mtag = self.block.create_multi_tag(mtagname, "to-be-deleted",
+                                           positions=pos)
+        mtag.extents = ext
+        self.block.groups[0].multi_tags.append(mtag)
+
+        self.assertEqual(mtag.positions, pos)
+        del self.block.data_arrays[posname]
+        self.assertIsNone(mtag.positions)
+        # ext still here
+        self.assertEqual(mtag.extents, ext)
+        # delete ext and check extents
+        del self.block.data_arrays[extname]
+        self.assertIsNone(mtag.extents)
+
+        # delete MultiTag and check Group
+        self.assertIn(mtagname, self.block.multi_tags)
+        self.assertIn(mtag.id, self.block.multi_tags)
+        self.assertIn(mtag, self.block.multi_tags)
+        del self.block.multi_tags[mtagname]
+        self.assertNotIn(mtagname, self.block.multi_tags)
