@@ -230,19 +230,25 @@ class H5Group(object):
         Deletes all references to a given object, identified by the entity_id,
         below the current object.
         """
-        # Manually traverse tree and check entity_id
-        # H5Py visit and visit_items only visit each item once, so they wont
-        # find all links to the same object. This function checks if each group
-        # object with a matching entity_id. We can't use the name because the
-        # name of the object in the path depends on what kind of link it is.
-        for grp in self:
-            if not isinstance(grp, type(self)):
-                continue
-            if grp.get_attr("entity_id") == eid:
-                del self._group[grp.name]
+        # Use visit_items to traverse groups and check their children.
+        # visit_items visits each item only once, so instead of checking
+        # whether each item is the one we're searching for, we check whether
+        # it *contains* the one we're searching for
+
+        parentgroups = dict()
+
+        def collect_id_parents(name, obj):
+            if not isinstance(obj, h5py.Group):
                 return
-            else:
-                grp.delete_all(eid)
+            grp = self.create_from_h5obj(obj)
+            for ch in grp:
+                if ch.get_attr("entity_id") == eid:
+                    parentgroups[grp] = ch.name
+                    break
+
+        self._group.visititems(collect_id_parents)
+        for pg, chname in parentgroups.items():
+            del pg[chname]
 
     def set_attr(self, name, value):
         self._create_h5obj()
