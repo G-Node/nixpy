@@ -182,7 +182,7 @@ class TestContainer(unittest.TestCase):
         with self.assertRaises(TypeError):
             nf.blocks[1].data_arrays[1] in nf.blocks[0].groups[0].tags
 
-    def test_delete_references_da(self):
+    def test_delete_links_da(self):
         # delete DataArray from Block and check Group
         daname = "new-data-array"
         da = self.block.create_data_array(daname, "to-be-deleted", data=[0])
@@ -198,7 +198,7 @@ class TestContainer(unittest.TestCase):
         self.assertNotIn(daname, self.block.data_arrays)
         self.assertNotIn(daname, self.block.groups[0].data_arrays)
 
-    def test_delete_references_tag(self):
+    def test_delete_links_tag(self):
         # delete Tag from Block and check Group
         tagname = "new-tag"
         tag = self.block.create_tag(tagname, "to-be-deleted", position=[0])
@@ -214,7 +214,7 @@ class TestContainer(unittest.TestCase):
         self.assertNotIn(tagname, self.block.tags)
         self.assertNotIn(tagname, self.block.groups[0].tags)
 
-    def test_delete_references_multitag(self):
+    def test_delete_links_multitag(self):
         # delete MultiTag DataArrays and check positions and extents
         posname = "new-mt-positions"
         pos = self.block.create_data_array(posname, "to-be-deleted", data=[0])
@@ -229,7 +229,8 @@ class TestContainer(unittest.TestCase):
 
         self.assertEqual(mtag.positions, pos)
         del self.block.data_arrays[posname]
-        self.assertIsNone(mtag.positions)
+        with self.assertRaises(RuntimeError):
+            mtag.positions
         # ext still here
         self.assertEqual(mtag.extents, ext)
         # delete ext and check extents
@@ -242,3 +243,40 @@ class TestContainer(unittest.TestCase):
         self.assertIn(mtag, self.block.multi_tags)
         del self.block.multi_tags[mtagname]
         self.assertNotIn(mtagname, self.block.multi_tags)
+
+    def test_delete_links_references(self):
+        posname = "new-mt-positions"
+        pos = self.block.create_data_array(posname, "to-be-deleted", data=[0])
+
+        tagname = "new-tag"
+        tag = self.block.create_tag(tagname, "to-be-deleted",
+                                    position=[1, 3, 10])
+        self.block.groups[0].tags.append(tag)
+
+        mtagname = "new-multi-tag"
+        mtag = self.block.create_multi_tag(mtagname, "to-be-deleted",
+                                           positions=pos)
+        self.block.groups[0].multi_tags.append(mtag)
+
+        refnamea = "new-da-ref-a"
+        refa = self.block.create_data_array(refnamea, "to-be-deleted",
+                                            data=[10])
+        tag.references.append(refa)
+        mtag.references.append(refa)
+
+        refnameb = "new-da-ref-b"
+        refb = self.block.create_data_array(refnameb, "to-be-deleted",
+                                            data=[11])
+        tag.references.append(refb)
+        mtag.references.append(refb)
+
+        # delete ref DAs and check refs
+        del self.block.data_arrays[refnamea]
+        self.assertNotIn(refnamea, tag.references)
+        self.assertIn(refnameb, tag.references)
+        self.assertNotIn(refnamea, mtag.references)
+        self.assertIn(refnameb, mtag.references)
+
+        del self.block.data_arrays[refnameb]
+        self.assertNotIn(refnameb, tag.references)
+        self.assertNotIn(refnameb, mtag.references)
