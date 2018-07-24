@@ -234,21 +234,19 @@ class H5Group(object):
         # visit_items visits each item only once, so instead of checking
         # whether each item is the one we're searching for, we check whether
         # it *contains* the one we're searching for
+        # We delete the child as soon as we find it; this doesn't cause
+        # iteration issues since it's deleted before descending into the
+        # children of the current group
 
-        parentgroups = dict()
-
-        def collect_id_parents(name, obj):
+        def delete_by_id(name, obj):
             if not isinstance(obj, h5py.Group):
                 return
             grp = self.create_from_h5obj(obj)
             for ch in grp:
                 if ch.get_attr("entity_id") == eid:
-                    parentgroups[grp] = ch.name
-                    break
+                    del grp[ch.name]
 
-        self._group.visititems(collect_id_parents)
-        for pg, chname in parentgroups.items():
-            del pg[chname]
+        self._group.visititems(delete_by_id)
 
     def set_attr(self, name, value):
         self._create_h5obj()
