@@ -284,7 +284,6 @@ class Block(Entity):
     @property
     def metadata(self):
         """
-
         Associated metadata of the entity. Sections attached to the entity via
         this attribute can provide additional annotations. This is an optional
         read-write property, and can be None if no metadata is available.
