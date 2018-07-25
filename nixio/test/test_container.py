@@ -208,8 +208,7 @@ class TestContainer(unittest.TestCase):
                       self.block.groups[-1].tags)
         self.assertIn(tagname, self.block.groups[0].tags)
 
-        self.assertEqual(self.block.groups[-1].tags[-1].name,
-                         tagname)
+        self.assertEqual(self.block.groups[-1].tags[-1].name, tagname)
 
         del self.block.tags[tagname]
         self.assertNotIn(tagname, self.block.tags)
@@ -400,3 +399,37 @@ class TestContainer(unittest.TestCase):
         self.tag.metadata = sectionc
         del grandparentc.sections[parentc.name]
         self.assertIsNone(self.tag.metadata)
+
+    def test_delete_links_tag_features(self):
+        posname = "new-mt-positions"
+        pos = self.block.create_data_array(posname, "to-be-deleted", data=[0])
+
+        tagname = "new-tag"
+        tag = self.block.create_tag(tagname, "to-be-deleted",
+                                    position=[1, 3, 10])
+        self.block.groups[0].tags.append(tag)
+
+        mtagname = "new-multi-tag"
+        mtag = self.block.create_multi_tag(mtagname, "to-be-deleted",
+                                           positions=pos)
+        self.block.groups[0].multi_tags.append(mtag)
+
+        dataname = "new-da-feat-a"
+        feat_da = self.block.create_data_array(dataname, "to-be-deleted",
+                                               data=[10])
+
+
+        feat = tag.create_feature(feat_da, nix.LinkType.Indexed)
+
+        self.assertIn(dataname, self.block.data_arrays)
+        self.assertIn(dataname, tag.features)
+
+        del self.block.data_arrays[dataname]
+
+        self.assertNotIn(dataname, self.block.data_arrays)
+
+        with self.assertRaises(RuntimeError):
+            self.assertNotIn(dataname, tag.features)
+
+        with self.assertRaises(RuntimeError):
+            tag.features[dataname].data
