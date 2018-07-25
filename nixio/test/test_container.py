@@ -7,6 +7,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import os
+import random
 import nixio as nix
 import unittest
 from .tmp import TempDir
@@ -280,3 +281,62 @@ class TestContainer(unittest.TestCase):
         del self.block.data_arrays[refnameb]
         self.assertNotIn(refnameb, tag.references)
         self.assertNotIn(refnameb, mtag.references)
+
+    def test_delete_links_sources(self):
+        sourcetreedepth = 5
+
+        # make a random source tree
+        def make_sources(par, depth=0):
+            if depth == sourcetreedepth:
+                return
+            for srcidx in range(3):
+                srcname = "{}:src-{}".format(par.name, srcidx)
+                srctype = "Source at depth {}".format(depth)
+                chsrc = par.create_source(srcname, srctype)
+                make_sources(chsrc, depth+1)
+
+        make_sources(self.block)
+
+        def get_rand_src(par, depth=None):
+            if depth is None:
+                depth = random.randint(0, sourcetreedepth-1)
+
+            idx = random.randint(0, len(par.sources)-1)
+            chsrc = par.sources[idx]
+            if depth == 0:
+                return chsrc
+
+            return get_rand_src(chsrc, depth-1)
+
+        # link a couple of random sources to dataarray
+        parenta = get_rand_src(self.block, depth=3)
+        sourcea = parenta.sources[-1]
+        self.dataarray.sources.append(sourcea)
+
+        parentb = get_rand_src(self.block, depth=2)
+        sourceb = parentb.sources[0]
+        self.dataarray.sources.append(sourceb)
+
+        # delete sourcea from parent
+        namelsa = sourcea.name
+        del parenta.sources[namelsa]
+        # check references
+        self.assertNotIn(namelsa, parenta.sources)
+        self.assertNotIn(namelsa, self.dataarray.sources)
+        self.assertIn(sourceb, self.dataarray.sources)
+
+        # delete sourceb from parent
+        namelsb = sourceb.name
+        del parentb.sources[namelsb]
+        # check references
+        self.assertNotIn(namelsb, parentb.sources)
+        self.assertNotIn(sourceb, self.dataarray.sources)
+
+        # link a deep source and delete its parent
+        grandparentc = get_rand_src(self.block, depth=0)
+        parentc = get_rand_src(grandparentc, depth=0)
+        sourcec = get_rand_src(parentc, depth=0)
+        self.tag.sources.append(sourcec)
+        cname = sourcec.name
+        del grandparentc.sources[parentc.name]
+        self.assertNotIn(cname, self.tag.sources)

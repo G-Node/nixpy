@@ -95,7 +95,7 @@ class Source(Entity):
         """
         A property containing child sources of a Source. Sources can be
         obtained via their name, index, id. Sources can be deleted from the
-        list.  Adding sources is done using the Blocks create_source method.
+        list. Adding sources is done using the Blocks create_source method.
         This is a read only attribute.
         """
         if self._sources is None:
