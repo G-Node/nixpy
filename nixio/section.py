@@ -13,7 +13,7 @@ except ImportError:
 from collections import Sequence, Iterable
 from six import string_types
 
-from .container import Container
+from .container import Container, SectionContainer
 from .datatype import DataType
 from .entity import Entity
 from .property import Property
@@ -360,7 +360,7 @@ class Section(Entity):
         :type: Container of Section
         """
         if self._sections is None:
-            self._sections = Container("sections", self, Section)
+            self._sections = SectionContainer("sections", self, Section)
         return self._sections
 
     def __eq__(self, other):

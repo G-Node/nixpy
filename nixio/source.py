@@ -10,7 +10,7 @@ from sys import maxsize as maxint
 
 from .import exceptions
 from .entity import Entity
-from .container import Container
+from .container import SourceContainer
 from . import util
 from .util import find as finders
 from .section import Section
@@ -99,7 +99,7 @@ class Source(Entity):
         This is a read only attribute.
         """
         if self._sources is None:
-            self._sources = Container("sources", self, Source)
+            self._sources = SourceContainer("sources", self, Source)
         return self._sources
 
     def __eq__(self, other):

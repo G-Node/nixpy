@@ -24,7 +24,7 @@ from .multi_tag import MultiTag
 from .tag import Tag
 from .source import Source
 from . import util
-from .container import Container
+from .container import Container, SourceContainer
 from .section import Section
 
 
@@ -212,7 +212,7 @@ class Block(Entity):
         This is a read only attribute.
         """
         if self._sources is None:
-            self._sources = Container("sources", self, Source)
+            self._sources = SourceContainer("sources", self, Source)
         return self._sources
 
     @property
