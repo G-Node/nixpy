@@ -227,8 +227,8 @@ class H5Group(object):
 
     def delete_all(self, eid):
         """
-        Deletes all references to a given object, identified by the entity_id,
-        below the current object.
+        Deletes all references to a given list of objects, identified by their
+        entity_id, below the current object.
         """
         # Use visit_items to traverse groups and check their children.
         # visit_items visits each item only once, so instead of checking
@@ -243,7 +243,7 @@ class H5Group(object):
                 return
             grp = self.create_from_h5obj(obj)
             for ch in grp:
-                if ch.get_attr("entity_id") == eid:
+                if ch.get_attr("entity_id") in eid:
                     del grp[ch.name]
 
         self._group.visititems(delete_by_id)
@@ -326,6 +326,7 @@ class H5Group(object):
             cls = Section
         else:
             raise InvalidEntity
+        # TODO: Fix this
         return cls(h5root)
 
     @property

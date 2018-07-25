@@ -20,7 +20,7 @@ import h5py
 from .hdf5.h5group import H5Group
 from .block import Block
 from .section import Section
-from .container import Container
+from .container import Container, SectionContainer
 from .exceptions import exceptions
 from . import util
 from .util import find as finders
@@ -358,7 +358,7 @@ class File(object):
         This is a read-only property.
         """
         if self._sections is None:
-            self._sections = Container("metadata", self, Section)
+            self._sections = SectionContainer("metadata", self, Section)
         return self._sections
 
 
