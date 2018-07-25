@@ -128,7 +128,7 @@ class TestFile(unittest.TestCase):
             self.assertEqual(danames[idx], datablock.data_arrays[idx].name)
 
     def test_context_open(self):
-        fname = "contextopen.nix"
+        fname = os.path.join(self.tmpdir.path, "contextopen.nix")
         with nix.File.open(fname, nix.FileMode.Overwrite) as nf:
             nf.create_block("blocky", "test-block")
 
