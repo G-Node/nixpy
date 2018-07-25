@@ -340,3 +340,63 @@ class TestContainer(unittest.TestCase):
         cname = sourcec.name
         del grandparentc.sources[parentc.name]
         self.assertNotIn(cname, self.tag.sources)
+
+    def test_delete_links_sections(self):
+        sectiontreedepth = 5
+
+        rootsec = self.file.create_section("GOD", "I AM THE TOP SECTION")
+
+        # make a random section tree
+        def make_sections(par, depth=0):
+            if depth == sectiontreedepth:
+                return
+            for secidx in range(3):
+                secname = "{}:sec-{}".format(par.name, secidx)
+                sectype = "section at depth {}".format(depth)
+                chsec = par.create_section(secname, sectype)
+                make_sections(chsec, depth+1)
+
+        make_sections(rootsec)
+
+        def get_rand_sec(par, depth=None):
+            if depth is None:
+                depth = random.randint(0, sectiontreedepth-1)
+
+            idx = random.randint(0, len(par.sections)-1)
+            chsec = par.sections[idx]
+            if depth == 0:
+                return chsec
+
+            return get_rand_sec(chsec, depth-1)
+
+        # link a couple of random sections to dataarray
+        parenta = get_rand_sec(rootsec, depth=3)
+        sectiona = parenta.sections[-1]
+        self.dataarray.metadata = sectiona
+
+        parentb = get_rand_sec(rootsec, depth=2)
+        sectionb = parentb.sections[0]
+        self.multi_tag.metadata = sectionb
+
+        # delete sectiona from parent
+        namelsa = sectiona.name
+        del parenta.sections[namelsa]
+        # check references
+        self.assertNotIn(namelsa, parenta.sections)
+        self.assertIsNone(self.dataarray.metadata)
+        self.assertEqual(sectionb, self.multi_tag.metadata)
+
+        # delete sectionb from parent
+        namelsb = sectionb.name
+        del parentb.sections[namelsb]
+        # check references
+        self.assertNotIn(namelsb, parentb.sections)
+        self.assertIsNone(self.multi_tag.metadata)
+
+        # link a deep section and delete its parent
+        grandparentc = get_rand_sec(rootsec, depth=0)
+        parentc = get_rand_sec(grandparentc, depth=0)
+        sectionc = get_rand_sec(parentc, depth=0)
+        self.tag.metadata = sectionc
+        del grandparentc.sections[parentc.name]
+        self.assertIsNone(self.tag.metadata)
