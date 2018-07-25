@@ -67,3 +67,6 @@ script:
     else
       python${pymajor} setup.py test --addopts "--force-compat -s -nauto";
     fi
+
+after_success:
+  - if [[ "${coveralls}" == 1 ]]; then coveralls; fi
