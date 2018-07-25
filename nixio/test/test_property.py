@@ -21,8 +21,10 @@ class TestProperties(unittest.TestCase):
         self.section = self.file.create_section("test section",
                                                 "recordingsession")
         self.prop = self.section.create_property("test property", 0)
-        self.prop_s = self.section.create_property("test str", nix.DataType.String)
-        self.other = self.section.create_property("other property", nix.DataType.Int64)
+        self.prop_s = self.section.create_property("test str",
+                                                   nix.DataType.String)
+        self.other = self.section.create_property("other property",
+                                                  nix.DataType.Int64)
 
     def tearDown(self):
         del self.file.sections[self.section.id]
@@ -153,89 +155,13 @@ class TestProperties(unittest.TestCase):
         assert(self.prop_s.values[0] != "bla")
         assert("bla" not in self.prop_s.values)
 
+    def test_empties(self):
+        self.prop.values = list()
+        assert(self.prop.values == tuple())  # comes back as tuple
 
-"""
-class TestValue(unittest.TestCase):
+        self.prop.values = tuple()
+        assert(self.prop.values == tuple())
 
-    def test_value_int(self):
-        value = nix.Value(10)
-        other = nix.Value(11)
-
-        assert(value.data_type == nix.DataType.Int64)
-
-        assert(value == value)
-        assert(value == 10)
-
-        assert(value != other)
-        assert(value != 11)
-
-        value.value = 20
-        assert(value == nix.Value(20))
-        assert(value == 20)
-        assert(value.value == 20)
-
-    def test_value_float(self):
-        value = nix.Value(47.11)
-        other = nix.Value(3.14)
-
-        assert(value.data_type == nix.DataType.Double)
-
-        assert(value == value)
-        assert(value == 47.11)
-
-        assert(value != other)
-        assert(value != 3.14)
-
-        value.value = 66.6
-        assert(value == nix.Value(66.6))
-        assert(value == 66.6)
-        assert(value.value == 66.6)
-
-    def test_value_bool(self):
-        value = nix.Value(True)
-        other = nix.Value(False)
-
-        assert(value.data_type == nix.DataType.Bool)
-
-        assert(value == value)
-        assert(value != other)
-        assert(value)
-
-        value.value = False
-        assert(value == other)
-
-    def test_value_str(self):
-        value = nix.Value("foo")
-        other = nix.Value("bar")
-
-        assert(value.data_type == nix.DataType.String)
-
-        assert(value == value)
-        assert(value == "foo")
-
-        assert(value != other)
-        assert(value != "bar")
-
-        value.value = "wrtlbrmpft"
-        assert(value == nix.Value("wrtlbrmpft"))
-        assert(value == "wrtlbrmpft")
-        assert(value.value == "wrtlbrmpft")
-
-    def test_value_attrs(self):
-        value = nix.Value(0)
-
-        value.reference = "a"
-        assert(value.reference == "a")
-
-        value.filename = "b"
-        assert(value.filename == "b")
-
-        value.filename = "c"
-        assert(value.filename == "c")
-
-        value.checksum = "d"
-        assert(value.checksum == "d")
-
-        value.uncertainty = 0.5
-        assert(value.uncertainty == 0.5)
-"""
+        self.prop_s.values = ""
+        assert(self.prop_s.values == tuple())
+        assert(self.prop_s.data_type == nix.DataType.String)

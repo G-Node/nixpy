@@ -43,30 +43,31 @@ init:
   - python -c "import sys;print('Python version is {}'.format(sys.version))"
 
 install:
-  - ps: |
-      if ($env:bits -eq "64") {
-          $env:vcvars = "x86_amd64"
-          $env:avjob = "job=Environment%3A%20PLATFORM%3Dx64%2C%20CONFIGURATION%3DRelease"
-          $env:avfname = "nix-$env:NIX_VERSION-win64.exe"
-      } else {
-          $env:vcvars = "x86"
-          $env:avjob = "job=Environment%3A%20PLATFORM%3Dx86%2C%20CONFIGURATION%3DRelease"
-          $env:avfname = "nix-$env:NIX_VERSION-win32.exe"
+  # TODO: Uncomment when cross-compatibility tests are fixed
+  # - ps: |
+  #     if ($env:bits -eq "64") {
+  #         $env:vcvars = "x86_amd64"
+  #         $env:avjob = "job=Environment%3A%20PLATFORM%3Dx64%2C%20CONFIGURATION%3DRelease"
+  #         $env:avfname = "nix-$env:NIX_VERSION-win64.exe"
+  #     } else {
+  #         $env:vcvars = "x86"
+  #         $env:avjob = "job=Environment%3A%20PLATFORM%3Dx86%2C%20CONFIGURATION%3DRelease"
+  #         $env:avfname = "nix-$env:NIX_VERSION-win32.exe"
 
-      }
-  - ps: |
-      if ($env:pyver -eq "2") {
-          python -m pip install enum34
-      }
-  - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
-  - ps: mkdir "$env:NIX_DIR"
-  - ps: cd "$env:NIX_DIR"
-  - ps: |
-      $env:nix_exe_url = "$env:NIX_APPVEYOR_ROOT/$env:avfname`?$env:avjob"
-      Write-Host "Downloading $env:nix_exe_url"
-      Invoke-WebRequest -URI $env:nix_exe_url -OutFile "nix.exe"
-  - 7z x nix.exe
-  - cd ..
+  #     }
+  # - ps: |
+  #     if ($env:pyver -eq "2") {
+  #         python -m pip install enum34
+  #     }
+  # - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  # - ps: mkdir "$env:NIX_DIR"
+  # - ps: cd "$env:NIX_DIR"
+  # - ps: |
+  #     $env:nix_exe_url = "$env:NIX_APPVEYOR_ROOT/$env:avfname`?$env:avjob"
+  #     Write-Host "Downloading $env:nix_exe_url"
+  #     Invoke-WebRequest -URI $env:nix_exe_url -OutFile "nix.exe"
+  # - 7z x nix.exe
+  # - cd ..
   - python -m pip install numpy h5py wheel pytest-xdist
   - ps: cd "$env:APPVEYOR_BUILD_FOLDER"
   - set DISTUTILS_USE_SDK="1"
