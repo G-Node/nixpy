@@ -184,7 +184,7 @@ class Section(Entity):
         properties = self._h5group.open_group("properties")
         inhprops = [Property(self, h5prop) for h5prop in properties]
         if self.link:
-            inhprops.append(self.link.inherited_properties())
+            inhprops.extend(self.link.inherited_properties())
         return inhprops
 
     @property
