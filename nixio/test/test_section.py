@@ -269,3 +269,23 @@ class TestSections(unittest.TestCase):
         self.assertEqual(len(self.other.referring_sources), 1)
         self.assertEqual(len(self.section.referring_sources), 0)
         self.assertEqual(self.other.referring_sources[0].id, src.id)
+
+
+    def test_section_link(self):
+        self.section.create_property("PropOnSection", "value")
+
+        self.assertIn("PropOnSection", self.section)
+        self.assertEqual("value", self.section["PropOnSection"])
+
+        self.assertNotIn("PropOnSection", self.other)
+        with self.assertRaises(KeyError):
+            self.other["PropOnSection"]
+
+        self.other.link = self.section
+
+        self.assertNotIn("PropOnSection", self.other)
+        with self.assertRaises(KeyError):
+            self.other["PropOnSection"]
+
+        inhpropnames = [p.name for p in self.other.inherited_properties()]
+        self.assertIn("PropOnSection", inhpropnames)
