@@ -17,6 +17,7 @@ from .datatype import DataType
 from .dimensions import (Dimension, SampledDimension, RangeDimension,
                          SetDimension, DimensionType, DimensionContainer)
 from . import util
+from .compression import Compression
 
 from .exceptions import InvalidUnit
 from .section import Section
@@ -39,8 +40,10 @@ class DataArray(Entity, DataSet):
                     compression):
         newentity = super(DataArray, cls)._create_new(nixparent, h5parent,
                                                       name, type_)
-        newentity._h5group.create_dataset("data", shape, data_type,
-                                          compression)
+        datacompr = False
+        if compression == Compression.DeflateNormal:
+            datacompr = True
+        newentity._h5group.create_dataset("data", shape, data_type, datacompr)
         return newentity
 
     def _read_data(self, sl=None):
