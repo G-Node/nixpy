@@ -92,8 +92,7 @@ class File(object):
         :param path: Path to file
         :param mode: FileMode ReadOnly, ReadWrite, or Overwrite.
                     (default: ReadWrite)
-        :param compression: No, DeflateNormal, Auto
-                            (default: Auto)
+        :param compression: No, DeflateNormal, Auto (default: Auto)
         :return: nixio.File object
         """
         try:
@@ -130,6 +129,8 @@ class File(object):
             self.force_created_at()
         if "updated_at" not in self._h5file.attrs:
             self.force_updated_at()
+        if compression == Compression.Auto:
+            compression = Compression.No
         self._compr = compression
 
         # make container props but don't initialise
@@ -274,7 +275,7 @@ class File(object):
         self._h5file.close()
 
     # Block
-    def create_block(self, name, type_):
+    def create_block(self, name, type_, compression=Compression.Auto):
         """
         Create a new block inside the file.
 
@@ -282,13 +283,16 @@ class File(object):
         :type name: str
         :param type_: The type of the block.
         :type type_: str
+        :param compression: No, DeflateNormal, Auto (default: Auto)
 
         :returns: The newly created block.
         :rtype: Block
         """
         if name in self._data:
             raise ValueError("Block with the given name already exists!")
-        block = Block._create_new(self, self._data, name, type_, self._compr)
+        if compression == Compression.Auto:
+            compression = self._compr
+        block = Block._create_new(self, self._data, name, type_, compression)
         return block
 
     # Section

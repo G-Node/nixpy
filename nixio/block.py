@@ -37,6 +37,7 @@ class Block(Entity):
         self._tags = None
         self._multi_tags = None
         self._sources = None
+        self._compr = compression
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, compression):
@@ -175,6 +176,8 @@ class Block(Entity):
         data_arrays = self._h5group.open_group("data_arrays")
         if name in data_arrays:
             raise exceptions.DuplicateName("create_data_array")
+        if compression == Compression.Auto:
+            compression = self._compr
         da = DataArray._create_new(self, data_arrays, name, array_type,
                                    dtype, shape, compression)
         if data is not None:
