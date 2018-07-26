@@ -433,3 +433,41 @@ class TestContainer(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             tag.features[dataname].data
+
+    def test_delete_links_section_link(self):
+        parsec = self.file.create_section("TopDog", "Root Section")
+        chsec = parsec.create_section("1Dog", "Level 1 section")
+        chchsec = chsec.create_section("2Dog", "Level 2 section")
+        chchchsec = chchsec.create_section("3Dog", "Level 3 section")
+
+        chchsec.create_property("2Prop", "Level 2 property")
+        chchchsec.create_property("3Prop", "Level 3 property")
+
+        chsecb = parsec.create_section("1Dog2", "Level 1 section")
+
+        # link chchchsec to chsecb and then delete it
+        chsecb.link = chchchsec
+
+        inhpropnames = [p.name for p in chsecb.inherited_properties()]
+        self.assertEqual(chchchsec, chsecb.link)
+        self.assertIn("3Prop", inhpropnames)
+
+        # delete chchchsec and check link and inherited props
+        del chchsec.sections["3Dog"]
+        inhpropnames = [p.name for p in chsecb.inherited_properties()]
+        self.assertIs(None, chsecb.link)
+        self.assertNotIn("3Prop", inhpropnames)
+
+        # link chchsec to chsecb then delete chsec (chchsec's parent)
+        chsecb.link = chchsec
+
+        inhpropnames = [p.name for p in chsecb.inherited_properties()]
+        self.assertEqual(chchsec, chsecb.link)
+        self.assertIn("2Prop", inhpropnames)
+
+        # delete chsec and check link and inherited props
+        del parsec.sections["1Dog"]
+        inhpropnames = [p.name for p in chsecb.inherited_properties()]
+        self.assertIs(None, chsecb.link)
+        self.assertNotIn("2Prop", inhpropnames)
+
