@@ -101,7 +101,7 @@ class Container(object):
 class SectionContainer(Container):
     """
     SectionContainer extends Container with a new __delitem__ method.
-    When a Section is deleted, all child sources need to be deleted
+    When a Section is deleted, all child sections need to be deleted
     individually to make sure all their references are removed.
     """
     def __delitem__(self, item):
