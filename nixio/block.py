@@ -24,7 +24,7 @@ from .multi_tag import MultiTag
 from .tag import Tag
 from .source import Source
 from . import util
-from .container import Container
+from .container import Container, SourceContainer
 from .section import Section
 
 
@@ -212,7 +212,7 @@ class Block(Entity):
         This is a read only attribute.
         """
         if self._sources is None:
-            self._sources = Container("sources", self, Source)
+            self._sources = SourceContainer("sources", self, Source)
         return self._sources
 
     @property
@@ -284,7 +284,6 @@ class Block(Entity):
     @property
     def metadata(self):
         """
-
         Associated metadata of the entity. Sections attached to the entity via
         this attribute can provide additional annotations. This is an optional
         read-write property, and can be None if no metadata is available.

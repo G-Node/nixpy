@@ -37,6 +37,8 @@ class Feature(Entity):
 
     @property
     def data(self):
+        if "data" not in self._h5group:
+            raise RuntimeError("Feature.data: DataArray not found!")
         return DataArray(self._parent._parent,
                          self._h5group.open_group("data"))
 

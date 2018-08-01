@@ -40,6 +40,8 @@ class MultiTag(BaseTag):
 
         :type: DataArray
         """
+        if "positions" not in self._h5group:
+            raise RuntimeError("MultiTag.positions: DataArray not found!")
         return DataArray(self._parent, self._h5group.open_group("positions"))
 
     @positions.setter

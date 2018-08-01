@@ -1,3 +1,4 @@
+from .entity import Entity
 from collections import Iterable
 from . import util
 
@@ -23,6 +24,7 @@ class Container(object):
         self._backend = parent._h5group.open_group(name)
         self._itemclass = itemclass
         self._parent = parent
+        self._name = name
 
     def _inst_item(self, item):
         return self._itemclass(self._parent, item)
@@ -42,20 +44,33 @@ class Container(object):
         return self._inst_item(item)
 
     def __delitem__(self, item):
-        # TODO: Delete from everywhere
-        if isinstance(item, int):
-            item = self._inst_item(self._backend.get_by_pos(item))
-        if isinstance(item, self._itemclass):
-            item = self._item_key(item)
-        self._backend.delete(item)
+        if not isinstance(item, Entity):
+            item = self[item]
+
+        if not isinstance(item, self._itemclass):
+            raise TypeError(
+                "Wrong item type: {} required or the name or ID of one".format(
+                    self._itemclass.__name__)
+            )
+
+        root = self._backend.h5root
+        if not root:
+            root = self._parent._h5group
+        root.delete_all([item.id])
 
     def __iter__(self):
         for group in self._backend:
             yield self._inst_item(group)
 
     def __contains__(self, item):
-        if isinstance(item, self._itemclass):
-            return item.name in self._backend
+        if hasattr(item, "id"):
+            if isinstance(item, self._itemclass):
+                return item.name in self._backend
+            # looks like a NIX object, but wrong type
+            raise TypeError(
+                "Wrong item type: {} required or the name or ID of one".format(
+                    self._itemclass.__name__)
+            )
         if util.is_uuid(item):
             try:
                 self._backend.get_by_id(item)
@@ -81,6 +96,55 @@ class Container(object):
         for group in self._backend:
             item = self._inst_item(group)
             yield item.id, item
+
+
+class SectionContainer(Container):
+    """
+    SectionContainer extends Container with a new __delitem__ method.
+    When a Section is deleted, all child sections need to be deleted
+    individually to make sure all their references are removed.
+    """
+    def __delitem__(self, item):
+        if not isinstance(item, Entity):
+            item = self[item]
+
+        if not isinstance(item, self._itemclass):
+            raise TypeError(
+                "Wrong item type: {} required or the name or ID of one".format(
+                    self._itemclass.__name__)
+            )
+
+        # collect all IDs under item and send them for deletion, starting from
+        # the root block
+        secids = [s.id for s in item.find_sections()]
+
+        root = self._backend.file
+        root.delete_all(secids)
+
+
+class SourceContainer(Container):
+    """
+    SourceContainer extends Container with a new __delitem__ method.
+    When a Source is deleted, all child sources need to be deleted individually
+    to make sure all their references are removed.
+    """
+    def __delitem__(self, item):
+        if not isinstance(item, Entity):
+            item = self[item]
+
+        if not isinstance(item, self._itemclass):
+            raise TypeError(
+                "Wrong item type: {} required or the name or ID of one".format(
+                    self._itemclass.__name__)
+            )
+
+        # collect all IDs under item and send them for deletion, starting from
+        # the root block
+        srcids = [s.id for s in item.find_sources()]
+        srcids.append(item.id)
+
+        root = self._backend.h5root
+        root.delete_all(srcids)
 
 
 class LinkContainer(Container):
@@ -112,6 +176,18 @@ class LinkContainer(Container):
     def __init__(self, name, parent, itemclass, itemstore):
         super(LinkContainer, self).__init__(name, parent, itemclass)
         self._itemstore = itemstore
+
+    def __delitem__(self, item):
+        if not isinstance(item, Entity):
+            item = self[item]
+
+        if not isinstance(item, self._itemclass):
+            raise TypeError(
+                "Wrong item type: {} required or the name or ID of one".format(
+                    self._itemclass.__name__)
+            )
+
+        self._backend.delete(item.id)
 
     def append(self, item):
         if util.is_uuid(item):
@@ -148,10 +224,19 @@ class LinkContainer(Container):
 
     def __contains__(self, item):
         # need to redefine because of id indexing/linking
-        if isinstance(item, self._itemclass):
-            return item.id in self._backend
+        if hasattr(item, "id"):
+            if isinstance(item, self._itemclass):
+                return item.id in self._backend
+            # looks like a NIX object, but wrong type
+            raise TypeError(
+                "Wrong item type: {} required or the name or ID of one".format(
+                    self._itemclass.__name__)
+            )
+
         if util.is_uuid(item):
             return item in self._backend
+
+        # assume it's a name and scan through LinkContainer
         for grp in self._backend:
             if item == grp.get_attr("name"):
                 return True

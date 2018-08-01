@@ -63,7 +63,10 @@ install:
 
 script:
   - if [[ "${coveralls}" == 1 ]]; then
-      coverage run --source=nixio setup.py test --addopts "--force-compat -s -nauto" && coverage report -m;
+      coverage run --source=nixio setup.py test --addopts "--force-compat -s" && coverage report -m;
     else
       python${pymajor} setup.py test --addopts "--force-compat -s -nauto";
     fi
+
+after_success:
+  - if [[ "${coveralls}" == 1 ]]; then coveralls; fi

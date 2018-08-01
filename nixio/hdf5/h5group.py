@@ -27,6 +27,7 @@ class H5Group(object):
         self.group = None
         if create or name in self._parent:
             self._create_h5obj()
+        self.h5obj = self.group
 
     def _create_h5obj(self):
         if self.name in self._parent:
@@ -206,6 +207,9 @@ class H5Group(object):
         return self.get_by_name(name)
 
     def delete(self, id_or_name):
+        """
+        Deletes the child HDF5 group that matches the given name or id.
+        """
         if util.is_uuid(id_or_name):
             name = self.get_by_id_or_name(id_or_name).name
         else:
@@ -220,6 +224,29 @@ class H5Group(object):
             del self.parent.group[self.name]
             # del self.group
             self.group = None
+
+    def delete_all(self, eid):
+        """
+        Deletes all references to a given list of objects, identified by their
+        entity_id, below the current object.
+        """
+        # Use visit_items to traverse groups and check their children.
+        # visit_items visits each item only once, so instead of checking
+        # whether each item is the one we're searching for, we check whether
+        # it *contains* the one we're searching for
+        # We delete the child as soon as we find it; this doesn't cause
+        # iteration issues since it's deleted before descending into the
+        # children of the current group
+
+        def delete_by_id(name, obj):
+            if not isinstance(obj, h5py.Group):
+                return
+            grp = self.create_from_h5obj(obj)
+            for ch in grp:
+                if ch.get_attr("entity_id") in eid:
+                    del grp[ch.name]
+
+        self._group.visititems(delete_by_id)
 
     def set_attr(self, name, value):
         self._create_h5obj()
@@ -238,17 +265,15 @@ class H5Group(object):
         return attr
 
     def find_children(self, filtr=None, limit=None):
-
         result = []
-        start_depth = len(self.group.name.split("/"))
 
         def match(name, obj):
-            curdepth = name.split("/")
-            if limit is not None and curdepth == start_depth + limit:
+            curdepth = len(name.split("/"))
+            if limit is not None and curdepth > limit:
                 return None
 
             h5grp = H5Group.create_from_h5obj(obj)
-            if filtr(h5grp):
+            if filtr is None or filtr(h5grp):
                 result.append(h5grp)
 
         self.group.visititems(match)
@@ -301,6 +326,7 @@ class H5Group(object):
             cls = Section
         else:
             raise InvalidEntity
+        # TODO: Fix this
         return cls(h5root)
 
     @property

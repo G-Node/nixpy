@@ -20,7 +20,7 @@ import h5py
 from .hdf5.h5group import H5Group
 from .block import Block
 from .section import Section
-from .container import Container
+from .container import Container, SectionContainer
 from .exceptions import exceptions
 from . import util
 from .util import find as finders
@@ -300,8 +300,8 @@ class File(object):
         :type name: str
         :param type_: The type of the section.
         :type type_: str
-        :param oid: object id, UUID string as specified in RFC 4122. If no id is provided,
-                   an id will be generated and assigned.
+        :param oid: object id, UUID string as specified in RFC 4122. If no id
+                    is provided, an id will be generated and assigned.
         :type oid: str
 
         :returns: The newly created section.
@@ -358,7 +358,7 @@ class File(object):
         This is a read-only property.
         """
         if self._sections is None:
-            self._sections = Container("metadata", self, Section)
+            self._sections = SectionContainer("metadata", self, Section)
         return self._sections
 
 
