@@ -1,0 +1,7 @@
+Things which should be validated.
+
+- convertible to float
+
+- if units are valid SI units
+
+- 

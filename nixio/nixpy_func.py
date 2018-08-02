@@ -5,17 +5,17 @@ import unittest
 import h5py
 import numpy as np
 import nixio as nix
-import nixio.pycore.file as filepy
-from nixio.pycore.exceptions.exceptions import InvalidFile
-from nixio.pycore.file import File
-from nixio.test.test_file import FileTestBase
+import nixio.file as filepy
+from nixio.exceptions.exceptions import InvalidFile
+from nixio.file import File
+from nixio.test.test_file import TestFile
 
 
 
-# class Test(FileTestBase, unittest.TestCase):
+# class Test(TestFile, unittest.TestCase):
 #     unittest.main()
 
-file = nix.File.open("/home/choi/PycharmProjects/nixpy/nixio/pycore/neoraw.nix")
+file = nix.File.open("/home/choi/PycharmProjects/nixpy/nixio/neoraw.nix")
 file.validate()
 
 

@@ -24,7 +24,7 @@ from .container import Container, SectionContainer
 from .exceptions import exceptions
 from . import util
 from .util import find as finders
-
+from .exceptions import *
 from .compression import Compression
 
 
@@ -260,6 +260,23 @@ class File(object):
             return True
         except ValueError:
             return False
+
+    def validate(self):
+
+        for blk in self.blocks:
+            if blk.id == None:
+                raise NoBlockID()
+            for gp in blk.groups:
+                for da in gp.data_arrays:
+                    pass
+                for mt in gp.multi_tags:
+                    pass
+
+        """
+        Checks if the File is a valid NIX file. This method is only available
+        when using the "hdf5" backend.
+        :return: Result object
+        """
 
     def flush(self):
         self._h5file.flush()
