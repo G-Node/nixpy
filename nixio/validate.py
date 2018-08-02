@@ -4,7 +4,10 @@ import shutil
 import unittest
 import h5py
 import numpy as np
+import quantities as pq
 import nixio as nix
+from .exceptions import *
+from .util.units import *
 
 class Validate():
 
@@ -17,6 +20,7 @@ class Validate():
 
     def check_data_array(self):
         valid_check_list = []
+
         for blk in self.file.blocks:
             for da in blk.data_arrays:
                 if da == None:
@@ -35,7 +39,20 @@ class Validate():
                     break
         valid_check_list.append(True)
 
-        
+        for blk in self.file.blocks:
+            for da in blk.data_arrays:
+                unit = da.unit
+                if is_si(unit):
+                    continue
+                valid_check_list.append(False)
+        valid_check_list.append(True)
+
+        for blk in self.file.blocks:
+            for da in blk.data_arrays:
+                poly = da.polynom_coefficients
+                
+
+
 
 
 
