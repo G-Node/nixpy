@@ -21,10 +21,10 @@ from .hdf5.h5group import H5Group
 from .block import Block
 from .section import Section
 from .container import Container, SectionContainer
-from .exceptions import exceptions
 from . import util
 from .util import find as finders
 from .exceptions import *
+from .validate import Validate
 from .compression import Compression
 
 
@@ -262,15 +262,9 @@ class File(object):
             return False
 
     def validate(self):
-
-        for blk in self.blocks:
-            if blk.id == None:
-                raise NoBlockID()
-            for gp in blk.groups:
-                for da in gp.data_arrays:
-                    pass
-                for mt in gp.multi_tags:
-                    pass
+        Validate.check_blocks(self)
+        Validate.check_data_array(self)
+        return "The file is a valid NIX file"
 
         """
         Checks if the File is a valid NIX file. This method is only available

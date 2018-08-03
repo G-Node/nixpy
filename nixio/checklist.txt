@@ -1,7 +1,5 @@
 Things which should be validated.
 
-- convertible to float
-
 - if units are valid SI units
 
-- 
+- dimensions for dataarray // there is a dim attr for data_array objects compare to  same index in the tag's units vector. What is tag?

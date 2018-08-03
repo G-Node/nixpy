@@ -9,13 +9,14 @@ import nixio.file as filepy
 from nixio.exceptions.exceptions import InvalidFile
 from nixio.file import File
 from nixio.test.test_file import TestFile
-
+from nixio.file import  *
 
 
 # class Test(TestFile, unittest.TestCase):
 #     unittest.main()
 
 file = nix.File.open("/home/choi/PycharmProjects/nixpy/nixio/neoraw.nix")
-file.validate()
+x = file.validate()
+print(x)
 
 
