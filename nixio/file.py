@@ -265,13 +265,11 @@ class File(object):
         Validate.check_file(self)
         Validate.check_blocks(self)
         Validate.check_data_array(self)
+        Validate.check_tag(self)
+        Validate.check_multi_tag(self)
+        Validate.check_section(self)
         return "The file is a valid NIX file"
 
-        """
-        Checks if the File is a valid NIX file. This method is only available
-        when using the "hdf5" backend.
-        :return: Result object
-        """
 
     def flush(self):
         self._h5file.flush()

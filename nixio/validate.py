@@ -15,23 +15,25 @@ class Validate():
         self.file = nix.File.open(file)
 
     def check_file(self):
-        assert self.created_at is not None, "date is not set!"
-        assert self.format is not None, "format is not set!"
-        assert self.version is not None, "version is not set!"
+        assert self.created_at, "date is not set!"
+        assert self.format, "format is not set!"
+        assert self.version, "version is not set!"
         # in nixpy no location attributes. This is checked in C++ version
 
     def check_blocks(self):
         for blk in self.blocks:
-            assert blk.name is not None, "blocks should have name"
-            assert blk.type is not None, 'blocks should have type'
+            assert blk.name, "blocks should have name"
+            assert blk.type, 'blocks should have type'
 
     def check_data_array(self):
         valid_check_list = []
 
+
         for blk in self.blocks:
             for da in blk.data_arrays:
-                if da == None:
+                if da == []:
                     valid_check_list.append(False)
+
         valid_check_list.append(True)
 
         for blk in self.blocks:
@@ -55,9 +57,16 @@ class Validate():
         for blk in self.blocks:
             for da in blk.data_arrays:
                 poly = da.polynom_coefficients
+                ex_origin = da.expansion_origin
+                if ex_origin:
+                    assert poly, "Expansion origins exist but " \
+                                 "polynomial coefficients are missing!"
+                if poly:
+                    assert ex_origin, "Polynomial coefficients exist" \
+                                      " but expansion origins are missing"
 
         valid_check_list = np.array(valid_check_list)
-        assert np.all(valid_check_list) == True , "Some/all data_arrays are invalid"
+        assert np.all(valid_check_list) == True, "Some/all data_arrays are invalid"
 
     def check_tag(self):
         pass
