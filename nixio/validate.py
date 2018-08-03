@@ -15,10 +15,15 @@ class Validate():
         self.file = nix.File.open(file)
 
     def check_file(self):
-        pass
+        assert self.created_at is not None, "date is not set!"
+        assert self.format is not None, "format is not set!"
+        assert self.version is not None, "version is not set!"
+        # in nixpy no location attributes. This is checked in C++ version
 
     def check_blocks(self):
-        pass
+        for blk in self.blocks:
+            assert blk.name is not None, "blocks should have name"
+            assert blk.type is not None, 'blocks should have type'
 
     def check_data_array(self):
         valid_check_list = []
@@ -31,8 +36,6 @@ class Validate():
 
         for blk in self.blocks:
             for i, da in enumerate(blk.data_arrays):
-                print( da.type, da.dimensions)
-                print("Sig{} is {}".format(i,da.data_extent))
                 dim = da.shape
                 len_dim = da.data_extent  # not sure if this make sense
                 if dim == len_dim:

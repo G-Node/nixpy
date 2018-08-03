@@ -262,6 +262,7 @@ class File(object):
             return False
 
     def validate(self):
+        Validate.check_file(self)
         Validate.check_blocks(self)
         Validate.check_data_array(self)
         return "The file is a valid NIX file"
