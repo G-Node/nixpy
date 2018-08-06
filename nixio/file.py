@@ -262,13 +262,14 @@ class File(object):
             return False
 
     def validate(self):
-        Validate.check_file(self)
-        Validate.check_blocks(self)
-        Validate.check_data_array(self)
-        Validate.check_tag(self)
-        Validate.check_multi_tag(self)
-        Validate.check_section(self)
-        return "The file is a valid NIX file"
+        errors = []
+        for i, blk in enumerate(self.blocks):
+            errors.append(Validate.check_for_basics(i,blk))
+            
+        if errors:
+            return errors
+        else:
+            return "The file is a valid NIX file"
 
 
     def flush(self):

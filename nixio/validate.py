@@ -11,6 +11,8 @@ from .util.units import *
 
 class Validate():
 
+
+
     def __init__(self, file=''):
         self.file = nix.File.open(file)
 
@@ -76,6 +78,16 @@ class Validate():
 
     def check_section(self):
         pass
+
+    def check_for_basics(idx, entity):
+        a = b = c = ''
+        if not entity.type:
+            a = "Type of {} {} is missing".format(entity, idx)
+        if not entity.id:
+            b = "ID of {} {} is missing".format(entity, idx)
+        if not entity.name:
+            c = "Name of {} {} is missing".format(entity, idx)
+        return a,b,c
 
 
 
