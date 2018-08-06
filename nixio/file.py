@@ -262,10 +262,47 @@ class File(object):
             return False
 
     def validate(self):
-        errors = []
-        for i, blk in enumerate(self.blocks):
-            errors.append(Validate.check_for_basics(i,blk))
-            
+
+        errors = {'files':[], 'blocks':[]}
+
+        for bi, blk in enumerate(self.blocks):
+            seg_dict = {'groups': []}
+            errors['blocks'].append(seg_dict)
+
+            valid_blk = Validate.check_for_basics(bi,blk)
+            if valid_blk:
+                errors['blocks'].append(valid_blk)
+
+            for gi, grp in enumerate (blk.groups):
+                da_dict = {'data_arrays': []}
+                t_dict = {'tags': []}
+                mt_dict = {'multi_tags': []}
+                errors['blocks'][bi]['groups'].append(da_dict)
+                errors['blocks'][bi]['groups'].append(t_dict)
+                errors['blocks'][bi]['groups'].append(mt_dict)
+
+                seg_list = errors['blocks'][bi]['groups'][gi]
+
+
+                valid_grp = Validate.check_for_basics(gi,grp)
+                if valid_grp:
+                    seg_list.append(valid_grp)
+
+                for di, da in enumerate(blk.data_arrays):
+                    valid_da = Validate.check_for_basics(di, da)
+                    if valid_da:
+                        seg_list['data_arrays'][di].append(valid_da)
+
+                for ti, tags in enumerate(grp.tags):
+                    valid_tag = Validate.check_for_basics(ti,tags)
+                    if valid_tag:
+                        seg_list['tags'][ti].append(valid_tag)
+
+                for mti, multag in enumerate(grp.multi_tags):
+                    valid_multag = Validate.check_for_basics(mti,multag)
+                    if valid_multag:
+                        seg_list['multi_tags'][mti].append(valid_multag)
+
         if errors:
             return errors
         else:
