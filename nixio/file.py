@@ -262,45 +262,34 @@ class File(object):
             return False
 
     def validate(self):
-
-        errors = {'files':[], 'blocks':[]}
-
+        validator = Validate(self)
+        validator.check_file()
+        validator.form_dict()
+        errors = validator.errors
         for bi, blk in enumerate(self.blocks):
-            seg_dict = {'groups': []}
-            errors['blocks'].append(seg_dict)
+            validator.check_blocks(blk, bi)
+            for gi, grp in enumerate(blk.groups):
+                validator.check_groups(grp,gi, bi)
+            for da in blk.data_arrays:
+                for dim in da.dimensions:
+                    if dim.dimension_type == 'Range':
+                        pass
+                    if dim.dimension_type == 'Set':
+                        pass
+                    if dim.dimension_type == 'Sampled':
+                        pass
+            for mt in blk.multi_tags:
+                for fea in mt.features:
+                    pass
+            for tag in blk.tags:
+                for fea in tag.features:
+                    pass
+            for src in blk.sources:
+                pass
 
-            valid_blk = Validate.check_for_basics(bi,blk)
-            if valid_blk:
-                errors['blocks'].append(valid_blk)
-
-            for gi, grp in enumerate (blk.groups):
-                da_dict = {'data_arrays': []}
-                t_dict = {'tags': []}
-                mt_dict = {'multi_tags': []}
-                errors['blocks'][bi]['groups'].append(da_dict)
-                errors['blocks'][bi]['groups'].append(t_dict)
-                errors['blocks'][bi]['groups'].append(mt_dict)
-
-                seg_list = errors['blocks'][bi]['groups'][gi]
-
-                valid_grp = Validate.check_for_basics(gi,grp)
-                if valid_grp:
-                    seg_list.append(valid_grp)
-
-                for di, da in enumerate(blk.data_arrays):
-                    valid_da = Validate.check_for_basics(di, da)
-                    if valid_da:
-                        seg_list['data_arrays'][di].append(valid_da)
-
-                for ti, tags in enumerate(grp.tags):
-                    valid_tag = Validate.check_for_basics(ti,tags)
-                    if valid_tag:
-                        seg_list['tags'][ti].append(valid_tag)
-
-                for mti, multag in enumerate(grp.multi_tags):
-                    valid_multag = Validate.check_for_basics(mti,multag)
-                    if valid_multag:
-                        seg_list['multi_tags'][mti].append(valid_multag)
+        for sec in self.sections:
+            for prop in sec.property:
+                pass
 
         if errors:
             return errors
