@@ -87,47 +87,35 @@ class Validate():
             return None
 
     def check_data_array(self, da, da_idx, blk_idx):  # seperate da and dim checking
+
         da_error_list = []
+        da_error_list.extend(self.check_for_basics(da,da_idx))
+        if da == []:
+            da_error_list.append("No empty data_array")
 
+        dim = da.shape
+        len_dim = da.data_extent  # not sure if this make sense
+        if dim != len_dim:
+            da_error_list.append("dimension mismatch")
 
-        # for blk in self.file.blocks:
-        #     for da in blk.data_arrays:
-        #         if da == []:
-        #             valid_check_list.append(False)
-        #
-        # valid_check_list.append(True)
-        #
-        # for blk in self.file.blocks:
-        #     for i, da in enumerate(blk.data_arrays):
-        #         dim = da.shape
-        #         len_dim = da.data_extent  # not sure if this make sense
-        #         if dim == len_dim:
-        #             continue
-        #         valid_check_list.append(False)
-        #         break
-        # valid_check_list.append(True)
-        #
-        # for blk in self.file.blocks:
-        #     for da in blk.data_arrays:
-        #         unit = da.unit
-        #         if is_si(unit):
-        #             continue
-        #         valid_check_list.append(False)
-        # valid_check_list.append(True)
-        #
-        # for blk in self.file.blocks:
-        #     for da in blk.data_arrays:
-        #         poly = da.polynom_coefficients
-        #         ex_origin = da.expansion_origin
-        #         if ex_origin:
-        #             assert poly, "Expansion origins exist but " \
-        #                          "polynomial coefficients are missing!"
-        #         if poly:
-        #             assert ex_origin, "Polynomial coefficients exist" \
-        #                               " but expansion origins are missing"
-        #
-        # valid_check_list = np.array(valid_check_list)
-        # assert np.all(valid_check_list) == True, "Some/all data_arrays are invalid"
+        unit = da.unit
+        if is_si(unit) == False:
+            da_error_list.append("invalid units")
+
+        poly = da.polynom_coefficients
+        ex_origin = da.expansion_origin
+        if ex_origin and not poly:
+            da_error_list.append("Expansion origins exist but "
+                                 "polynomial coefficients are missing!")
+        if poly and not ex_origin:
+            da_error_list.append("Polynomial coefficients exist" \
+                              " but expansion origins are missing")
+
+        if da_error_list:
+            self.errors['blocks'][blk_idx]['data_arrays'].append(da_error_list)
+            return self.errors
+        else:
+            return None
 
     def check_tag(self, tag):
         for blk in self.file.blocks:

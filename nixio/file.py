@@ -270,7 +270,8 @@ class File(object):
             validator.check_blocks(blk, bi)
             for gi, grp in enumerate(blk.groups):
                 validator.check_groups(grp,gi, bi)
-            for da in blk.data_arrays:
+            for di, da in enumerate(blk.data_arrays):
+                validator.check_data_array(da, di, bi)
                 for dim in da.dimensions:
                     if dim.dimension_type == 'Range':
                         pass
