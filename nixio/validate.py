@@ -18,17 +18,19 @@ class Validate():
 
     def check_file(self):
 
-        if not self.created_at: print("date is not set!")
-        if not self.format: print("format is not set!")
-        if not self.version: print("version is not set!")
+        if not self.created_at: a = ("date is not set!")
+        if not self.format: b = ("format is not set!")
+        if not self.version: c = ("version is not set!")
         # in nixpy no location attributes. This is checked in C++ version
+        return a,b,c
 
     def check_blocks(self):
         blk_dict = {}
 
         for blk in self.blocks:
-            assert blk.name, "blocks should have name"
-            assert blk.type, 'blocks should have type'
+            if not blk.name: a = "blocks should have name"
+            if not blk.type: b = 'blocks should have type'
+        return a,b
 
     def check_data_array(self):  # maybe I should seperate the checks of da and dims
         valid_check_list = []
@@ -79,17 +81,23 @@ class Validate():
                 for tag in grp.tags:
                     if not tag.position:
                         a = "Position is not set!"
-                    if tag.references:  # referenced da dimension and units should match the tag
-                        pass
+                    if tag.references:
+                        # referenced da dimension and units should match the tag
+                        if tag.references.size != len(tag.position):
+                            err_msg = "number of data do not match"
+                        if tag.extent:
+                            if tag.positions.shape[1] != len(tag.references):
+                                err_msg2 = "number of data do not match"
+                            if tag.references.size != tag.extent.size:
+                                err_msg3 = "number of data do not match"
                     if tag.units:
                         if not is_si(tag.units):
                             b = "It is not a valid unit"
+                        if not tag.references.units:
+                            err_msg1 = "references need to have units"
+                            continue
                         if tag.references.units != tag.units:
-                            c = "Some of the referenced DataArrays' dimensions don't " \
-                                "have units where the tag has. Make sure that all referen" \
-                                "ces have the same number of dimensions as the tag has un" \
-                                "its and that each dimension has a unit set."
-
+                            c = "Units unmatched"
 
     def check_multi_tag(self):
         for blk in self.blocks:
@@ -97,33 +105,40 @@ class Validate():
                 for mt in grp.multi_tags:
                     if not mt.positions:
                         a = "Position is not set!"
+                        continue
+                    if mt.extents:
+                        if mt.positions.shape[1] != len(mt.extents):
+                            err_msg = "No of entries in positions and extents do not match"
                     if mt.references:
-                        pass
+                        if mt.positions.shape[1] != len(mt.references):
+                            err_msg1 = "The number of entries do not match"
+                        if mt.extents:
+                            if len(mt.references) != len(mt.extents):
+                                err_msg2 = "Entries unmatch"
                     if mt.units:
                         if not is_si(mt.units):
                             b = "It is not a valid unit"
                         if mt.references.units != mt.units:
-                            pass
+                            err_msg3 = "Units not match"
 
     def check_section(self):
         for meta in self.metadata:  # this part may be replaced by check_for_basics
             if not meta.name:
-                pass
+                err_msg1 = "Section must have names"
             if not meta.id:
-                pass
+                err_msg2 = "Section must have id"
             if not meta.type:
-                pass
+                err_msg3 = "Section must have type"
             for prop in meta.property:
-                if not prop.unit:
+                if prop.values and not prop.unit:
                     b = "Why there is no unit?"
                     continue
-                if is_si(prop.unit):
+                if prop.unit and is_si(prop.unit) == False:
                     a = "The unit is not valid!"
 
 
     def check_for_basics(idx, entity):
         a = b = c = ''
-        print(entity.type)
         if not entity.type:
             a = "Type of {} {} is missing".format(entity, idx)
         if not entity.id:

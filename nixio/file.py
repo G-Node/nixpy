@@ -283,7 +283,6 @@ class File(object):
 
                 seg_list = errors['blocks'][bi]['groups'][gi]
 
-
                 valid_grp = Validate.check_for_basics(gi,grp)
                 if valid_grp:
                     seg_list.append(valid_grp)
