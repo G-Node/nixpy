@@ -273,10 +273,11 @@ class File(object):
             for di, da in enumerate(blk.data_arrays):
                 validator.check_data_array(da, di, bi)
                 for dim in da.dimensions:
+                    validator.check_dim(dim,di,bi)
                     if dim.dimension_type == 'Range':
                         pass
                     if dim.dimension_type == 'Set':
-                        pass
+                        validator.check_set_dim(dim, di, bi)
                     if dim.dimension_type == 'Sampled':
                         pass
             for mt in blk.multi_tags:
@@ -291,8 +292,9 @@ class File(object):
         for sec in self.sections:
             pass
         for blk in self.blocks:
-            for md in blk.metadata:
-                pass
+            if blk.metadata:
+                for md in blk.metadata:
+                    pass
 
         if errors:
             return errors

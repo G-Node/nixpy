@@ -23,34 +23,9 @@ class Validate():
                         'tags': [], 'multi_tags': [], 'blk_err': []}
             self.errors['blocks'].append(blk_dict)
 
-            # valid_blk = self.check_for_basics(bi, blk)
-            # if valid_blk:
-            #     self.errors['blocks'].append(valid_blk)
-
             for gi, da in enumerate(blk.data_arrays):
                 d = {'dimensions': [] , 'da_err': []}
                 self.errors['blocks'][bi]['data_arrays'].append(d)
-
-                # seg_list = self.errors['blocks'][bi]['groups'][gi]
-
-                # valid_grp = self.check_for_basics(gi, grp)
-                # if valid_grp:
-                #     seg_list.append(valid_grp)
-                #
-                # for di, da in enumerate(blk.data_arrays):
-                #     valid_da = self.check_for_basics(di, da)
-                #     if valid_da:
-                #         seg_list['data_arrays'][di].append(valid_da)
-                #
-                # for ti, tags in enumerate(grp.tags):
-                #     valid_tag = self.check_for_basics(ti, tags)
-                #     if valid_tag:
-                #         seg_list['tags'][ti].append(valid_tag)
-                #
-                # for mti, multag in enumerate(grp.multi_tags):
-                #     valid_multag = self.check_for_basics(mti, multag)
-                #     if valid_multag:
-                #         seg_list['multi_tags'][mti].append(valid_multag)
 
     def check_file(self):
 
@@ -114,7 +89,7 @@ class Validate():
                                              "of ticks differ from the data entries")
 
         unit = da.unit
-        if is_si(unit) == False:
+        if not is_si(unit):
             da_error_list.append("invalid units")
 
         poly = da.polynom_coefficients
@@ -135,6 +110,8 @@ class Validate():
             return None
 
     def check_tag(self, tag):
+        tag_err_list = []
+
         for blk in self.file.blocks:
             for grp in blk.groups:
                 for tag in grp.tags:
@@ -159,6 +136,8 @@ class Validate():
                             c = "Units unmatched"
 
     def check_multi_tag(self):
+        mt_err_list = []
+
         for blk in self.file.blocks:
             for grp in blk.groups:
                 for mt in grp.multi_tags:
@@ -192,7 +171,7 @@ class Validate():
                 if prop.values and not prop.unit:
                     b = "Why there is no unit?"
                     continue
-                if prop.unit and is_si(prop.unit) == False:
+                if prop.unit and not is_si(prop.unit):
                     a = "The unit is not valid!"
 
     def check_features(self):
@@ -201,17 +180,64 @@ class Validate():
     def check_sources(self):
         self.check_for_basics()
 
-    def check_dim(self):
-        pass
+    def check_dim(self, dimen, da_idx, blk_idx):  # call it in file after the index problem is fixed
+        if dimen.index:
+            return None
+        else:
+            self.errors['blocks'][blk_idx]['data_arrays'][da_idx]['dimensions'].append('index must > 0')
+            return self.errors
 
-    def check_range_dim(self):
-        pass
+    def check_range_dim(self, r_dim, da_idx, blk_idx):
+        rdim_err_list = []
 
-    def check_set_dim(self):
-        pass
+        if not r_dim.ticks:
+            rdim_err_list.append("ticks need to be set for range dimensions")
+        if type(r_dim).__name__ != "RangeDimension" :
+            rdim_err_list.append("dimension type is not correct!")
 
-    def check_sampled_dim(self):
-        pass
+        # sorting!
+        if r_dim.unit:
+            if not is_atomic(r_dim.unit):
+                rdim_err_list.append("unit must be atomic, not composite!")
+
+        if rdim_err_list:
+            self.errors['blocks'][blk_idx]['data_arrays']\
+                [da_idx]['dimensions'].append(rdim_err_list)
+            return self.errors
+        else:
+            return None
+
+    def check_set_dim(self, set_dim, da_idx, blk_idx):
+        if type(set_dim).__name__ != "SetDimension":
+            self.errors['blocks'][blk_idx]['data_arrays'][da_idx] \
+                ['dimensions'].append("dimension type is not correct!")
+            return self.errors
+        else:
+            return None
+
+    def check_sampled_dim(self, sam_dim, da_idx, blk_idx):
+        sdim_err_list = []
+
+        if sam_dim.sampling_interval < 0:
+            sdim_err_list.append("samplingInterval is not set to valid value (> 0)!")
+
+        if type(sam_dim).__name__ != "SampledDimension":
+            sdim_err_list.append("dimension type is not correct!")
+
+        if sam_dim.offset and not sam_dim.unit:
+            sdim_err_list.append("offset is set, but no valid unit set!")
+
+        if sam_dim.unit:
+            if not is_atomic(sam_dim.unit):
+                sdim_err_list.append("unit must be atomic, not composite!")
+
+        if sdim_err_list:
+            self.errors['blocks'][blk_idx]['data_arrays']\
+                [da_idx]['dimensions'].append(sdim_err_list)
+            return self.errors
+        else:
+            return None
+
 
     def check_for_basics(self,entity, idx):
         basic_check_list = []
