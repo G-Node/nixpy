@@ -289,7 +289,9 @@ class File(object):
                 pass
 
         for sec in self.sections:
-            for prop in sec.property:
+            pass
+        for blk in self.blocks:
+            for md in blk.metadata:
                 pass
 
         if errors:

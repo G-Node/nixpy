@@ -28,7 +28,7 @@ class Validate():
             #     self.errors['blocks'].append(valid_blk)
 
             for gi, da in enumerate(blk.data_arrays):
-                d = {'dimensions': []}
+                d = {'dimensions': [] , 'da_err': []}
                 self.errors['blocks'][bi]['data_arrays'].append(d)
 
                 # seg_list = self.errors['blocks'][bi]['groups'][gi]
@@ -89,14 +89,29 @@ class Validate():
     def check_data_array(self, da, da_idx, blk_idx):  # seperate da and dim checking
 
         da_error_list = []
-        da_error_list.extend(self.check_for_basics(da,da_idx))
+        if self.check_for_basics(da,da_idx):
+            da_error_list.extend(self.check_for_basics(da,da_idx))
+        else:
+            pass
         if da == []:
             da_error_list.append("No empty data_array")
 
         dim = da.shape
-        len_dim = da.data_extent  # not sure if this make sense
+        len_dim = da.data_extent
         if dim != len_dim:
             da_error_list.append("dimension mismatch")
+
+
+        if da.dimensions:
+            for dim in da.dimensions:
+                if dim.dimension_type == 'range':
+                    if len(dim.ticks) != len(da): # or should I use da.data_extent
+                        da_error_list.append("in some Range Dimensions, the number"
+                                             " of ticks differ from the data entries")
+                if dim.dimension_type == 'set': # don't know why only check set dim
+                    if len(dim.labels) != len(da):
+                        da_error_list.append("in some Set Dimensions, the number "
+                                             "of ticks differ from the data entries")
 
         unit = da.unit
         if is_si(unit) == False:
@@ -104,15 +119,17 @@ class Validate():
 
         poly = da.polynom_coefficients
         ex_origin = da.expansion_origin
-        if ex_origin and not poly:
-            da_error_list.append("Expansion origins exist but "
+        if np.any(ex_origin):
+            if not poly:
+                da_error_list.append("Expansion origins exist but "
                                  "polynomial coefficients are missing!")
         if poly and not ex_origin:
             da_error_list.append("Polynomial coefficients exist" \
                               " but expansion origins are missing")
 
         if da_error_list:
-            self.errors['blocks'][blk_idx]['data_arrays'].append(da_error_list)
+            self.errors['blocks'][blk_idx]['data_arra' \
+                                           'ys'][da_idx]['da_err'].append(da_error_list)
             return self.errors
         else:
             return None
