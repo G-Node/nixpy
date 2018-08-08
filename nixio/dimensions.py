@@ -28,7 +28,7 @@ class DimensionContainer(Container):
             DimensionType.Sample: SampledDimension,
             DimensionType.Set: SetDimension,
         }[item.get_attr("dimension_type")]
-        idx = item.get_attr("index")
+        idx = item.name
         return cls(item, idx)
 
 
@@ -36,7 +36,7 @@ class Dimension(object):
 
     def __init__(self, h5group, index):
         self._h5group = h5group
-        self.dim_index = index
+        self.dim_index = int(index)
 
     @classmethod
     def _create_new(cls, parent, index):
@@ -58,11 +58,6 @@ class Dimension(object):
     @property
     def index(self):
         return self.dim_index
-
-    @index.setter
-    def index(self, idx):
-        util.check_attr_type(idx, int)
-        self.dim_index = idx
 
 
 class SampledDimension(Dimension):
