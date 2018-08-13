@@ -274,29 +274,29 @@ class File(object):
                 validator.check_data_array(da, di, bi)
                 for dim in da.dimensions:
                     validator.check_dim(dim,di,bi)
-                    if dim.dimension_type == 'Range':
-                        pass
-                    if dim.dimension_type == 'Set':
+                    if dim.dimension_type == 'range':
+                        validator.check_range_dim(dim, di, bi)
+                    if dim.dimension_type == 'set':
                         validator.check_set_dim(dim, di, bi)
-                    if dim.dimension_type == 'Sampled':
-                        pass
-            for mt in blk.multi_tags:
+                    if dim.dimension_type == 'sampled':
+                        validator.check_sampled_dim(dim, di, bi)
+            for mti, mt in enumerate(blk.multi_tags):
+                validator.check_multi_tag(mt, mti, bi)
                 for fea in mt.features:
-                    pass
-            for tag in blk.tags:
+                    validator.check_features(fea, 'multi_tags', bi, mti)
+            for ti, tag in enumerate(blk.tags):
+                validator.check_tag(tag, ti, bi)
                 for fea in tag.features:
-                    pass
-            for src in blk.sources:
-                pass
+                    validator.check_features(fea, 'tags', bi, ti)
+            for src in blk.find_sources():
+                validator.check_sources(src)
 
-        for sec in self.sections:
-            pass
-        for blk in self.blocks:
-            if blk.metadata:
-                for md in blk.metadata:
-                    pass
+        for si, sec in enumerate(self.find_sections()):
+            validator.check_section(sec)
+            for prop in sec.props:
+                validator.check_property(prop, si)
 
-        if errors:
+        if errors:  # how to know all entries in dict is empty
             return errors
         else:
             return "The file is a valid NIX file"

@@ -1,31 +1,46 @@
 from __future__ import (absolute_import, division, print_function)
 import os
-import shutil
 import h5py
 import numpy as np
 import quantities as pq
 import nixio as nix
 from .exceptions import *
 from .util.units import *
-
+from collections import OrderedDict
 
 class Validate():
 
     def __init__(self, file):
         self.file = file
-        self.errors = {'files': [], 'blocks': []}
+        self.errors = OrderedDict()
+        self.errors['files'] = []
+        self.errors['blocks'] = []
+        self.errors['sections'] = []
 
     def form_dict(self):
         file = self.file
 
+        for si, sec in enumerate(file.find_sections()):
+            prop_dict = {'props': []}
+            self.errors['sections'].append(prop_dict)
+
         for bi, blk in enumerate(file.blocks):
-            blk_dict = {'groups': [], 'data_arrays': [],
+            blk_dict = {'sources':[], 'groups': [], 'data_arrays': [],
                         'tags': [], 'multi_tags': [], 'blk_err': []}
             self.errors['blocks'].append(blk_dict)
+            OrderedDict(self.errors)
 
             for gi, da in enumerate(blk.data_arrays):
                 d = {'dimensions': [] , 'da_err': []}
                 self.errors['blocks'][bi]['data_arrays'].append(d)
+
+            for mi, mt in enumerate(blk.multi_tags):
+                mt_dict = {'features': [], 'mt_err': []}
+                self.errors['blocks'][bi]['multi_tags'].append(mt_dict)
+
+            for ti, tag in enumerate(blk.tags):
+                tag_dict = {'features': [], 'tag_err': []}
+                self.errors['blocks'][bi]['tags'].append(tag_dict)
 
     def check_file(self):
 
@@ -43,7 +58,7 @@ class Validate():
 
     def check_blocks(self, blocks, blk_idx):
 
-        blk_err_list = self.check_for_basics(blocks, blk_idx)
+        blk_err_list = self.check_for_basics(blocks)
 
         if blk_err_list:
             self.errors['blocks'][blk_idx]['blk_err'].append(blk_err_list)
@@ -53,7 +68,7 @@ class Validate():
 
     def check_groups(self, groups, grp_idx, blk_idx):
 
-        grp_err_list = self.check_for_basics(groups, grp_idx)
+        grp_err_list = self.check_for_basics(groups)
 
         if grp_err_list:
             self.errors['blocks'][blk_idx]['groups'].append(grp_err_list)
@@ -64,8 +79,8 @@ class Validate():
     def check_data_array(self, da, da_idx, blk_idx):  # seperate da and dim checking
 
         da_error_list = []
-        if self.check_for_basics(da,da_idx):
-            da_error_list.extend(self.check_for_basics(da,da_idx))
+        if self.check_for_basics(da):
+            da_error_list.extend(self.check_for_basics(da))
         else:
             pass
         if da == []:
@@ -109,82 +124,112 @@ class Validate():
         else:
             return None
 
-    def check_tag(self, tag):
+    def check_tag(self, tag, tag_idx, blk_idx):
         tag_err_list = []
 
-        for blk in self.file.blocks:
-            for grp in blk.groups:
-                for tag in grp.tags:
-                    if not tag.position:
-                        a = "Position is not set!"
-                    if tag.references:
-                        # referenced da dimension and units should match the tag
-                        if tag.references.size != len(tag.position):
-                            err_msg = "number of data do not match"
-                        if tag.extent:
-                            if tag.positions.shape[1] != len(tag.references):
-                                err_msg2 = "number of data do not match"
-                            if tag.references.size != tag.extent.size:
-                                err_msg3 = "number of data do not match"
-                    if tag.units:
-                        if not is_si(tag.units):
-                            b = "It is not a valid unit"
-                        if not tag.references.units:
-                            err_msg1 = "references need to have units"
-                            continue
-                        if tag.references.units != tag.units:
-                            c = "Units unmatched"
+        if not tag.position:
+            tag_err_list.append("Position is not set!")
+        if tag.references:
+            # referenced da dimension and units should match the tag
+            if tag.references.size != len(tag.position):
+                tag_err_list.append("number of data do not match")
+            if tag.extent:
+                if tag.positions.shape[1] != len(tag.references):
+                    tag_err_list.append("number of data do not match")
+                if tag.references.size != tag.extent.size:
+                    tag_err_list.append("number of data do not match")
+        if tag.units:
+            if not is_si(tag.units):
+                tag_err_list.append("It is not a valid unit")
+            if not tag.references.units:
+                tag_err_list.append("references need to have units")
+            elif tag.references.units != tag.units:
+                    tag_err_list.append("Units unmatched")
 
-    def check_multi_tag(self):
+        if tag_err_list:
+            self.errors['blocks'][blk_idx]['tags'][tag_idx]['tag' \
+                                                            '_err'].append(tag_err_list)
+            return self.errors
+        else:
+            return None
+
+    def check_multi_tag(self, mt, mt_idx, blk_idx):
         mt_err_list = []
 
-        for blk in self.file.blocks:
-            for grp in blk.groups:
-                for mt in grp.multi_tags:
-                    if not mt.positions:
-                        a = "Position is not set!"
-                        continue
-                    if mt.extents:
-                        if mt.positions.shape[1] != len(mt.extents):
-                            err_msg = "No of entries in positions and extents do not match"
-                    if mt.references:
-                        if mt.positions.shape[1] != len(mt.references):
-                            err_msg1 = "The number of entries do not match"
-                        if mt.extents:
-                            if len(mt.references) != len(mt.extents):
-                                err_msg2 = "Entries unmatch"
-                    if mt.units:
-                        if not is_si(mt.units):
-                            b = "It is not a valid unit"
-                        if mt.references.units != mt.units:
-                            err_msg3 = "Units not match"
+        if not mt.positions:
+            mt_err_list.append("Position is not set!")
+        if mt.extents:
+            if mt.positions.shape[0] != mt.extents.shape[0]:  # not sure if correct
+                # not sure what index should be given to shape
+                mt_err_list.append("No of entries in positions and extents do not match")
+        if mt.references:
+            if len(mt.positions) != len(mt.references):  # not sure if correct
+                mt_err_list.append("The number of entries do not match")
+            if mt.extents:
+                if len(mt.references) != len(mt.extents):
+                    mt_err_list.append("Entries unmatch")
+        if mt.units:
+            if not is_si(mt.units):
+                mt_err_list.append("It is not a valid unit")
+            if mt.references.units != mt.units:
+                mt_err_list.append("Units not match")
 
-    def check_section(self):
-        for meta in self.file.metadata:  # this part may be replaced by check_for_basics
-            if not meta.name:
-                err_msg1 = "Section must have names"
-            if not meta.id:
-                err_msg2 = "Section must have id"
-            if not meta.type:
-                err_msg3 = "Section must have type"
-            for prop in meta.property:
-                if prop.values and not prop.unit:
-                    b = "Why there is no unit?"
-                    continue
-                if prop.unit and not is_si(prop.unit):
-                    a = "The unit is not valid!"
+        if mt_err_list:
+            self.errors['blocks'][blk_idx]['multi_tags'][mt_idx]['mt' \
+                                                            '_err'].append(mt_err_list)
+            return self.errors
+        else:
+            return None
 
-    def check_features(self):
-        pass
+    def check_section(self, section):
+        if self.check_for_basics(section):
+            self.errors['sections'].append(self.check_for_basics(section))
+            return self.errors
+        else:
+            return None
 
-    def check_sources(self):
-        self.check_for_basics()
+    def check_property(self, prop, sec_idx):
+        prop_err_list = []
+
+        if prop.values and not prop.unit:
+            prop_err_list.append("Unit is not set")
+        if prop.unit and not is_si(prop.unit):
+            prop_err_list.append("Unit is not valid!")
+
+        if prop_err_list:
+            self.errors['sections'][sec_idx]['props'].append(prop_err_list)
+            return self.errors
+        else:
+            return None
+
+    def check_features(self, feat, parent, blk_idx, tag_idx):
+
+        fea_err_list = []
+
+        if not feat.link_type:
+            fea_err_list.append("linked type is not set!")
+        if not feat.data:
+            fea_err_list.append("data is not set")
+
+        if fea_err_list:
+            self.errors['blocks'][blk_idx][parent][tag_idx]['fea' \
+                                                            'tures'].append(fea_err_list)
+            return self.errors
+        else:
+            return None
+
+    def check_sources(self, src):
+        if self.check_for_basics(src):
+            pass
+        else:
+            return None
 
     def check_dim(self, dimen, da_idx, blk_idx):  # call it in file after the index problem is fixed
         if dimen.index:
             return None
         else:
-            self.errors['blocks'][blk_idx]['data_arrays'][da_idx]['dimensions'].append('index must > 0')
+            self.errors['blocks'][blk_idx]['data_arrays'][da_idx]['di' \
+                                                    'mensions'].append('index must > 0')
             return self.errors
 
     def check_range_dim(self, r_dim, da_idx, blk_idx):
@@ -195,7 +240,7 @@ class Validate():
         if type(r_dim).__name__ != "RangeDimension" :
             rdim_err_list.append("dimension type is not correct!")
 
-        # sorting!
+        # sorting is already covered in the dimensions.py file
         if r_dim.unit:
             if not is_atomic(r_dim.unit):
                 rdim_err_list.append("unit must be atomic, not composite!")
@@ -239,17 +284,17 @@ class Validate():
             return None
 
 
-    def check_for_basics(self,entity, idx):
+    def check_for_basics(self,entity):
         basic_check_list = []
         a = b = c = ''
         if not entity.type:
-            a = "Type of {} {} is missing".format(type(entity).__name__, idx)
+            a = "Type of some {} is missing".format(type(entity).__name__)
             basic_check_list.append(a)
         if not entity.id:
-            b = "ID of {} {} is missing".format(type(entity).__name__, idx)
+            b = "ID of some {} is missing".format(type(entity).__name__)
             basic_check_list.append(b)
         if not entity.name:
-            c = "Name of {} {} is missing".format(type(entity).__name__, idx)
+            c = "Name of some {} is missing".format(type(entity).__name__)
             basic_check_list.append(c)
         if a == b == c == '':
             return None
