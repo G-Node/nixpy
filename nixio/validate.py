@@ -159,7 +159,7 @@ class Validate():
         if not mt.positions:
             mt_err_list.append("Position is not set!")
         if mt.extents:
-            if mt.positions.shape[0] != mt.extents.shape[0]:  # not sure if correct
+            if mt.positions.shape != mt.extents.shape:  # not sure if correct
                 # not sure what index should be given to shape
                 mt_err_list.append("No of entries in positions and extents do not match")
         if mt.references:

@@ -9,8 +9,7 @@ from .tmp import TempDir
 class TestValidate (unittest.TestCase):
 
     def Setup(self):
-        self.tmpdir = TempDir("blocktest")
-        self.testfilename = os.path.join(self.tmpdir.path, "blocktest.nix")
+        self.tmpdir = TempDir("validatetest")
+        self.testfilename = os.path.join(self.tmpdir.path, "validatetest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
-        self.block = self.file.create_block("test block", "recordingsession")
-        self.other = self.file.create_block("other block", "recordingsession")
+
