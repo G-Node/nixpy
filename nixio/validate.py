@@ -4,7 +4,6 @@ import h5py
 import numpy as np
 import quantities as pq
 import nixio as nix
-from .exceptions import *
 from .util.units import *
 from collections import OrderedDict
 
@@ -45,13 +44,13 @@ class Validate():
     def check_file(self):
 
         file_err_list = []
-        if not self.file.created_at: file_err_list.append("date is not set!")
-        if not self.file.format: file_err_list.append("format is not set!")
-        if not self.file.version: file_err_list.append("version is not set!")
+        if not self.file.created_at:
+            file_err_list.append("date is not set!")
+        # will not check format as Error will be raised anyways
+        # will not check version as Error will be raised
         # in nixpy no location attributes. This is checked in C++ version
-
         if file_err_list:
-            self.errors['files'].append(file_err_list)
+            self.errors['files'].extend(file_err_list)
             return self.errors
         else:
             return None
@@ -61,7 +60,7 @@ class Validate():
         blk_err_list = self.check_for_basics(blocks)
 
         if blk_err_list:
-            self.errors['blocks'][blk_idx]['blk_err'].append(blk_err_list)
+            self.errors['blocks'][blk_idx]['blk_err'].extend(blk_err_list)
             return self.errors
         else:
             return None
@@ -141,9 +140,9 @@ class Validate():
         if tag.units:
             if not is_si(tag.units):
                 tag_err_list.append("It is not a valid unit")
-            if not tag.references.units:
+            if tag.references and not tag.references.units:
                 tag_err_list.append("references need to have units")
-            elif tag.references.units != tag.units:
+            elif tag.references and tag.references.units != tag.units:
                     tag_err_list.append("Units unmatched")
 
         if tag_err_list:
@@ -159,19 +158,29 @@ class Validate():
         if not mt.positions:
             mt_err_list.append("Position is not set!")
         if mt.extents:
-            if mt.positions.shape != mt.extents.shape:  # not sure if correct
+            if mt.positions.shape != mt.extents.shape:
                 # not sure what index should be given to shape
                 mt_err_list.append("No of entries in positions and extents do not match")
         if mt.references:
-            if len(mt.positions) != len(mt.references):  # not sure if correct
-                mt_err_list.append("The number of entries do not match")
+            ref_ndim = len(mt.references)
+            print(mt.positions)
+            if ref_ndim > 1 and len(mt.positions.shape) == 1:
+                mt_err_list.append("The number of reference and position"
+                                   " entries do not match")
+            elif len(mt.positions.shape) == 2 and mt.positions.shape[1] != ref_ndim:
+                mt_err_list.append("The number of reference and position"
+                                   " entries do not match")
             if mt.extents:
-                if len(mt.references) != len(mt.extents):
-                    mt_err_list.append("Entries unmatch")
+                if ref_ndim > 1 and len(mt.extents.shape) == 1:
+                    mt_err_list.append("The number of  and extent"
+                                       " entries do not match")
+                elif len(mt.extents.shape) == 2 and mt.extents.shape[1] != ref_ndim:
+                    mt_err_list.append("The number of reference and extent"
+                                       " entries do not match")
         if mt.units:
             if not is_si(mt.units):
                 mt_err_list.append("It is not a valid unit")
-            if mt.references.units != mt.units:
+            if mt.references and mt.references.units != mt.units:
                 mt_err_list.append("Units not match")
 
         if mt_err_list:
@@ -288,21 +297,20 @@ class Validate():
         basic_check_list = []
         a = b = c = ''
         if not entity.type:
-            a = "Type of some {} is missing".format(type(entity).__name__)
-            basic_check_list.append(a)
+            basic_check_list.append("Type of some {} is missing".format(type(entity).__name__))
         if not entity.id:
-            b = "ID of some {} is missing".format(type(entity).__name__)
-            basic_check_list.append(b)
+            basic_check_list.append("ID of some {} is missing".format(type(entity).__name__))
         if not entity.name:
-            c = "Name of some {} is missing".format(type(entity).__name__)
-            basic_check_list.append(c)
-        if a == b == c == '':
+            basic_check_list.append("Name of some {} is missing".format(type(entity).__name__))
+        if not basic_check_list:
             return None
         else:
             return basic_check_list
 
-
-
+    def check_dict_empty(self, dict):
+        assert type(dict) is dict or OrderedDict, "This is not a dictionary"
+        x = dict.values
+        print(x)
 
 
 

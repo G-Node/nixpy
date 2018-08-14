@@ -4,6 +4,7 @@ import h5py
 import numpy as np
 
 file = nix.File.open('testing.nix', nix.FileMode.Overwrite)
+
 block = file.create_block("blk1", "blk")
 block1 = file.create_block("blk2", "blk")
 for blk in block,block1:
@@ -35,7 +36,7 @@ da1._h5group.set_attr("expansion_origin" ,  [0.11,0.22])
 
 da2 = block.data_arrays[1]
 da2.append_set_dimension()
-da2.dimension[0]._h5group.set_attr("labels", None)
+da2.dimensions[0]._h5group.set_attr("labels", None)
 
 # del block._h5group.group.attrs["name"]
 file.close()
