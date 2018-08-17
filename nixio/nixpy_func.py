@@ -3,21 +3,20 @@ import nixio as nix
 
 from collections import OrderedDict
 import numpy as np
-file = nix.File.open('testing.nix', 'a')
-da3 = file.blocks[1].data_arrays[0]
-da3.data_extent = (10, )
-print(da3.data_extent)
-print(da3[:])
+file = nix.File.open('neoraw.nix', 'a')
+
 x = file.validate()
 print(x['blocks'][0]['data_arrays'][1]['da_err'])
 
-
-print(x['blocks'][1]['data_arrays'][0]['da_err'] )
-da= file.blocks[0].data_arrays[1]
-
-# print(da.dimensions)
-# print(len(da))
-# print(da.data_extent)
-# print(len(da.dimensions[0].labels))
+tag = file.blocks[0].multi_tags[0]
+print("=====================")
+print(tag.references)
+print(tag.id)
+print(tag.name)
+print(tag.type)
+print(tag.definition)
+print(len(tag.position))
+print(tag.references)
+print("///////////////////////")
 print(x)
 file.close()

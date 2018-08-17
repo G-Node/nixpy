@@ -124,34 +124,34 @@ class Validate():
         return self.errors
 
 
-    def check_tag(self, tag, tag_idx, blk_idx):
+    def check_tag(self, tag_idx, blk_idx):
+        tag = self.file.blocks[blk_idx].tags[tag_idx]
         tag_err_list = []
 
         if not tag.position:
             tag_err_list.append("Position is not set!")
         if tag.references:
             # referenced da dimension and units should match the tag
-            if tag.references.size != len(tag.position):
-                tag_err_list.append("number of data do not match")
+            if tag.position:
+                if tag.positions.shape[1] != len(tag.references.shape):
+                    tag_err_list.append("Number of position and dimensionality of reference do not match")
             if tag.extent:
-                if tag.positions.shape[1] != len(tag.references):
-                    tag_err_list.append("number of data do not match")
-                if tag.references.size != tag.extent.size:
-                    tag_err_list.append("number of data do not match")
-        if tag.units:
-            if not is_si(tag.units):
-                tag_err_list.append("It is not a valid unit")
+                if len(tag.references.shape) != tag.extent.shape[1]:
+                    tag_err_list.append("Number of extent and dimensionality of reference do not match")
             if tag.references and not tag.references.units:
-                tag_err_list.append("references need to have units")
-            elif tag.references and tag.references.units != tag.units:
-                    tag_err_list.append("Units unmatched")
+                tag_err_list.append("References need to have units")
+            if tag.references and tag.references.units != tag.units:
+                tag_err_list.append("References and tag units unmatched")
 
-        if tag_err_list:
-            self.errors['blocks'][blk_idx]['tags'][tag_idx]['tag' \
-                                                            '_err'].append(tag_err_list)
-            return self.errors
-        else:
-            return None
+        for unit in tag.units:
+            if not is_si(unit):
+                tag_err_list.append('Invalid unit')
+
+
+
+        self.errors['blocks'][blk_idx]['tags'][tag_idx]['tag' \
+                                                        '_err'] = tag_err_list
+        return self.errors
 
     def check_multi_tag(self, mt, mt_idx, blk_idx):
         mt_err_list = []

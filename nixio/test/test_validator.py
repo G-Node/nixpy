@@ -30,7 +30,7 @@ class TestValidate (unittest.TestCase):
                                       data=(1 + np.random.random((5))))
             for i in range(4):
                 blk.create_tag("tag{}".format(i), "tags",
-                               np.random.random((10, 10)))
+                               np.random.random((5,5)))
             for i in range(4):
                 blk.create_multi_tag("mt{}".format(i), "multi_tags",
                                      blk.data_arrays[i])
@@ -101,5 +101,13 @@ class TestValidate (unittest.TestCase):
         # Dimension mismatch missed out / change data_extent attr will also change shape
 
     def test_check_tags(self):
-        pass
+        tag1 = self.block1.tags[0]
+        tag1.position = []
+        self.validator.check_tag(0,0)
+        assert self.validator.errors['blocks'][0]['tags'][0]['tag_err'] == ['Position is not set!']
+
+        tag2 = self.block1.tags[1]
+        tag2.units = ['abc']
+        self.validator.check_tag(1,0)
+        assert self.validator.errors['blocks'][0]['tags'][1]['tag_err'] == ['Invalid unit']
 

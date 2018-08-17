@@ -285,7 +285,7 @@ class File(object):
                 for fea in mt.features:
                     validator.check_features(fea, 'multi_tags', bi, mti)
             for ti, tag in enumerate(blk.tags):
-                validator.check_tag(tag, ti, bi)
+                validator.check_tag(ti, bi)
                 for fea in tag.features:
                     validator.check_features(fea, 'tags', bi, ti)
             for src in blk.find_sources():
