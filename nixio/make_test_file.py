@@ -27,12 +27,12 @@ group1 = block.groups[0]
 group1._h5group.set_attr("name", None)
 
 da1 = block.data_arrays[0]
-da1.append_range_dimension([1,2,3,4,5,6,7,8,9])
+da1.append_range_dimension([1, 2, 3, 4, 5,6,7,8,9])
 da1.append_sampled_dimension( 0.5)
 da1.append_set_dimension()  # correct set dimension
 da1._h5group.set_attr("unit", "abcde")
 da1._h5group.set_attr("type", None)
-da1._h5group.set_attr("expansion_origin" ,  [0.11,0.22])
+da1._h5group.set_attr("expansion_origin" ,  [0.11, 0.22])
 
 da2 = block.data_arrays[1]
 da2.append_set_dimension()

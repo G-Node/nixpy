@@ -50,6 +50,7 @@ class Validate():
         # will not check version as Error will be raised
         # in nixpy no location attributes. This is checked in C++ version
         if file_err_list:
+            self.errors['files'] = []
             self.errors['files'].extend(file_err_list)
             return self.errors
         else:
@@ -59,18 +60,16 @@ class Validate():
 
         blk_err_list = self.check_for_basics(blocks)
 
-        if blk_err_list:
-            self.errors['blocks'][blk_idx]['blk_err'].extend(blk_err_list)
-            return self.errors
-        else:
-            return None
+        self.errors['blocks'][blk_idx]['blk_err'] = blk_err_list
+        return self.errors
+
 
     def check_groups(self, groups, grp_idx, blk_idx):
 
         grp_err_list = self.check_for_basics(groups)
 
         if grp_err_list:
-            self.errors['blocks'][blk_idx]['groups'].append(grp_err_list)
+            self.errors['blocks'][blk_idx]['groups'] = grp_err_list
             return self.errors
         else:
             return None
