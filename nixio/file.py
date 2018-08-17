@@ -271,7 +271,7 @@ class File(object):
             for gi, grp in enumerate(blk.groups):
                 validator.check_groups(gi, bi)
             for di, da in enumerate(blk.data_arrays):
-                validator.check_data_array(da, di, bi)
+                validator.check_data_arrays(di, bi)
                 for dim in da.dimensions:
                     validator.check_dim(dim,di,bi)
                     if dim.dimension_type == 'range':

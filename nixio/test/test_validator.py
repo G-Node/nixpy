@@ -27,7 +27,7 @@ class TestValidate (unittest.TestCase):
             for i in range(4):
                 blk.create_data_array("da{}".format(i), "data_arrays",
                                       dtype="float",
-                                      data=(1 + np.random.random((10, 10))))
+                                      data=(1 + np.random.random((5))))
             for i in range(4):
                 blk.create_tag("tag{}".format(i), "tags",
                                np.random.random((10, 10)))
@@ -76,3 +76,30 @@ class TestValidate (unittest.TestCase):
 
     def test_check_data_arrays(self):
         da1 = self.block1.data_arrays[0]
+        da1.append_range_dimension([1, 2, 3, 4, 5, 6, 7, 8, 9])
+        da1.append_set_dimension()
+        da1.dimensions[1].labels = ["A", "B", "C", "D"]
+        da1._h5group.set_attr("unit", "abcde")
+        da1._h5group.set_attr("type", None)
+        da1._h5group.set_attr("expansion_origin", 0.11) # poly not set
+        self.validator.check_data_arrays(0,0)
+        assert self.validator.errors['blocks'][0]['data_arrays'][0]['da_err'] == \
+               ['Type of some DataArray is missing',
+                'In some Range Dimensions, the number of '
+                'ticks differ from the data entries', 'In some Set '
+                'Dimensions, the number of labels differ from the data entries', 'Invalid units',
+                'Expansion origins exist but polynomial coefficients are missing']
+
+        da2 = self.block1.data_arrays[1]
+        da2.append_set_dimension()
+        da2.dimensions[0].labels = ["A", "B", "C", "D", "E"]
+        da2.polynom_coefficients = [0.1, 0.2]
+        self.validator.check_data_arrays(1, 0)
+        assert self.validator.errors['blocks'][0]['data_arrays'][1]['da_err'] == \
+               ["Polynomial coefficients exist but expansion origins are missing"]
+
+        # Dimension mismatch missed out / change data_extent attr will also change shape
+
+    def test_check_tags(self):
+        pass
+

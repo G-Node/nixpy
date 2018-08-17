@@ -78,53 +78,51 @@ class Validate():
         else:
             return None
 
-    def check_data_arrays(self, da, da_idx, blk_idx):  # seperate da and dim checking
-
+    def check_data_arrays(self, da_idx, blk_idx):  # seperate da and dim checking
+        da = self.file.blocks[blk_idx].data_arrays[da_idx]
         da_error_list = []
         if self.check_for_basics(da):
             da_error_list.extend(self.check_for_basics(da))
         else:
             pass
-        if da == []:
-            da_error_list.append("No empty data_array")
 
         dim = da.shape
         len_dim = da.data_extent
         if dim != len_dim:
-            da_error_list.append("dimension mismatch")
-
+            da_error_list.append("Dimension mismatch")
 
         if da.dimensions:
             for dim in da.dimensions:
                 if dim.dimension_type == 'range':
-                    if len(dim.ticks) != len(da): # or should I use da.data_extent
-                        da_error_list.append("in some Range Dimensions, the number"
+                    if len(dim.ticks) != len(da):
+        # if data_extent is used insteand of len() a tuple will be observed, eg (1200,)
+                        da_error_list.append("In some Range Dimensions, the number"
                                              " of ticks differ from the data entries")
-                if dim.dimension_type == 'set': # don't know why only check set dim
-                    if len(dim.labels) != len(da):
-                        da_error_list.append("in some Set Dimensions, the number "
-                                             "of ticks differ from the data entries")
+                if dim.dimension_type == 'set':
+                    # same as above
+                    if len(dim.labels) != len(da):  # not sure
+                        da_error_list.append("In some Set Dimensions, the number "
+                                             "of labels differ from the data entries")
 
         unit = da.unit
-        if not is_si(unit):
-            da_error_list.append("invalid units")
+        if unit and not is_si(unit):
+            da_error_list.append("Invalid units")
 
         poly = da.polynom_coefficients
         ex_origin = da.expansion_origin
         if np.any(ex_origin):
             if not poly:
                 da_error_list.append("Expansion origins exist but "
-                                 "polynomial coefficients are missing!")
-        if poly and not ex_origin:
-            da_error_list.append("Polynomial coefficients exist" \
-                              " but expansion origins are missing")
+                                 "polynomial coefficients are missing")
+        if np.any(poly):
+            if not ex_origin:
+                da_error_list.append("Polynomial coefficients exist" 
+                                     " but expansion origins are missing")
 
-        if da_error_list:
-            self.errors['blocks'][blk_idx]['data_arra' \
-                                           'ys'][da_idx]['da_err'].append(da_error_list)
-            return self.errors
-        else:
-            return None
+        self.errors['blocks'][blk_idx]['data_arra' \
+                                       'ys'][da_idx]['da_err'] = da_error_list
+        return self.errors
+
 
     def check_tag(self, tag, tag_idx, blk_idx):
         tag_err_list = []
@@ -166,7 +164,6 @@ class Validate():
                 mt_err_list.append("No of entries in positions and extents do not match")
         if mt.references:
             ref_ndim = len(mt.references)
-            print(mt.positions)
             if ref_ndim > 1 and len(mt.positions.shape) == 1:
                 mt_err_list.append("The number of reference and position"
                                    " entries do not match")
