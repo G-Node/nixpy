@@ -267,9 +267,9 @@ class File(object):
         validator.form_dict()
         errors = validator.errors
         for bi, blk in enumerate(self.blocks):
-            validator.check_blocks(blk, bi)
+            validator.check_blocks(bi)
             for gi, grp in enumerate(blk.groups):
-                validator.check_groups(grp,gi, bi)
+                validator.check_groups(gi, bi)
             for di, da in enumerate(blk.data_arrays):
                 validator.check_data_array(da, di, bi)
                 for dim in da.dimensions:

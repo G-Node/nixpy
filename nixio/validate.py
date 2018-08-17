@@ -29,7 +29,11 @@ class Validate():
             self.errors['blocks'].append(blk_dict)
             OrderedDict(self.errors)
 
-            for gi, da in enumerate(blk.data_arrays):
+            for gi, grp in enumerate(blk.groups):
+                grp_dict = {'grp_err': []}
+                self.errors['blocks'][bi]['groups'].append(grp_dict)
+
+            for di, da in enumerate(blk.data_arrays):
                 d = {'dimensions': [] , 'da_err': []}
                 self.errors['blocks'][bi]['data_arrays'].append(d)
 
@@ -56,25 +60,25 @@ class Validate():
         else:
             return None
 
-    def check_blocks(self, blocks, blk_idx):
-
-        blk_err_list = self.check_for_basics(blocks)
+    def check_blocks(self, blk_idx):
+        block = self.file.blocks[blk_idx]
+        blk_err_list = self.check_for_basics(block)
 
         self.errors['blocks'][blk_idx]['blk_err'] = blk_err_list
         return self.errors
 
 
-    def check_groups(self, groups, grp_idx, blk_idx):
-
-        grp_err_list = self.check_for_basics(groups)
+    def check_groups(self, grp_idx, blk_idx):
+        group = self.file.blocks[blk_idx].groups[grp_idx]
+        grp_err_list = self.check_for_basics(group)
 
         if grp_err_list:
-            self.errors['blocks'][blk_idx]['groups'] = grp_err_list
+            self.errors['blocks'][blk_idx]['groups'][grp_idx]['grp_err'] = grp_err_list
             return self.errors
         else:
             return None
 
-    def check_data_array(self, da, da_idx, blk_idx):  # seperate da and dim checking
+    def check_data_arrays(self, da, da_idx, blk_idx):  # seperate da and dim checking
 
         da_error_list = []
         if self.check_for_basics(da):

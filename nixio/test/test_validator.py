@@ -18,9 +18,9 @@ class TestValidate (unittest.TestCase):
         self.tmpdir = TempDir("validatetest")
         self.testfilename = os.path.join(self.tmpdir.path, "validatetest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
-        self.block = self.file.create_block("blk1", "blk")
-        self.block1 = self.file.create_block("blk2", "blk2")
-        for blk in self.block, self.block1:
+        self.block1 = self.file.create_block("blk1", "blk")
+        self.block2 = self.file.create_block("blk2", "blk2")
+        for blk in self.block1, self.block2:
             # blk.create_section("metadata", "md")  # create metatdata
             for i in range(2):
                 blk.create_group("grp{}".format(i), "groups")
@@ -48,16 +48,31 @@ class TestValidate (unittest.TestCase):
         assert self.validator.check_file()['files'] == ["date is not set!"]
 
 
-    def test_check_blocks(self):
-        block = self.block
+    def test_check_blocks(self):  # Done
+        block = self.block1
         assert self.validator.errors['blocks'][0]['blk_err'] == []
         block._h5group.set_attr("name", None)
-        assert self.validator.check_blocks(block, 0)\
+        assert self.validator.check_blocks(0)\
             ['blocks'][0]['blk_err'] == ['Name of some Block is missing']
         block._h5group.set_attr("type", None)
-        self.validator.check_blocks(block, 0)
+        self.validator.check_blocks(0)
         assert self.validator.errors['blocks'][0]['blk_err'] == ['Type of some Block is '
                                             'missing', 'Name of some Block is missing']
 
-    def test_check_groups(self):
-        pass
+    def test_check_groups(self):  # Done
+        group1 = self.block1.groups[0]
+        group1._h5group.set_attr("name", None)
+        self.validator.check_groups(0, 0)
+        assert self.validator.errors['blocks'][0]['gro' \
+                                'ups'][0]['grp_err'] == ['Name of some Group is missing']
+        group2 = self.block2.groups[1]
+        group2._h5group.set_attr("name", None)
+        self.validator.check_groups(1,1)
+        assert self.validator.errors['blocks'][1]['groups'][1]['grp_err'] == ['Name of some Group is missing']
+        group2._h5group.set_attr("type", None)
+        self.validator.check_groups(1, 1)
+        assert self.validator.errors['blocks'][1]['groups'][1]['grp_err'] == [
+            'Type of some Group is missing','Name of some Group is missing']
+
+    def test_check_data_arrays(self):
+        da1 = self.block1.data_arrays[0]
