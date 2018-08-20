@@ -132,21 +132,27 @@ class Validate():
             tag_err_list.append("Position is not set!")
         if tag.references:
             # referenced da dimension and units should match the tag
-            ref_len = len(tag.references[0])
-            if len(tag.references) > 1:
-                ref_len += 1
+            ndim = len(tag.references[0].shape)
             if tag.position:
-                if len(tag.position) != ref_len:
+                if len(tag.position) != ndim:
                     tag_err_list.append("Number of position and dimensionality of reference do not match")
             if tag.extent:
-                if ref_len != len(tag.extent):
+                if ndim != len(tag.extent):
                     tag_err_list.append("Number of extent and dimensionality of reference do not match")
 
             for ref in tag.references:
-                if not ref.unit:
-                    tag_err_list.append("References need to have units")
-                if ref.unit != tag.units:  # how to match the dimensions
-                    tag_err_list.append("References and tag units unmatched")
+                unit_list = self.get_dim_units(ref)
+                unit_list = [un for un in unit_list if un]
+                dim_list = [dim for refer in tag.references for dim in refer.dimensions
+                            if dim.dimension_type != 'set']
+                if len(unit_list) != len(dim_list):
+                    tag_err_list.append("Some dimensions of references have no units")
+                for u in unit_list:
+                    for tu in tag.units:
+                        if not scalable(u, tu):
+                            tag_err_list.append("References and tag units mismatched")
+                            break
+                    break
 
         for unit in tag.units:
             if not is_si(unit):
@@ -249,7 +255,7 @@ class Validate():
 
         if not r_dim.ticks:
             rdim_err_list.append("ticks need to be set for range dimensions")
-        if type(r_dim).__name__ != "RangeDimension" :
+        if type(r_dim).__name__ != "RangeDimension":
             rdim_err_list.append("dimension type is not correct!")
 
         # sorting is already covered in the dimensions.py file
@@ -320,10 +326,10 @@ class Validate():
         for dim in data_arrays.dimensions:
             if dim.dimension_type == 'range':
                 unit_list.append(dim.unit)
-            if dim.dimension_type == 'sampled':
+            if dim.dimension_type == 'sample':
                 unit_list.append(dim.unit)
             if dim.dimension_type == 'set':
-                unit_list.append(' ')
+                pass
         return unit_list
 
 
