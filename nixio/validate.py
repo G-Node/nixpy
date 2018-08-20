@@ -132,22 +132,25 @@ class Validate():
             tag_err_list.append("Position is not set!")
         if tag.references:
             # referenced da dimension and units should match the tag
+            ref_len = len(tag.references[0])
+            if len(tag.references) > 1:
+                ref_len += 1
             if tag.position:
-                if tag.positions.shape[1] != len(tag.references.shape):
+                if len(tag.position) != ref_len:
                     tag_err_list.append("Number of position and dimensionality of reference do not match")
             if tag.extent:
-                if len(tag.references.shape) != tag.extent.shape[1]:
+                if ref_len != len(tag.extent):
                     tag_err_list.append("Number of extent and dimensionality of reference do not match")
-            if tag.references and not tag.references.units:
-                tag_err_list.append("References need to have units")
-            if tag.references and tag.references.units != tag.units:
-                tag_err_list.append("References and tag units unmatched")
+
+            for ref in tag.references:
+                if not ref.unit:
+                    tag_err_list.append("References need to have units")
+                if ref.unit != tag.units:  # how to match the dimensions
+                    tag_err_list.append("References and tag units unmatched")
 
         for unit in tag.units:
             if not is_si(unit):
                 tag_err_list.append('Invalid unit')
-
-
 
         self.errors['blocks'][blk_idx]['tags'][tag_idx]['tag' \
                                                         '_err'] = tag_err_list
@@ -311,6 +314,17 @@ class Validate():
         assert type(dict) is dict or OrderedDict, "This is not a dictionary"
         x = dict.values
         print(x)
+
+    def get_dim_units(self, data_arrays):
+        unit_list = []
+        for dim in data_arrays.dimensions:
+            if dim.dimension_type == 'range':
+                unit_list.append(dim.unit)
+            if dim.dimension_type == 'sampled':
+                unit_list.append(dim.unit)
+            if dim.dimension_type == 'set':
+                unit_list.append(' ')
+        return unit_list
 
 
 
