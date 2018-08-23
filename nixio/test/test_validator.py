@@ -85,7 +85,8 @@ class TestValidate (unittest.TestCase):
         da_warn3 = 'In some Set Dimensions, the number of labels differ from the data entries'
         da_warn4 = 'Invalid units'
         da_warn5 = 'Expansion origins exist but polynomial coefficients are missing'
-        assert da_warn1 and  da_warn2 and da_warn3 and da_warn4 and da_warn5 in self.validator.errors['blocks'][0]['data_arrays'][0]['da_err']
+        assert da_warn1 and  da_warn2 and da_warn3 and da_warn4 and da_warn5\
+               in self.validator.errors['blocks'][0]['data_arrays'][0]['da_err']
 
         da2 = self.block1.data_arrays[1]
         da2.append_set_dimension()
@@ -125,8 +126,10 @@ class TestValidate (unittest.TestCase):
         da3 = self.block1.data_arrays[2]
         tag4.references.append(da2)
         tag4.references.append(da3)
+        tag4.extent = [1, 1]
+        tag4.position = [0.5, 0.5]
         print(tag4.extent)
-        print(tag4.extent)
+        print(tag4.references[0].shape)
         self.validator.check_tag(3, 0)
         tag_dim_warn1 = "Number of extent and dimensionality of reference do not match"
         tag_dim_warn2 = "Number of position and dimensionality of reference do not match"
