@@ -298,7 +298,6 @@ class Validate():
 
     def check_for_basics(self,entity):
         basic_check_list = []
-        a = b = c = ''
         if not entity.type:
             basic_check_list.append("Type of some {} is missing".format(type(entity).__name__))
         if not entity.id:
@@ -310,9 +309,9 @@ class Validate():
         else:
             return basic_check_list
 
-    def check_dict_empty(self, dict):
+    @staticmethod
+    def check_dict_empty(dict):
         assert type(dict) is dict or type(dict) is OrderedDict, "This is not a dictionary"
-        x = dict.values
 
     def get_dim_units(self, data_arrays):
         unit_list = []

@@ -65,7 +65,7 @@ class TestValidate (unittest.TestCase):
                                 'ups'][0]['grp_err'] == ['Name of some Group is missing']
         group2 = self.block2.groups[1]
         group2._h5group.set_attr("name", None)
-        self.validator.check_groups(1,1)
+        self.validator.check_groups(1, 1)
         assert self.validator.errors['blocks'][1]['groups'][1]['grp_err'] == ['Name of some Group is missing']
         group2._h5group.set_attr("type", None)
         self.validator.check_groups(1, 1)
@@ -79,8 +79,8 @@ class TestValidate (unittest.TestCase):
         da1.dimensions[1].labels = ["A", "B", "C", "D"]
         da1._h5group.set_attr("unit", "abcde")
         da1._h5group.set_attr("type", None)
-        da1._h5group.set_attr("expansion_origin", 0.11) # poly not set
-        self.validator.check_data_arrays(0,0)
+        da1._h5group.set_attr("expansion_origin", 0.11)  # poly not set
+        self.validator.check_data_arrays(0, 0)
         da_warn1 = 'Type of some DataArray is missing'
         da_warn2 = 'In some Range Dimensions, the number of ticks differ from the data entries'
         da_warn3 = 'In some Set Dimensions, the number of labels differ from the data entries'
@@ -110,7 +110,7 @@ class TestValidate (unittest.TestCase):
 
         tag2 = self.block1.tags[1]
         tag2.units = ['abc']
-        self.validator.check_tag(1,0)
+        self.validator.check_tag(1, 0)
         assert self.validator.errors['blocks'][0]['tags'][1]['tag_err'] == ['Invalid unit']
 
         tag3 = self.block1.tags[2]
@@ -224,7 +224,7 @@ class TestValidate (unittest.TestCase):
     def test_check_section(self): # only have check for basics now
         pass
 
-    def test_check_prop(self):
+    def test_check_props(self):
         section = self.file.sections[0]
         prop = section.create_property("prop1", [1,2,3,4])
         self.validator.check_property(prop, 0)
@@ -233,3 +233,7 @@ class TestValidate (unittest.TestCase):
         prop1 = section.create_property()
         self.validator.check_property(prop, 0)
         assert "Unit is not set" in self.validator.errors['sections'][0]['props']
+
+    def test_check_features(self):
+        pass
+
