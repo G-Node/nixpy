@@ -7,6 +7,7 @@ import nixio as nix
 from .util.units import *
 from collections import OrderedDict
 
+
 class Validate():
 
     def __init__(self, file):
@@ -19,7 +20,7 @@ class Validate():
     def form_dict(self):
         file = self.file
 
-        for si, sec in enumerate(file.find_sections()):
+        for si, sec in enumerate(file.find_sections()): # flat struct for section may not be correct?
             prop_dict = {'props': []}
             self.errors['sections'].append(prop_dict)
 
@@ -220,10 +221,8 @@ class Validate():
         if prop.unit and not is_si(prop.unit):
             prop_err_list.append("Unit is not valid!")
 
-
         self.errors['sections'][sec_idx]['props'] = prop_err_list
         return self.errors
-
 
     def check_features(self, feat, parent, blk_idx, tag_idx):
 
@@ -234,12 +233,9 @@ class Validate():
         if not feat.data:
             fea_err_list.append("data is not set")
 
-        if fea_err_list:
-            self.errors['blocks'][blk_idx][parent][tag_idx]['fea' \
-                                                            'tures'].append(fea_err_list)
-            return self.errors
-        else:
-            return None
+        self.errors['blocks'][blk_idx][parent][tag_idx]['fea' \
+                                                        'tures'] = fea_err_list
+        return self.errors
 
     def check_sources(self, src):
         if self.check_for_basics(src):
@@ -268,12 +264,9 @@ class Validate():
             if not is_atomic(r_dim.unit):
                 rdim_err_list.append("unit must be atomic, not composite!")
 
-        if rdim_err_list:
-            self.errors['blocks'][blk_idx]['data_arrays']\
-                [da_idx]['dimensions'].append(rdim_err_list)
-            return self.errors
-        else:
-            return None
+        self.errors['blocks'][blk_idx]['data_arrays']\
+            [da_idx]['dimensions'] = rdim_err_list
+        return self.errors
 
     def check_set_dim(self, set_dim, da_idx, blk_idx):
         if type(set_dim).__name__ != "SetDimension":
@@ -299,13 +292,9 @@ class Validate():
             if not is_atomic(sam_dim.unit):
                 sdim_err_list.append("unit must be atomic, not composite!")
 
-        if sdim_err_list:
-            self.errors['blocks'][blk_idx]['data_arrays']\
-                [da_idx]['dimensions'].append(sdim_err_list)
-            return self.errors
-        else:
-            return None
-
+        self.errors['blocks'][blk_idx]['data_arrays']\
+            [da_idx]['dimensions'] = sdim_err_list
+        return self.errors
 
     def check_for_basics(self,entity):
         basic_check_list = []

@@ -229,3 +229,7 @@ class TestValidate (unittest.TestCase):
         prop = section.create_property("prop1", [1,2,3,4])
         self.validator.check_property(prop, 0)
         assert "Unit is not set" in self.validator.errors['sections'][0]['props']
+
+        prop1 = section.create_property()
+        self.validator.check_property(prop, 0)
+        assert "Unit is not set" in self.validator.errors['sections'][0]['props']
