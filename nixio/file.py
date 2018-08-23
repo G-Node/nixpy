@@ -281,7 +281,7 @@ class File(object):
                     if dim.dimension_type == 'sampled':
                         validator.check_sampled_dim(dim, di, bi)
             for mti, mt in enumerate(blk.multi_tags):
-                validator.check_multi_tag(mt, mti, bi)
+                validator.check_multi_tag(mti, bi)
                 for fea in mt.features:
                     validator.check_features(fea, 'multi_tags', bi, mti)
             for ti, tag in enumerate(blk.tags):

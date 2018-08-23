@@ -5,9 +5,17 @@ from collections import OrderedDict
 import numpy as np
 file = nix.File.open('testing.nix', 'a')
 
-a = 1
+list_a = [1]
+list_b =[0]
 
-assert a == 0 or 1
+for a in list_a:
+    if a:
+        print("a")
+        break
+
+    for b in list_b:
+        print("b")
+
 
 x = file.validate()
 print(x['blocks'][0]['data_arrays'][1]['da_err'])

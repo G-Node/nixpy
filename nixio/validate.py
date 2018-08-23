@@ -67,7 +67,6 @@ class Validate():
         self.errors['blocks'][blk_idx]['blk_err'] = blk_err_list
         return self.errors
 
-
     def check_groups(self, grp_idx, blk_idx):
         group = self.file.blocks[blk_idx].groups[grp_idx]
         grp_err_list = self.check_for_basics(group)
@@ -123,7 +122,6 @@ class Validate():
                                        'ys'][da_idx]['da_err'] = da_error_list
         return self.errors
 
-
     def check_tag(self, tag_idx, blk_idx):
         tag = self.file.blocks[blk_idx].tags[tag_idx]
         tag_err_list = []
@@ -162,17 +160,23 @@ class Validate():
                                                         '_err'] = tag_err_list
         return self.errors
 
-    def check_multi_tag(self, mt, mt_idx, blk_idx):
+    def check_multi_tag(self, mt_idx, blk_idx):
+        mt = self.file.blocks[blk_idx].multi_tags[mt_idx]
         mt_err_list = []
 
         if not mt.positions:
-            mt_err_list.append("Position is not set!")
+            mt_err_list.append("Position is not set!")  # no test for this
+        else:
+            if len(mt.positions.shape) > 2:
+                mt_err_list.append("Positions should not have more than 2 dimensions")
         if mt.extents:
+            if len(mt.extents.shape) > 2:
+                mt_err_list.append("Extents should not have more than 2 dimensions")
             if mt.positions.shape != mt.extents.shape:
                 # not sure what index should be given to shape
                 mt_err_list.append("No of entries in positions and extents do not match")
         if mt.references:
-            ref_ndim = len(mt.references)
+            ref_ndim = len(mt.references[0].shape) # assume all references have same shape
             if ref_ndim > 1 and len(mt.positions.shape) == 1:
                 mt_err_list.append("The number of reference and position"
                                    " entries do not match")
@@ -180,31 +184,33 @@ class Validate():
                 mt_err_list.append("The number of reference and position"
                                    " entries do not match")
             if mt.extents:
-                if ref_ndim > 1 and len(mt.extents.shape) == 1:
-                    mt_err_list.append("The number of  and extent"
-                                       " entries do not match")
-                elif len(mt.extents.shape) == 2 and mt.extents.shape[1] != ref_ndim:
+                if len(mt.extents.shape) == 1 and ref_ndim > 1 :
                     mt_err_list.append("The number of reference and extent"
                                        " entries do not match")
-        if mt.units:
-            if not is_si(mt.units):
-                mt_err_list.append("It is not a valid unit")
-            if mt.references and mt.references.units != mt.units:
-                mt_err_list.append("Units not match")
+                elif len(mt.extents.shape) == 2 and mt.extents.shape[1] != ref_ndim:
+                    # should we add a function for limiting extent dim to <= 2
+                    mt_err_list.append("The number of reference and extent"
+                                       " entries do not match")
+        for unit in mt.units:
+            if not is_si(unit):
+                mt_err_list.append("Invalid unit")
+                continue
+            for ref in mt.references:
+                u_list = self.get_dim_units(ref)
+                for u in u_list:
+                    if not scalable(u, unit):
+                        mt_err_list.append("References and multi_tag units mismatched")
+                        break
 
-        if mt_err_list:
-            self.errors['blocks'][blk_idx]['multi_tags'][mt_idx]['mt' \
-                                                            '_err'].append(mt_err_list)
-            return self.errors
-        else:
-            return None
+        self.errors['blocks'][blk_idx]['multi_tags'][mt_idx]['mt' \
+                                                        '_err'] = mt_err_list
+        return self.errors
 
     def check_section(self, section):
-        if self.check_for_basics(section):
-            self.errors['sections'].append(self.check_for_basics(section))
-            return self.errors
-        else:
-            return None
+
+        self.errors['sections'] = self.check_for_basics(section)
+        return self.errors
+
 
     def check_property(self, prop, sec_idx):
         prop_err_list = []
@@ -214,11 +220,10 @@ class Validate():
         if prop.unit and not is_si(prop.unit):
             prop_err_list.append("Unit is not valid!")
 
-        if prop_err_list:
-            self.errors['sections'][sec_idx]['props'].append(prop_err_list)
-            return self.errors
-        else:
-            return None
+
+        self.errors['sections'][sec_idx]['props'] = prop_err_list
+        return self.errors
+
 
     def check_features(self, feat, parent, blk_idx, tag_idx):
 
@@ -317,9 +322,8 @@ class Validate():
             return basic_check_list
 
     def check_dict_empty(self, dict):
-        assert type(dict) is dict or OrderedDict, "This is not a dictionary"
+        assert type(dict) is dict or type(dict) is OrderedDict, "This is not a dictionary"
         x = dict.values
-        print(x)
 
     def get_dim_units(self, data_arrays):
         unit_list = []
