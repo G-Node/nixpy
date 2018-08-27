@@ -227,13 +227,34 @@ class TestValidate (unittest.TestCase):
     def test_check_props(self):
         section = self.file.sections[0]
         prop = section.create_property("prop1", [1,2,3,4])
-        self.validator.check_property(prop, 0)
+        self.validator.check_property(prop,0, 0)
         assert "Unit is not set" in self.validator.errors['sections'][0]['props']
 
         prop1 = section.create_property()
-        self.validator.check_property(prop, 0)
+        self.validator.check_property(prop1,0, 0)
         assert "Unit is not set" in self.validator.errors['sections'][0]['props']
 
     def test_check_features(self):
-        pass
+        mt1 = self.block1.multi_tags[0]
+
+        tag1 = self.block1.tags[0]
+
+    def test_range_dim(self):
+        err_dict = self.validator.errors['blocks'][0]['data_arrays']
+
+        da1 = self.block1.data_arrays[0]
+        rdim1 = da1.append_range_dimension([0.55, 0.10, 0.1])
+        rdim1._h5group.set_attr('dimension_type', 'set')
+        self.validator.check_range_dim(rdim1, 0, 0)
+        assert "Dimension type is not correct!" in err_dict[0]['dimensions']
+        assert "Ticks are not sorted!" in err_dict[0]['dimensions']
+
+
+
+
+    def test_sample_dim(self):
+        da1 = self.block1.data_arrays[0]
+
+    def test_set_dim(self):
+        da1 = self.block1.data_arrays[0]
 

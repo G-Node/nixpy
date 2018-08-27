@@ -23,6 +23,9 @@ class Validate():
         for si, sec in enumerate(file.find_sections()): # flat struct for section may not be correct?
             prop_dict = {'props': []}
             self.errors['sections'].append(prop_dict)
+            for pi, prop in enumerate(sec.props):
+                pe_dict = {'prop_err': []}
+                self.errors['sections'][si]['prop'].append(pe_dict)
 
         for bi, blk in enumerate(file.blocks):
             blk_dict = {'sources':[], 'groups': [], 'data_arrays': [],
@@ -37,14 +40,23 @@ class Validate():
             for di, da in enumerate(blk.data_arrays):
                 d = {'dimensions': [] , 'da_err': []}
                 self.errors['blocks'][bi]['data_arrays'].append(d)
+                for dim_idx, dim in enumerate(da.dimensions):
+                    dim_dict = {'dim_err': []}
+                    self.errors['blocks'][bi]['data_arrays'][di]['dimensions'].append(dim_dict)
 
             for mi, mt in enumerate(blk.multi_tags):
                 mt_dict = {'features': [], 'mt_err': []}
                 self.errors['blocks'][bi]['multi_tags'].append(mt_dict)
+                for fi, fea in mt.features:
+                    fea_dict = {'fea_err': []}
+                    self.errors['blocks'][bi]['multi_tags'][mi]['features'].append(fea_dict)
 
             for ti, tag in enumerate(blk.tags):
                 tag_dict = {'features': [], 'tag_err': []}
                 self.errors['blocks'][bi]['tags'].append(tag_dict)
+                for fi, fea in tag.features:
+                    fea_dict = {'fea_err': []}
+                    self.errors['blocks'][bi]['tags'][ti]['features'].append(fea_dict)
 
     def check_file(self):
 
@@ -212,8 +224,7 @@ class Validate():
         self.errors['sections'] = self.check_for_basics(section)
         return self.errors
 
-
-    def check_property(self, prop, sec_idx):
+    def check_property(self, prop, prop_idx, sec_idx):
         prop_err_list = []
 
         if prop.values and not prop.unit:
@@ -221,10 +232,10 @@ class Validate():
         if prop.unit and not is_si(prop.unit):
             prop_err_list.append("Unit is not valid!")
 
-        self.errors['sections'][sec_idx]['props'] = prop_err_list
+        self.errors['sections'][sec_idx]['props'][prop_idx]['prop_err'] = prop_err_list
         return self.errors
 
-    def check_features(self, feat, parent, blk_idx, tag_idx):
+    def check_features(self, feat, parent, blk_idx, tag_idx, fea_idx):
 
         fea_err_list = []
 
@@ -234,7 +245,7 @@ class Validate():
             fea_err_list.append("data is not set")
 
         self.errors['blocks'][blk_idx][parent][tag_idx]['fea' \
-                                                        'tures'] = fea_err_list
+                                                        'tures'][fea_idx]['fea_err'] = fea_err_list
         return self.errors
 
     def check_sources(self, src):
@@ -243,46 +254,50 @@ class Validate():
         else:
             return None
 
-    def check_dim(self, dimen, da_idx, blk_idx):  # call it in file after the index problem is fixed
+    def check_dim(self, dimen):  # call it in file after the index problem is fixed
+        # call it in other check dim function/ dont call alone
         if dimen.index:
             return None
         else:
-            self.errors['blocks'][blk_idx]['data_arrays'][da_idx]['di' \
-                                                    'mensions'].append('index must > 0')
-            return self.errors
+            return 'index must > 0'
 
-    def check_range_dim(self, r_dim, da_idx, blk_idx):
+    def check_range_dim(self, r_dim, dim_idx, da_idx, blk_idx):
         rdim_err_list = []
 
+        # if self.check_dim(r_dim):
+        #     rdim_err_list.append(self.check_dim(r_dim))
+
         if not r_dim.ticks:
-            rdim_err_list.append("ticks need to be set for range dimensions")
-        if type(r_dim).__name__ != "RangeDimension":
-            rdim_err_list.append("dimension type is not correct!")
+            rdim_err_list.append("Ticks need to be set for range dimensions")
+        elif not all(r_dim.ticks[i] <= r_dim.ticks[i+1] for i in range(len(r_dim.ticks)-1)):
+            rdim_err_list.append("Ticks are not sorted!")
+        if r_dim.dimension_type != 'range':
+            rdim_err_list.append("Dimension type is not correct!")
 
         # sorting is already covered in the dimensions.py file
         if r_dim.unit:
             if not is_atomic(r_dim.unit):
-                rdim_err_list.append("unit must be atomic, not composite!")
+                rdim_err_list.append("Unit must be atomic, not composite!")
 
         self.errors['blocks'][blk_idx]['data_arrays']\
-            [da_idx]['dimensions'] = rdim_err_list
+            [da_idx]['dimensions'][dim_idx]['dim_err'] = rdim_err_list
         return self.errors
 
-    def check_set_dim(self, set_dim, da_idx, blk_idx):
-        if type(set_dim).__name__ != "SetDimension":
+    def check_set_dim(self, set_dim, dim_idx, da_idx, blk_idx):
+        if set_dim.dimension_type != 'set':
             self.errors['blocks'][blk_idx]['data_arrays'][da_idx] \
-                ['dimensions'].append("dimension type is not correct!")
+                ['dimensions'][dim_idx]['dim_err'].append("dimension type is not correct!")
             return self.errors
         else:
             return None
 
-    def check_sampled_dim(self, sam_dim, da_idx, blk_idx):
+    def check_sampled_dim(self, sam_dim, dim_idx, da_idx, blk_idx):
         sdim_err_list = []
 
         if sam_dim.sampling_interval < 0:
             sdim_err_list.append("samplingInterval is not set to valid value (> 0)!")
 
-        if type(sam_dim).__name__ != "SampledDimension":
+        if sam_dim.dimension_type != 'sample':
             sdim_err_list.append("dimension type is not correct!")
 
         if sam_dim.offset and not sam_dim.unit:
@@ -293,7 +308,7 @@ class Validate():
                 sdim_err_list.append("unit must be atomic, not composite!")
 
         self.errors['blocks'][blk_idx]['data_arrays']\
-            [da_idx]['dimensions'] = sdim_err_list
+            [da_idx]['dimensions'][dim_idx]['dim_err'] = sdim_err_list
         return self.errors
 
     def check_for_basics(self,entity):

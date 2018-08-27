@@ -272,29 +272,28 @@ class File(object):
                 validator.check_groups(gi, bi)
             for di, da in enumerate(blk.data_arrays):
                 validator.check_data_arrays(di, bi)
-                for dim in da.dimensions:
-                    validator.check_dim(dim,di,bi)
-                    if dim.dimension_type == 'range':
-                        validator.check_range_dim(dim, di, bi)
-                    if dim.dimension_type == 'set':
-                        validator.check_set_dim(dim, di, bi)
-                    if dim.dimension_type == 'sampled':
-                        validator.check_sampled_dim(dim, di, bi)
+                for dimi, dim in enumerate(da.dimensions):
+                    if type(dim).__name__ == "RangeDimension":
+                        validator.check_range_dim(dim, dimi, di, bi)
+                    if type(dim).__name__ == "SetDimension":
+                        validator.check_set_dim(dim, dimi, di, bi)
+                    if type(dim).__name__ == "SampledDimension":
+                        validator.check_sampled_dim(dim, dimi, di, bi)
             for mti, mt in enumerate(blk.multi_tags):
                 validator.check_multi_tag(mti, bi)
-                for fea in mt.features:
-                    validator.check_features(fea, 'multi_tags', bi, mti)
+                for fi, fea in enumerate(mt.features):
+                    validator.check_features(fea, 'multi_tags', bi, mti, fi)
             for ti, tag in enumerate(blk.tags):
                 validator.check_tag(ti, bi)
-                for fea in tag.features:
-                    validator.check_features(fea, 'tags', bi, ti)
+                for fi, fea in enumerate(tag.features):
+                    validator.check_features(fea, 'tags', bi, ti, fi)
             for src in blk.find_sources():
                 validator.check_sources(src)
 
         for si, sec in enumerate(self.find_sections()):
             validator.check_section(sec)
-            for prop in sec.props:
-                validator.check_property(prop, si)
+            for pi , prop in enumerate(sec.props):
+                validator.check_property(prop, pi, si)
 
         if errors:  # how to know all entries in dict is empty
             return errors
