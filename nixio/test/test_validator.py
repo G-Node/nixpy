@@ -31,10 +31,11 @@ class TestValidate (unittest.TestCase):
             for i in range(4):
                 blk.create_multi_tag("mt{}".format(i), "multi_tags",
                                      blk.data_arrays[i])
-        self.file.create_section("sec1", "test")
+
+        section = self.file.create_section("sec1", "test")
+
         self.validator = Validate(self.file)
         self.validator.form_dict()
-
 
     def tearDown(self):
         self.file.close()
@@ -225,36 +226,95 @@ class TestValidate (unittest.TestCase):
         pass
 
     def test_check_props(self):
+        # check1
         section = self.file.sections[0]
         prop = section.create_property("prop1", [1,2,3,4])
-        self.validator.check_property(prop,0, 0)
-        assert "Unit is not set" in self.validator.errors['sections'][0]['props']
-
-        prop1 = section.create_property()
-        self.validator.check_property(prop1,0, 0)
-        assert "Unit is not set" in self.validator.errors['sections'][0]['props']
+        self.validator.form_dict()
+        # check2
+        prop1 = section.create_property("prop2", values_or_dtype= [1, 2, 3, 4])
+        prop1.delete_values()
+        prop1._h5group.set_attr('name', None)
+        print(prop1.name)
+        # check3
+        prop2 = section.create_property("prop3", values_or_dtype= [1, 2, 3, 4])
+        prop2.unit = "invalidu"
+        self.validator.form_dict()
+        self.validator.check_property(prop, 0, 0)  # check1
+        assert "Unit is not set" in self.validator.errors['sections'][0]['props'][0][
+            'prop_err']
+        self.validator.check_property(prop1, 1, 0)  # check2 - nameerr but no uniterr
+        assert self.validator.errors['sections'][0]['props'][1]['prop_err'] == ['Name is not set!']
+        self.validator.check_property(prop2, 2, 0)  # check3
+        assert 'Unit is not valid!' in self.validator.errors['sections'][0]['props'][2]['prop_err']
 
     def test_check_features(self):
-        mt1 = self.block1.multi_tags[0]
+        # mt1 = self.block1.multi_tags[0]
+        da1 = self.block1.data_arrays[0]
+        da2 = self.block1.data_arrays[1]
+        # fea1 = mt1.create_feature(da1, 'Tagged')
+        # fea1._h5group.set_attr('link_type', None)
 
         tag1 = self.block1.tags[0]
+        tag1.create_feature(da1, 'Indexed')
+        fea2 = tag1.create_feature(da2, 'Indexed')
+        fea2._h5group.set_attr('data', None)
+        print(fea2.data)
+
+        self.validator.form_dict()
+        self.validator.check_features(fea2, 'tags', 0, 0, 1)
+        assert "Data is not set" in self.validator.errors['blocks'][0]['tags'][0]['features'][1]['fea_err']
 
     def test_range_dim(self):
         err_dict = self.validator.errors['blocks'][0]['data_arrays']
-
+        # check1
         da1 = self.block1.data_arrays[0]
         rdim1 = da1.append_range_dimension([0.55, 0.10, 0.1])
+        self.validator.form_dict()  # for dims fea and prop test we need to form_dict again
         rdim1._h5group.set_attr('dimension_type', 'set')
-        self.validator.check_range_dim(rdim1, 0, 0)
-        assert "Dimension type is not correct!" in err_dict[0]['dimensions']
-        assert "Ticks are not sorted!" in err_dict[0]['dimensions']
+        # check2
+        rdim2 = da1.append_range_dimension([])
+        rdim2._h5group.set_attr("unit", "m/s")  # compound unit
 
-
-
+        self.validator.form_dict()
+        self.validator.check_range_dim(rdim1, 0, 0, 0)  # check1
+        assert "Dimension type is not correct!" in err_dict[0]['dimensions'][0]['dim_err']
+        assert "Ticks are not sorted!" in err_dict[0]['dimensions'][0]['dim_err']
+        self.validator.check_range_dim(rdim2, 1, 0, 0)  # check2
+        assert "Ticks need to be set for range dimensions" in err_dict[0]['dimensions'][1]['dim_err']
+        assert "Unit must be atomic, not composite!" in err_dict[0]['dimensions'][1]['dim_err']
 
     def test_sample_dim(self):
+        # check1
         da1 = self.block1.data_arrays[0]
+        sdim1 = da1.append_sampled_dimension(sampling_interval=0.5)
+        sdim1._h5group.set_attr('dimension_type', 'set')
+        sdim1.offset = 0.1
+
+        # check2
+        sdim2 = da1.append_sampled_dimension(sampling_interval=-0.5)
+        sdim2.unit = "m/s"
+
+        self.validator.form_dict()
+        self.validator.check_sampled_dim(sdim1, 0, 0, 0)  # check1
+        assert "Dimension type is not correct!" in self.validator.errors['blocks'] \
+            [0]['data_arrays'][0]['dimensions'][0]['dim_err']
+        assert "Offset is set, but no unit set!" in self.validator.errors['blocks'] \
+            [0]['data_arrays'][0]['dimensions'][0]['dim_err']
+        self.validator.check_sampled_dim(sdim2, 1, 0, 0)  # check2
+        assert "Unit must be atomic, not composite!" in self.validator.errors['blocks'] \
+            [0]['data_arrays'][0]['dimensions'][1]['dim_err']
+        assert "SamplingInterval is not set to valid value (> 0)!" in self.validator.errors['blocks'] \
+            [0]['data_arrays'][0]['dimensions'][1]['dim_err']
 
     def test_set_dim(self):
         da1 = self.block1.data_arrays[0]
+        setdim1 = da1.append_set_dimension()
+        setdim1._h5group.set_attr('dimension_type', 'range')
+        self.validator.form_dict()
+        self.validator.check_set_dim(setdim1, 0, 0, 0)
+        assert "Dimension type is not correct!" in self.validator.errors['blocks'] \
+            [0]['data_arrays'][0]['dimensions'][0]['dim_err']
+
+    def test_sources(self):
+        pass
 

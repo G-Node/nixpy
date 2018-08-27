@@ -39,9 +39,13 @@ tag1 = block.tags[0]
 tag1.references.append(da1)
 tag1.units = ['A', 'mV']
 
+
 da2 = block.data_arrays[1]
 da2.append_set_dimension()
 da2.dimensions[0]._h5group.set_attr("labels", None)
+
+tag1.create_feature(da1, 'Tagged')
+tag1.create_feature(da2, 'Tagged')
 
 # del block._h5group.group.attrs["name"]
 file.close()

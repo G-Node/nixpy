@@ -21,11 +21,12 @@ class Validate():
         file = self.file
 
         for si, sec in enumerate(file.find_sections()): # flat struct for section may not be correct?
-            prop_dict = {'props': []}
+            prop_dict = {'sec_err': [], 'props': []}
             self.errors['sections'].append(prop_dict)
+
             for pi, prop in enumerate(sec.props):
                 pe_dict = {'prop_err': []}
-                self.errors['sections'][si]['prop'].append(pe_dict)
+                self.errors['sections'][si]['props'].append(pe_dict)
 
         for bi, blk in enumerate(file.blocks):
             blk_dict = {'sources':[], 'groups': [], 'data_arrays': [],
@@ -47,16 +48,17 @@ class Validate():
             for mi, mt in enumerate(blk.multi_tags):
                 mt_dict = {'features': [], 'mt_err': []}
                 self.errors['blocks'][bi]['multi_tags'].append(mt_dict)
-                for fi, fea in mt.features:
+                for fi, fea in enumerate(mt.features):
                     fea_dict = {'fea_err': []}
                     self.errors['blocks'][bi]['multi_tags'][mi]['features'].append(fea_dict)
 
             for ti, tag in enumerate(blk.tags):
                 tag_dict = {'features': [], 'tag_err': []}
                 self.errors['blocks'][bi]['tags'].append(tag_dict)
-                for fi, fea in tag.features:
+                for fi, fea in enumerate(tag.features):
                     fea_dict = {'fea_err': []}
                     self.errors['blocks'][bi]['tags'][ti]['features'].append(fea_dict)
+
 
     def check_file(self):
 
@@ -219,38 +221,40 @@ class Validate():
                                                         '_err'] = mt_err_list
         return self.errors
 
-    def check_section(self, section):
+    def check_section(self, section, sec_idx):
 
-        self.errors['sections'] = self.check_for_basics(section)
+        self.errors['sections'][sec_idx]['sec_err'] = self.check_for_basics(section)
         return self.errors
 
     def check_property(self, prop, prop_idx, sec_idx):
         prop_err_list = []
 
+        if not prop.name:
+            prop_err_list.append("Name is not set!")
         if prop.values and not prop.unit:
             prop_err_list.append("Unit is not set")
         if prop.unit and not is_si(prop.unit):
             prop_err_list.append("Unit is not valid!")
-
         self.errors['sections'][sec_idx]['props'][prop_idx]['prop_err'] = prop_err_list
         return self.errors
 
     def check_features(self, feat, parent, blk_idx, tag_idx, fea_idx):
 
         fea_err_list = []
-
-        if not feat.link_type:
-            fea_err_list.append("linked type is not set!")
+        # will raise RuntimeError, no need to check
+        # if not feat.link_type:
+        #     fea_err_list.append("Linked type is not set!")
         if not feat.data:
-            fea_err_list.append("data is not set")
+            fea_err_list.append("Data is not set")
 
         self.errors['blocks'][blk_idx][parent][tag_idx]['fea' \
                                                         'tures'][fea_idx]['fea_err'] = fea_err_list
         return self.errors
 
-    def check_sources(self, src):
+    def check_sources(self, src, blk_idx):
         if self.check_for_basics(src):
-            pass
+            self.errors['blocks'][blk_idx]['sources'] = self.check_for_basics(src)
+            return self.errors
         else:
             return None
 
@@ -286,7 +290,7 @@ class Validate():
     def check_set_dim(self, set_dim, dim_idx, da_idx, blk_idx):
         if set_dim.dimension_type != 'set':
             self.errors['blocks'][blk_idx]['data_arrays'][da_idx] \
-                ['dimensions'][dim_idx]['dim_err'].append("dimension type is not correct!")
+                ['dimensions'][dim_idx]['dim_err'].append("Dimension type is not correct!")
             return self.errors
         else:
             return None
@@ -295,17 +299,17 @@ class Validate():
         sdim_err_list = []
 
         if sam_dim.sampling_interval < 0:
-            sdim_err_list.append("samplingInterval is not set to valid value (> 0)!")
+            sdim_err_list.append("SamplingInterval is not set to valid value (> 0)!")
 
         if sam_dim.dimension_type != 'sample':
-            sdim_err_list.append("dimension type is not correct!")
+            sdim_err_list.append("Dimension type is not correct!")
 
         if sam_dim.offset and not sam_dim.unit:
-            sdim_err_list.append("offset is set, but no valid unit set!")
+            sdim_err_list.append("Offset is set, but no unit set!")  #validity check below
 
         if sam_dim.unit:
             if not is_atomic(sam_dim.unit):
-                sdim_err_list.append("unit must be atomic, not composite!")
+                sdim_err_list.append("Unit must be atomic, not composite!")
 
         self.errors['blocks'][blk_idx]['data_arrays']\
             [da_idx]['dimensions'][dim_idx]['dim_err'] = sdim_err_list

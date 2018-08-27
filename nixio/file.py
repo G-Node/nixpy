@@ -288,10 +288,12 @@ class File(object):
                 for fi, fea in enumerate(tag.features):
                     validator.check_features(fea, 'tags', bi, ti, fi)
             for src in blk.find_sources():
-                validator.check_sources(src)
+                validator.check_sources(src, bi)
+                if validator.check_sources(src, bi):
+                    break
 
         for si, sec in enumerate(self.find_sections()):
-            validator.check_section(sec)
+            validator.check_section(sec, si)
             for pi , prop in enumerate(sec.props):
                 validator.check_property(prop, pi, si)
 
