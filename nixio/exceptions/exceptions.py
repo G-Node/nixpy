@@ -70,15 +70,4 @@ class InvalidFile(Exception):
     def __init__(self):
         self.message = "Invalid file - file is not a nix file."
         super(InvalidFile, self).__init__(self.message)
-
-class NoBlockID(Exception):
-
-    def __init__(self):
-        self.message = "Not NIX file - no Block ID"
-        super(NoBlockID, self).__init__(self.message)
-
-class NoBlock(Exception):
-
-    def __init__(self):
-        self.message = "Not NIX file - no Block ID"
-        super(NoBlockID, self).__init__(self.message)
+        
