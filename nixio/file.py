@@ -301,7 +301,7 @@ class File(object):
             return errors
         else:
             print("No errors found: The file is a valid NIX file")
-            return  errors
+            return errors
 
     def flush(self):
         self._h5file.flush()

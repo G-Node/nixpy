@@ -52,7 +52,7 @@ class TestValidate (unittest.TestCase):
         block._h5group.set_attr("type", None)
         self.validator.check_blocks(block, 0)
         assert self.validator.errors['blocks'][0]['errors'] == ['Type of Block is '
-                                            'missing', 'Name of Block is missing']
+                                                              'missing', 'Name of Block is missing']
 
     def test_check_groups(self):
         group1 = self.block1.groups[0]
