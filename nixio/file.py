@@ -26,6 +26,7 @@ from .util import find as finders
 from .exceptions import *
 from .validate import Validate
 from .compression import Compression
+from .dimensions import RangeDimension, SetDimension, SampledDimension
 
 
 FILE_FORMAT = "nix"
@@ -267,24 +268,24 @@ class File(object):
         validator.form_dict()
         errors = validator.errors
         for bi, blk in enumerate(self.blocks):
-            validator.check_blocks(bi)
+            validator.check_blocks(blk, bi)
             for gi, grp in enumerate(blk.groups):
-                validator.check_groups(gi, bi)
+                validator.check_groups(grp, gi, bi)
             for di, da in enumerate(blk.data_arrays):
-                validator.check_data_arrays(di, bi)
+                validator.check_data_arrays(da, di, bi)
                 for dimi, dim in enumerate(da.dimensions):
-                    if type(dim).__name__ == "RangeDimension":
+                    if isinstance(dim, RangeDimension):
                         validator.check_range_dim(dim, dimi, di, bi)
-                    if type(dim).__name__ == "SetDimension":
+                    if isinstance(dim, SetDimension):
                         validator.check_set_dim(dim, dimi, di, bi)
-                    if type(dim).__name__ == "SampledDimension":
+                    if isinstance(dim, SampledDimension):
                         validator.check_sampled_dim(dim, dimi, di, bi)
             for mti, mt in enumerate(blk.multi_tags):
-                validator.check_multi_tag(mti, bi)
+                validator.check_multi_tag(mt, mti, bi)
                 for fi, fea in enumerate(mt.features):
                     validator.check_features(fea, 'multi_tags', bi, mti, fi)
             for ti, tag in enumerate(blk.tags):
-                validator.check_tag(ti, bi)
+                validator.check_tag(tag, ti, bi)
                 for fi, fea in enumerate(tag.features):
                     validator.check_features(fea, 'tags', bi, ti, fi)
             for src in blk.find_sources():

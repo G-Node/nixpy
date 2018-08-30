@@ -13,7 +13,7 @@ class Validate():
     def __init__(self, file):
         self.file = file
         self.errors = OrderedDict()
-        self.errors['files'] = []
+        self.errors['file_errors'] = []
         self.errors['blocks'] = []
         self.errors['sections'] = []
 
@@ -21,44 +21,43 @@ class Validate():
         file = self.file
 
         for si, sec in enumerate(file.find_sections()): # flat struct for section may not be correct?
-            prop_dict = {'sec_err': [], 'props': []}
+            prop_dict = {'errors': [], 'props': [], "obj_ref": sec}
             self.errors['sections'].append(prop_dict)
 
             for pi, prop in enumerate(sec.props):
-                pe_dict = {'prop_err': []}
+                pe_dict = {'errors': [], "obj_ref": prop}
                 self.errors['sections'][si]['props'].append(pe_dict)
 
         for bi, blk in enumerate(file.blocks):
             blk_dict = {'sources':[], 'groups': [], 'data_arrays': [],
-                        'tags': [], 'multi_tags': [], 'blk_err': []}
+                        'tags': [], 'multi_tags': [], 'errors': [], "obj_ref": blk}
             self.errors['blocks'].append(blk_dict)
             OrderedDict(self.errors)
 
             for gi, grp in enumerate(blk.groups):
-                grp_dict = {'grp_err': []}
+                grp_dict = {'errors': [], "obj_ref": grp}
                 self.errors['blocks'][bi]['groups'].append(grp_dict)
 
             for di, da in enumerate(blk.data_arrays):
-                d = {'dimensions': [] , 'da_err': []}
+                d = {'dimensions': [] , 'errors': [], "obj_ref": da}
                 self.errors['blocks'][bi]['data_arrays'].append(d)
                 for dim_idx, dim in enumerate(da.dimensions):
-                    dim_dict = {'dim_err': []}
+                    dim_dict = {'errors': [], "obj_ref": dim}
                     self.errors['blocks'][bi]['data_arrays'][di]['dimensions'].append(dim_dict)
 
             for mi, mt in enumerate(blk.multi_tags):
-                mt_dict = {'features': [], 'mt_err': []}
+                mt_dict = {'features': [], 'errors': [], "obj_ref": mt}
                 self.errors['blocks'][bi]['multi_tags'].append(mt_dict)
                 for fi, fea in enumerate(mt.features):
-                    fea_dict = {'fea_err': []}
+                    fea_dict = {'errors': [], "obj_ref": fea}
                     self.errors['blocks'][bi]['multi_tags'][mi]['features'].append(fea_dict)
 
             for ti, tag in enumerate(blk.tags):
-                tag_dict = {'features': [], 'tag_err': []}
+                tag_dict = {'features': [], 'errors': [], "obj_ref": tag}
                 self.errors['blocks'][bi]['tags'].append(tag_dict)
                 for fi, fea in enumerate(tag.features):
-                    fea_dict = {'fea_err': []}
+                    fea_dict = {'errors': [], "obj_ref": fea}
                     self.errors['blocks'][bi]['tags'][ti]['features'].append(fea_dict)
-
 
     def check_file(self):
 
@@ -68,37 +67,29 @@ class Validate():
         # will not check format as Error will be raised anyways
         # will not check version as Error will be raised
         # in nixpy no location attributes. This is checked in C++ version
-        if file_err_list:
-            self.errors['files'] = []
-            self.errors['files'].extend(file_err_list)
-            return self.errors
-        else:
-            return None
 
-    def check_blocks(self, blk_idx):
-        block = self.file.blocks[blk_idx]
-        blk_err_list = self.check_for_basics(block)
-
-        self.errors['blocks'][blk_idx]['blk_err'] = blk_err_list
+        self.errors['file_errors'] = file_err_list
         return self.errors
 
-    def check_groups(self, grp_idx, blk_idx):
-        group = self.file.blocks[blk_idx].groups[grp_idx]
+    def check_blocks(self, block, blk_idx):
+        blk_err_list = self.check_for_basics(block)
+
+        self.errors['blocks'][blk_idx]['errors'] = blk_err_list
+        return self.errors
+
+    def check_groups(self, group, grp_idx, blk_idx):
         grp_err_list = self.check_for_basics(group)
 
         if grp_err_list:
-            self.errors['blocks'][blk_idx]['groups'][grp_idx]['grp_err'] = grp_err_list
+            self.errors['blocks'][blk_idx]['groups'][grp_idx]['errors'] = grp_err_list
             return self.errors
         else:
             return None
 
-    def check_data_arrays(self, da_idx, blk_idx):  # seperate da and dim checking
-        da = self.file.blocks[blk_idx].data_arrays[da_idx]
+    def check_data_arrays(self, da, da_idx, blk_idx):  # seperate da and dim checking
         da_error_list = []
         if self.check_for_basics(da):
             da_error_list.extend(self.check_for_basics(da))
-        else:
-            pass
 
         dim = da.shape
         len_dim = da.data_extent
@@ -134,11 +125,10 @@ class Validate():
                                      " but expansion origins are missing")
 
         self.errors['blocks'][blk_idx]['data_arra' \
-                                       'ys'][da_idx]['da_err'] = da_error_list
+                                       'ys'][da_idx]['errors'] = da_error_list
         return self.errors
 
-    def check_tag(self, tag_idx, blk_idx):
-        tag = self.file.blocks[blk_idx].tags[tag_idx]
+    def check_tag(self, tag, tag_idx, blk_idx):
         tag_err_list = []
 
         if not tag.position:
@@ -171,12 +161,10 @@ class Validate():
             if not is_si(unit):
                 tag_err_list.append('Invalid unit')
 
-        self.errors['blocks'][blk_idx]['tags'][tag_idx]['tag' \
-                                                        '_err'] = tag_err_list
+        self.errors['blocks'][blk_idx]['tags'][tag_idx]['errors'] = tag_err_list
         return self.errors
 
-    def check_multi_tag(self, mt_idx, blk_idx):
-        mt = self.file.blocks[blk_idx].multi_tags[mt_idx]
+    def check_multi_tag(self, mt, mt_idx, blk_idx):
         mt_err_list = []
 
         if not mt.positions:
@@ -189,7 +177,7 @@ class Validate():
                 mt_err_list.append("Extents should not have more than 2 dimensions")
             if mt.positions.shape != mt.extents.shape:
                 # not sure what index should be given to shape
-                mt_err_list.append("No of entries in positions and extents do not match")
+                mt_err_list.append("Number of entries in positions and extents do not match")
         if mt.references:
             ref_ndim = len(mt.references[0].shape) # assume all references have same shape
             if ref_ndim > 1 and len(mt.positions.shape) == 1:
@@ -217,13 +205,12 @@ class Validate():
                         mt_err_list.append("References and multi_tag units mismatched")
                         break
 
-        self.errors['blocks'][blk_idx]['multi_tags'][mt_idx]['mt' \
-                                                        '_err'] = mt_err_list
+        self.errors['blocks'][blk_idx]['multi_tags'][mt_idx]['errors'] = mt_err_list
         return self.errors
 
     def check_section(self, section, sec_idx):
 
-        self.errors['sections'][sec_idx]['sec_err'] = self.check_for_basics(section)
+        self.errors['sections'][sec_idx]['errors'] = self.check_for_basics(section)
         return self.errors
 
     def check_property(self, prop, prop_idx, sec_idx):
@@ -235,20 +222,20 @@ class Validate():
             prop_err_list.append("Unit is not set")
         if prop.unit and not is_si(prop.unit):
             prop_err_list.append("Unit is not valid!")
-        self.errors['sections'][sec_idx]['props'][prop_idx]['prop_err'] = prop_err_list
+        self.errors['sections'][sec_idx]['props'][prop_idx]['errors'] = prop_err_list
         return self.errors
 
     def check_features(self, feat, parent, blk_idx, tag_idx, fea_idx):
 
         fea_err_list = []
-        # will raise RuntimeError, no need to check
-        # if not feat.link_type:
-        #     fea_err_list.append("Linked type is not set!")
+        # will raise RuntimeError for both, actually no need to check
+        if not feat.link_type:
+            fea_err_list.append("Linked type is not set!")
         if not feat.data:
             fea_err_list.append("Data is not set")
 
         self.errors['blocks'][blk_idx][parent][tag_idx]['fea' \
-                                                        'tures'][fea_idx]['fea_err'] = fea_err_list
+                                                        'tures'][fea_idx]['errors'] = fea_err_list
         return self.errors
 
     def check_sources(self, src, blk_idx):
@@ -284,13 +271,13 @@ class Validate():
                 rdim_err_list.append("Unit must be atomic, not composite!")
 
         self.errors['blocks'][blk_idx]['data_arrays']\
-            [da_idx]['dimensions'][dim_idx]['dim_err'] = rdim_err_list
+            [da_idx]['dimensions'][dim_idx]['errors'] = rdim_err_list
         return self.errors
 
     def check_set_dim(self, set_dim, dim_idx, da_idx, blk_idx):
         if set_dim.dimension_type != 'set':
             self.errors['blocks'][blk_idx]['data_arrays'][da_idx] \
-                ['dimensions'][dim_idx]['dim_err'].append("Dimension type is not correct!")
+                ['dimensions'][dim_idx]['errors'].append("Dimension type is not correct!")
             return self.errors
         else:
             return None
@@ -312,21 +299,19 @@ class Validate():
                 sdim_err_list.append("Unit must be atomic, not composite!")
 
         self.errors['blocks'][blk_idx]['data_arrays']\
-            [da_idx]['dimensions'][dim_idx]['dim_err'] = sdim_err_list
+            [da_idx]['dimensions'][dim_idx]['errors'] = sdim_err_list
         return self.errors
 
     def check_for_basics(self,entity):
         basic_check_list = []
         if not entity.type:
-            basic_check_list.append("Type of some {} is missing".format(type(entity).__name__))
+            basic_check_list.append("Type of {} is missing".format(type(entity).__name__))
         if not entity.id:
-            basic_check_list.append("ID of some {} is missing".format(type(entity).__name__))
+            basic_check_list.append("ID of {} is missing".format(type(entity).__name__))
         if not entity.name:
-            basic_check_list.append("Name of some {} is missing".format(type(entity).__name__))
-        if not basic_check_list:
-            return None
-        else:
-            return basic_check_list
+            basic_check_list.append("Name of {} is missing".format(type(entity).__name__))
+
+        return basic_check_list
 
     @staticmethod
     def check_dict_empty(dict):
