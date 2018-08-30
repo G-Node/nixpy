@@ -295,14 +295,15 @@ class File(object):
 
         for si, sec in enumerate(self.find_sections()):
             validator.check_section(sec, si)
-            for pi , prop in enumerate(sec.props):
+            for pi, prop in enumerate(sec.props):
                 validator.check_property(prop, pi, si)
 
-        if errors:  # how to know all entries in dict is empty
+        if validator.error_count:
+            print("{} errors found".format(validator.error_count))
             return errors
         else:
-            return "The file is a valid NIX file"
-
+            print("No errors found: The file is a valid NIX file")
+            return  errors
 
     def flush(self):
         self._h5file.flush()

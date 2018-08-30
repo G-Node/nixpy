@@ -1,14 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
-import os
-import h5py
 import numpy as np
-import quantities as pq
-import nixio as nix
 from .util.units import *
 from collections import OrderedDict
 
 
-class Validate():
+class Validate:
 
     def __init__(self, file):
         self.file = file
@@ -19,8 +15,9 @@ class Validate():
 
     def form_dict(self):
         file = self.file
+        self.error_count = 0
 
-        for si, sec in enumerate(file.find_sections()): # flat struct for section may not be correct?
+        for si, sec in enumerate(file.find_sections()):
             prop_dict = {'errors': [], 'props': [], "obj_ref": sec}
             self.errors['sections'].append(prop_dict)
 
@@ -29,7 +26,7 @@ class Validate():
                 self.errors['sections'][si]['props'].append(pe_dict)
 
         for bi, blk in enumerate(file.blocks):
-            blk_dict = {'sources':[], 'groups': [], 'data_arrays': [],
+            blk_dict = {'sources': [], 'groups': [], 'data_arrays': [],
                         'tags': [], 'multi_tags': [], 'errors': [], "obj_ref": blk}
             self.errors['blocks'].append(blk_dict)
             OrderedDict(self.errors)
@@ -39,7 +36,7 @@ class Validate():
                 self.errors['blocks'][bi]['groups'].append(grp_dict)
 
             for di, da in enumerate(blk.data_arrays):
-                d = {'dimensions': [] , 'errors': [], "obj_ref": da}
+                d = {'dimensions': [], 'errors': [], "obj_ref": da}
                 self.errors['blocks'][bi]['data_arrays'].append(d)
                 for dim_idx, dim in enumerate(da.dimensions):
                     dim_dict = {'errors': [], "obj_ref": dim}
@@ -100,12 +97,12 @@ class Validate():
             for dim in da.dimensions:
                 if dim.dimension_type == 'range':
                     if len(dim.ticks) != len(da):
-        # if data_extent is used insteand of len() a tuple will be observed, eg (1200,)
+                        # if data_extent is used instead of len() tuple will be observed, eg (1200,)
                         da_error_list.append("In some Range Dimensions, the number"
                                              " of ticks differ from the data entries")
                 if dim.dimension_type == 'set':
                     # same as above
-                    if len(dim.labels) != len(da):  # not sure
+                    if len(dim.labels) != len(da):
                         da_error_list.append("In some Set Dimensions, the number "
                                              "of labels differ from the data entries")
 
@@ -118,14 +115,13 @@ class Validate():
         if np.any(ex_origin):
             if not poly:
                 da_error_list.append("Expansion origins exist but "
-                                 "polynomial coefficients are missing")
+                                     "polynomial coefficients are missing")
         if np.any(poly):
             if not ex_origin:
                 da_error_list.append("Polynomial coefficients exist" 
                                      " but expansion origins are missing")
 
-        self.errors['blocks'][blk_idx]['data_arra' \
-                                       'ys'][da_idx]['errors'] = da_error_list
+        self.errors['blocks'][blk_idx]['data_arrays'][da_idx]['errors'] = da_error_list
         return self.errors
 
     def check_tag(self, tag, tag_idx, blk_idx):
@@ -138,10 +134,12 @@ class Validate():
             ndim = len(tag.references[0].shape)
             if tag.position:
                 if len(tag.position) != ndim:
-                    tag_err_list.append("Number of position and dimensionality of reference do not match")
+                    tag_err_list.append("Number of position "
+                                        "and dimensionality of reference do not match")
             if tag.extent:
                 if ndim != len(tag.extent):
-                    tag_err_list.append("Number of extent and dimensionality of reference do not match")
+                    tag_err_list.append("Number of extent "
+                                        "and dimensionality of reference do not match")
 
             for ref in tag.references:
                 unit_list = self.get_dim_units(ref)
@@ -179,7 +177,7 @@ class Validate():
                 # not sure what index should be given to shape
                 mt_err_list.append("Number of entries in positions and extents do not match")
         if mt.references:
-            ref_ndim = len(mt.references[0].shape) # assume all references have same shape
+            ref_ndim = len(mt.references[0].shape)  # assume all references have same shape
             if ref_ndim > 1 and len(mt.positions.shape) == 1:
                 mt_err_list.append("The number of reference and position"
                                    " entries do not match")
@@ -187,7 +185,7 @@ class Validate():
                 mt_err_list.append("The number of reference and position"
                                    " entries do not match")
             if mt.extents:
-                if len(mt.extents.shape) == 1 and ref_ndim > 1 :
+                if len(mt.extents.shape) == 1 and ref_ndim > 1:
                     mt_err_list.append("The number of reference and extent"
                                        " entries do not match")
                 elif len(mt.extents.shape) == 2 and mt.extents.shape[1] != ref_ndim:
@@ -234,8 +232,8 @@ class Validate():
         if not feat.data:
             fea_err_list.append("Data is not set")
 
-        self.errors['blocks'][blk_idx][parent][tag_idx]['fea' \
-                                                        'tures'][fea_idx]['errors'] = fea_err_list
+        self.errors['blocks'][blk_idx][parent][tag_idx]['features']\
+                                [fea_idx]['errors'] = fea_err_list
         return self.errors
 
     def check_sources(self, src, blk_idx):
@@ -247,7 +245,7 @@ class Validate():
 
     def check_dim(self, dimen):  # call it in file after the index problem is fixed
         # call it in other check dim function/ dont call alone
-        if dimen.index:
+        if dimen.index and dimen.index > 0:
             return None
         else:
             return 'index must > 0'
@@ -276,8 +274,8 @@ class Validate():
 
     def check_set_dim(self, set_dim, dim_idx, da_idx, blk_idx):
         if set_dim.dimension_type != 'set':
-            self.errors['blocks'][blk_idx]['data_arrays'][da_idx] \
-                ['dimensions'][dim_idx]['errors'].append("Dimension type is not correct!")
+            self.errors['blocks'][blk_idx]['data_arrays'][da_idx]['dimensions'][dim_idx]\
+                                ['errors'].append("Dimension type is not correct!")
             return self.errors
         else:
             return None
@@ -292,7 +290,7 @@ class Validate():
             sdim_err_list.append("Dimension type is not correct!")
 
         if sam_dim.offset and not sam_dim.unit:
-            sdim_err_list.append("Offset is set, but no unit set!")  #validity check below
+            sdim_err_list.append("Offset is set, but no unit set!")  # validity check below
 
         if sam_dim.unit:
             if not is_atomic(sam_dim.unit):
@@ -302,7 +300,7 @@ class Validate():
             [da_idx]['dimensions'][dim_idx]['errors'] = sdim_err_list
         return self.errors
 
-    def check_for_basics(self,entity):
+    def check_for_basics(self, entity):
         basic_check_list = []
         if not entity.type:
             basic_check_list.append("Type of {} is missing".format(type(entity).__name__))
@@ -314,8 +312,8 @@ class Validate():
         return basic_check_list
 
     @staticmethod
-    def check_dict_empty(dict):
-        assert type(dict) is dict or type(dict) is OrderedDict, "This is not a dictionary"
+    def check_dict_empty(diction):
+        assert type(diction) is dict or type(diction) is OrderedDict, "This is not a dictionary"
 
     def get_dim_units(self, data_arrays):
         unit_list = []
@@ -327,7 +325,6 @@ class Validate():
             if dim.dimension_type == 'set':
                 pass
         return unit_list
-
 
 
 
