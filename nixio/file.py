@@ -290,8 +290,6 @@ class File(object):
                     validator.check_features(fea, 'tags', bi, ti, fi)
             for src in blk.find_sources():
                 validator.check_sources(src, bi)
-                if validator.check_sources(src, bi):
-                    break
 
         for si, sec in enumerate(self.find_sections()):
             validator.check_section(sec, si)

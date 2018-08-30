@@ -21,10 +21,10 @@ class TestValidate (unittest.TestCase):
             for i in range(4):
                 blk.create_data_array("da{}".format(i), "data_arrays",
                                       dtype="float",
-                                      data=(1 + np.random.random((5))))
+                                      data=(1 + np.random.random(5)))
             for i in range(4):
                 blk.create_tag("tag{}".format(i), "tags",
-                               np.random.random((1)))
+                               np.random.random(1))
             for i in range(4):
                 blk.create_multi_tag("mt{}".format(i), "multi_tags",
                                      blk.data_arrays[i])
@@ -43,7 +43,6 @@ class TestValidate (unittest.TestCase):
         self.file.force_created_at(0)
         assert self.validator.check_file()['file_errors'] == ["date is not set!"]
 
-
     def test_check_blocks(self):
         block = self.block1
         assert self.validator.errors['blocks'][0]['errors'] == []
@@ -59,16 +58,17 @@ class TestValidate (unittest.TestCase):
         group1 = self.block1.groups[0]
         group1._h5group.set_attr("name", None)
         self.validator.check_groups(group1, 0, 0)
-        assert self.validator.errors['blocks'][0]['gro' \
+        assert self.validator.errors['blocks'][0]['gro'
                                 'ups'][0]['errors'] == ['Name of Group is missing']
         group2 = self.block2.groups[1]
         group2._h5group.set_attr("name", None)
         self.validator.check_groups(group2, 1, 1)
-        assert self.validator.errors['blocks'][1]['groups'][1]['errors'] == ['Name of Group is missing']
+        assert self.validator.errors['blocks'][1]['groups'][1]['errors'] == \
+               ['Name of Group is missing']
         group2._h5group.set_attr("type", None)
         self.validator.check_groups(group2, 1, 1)
         assert self.validator.errors['blocks'][1]['groups'][1]['errors'] == [
-            'Type of Group is missing','Name of Group is missing']
+            'Type of Group is missing', 'Name of Group is missing']
 
     def test_check_data_arrays(self):
         da1 = self.block1.data_arrays[0]
@@ -151,20 +151,20 @@ class TestValidate (unittest.TestCase):
         mt1 = self.block1.multi_tags[0]
         da1 = self.block1.create_data_array(name='test1', array_type='t', dtype='float', data=0)
         mt1.extents = da1
-        self.validator.check_multi_tag(mt1, 0,0)
+        self.validator.check_multi_tag(mt1, 0, 0)
         assert self.validator.errors['blocks'][0]['multi_tags'][0]['errors']\
-               == ['Number of entries in positions and extents do not match']
+            == ['Number of entries in positions and extents do not match']
 
         # test for pos & extent with multiple dimensions
         mt2 = self.block1.multi_tags[1]
         da2 = self.block1.create_data_array(name='test2a', array_type='t', dtype='float',
-                                            data=np.random.random((6,5)))
+                                            data=np.random.random((6, 5)))
         da3 = self.block1.create_data_array(name='test2b', array_type='t', dtype='float',
-                                            data=np.random.random((5,8)))
+                                            data=np.random.random((5, 8)))
         da4 = self.block1.create_data_array(name='test2c', array_type='t', dtype='float',
-                                            data=np.random.random((5,4)))
+                                            data=np.random.random((5, 4)))
         da5 = self.block1.create_data_array(name='test2d', array_type='t', dtype='float',
-                                            data=np.random.random((5,3)))
+                                            data=np.random.random((5, 3)))
         mt2.references.append(da2)
         mt2.references.append(da3)
         mt2.positions = da5
@@ -172,16 +172,16 @@ class TestValidate (unittest.TestCase):
         self.validator.check_multi_tag(mt2, 1, 0)
         warn1 = "The number of reference and position entries do not match"
         warn2 = "The number of reference and extent entries do not match"
-        # pos-extent-mismatch warning exist but not assert, change shape of da4/5 to elim this warning
+        # pos-extent-mismatch warning exist but not assert, change shape of da4/5 to elim warning
         assert warn1 in self.validator.errors['blocks'][0]['multi_tags'][1]['errors']
         assert warn2 in self.validator.errors['blocks'][0]['multi_tags'][1]['errors']
 
         # test for pos & extent with only ONE dimensions
         mt3 = self.block1.multi_tags[2]
         da6 = self.block1.create_data_array(name='test3a', array_type='t', dtype='float',
-                                            data=np.random.random((5)))
+                                            data=np.random.random(5))
         da7 = self.block1.create_data_array(name='test3b', array_type='t', dtype='float',
-                                            data=np.random.random((3,3)))
+                                            data=np.random.random((3, 3)))
         mt3.positions = da6
         mt3.extents = da6
         mt3.references.append(da7)
@@ -192,7 +192,7 @@ class TestValidate (unittest.TestCase):
         # test for ext and pos dimensionality
         mt4 = self.block1.multi_tags[3]
         da8 = self.block1.create_data_array(name='test3c', array_type='t', dtype='float',
-                                            data=np.random.random((5,3,4)))
+                                            data=np.random.random((5, 3, 4)))
         mt4.positions = da8
         mt4.extents = da8
         self.validator.check_multi_tag(mt4, 3, 0)
@@ -201,7 +201,7 @@ class TestValidate (unittest.TestCase):
         assert "Extents should not have more than 2 dimensions" \
                in self.validator.errors['blocks'][0]['multi_tags'][3]['errors']
 
-        #test for units
+        # test for units
         mt5 = self.block2.multi_tags[0]
         mt5.units = ['s', 'abc']
         da9 = self.block2.data_arrays[0]
@@ -219,7 +219,7 @@ class TestValidate (unittest.TestCase):
         self.validator.check_multi_tag(mt5, 0, 1)
         assert self.validator.errors['blocks'][1]['multi_tags'][0]['errors'] == []
 
-    def test_check_section(self): # only have check for basics now
+    def test_check_section(self):  # only have check for basics now
         sec1 = self.file.sections[0]
         sec1._h5group.set_attr("type", None)
         self.validator.check_section(sec1, 0)
@@ -228,15 +228,15 @@ class TestValidate (unittest.TestCase):
     def test_check_props(self):
         # check1
         section = self.file.sections[0]
-        prop = section.create_property("prop1", [1,2,3,4])
+        prop = section.create_property("prop1", [1, 2, 3, 4])
         self.validator.form_dict()
         # check2
-        prop1 = section.create_property("prop2", values_or_dtype= [1, 2, 3, 4])
+        prop1 = section.create_property("prop2", values_or_dtype=[1, 2, 3, 4])
         prop1.delete_values()
         prop1._h5group.set_attr('name', None)
         print(prop1.name)
         # check3
-        prop2 = section.create_property("prop3", values_or_dtype= [1, 2, 3, 4])
+        prop2 = section.create_property("prop3", values_or_dtype=[1, 2, 3, 4])
         prop2.unit = "invalidu"
         self.validator.form_dict()
         self.validator.check_property(prop, 0, 0)  # check1
@@ -289,8 +289,8 @@ class TestValidate (unittest.TestCase):
         self.validator.check_sampled_dim(sdim2, 1, 0, 0)  # check2
         assert "Unit must be atomic, not composite!" in self.validator.errors['blocks'] \
             [0]['data_arrays'][0]['dimensions'][1]['errors']
-        assert "SamplingInterval is not set to valid value (> 0)!" in self.validator.errors['blocks'] \
-            [0]['data_arrays'][0]['dimensions'][1]['errors']
+        assert "SamplingInterval is not set to valid value (> 0)!" in self.validator.errors['bloc' 
+                                               'ks'][0]['data_arrays'][0]['dimensions'][1]['errors']
 
     def test_set_dim(self):
         da1 = self.block1.data_arrays[0]
@@ -303,7 +303,7 @@ class TestValidate (unittest.TestCase):
 
     def test_sources(self):
         da1 = self.block1.data_arrays[0]
-        src1 = self.block1.create_source("src1","testing_src")
+        src1 = self.block1.create_source("src1", "testing_src")
         da1.sources.append(src1)
         src1._h5group.set_attr('name', None)
         print(da1.sources)

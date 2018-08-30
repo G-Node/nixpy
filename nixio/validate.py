@@ -12,6 +12,8 @@ class Validate:
         self.errors['file_errors'] = []
         self.errors['blocks'] = []
         self.errors['sections'] = []
+        self.error_count = 0  # only for file.py use, number will not be correct
+        # if a function addressing same object is called more than once
 
     def form_dict(self):
         file = self.file
@@ -66,12 +68,14 @@ class Validate:
         # in nixpy no location attributes. This is checked in C++ version
 
         self.errors['file_errors'] = file_err_list
+        self.error_count += len(file_err_list)
         return self.errors
 
     def check_blocks(self, block, blk_idx):
         blk_err_list = self.check_for_basics(block)
 
         self.errors['blocks'][blk_idx]['errors'] = blk_err_list
+        self.error_count += len(blk_err_list)
         return self.errors
 
     def check_groups(self, group, grp_idx, blk_idx):
@@ -79,6 +83,7 @@ class Validate:
 
         if grp_err_list:
             self.errors['blocks'][blk_idx]['groups'][grp_idx]['errors'] = grp_err_list
+            self.error_count += len(grp_err_list)
             return self.errors
         else:
             return None
@@ -122,6 +127,7 @@ class Validate:
                                      " but expansion origins are missing")
 
         self.errors['blocks'][blk_idx]['data_arrays'][da_idx]['errors'] = da_error_list
+        self.error_count += len(da_error_list)
         return self.errors
 
     def check_tag(self, tag, tag_idx, blk_idx):
@@ -160,6 +166,7 @@ class Validate:
                 tag_err_list.append('Invalid unit')
 
         self.errors['blocks'][blk_idx]['tags'][tag_idx]['errors'] = tag_err_list
+        self.error_count += len(tag_err_list)
         return self.errors
 
     def check_multi_tag(self, mt, mt_idx, blk_idx):
@@ -204,11 +211,14 @@ class Validate:
                         break
 
         self.errors['blocks'][blk_idx]['multi_tags'][mt_idx]['errors'] = mt_err_list
+        self.error_count += len(mt_err_list)
         return self.errors
 
     def check_section(self, section, sec_idx):
 
         self.errors['sections'][sec_idx]['errors'] = self.check_for_basics(section)
+        self.error_count += len(self.check_for_basics(section))
+
         return self.errors
 
     def check_property(self, prop, prop_idx, sec_idx):
@@ -221,6 +231,7 @@ class Validate:
         if prop.unit and not is_si(prop.unit):
             prop_err_list.append("Unit is not valid!")
         self.errors['sections'][sec_idx]['props'][prop_idx]['errors'] = prop_err_list
+        self.error_count += len(prop_err_list)
         return self.errors
 
     def check_features(self, feat, parent, blk_idx, tag_idx, fea_idx):
@@ -234,11 +245,13 @@ class Validate:
 
         self.errors['blocks'][blk_idx][parent][tag_idx]['features']\
                                 [fea_idx]['errors'] = fea_err_list
+        self.error_count += len(fea_err_list)
         return self.errors
 
     def check_sources(self, src, blk_idx):
         if self.check_for_basics(src):
             self.errors['blocks'][blk_idx]['sources'] = self.check_for_basics(src)
+            self.error_count += len(self.check_for_basics(src))
             return self.errors
         else:
             return None
@@ -253,8 +266,8 @@ class Validate:
     def check_range_dim(self, r_dim, dim_idx, da_idx, blk_idx):
         rdim_err_list = []
 
-        # if self.check_dim(r_dim):
-        #     rdim_err_list.append(self.check_dim(r_dim))
+        if self.check_dim(r_dim):
+            rdim_err_list.append(self.check_dim(r_dim))
 
         if not r_dim.ticks:
             rdim_err_list.append("Ticks need to be set for range dimensions")
@@ -270,18 +283,26 @@ class Validate:
 
         self.errors['blocks'][blk_idx]['data_arrays']\
             [da_idx]['dimensions'][dim_idx]['errors'] = rdim_err_list
+        self.error_count += len(rdim_err_list)
         return self.errors
 
     def check_set_dim(self, set_dim, dim_idx, da_idx, blk_idx):
+
+        if self.check_dim(set_dim):
+            self.errors['blocks'][blk_idx]['data_arrays'][da_idx]['dimensions'][dim_idx] \
+                ['errors'].append(self.check_dim(set_dim))
+            self.error_count += 1
         if set_dim.dimension_type != 'set':
             self.errors['blocks'][blk_idx]['data_arrays'][da_idx]['dimensions'][dim_idx]\
                                 ['errors'].append("Dimension type is not correct!")
-            return self.errors
-        else:
-            return None
+            self.error_count += 1
+        return self.errors
 
     def check_sampled_dim(self, sam_dim, dim_idx, da_idx, blk_idx):
         sdim_err_list = []
+
+        if self.check_dim(sam_dim):
+            sdim_err_list.append(self.check_dim(sam_dim))
 
         if sam_dim.sampling_interval < 0:
             sdim_err_list.append("SamplingInterval is not set to valid value (> 0)!")
@@ -298,6 +319,7 @@ class Validate:
 
         self.errors['blocks'][blk_idx]['data_arrays']\
             [da_idx]['dimensions'][dim_idx]['errors'] = sdim_err_list
+        self.error_count += len(sdim_err_list)
         return self.errors
 
     def check_for_basics(self, entity):
@@ -310,10 +332,6 @@ class Validate:
             basic_check_list.append("Name of {} is missing".format(type(entity).__name__))
 
         return basic_check_list
-
-    @staticmethod
-    def check_dict_empty(diction):
-        assert type(diction) is dict or type(diction) is OrderedDict, "This is not a dictionary"
 
     def get_dim_units(self, data_arrays):
         unit_list = []
