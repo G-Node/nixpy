@@ -20,6 +20,7 @@ from .entity import Entity
 from .exceptions import exceptions
 from .group import Group
 from .data_array import DataArray
+from .data_frame import DataFrame
 from .multi_tag import MultiTag
 from .tag import Tag
 from .source import Source
@@ -183,6 +184,13 @@ class Block(Entity):
         if data is not None:
             da.write_direct(data)
         return da
+
+    def create_data_frame(self, df_name, frame_type, col_name=None ,col_dtype=None, col_dict=None, shape=None,
+                          data=None, compression=Compression.Auto):
+        data_frames = self._h5group.open_group("data_frames")
+        df = DataFrame._create_new(self, data_frames, df_name, frame_type, shape, col_dict, compression, data)
+        # write_direct in data_frame file
+        return df
 
     def find_sources(self, filtr=lambda _: True, limit=None):
         """

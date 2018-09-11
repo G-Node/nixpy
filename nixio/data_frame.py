@@ -1,7 +1,6 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import h5py
-from .block import Block
 from .exceptions import OutOfBounds
 from .entity import Entity
 from . import util
@@ -20,15 +19,17 @@ class DataFrame(Entity, DataSet):
         self._row_count = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, shape, col_dict):
+    def _create_new(cls, nixparent, h5parent, name, type_, shape, col_dict, compression, data):
         assert len(shape) == 2, "DataFrames should always be 2 dimension"  # replace with Exception later
         cls.raw_shape = shape
+        print(list(col_dict))
         cls.col_names = list(col_dict)
-        cls.col_dtype = np.dtype(list(col_dict))
+        cls.col_dtype = np.dtype(list(col_dict.items()))
         x,y = shape
         newentity = super()._create_new(nixparent, h5parent, name, type_)
-        newentity._h5group.create_dataset("data", (x+1, y+1))
+        newentity._h5group.create_dataset("data", (x+1, y+1), cls.col_dtype)
         newentity[0, 1:] = np.array(cls.col_names)
+        newentity[1:, ] = data
         print(newentity)
         return newentity
 
@@ -91,7 +92,7 @@ class DataFrame(Entity, DataSet):
 
     def read_column(self, col_idx):  # add col_name later  # support idx as tuple slice also! later
         assert col_idx < self.raw_shape[1]
-        get_col = self._read_data(sl=(:,col_idx))  #look through this function work in data_set
+        get_col = self._read_data(sl=(col_idx))  #look through this function work in data_set
         return get_col
 
     def read_row(self, row_idx):
@@ -100,6 +101,7 @@ class DataFrame(Entity, DataSet):
 
     def write_cell(self, position):
         assert type(position) is tuple
+
 
     def read_cell(self, position):
         pass
