@@ -18,6 +18,7 @@ from .source import Source
 from .section import Section, S
 from .property import Property, OdmlType
 from .feature import Feature
+from .data_frame import DataFrame
 from .dimensions import SampledDimension, RangeDimension, SetDimension
 
 # enums
@@ -31,7 +32,7 @@ from .compression import Compression
 # version
 from .info import VERSION as __version__
 
-__all__ = ("File", "Block", "Group", "DataArray", "Tag", "MultiTag", "Source",
+__all__ = ("File", "Block", "Group", "DataArray", "DataFrame", "Tag", "MultiTag", "Source",
            "Section", "S", "Feature", "Property", "OdmlType",
            "SampledDimension", "RangeDimension", "SetDimension",
            "FileMode", "DataSliceMode", "DataType", "DimensionType",
