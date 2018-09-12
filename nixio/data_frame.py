@@ -8,6 +8,7 @@ from .data_set import DataSet
 from .data_view import DataView
 
 
+
 class DataFrame(Entity, DataSet):
 
     def __init__(self, nixparent, h5group):
@@ -19,18 +20,21 @@ class DataFrame(Entity, DataSet):
         self._row_count = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, shape, col_dict, compression, data):
+    def _create_new(cls, nixparent, h5parent, name, type_, shape, col_name, col_dtype, compression, data):
         assert len(shape) == 2, "DataFrames should always be 2 dimension"  # replace with Exception later
-        cls.raw_shape = shape
-        print(list(col_dict))
-        cls.col_names = list(col_dict)
-        cls.col_dtype = np.dtype(list(col_dict.items()))
+        # for name, type in col_dict.items():
+        #     if type == str:
+        #         col_dict[name] == str('utf-8')
+        # cls.raw_shape = shape
+        # cls.col_names = np.array(col_dict)
+        # arr = list(col_dict.items())
+        # print(arr)
+        # cls.col_dtype = np.dtype(arr)
+        cls.col_names = np.char.encode(col_name, encoding='utf8')
+        cls.col_dtype = col_dtype  # add that the first row always string  # how to merge np dtype
         x,y = shape
         newentity = super()._create_new(nixparent, h5parent, name, type_)
-        newentity._h5group.create_dataset("data", (x+1, y+1), cls.col_dtype)
-        newentity[0, 1:] = np.array(cls.col_names)
-        newentity[1:, ] = data
-        print(newentity)
+        newentity._h5group.create_dataset("data", (x+1, y), cls.col_dtype )
         return newentity
 
     def _read_data(self, sl=None):
