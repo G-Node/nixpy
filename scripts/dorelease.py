@@ -244,11 +244,9 @@ def main():
     chdir()
 
     if len(sys.argv) < 2:
-        die("Specify version (X.Y.Z)")
+        die("Specify version")
 
     newverstr = sys.argv[1]
-    parse_version_string(newverstr)
-
     prepline = "Preparing new release: {}".format(newverstr)
     banner = "="*len(prepline) + "\n" + prepline + "\n" + "="*len(prepline)
     banner = bold_begin + banner + bold_end
