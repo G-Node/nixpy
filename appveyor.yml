@@ -26,6 +26,11 @@ environment:
       pyver: 3
       bits: 32
 
+    # Python 3.7 32 bit
+    - PYTHON: "C:\\Python37"
+      pyver: 3
+      bits: 32
+
     # Python 2.7 64 bit
     - PYTHON: "C:\\Python27-x64"
       pyver: 2
@@ -33,6 +38,11 @@ environment:
 
     # Python 3.6 64 bit
     - PYTHON: "C:\\Python36-x64"
+      pyver: 3
+      bits: 64
+
+    # Python 3.7 64 bit
+    - PYTHON: "C:\\Python37-x64"
       pyver: 3
       bits: 64
       RDP: "no"

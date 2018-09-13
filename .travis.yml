@@ -15,6 +15,9 @@ matrix:
     - python: "3.6"
       os: linux
       env: pymajor=3 coveralls=1
+    - python: "3.7"
+      os: linux
+      env: pymajor=3 coveralls=1
     - language: generic
       os: osx
       env: pymajor=2
