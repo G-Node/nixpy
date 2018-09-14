@@ -28,21 +28,18 @@ def cc(filenames, dest,
     compiler = ccompiler.new_compiler()
 
     distutils.sysconfig.customize_compiler(compiler)
-    if library_dirs:
-        [compiler.add_library_dir(libd) for libd in library_dirs]
-    if include_dirs:
-        [compiler.add_include_dir(incd) for incd in include_dirs]
-    if libraries:
-        [compiler.add_library(lib) for lib in libraries]
-    if runtime_lib_dirs and not WINDOWS:
-        [compiler.add_runtime_library_dir(rund) for rund in runtime_lib_dirs]
+    compiler.set_library_dirs(library_dirs)
+    compiler.set_include_dirs(include_dirs)
+    compiler.set_libraries(libraries)
+    compiler.set_runtime_library_dirs(runtime_lib_dirs)
 
     try:
-        for srcname in filenames:
-            execname, ext = os.path.splitext(srcname)
+        objnames = compiler.compile(filenames, output_dir=dest,
+                                    extra_postargs=compile_args)
+        for obj in objnames:
+            execname, ext = os.path.splitext(obj)
             compiler.link_executable(
-                [srcname], execname, output_dir=dest,
-                extra_postargs=compile_args,
+                [obj], execname, output_dir=dest,
                 target_lang="c++",
             )
     except (CompileError, LinkError):
@@ -54,7 +51,7 @@ def maketests(dest):
     scriptloc, _ = os.path.split(os.path.abspath(__file__))
     os.chdir(scriptloc)
     filenames = glob("*.cpp")
-    nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include')
+    nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include/nixio-1.0')
     nix_lib_dir = os.getenv('NIX_LIBDIR', '/usr/local/lib')
 
     boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
