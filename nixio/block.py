@@ -186,18 +186,15 @@ class Block(Entity):
             da.write_direct(data)
         return da
 
-    def create_data_frame(self, df_name, frame_type,shape=None, col_name=None ,col_dtype=None,
+    def create_data_frame(self, df_name, frame_type,shape=None, col_dict=None,
                           data=None, compression=Compression.Auto):
         # add col dict later
         data_frames = self._h5group.open_group("data_frames")
-        df = DataFrame._create_new(self, data_frames, df_name, frame_type, shape, col_name, col_dtype, compression, data)
+        df = DataFrame._create_new(self, data_frames, df_name, frame_type, shape, col_dict, compression, data)
         # write_direct in data_frame file
-        namelist= []
-        col_name = np.char.encode(col_name, encoding='utf8')
-        namelist.append(col_name)
-        data = list(data)
-        namelist.extend(data)
-        arr = np.array(namelist)
+        arr = np.array(data , dtype=(DataFrame.col_dtype))
+        print(arr)
+        print(DataFrame.col_dtype)
         df.write_direct(arr)
         return df
 

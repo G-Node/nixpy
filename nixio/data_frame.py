@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import h5py
@@ -20,24 +22,24 @@ class DataFrame(Entity, DataSet):
         self._row_count = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, shape, col_name, col_dtype, compression, data):
+    def _create_new(cls, nixparent, h5parent, name, type_, shape, col_dict, compression, data):
+        assert len(data) == 2, "DataFrames should always be 2 dimension"
+        assert  len(data[0]) == len(col_dict), 'unmatch'
         assert len(shape) == 2, "DataFrames should always be 2 dimension"  # replace with Exception later
-        # for name, type in col_dict.items():
-        #     if type == str:
-        #         col_dict[name] == str('utf-8')
-        # cls.raw_shape = shape
-        # cls.col_names = np.array(col_dict)
-        # arr = list(col_dict.items())
-        # print(arr)
-        # cls.col_dtype = np.dtype(arr)
-        cls.col_names = np.char.encode(col_name, encoding='utf8')
-        cls.col_dtype = col_dtype  # add that the first row always string  # how to merge np dtype
+        for name, type in col_dict.items():
+            if type == str:
+                col_dict[name] = util.vlen_str_dtype  # use the special type from util
+        cls.raw_shape = shape
+        cls.col_names = np.array(list(col_dict.keys()))
+        arr = list(col_dict.items())
+        cls.col_dtype = np.dtype(arr)
+        cls.col_raw_dtype = list(col_dict.values())
         x,y = shape
         newentity = super()._create_new(nixparent, h5parent, name, type_)
-        newentity._h5group.create_dataset("data", (x+1, y), cls.col_dtype )
+        newentity._h5group.create_dataset("data", (x, ), cls.col_dtype )
         return newentity
 
-    def _read_data(self, sl=None):
+    def _read_data(self, sl=None):  #Done
         data = super()._read_data(sl)
         return data
 
@@ -78,20 +80,21 @@ class DataFrame(Entity, DataSet):
         assert len(changed_col) == self.raw_shape[0], 'if missing data, please fill None'
         if not column_idx and not column_name:
             raise IndexError  # change the error later
-        if not column_idx and column_name:
-            column_idx = self.find_idx_by_name(column_name) # find idx by name
-
-        self[:, column_idx] = changed_col
+        if not column_name and column_name:
+            column_name = self.find_name_by_idx(column_idx) # find name by name
+        for i, x in enumerate(self):
+            x[column_idx] = changed_col[i]
+        print(self)
         return self
 
-    def write_rows(self, changed_row, row_idx = None, row_name = None):
+    def write_rows(self, changed_row, row_idx = None, row_name = None):  # Done!
         assert len(changed_row) == self.raw_shape[1]
-        if not row_idx and not row_name:
+        if row_idx == None and not row_name:
             raise IndexError  # change the error later
-        if not row_idx and row_name:
-            row_idx = self.find_idx_by_name(row_name) # find idx by name
+        # if not row_idx and row_name:
+        #     row_idx = self.find_idx_by_name(row_name) # find idx by name
 
-        self[row_idx, :] = changed_row
+        self[row_idx] = changed_row
         return self
 
     def read_column(self, col_idx):  # add col_name later  # support idx as tuple slice also! later
@@ -103,12 +106,19 @@ class DataFrame(Entity, DataSet):
         get_row = self._read_data(sl=(row_idx, ))
         return get_row
 
-    def write_cell(self, position):
-        assert type(position) is tuple
+    def write_cell(self, new_item, position):
+        assert len(position) == 2, 'not a position'
+        x, y = position
+        print(x, y )
+        print(self[x][y])
+        self[x][y] = new_item
+        return self
 
 
     def read_cell(self, position):
-        pass
+        assert len(position) == 2, 'not a position'
+        x, y = position
+        return self[x][y]
 
     def columns(self):
         pass
@@ -120,4 +130,10 @@ class DataFrame(Entity, DataSet):
         for  i, n in enumerate(self.col_names):
             if n == name:
                 return i
+        return None
+
+    def find_name_by_idx(self, idx):
+        for i, n in enumerate(self.col_names):
+            if i == idx:
+                return n
         return None
