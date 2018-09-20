@@ -188,13 +188,10 @@ class Block(Entity):
 
     def create_data_frame(self, df_name, frame_type,shape=None, col_dict=None,
                           data=None, compression=Compression.Auto):
-        # add col dict later
         data_frames = self._h5group.open_group("data_frames")
-        df = DataFrame._create_new(self, data_frames, df_name, frame_type, shape, col_dict, compression, data)
+        df = DataFrame._create_new(self, data_frames, df_name, frame_type, shape, col_dict, compression)
         # write_direct in data_frame file
-        arr = np.array(data , dtype=(DataFrame.col_dtype))
-        print(arr)
-        print(DataFrame.col_dtype)
+        arr = np.ascontiguousarray(data , dtype=(DataFrame.col_dtype))
         df.write_direct(arr)
         return df
 
