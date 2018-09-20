@@ -8,8 +8,8 @@ from .entity import Entity
 from . import util
 from .data_set import DataSet
 from .data_view import DataView
-
-
+from collections import OrderedDict
+# TODO add slicing param for functions
 
 class DataFrame(Entity, DataSet):
 
@@ -18,17 +18,15 @@ class DataFrame(Entity, DataSet):
         self._sources = None
         self._columns = None
         self._rows = None
-        self._col_count = None
-        self._row_count = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, shape, col_dict, compression, data):
-        assert len(data) == 2, "DataFrames should always be 2 dimension"
-        assert  len(data[0]) == len(col_dict), 'unmatch'
+    def _create_new(cls, nixparent, h5parent, name, type_, shape, col_dict, compression):
         assert len(shape) == 2, "DataFrames should always be 2 dimension"  # replace with Exception later
+        col_dict = OrderedDict(col_dict.items())
+        print(col_dict)
         for name, type in col_dict.items():
             if type == str:
-                col_dict[name] = util.vlen_str_dtype  # use the special type from util
+                col_dict[name] = util.vlen_str_dtype
         cls.raw_shape = shape
         cls.col_names = np.array(list(col_dict.keys()))
         arr = list(col_dict.items())
@@ -39,30 +37,18 @@ class DataFrame(Entity, DataSet):
         newentity._h5group.create_dataset("data", (x, ), cls.col_dtype )
         return newentity
 
-    def _read_data(self, sl=None):  #Done
+    def _read_data(self, sl=None):  # Done
         data = super()._read_data(sl)
         return data
 
-    def setup(self, mode):  # replace the write column, write rows later
-        if mode == "row":
-            pass  # write data in row to row
-        if mode == 'column':
-            pass   # write data in columns
-
-    def _set_columns(self, names, dtype_list):
-        assert  len(names) == self.raw_shape[1], 'Not all columns are named'  # replace with Exception later
-        assert  len(dtype_list) == self.raw_shape[1], 'Not all dtype of columns are set'  # replace with Exception later
-        names = np.array(names)
-
-
-    def add_rows(self, data):  # need to support write multiple at same time
+    def append_rows(self, data):  # need to support write multiple at same time
         # experimental function for adding new rows
         assert len(data) == self.raw_shape[1]
         util.check_attr_type(data, self.col_dtype or None)
         self.append(data)
         return self
 
-    def add_column(self, new_col, dtype):  # experimental function for adding new column
+    def append_column(self, new_col, dtype):  # experimental function for adding new column
         if len(new_col) != self.data_extent[0]:
             diff = len(new_col) - self.data_extent[0]
             sl = [self.data_extent[0], len(new_col)]  # should be a slice with : not comma
@@ -76,57 +62,66 @@ class DataFrame(Entity, DataSet):
         self = np.transpose(trans_arr)
         return self
 
-    def write_column (self, changed_col, column_idx= None, column_name=None):
+    def write_column(self, changed_col, col_idx= None, column_name=None):
         assert len(changed_col) == self.raw_shape[0], 'if missing data, please fill None'
-        if not column_idx and not column_name:
+        if not col_idx and not column_name:
             raise IndexError  # change the error later
-        if not column_name and column_name:
-            column_name = self.find_name_by_idx(column_idx) # find name by name
-        for i, x in enumerate(self):
-            x[column_idx] = changed_col[i]
-        print(self)
+        if column_name is None:
+            column_name = self.find_name_by_idx(col_idx) # find name by name
+        print(self[:][column_name])
+        changed_col = np.array(changed_col)
+        self._write_data(changed_col)
         return self
 
-    def write_rows(self, changed_row, row_idx = None, row_name = None):  # Done!
-        assert len(changed_row) == self.raw_shape[1]
-        if row_idx == None and not row_name:
-            raise IndexError  # change the error later
-        # if not row_idx and row_name:
-        #     row_idx = self.find_idx_by_name(row_name) # find idx by name
-
-        self[row_idx] = changed_row
-        return self
-
-    def read_column(self, col_idx):  # add col_name later  # support idx as tuple slice also! later
-        assert col_idx < self.raw_shape[1]
-        get_col = self._read_data(sl=(col_idx))  #look through this function work in data_set
+    def read_column(self, col_idx= None, col_name=None):  #Done
+        # assert col_idx < self.raw_shape[1]
+        if col_idx is None and col_name is None:
+            raise IndexError  # change error later
+        if col_name is None:
+            col_name = self.col_names[col_idx]
+        slice = np.s_[:]
+        get_col = self._read_data(sl=slice)[col_name]
         return get_col
 
-    def read_row(self, row_idx):
+    def write_rows(self, changed_row, row_idx = None, row_name = None):  # Done!
+        if row_idx is None and not row_name:
+            raise IndexError  # change the error later
+        if not row_idx and row_name:
+            row_idx = self.find_idx_by_name(row_name)
+
+        self._write_data(changed_row, sl=row_idx)
+        return self
+
+    def read_row(self, row_idx):  # Done
         get_row = self._read_data(sl=(row_idx, ))
         return get_row
 
-    def write_cell(self, new_item, position):
-        assert len(position) == 2, 'not a position'
-        x, y = position
-        print(x, y )
-        print(self[x][y])
-        self[x][y] = new_item
-        return self
+    def write_cell(self, new_item, position= None, col_name=None, row_idx=None):
+        # TODO force the dtype to be inline
+        if position:
+            assert len(position) == 2, 'not a position'
+            x, y = position
+            print(x, y )
+            print(self[x][y])
+            self[1]['time'] = new_item  # not working now
+            print(self[1]['time'], 'time')
+            return self
+        else:
+            if col_name is None and row_idx is None:
+                raise IndexError  # change Error later
 
 
-    def read_cell(self, position):
-        assert len(position) == 2, 'not a position'
-        x, y = position
-        return self[x][y]
+    def read_cell(self, position= None, col_name=None, row_idx=None):  # Done
+        if position:
+            assert len(position) == 2, 'not a position'
+            x, y = position
+            return self[x][y]
+        else:
+            if col_name is None or row_idx is None:
+                raise IndexError  # change Error later
+            return self[row_idx][col_name]
 
-    def columns(self):
-        pass
-
-    def rows(self):
-        pass
-
-    def find_idx_by_name(self, name):  # very inefficient change!
+    def find_idx_by_name(self, name):
         for  i, n in enumerate(self.col_names):
             if n == name:
                 return i
@@ -137,3 +132,28 @@ class DataFrame(Entity, DataSet):
             if i == idx:
                 return n
         return None
+
+    def row_count(self):
+        count = len(self)
+        return count
+
+    @property
+    def unit(self):
+        return self._h5group.get_attr("unit")
+
+    @unit.setter
+    def unit(self, u):
+        if len(u) != len(self.col_dtype):
+            raise IndexError
+        self._h5group.set_attr("unit", u)
+
+    @property
+    def data_type(self):
+        return self._h5group.get_attr('dtype')
+
+    @data_type.setter
+    def data_type(self):
+        dt = self.col_dtype
+        self._h5group.set_attr('dtype', dt)
+
+
