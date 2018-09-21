@@ -8,7 +8,6 @@ from .entity import Entity
 from . import util
 from .data_set import DataSet
 from .data_view import DataView
-from collections import OrderedDict
 # TODO add slicing param for functions
 
 class DataFrame(Entity, DataSet):
@@ -22,7 +21,6 @@ class DataFrame(Entity, DataSet):
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, shape, col_dict, compression):
         assert len(shape) == 2, "DataFrames should always be 2 dimension"  # replace with Exception later
-        col_dict = OrderedDict(col_dict.items())
         print(col_dict)
         for name, type in col_dict.items():
             if type == str:
@@ -44,7 +42,7 @@ class DataFrame(Entity, DataSet):
     def append_rows(self, data):  # need to support write multiple at same time
         # experimental function for adding new rows
         assert len(data) == self.raw_shape[1]
-        util.check_attr_type(data, self.col_dtype or None)
+        util.check_attr_type(data, self.col_dtype)  
         self.append(data)
         return self
 
@@ -96,20 +94,22 @@ class DataFrame(Entity, DataSet):
         get_row = self._read_data(sl=(row_idx, ))
         return get_row
 
-    def write_cell(self, new_item, position= None, col_name=None, row_idx=None):
+    def write_cell(self, new_item, position= None, col_name=None, row_idx=None):  #Done
         # TODO force the dtype to be inline
         if position:
             assert len(position) == 2, 'not a position'
             x, y = position
-            print(x, y )
-            print(self[x][y])
-            self[1]['time'] = new_item  # not working now
-            print(self[1]['time'], 'time')
+            targeted_row = self.read_row(x)
+            targeted_row[y] = new_item
+            self._write_data(targeted_row, sl=x)
             return self
         else:
             if col_name is None and row_idx is None:
                 raise IndexError  # change Error later
-
+            targeted_row = self.read_row(row_idx)
+            targeted_row[col_name] = new_item
+            self._write_data(targeted_row,sl=row_idx)
+            return self
 
     def read_cell(self, position= None, col_name=None, row_idx=None):  # Done
         if position:
@@ -155,5 +155,10 @@ class DataFrame(Entity, DataSet):
     def data_type(self):
         dt = self.col_dtype
         self._h5group.set_attr('dtype', dt)
+
+    def check_dtype(self, dt):
+        dtype_list = None
+        if dt not in dtype_list:
+            return False
 
 
