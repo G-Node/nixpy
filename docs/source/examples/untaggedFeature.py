@@ -28,13 +28,17 @@ import matplotlib.pylab as plt
 
 def fake_neuron(stepsize=0.001, offset=.8):
     stimulus = np.random.randn(80000) * 2.5
+
     b, a = signal.butter(8, 0.125)
-    stimulus = signal.filtfilt(b, a, stimulus)
+    stimulus = signal.filtfilt(b, a, stimulus[:])
+
     s = np.hstack((np.zeros(10000), stimulus, np.zeros(10000)))
     lif_model = lif.LIF(stepsize=stepsize, offset=offset)
     time, v, spike_times = lif_model.run_stimulus(s)
+
     stimulus_onset = 10000*stepsize
     stimulus_duration = len(stimulus)*stepsize
+
     return time, v, stimulus, stimulus_onset, stimulus_duration
 
 
