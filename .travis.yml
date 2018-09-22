@@ -18,6 +18,8 @@ matrix:
     - python: "3.7"
       os: linux
       env: pymajor=3 coveralls=1
+      dist: xenial
+      sudo: true
     - language: generic
       os: osx
       env: pymajor=2
@@ -34,7 +36,8 @@ addons:
       - libboost-all-dev
 
 before_install:
-  - export NIX_INCDIR=${nixprefix}/include
+  - nixprefix="/usr/local"
+  - export NIX_INCDIR=${nixprefix}/include/nixio-1.0
   - export NIX_LIBDIR=${nixprefix}/lib
   - export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:${nixprefix}/lib/pkgconfig
   - if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
@@ -50,8 +53,7 @@ before_install:
   - pushd /tmp/libnix
   - mkdir build
   - pushd build
-  - nixprefix="/usr/local"
-  - cmake -DCMAKE_INSTALL_PREFIX=/usr/local ..
+  - cmake -DCMAKE_INSTALL_PREFIX=${nixprefix} ..
   - make
   - sudo make install
   - popd
