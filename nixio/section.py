@@ -61,7 +61,7 @@ class Section(Entity):
         return newentity
 
     # Section
-    def create_section(self, name, type_, oid=None):
+    def create_section(self, name, type_="undefined", oid=None):
         """
         Creates a new subsection that is a child of this section entity.
 

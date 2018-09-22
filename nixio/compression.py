@@ -6,9 +6,9 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from enum import Enum
 
-# TODO: Convert to enum
-class Compression(object):
+class Compression(Enum):
     No = "None"
     DeflateNormal = "DeflateNormal"
     Auto = "Auto"
