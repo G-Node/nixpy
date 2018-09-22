@@ -31,7 +31,7 @@ def fake_neuron(stepsize=0.001, offset=.8):
     b, a = signal.butter(8, 0.125)
     stimulus = signal.filtfilt(b, a, stimulus)
     s = np.hstack((np.zeros(10000), stimulus, np.zeros(10000)))
-    lif_model = lif.lif(stepsize=stepsize, offset=offset)
+    lif_model = lif.LIF(stepsize=stepsize, offset=offset)
     time, v, spike_times = lif_model.run_stimulus(s)
     stimulus_onset = 10000*stepsize
     stimulus_duration = len(stimulus)*stepsize
@@ -77,7 +77,7 @@ def plot_data(tag):
                        stim_onset, color='silver', alpha=0.25, zorder=0, label="stimulus epoch")
     response_axis.legend()
 
-    stimulus_axis.plot(stimulus_time, stimulus, color="slategray", label="stimulus")
+    stimulus_axis.plot(stimulus_time, stimulus[:], color="slategray", label="stimulus")
     stimulus_axis.set_xlabel(stim_time_dim.label + ((" [" + stim_time_dim.unit + "]") if stim_time_dim.unit else ""))
     stimulus_axis.set_ylabel(stimulus_array.label + ((" [" + stimulus_array.unit + "]") if stimulus_array.unit else ""))
     stimulus_axis.set_xlim(np.min(stimulus_time), np.max(stimulus_time))

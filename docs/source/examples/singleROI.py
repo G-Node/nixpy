@@ -27,7 +27,7 @@
 
 import nixio as nix
 import numpy as np
-import Image as img
+from PIL import Image as img
 
 
 def load_image():
@@ -49,8 +49,9 @@ def plot_data(tag):
     img_data = np.zeros(data_array.data.shape)
     data_array.data.read_direct(img_data)
     img_data = np.array(img_data, dtype='uint8')
-    pos = tag.position
-    ext = tag.extent
+    # positions and extents are double by default, need to convert to int
+    pos = tuple(map(int, tag.position))
+    ext = tuple(map(int, tag.extent))
     draw_rect(img_data, pos, ext)
     new_img = img.fromarray(img_data)
     new_img.show()
@@ -60,11 +61,11 @@ if __name__ == '__main__':
     img_data, channels = load_image()
     # create a new file overwriting any existing content
     file_name = 'single_roi.h5'
-    file = nix.File.open(file_name, nix.FileMode.Overwrite)
+    f = nix.File.open(file_name, nix.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.
     # it gets a name and a type
-    block = file.create_block("block name", "nix.session")
+    block = f.create_block("block name", "nix.session")
 
     # create a 'DataArray' to take the sinewave, add some information about the signal
     data = block.create_data_array("lenna", "nix.image.rgb", data=img_data)
@@ -85,4 +86,4 @@ if __name__ == '__main__':
 
     # let's plot the data from the stored information
     plot_data(tag)
-    file.close()
+    f.close()
