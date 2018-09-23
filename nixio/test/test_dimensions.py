@@ -137,3 +137,8 @@ class TestDimension(unittest.TestCase):
         assert(da.dimensions[0].label == da.label)
         assert(da.dimensions[0].unit == da.unit)
         assert(np.all(da.dimensions[0].ticks == da[:]))
+
+    def test_set_dim_label_resize(self):
+        setdim = self.array.append_set_dimension()
+        setdim.labels = ["A", "B"]
+        setdim.labels = ["C", "B", "A"]
