@@ -147,3 +147,8 @@ class TestDimension(unittest.TestCase):
         setdim = self.array.append_set_dimension()
         setdim.labels = ["A", "B"]
         setdim.labels = ["C", "B", "A"]
+
+    def test_range_dim_ticks_resize(self):
+        rangedim = self.array.append_range_dimension([1, 2, 100])
+        rangedim.ticks = [1, 1, 30]
+        rangedim.ticks = [2, 4, 300, 800]
