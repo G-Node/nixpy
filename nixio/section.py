@@ -440,7 +440,7 @@ class Section(Entity):
     def pprint(self, indent=2, max_depth=1, max_length=80, current_depth=0):
 
         spaces = " " * (current_depth * indent)
-        sec_str = "{} {} [{}] --- {}".format(spaces, self.name, self.type, self.id)
+        sec_str = "{} {} [{}]".format(spaces, self.name, self.type)
         print(sec_str)
         for p in self.props:
             p.pprint(current_depth=current_depth, indent=indent, max_length=max_length)
@@ -452,5 +452,5 @@ class Section(Entity):
             child_sec_indent = spaces + " " * indent
             more_indent = spaces + " " * (current_depth + 2 * indent)
             for s in self.sections:
-                print("{} {} [{}] --- {}\n{}[...]".format(child_sec_indent,
-                                                          s.name, s.type, s.id, more_indent))
+                print("{} {} [{}]\n{}[...]".format(child_sec_indent,
+                                                          s.name, s.type, more_indent))
