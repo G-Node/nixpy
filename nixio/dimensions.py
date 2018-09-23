@@ -307,8 +307,5 @@ class SetDimension(Dimension):
 
     @labels.setter
     def labels(self, labels):
-        lshape = np.shape(labels)
         dt = util.vlen_str_dtype
-        labelsds = self._h5group.create_dataset("labels", shape=lshape,
-                                                dtype=dt)
-        labelsds.write_data(labels)
+        self._h5group.write_data("labels", labels, dtype=dt)
