@@ -315,7 +315,7 @@ class Property(Entity):
         """
         return hash(self.id)
 
-    def pprint(self, current_depth=-1, indent=2, max_length=80):
+    def pprint(self, indent=2, max_length=80, current_depth=-1):
         property_spaces = ""
         prefix = ""
         if current_depth >= 0:
