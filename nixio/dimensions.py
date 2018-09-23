@@ -163,10 +163,7 @@ class RangeDimension(Dimension):
     def _create_new(cls, parent, index, ticks):
         newdim = super(RangeDimension, cls)._create_new(parent, index)
         newdim.dimension_type = DimensionType.Range
-        ticksds = newdim._h5group.create_dataset("ticks",
-                                                 shape=np.shape(ticks),
-                                                 dtype=DataType.Double)
-        ticksds.write_data(ticks)
+        newdim._h5group.write_data("ticks", ticks, dtype=DataType.Double)
         return newdim
 
     @classmethod
@@ -201,8 +198,7 @@ class RangeDimension(Dimension):
     def ticks(self, ticks):
         if np.any(np.diff(ticks) < 0):
             raise ValueError("Ticks are not given in an ascending order.")
-        ticksds = self._h5group.get_dataset("ticks")
-        ticksds.write_data(ticks)
+        self._h5group.write_data("ticks", ticks)
 
     @property
     def _redirgrp(self):
@@ -306,8 +302,5 @@ class SetDimension(Dimension):
 
     @labels.setter
     def labels(self, labels):
-        lshape = np.shape(labels)
         dt = util.vlen_str_dtype
-        labelsds = self._h5group.create_dataset("labels", shape=lshape,
-                                                dtype=dt)
-        labelsds.write_data(labels)
+        self._h5group.write_data("labels", labels, dtype=dt)
