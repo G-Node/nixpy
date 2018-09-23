@@ -314,3 +314,22 @@ class Property(Entity):
         implemented or escaped
         """
         return hash(self.id)
+
+    def pprint(self, current_depth=-1, indent=2, max_length=80):
+        property_spaces = ""
+        prefix = ""
+        if current_depth >= 0:
+            property_spaces = " " * ((current_depth + 2) * indent)
+            prefix = "|-"
+        if self.unit is None:
+            value_string = str(self.values)
+        else:
+            value_string = "{}{}".format(self.values, self.unit)
+        p_len = len(property_spaces) + len(self.name) + len(value_string)
+        if p_len >= max_length - 4:
+            split_len = int((max_length - len(property_spaces) + len(self.name) - len(prefix))/2)
+            str1 = value_string[0: split_len]
+            str2 = value_string[-split_len:]
+            print(("{}{} {}: {} ... {}".format(property_spaces, prefix, self.name, str1, str2)))
+        else:
+            print(("{}{} {}: {}".format(property_spaces, prefix, self.name, value_string)))
