@@ -303,7 +303,7 @@ class Section(NamedEntity, SectionMixin):
                            if src.metadata.id == self.id)
         return sources
 
-    def pprint(self, current_depth=0, max_depth=1, indent=2, max_length=80):
+    def pprint(self, max_depth=1, indent=2, max_length=80, current_depth=0):
         spaces = " " * (current_depth * indent)
         sec_str = "%s  %s [%s] --- %s" % (spaces, self.name, self.type, self.id)
         print(sec_str)
