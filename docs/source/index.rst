@@ -1,5 +1,5 @@
 ================================
-NIX Python Binding Documentation
+NIXIO Python Package for NIX Datafiles
 ================================
 
 The nixpy module contains the python binding to the nix c++ library. In order

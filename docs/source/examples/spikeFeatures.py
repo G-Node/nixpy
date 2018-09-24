@@ -30,12 +30,12 @@ def fake_neuron(stepsize=0.001, offset=.8, sta_offset=100):
     stimulus = np.random.randn(100000) * 2.5
     b, a = signal.butter(8, 0.25)
     stimulus = signal.filtfilt(b, a, stimulus)
-    lif_model = lif.lif(stepsize=stepsize, offset=offset)
+    lif_model = lif.LIF(stepsize=stepsize, offset=offset)
     time, v, spike_times = lif_model.run_stimulus(stimulus)
     snippets = np.zeros((len(spike_times), 2 * sta_offset))
 
-    for i,t in enumerate(spike_times):
-        index = round(t/stepsize)
+    for i, t in enumerate(spike_times):
+        index = int(round(t/stepsize))
         if index < sta_offset:
             snip = stimulus[0:index + sta_offset]
             snippets[i, -len(snip):] = snip
@@ -43,7 +43,7 @@ def fake_neuron(stepsize=0.001, offset=.8, sta_offset=100):
             snip = stimulus[index-sta_offset:]
             snippets[i, 0:len(snip)] = snip
         else:
-            snippets[i,:] = stimulus[index - sta_offset:index + sta_offset]
+            snippets[i, :] = stimulus[index - sta_offset:index + sta_offset]
     return time, v, spike_times, snippets
 
 
