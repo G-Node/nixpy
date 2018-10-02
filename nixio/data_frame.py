@@ -21,14 +21,13 @@ class DataFrame(Entity, DataSet):
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, shape, col_dict, compression):
         assert len(shape) == 2, "DataFrames should always be 2 dimension"  # replace with Exception later
-        print(col_dict)
         for name, type in col_dict.items():
             if type == str:
                 col_dict[name] = util.vlen_str_dtype
         cls.raw_shape = shape
         cls.col_names = np.array(list(col_dict.keys()))
-        arr = list(col_dict.items())
-        cls.col_dtype = np.dtype(arr)
+        dt_arr = list(col_dict.items())
+        cls.col_dtype = np.dtype(dt_arr)
         cls.col_raw_dtype = list(col_dict.values())
         x,y = shape
         newentity = super()._create_new(nixparent, h5parent, name, type_)
