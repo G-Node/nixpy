@@ -20,7 +20,7 @@ class DataFrame(Entity, DataSet):
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, shape, col_dict, compression):
-        assert len(shape) == 2, "DataFrames should always be 2 dimension"  # replace with Exception later
+        if len(shape) != 2: raise ValueError("Dataframe must be 2D")
         for name, type in col_dict.items():
             if type == str:
                 col_dict[name] = util.vlen_str_dtype
@@ -40,7 +40,8 @@ class DataFrame(Entity, DataSet):
 
     def append_rows(self, data):  # need to support write multiple at same time
         # experimental function for adding new rows
-        assert len(data) == self.raw_shape[1]
+        if len(data) != self.raw_shape[1]:
+            raise ValueError("No of items in new row is not correct")
         util.check_attr_type(data, self.col_dtype)
         self.append(data)
         return self
@@ -50,7 +51,7 @@ class DataFrame(Entity, DataSet):
             diff = len(new_col) - self.data_extent[0]
             sl = [self.data_extent[0], len(new_col)]  # should be a slice with : not comma
             if diff < 0:
-                raise IndexError  # should be Error: not all specify missing data must fill with None
+                raise ValueError("No of items in new column is not correct")
             else:
                 self.write_rows(data=new_col[sl]) # maybe good idea to make it auto-fill in None
 
@@ -60,9 +61,10 @@ class DataFrame(Entity, DataSet):
         return self
 
     def write_column(self, changed_col, col_idx= None, column_name=None):  # Done
-        assert len(changed_col) == self.raw_shape[0], 'if missing data, please fill None'
+        if len(changed_col) != self.raw_shape[0]:
+            raise  ValueError('if missing data, please fill None')
         if not col_idx and not column_name:
-            raise IndexError  # change the error later
+            raise ValueError("Either index or name must not be None")
         if column_name is None:
             column_name = self.find_name_by_idx(col_idx)  # find name by name
         changed_col = np.array(changed_col)
@@ -73,9 +75,8 @@ class DataFrame(Entity, DataSet):
         return self
 
     def read_column(self, col_idx= None, col_name=None):  #Done
-        # assert col_idx < self.raw_shape[1]
         if col_idx is None and col_name is None:
-            raise IndexError  # change error later
+            raise ValueError("Either index or name must not be None")
         if col_name is None:
             col_name = self.col_names[col_idx]
         slice = np.s_[:]
@@ -84,7 +85,7 @@ class DataFrame(Entity, DataSet):
 
     def write_rows(self, changed_row, row_idx = None, row_name = None):  # Done!
         if row_idx is None and not row_name:
-            raise IndexError  # change the error later
+            raise ValueError("Either index or name must not be None")
         if not row_idx and row_name:
             row_idx = self.find_idx_by_name(row_name)
 
@@ -98,7 +99,7 @@ class DataFrame(Entity, DataSet):
     def write_cell(self, new_item, position= None, col_name=None, row_idx=None):  #Done
         # TODO force the dtype to be inline
         if position:
-            assert len(position) == 2, 'not a position'
+            if len(position) != 2: raise ValueError('not a position')
             x, y = position
             targeted_row = self.read_row(x)
             targeted_row[y] = new_item
@@ -106,7 +107,7 @@ class DataFrame(Entity, DataSet):
             return self
         else:
             if col_name is None and row_idx is None:
-                raise IndexError  # change Error later
+                raise ValueError("Column and rows identifier must be given")
             targeted_row = self.read_row(row_idx)
             targeted_row[col_name] = new_item
             self._write_data(targeted_row,sl=row_idx)
@@ -114,12 +115,12 @@ class DataFrame(Entity, DataSet):
 
     def read_cell(self, position= None, col_name=None, row_idx=None):  # Done
         if position:
-            assert len(position) == 2, 'not a position'
+            if len(position) != 2: raise ValueError('not a position')
             x, y = position
             return self[x][y]
         else:
             if col_name is None or row_idx is None:
-                raise IndexError  # change Error later
+                raise ValueError("Column and rows identifier must be given")
             return self[row_idx][col_name]
 
     def find_idx_by_name(self, name):
@@ -145,7 +146,7 @@ class DataFrame(Entity, DataSet):
     @unit.setter
     def unit(self, u):
         if len(u) != len(self.col_dtype):
-            raise IndexError
+            raise ValueError("Length mismatched")
         self._h5group.set_attr("unit", u)
 
     @property
