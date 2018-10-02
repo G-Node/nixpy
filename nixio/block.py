@@ -188,9 +188,10 @@ class Block(Entity):
 
     def create_data_frame(self, df_name, frame_type,shape=None, col_dict=None,
                           data=None, compression=Compression.Auto):
+        assert len(data[0]) == len(col_dict)
         data_frames = self._h5group.open_group("data_frames")
         df = DataFrame._create_new(self, data_frames, df_name, frame_type, shape, col_dict, compression)
-        # write_direct in data_frame file
+        data = list(map(tuple, data))
         arr = np.ascontiguousarray(data , dtype=(DataFrame.col_dtype))
         df.write_direct(arr)
         return df
