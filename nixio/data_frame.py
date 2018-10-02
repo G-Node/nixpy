@@ -42,7 +42,7 @@ class DataFrame(Entity, DataSet):
     def append_rows(self, data):  # need to support write multiple at same time
         # experimental function for adding new rows
         assert len(data) == self.raw_shape[1]
-        util.check_attr_type(data, self.col_dtype)  
+        util.check_attr_type(data, self.col_dtype)
         self.append(data)
         return self
 
@@ -57,18 +57,20 @@ class DataFrame(Entity, DataSet):
 
         trans_arr = np.transpose(self)
         trans_arr.append(new_col)
-        self = np.transpose(trans_arr)
+        self['data'] = np.transpose(trans_arr)
         return self
 
-    def write_column(self, changed_col, col_idx= None, column_name=None):
+    def write_column(self, changed_col, col_idx= None, column_name=None):  # Done
         assert len(changed_col) == self.raw_shape[0], 'if missing data, please fill None'
         if not col_idx and not column_name:
             raise IndexError  # change the error later
         if column_name is None:
-            column_name = self.find_name_by_idx(col_idx) # find name by name
-        print(self[:][column_name])
+            column_name = self.find_name_by_idx(col_idx)  # find name by name
         changed_col = np.array(changed_col)
-        self._write_data(changed_col)
+        for i, rows in enumerate(self._h5group.group['data'][:]):
+            cell = changed_col[i]
+            rows[column_name] = cell
+            self.write_rows(changed_row=rows, row_idx=i)
         return self
 
     def read_column(self, col_idx= None, col_name=None):  #Done
