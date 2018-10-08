@@ -2,13 +2,13 @@
 
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
-import h5py
 from .exceptions import OutOfBounds
 from .entity import Entity
 from . import util
 from .data_set import DataSet
 from .data_view import DataView
 # TODO add slicing param for functions
+
 
 class DataFrame(Entity, DataSet):
 
@@ -31,7 +31,7 @@ class DataFrame(Entity, DataSet):
         cls.col_raw_dtype = list(col_dict.values())
         x,y = shape
         newentity = super()._create_new(nixparent, h5parent, name, type_)
-        newentity._h5group.create_dataset("data", (x, ), cls.col_dtype )
+        newentity._h5group.create_dataset("data", (x, ), cls.col_dtype)
         return newentity
 
     def _read_data(self, sl=None):  # Done
@@ -74,20 +74,23 @@ class DataFrame(Entity, DataSet):
             self.write_rows(changed_row=rows, row_idx=i)
         return self
 
-    def read_column(self, col_idx= None, col_name=None):  #Done
+    def read_columns(self, col_idx= None, col_name=None):  #Done
         if col_idx is None and col_name is None:
             raise ValueError("Either index or name must not be None")
         if col_name is None:
-            col_name = self.col_names[col_idx]
+            if len(col_idx) == 1:
+                col_name = self.col_names[col_idx]
+            else:
+                col_name = []
+                for ci in col_idx:
+                    col_name.append(self.col_names[ci])
         slice = np.s_[:]
         get_col = self._read_data(sl=slice)[col_name]
         return get_col
 
-    def write_rows(self, changed_row, row_idx = None, row_name = None):  # Done!
-        if row_idx is None and not row_name:
-            raise ValueError("Either index or name must not be None")
-        if not row_idx and row_name:
-            row_idx = self.find_idx_by_name(row_name)
+    def write_rows(self, changed_row, row_idx = None):  # Done!
+        if row_idx is None:
+            raise ValueError("Index must be specified")
 
         self._write_data(changed_row, sl=row_idx)
         return self
@@ -158,9 +161,7 @@ class DataFrame(Entity, DataSet):
         dt = self.col_dtype
         self._h5group.set_attr('dtype', dt)
 
-    def check_dtype(self, dt):
-        dtype_list = None
-        if dt not in dtype_list:
-            return False
-
+    @property
+    def column(self):
+        return self.dtype
 
