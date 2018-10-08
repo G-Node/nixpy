@@ -26,8 +26,8 @@ class DataFrame(Entity, DataSet):
                 col_dict[name] = util.vlen_str_dtype
         cls.raw_shape = shape
         cls.col_names = np.array(list(col_dict.keys()))
-        dt_arr = list(col_dict.items())
-        cls.col_dtype = np.dtype(dt_arr)
+        cls.dt_arr = list(col_dict.items())
+        cls.col_dtype = np.dtype(cls.dt_arr)
         cls.col_raw_dtype = list(col_dict.values())
         x,y = shape
         newentity = super()._create_new(nixparent, h5parent, name, type_)
@@ -43,12 +43,15 @@ class DataFrame(Entity, DataSet):
             li_data.append(d)
         pro_data = np.array(li_data, dtype=self.col_dtype)
         self.append(pro_data, axis=0)
-        self.raw_shape = tuple((self.raw_shape[0] +1), self.raw_shape[1])
+        self.raw_shape = tuple((self.raw_shape[0] + len(data), self.raw_shape[1]))
         return self
 
-    def append_column(self, new_col, new_col_name, dtype): # same as append_rows! just use axis = 1 in append
-        
-        self.append(new_col, axis=1)
+    def append_column(self, new_col, new_col_name, dt): # same as append_rows! just use axis = 1 in append
+        self.dt_arr.append((new_col_name, dt))
+        self.col_dtype = np.dtype(self.dt_arr)
+        new_col = np.array(new_col, dtype=dt)
+
+        self.raw_shape = tuple((self.raw_shape[0] , self.raw_shape[1]+ len(new_col)))
         return self
 
     def write_column(self, changed_col, col_idx= None, column_name=None):  # Done
