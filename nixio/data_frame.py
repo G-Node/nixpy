@@ -78,12 +78,9 @@ class DataFrame(Entity, DataSet):
         if col_idx is None and col_name is None:
             raise ValueError("Either index or name must not be None")
         if col_name is None:
-            if len(col_idx) == 1:
-                col_name = self.col_names[col_idx]
-            else:
-                col_name = []
-                for ci in col_idx:
-                    col_name.append(self.col_names[ci])
+            col_name = []
+            for ci in col_idx:
+                col_name.append(self.col_names[ci])
         slice = np.s_[:]
         get_col = self._read_data(sl=slice)[col_name]
         return get_col
@@ -91,11 +88,21 @@ class DataFrame(Entity, DataSet):
     def write_rows(self, changed_row, row_idx = None):  # Done!
         if row_idx is None:
             raise ValueError("Index must be specified")
+        x, y = self.raw_shape
+        if max(row_idx) > (x-1):
+            raise OutOfBounds("Row index should not exceed the existing no. of rows")
+        if len(row_idx) == 1:
+            changed_row = tuple(changed_row)
+            self._write_data(changed_row, sl=row_idx)
+            return self
+        else:
+            cr_list = []
+            for i, cr in enumerate(changed_row):
+               cr_list.append(tuple(cr))
+            self._write_data(cr_list,sl=row_idx)
+            return self
 
-        self._write_data(changed_row, sl=row_idx)
-        return self
-
-    def read_row(self, row_idx):  # Done
+    def read_rows(self, row_idx):  # Done
         get_row = self._read_data(sl=(row_idx, ))
         return get_row
 
