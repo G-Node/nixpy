@@ -34,30 +34,21 @@ class DataFrame(Entity, DataSet):
         newentity._h5group.create_dataset("data", (x, ), cls.col_dtype)
         return newentity
 
-    def _read_data(self, sl=None):  # Done
-        data = super()._read_data(sl)
-        return data
-
-    def append_rows(self, data):  # need to support write multiple at same time
-        # experimental function for adding new rows
-        if len(data) != self.raw_shape[1]:
-            raise ValueError("No of items in new row is not correct")
-        util.check_attr_type(data, self.col_dtype)
-        self.append(data)
+    def append_rows(self, data):  # still some problem but can be used
+        # if len(data) != self.raw_shape[1]:
+        #     raise ValueError("No of items in new row is not correct")
+        li_data = []
+        for d in data:
+            d = tuple(d)
+            li_data.append(d)
+        pro_data = np.array(li_data, dtype=self.col_dtype)
+        self.append(pro_data, axis=0)
+        self.raw_shape = tuple((self.raw_shape[0] +1), self.raw_shape[1])
         return self
 
-    def append_column(self, new_col, dtype):  # experimental function for adding new column
-        if len(new_col) != self.data_extent[0]:
-            diff = len(new_col) - self.data_extent[0]
-            sl = [self.data_extent[0], len(new_col)]  # should be a slice with : not comma
-            if diff < 0:
-                raise ValueError("No of items in new column is not correct")
-            else:
-                self.write_rows(data=new_col[sl]) # maybe good idea to make it auto-fill in None
-
-        trans_arr = np.transpose(self)
-        trans_arr.append(new_col)
-        self['data'] = np.transpose(trans_arr)
+    def append_column(self, new_col, new_col_name, dtype): # same as append_rows! just use axis = 1 in append
+        
+        self.append(new_col, axis=1)
         return self
 
     def write_column(self, changed_col, col_idx= None, column_name=None):  # Done
@@ -125,7 +116,7 @@ class DataFrame(Entity, DataSet):
 
     def read_cell(self, position= None, col_name=None, row_idx=None):  # Done
         if position:
-            if len(position) != 2: raise ValueError('not a position')
+            if len(position) != 2: raise ValueError('Not a position')
             x, y = position
             return self[x][y]
         else:
