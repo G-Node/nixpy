@@ -98,7 +98,7 @@ def test_groups(tmpdir):
     runcpp("readgroups", nixfilepath)
 
 
-def test_data_arrays(tmpdir):
+def _test_data_arrays(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "arraytest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "blocktype")
@@ -122,7 +122,7 @@ def test_data_arrays(tmpdir):
     # validate(nixfilepath)
 
 
-def test_tags(tmpdir):
+def _test_tags(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "tagtest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "blocktype")
@@ -144,7 +144,7 @@ def test_tags(tmpdir):
     # validate(nixfilepath)
 
 
-def test_multi_tags(tmpdir):
+def _test_multi_tags(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "mtagtest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "blocktype")
@@ -166,7 +166,7 @@ def test_multi_tags(tmpdir):
     # validate(nixfilepath)
 
 
-def test_sources(tmpdir):
+def _test_sources(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "sourcetest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "sourcetest")
@@ -197,7 +197,7 @@ def test_sources(tmpdir):
     # validate(nixfilepath)
 
 
-def test_dimensions(tmpdir):
+def _test_dimensions(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "dimtest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "dimtest")
@@ -237,7 +237,7 @@ def test_dimensions(tmpdir):
     # validate(nixfilepath)
 
 
-def test_tag_features(tmpdir):
+def _test_tag_features(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "feattest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "feattest")
