@@ -34,9 +34,7 @@ class DataFrame(Entity, DataSet):
         newentity._h5group.create_dataset("data", (x, ), cls.col_dtype)
         return newentity
 
-    def append_rows(self, data):  # still some problem but can be used
-        # if len(data) != self.raw_shape[1]:
-        #     raise ValueError("No of items in new row is not correct")
+    def append_rows(self, data):
         li_data = []
         for d in data:
             d = tuple(d)
@@ -46,11 +44,12 @@ class DataFrame(Entity, DataSet):
         self.raw_shape = tuple((self.raw_shape[0] + len(data), self.raw_shape[1]))
         return self
 
-    def append_column(self, new_col, new_col_name, dt): # same as append_rows! just use axis = 1 in append
-        self.dt_arr.append((new_col_name, dt))
+    def append_column(self, new_col, new_col_name, new_dt):
+        if new_dt == str:
+            new_dt = util.vlen_str_dtype
+        self.dt_arr.append((new_col_name, new_dt))
         self.col_dtype = np.dtype(self.dt_arr)
-        new_col = np.array(new_col, dtype=dt)
-
+        new_col = np.array(new_col, dtype=new_dt)
         self.raw_shape = tuple((self.raw_shape[0] , self.raw_shape[1]+ len(new_col)))
         return self
 
@@ -126,6 +125,17 @@ class DataFrame(Entity, DataSet):
             if col_name is None or row_idx is None:
                 raise ValueError("Column and rows identifier must be given")
             return self[row_idx][col_name]
+
+    def print_table(self):
+        len_count =
+        for n in self.col_names:
+            print('  ', n, end=' ')
+        print('\n')
+        for i, rows in enumerate(self._h5group.group['data'][:]):
+            print("Data{}".format(i), end=' ')
+            for ele in rows:
+                print(ele, end=' ')
+            print('\n')
 
     def find_idx_by_name(self, name):
         for  i, n in enumerate(self.col_names):
