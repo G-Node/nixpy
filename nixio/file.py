@@ -24,6 +24,7 @@ from .container import Container, SectionContainer
 from . import util
 from .exceptions import InvalidFile, DuplicateName
 from .util import find as finders
+from .exceptions import *
 from .validate import Validate
 from .compression import Compression
 from .dimensions import RangeDimension, SetDimension, SampledDimension
