@@ -26,8 +26,8 @@ class DataFrame(Entity, DataSet):
                 col_dict[name] = util.vlen_str_dtype
         cls.raw_shape = shape
         cls.col_names = np.array(list(col_dict.keys()))
-        cls.dt_arr = list(col_dict.items())
-        cls.col_dtype = np.dtype(cls.dt_arr)
+        dt_arr = list(col_dict.items())
+        cls.col_dtype = np.dtype(dt_arr)
         cls.col_raw_dtype = list(col_dict.values())
         x,y = shape
         newentity = super()._create_new(nixparent, h5parent, name, type_)
@@ -127,15 +127,12 @@ class DataFrame(Entity, DataSet):
             return self[row_idx][col_name]
 
     def print_table(self):
-        len_count =
-        for n in self.col_names:
-            print('  ', n, end=' ')
-        print('\n')
-        for i, rows in enumerate(self._h5group.group['data'][:]):
-            print("Data{}".format(i), end=' ')
-            for ele in rows:
-                print(ele, end=' ')
-            print('\n')
+        row_form = "{:^10}" * (len(self.col_names) + 1)
+        print(row_form.format(" ", *self.col_names))
+        if self.unit:
+            print(row_form.format("unit", *self.unit))
+        for i, row in enumerate(self._h5group.group['data'][:]):
+            print(row_form.format("Data{}".format(i),*row))
 
     def find_idx_by_name(self, name):
         for  i, n in enumerate(self.col_names):
