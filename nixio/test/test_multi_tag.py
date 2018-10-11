@@ -337,6 +337,25 @@ class TestMultiTags(unittest.TestCase):
         assert(len(segdata.shape) == 3)
         assert(segdata.shape == (1, 4, 1))
 
+        # retrieve all positions for all references
+        for ridx, ref in enumerate(mtag.references):
+            for pidx, p in enumerate(mtag.positions):
+                mtag.retrieve_data(pidx, ridx)
+
+    def test_multi_tag_retrieve_data_1d(self):
+        # MultiTags to vectors behave a bit differently
+        # Testing separately
+        oneddata = self.block.create_data_array("1dda", "data",
+                                                data=list(range(100)))
+        oneddata.append_sampled_dimension(0.1)
+        onedpos = self.block.create_data_array("1dpos", "positions",
+                                               data=[1, 9, 34])
+        onedmtag = self.block.create_multi_tag("2dmt", "mtag",
+                                               positions=onedpos)
+        onedmtag.references.append(oneddata)
+        for pidx, p in enumerate(onedmtag.positions):
+            onedmtag.retrieve_data(pidx, 0)
+
     def test_multi_tag_feature_data(self):
         index_data = self.block.create_data_array("indexed feature data",
                                                   "test",
