@@ -7,6 +7,7 @@ from .entity import Entity
 from . import util
 from .data_set import DataSet
 from .data_view import DataView
+import csv
 # TODO add slicing param for functions
 
 
@@ -133,6 +134,20 @@ class DataFrame(Entity, DataSet):
             print(row_form.format("unit", *self.unit))
         for i, row in enumerate(self._h5group.group['data'][:]):
             print(row_form.format("Data{}".format(i),*row))
+
+    def write_to_csv(self):
+        with open('t.csv', 'w', newline='') as csvfile:
+            dw = csv.DictWriter(csvfile, fieldnames=self.col_names)
+            dw.writeheader()
+            di = {}
+            for names in self.col_names:
+                n = str(names)
+                di[n] = []
+            for i, row in enumerate(self._h5group.group['data'][:]):
+                for name, da in zip(self.col_names, row):
+                    di[name].append(da)
+            print(di)
+            dw.writerows(di)
 
     def find_idx_by_name(self, name):
         for  i, n in enumerate(self.col_names):
