@@ -2,6 +2,7 @@ import unittest
 import nixio as nix
 from .tmp import TempDir
 import os
+import pytest
 
 
 class TestDataFrame(unittest.TestCase):
@@ -21,4 +22,25 @@ class TestDataFrame(unittest.TestCase):
         self.tmpdir.cleanup()
 
     def test_data_frame_eq(self):
+        pass
+
+    def test_write_row(self):
+        pass
+
+    def test_write_col(self):
+        pass
+
+    def test_read_row(self):
+        pass
+
+    def test_read_col(self):
+        pass
+
+    def test_read_cell(self):
+        pass
+
+    def test_write_cell(self):
+        pass
+
+    def test_unit(self):
         pass
