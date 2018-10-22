@@ -2,7 +2,6 @@ import unittest
 import nixio as nix
 from .tmp import TempDir
 import os
-import pytest
 
 
 class TestDataFrame(unittest.TestCase):

@@ -54,13 +54,13 @@ class DataFrame(Entity, DataSet):
         self.raw_shape = tuple((self.raw_shape[0] , self.raw_shape[1]+ len(new_col)))
         return self
 
-    def write_column(self, changed_col, col_idx= None, column_name=None):  # Done
+    def write_column(self, changed_col, col_idx=None, column_name=None):  # Done
         if len(changed_col) != self.raw_shape[0]:
             raise  ValueError('if missing data, please fill None')
         if not col_idx and not column_name:
             raise ValueError("Either index or name must not be None")
         if column_name is None:
-            column_name = self.find_name_by_idx(col_idx)  # find name by name
+            column_name = self._find_name_by_idx(col_idx)  # find name by name
         changed_col = np.array(changed_col)
         for i, rows in enumerate(self._h5group.group['data'][:]):
             cell = changed_col[i]
@@ -149,13 +149,13 @@ class DataFrame(Entity, DataSet):
             print(di)
             dw.writerows(di)
 
-    def find_idx_by_name(self, name):
+    def _find_idx_by_name(self, name):
         for  i, n in enumerate(self.col_names):
             if n == name:
                 return i
         return None
 
-    def find_name_by_idx(self, idx):
+    def _find_name_by_idx(self, idx):
         for i, n in enumerate(self.col_names):
             if i == idx:
                 return n
@@ -185,6 +185,6 @@ class DataFrame(Entity, DataSet):
         self._h5group.set_attr('dtype', dt)
 
     @property
-    def column(self):
-        return self.dtype
+    def columns(self):
+        return self.col_names, self.dtype, self.unit
 
