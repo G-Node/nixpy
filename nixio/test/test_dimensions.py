@@ -83,6 +83,7 @@ class DimensionTestBase(unittest.TestCase):
 
         assert(self.sample_dim.index_of(3.14) == 0)
         assert(self.sample_dim.index_of(23.) == 10)
+        assert(type(self.sample_dim.index_of(23.) == int))
 
         assert(self.sample_dim.position_at(0) == 3.)
         assert(self.sample_dim.position_at(200) == 200*2.+3.)
