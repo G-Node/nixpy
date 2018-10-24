@@ -92,6 +92,10 @@ class DimensionTestBase(unittest.TestCase):
         assert(self.sample_dim.axis(10)[0] == 3.)
         assert(self.sample_dim.axis(10)[-1] == 9*2.+3.)
 
+        assert(len(self.sample_dim.axis(10, 2)) == 10)
+        assert(self.sample_dim.axis(10, 2)[0] == 2 * 2. + 3.)
+        assert(self.sample_dim.axis(10, 2)[-1] == (9 + 2) * 2. + 3.)
+
     def test_range_dimension(self):
         assert(self.range_dim.index == 3)
         assert(self.range_dim.dimension_type == nix.DimensionType.Range)
