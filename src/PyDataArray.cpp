@@ -59,7 +59,17 @@ void setPolynomCoefficients(DataArray& da, const std::vector<double>& pc) {
         da.polynomCoefficients(boost::none);
 }
 
+SetDimension dataArrayAppendSetDimension(DataArray& da) {
+  return da.appendSetDimension();
+}
 
+SampledDimension dataArrayAppendSampledDimension(DataArray& da, const double sampling_interval){
+    return da.appendSampledDimension(sampling_interval);
+}
+
+RangeDimension dataArrayAppendRangeDimension(DataArray& da, const std::vector<double>& ticks) {
+    return da.appendRangeDimension(ticks);
+}
 // Dimensions
 
 PyObject* getDimension(const DataArray& da, size_t index) {
@@ -87,8 +97,6 @@ PyObject* getDimension(const DataArray& da, size_t index) {
 
 
 void PyDataArray::do_export() {
-
-
 
     PyEntityWithSources<base::IDataArray>::do_export("DataArray");
     class_<DataArray, bases<base::EntityWithSources<base::IDataArray>, DataSet>>("DataArray")
@@ -118,11 +126,11 @@ void PyDataArray::do_export() {
              doc::data_array_create_range_dimension)
         .def("create_alias_range_dimension", &DataArray::createAliasRangeDimension,
              doc::data_array_create_alias_range_dimension)
-        .def("append_set_dimension", &DataArray::appendSetDimension,
+        .def("append_set_dimension", dataArrayAppendSetDimension,
              doc::data_array_append_set_dimension)
-        .def("append_sampled_dimension", &DataArray::appendSampledDimension,
+        .def("append_sampled_dimension", dataArrayAppendSampledDimension,
              doc::data_array_append_sampled_dimension)
-        .def("append_range_dimension", &DataArray::appendRangeDimension,
+        .def("append_range_dimension", dataArrayAppendRangeDimension,
              doc::data_array_append_range_dimension)
         .def("append_alias_range_dimension", &DataArray::appendAliasRangeDimension,
              doc::data_array_append_alias_range_dimension)
