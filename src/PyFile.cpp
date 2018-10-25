@@ -32,7 +32,7 @@ File open(std::string path, std::string mode = "a", std::string compression = "A
     } else if (mode == "r") {
         nixmode = FileMode::ReadOnly;
     } else {
-        // TODO: Raise error
+      throw std::invalid_argument("File::open: invalid file mode flag (valid flags are: a, w, r for read-write, overwrite and read-only, respectively)!");
     }
     return File::open(path, nixmode, "hdf5", pyCompressionToNix(compression));
 }
