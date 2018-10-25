@@ -56,7 +56,7 @@ struct vector_transmogrify {
 
         std::vector<T>* vec= static_cast<std::vector<T> *>(raw);
 
-        for(size_t index = 0; index < length; index++) {
+        for(int index = 0; index < length; index++) {
             vec->push_back(extract<T>(PySequence_GetItem(obj, index)));
         }
 
