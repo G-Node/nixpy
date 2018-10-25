@@ -241,8 +241,8 @@ class RangeDimension(Dimension):
             return len(ticks) - 1
 
         ticks = np.array(ticks)
-        pidxs = np.flatnonzero((ticks - position) >= 0)
-        return int(pidxs[0])
+        pidxs = np.flatnonzero((ticks - position) <= 0)
+        return int(pidxs[-1])
 
     def tick_at(self, index):
         """
