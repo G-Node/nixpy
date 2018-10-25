@@ -88,6 +88,15 @@ std::vector<double> getRangeDimensionAxis2(RangeDimension& dim, const size_t cou
     return dim.axis(count, start_index);
 }
 
+ndsize_t getSampledDimensionIndexOf(SampledDimension& dim, const double position) {
+  return dim.indexOf(position);
+}
+
+
+ndsize_t getRangeDimensionIndexOf(RangeDimension& dim, const double position) {
+  return dim.indexOf(position);
+}
+
 void PyDimensions::do_export() {
 
     class_<SampledDimension>("SampledDimension")
@@ -105,7 +114,7 @@ void PyDimensions::do_export() {
                       OPT_GETTER(double, SampledDimension, offset),
                       setSampledDimensionOffset)
         .def("position_at", &SampledDimension::positionAt, doc::sampled_dimension_position_at)
-        .def("index_of", &SampledDimension::indexOf, doc::sampled_dimension_index_of)
+        .def("index_of", getSampledDimensionIndexOf, doc::sampled_dimension_index_of)
         .def("axis", getSampledDimensionAxis1, doc::sampled_dimension_axis)
         .def("axis", getSampledDimensionAxis2, doc::sampled_dimension_axis)
         ;
@@ -121,7 +130,7 @@ void PyDimensions::do_export() {
         .add_property("ticks",
                       GETTER(std::vector<double>, RangeDimension, ticks),
                       REF_SETTER(std::vector<double>, RangeDimension, ticks))
-        .def("index_of", &RangeDimension::indexOf, doc::range_dimension_index_of)
+        .def("index_of", getRangeDimensionIndexOf, doc::range_dimension_index_of)
         .def("tick_at", &RangeDimension::tickAt, doc::range_dimension_tick_at)
         .def("axis", getRangeDimensionAxis1, doc::range_dimension_axis)
         .def("axis", getRangeDimensionAxis2, doc::range_dimension_axis)
