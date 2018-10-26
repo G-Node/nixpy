@@ -456,5 +456,4 @@ class Section(Entity):
             more_indent = spaces + " " * (current_depth + 2 * indent)
             for s in self.sections:
                 print("{} {} [{}]\n{}[...]".format(child_sec_indent,
-                                                   s.name, s.type,
-                                                   more_indent))
+                                                          s.name, s.type, more_indent))
