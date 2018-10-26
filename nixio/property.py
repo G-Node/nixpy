@@ -7,7 +7,10 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from collections import Sequence, Iterable
+try:
+    from collections.abc import Sequence, Iterable
+except ImportError:
+    from collections import Sequence, Iterable
 from enum import Enum
 from numbers import Number
 from six import string_types

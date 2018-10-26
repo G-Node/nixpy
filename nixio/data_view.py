@@ -7,8 +7,10 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import numpy as np
-from collections import Iterable
-
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 from .data_set import DataSet
 from .exceptions import OutOfBounds
 

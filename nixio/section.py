@@ -10,7 +10,10 @@ try:
     from sys import maxint
 except ImportError:
     from sys import maxsize as maxint
-from collections import Sequence, Iterable
+try:
+    from collections.abc import Sequence, Iterable
+except ImportError:
+    from collections import Sequence, Iterable
 from six import string_types
 
 from .container import Container, SectionContainer
