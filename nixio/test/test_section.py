@@ -270,7 +270,6 @@ class TestSections(unittest.TestCase):
         self.assertEqual(len(self.section.referring_sources), 0)
         self.assertEqual(self.other.referring_sources[0].id, src.id)
 
-
     def test_section_link(self):
         self.section.create_property("PropOnSection", "value")
 

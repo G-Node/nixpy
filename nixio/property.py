@@ -331,9 +331,12 @@ class Property(Entity):
             value_string = "{}{}".format(self.values, self.unit)
         p_len = len(property_spaces) + len(self.name) + len(value_string)
         if p_len >= max_length - 4:
-            split_len = int((max_length - len(property_spaces) + len(self.name) - len(prefix))/2)
+            split_len = int((max_length - len(property_spaces)
+                             + len(self.name) - len(prefix))/2)
             str1 = value_string[0: split_len]
             str2 = value_string[-split_len:]
-            print(("{}{} {}: {} ... {}".format(property_spaces, prefix, self.name, str1, str2)))
+            print(("{}{} {}: {} ... {}".format(property_spaces, prefix,
+                                               self.name, str1, str2)))
         else:
-            print(("{}{} {}: {}".format(property_spaces, prefix, self.name, value_string)))
+            print(("{}{} {}: {}".format(property_spaces, prefix, self.name,
+                                        value_string)))
