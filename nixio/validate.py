@@ -123,7 +123,7 @@ class Validate:
                                      "polynomial coefficients are missing")
         if np.any(poly):
             if not ex_origin:
-                da_error_list.append("Polynomial coefficients exist" 
+                da_error_list.append("Polynomial coefficients exist"
                                      " but expansion origins are missing")
 
         self.errors['blocks'][blk_idx]['data_arrays'][da_idx]['errors'] = da_error_list

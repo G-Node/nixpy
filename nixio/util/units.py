@@ -9,7 +9,10 @@
 
 from six import string_types
 import re
-from collections import Sequence
+try:
+    from collections.abc import Sequence
+except ImportError:
+    from collections import Sequence
 from ..exceptions import InvalidUnit
 
 

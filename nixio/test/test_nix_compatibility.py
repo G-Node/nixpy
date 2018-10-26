@@ -7,7 +7,10 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import os
-from collections import Iterable
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
 from six import string_types
 from subprocess import Popen, PIPE
 import numpy as np
