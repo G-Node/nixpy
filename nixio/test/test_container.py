@@ -418,8 +418,7 @@ class TestContainer(unittest.TestCase):
         feat_da = self.block.create_data_array(dataname, "to-be-deleted",
                                                data=[10])
 
-
-        feat = tag.create_feature(feat_da, nix.LinkType.Indexed)
+        tag.create_feature(feat_da, nix.LinkType.Indexed)
 
         self.assertIn(dataname, self.block.data_arrays)
         self.assertIn(dataname, tag.features)
@@ -470,4 +469,3 @@ class TestContainer(unittest.TestCase):
         inhpropnames = [p.name for p in chsecb.inherited_properties()]
         self.assertIs(None, chsecb.link)
         self.assertNotIn("2Prop", inhpropnames)
-

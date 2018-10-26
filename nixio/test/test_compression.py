@@ -7,11 +7,9 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import os
-import random
 import nixio as nix
 import unittest
 from .tmp import TempDir
-
 
 
 def compr_enabled(da):

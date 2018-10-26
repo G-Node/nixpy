@@ -183,4 +183,3 @@ class TestDimension(unittest.TestCase):
         assert slabel == smpldim.label
         assert sunit == smpldim.unit
         assert soffset == smpldim.offset
-

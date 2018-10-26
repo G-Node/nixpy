@@ -22,8 +22,8 @@ from .block import Block
 from .section import Section
 from .container import Container, SectionContainer
 from . import util
+from .exceptions import InvalidFile, DuplicateName
 from .util import find as finders
-from .exceptions import *
 from .validate import Validate
 from .compression import Compression
 from .dimensions import RangeDimension, SetDimension, SampledDimension
@@ -151,7 +151,7 @@ class File(object):
 
     def _check_header(self, mode):
         if self.format != FILE_FORMAT:
-            raise exceptions.InvalidFile
+            raise InvalidFile
 
         if mode == FileMode.ReadWrite:
             if not can_write(self):
@@ -354,7 +354,7 @@ class File(object):
         :rtype: Section
         """
         if name in self.metadata:
-            raise exceptions.DuplicateName("create_section")
+            raise DuplicateName("create_section")
         sec = Section._create_new(self, self.metadata, name, type_, oid)
         return sec
 
