@@ -70,4 +70,3 @@ class InvalidFile(Exception):
     def __init__(self):
         self.message = "Invalid file - file is not a nix file."
         super(InvalidFile, self).__init__(self.message)
-        

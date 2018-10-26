@@ -41,34 +41,37 @@ class TestValidate (unittest.TestCase):
     def test_check_file(self):
         assert self.validator.check_file()['file_errors'] == []
         self.file.force_created_at(0)
-        assert self.validator.check_file()['file_errors'] == ["date is not set!"]
+        res = self.validator.check_file()
+        assert res['file_errors'] == ["date is not set!"]
 
     def test_check_blocks(self):
         block = self.block1
         assert self.validator.errors['blocks'][0]['errors'] == []
         block._h5group.set_attr("name", None)
-        assert self.validator.check_blocks(block, 0)\
-            ['blocks'][0]['errors'] == ['Name of Block is missing']
+        res = self.validator.check_blocks(block, 0)
+        assert res['blocks'][0]['errors'] == ['Name of Block is missing']
         block._h5group.set_attr("type", None)
         self.validator.check_blocks(block, 0)
-        assert self.validator.errors['blocks'][0]['errors'] == ['Type of Block is '
-                                                              'missing', 'Name of Block is missing']
+        blkerr = self.validator.errors['blocks'][0]['errors']
+        assert blkerr == ['Type of Block is missing',
+                          'Name of Block is missing']
 
     def test_check_groups(self):
         group1 = self.block1.groups[0]
         group1._h5group.set_attr("name", None)
         self.validator.check_groups(group1, 0, 0)
-        assert self.validator.errors['blocks'][0]['gro'
-                                'ups'][0]['errors'] == ['Name of Group is missing']
+        grperr = self.validator.errors['blocks'][0]['groups'][0]['errors']
+        assert grperr == ['Name of Group is missing']
         group2 = self.block2.groups[1]
         group2._h5group.set_attr("name", None)
         self.validator.check_groups(group2, 1, 1)
-        assert self.validator.errors['blocks'][1]['groups'][1]['errors'] == \
-               ['Name of Group is missing']
+        grperr = self.validator.errors['blocks'][1]['groups'][1]['errors']
+        assert grperr == ['Name of Group is missing']
         group2._h5group.set_attr("type", None)
         self.validator.check_groups(group2, 1, 1)
-        assert self.validator.errors['blocks'][1]['groups'][1]['errors'] == [
-            'Type of Group is missing', 'Name of Group is missing']
+        grperr = self.validator.errors['blocks'][1]['groups'][1]['errors']
+        assert grperr == ['Type of Group is missing',
+                          'Name of Group is missing']
 
     def test_check_data_arrays(self):
         da1 = self.block1.data_arrays[0]
@@ -80,36 +83,43 @@ class TestValidate (unittest.TestCase):
         da1._h5group.set_attr("expansion_origin", 0.11)  # poly not set
         self.validator.check_data_arrays(da1, 0, 0)
         da_warn1 = 'Type of DataArray is missing'
-        da_warn2 = 'In some Range Dimensions, the number of ticks differ from the data entries'
-        da_warn3 = 'In some Set Dimensions, the number of labels differ from the data entries'
+        da_warn2 = ('In some Range Dimensions, '
+                    'the number of ticks differ from the data entries')
+        da_warn3 = ('In some Set Dimensions, '
+                    'the number of labels differ from the data entries')
         da_warn4 = 'Invalid units'
-        da_warn5 = 'Expansion origins exist but polynomial coefficients are missing'
-        da_dict1 = self.validator.errors['blocks'][0]['data_arrays'][0]['errors']
-        assert da_warn1 in da_dict1
-        assert da_warn2 in da_dict1
-        assert da_warn3 in da_dict1
-        assert da_warn4 in da_dict1
-        assert da_warn5 in da_dict1
+        da_warn5 = ('Expansion origins exist '
+                    'but polynomial coefficients are missing')
+        da_err = self.validator.errors['blocks'][0]['data_arrays'][0]['errors']
+        assert da_warn1 in da_err
+        assert da_warn2 in da_err
+        assert da_warn3 in da_err
+        assert da_warn4 in da_err
+        assert da_warn5 in da_err
 
         da2 = self.block1.data_arrays[1]
         da2.append_set_dimension()
         da2.dimensions[0].labels = ["A", "B", "C", "D", "E"]
         da2.polynom_coefficients = [0.1, 0.2]
         self.validator.check_data_arrays(da2, 1, 0)
-        assert self.validator.errors['blocks'][0]['data_arrays'][1]['errors'] == \
-               ["Polynomial coefficients exist but expansion origins are missing"]
-        # Dimension mismatch missed out as change data_extent attr will also change shape
+        da_err = self.validator.errors['blocks'][0]['data_arrays'][1]['errors']
+        assert da_err == ["Polynomial coefficients exist but expansion "
+                          "origins are missing"]
+        # Dimension mismatch missed out as change data_extent attr
+        # will also change shape
 
     def test_check_tags(self):
         tag1 = self.block1.tags[0]
         tag1.position = []
         self.validator.check_tag(tag1, 0, 0)
-        assert self.validator.errors['blocks'][0]['tags'][0]['errors'] == ['Position is not set!']
+        tagerr = self.validator.errors['blocks'][0]['tags'][0]['errors']
+        assert tagerr == ['Position is not set!']
 
         tag2 = self.block1.tags[1]
         tag2.units = ['abc']
         self.validator.check_tag(tag2, 1, 0)
-        assert self.validator.errors['blocks'][0]['tags'][1]['errors'] == ['Invalid unit']
+        tagerr = self.validator.errors['blocks'][0]['tags'][1]['errors']
+        assert tagerr == ['Invalid unit']
 
         tag3 = self.block1.tags[2]
         da1 = self.block1.data_arrays[0]
@@ -131,10 +141,13 @@ class TestValidate (unittest.TestCase):
         tag4.extent = [1, 1]
         tag4.position = [0.5, 0.5]
         self.validator.check_tag(tag4, 3, 0)
-        tag_dim_warn1 = "Number of extent and dimensionality of reference do not match"
-        tag_dim_warn2 = "Number of position and dimensionality of reference do not match"
-        assert tag_dim_warn2 in self.validator.errors['blocks'][0]['tags'][3]['errors']
-        assert tag_dim_warn1 in self.validator.errors['blocks'][0]['tags'][3]['errors']
+        tag_dim_warn1 = ("Number of extent and dimensionality of reference "
+                         "do not match")
+        tag_dim_warn2 = ("Number of position and dimensionality of reference "
+                         "do not match")
+        tagerr = self.validator.errors['blocks'][0]['tags'][3]['errors']
+        assert tag_dim_warn2 in tagerr
+        assert tag_dim_warn1 in tagerr
 
         tag5 = self.block2.tags[0]
         da2 = self.block1.data_arrays[1]
@@ -149,7 +162,8 @@ class TestValidate (unittest.TestCase):
 
     def test_check_multi_tag(self):
         mt1 = self.block1.multi_tags[0]
-        da1 = self.block1.create_data_array(name='test1', array_type='t', dtype='float', data=0)
+        da1 = self.block1.create_data_array(name='test1', array_type='t',
+                                            dtype='float', data=0)
         mt1.extents = da1
         self.validator.check_multi_tag(mt1, 0, 0)
         assert self.validator.errors['blocks'][0]['multi_tags'][0]['errors']\
@@ -157,13 +171,17 @@ class TestValidate (unittest.TestCase):
 
         # test for pos & extent with multiple dimensions
         mt2 = self.block1.multi_tags[1]
-        da2 = self.block1.create_data_array(name='test2a', array_type='t', dtype='float',
+        da2 = self.block1.create_data_array(name='test2a', array_type='t',
+                                            dtype='float',
                                             data=np.random.random((6, 5)))
-        da3 = self.block1.create_data_array(name='test2b', array_type='t', dtype='float',
+        da3 = self.block1.create_data_array(name='test2b', array_type='t',
+                                            dtype='float',
                                             data=np.random.random((5, 8)))
-        da4 = self.block1.create_data_array(name='test2c', array_type='t', dtype='float',
+        da4 = self.block1.create_data_array(name='test2c', array_type='t',
+                                            dtype='float',
                                             data=np.random.random((5, 4)))
-        da5 = self.block1.create_data_array(name='test2d', array_type='t', dtype='float',
+        da5 = self.block1.create_data_array(name='test2d', array_type='t',
+                                            dtype='float',
                                             data=np.random.random((5, 3)))
         mt2.references.append(da2)
         mt2.references.append(da3)
@@ -172,26 +190,32 @@ class TestValidate (unittest.TestCase):
         self.validator.check_multi_tag(mt2, 1, 0)
         warn1 = "The number of reference and position entries do not match"
         warn2 = "The number of reference and extent entries do not match"
-        # pos-extent-mismatch warning exist but not assert, change shape of da4/5 to elim warning
-        assert warn1 in self.validator.errors['blocks'][0]['multi_tags'][1]['errors']
-        assert warn2 in self.validator.errors['blocks'][0]['multi_tags'][1]['errors']
+        # pos-extent-mismatch warning exist but not assert
+        # change shape of da4/5 to elim warning
+        mterr = self.validator.errors['blocks'][0]['multi_tags'][1]['errors']
+        assert warn1 in mterr
+        assert warn2 in mterr
 
         # test for pos & extent with only ONE dimensions
         mt3 = self.block1.multi_tags[2]
-        da6 = self.block1.create_data_array(name='test3a', array_type='t', dtype='float',
+        da6 = self.block1.create_data_array(name='test3a', array_type='t',
+                                            dtype='float',
                                             data=np.random.random(5))
-        da7 = self.block1.create_data_array(name='test3b', array_type='t', dtype='float',
+        da7 = self.block1.create_data_array(name='test3b', array_type='t',
+                                            dtype='float',
                                             data=np.random.random((3, 3)))
         mt3.positions = da6
         mt3.extents = da6
         mt3.references.append(da7)
         self.validator.check_multi_tag(mt3, 2, 0)
-        assert warn1 in self.validator.errors['blocks'][0]['multi_tags'][2]['errors']
-        assert warn2 in self.validator.errors['blocks'][0]['multi_tags'][2]['errors']
+        mterr = self.validator.errors['blocks'][0]['multi_tags'][2]['errors']
+        assert warn1 in mterr
+        assert warn2 in mterr
 
         # test for ext and pos dimensionality
         mt4 = self.block1.multi_tags[3]
-        da8 = self.block1.create_data_array(name='test3c', array_type='t', dtype='float',
+        da8 = self.block1.create_data_array(name='test3c', array_type='t',
+                                            dtype='float',
                                             data=np.random.random((5, 3, 4)))
         mt4.positions = da8
         mt4.extents = da8
@@ -209,21 +233,23 @@ class TestValidate (unittest.TestCase):
         da9.append_range_dimension([1, 2, 3, 4, 5, 6, 7, 8, 9])
         da9.dimensions[0]._h5group.set_attr("unit", "mV")
         self.validator.check_multi_tag(mt5, 0, 1)
-        assert "Invalid unit" in self.validator.errors['blocks'][1]['multi_tags'][0]['errors']
-        assert "References and multi_tag units mismatched" \
-               in self.validator.errors['blocks'][1]['multi_tags'][0]['errors']
+        mtagerr = self.validator.errors['blocks'][1]['multi_tags'][0]['errors']
+        assert "Invalid unit" in mtagerr
+        assert "References and multi_tag units mismatched" in mtagerr
 
         # 2nd test for units
         da9.dimensions[0]._h5group.set_attr("unit", "ms")
         mt5.units = ['s']
         self.validator.check_multi_tag(mt5, 0, 1)
-        assert self.validator.errors['blocks'][1]['multi_tags'][0]['errors'] == []
+        mtagerr = self.validator.errors['blocks'][1]['multi_tags'][0]['errors']
+        assert mtagerr == []
 
     def test_check_section(self):  # only have check for basics now
         sec1 = self.file.sections[0]
         sec1._h5group.set_attr("type", None)
         self.validator.check_section(sec1, 0)
-        assert "Type of Section is missing" in self.validator.errors['sections'][0]['errors']
+        err = self.validator.errors['sections'][0]['errors']
+        assert "Type of Section is missing" in err
 
     def test_check_props(self):
         # check1
@@ -240,12 +266,15 @@ class TestValidate (unittest.TestCase):
         prop2.unit = "invalidu"
         self.validator.form_dict()
         self.validator.check_property(prop, 0, 0)  # check1
-        assert "Unit is not set" in self.validator.errors['sections'][0]['props'][0][
-            'errors']
-        self.validator.check_property(prop1, 1, 0)  # check2 - nameerr but no uniterr
-        assert self.validator.errors['sections'][0]['props'][1]['errors'] == ['Name is not set!']
+        err = self.validator.errors['sections'][0]['props'][0]['errors']
+        assert "Unit is not set" in err
+        # check2 - nameerr but no uniterr
+        self.validator.check_property(prop1, 1, 0)
+        err = self.validator.errors['sections'][0]['props'][1]['errors']
+        assert err == ['Name is not set!']
         self.validator.check_property(prop2, 2, 0)  # check3
-        assert 'Unit is not valid!' in self.validator.errors['sections'][0]['props'][2]['errors']
+        err = self.validator.errors['sections'][0]['props'][2]['errors']
+        assert 'Unit is not valid!' in err
 
     def test_check_features(self):
         pass  # RuntimeError will be raised, so no need for test
@@ -255,7 +284,8 @@ class TestValidate (unittest.TestCase):
         # check1
         da1 = self.block1.data_arrays[0]
         rdim1 = da1.append_range_dimension([0.55, 0.10, 0.1])
-        self.validator.form_dict()  # for dims and prop test we need to form_dict again
+        # for dims and prop test we need to form_dict again
+        self.validator.form_dict()
         rdim1._h5group.set_attr('dimension_type', 'set')
         # check2
         rdim2 = da1.append_range_dimension([])
@@ -263,11 +293,13 @@ class TestValidate (unittest.TestCase):
 
         self.validator.form_dict()
         self.validator.check_range_dim(rdim1, 0, 0, 0)  # check1
-        assert "Dimension type is not correct!" in err_dict[0]['dimensions'][0]['errors']
-        assert "Ticks are not sorted!" in err_dict[0]['dimensions'][0]['errors']
+        err = err_dict[0]['dimensions'][0]['errors']
+        assert "Dimension type is not correct!" in err
+        assert "Ticks are not sorted!" in err
         self.validator.check_range_dim(rdim2, 1, 0, 0)  # check2
-        assert "Ticks need to be set for range dimensions" in err_dict[0]['dimensions'][1]['errors']
-        assert "Unit must be atomic, not composite!" in err_dict[0]['dimensions'][1]['errors']
+        err = err_dict[0]['dimensions'][1]['errors']
+        assert "Ticks need to be set for range dimensions" in err
+        assert "Unit must be atomic, not composite!" in err
 
     def test_sample_dim(self):
         # check1
@@ -282,15 +314,14 @@ class TestValidate (unittest.TestCase):
 
         self.validator.form_dict()
         self.validator.check_sampled_dim(sdim1, 0, 0, 0)  # check1
-        assert "Dimension type is not correct!" in self.validator.errors['blocks'] \
-            [0]['data_arrays'][0]['dimensions'][0]['errors']
-        assert "Offset is set, but no unit set!" in self.validator.errors['blocks'] \
-            [0]['data_arrays'][0]['dimensions'][0]['errors']
+        da = self.validator.errors['blocks'][0]['data_arrays'][0]
+        err = da['dimensions'][0]['errors']
+        assert "Dimension type is not correct!" in err
+        assert "Offset is set, but no unit set!" in err
         self.validator.check_sampled_dim(sdim2, 1, 0, 0)  # check2
-        assert "Unit must be atomic, not composite!" in self.validator.errors['blocks'] \
-            [0]['data_arrays'][0]['dimensions'][1]['errors']
-        assert "SamplingInterval is not set to valid value (> 0)!" in self.validator.errors['bloc' 
-                                               'ks'][0]['data_arrays'][0]['dimensions'][1]['errors']
+        err = da['dimensions'][1]['errors']
+        assert "Unit must be atomic, not composite!" in err
+        assert "SamplingInterval is not set to valid value (> 0)!" in err
 
     def test_set_dim(self):
         da1 = self.block1.data_arrays[0]
@@ -298,8 +329,9 @@ class TestValidate (unittest.TestCase):
         setdim1._h5group.set_attr('dimension_type', 'range')
         self.validator.form_dict()
         self.validator.check_set_dim(setdim1, 0, 0, 0)
-        assert "Dimension type is not correct!" in self.validator.errors['blocks'] \
-            [0]['data_arrays'][0]['dimensions'][0]['errors']
+        da = self.validator.errors['blocks'][0]['data_arrays'][0]
+        dimerr = da['dimensions'][0]['errors']
+        assert "Dimension type is not correct!" in dimerr
 
     def test_sources(self):
         da1 = self.block1.data_arrays[0]
@@ -309,4 +341,5 @@ class TestValidate (unittest.TestCase):
         print(da1.sources)
         self.validator.form_dict()
         self.validator.check_sources(src1, 0)
-        assert "Name of Source is missing" in self.validator.errors['blocks'][0]['sources']
+        err = self.validator.errors['blocks'][0]['sources']
+        assert "Name of Source is missing" in err
