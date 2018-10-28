@@ -2,10 +2,10 @@
 #include <boost/optional/optional.hpp>
 
 #include <nix.hpp>
-#include <transmorgify.hpp>
-#include <accessors.hpp>
+#include "transmorgify.hpp"
+#include "accessors.hpp"
 
-#include <PyEntity.hpp>
+#include "PyEntity.hpp"
 
 using namespace boost::python;
 using namespace nix;
