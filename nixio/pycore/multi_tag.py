@@ -121,7 +121,7 @@ class MultiTag(BaseTag, MultiTagMixin):
                     unit = units[idx]
                 c = self._pos_to_idx(offset.item(idx) + extent.item(idx),
                                      unit, dim) - offsets[idx]
-                counts.append(c if c > 1 else 1)
+                counts.append(c + 1 if c >= 1 else 1)
         else:
             counts = [1]*len(data.dimensions)
 
