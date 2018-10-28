@@ -248,12 +248,12 @@ class Tag(BaseTag, TagMixin):
                 unit = self.units[idx]
             else:
                 unit = None
-            o = self._pos_to_idx(position[idx], unit, dim)
+            o = self._pos_to_idx(pos, unit, dim)
             offset.append(o)
             if idx < len(extent):
                 ext = extent[idx]
                 c = self._pos_to_idx(pos + ext, unit, dim) - o
-                count.append(c if c > 1 else 1)
+                count.append(c + 1 if c >= 1 else 1)
             else:
                 count.append(1)
         return tuple(offset), tuple(count)
