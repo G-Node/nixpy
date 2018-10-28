@@ -265,12 +265,12 @@ class MultiTagTestBase(unittest.TestCase):
         dim.unit = 's'
 
         pos = block.create_data_array('pos1', 'positions',
-                                      data=np.array([0.]).reshape((1, 1)))
+                                      data=np.array([0.]).reshape(1, 1))
         pos.append_set_dimension()
         pos.append_set_dimension()
         pos.unit = 'ms'
         ext = block.create_data_array('ext1', 'extents',
-                                      data=np.array([2000.]).reshape((1, 1)))
+                                      data=np.array([2000.]).reshape(1, 1))
         ext.append_set_dimension()
         ext.append_set_dimension()
         ext.unit = 'ms'
@@ -303,7 +303,7 @@ class MultiTagTestBase(unittest.TestCase):
         pos.append_set_dimension()
         pos.append_set_dimension()
         ext = self.block.create_data_array("ext", "test",
-                                           data=[[2, 5, 2],
+                                           data=[[1, 5, 2],
                                                  [0, 4, 1]])
         ext.append_set_dimension()
         ext.append_set_dimension()
@@ -336,14 +336,14 @@ class MultiTagTestBase(unittest.TestCase):
         assert(len(posdata.shape) == 3)
         assert(posdata.shape == (1, 1, 1))
         assert(np.isclose(posdata[0, 0, 0], data[1, 1, 0]))
-
+ 
         segdata = segtag.retrieve_data(0, 0)
         assert(len(segdata.shape) == 3)
-        assert(segdata.shape == (2, 5, 2))
+        assert(segdata.shape == (2, 6, 2))
 
         segdata = segtag.retrieve_data(1, 0)
         assert(len(segdata.shape) == 3)
-        assert(segdata.shape == (1, 4, 1))
+        assert(segdata.shape == (1, 5, 1))
 
     def test_multi_tag_feature_data(self):
         index_data = self.block.create_data_array("indexed feature data",
