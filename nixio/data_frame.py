@@ -21,9 +21,10 @@ class DataFrame(Entity, DataSet):
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, shape, col_dict, compression):
         if len(shape) != 2: raise ValueError("Dataframe must be 2D")
-        for name, type in col_dict.items():
+        for nam, type in col_dict.items():
             if type == str:
-                col_dict[name] = util.vlen_str_dtype
+                col_dict[nam] = util.vlen_str_dtype
+        cls.name = name
         cls.raw_shape = shape
         cls.col_names = np.array(list(col_dict.keys()))
         cls.dt_arr = list(col_dict.items())
@@ -48,12 +49,10 @@ class DataFrame(Entity, DataSet):
             tu = tuple(li)
             new_da.append(tu)
         farr = np.ascontiguousarray(new_da, dtype=(self.col_dtype))
-        # print(dir(self._h5group.group['data']))
-        # print(self._h5group.group.items())
-        # del self._h5group.group['data']
-        # print(self._h5group.group.items())
-        # self._h5group.create_dataset("data", (self.shape[0],), self.col_dtype)
-        # self.write_direct(farr)
+        del self._h5group.group['data']
+        self._h5group.group['data'] = farr
+        self._h5group.create_dataset("data", (self.shape[0],), self.col_dtype)
+        self.write_direct(farr)
 
     def append_rows(self, data):
         li_data = []
