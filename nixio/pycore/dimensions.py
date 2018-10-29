@@ -87,7 +87,7 @@ class SampledDimension(Dimension):
         """
         offset = self.offset if self.offset else 0
         sample = self.sampling_interval
-        index = round((position - offset) / sample)
+        index = int(round((position - offset) / sample))
         if index < 0:
             raise IndexError("Position is out of bounds of this dimension!")
         return index
@@ -103,10 +103,11 @@ class SampledDimension(Dimension):
         :returns: The created axis
         :rtype: list
         """
-        offset = self.offset if self.offset else 0
+        offset = self.offset if self.offset else 0.0
         sample = self.sampling_interval
-        end = (count + start) * sample + offset
-        return tuple(np.arange(offset, end, sample))
+        start_val = start * sample + offset
+        end_val = (start + count) * sample + offset
+        return tuple(np.arange(start_val, end_val, sample))
 
     @property
     def label(self):
