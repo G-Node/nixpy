@@ -3,6 +3,8 @@ import nixio as nix
 from .tmp import TempDir
 import os
 
+# TODO: add test for dict vs name_list + dt_list creation
+
 
 class TestDataFrame(unittest.TestCase):
 

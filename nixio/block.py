@@ -190,7 +190,7 @@ class Block(Entity):
                           col_dtypes=None, data=None, compression=Compression.No):
         """
         :param df_name:
-        :param frame_type:
+        :param frame_type: description-like
         :param shape:
         :param col_dict:
         :param col_names:
@@ -209,7 +209,7 @@ class Block(Entity):
             if col_names is None or col_dtypes is None:
                 raise  ValueError("Info about columns should be given, either"
                                   " with col_dict or (col_names+col_dtypes)")
-            col_dict = dict((str(name), dt) for name, dt in zip(col_names, col_dtypes))
+            col_dict = dict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
         data_frames = self._h5group.open_group("data_frames")
         df = DataFrame._create_new(self, data_frames, df_name,
                                    frame_type, shape, col_dict, compression)
