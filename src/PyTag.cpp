@@ -62,7 +62,8 @@ Feature createNewFeature(Tag& st, const DataArray &data, const std::string& link
         lt = LinkType::Untagged;
     else if (link_type == "Indexed")
         lt = LinkType::Indexed;
-    // TODO: Throw error
+    else
+      throw std::invalid_argument("Tag::createNewFeature: invalid link type (Possible types: Tagged, Untagged or Indexed)!");
 
     return st.createFeature(data, lt);
 }

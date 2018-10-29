@@ -211,7 +211,7 @@ class TagTestBase(unittest.TestCase):
 
         segdata = segtag.retrieve_data(0)
         assert(len(segdata.shape) == 3)
-        assert(segdata.shape == (1, 6, 2))
+        assert(segdata.shape == (1, 7, 2))
 
         # retrieve data by id and name
         posdata = postag.retrieve_data(da.name)
@@ -219,14 +219,14 @@ class TagTestBase(unittest.TestCase):
         assert(posdata.shape == (1, 1, 1))
         segdata = segtag.retrieve_data(da.name)
         assert(len(segdata.shape) == 3)
-        assert(segdata.shape == (1, 6, 2))
+        assert(segdata.shape == (1, 7, 2))
 
         posdata = postag.retrieve_data(da.id)
         assert(len(posdata.shape) == 3)
         assert(posdata.shape == (1, 1, 1))
         segdata = segtag.retrieve_data(da.id)
         assert(len(segdata.shape) == 3)
-        assert(segdata.shape == (1, 6, 2))
+        assert(segdata.shape == (1, 7, 2))
 
     def test_tag_retrieve_feature_data(self):
         number_feat = self.block.create_data_array("number feature", "test",
@@ -262,7 +262,7 @@ class TagTestBase(unittest.TestCase):
         data3 = pos_tag.retrieve_feature_data(2)
 
         assert(data1.size == 1)
-        assert(data2.size == 2)
+        assert(data2.size == 3)
         assert(data3.size == len(ramp_data))
 
         # get by name
@@ -270,7 +270,7 @@ class TagTestBase(unittest.TestCase):
         data2 = pos_tag.retrieve_feature_data(ramp_feat.name)
 
         assert(data1.size == 1)
-        assert(data2.size == 2)
+        assert(data2.size == 3)
 
 
 @unittest.skipIf(skip_cpp, "HDF5 backend not available.")

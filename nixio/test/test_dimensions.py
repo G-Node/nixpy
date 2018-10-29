@@ -113,7 +113,7 @@ class DimensionTestBase(unittest.TestCase):
         assert(self.range_dim.ticks == other)
 
         assert(self.range_dim.index_of(0.) == 0)
-        assert(self.range_dim.index_of(10.) == (np.ceil(10./3.14)))
+        assert(self.range_dim.index_of(10.) == (np.floor(10./3.14)))
         assert(self.range_dim.index_of(100.) == 9)
         assert(self.range_dim.index_of(-100.) == 0)
 
