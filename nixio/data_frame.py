@@ -6,7 +6,6 @@ from .exceptions import OutOfBounds
 from .entity import Entity
 from . import util
 from .data_set import DataSet
-from .data_view import DataView
 import csv
 # TODO add slicing param for functions
 
@@ -27,13 +26,34 @@ class DataFrame(Entity, DataSet):
                 col_dict[name] = util.vlen_str_dtype
         cls.raw_shape = shape
         cls.col_names = np.array(list(col_dict.keys()))
-        dt_arr = list(col_dict.items())
-        cls.col_dtype = np.dtype(dt_arr)
+        cls.dt_arr = list(col_dict.items())
+        cls.col_dtype = np.dtype(cls.dt_arr)
         cls.col_raw_dtype = list(col_dict.values())
         x,y = shape
         newentity = super()._create_new(nixparent, h5parent, name, type_)
         newentity._h5group.create_dataset("data", (x, ), cls.col_dtype)
         return newentity
+
+    def append_column(self, new_col, col_name, new_dt):
+        if new_dt == str:
+            new_dt = util.vlen_str_dtype
+        self.dt_arr.append((col_name, new_dt))
+        self.col_dtype = np.dtype(self.dt_arr)
+        new_col = np.array(new_col, dtype=new_dt)
+        self.raw_shape = tuple((self.raw_shape[0] , self.raw_shape[1]+ len(new_col)))
+        new_da = []
+        for i, rows in enumerate(self._h5group.group['data'][:]):
+            li = list(rows)
+            li.append(new_col[i])
+            tu = tuple(li)
+            new_da.append(tu)
+        farr = np.ascontiguousarray(new_da, dtype=(self.col_dtype))
+        # print(dir(self._h5group.group['data']))
+        # print(self._h5group.group.items())
+        # del self._h5group.group['data']
+        # print(self._h5group.group.items())
+        # self._h5group.create_dataset("data", (self.shape[0],), self.col_dtype)
+        # self.write_direct(farr)
 
     def append_rows(self, data):
         li_data = []
@@ -43,16 +63,6 @@ class DataFrame(Entity, DataSet):
         pro_data = np.array(li_data, dtype=self.col_dtype)
         self.append(pro_data, axis=0)
         self.raw_shape = tuple((self.raw_shape[0] + len(data), self.raw_shape[1]))
-        return self
-
-    def append_column(self, new_col, new_col_name, new_dt):
-        if new_dt == str:
-            new_dt = util.vlen_str_dtype
-        self.dt_arr.append((new_col_name, new_dt))
-        self.col_dtype = np.dtype(self.dt_arr)
-        new_col = np.array(new_col, dtype=new_dt)
-        self.raw_shape = tuple((self.raw_shape[0] , self.raw_shape[1]+ len(new_col)))
-        return self
 
     def write_column(self, changed_col, col_idx=None, column_name=None):  # Done
         if len(changed_col) != self.raw_shape[0]:
@@ -65,10 +75,9 @@ class DataFrame(Entity, DataSet):
         for i, rows in enumerate(self._h5group.group['data'][:]):
             cell = changed_col[i]
             rows[column_name] = cell
-            self.write_rows(changed_row=rows, row_idx=i)
-        return self
+            self.write_rows(changed_row=rows, row_idx=[i])
 
-    def read_columns(self, col_idx= None, col_name=None):  #Done
+    def read_columns(self, col_idx= None, col_name=None):  # Done
         if col_idx is None and col_name is None:
             raise ValueError("Either index or name must not be None")
         if col_name is None:
@@ -88,34 +97,31 @@ class DataFrame(Entity, DataSet):
         if len(row_idx) == 1:
             changed_row = tuple(changed_row)
             self._write_data(changed_row, sl=row_idx)
-            return self
         else:
             cr_list = []
             for i, cr in enumerate(changed_row):
                cr_list.append(tuple(cr))
+            print(cr_list)
+            print(type(cr_list))
             self._write_data(cr_list,sl=row_idx)
-            return self
 
     def read_rows(self, row_idx):  # Done
         get_row = self._read_data(sl=(row_idx, ))
         return get_row
 
     def write_cell(self, new_item, position= None, col_name=None, row_idx=None):  #Done
-        # TODO force the dtype to be inline
         if position:
             if len(position) != 2: raise ValueError('not a position')
             x, y = position
             targeted_row = self.read_row(x)
             targeted_row[y] = new_item
             self._write_data(targeted_row, sl=x)
-            return self
         else:
             if col_name is None and row_idx is None:
                 raise ValueError("Column and rows identifier must be given")
             targeted_row = self.read_row(row_idx)
             targeted_row[col_name] = new_item
             self._write_data(targeted_row,sl=row_idx)
-            return self
 
     def read_cell(self, position= None, col_name=None, row_idx=None):  # Done
         if position:
@@ -146,7 +152,6 @@ class DataFrame(Entity, DataSet):
             for i, row in enumerate(self._h5group.group['data'][:]):
                 for name, da in zip(self.col_names, row):
                     di[name].append(da)
-            print(di)
             dw.writerows(di)
 
     def _find_idx_by_name(self, name):
