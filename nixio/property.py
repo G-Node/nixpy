@@ -147,6 +147,7 @@ class Property(Entity):
     @uncertainty.setter
     def uncertainty(self, uncertainty):
         util.check_attr_type(uncertainty, Number)
+        uncertainty = float(uncertainty) if uncertainty is not None else None
         self._h5dataset.set_attr("uncertainty", uncertainty)
 
     @property
