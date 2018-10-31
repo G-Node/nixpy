@@ -8,7 +8,8 @@ from . import util
 from .data_set import DataSet
 from .datatype import DataType
 from six import string_types
-
+import csv
+import pandas as pd
 
 class DataFrame(Entity, DataSet):
 
@@ -152,6 +153,31 @@ class DataFrame(Entity, DataSet):
     def row_count(self):
         count = len(self)
         return count
+
+    def write_to_csv(self, filename, mode='w'):
+        with open(filename, mode, newline='') as csvfile:
+            dw = csv.DictWriter(csvfile, fieldnames=self.column_names)
+            dw.writeheader()
+            di = dict()  # this dict make the iter below quicker compared to using self in L172
+            for n in self.column_names:
+                n = str(n)
+                di[n] = list(self[n])
+            complete_di_list = []
+            sample_len = len(self[n])
+            for i in range(sample_len):
+                single_sample_di = dict()
+                for na in self.column_names:
+                    single_sample_di[na] = di[na][i]
+                complete_di_list.append(single_sample_di)
+            dw.writerows(complete_di_list)
+            csvfile.close()
+
+    def write_to_pandas(self):
+        tmp_list = []
+        tmp_list.extend(self._h5group.group['data'][:])
+        li = [list(ite) for ite in tmp_list]  # make all element list
+        pd_df = pd.DataFrame(li, columns=[str(n) for n in self.column_names])
+        return pd_df
 
     @property
     def unit(self):
