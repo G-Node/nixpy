@@ -6,8 +6,6 @@ from .exceptions import OutOfBounds
 from .entity import Entity
 from . import util
 from .data_set import DataSet
-import csv
-# TODO add slicing param for functions
 
 
 class DataFrame(Entity, DataSet):
@@ -20,9 +18,10 @@ class DataFrame(Entity, DataSet):
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, shape, col_dict, compression):
-        if len(shape) != 2: raise ValueError("Dataframe must be 2D")
-        for nam, type in col_dict.items():
-            if type == str:
+        if len(shape) != 2:
+            raise ValueError("DataFrame must be 2D")
+        for nam, dt in col_dict.items():
+            if dt == str:
                 col_dict[nam] = util.vlen_str_dtype
         cls.df_name = name
         cls.raw_shape = shape
@@ -30,7 +29,7 @@ class DataFrame(Entity, DataSet):
         cls.dt_arr = list(col_dict.items())
         cls.col_dtype = np.dtype(cls.dt_arr)
         cls.col_raw_dtype = list(col_dict.values())
-        x,y = shape
+        x, y = shape
         newentity = super()._create_new(nixparent, h5parent, name, type_)
         newentity._h5group.create_dataset("data", (x, ), cls.col_dtype)
         return newentity
@@ -65,7 +64,7 @@ class DataFrame(Entity, DataSet):
 
     def write_column(self, changed_col, col_idx=None, column_name=None):
         if len(changed_col) != self.raw_shape[0]:
-            raise ValueError('if missing data, please fill None')
+            raise ValueError('If there are missing data, please fill in None')
         if not col_idx and not column_name:
             raise ValueError("Either index or name must not be None")
         if column_name is None:
@@ -83,8 +82,8 @@ class DataFrame(Entity, DataSet):
             col_name = []
             for ci in col_idx:
                 col_name.append(self.col_names[ci])
-        slice = np.s_[:]
-        get_col = self._read_data(sl=slice)[col_name]
+        slic = np.s_[:]
+        get_col = self._read_data(sl=slic)[col_name]
         return get_col
 
     def write_rows(self, changed_row, row_idx=None):
@@ -100,13 +99,13 @@ class DataFrame(Entity, DataSet):
             cr_list = []
             for i, cr in enumerate(changed_row):
                 cr_list.append(tuple(cr))
-            self._write_data(cr_list,sl=row_idx)
+            self._write_data(cr_list, sl=row_idx)
 
     def read_rows(self, row_idx):
         get_row = self._read_data(sl=(row_idx, ))
         return get_row
 
-    def write_cell(self, new_item, position = None, col_name=None, row_idx=None):
+    def write_cell(self, new_item, position=None, col_name=None, row_idx=None):
         if position:
             if len(position) != 2:
                 raise ValueError('not a position')
@@ -119,9 +118,9 @@ class DataFrame(Entity, DataSet):
                 raise ValueError("Column and rows identifier must be given")
             targeted_row = self.read_rows(row_idx)
             targeted_row[col_name] = new_item
-            self._write_data(targeted_row,sl=row_idx)
+            self._write_data(targeted_row, sl=row_idx)
 
-    def read_cell(self, position= None, col_name=None, row_idx=None):
+    def read_cell(self, position=None, col_name=None, row_idx=None):
         if position:
             if len(position) != 2:
                 raise ValueError('Not a position')
@@ -139,19 +138,6 @@ class DataFrame(Entity, DataSet):
             print(row_form.format("unit", *self.unit))
         for i, row in enumerate(self._h5group.group['data'][:]):
             print(row_form.format("Data{}".format(i), *row))
-
-    def write_to_csv(self):
-        with open('t.csv', 'w', newline='') as csvfile:
-            dw = csv.DictWriter(csvfile, fieldnames=self.col_names)
-            dw.writeheader()
-            di = {}
-            for names in self.col_names:
-                n = str(names)
-                di[n] = []
-            for i, row in enumerate(self._h5group.group['data'][:]):
-                for name, da in zip(self.col_names, row):
-                    di[name].append(da)
-            dw.writerows(di)
 
     def _find_idx_by_name(self, name):
         for i, n in enumerate(self.col_names):
