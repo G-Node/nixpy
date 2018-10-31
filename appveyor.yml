@@ -69,6 +69,7 @@ install:
             $env:avjob = "job=Environment%3A%20PLATFORM%3Dx86%2C%20CONFIGURATION%3DRelease"
             $env:avfname = "nix-$env:NIX_VERSION-win32.exe"
         }
+    - python -m pip install --upgrade pip
     - ps: |
         if ($env:pyver -eq "2") {
             python -m pip install enum34
