@@ -154,6 +154,7 @@ class DataFrame(Entity, DataSet):
         count = len(self)
         return count
 
+<<<<<<< 9d6b672635a243969a54fdd70cbde98da7eecd14
     def write_to_csv(self, filename, mode='w'):
         with open(filename, mode, newline='') as csvfile:
             dw = csv.DictWriter(csvfile, fieldnames=self.column_names)
@@ -170,6 +171,29 @@ class DataFrame(Entity, DataSet):
                     single_sample_di[na] = di[na][i]
                 complete_di_list.append(single_sample_di)
             dw.writerows(complete_di_list)
+=======
+    def write_to_csv(self, filename):  # crazily stupid and verbose! change it!
+        # create better variable name
+        with open(filename, 'w', newline='') as csvfile:
+            dw = csv.DictWriter(csvfile, fieldnames=self.col_names)
+            dw.writeheader()
+            di = {}
+            for names in self.col_names:
+                n = str(names)
+                di[n] = []
+            for i, row in enumerate(self._h5group.group['data'][:]):
+                for name, da in zip(self.col_names, row):
+                    di[name].append(da)
+            dname = list(di.keys())
+            di_li = []
+            obs_len = len(di[n])
+            for i in range(obs_len):
+                single_dict = dict()
+                for id, na in enumerate(dname):
+                    single_dict[na] = di[na][i]
+                di_li.append(single_dict)
+            dw.writerows(di_li)
+>>>>>>> write_to_csv working! but very verbose
             csvfile.close()
 
     def write_to_pandas(self):
