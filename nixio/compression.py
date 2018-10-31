@@ -8,6 +8,7 @@
 # LICENSE file in the root of the Project.
 from enum import Enum
 
+
 class Compression(Enum):
     No = "None"
     DeflateNormal = "DeflateNormal"
