@@ -7,7 +7,7 @@ import numpy as np
 # TODO: add test for dict vs name_list + dt_list creation
 # TODO: add test for multiple reading and multiple writing (if supported)
 
-@unittest.skip
+
 class TestDataFrame(unittest.TestCase):
 
     def setUp(self):
@@ -33,6 +33,10 @@ class TestDataFrame(unittest.TestCase):
 
     def test_data_frame_eq(self):
         pass
+
+    def test_data_frame_type(self):
+        self.df.type = None
+
 
     def test_write_row(self):
         pass
