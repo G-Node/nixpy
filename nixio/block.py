@@ -186,36 +186,25 @@ class Block(Entity):
             da.write_direct(data)
         return da
 
-    def create_data_frame(self, df_name, frame_type,shape=None, col_dict=None, col_names=None,
+    def create_data_frame(self, name, type_, col_dict=None, col_names=None,
                           col_dtypes=None, data=None, compression=Compression.No):
-        """
-        :param df_name:
-        :param frame_type: description-like
-        :param shape:
-        :param col_dict:
-        :param col_names:
-        :param col_dtypes:
-        :param data:
-        :param compression:
-        :return:
-
-        if info about columns
-        """
 
         if data is None:
-            if shape is None:
-                raise ValueError("Either shape and or data must not be None")
+            raise ValueError("Data must not be None")
         if col_dict is None:
             if col_names is None or col_dtypes is None:
                 raise  ValueError("Info about columns should be given, either"
                                   " with col_dict or (col_names+col_dtypes)")
             col_dict = dict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
         data_frames = self._h5group.open_group("data_frames")
-        df = DataFrame._create_new(self, data_frames, df_name,
-                                   frame_type, shape, col_dict, compression)
+        shape = data.shape
+        df = DataFrame._create_new(self, data_frames, name,
+                                   type_, shape, col_dict, compression)
         if data is not None:
             data = list(map(tuple, data))
-            arr = np.ascontiguousarray(data , dtype=(DataFrame.col_dtype))
+            dt_arr = list(col_dict.items())
+            col_dtype = np.dtype(dt_arr)
+            arr = np.ascontiguousarray(data , dtype=(col_dtype))
             df.write_direct(arr)
         return df
 

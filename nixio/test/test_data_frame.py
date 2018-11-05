@@ -57,4 +57,4 @@ class TestDataFrame(unittest.TestCase):
 
     def test_append_column(self):
         y = np.arange(start=1333, stop=1666, step=1)
-        self.df.append_column(y, col_name='trail_col', new_dt=str)
+        self.df.append_column(y, name='trail_col', datatype=str)
