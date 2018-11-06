@@ -20,6 +20,7 @@ from .entity import Entity
 from .exceptions import exceptions
 from .group import Group
 from .data_array import DataArray
+from .data_frame import DataFrame
 from .multi_tag import MultiTag
 from .tag import Tag
 from .source import Source
@@ -38,6 +39,7 @@ class Block(Entity):
         self._multi_tags = None
         self._sources = None
         self._compr = compression
+        self._data_frames = None
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, compression):
@@ -184,6 +186,28 @@ class Block(Entity):
             da.write_direct(data)
         return da
 
+    def create_data_frame(self, name, type_, col_dict=None, col_names=None,
+                          col_dtypes=None, data=None, compression=Compression.No):
+
+        if data is None:
+            raise ValueError("Data must not be None")
+        if col_dict is None:
+            if col_names is None or col_dtypes is None:
+                raise  ValueError("Info about columns should be given, either"
+                                  " with col_dict or (col_names+col_dtypes)")
+            col_dict = dict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
+        data_frames = self._h5group.open_group("data_frames")
+        shape = data.shape
+        df = DataFrame._create_new(self, data_frames, name,
+                                   type_, shape, col_dict, compression)
+        if data is not None:
+            data = list(map(tuple, data))
+            dt_arr = list(col_dict.items())
+            col_dtype = np.dtype(dt_arr)
+            arr = np.ascontiguousarray(data , dtype=(col_dtype))
+            df.write_direct(arr)
+        return df
+
     def find_sources(self, filtr=lambda _: True, limit=None):
         """
         Get all sources in this block recursively.
@@ -254,6 +278,12 @@ class Block(Entity):
         if self._data_arrays is None:
             self._data_arrays = Container("data_arrays", self, DataArray)
         return self._data_arrays
+
+    @property
+    def data_frames(self):
+        if self._data_frames is None:
+            self._data_frames = Container("data_frames", self, DataFrame)
+        return self._data_frames
 
     @property
     def groups(self):
