@@ -312,11 +312,12 @@ class Section(NamedEntity, SectionMixin):
                                           self.type, self.id)
         print(sec_str)
         for p in self.props:
-            p.pprint(current_depth, indent, max_length=max_length)
+            p.pprint(indent, max_length=max_length,
+                     current_depth=current_depth)
         if max_depth == -1 or current_depth < max_depth:
             for s in self.sections:
-                s.pprint(current_depth+1, max_depth=max_depth,
-                         indent=indent, max_length=max_length)
+                s.pprint(max_depth=max_depth, indent=indent,
+                         max_length=max_length, current_depth=current_depth+1)
         elif max_depth == current_depth:
             child_sec_indent = spaces+" "*indent
             more_indent = spaces+" "*(current_depth+2*indent)
