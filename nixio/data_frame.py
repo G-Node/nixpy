@@ -189,15 +189,12 @@ class DataFrame(Entity, DataSet):
                 self._h5group.set_attr("unit", u_list)
 
     @property
-<<<<<<< c5b02465ffefa07acaf78d6183ab746ecbd8ac12
-=======
     def data_type(self):
         self._h5group.set_attr('dtype', )
         print(list(self._h5group.group.attrs.keys()))
         return self._h5group.get_attr('dtype')
 
     @property
->>>>>>> some changes to the test
     def columns(self):
         if self.unit:
             cols = [(n, dt, u) for n, dt, u in zip(self.column_names, self.dtype, self.unit)]
