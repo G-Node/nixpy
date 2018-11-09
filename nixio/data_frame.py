@@ -97,6 +97,8 @@ class DataFrame(Entity, DataSet):
             self._write_data(cr_list, sl=index)
 
     def read_rows(self, index):
+        if hasattr(index, '__iter__'):
+            index = list(index)
         get_row = self._read_data(sl=(index,))
         return get_row
 
