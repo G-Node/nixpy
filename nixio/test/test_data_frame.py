@@ -39,7 +39,10 @@ class TestDataFrame(unittest.TestCase):
         assert self.df1 is not None
         assert self.df2 is not None
 
-    def test_wrong_shape(self):
+    def test_shape(self):
+        print(self.df1.df_shape)
+        assert self.df1.df_shape ==  (300, 5)
+        # create df with incorrect dimension to see if Error is raised
         arr = np.arange(100).reshape(100)
 
     def test_create_with_list(self):
@@ -56,6 +59,8 @@ class TestDataFrame(unittest.TestCase):
 
     def test_data_frame_type(self):
         assert self.df1.type == "signal1"
+        self.df1.type = "test change"
+        assert self.df1.type == "test change"
 
     def test_write_row(self):
         # test write single row
@@ -73,12 +78,22 @@ class TestDataFrame(unittest.TestCase):
         assert list(self.df1[1]) == [1775,'1776',1777,1778,1779]
         assert list(self.df1[2]) == [1785,'1786',1787,1788,1789]
 
-
     def test_write_column(self):
-        pass
+        # write by name
+        column1 = np.arange(10000, 10300)
+        self.df1.write_column(column1, name='sig1')
+        assert list(self.df1[:]['sig1']) == list(column1)
+        # write by index
+        column2 = np.arange(20000, 20300)
+        self.df1.write_column(column2, index=4)
+        assert list(self.df1[:]['sig2']) == list(column2)
 
     def test_read_row(self):
-        pass
+        # read single row
+        assert list(self.df1.read_rows(0)) == [0,'1',2,3,4]
+        # read multiple
+        multi_rows = self.df1.read_rows(np.arange(100,150))
+        assert list(multi_rows) == list(self.df1[100:150])
 
     def test_read_column(self):
         pass
@@ -94,6 +109,8 @@ class TestDataFrame(unittest.TestCase):
         # set one unit for one column
         # set multiple
         # set all
+        self.df1.unit = ["s", 'A', 'ms', 'Hz', 'mA']
+        assert self.df1.unit == ["s", 'A', 'ms', 'Hz', 'mA']
 
         assert self.df2.unit is None
 
