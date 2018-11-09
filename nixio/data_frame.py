@@ -68,7 +68,7 @@ class DataFrame(Entity, DataSet):
         for i, rows in enumerate(self._h5group.group['data'][:]):
             cell = column[i]
             rows[name] = cell
-            self.write_rows(rows=rows, index=[i])
+            self.write_rows(rows=[rows], index=[i])
 
     def read_columns(self, index=None, name=None):
         if index is None and name is None:
@@ -81,7 +81,7 @@ class DataFrame(Entity, DataSet):
         get_col = self._read_data(sl=slic)[name]
         return get_col
 
-    def write_rows(self, rows, index=None):
+    def write_rows(self, rows, index):
         if len(rows) != len(index):
             raise IndexError("Length of row changed and index specified do not match")
         x, = self.shape
@@ -189,12 +189,6 @@ class DataFrame(Entity, DataSet):
                 self._h5group.set_attr("unit", u_list)
 
     @property
-    def data_type(self):
-        self._h5group.set_attr('dtype', )
-        print(list(self._h5group.group.attrs.keys()))
-        return self._h5group.get_attr('dtype')
-
-    @property
     def columns(self):
         if self.unit:
             cols = [(n, dt, u) for n, dt, u in zip(self.column_names, self.dtype, self.unit)]
@@ -222,6 +216,7 @@ class DataFrame(Entity, DataSet):
             x = len(self._h5group.group["data"])
             y = len(self.column_names)
             df_shape = (x, y)
+            df_shape = tuple(df_shape)
             self._h5group.set_attr("df_shape", df_shape)
         return self._h5group.get_attr("df_shape")
 
