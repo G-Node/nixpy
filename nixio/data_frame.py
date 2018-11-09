@@ -155,8 +155,6 @@ class DataFrame(Entity, DataSet):
         count = len(self)
         return count
 
-<<<<<<< ab7b6fd6930433c3a155611b214d8228230fdda0
-<<<<<<< 9d6b672635a243969a54fdd70cbde98da7eecd14
     def write_to_csv(self, filename, mode='w'):
         with open(filename, mode, newline='') as csvfile:
             dw = csv.DictWriter(csvfile, fieldnames=self.column_names)
@@ -173,58 +171,13 @@ class DataFrame(Entity, DataSet):
                     single_sample_di[na] = di[na][i]
                 complete_di_list.append(single_sample_di)
             dw.writerows(complete_di_list)
-=======
-    def write_to_csv(self, filename):  # crazily stupid and verbose! change it!
-        # create better variable name
-        with open(filename, 'w', newline='') as csvfile:
-            dw = csv.DictWriter(csvfile, fieldnames=self.col_names)
-            dw.writeheader()
-            di = {}
-            for names in self.col_names:
-                n = str(names)
-                di[n] = []
-            for i, row in enumerate(self._h5group.group['data'][:]):
-                for name, da in zip(self.col_names, row):
-                    di[name].append(da)
-            dname = list(di.keys())
-            di_li = []
-            obs_len = len(di[n])
-            for i in range(obs_len):
-                single_dict = dict()
-                for id, na in enumerate(dname):
-                    single_dict[na] = di[na][i]
-                di_li.append(single_dict)
-            dw.writerows(di_li)
->>>>>>> write_to_csv working! but very verbose
-=======
-    def write_to_csv(self, filename, mode='w'):
-        with open(filename, mode, newline='') as csvfile:
-            dw = csv.DictWriter(csvfile, fieldnames=self.col_names)
-            dw.writeheader()
-            di = dict()  # this dict make the iter below quicker compared to using self in L172
-            for n in self.col_names:
-                n = str(n)
-                di[n] = list(self[n])
-            complete_di_list = []
-            sample_len = len(self[n])
-            for i in range(sample_len):
-                single_sample_di = dict()
-                for na in self.col_names:
-                    single_sample_di[na] = di[na][i]
-                complete_di_list.append(single_sample_di)
-            dw.writerows(complete_di_list)
->>>>>>> write_to_csv improvement/ cleanup variable
             csvfile.close()
 
     def write_to_pandas(self):
         tmp_list = []
         tmp_list.extend(self._h5group.group['data'][:])
         li = [list(ite) for ite in tmp_list]  # make all element list
-<<<<<<< ab7b6fd6930433c3a155611b214d8228230fdda0
         pd_df = pd.DataFrame(li, columns=[str(n) for n in self.column_names])
-=======
-        pd_df = pd.DataFrame(li, columns=[str(n) for n in self.col_names])
->>>>>>> write_to_csv improvement/ cleanup variable
         return pd_df
 
     @property
