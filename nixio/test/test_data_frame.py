@@ -3,43 +3,76 @@ import nixio as nix
 from .tmp import TempDir
 import os
 import numpy as np
+from six import string_types, integer_types
 
-# TODO: add test for dict vs name_list + dt_list creation
 # TODO: add test for multiple reading and multiple writing (if supported)
 
 
 class TestDataFrame(unittest.TestCase):
 
     def setUp(self):
-        di = {'name': int, 'id': str, 'time': float}
-        arr = np.arange(999).reshape((333, 3))
+
         self.tmpdir = TempDir("dataframetest")
         self.testfilename = os.path.join(self.tmpdir.path, "dataframetest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
-        self.df = self.block.create_data_frame("test array", "signal",
-                                                  shape=(50, 100), col_dict=di)
+        di = {'name': int, 'id': str, 'time': float, 'sig1': np.float64, 'sig2': np.int32}
+        arr = np.arange(1500).reshape((300, 5))
+        other_arr = np.arange(11101, 11200).reshape((33, 3))
+        other_di = {'name': int, 'id': str, 'time': float}
+        self.df1 = self.block.create_data_frame("test df", "signal1",
+                                                data=arr, col_dict=di)
+        self.df2 = self.block.create_data_frame("other df", "signal2",
+                                               data=other_arr, col_dict=other_di)
+        self.df3 = self.block.create_data_frame("reference df", "signal3",
+                                                data=arr, col_dict=di)
+        self.dtype = self.df1._h5group.group["data"].dtype
 
     def tearDown(self):
         self.file.close()
         self.tmpdir.cleanup()
 
-    def create_with_list(self):
-        arr = np.arange(999).reshape((333, 3))
-        namelist = np.array(['name', 'id', 'time'])
-        dtlist = np.array([int, str, float])
-        new_df = self.block.create_data_frame('test1', 'for_test',
-                                    col_names=namelist, col_dtypes=dtlist, shape=(333, 3), data=arr)
-
     def test_data_frame_eq(self):
-        pass
+        assert self.df1 == self.df1
+        assert not self.df1 == self.df2
+        assert self.df2 == self.df2
+        assert self.df1 is not None
+        assert self.df2 is not None
+
+    def test_wrong_shape(self):
+        arr = np.arange(100).reshape(100)
+
+    def test_create_with_list(self):
+        arr = np.arange(1500).reshape((300, 5))
+        namelist = np.array(['name', 'id', 'time', 'sig1', 'sig2'])
+        dtlist = np.array([int, str, float, np.float64, np.int32])
+        df_li = self.block.create_data_frame("test_list", "make_of_list", data=arr,
+                                             col_names=namelist, col_dtypes=dtlist)
+        assert df_li.column_names == self.df1.column_names
+        assert df_li.dtype == self.df1.dtype
+        for i in df_li[:]:
+            self.assertIsInstance(i['id'], str)
+            self.assertIsInstance(i['sig2'], np.int32)
 
     def test_data_frame_type(self):
-        self.df.type = None
-
+        assert self.df1.type == "signal1"
 
     def test_write_row(self):
-        pass
+        # test write single row
+        row = ["1",'abc',3,4.4556356242341,5.1111111]
+        self.assertAlmostEqual(list(self.df1[11]),
+                               [55, '56', 57., 58., 59], "Contents or dtype incorrect")
+        self.df1.write_rows([row], [11])
+        assert list(self.df1[11]) == [1, 'abc',3. ,4.4556356242341, 5]
+        self.assertIsInstance(self.df1[11]['name'],  np.integer)
+        self.assertIsInstance(self.df1[11]['sig2'],  np.int32)
+        assert self.df1[11]['sig2'] == int(5)
+        # test write multiple rows
+        multi_rows = [[1775,1776,1777,1778,1779], [1785,1786,1787,1788,1789]]
+        self.df1.write_rows(multi_rows, [1,2])
+        assert list(self.df1[1]) == [1775,'1776',1777,1778,1779]
+        assert list(self.df1[2]) == [1785,'1786',1787,1788,1789]
+
 
     def test_write_column(self):
         pass
@@ -57,8 +90,16 @@ class TestDataFrame(unittest.TestCase):
         pass
 
     def test_unit(self):
-        pass
+        assert self.df1.unit is None
+        # set one unit for one column
+        # set multiple
+        # set all
+
+        assert self.df2.unit is None
 
     def test_append_column(self):
-        y = np.arange(start=1333, stop=1666, step=1)
-        self.df.append_column(y, name='trail_col', datatype=str)
+        y = np.arange(start=1600, stop=1900, step=1)
+        self.df1.append_column(y, name='trail_col', datatype=str)
+
+    def test_data_type(self):
+        pass
