@@ -9,7 +9,6 @@ from .data_set import DataSet
 from .datatype import DataType
 from six import string_types
 import csv
-import pandas as pd
 
 
 class DataFrame(Entity, DataSet):
@@ -172,13 +171,6 @@ class DataFrame(Entity, DataSet):
                 complete_di_list.append(single_sample_di)
             dw.writerows(complete_di_list)
             csvfile.close()
-
-    def write_to_pandas(self):
-        tmp_list = []
-        tmp_list.extend(self._h5group.group['data'][:])
-        li = [list(ite) for ite in tmp_list]  # make all element list
-        pd_df = pd.DataFrame(li, columns=[str(n) for n in self.column_names])
-        return pd_df
 
     @property
     def unit(self):
