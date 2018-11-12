@@ -5,8 +5,6 @@ import os
 import numpy as np
 from six import string_types, integer_types
 
-# TODO: add test for multiple reading and multiple writing (if supported)
-
 
 class TestDataFrame(unittest.TestCase):
 
@@ -135,14 +133,23 @@ class TestDataFrame(unittest.TestCase):
         assert isinstance(self.df1[0]["trial_col"], string_types)
         # too short coulmn
         sh_col = np.arange(start=16000, stop=16100, step=1)
-        self.assertRaises(IndexError, lambda : self.df1.append_column(sh_col, name='sh_col'))
+        self.assertRaises(ValueError, lambda : self.df1.append_column(sh_col, name='sh_col'))
         #too long column
         long = np.arange(start=16000, stop=16500, step=1)
-        self.assertRaises(IndexError, lambda: self.df1.append_column(long, name='long'))
-
+        self.assertRaises(ValueError, lambda: self.df1.append_column(long, name='long'))
 
     def test_append_rows(self):
-        pass
+        # append single row
+        srow = [1,"test",3,4,5]
+        self.df1.append_rows([srow])
+        assert list(self.df1[300]) == srow
+        # append multi-rows
+        mrows = np.array([[1,2,3,4,5], [6,'testing',8,9,10]])
+        self.df1.append_rows(mrows)
+        assert [list(i) for i in self.df1[-2:]]== [[1,'2',3.,4.,5], [6,'testing',8.,9.,10]]
+        # append row with incorrect length
+        errrow = [5,6,7,8]
+        self.assertRaises(ValueError, lambda: self.df1.append_rows([errrow]))
 
     def test_unit(self):
         assert self.df1.unit is None
@@ -154,6 +161,9 @@ class TestDataFrame(unittest.TestCase):
 
         assert self.df2.unit is None
 
+    def test_df_shape(self):
+        print(type(self.df1.df_shape))
+        assert self.df1.df_shape
 
 
     def test_data_type(self):
