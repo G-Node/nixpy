@@ -3,7 +3,7 @@ import nixio as nix
 from .tmp import TempDir
 import os
 import numpy as np
-from six import string_types, integer_types
+from six import string_types
 
 
 class TestDataFrame(unittest.TestCase):
@@ -21,7 +21,7 @@ class TestDataFrame(unittest.TestCase):
         self.df1 = self.block.create_data_frame("test df", "signal1",
                                                 data=arr, col_dict=di)
         self.df2 = self.block.create_data_frame("other df", "signal2",
-                                               data=arr, col_dict=di)
+                                                data=arr, col_dict=di)
         self.df3 = self.block.create_data_frame("reference df", "signal3",
                                                 data=other_arr, col_dict=other_di)
         self.dtype = self.df1._h5group.group["data"].dtype
@@ -56,19 +56,19 @@ class TestDataFrame(unittest.TestCase):
 
     def test_write_row(self):
         # test write single row
-        row = ["1",'abc',3,4.4556356242341,5.1111111]
+        row = ["1", 'abc', 3, 4.4556356242341, 5.1111111]
         self.assertAlmostEqual(list(self.df1[11]),
                                [55, '56', 57., 58., 59], "Contents or dtype incorrect")
         self.df1.write_rows([row], [11])
-        assert list(self.df1[11]) == [1, 'abc',3. ,4.4556356242341, 5]
+        assert list(self.df1[11]) == [1, 'abc', 3., 4.4556356242341, 5]
         self.assertIsInstance(self.df1[11]['name'],  np.integer)
         self.assertIsInstance(self.df1[11]['sig2'],  np.int32)
         assert self.df1[11]['sig2'] == int(5)
         # test write multiple rows
-        multi_rows = [[1775,1776,1777,1778,1779], [1785,1786,1787,1788,1789]]
-        self.df1.write_rows(multi_rows, [1,2])
-        assert list(self.df1[1]) == [1775,'1776',1777,1778,1779]
-        assert list(self.df1[2]) == [1785,'1786',1787,1788,1789]
+        multi_rows = [[1775, 1776, 1777, 1778, 1779], [1785, 1786, 1787, 1788, 1789]]
+        self.df1.write_rows(multi_rows, [1, 2])
+        assert list(self.df1[1]) == [1775, '1776', 1777, 1778, 1779]
+        assert list(self.df1[2]) == [1785, '1786', 1787, 1788, 1789]
 
     def test_write_column(self):
         # write by name
@@ -82,9 +82,9 @@ class TestDataFrame(unittest.TestCase):
 
     def test_read_row(self):
         # read single row
-        assert list(self.df1.read_rows(0)) == [0,'1',2,3,4]
+        assert list(self.df1.read_rows(0)) == [0, '1', 2, 3, 4]
         # read multiple
-        multi_rows = self.df1.read_rows(np.arange(100,150))
+        multi_rows = self.df1.read_rows(np.arange(100, 150))
         np.testing.assert_array_equal(multi_rows, self.df1[100:150])
 
     def test_read_column(self):
@@ -94,30 +94,29 @@ class TestDataFrame(unittest.TestCase):
         t = np.array(t, dtype=str)
         np.testing.assert_array_equal(single_col, t)
         # read multiple columns by name
-        multi_col = self.df1.read_columns(name=['sig1','sig2'])
+        multi_col = self.df1.read_columns(name=['sig1', 'sig2'])
         assert len(multi_col) == 300
         # read columns with slices
-        sl_col = self.df1.read_columns(name=['sig1','sig2'], sl=slice(0,10))
+        sl_col = self.df1.read_columns(name=['sig1', 'sig2'], sl=slice(0, 10))
         assert len(sl_col) == 10
 
-
     def test_read_cell(self):
-        # read cell by postion
-        scell = self.df1.read_cell(position=[5,3])
+        # read cell by position
+        scell = self.df1.read_cell(position=[5, 3])
         assert scell == 28
         # read cell by row_idx + col_name
         crcell = self.df1.read_cell(col_name=['id'], row_idx=22)
         assert crcell == '111'
         # test error raise if only one param given
-        self.assertRaises(ValueError, lambda :self.df1.read_cell(row_idx=10))
-        self.assertRaises(ValueError, lambda :self.df1.read_cell(col_name='sig1'))
+        self.assertRaises(ValueError, lambda: self.df1.read_cell(row_idx=10))
+        self.assertRaises(ValueError, lambda: self.df1.read_cell(col_name='sig1'))
 
     def test_write_cell(self):
         # write cell by position
-        pcell = self.df1.write_cell(105, position=[111,3])
+        self.df1.write_cell(105, position=[111, 3])
         assert self.df1[111]['sig1'] == 105
         # write cell by rowid colname
-        rccell = self.df1.write_cell('test', col_name='id', row_idx=244)
+        self.df1.write_cell('test', col_name='id', row_idx=244)
         assert self.df1[244]['id'] == 'test'
         # test error raise
         self.assertRaises(ValueError, lambda: self.df1.write_cell(11, col_name='sig1'))
@@ -132,22 +131,22 @@ class TestDataFrame(unittest.TestCase):
         assert isinstance(self.df1[0]["trial_col"], string_types)
         # too short coulmn
         sh_col = np.arange(start=16000, stop=16100, step=1)
-        self.assertRaises(ValueError, lambda : self.df1.append_column(sh_col, name='sh_col'))
-        #too long column
+        self.assertRaises(ValueError, lambda: self.df1.append_column(sh_col, name='sh_col'))
+        # too long column
         long = np.arange(start=16000, stop=16500, step=1)
         self.assertRaises(ValueError, lambda: self.df1.append_column(long, name='long'))
 
     def test_append_rows(self):
         # append single row
-        srow = [1,"test",3,4,5]
+        srow = [1, "test", 3, 4, 5]
         self.df1.append_rows([srow])
         assert list(self.df1[300]) == srow
         # append multi-rows
-        mrows = np.array([[1,2,3,4,5], [6,'testing',8,9,10]])
+        mrows = np.array([[1, 2, 3, 4, 5], [6, 'testing', 8, 9, 10]])
         self.df1.append_rows(mrows)
-        assert [list(i) for i in self.df1[-2:]]== [[1,'2',3.,4.,5], [6,'testing',8.,9.,10]]
+        assert [list(i) for i in self.df1[-2:]] == [[1, '2', 3., 4., 5], [6, 'testing', 8., 9., 10]]
         # append row with incorrect length
-        errrow = [5,6,7,8]
+        errrow = [5, 6, 7, 8]
         self.assertRaises(ValueError, lambda: self.df1.append_rows([errrow]))
 
     def test_unit(self):
@@ -159,9 +158,9 @@ class TestDataFrame(unittest.TestCase):
     def test_df_shape(self):
         assert tuple(self.df1.df_shape) == (300, 5)
         # create df with incorrect dimension to see if Error is raised
-        arr = np.arange(1000).reshape(10,10,10)
+        arr = np.arange(1000).reshape(10, 10, 10)
         self.assertRaises(ValueError, lambda:
-            self.block.create_data_frame('err', 'err', {'name':int}, data=arr))
+                          self.block.create_data_frame('err', 'err', {'name': int}, data=arr))
 
     def test_data_type(self):
         print(self.df1.dtype)
