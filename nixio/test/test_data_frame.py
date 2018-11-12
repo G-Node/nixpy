@@ -96,10 +96,24 @@ class TestDataFrame(unittest.TestCase):
         assert list(multi_rows) == list(self.df1[100:150])
 
     def test_read_column(self):
-        pass
+        #read single columns by index
+        single_col = self.df1.read_columns(index=[1])
+        print(single_col.shape)
+        #read multiple columns by name
+        multi_col = self.df1.read_columns(name=['sig1','sig2'])
+        print(multi_col.shape)
+        print(len(multi_col[1]))
 
     def test_read_cell(self):
-        pass
+        # read cell by postion
+        scell = self.df1.read_cell(position=[5,3])
+        assert scell == 28
+        # read cell by row_idx + col_name
+        crcell = self.df1.read_cell(col_name=['id'], row_idx=22)
+        assert crcell == '111'
+        # test error raise if only one param given
+        self.assertRaises(ValueError, lambda :self.df1.read_cell(row_idx=10))
+        self.assertRaises(ValueError, lambda :self.df1.read_cell(col_name='sig1'))
 
     def test_write_cell(self):
         pass
