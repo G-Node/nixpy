@@ -116,7 +116,14 @@ class TestDataFrame(unittest.TestCase):
         self.assertRaises(ValueError, lambda :self.df1.read_cell(col_name='sig1'))
 
     def test_write_cell(self):
-        pass
+        # write cell by position
+        pcell = self.df1.write_cell(105, position=[111,3])
+        assert self.df1[111]['sig1'] == 105
+        # write cell by rowid colname
+        rccell = self.df1.write_cell('test', col_name='id', row_idx=244)
+        assert self.df1[244]['id'] == 'test'
+        # test error raise
+        self.assertRaises(ValueError, lambda: self.df1.write_cell(11, col_name='sig1'))
 
     def test_unit(self):
         assert self.df1.unit is None
