@@ -93,7 +93,7 @@ class TestDataFrame(unittest.TestCase):
         assert list(self.df1.read_rows(0)) == [0,'1',2,3,4]
         # read multiple
         multi_rows = self.df1.read_rows(np.arange(100,150))
-        assert list(multi_rows) == list(self.df1[100:150])
+        np.testing.assert_array_equal(multi_rows, self.df1[100:150])
 
     def test_read_column(self):
         #read single columns by index
@@ -125,6 +125,25 @@ class TestDataFrame(unittest.TestCase):
         # test error raise
         self.assertRaises(ValueError, lambda: self.df1.write_cell(11, col_name='sig1'))
 
+    def test_append_column(self):
+        y = np.arange(start=16000, stop=16300, step=1)
+        self.df1.append_column(y, name='trial_col', datatype=str)
+        assert self.df1.column_names == ('name', 'id', 'time', 'sig1', 'sig2', 'trial_col')
+        assert len(self.df1.dtype) == 6
+        k = np.array(self.df1[0:300]["trial_col"], dtype=int)
+        np.testing.assert_almost_equal(k, y)
+        assert isinstance(self.df1[0]["trial_col"], string_types)
+        # too short coulmn
+        sh_col = np.arange(start=16000, stop=16100, step=1)
+        self.assertRaises(IndexError, lambda : self.df1.append_column(sh_col, name='sh_col'))
+        #too long column
+        long = np.arange(start=16000, stop=16500, step=1)
+        self.assertRaises(IndexError, lambda: self.df1.append_column(long, name='long'))
+
+
+    def test_append_rows(self):
+        pass
+
     def test_unit(self):
         assert self.df1.unit is None
         # set one unit for one column
@@ -135,9 +154,7 @@ class TestDataFrame(unittest.TestCase):
 
         assert self.df2.unit is None
 
-    def test_append_column(self):
-        y = np.arange(start=1600, stop=1900, step=1)
-        self.df1.append_column(y, name='trail_col', datatype=str)
+
 
     def test_data_type(self):
         pass
