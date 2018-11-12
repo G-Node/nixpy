@@ -21,9 +21,9 @@ class TestDataFrame(unittest.TestCase):
         self.df1 = self.block.create_data_frame("test df", "signal1",
                                                 data=arr, col_dict=di)
         self.df2 = self.block.create_data_frame("other df", "signal2",
-                                               data=other_arr, col_dict=other_di)
+                                               data=arr, col_dict=di)
         self.df3 = self.block.create_data_frame("reference df", "signal3",
-                                                data=arr, col_dict=di)
+                                                data=other_arr, col_dict=other_di)
         self.dtype = self.df1._h5group.group["data"].dtype
 
     def tearDown(self):
@@ -36,12 +36,6 @@ class TestDataFrame(unittest.TestCase):
         assert self.df2 == self.df2
         assert self.df1 is not None
         assert self.df2 is not None
-
-    def test_shape(self):
-        print(self.df1.df_shape)
-        assert self.df1.df_shape ==  (300, 5)
-        # create df with incorrect dimension to see if Error is raised
-        arr = np.arange(100).reshape(100)
 
     def test_create_with_list(self):
         arr = np.arange(1500).reshape((300, 5))
@@ -94,13 +88,18 @@ class TestDataFrame(unittest.TestCase):
         np.testing.assert_array_equal(multi_rows, self.df1[100:150])
 
     def test_read_column(self):
-        #read single columns by index
+        # read single columns by index
         single_col = self.df1.read_columns(index=[1])
-        print(single_col.shape)
-        #read multiple columns by name
+        t = np.arange(1, 1497, step=5)
+        t = np.array(t, dtype=str)
+        np.testing.assert_array_equal(single_col, t)
+        # read multiple columns by name
         multi_col = self.df1.read_columns(name=['sig1','sig2'])
-        print(multi_col.shape)
-        print(len(multi_col[1]))
+        assert len(multi_col) == 300
+        # read columns with slices
+        sl_col = self.df1.read_columns(name=['sig1','sig2'], sl=slice(0,10))
+        assert len(sl_col) == 10
+
 
     def test_read_cell(self):
         # read cell by postion
@@ -152,19 +151,20 @@ class TestDataFrame(unittest.TestCase):
         self.assertRaises(ValueError, lambda: self.df1.append_rows([errrow]))
 
     def test_unit(self):
-        assert self.df1.unit is None
-        # set one unit for one column
-        # set multiple
-        # set all
-        self.df1.unit = ["s", 'A', 'ms', 'Hz', 'mA']
-        assert self.df1.unit == ["s", 'A', 'ms', 'Hz', 'mA']
-
-        assert self.df2.unit is None
+        assert self.df1.units is None
+        self.df1.units = ["s", 'A', 'ms', 'Hz', 'mA']
+        np.testing.assert_array_equal(self.df1.units,  np.array(["s", 'A', 'ms', 'Hz', 'mA']))
+        assert self.df2.units is None
 
     def test_df_shape(self):
-        print(type(self.df1.df_shape))
-        assert self.df1.df_shape
-
+        assert tuple(self.df1.df_shape) == (300, 5)
+        # create df with incorrect dimension to see if Error is raised
+        arr = np.arange(1000).reshape(10,10,10)
+        self.assertRaises(ValueError, lambda:
+            self.block.create_data_frame('err', 'err', {'name':int}, data=arr))
 
     def test_data_type(self):
-        pass
+        print(self.df1.dtype)
+        assert self.df1.dtype[4] == np.int32
+        assert self.df1.dtype[0] != self.df1.dtype[4]
+        assert self.df1.dtype[2] == self.df1.dtype[3]
