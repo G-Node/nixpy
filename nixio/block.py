@@ -189,15 +189,16 @@ class Block(Entity):
     def create_data_frame(self, name, type_, col_dict=None, col_names=None,
                           col_dtypes=None, data=None, compression=Compression.No):
 
-        if data is None:
-            raise ValueError("Data must not be None")
         if col_dict is None:
             if col_names is None or col_dtypes is None:
                 raise  ValueError("Info about columns should be given, either"
                                   " with col_dict or (col_names+col_dtypes)")
             col_dict = dict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
         data_frames = self._h5group.open_group("data_frames")
-        shape = len(data)
+        if data:
+            shape = len(data)
+        else:
+            shape = 0
         df = DataFrame._create_new(self, data_frames, name,
                                    type_, shape, col_dict, compression)
         if data is not None:
