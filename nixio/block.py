@@ -190,10 +190,14 @@ class Block(Entity):
                           col_dtypes=None, data=None, compression=Compression.No):
 
         if col_dict is None:
-            if col_names is None or col_dtypes is None:
-                raise  ValueError("Info about columns should be given, either"
-                                  " with col_dict or (col_names+col_dtypes)")
-            col_dict = dict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
+            if col_names is None :
+                raise ValueError
+            elif col_dtypes is None:
+                dt = data[0].dtype
+                col_dtype = 
+                col_dict = dict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
+            else:
+                col_dict = dict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
         data_frames = self._h5group.open_group("data_frames")
         if data:
             shape = len(data)
