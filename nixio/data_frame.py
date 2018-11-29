@@ -26,7 +26,7 @@ class DataFrame(Entity, DataSet):
                 col_dict[nam] = util.vlen_str_dtype
         dt_arr = list(col_dict.items())
         col_dtype = np.dtype(dt_arr)
-        x, y = shape
+        x = shape
         newentity = super(DataFrame, cls)._create_new(nixparent, h5parent, name, type_)
         newentity._h5group.create_dataset("data", (x, ), col_dtype)
         return newentity
