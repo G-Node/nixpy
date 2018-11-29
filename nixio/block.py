@@ -197,7 +197,7 @@ class Block(Entity):
                                   " with col_dict or (col_names+col_dtypes)")
             col_dict = dict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
         data_frames = self._h5group.open_group("data_frames")
-        shape = data.shape
+        shape = len(data)
         df = DataFrame._create_new(self, data_frames, name,
                                    type_, shape, col_dict, compression)
         if data is not None:
