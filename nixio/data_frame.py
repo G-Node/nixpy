@@ -19,12 +19,8 @@ class DataFrame(Entity, DataSet):
         self._rows = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, shape, col_dict, compression):
-        for nam, dt in col_dict.items():
-            if dt == str:
-                col_dict[nam] = util.vlen_str_dtype
-        dt_arr = list(col_dict.items())
-        col_dtype = np.dtype(dt_arr)
+    def _create_new(cls, nixparent, h5parent, name, type_, shape, col_dtype, compression):
+
         newentity = super(DataFrame, cls)._create_new(nixparent, h5parent, name, type_)
         newentity._h5group.create_dataset("data", (shape, ), col_dtype)
         return newentity
