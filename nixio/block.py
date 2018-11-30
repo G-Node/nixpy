@@ -189,26 +189,43 @@ class Block(Entity):
     def create_data_frame(self, name, type_, col_dict=None, col_names=None,
                           col_dtypes=None, data=None, compression=Compression.No):
 
-        if col_dict is None:
-            if col_names is None :
-                raise ValueError
-            elif col_dtypes is None:
-                dt = data[0].dtype
-                col_dtype = 
-                col_dict = dict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
-            else:
-                col_dict = dict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
-        data_frames = self._h5group.open_group("data_frames")
-        if data:
+        if data is not None:
             shape = len(data)
         else:
             shape = 0
-        df = DataFrame._create_new(self, data_frames, name,
-                                   type_, shape, col_dict, compression)
-        if data is not None:
-            data = list(map(tuple, data))
+        data_frames = self._h5group.open_group("data_frames")
+
+        if col_dict is None:
+            if col_names is not None:
+                if col_dtypes is not None:
+                    col_dict = dict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
+                elif col_dtypes is None and data is not None:
+                    col_dtypes = []
+                    for x in data[0]:
+                        col_dtypes.append(type(x))
+                    col_dict = dict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
+                else:  # col_dtypes is None and data is None
+                    raise (ValueError, "The dtype of each column have to be specified")
+            else: # if col_names is None
+                if type(data[0]) == np.void:
+                    col_dtype = data[0].dtype
+                else: # data is None or type(data[0]) != np.void /data_type doesnt matter
+                    raise (ValueError, "No information about column names is provided!")
+
+        if col_dict is not None:
+            for nam, dt in col_dict.items():
+                if dt == str:
+                    col_dict[nam] = util.vlen_str_dtype
             dt_arr = list(col_dict.items())
             col_dtype = np.dtype(dt_arr)
+
+        df = DataFrame._create_new(self, data_frames, name,
+                                   type_, shape, col_dtype, compression)
+
+        if type(data[0]) == np.void:
+            df.write_direct(data)
+        elif data is not None and type(data[0]) != np.void:
+            data = list(map(tuple, data))
             arr = np.ascontiguousarray(data , dtype=(col_dtype))
             df.write_direct(arr)
         return df
