@@ -205,11 +205,11 @@ class Block(Entity):
                         col_dtypes.append(type(x))
                     col_dict = dict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
                 else:  # col_dtypes is None and data is None
-                    raise (ValueError, "The dtype of each column have to be specified")
-            else: # if col_names is None
+                    raise (ValueError, "The data type of each column have to be specified")
+            else:  # if col_names is None
                 if type(data[0]) == np.void:
                     col_dtype = data[0].dtype
-                else: # data is None or type(data[0]) != np.void /data_type doesnt matter
+                else:  # data is None or type(data[0]) != np.void /data_type doesnt matter
                     raise (ValueError, "No information about column names is provided!")
 
         if col_dict is not None:
@@ -226,7 +226,7 @@ class Block(Entity):
             df.write_direct(data)
         elif data is not None and type(data[0]) != np.void:
             data = list(map(tuple, data))
-            arr = np.ascontiguousarray(data , dtype=(col_dtype))
+            arr = np.ascontiguousarray(data, dtype=col_dtype)
             df.write_direct(arr)
         return df
 
