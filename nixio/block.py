@@ -222,12 +222,13 @@ class Block(Entity):
         df = DataFrame._create_new(self, data_frames, name,
                                    type_, shape, col_dtype, compression)
 
-        if type(data[0]) == np.void:
-            df.write_direct(data)
-        elif data is not None and type(data[0]) != np.void:
-            data = list(map(tuple, data))
-            arr = np.ascontiguousarray(data, dtype=col_dtype)
-            df.write_direct(arr)
+        if data is not None:
+            if type(data[0]) == np.void:
+                df.write_direct(data)
+            elif type(data[0]) != np.void:
+                data = list(map(tuple, data))
+                arr = np.ascontiguousarray(data, dtype=col_dtype)
+                df.write_direct(arr)
         return df
 
     def find_sources(self, filtr=lambda _: True, limit=None):
