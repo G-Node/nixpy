@@ -12,6 +12,7 @@ try:
 except ImportError:
     from sys import maxsize as maxint
 import numpy as np
+from six import string_types
 
 from .util import find as finders
 from .compression import Compression
@@ -207,14 +208,14 @@ class Block(Entity):
                 else:  # col_dtypes is None and data is None
                     raise (ValueError, "The data type of each column have to be specified")
             else:  # if col_names is None
-                if type(data[0]) == np.void:
+                if data is not None and type(data[0]) == np.void:
                     col_dtype = data[0].dtype
                 else:  # data is None or type(data[0]) != np.void /data_type doesnt matter
                     raise (ValueError, "No information about column names is provided!")
 
         if col_dict is not None:
             for nam, dt in col_dict.items():
-                if dt == str:
+                if dt in string_types:
                     col_dict[nam] = util.vlen_str_dtype
             dt_arr = list(col_dict.items())
             col_dtype = np.dtype(dt_arr)
@@ -224,8 +225,9 @@ class Block(Entity):
 
         if data is not None:
             if type(data[0]) == np.void:
+                data = np.ascontiguousarray(data, dtype=col_dtype)
                 df.write_direct(data)
-            elif type(data[0]) != np.void:
+            else:
                 data = list(map(tuple, data))
                 arr = np.ascontiguousarray(data, dtype=col_dtype)
                 df.write_direct(arr)
