@@ -33,6 +33,13 @@ class TestDataFrame(unittest.TestCase):
         self.file.close()
         self.tmpdir.cleanup()
 
+    def create_with_list(self):
+        arr = np.arange(999).reshape((333, 3))
+        namelist = np.array(['name', 'id', 'time'])
+        dtlist = np.array([int, str, float])
+        new_df = self.blk.create_data_frame('test1', 'for_test',
+                                    col_names=namelist, col_dtypes=dtlist, data=arr)
+
     def test_data_frame_eq(self):
         assert self.df1 == self.df1
         assert not self.df1 == self.df2
@@ -169,3 +176,4 @@ class TestDataFrame(unittest.TestCase):
         assert self.df1.dtype[4] == np.int32
         assert self.df1.dtype[0] != self.df1.dtype[4]
         assert self.df1.dtype[2] == self.df1.dtype[3]
+

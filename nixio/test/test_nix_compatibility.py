@@ -125,6 +125,31 @@ def _test_data_arrays(tmpdir):
     # validate(nixfilepath)
 
 
+def _test_data_frames(tmpdir):
+    nixfilepath = os.path.join(str(tmpdir), "frametest.nix")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
+    blk = nix_file.create_block("testblock", "blocktype")
+    grp = blk.create_group("testgroup", "grouptype")
+    print(dtypes)
+    full_cn = []
+    full_dt = [str, int, float]
+
+    arr = np.arange(999).reshape((333, 3))
+
+    for idx in range(7):
+        cn = []
+        dt_list = []
+        di = dict(zip(cn, dt_list))
+        di = {'name': int, 'id': str, 'time': float}
+        arr = np.arange(999).reshape((333, 3))
+        df = blk.create_data_frame("df_" + str(idx), "dataframe", col_dict=di,
+                                   data=arr)
+        df.definition = "da definition " + str(idx)
+        df.force_created_at(np.random.randint(1000000000))
+        df.label = "data label " + str(idx)
+
+    nix_file.close()
+
 def _test_tags(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "tagtest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
@@ -262,6 +287,8 @@ def _test_tag_features(tmpdir):
 
     nix_file.close()
     # validate(nixfilepath)
+
+
 
 
 def test_multi_tag_features(tmpdir):
