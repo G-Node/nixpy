@@ -137,11 +137,8 @@ int main(int argc, char* argv[]) {
     errcount += compare("adataframe", df.name());
     errcount += compare("4-column df", df.type());
     errcount += compare(nix::ndsize_t{3}, df.rows());
-    errcount += compare(std::string{"name"}, df.colName(0));
-    errcount += compare(df.readColumn(0)::name, "Bob")
-    std::vector<nix::Variant> dfcol(3);
-    std::vector<nix::Variant> dfrow(4);
-//    errcount += compare(df.readRow(nix::ndsize_t{0}), nix::Variant{"Bob", 9, 11.28, false});
+    //errcount += compare(std::string{"name"}, df.colName(0));
+    errcount += compare(df.readRow(nix::ndsize_t{0}), {nix::Variant("Bob"), nix::Variant(int64_t(9)), nix::Variant(11.28), nix::Variant(false)});
 
     // Tag
     auto tag = block.getTag(0);
