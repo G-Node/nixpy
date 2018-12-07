@@ -66,6 +66,9 @@ int main(int argc, char* argv[]) {
     group = block.getGroup(0);
     group.addDataArray(da);
 
+    nix::Column name = new nix::Column ();
+    auto df = block.creteDataFrame("paneldata", "filing", std::)
+
     datadbl = {0.4, 0.41, 0.49, 0.1, 0.1, 0.1};
     auto featda = block.createDataArray("feat-da", "tag-feature", nix::DataType::Double, nix::NDSize{6});
     featda.setData(nix::DataType::Double, datadbl.data(), nix::NDSize{6}, nix::NDSize{0});
