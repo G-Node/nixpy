@@ -125,9 +125,10 @@ def _test_data_arrays(tmpdir):
     # validate(nixfilepath)
 
 
-def _test_data_frames(tmpdir):
+def test_data_frames(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "frametest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
+    print(nixfilepath, nix_file)
     blk = nix_file.create_block("testblock", "blocktype")
     grp = blk.create_group("testgroup", "grouptype")
     print(dtypes)
@@ -149,6 +150,8 @@ def _test_data_frames(tmpdir):
         df.label = "data label " + str(idx)
 
     nix_file.close()
+    # validate(nixfilepath)
+    runcpp("readgroups", nixfilepath)
 
 def _test_tags(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "tagtest.nix")
@@ -506,6 +509,11 @@ def test_full_file(tmpdir):
     setdim.labels = ["a", "b"]
     group = block.groups[0]
     group.data_arrays.append(da)
+
+    df = block.create_data_frame("adataframe", "dataframe",
+                                 col_dict={'name': str, 'id': int, 'time': float, 'Adjusted': bool},
+                                   data=[["Bob", 9, 11.28, False], ["Jane", 10, 14.37, True]])
+    df.append_rows([["Alice", 2, 3.7, False]])
 
     featda = block.create_data_array("feat-da", "tag-feature",
                                      data=[0.4, 0.41, 0.49, 0.1, 0.1, 0.1])

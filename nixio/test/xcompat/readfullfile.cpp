@@ -132,6 +132,10 @@ int main(int argc, char* argv[]) {
     setdim = dim;
     errcount += compare({"a", "b"}, setdim.labels());
 
+    // DataFrame
+    auto df = block.getDataFrame(0);
+    errcount += compare("adataframe", df.name());
+
     // Tag
     auto tag = block.getTag(0);
     errcount += compare("tagu", tag.name());
