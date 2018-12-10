@@ -14,10 +14,10 @@ class TestDataFrame(unittest.TestCase):
         self.testfilename = os.path.join(self.tmpdir.path, "dataframetest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
-        di = {'name': int, 'id': str, 'time': float, 'sig1': np.float64, 'sig2': np.int32}
+        di = {'name': np.int64, 'id': str, 'time': float, 'sig1': np.float64, 'sig2': np.int32}
         arr = np.arange(1500).reshape((300, 5))
         other_arr = np.arange(11101, 11200).reshape((33, 3))
-        other_di = {'name': int, 'id': str, 'time': float}
+        other_di = {'name': np.int64, 'id': str, 'time': float}
         self.df1 = self.block.create_data_frame("test df", "signal1",
                                                 data=arr, col_dict=di)
         self.df2 = self.block.create_data_frame("other df", "signal2",
@@ -40,7 +40,7 @@ class TestDataFrame(unittest.TestCase):
     def test_create_with_list(self):
         arr = np.arange(1500).reshape((300, 5))
         namelist = np.array(['name', 'id', 'time', 'sig1', 'sig2'])
-        dtlist = np.array([int, str, float, np.float64, np.int32])
+        dtlist = np.array([np.int64, str, float, np.float64, np.int32])
         df_li = self.block.create_data_frame("test_list", "make_of_list", data=arr,
                                              col_names=namelist, col_dtypes=dtlist)
         assert df_li.column_names == self.df1.column_names
@@ -126,7 +126,7 @@ class TestDataFrame(unittest.TestCase):
         self.df1.append_column(y, name='trial_col', datatype=str)
         assert self.df1.column_names == ('name', 'id', 'time', 'sig1', 'sig2', 'trial_col')
         assert len(self.df1.dtype) == 6
-        k = np.array(self.df1[0:300]["trial_col"], dtype=int)
+        k = np.array(self.df1[0:300]["trial_col"], dtype=np.int64)
         np.testing.assert_almost_equal(k, y)
         assert isinstance(self.df1[0]["trial_col"], string_types)
         # too short coulmn
@@ -160,10 +160,9 @@ class TestDataFrame(unittest.TestCase):
         # create df with incorrect dimension to see if Error is raised
         arr = np.arange(1000).reshape(10, 10, 10)
         self.assertRaises(ValueError, lambda:
-                          self.block.create_data_frame('err', 'err', {'name': int}, data=arr))
+                          self.block.create_data_frame('err', 'err', {'name': np.int64}, data=arr))
 
     def test_data_type(self):
-        print(self.df1.dtype)
         assert self.df1.dtype[4] == np.int32
         assert self.df1.dtype[0] != self.df1.dtype[4]
         assert self.df1.dtype[2] == self.df1.dtype[3]
