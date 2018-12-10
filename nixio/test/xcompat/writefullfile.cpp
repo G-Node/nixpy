@@ -67,7 +67,18 @@ int main(int argc, char* argv[]) {
     group.addDataArray(da);
 
     //nix::Data
-    //auto df = block.creteDataFrame("paneldata", "filing", std::)
+    std::vector<nix::Column> cols  = {{"str", "", nix::DataType::String}
+                    ,{"Double", "A", nix::DataType::Double},
+                    {"int64", "ms", nix::DataType::Int64},
+                    {"bool", "", nix::DataType::Bool}};
+    auto df = block.createDataFrame("paneldata", "filing", cols);
+    std::vector<nix::Variant> vals = {nix::Variant("test"),
+                                       nix::Variant(42.1), nix::Variant(10), nix::Variant(false)};
+    df.rows(1);
+    df.writeRow(0, vals);
+    group.addDataFrame(df);
+
+
 
     datadbl = {0.4, 0.41, 0.49, 0.1, 0.1, 0.1};
     auto featda = block.createDataArray("feat-da", "tag-feature", nix::DataType::Double, nix::NDSize{6});
