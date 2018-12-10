@@ -132,10 +132,6 @@ def _test_data_frames(tmpdir):
     print(nixfilepath, nix_file)
     blk = nix_file.create_block("testblock", "blocktype")
     grp = blk.create_group("testgroup", "grouptype")
-    print(dtypes)
-    full_cn = []
-    full_dt = [str, int, float]
-
     arr = np.arange(999).reshape((333, 3))
 
     for idx in range(7):
@@ -290,8 +286,6 @@ def _test_tag_features(tmpdir):
 
     nix_file.close()
     # validate(nixfilepath)
-
-
 
 
 def test_multi_tag_features(tmpdir):
@@ -512,7 +506,7 @@ def test_full_file(tmpdir):
 
     df = block.create_data_frame("adataframe", "4-column df",
                                  col_dict={'name': str, 'id': int, 'time': float, 'Adjusted': bool},
-                                   data=[["Bob", 9, 11.28, False], ["Jane", 10, 14.37, True]])
+                                data=[["Bob", 9, 11.28, False], ["Jane", 10, 14.37, True]])
     df.append_rows([["Alice", 2, 3.7, False]])
 
     featda = block.create_data_array("feat-da", "tag-feature",
@@ -744,7 +738,7 @@ def test_full_file_read(tmpdir):
     compare(nix.DimensionType.Set, dim.dimension_type)
     compare(["a", "b"], dim.labels)
 
-    #Data Frame
+    # Data Frame
     df = block.data_frames[0]
     compare("table", df.name)
     compare("filing", df.type)
@@ -756,7 +750,6 @@ def test_full_file_read(tmpdir):
     arr = np.array([(b"exp1", 42.1, 10, False), (b"exp2", 30.2, 4, True)], dtype=combine_dt)
     compare(arr, df[:])
     # could not test shape because it will write data
-
 
     # Tag
     tag = block.tags[0]
