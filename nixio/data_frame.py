@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import (absolute_import, division, print_function)
+from collections.abc import Iterable
 import numpy as np
 from .exceptions import OutOfBounds
 from .entity import Entity
@@ -14,7 +15,7 @@ import csv
 class DataFrame(Entity, DataSet):
 
     def __init__(self, nixparent, h5group):
-        super().__init__(nixparent, h5group)
+        super(DataFrame, self).__init__(nixparent, h5group)
         self._sources = None
         self._columns = None
         self._rows = None
@@ -105,7 +106,7 @@ class DataFrame(Entity, DataSet):
             self._write_data(cr_list, sl=index)
 
     def read_rows(self, index):
-        if hasattr(index, '__iter__'):
+        if isinstance(index, Iterable):
             index = list(index)
         get_row = self._read_data(sl=(index,))
         return get_row
