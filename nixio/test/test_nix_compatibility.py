@@ -21,6 +21,7 @@ import nixio as nix
 from .xcompat.compile import maketests
 
 
+
 BINDIR = tempfile.mkdtemp(prefix="nixpy-tests-")
 
 # skip these tests if nix isn't available
@@ -125,7 +126,7 @@ def _test_data_arrays(tmpdir):
     # validate(nixfilepath)
 
 
-def test_data_frames(tmpdir):
+def _test_data_frames(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "frametest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     print(nixfilepath, nix_file)
@@ -151,7 +152,6 @@ def test_data_frames(tmpdir):
 
     nix_file.close()
     # validate(nixfilepath)
-    runcpp("readgroups", nixfilepath)
 
 def _test_tags(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "tagtest.nix")
@@ -743,6 +743,20 @@ def test_full_file_read(tmpdir):
     dim = da.dimensions[1]
     compare(nix.DimensionType.Set, dim.dimension_type)
     compare(["a", "b"], dim.labels)
+
+    #Data Frame
+    df = block.data_frames[0]
+    compare("table", df.name)
+    compare("filing", df.type)
+    dt = (nix.util.util.vlen_str_dtype, nix.DataType.Double, nix.DataType.Int64, nix.DataType.Bool)
+    compare(dt, df.dtype)
+    col_name = ("str", "Double", "int64", "bool")
+    compare(col_name, df.column_names)
+    combine_dt = np.dtype([(n, dty) for n, dty in zip(col_name, dt)])
+    arr = np.array([(b"exp1", 42.1, 10, False), (b"exp2", 30.2, 4, True)], dtype=combine_dt)
+    compare(arr, df[:])
+    # could not test shape because it will write data
+
 
     # Tag
     tag = block.tags[0]

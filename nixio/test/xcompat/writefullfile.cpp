@@ -66,19 +66,21 @@ int main(int argc, char* argv[]) {
     group = block.getGroup(0);
     group.addDataArray(da);
 
-    //nix::Data
+    // Data Frame
     std::vector<nix::Column> cols  = {{"str", "", nix::DataType::String}
-                    ,{"Double", "A", nix::DataType::Double},
-                    {"int64", "ms", nix::DataType::Int64},
-                    {"bool", "", nix::DataType::Bool}};
-    auto df = block.createDataFrame("paneldata", "filing", cols);
-    std::vector<nix::Variant> vals = {nix::Variant("test"),
+                ,{"Double", "A", nix::DataType::Double},
+                {"int64", "ms", nix::DataType::Int64},
+                {"bool", "", nix::DataType::Bool}};
+    auto df = block.createDataFrame("table", "filing", cols);
+    std::vector<nix::Variant> vals = {nix::Variant("exp1"),
                                        nix::Variant(42.1), nix::Variant(10), nix::Variant(false)};
     df.rows(1);
     df.writeRow(0, vals);
     group.addDataFrame(df);
-
-
+    df.rows(2);
+    vals = {nix::Variant("exp2"),
+                        nix::Variant(30.2), nix::Variant(4), nix::Variant(true)};
+    df.writeRow(1, vals);
 
     datadbl = {0.4, 0.41, 0.49, 0.1, 0.1, 0.1};
     auto featda = block.createDataArray("feat-da", "tag-feature", nix::DataType::Double, nix::NDSize{6});
@@ -90,6 +92,8 @@ int main(int argc, char* argv[]) {
     tag.addReference(da);
     group.addTag(tag);
     tag.createFeature(featda, nix::LinkType::Untagged);
+
+
 
     auto mtag = block.createMultiTag("mtagu", "multi tagging", block.createDataArray("tag-data", "multi-tagger", nix::DataType::Double, nix::NDSize{1, 3}));
     datadbl = {0, 0.1, 10.1};
