@@ -2,9 +2,10 @@
 
 from __future__ import (absolute_import, division, print_function)
 try:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, OrderedDict
 except ImportError:
-    from collections import Iterable
+    from collections import Iterable, OrderedDict
+from inspect import isclass
 import numpy as np
 from .exceptions import OutOfBounds
 from .entity import Entity
@@ -37,7 +38,7 @@ class DataFrame(Entity, DataSet):
             raise ValueError("Too much entries for column in this dataframe")
         if datatype is None:
             datatype = DataType.get_dtype(column[0])
-        if datatype in string_types:
+        if isclass(datatype) and any(issubclass(datatype, st) for st in string_types):
             datatype = util.vlen_str_dtype
         dt_arr = [(n, dty) for n, dty in zip(self.column_names, self.dtype)]
         dt_arr.append((name, datatype))
@@ -55,7 +56,7 @@ class DataFrame(Entity, DataSet):
         self._h5group.create_dataset("data", (self.shape[0],), dt)
         self.write_direct(farr)
 
-    def append_rows(self, data):
+    def append_rows(self, data):  # In Python2, the data supplied must be iterable (not np arrays)
         li_data = []
         for d in data:
             d = tuple(d)
@@ -206,13 +207,17 @@ class DataFrame(Entity, DataSet):
     @property
     def column_names(self):
         dt = self._h5group.group["data"].dtype
-        cn = dt.fields.keys()
-        return tuple(cn)
+        # cn = dt.fields.keys()
+        return dt.names
 
     @property
     def dtype(self):
         dt = self._h5group.group["data"].dtype
-        raw_dt = dt.fields.values()
+        key = self.column_names
+        di = OrderedDict()
+        for k in key:
+            di[k] = dt.fields[k]
+        raw_dt = di.values()
         raw_dt = list(raw_dt)
         raw_dt_list = [ele[0] for ele in raw_dt]
         return tuple(raw_dt_list)
@@ -225,3 +230,4 @@ class DataFrame(Entity, DataSet):
         df_shape = tuple(df_shape)
         self._h5group.set_attr("df_shape", df_shape)
         return self._h5group.get_attr("df_shape")
+
