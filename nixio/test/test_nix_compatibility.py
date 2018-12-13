@@ -11,7 +11,6 @@ try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
-import sys
 from six import string_types
 from subprocess import Popen, PIPE
 import numpy as np
@@ -127,34 +126,28 @@ def _test_data_arrays(tmpdir):
     # validate(nixfilepath)
 
 
-def test_data_frames(tmpdir):
+def _test_data_frames(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "frametest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
+    print(nixfilepath, nix_file)
     blk = nix_file.create_block("testblock", "blocktype")
     grp = blk.create_group("testgroup", "grouptype")
-    dt_full_list = [nix.DataType.String, nix.DataType.Int64,
-                    nix.DataType.Float, nix.DataType.Float, nix.DataType.Bool]
-
+    arr = np.arange(999).reshape((333, 3))
 
     for idx in range(7):
-        col_names = ['name', 'id', 'exp1', 'exp2', 'Valid']
-        arr = [('Alice', 1234590, 1234.1245614e+9, 1034545e-8, False),
-               ('Bob', 9874542, 12.335205e-9, 123958e+9, True)]
-        df = blk.create_data_frame("df_" + str(idx), "df definition " + str(idx),
-                            col_names= col_names, col_dtypes=dt_full_list,
-                            data=arr)
+        cn = []
+        dt_list = []
+        di = dict(zip(cn, dt_list))
+        di = {'name': int, 'id': str, 'time': float}
+        arr = np.arange(999).reshape((333, 3))
+        df = blk.create_data_frame("df_" + str(idx), "dataframe", col_dict=di,
+                                   data=arr)
+        df.definition = "da definition " + str(idx)
         df.force_created_at(np.random.randint(1000000000))
-        if idx == 4:
-            str_arr = np.array(['119741023950123956123', '1',
-                            'a', 'asd908v*6asd', 'r1231-234','a'*1000, ' '])
-            df.append_column(str_arr, "somelongstr"*10)
-        elif idx== 5:
-            new_row = [('Chris', 111, 123.445, 546.555, True)]
-            df.append_row(new_row)
+        df.label = "data label " + str(idx)
 
     nix_file.close()
     # validate(nixfilepath)
-    runcpp("readdataframes", nixfilepath)
 
 
 def _test_tags(tmpdir):
