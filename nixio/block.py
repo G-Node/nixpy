@@ -12,7 +12,9 @@ try:
 except ImportError:
     from sys import maxsize as maxint
 import numpy as np
+from inspect import isclass
 from six import string_types
+from collections import OrderedDict  # using it for python2.7
 
 from .util import find as finders
 from .compression import Compression
@@ -199,12 +201,12 @@ class Block(Entity):
         if col_dict is None:
             if col_names is not None:
                 if col_dtypes is not None:
-                    col_dict = dict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
+                    col_dict = OrderedDict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
                 elif col_dtypes is None and data is not None:
                     col_dtypes = []
                     for x in data[0]:
                         col_dtypes.append(type(x))
-                    col_dict = dict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
+                    col_dict = OrderedDict((str(nam), dt) for nam, dt in zip(col_names, col_dtypes))
                 else:  # col_dtypes is None and data is None
                     raise (ValueError, "The data type of each column have to be specified")
             else:  # if col_names is None
@@ -216,14 +218,14 @@ class Block(Entity):
                             raw_dt = col_dtype.fields.values()
                             raw_dt = list(raw_dt)
                             raw_dt_list = [ele[0] for ele in raw_dt]
-                            col_dict = dict(zip(cn, raw_dt_list))
+                            col_dict = OrderedDict(zip(cn, raw_dt_list))
 
                 else:  # data is None or type(data[0]) != np.void /data_type doesnt matter
                     raise (ValueError, "No information about column names is provided!")
 
         if col_dict is not None:
             for nam, dt in col_dict.items():
-                if dt in string_types:
+                if isclass(dt) and any(issubclass(dt, st) for st in string_types):
                     col_dict[nam] = util.vlen_str_dtype
             dt_arr = list(col_dict.items())
             col_dtype = np.dtype(dt_arr)
