@@ -16,10 +16,10 @@ from subprocess import Popen, PIPE
 import numpy as np
 import tempfile
 import pytest
+from collections import OrderedDict
 
 import nixio as nix
 from .xcompat.compile import maketests
-
 
 
 BINDIR = tempfile.mkdtemp(prefix="nixpy-tests-")
@@ -148,6 +148,7 @@ def _test_data_frames(tmpdir):
 
     nix_file.close()
     # validate(nixfilepath)
+
 
 def _test_tags(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "tagtest.nix")
@@ -505,8 +506,10 @@ def test_full_file(tmpdir):
     group.data_arrays.append(da)
 
     df = block.create_data_frame("adataframe", "4-column df",
-                                 col_dict={'name': str, 'id': int, 'time': float, 'Adjusted': bool},
-                                data=[["Bob", 9, 11.28, False], ["Jane", 10, 14.37, True]])
+                                 col_dict=OrderedDict([('name', str), ('id',
+                                   int), ('time', float), ('Adjusted', bool)]),
+                                 data=[["Bob", 9, 11.28, False],
+                                       ["Jane", 10, 14.37, True]])
     df.append_rows([["Alice", 2, 3.7, False]])
 
     featda = block.create_data_array("feat-da", "tag-feature",
@@ -742,12 +745,14 @@ def test_full_file_read(tmpdir):
     df = block.data_frames[0]
     compare("table", df.name)
     compare("filing", df.type)
-    dt = (nix.util.util.vlen_str_dtype, nix.DataType.Double, nix.DataType.Int64, nix.DataType.Bool)
+    dt = (nix.util.util.vlen_str_dtype,
+          nix.DataType.Double, nix.DataType.Int64, nix.DataType.Bool)
     compare(dt, df.dtype)
     col_name = ("str", "Double", "int64", "bool")
     compare(col_name, df.column_names)
     combine_dt = np.dtype([(n, dty) for n, dty in zip(col_name, dt)])
-    arr = np.array([(b"exp1", 42.1, 10, False), (b"exp2", 30.2, 4, True)], dtype=combine_dt)
+    arr = np.array([(b"exp1", 42.1, 10, False),
+                    (b"exp2", 30.2, 4, True)], dtype=combine_dt)
     compare(arr, df[:])
     # could not test shape because it will write data
 
