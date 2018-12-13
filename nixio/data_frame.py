@@ -230,4 +230,3 @@ class DataFrame(Entity, DataSet):
         df_shape = tuple(df_shape)
         self._h5group.set_attr("df_shape", df_shape)
         return self._h5group.get_attr("df_shape")
-
