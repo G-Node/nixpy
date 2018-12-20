@@ -1,0 +1,69 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+ Copyright © 2014 German Neuroinformatics Node (G-Node)
+
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted under the terms of the BSD License. See
+ LICENSE file in the root of the Project.
+
+ Author: Jan Grewe <jan.grewe@g-node.org>
+
+ This tutorial shows how regulary sampled data is stored in nix-files.
+ See https://github.com/G-node/nix/wiki for more information.
+"""
+
+import nixio as nix
+import numpy as np
+import matplotlib.pylab as plt
+
+
+def create_sinewave(duration=1, freq=10, stepsize=0.01):
+    x = np.arange(0, duration*2*np.pi, stepsize)
+    y = np.sin(freq*x)
+    return x, y
+
+
+def plot_data(data_array):
+    x_axis = data_array.dimensions[0]
+    x = x_axis.axis(data_array.data.shape[0])
+    y = data_array.data[:]
+    plt.plot(x, y, marker=".", markersize=5)
+    plt.xlabel(x_axis.label + " [" + x_axis.unit + "]")
+    plt.ylabel(data_array.label + " [" + data_array.unit + "]")
+    plt.title(data_array.name)
+    plt.xlim(0, np.max(x))
+    plt.ylim((1.1 * np.min(y), 1.1 * np.max(y)))
+    plt.show()
+
+
+if __name__ == "__main__":
+    # fake some data
+    duration = 1.
+    frequency = 5
+    stepsize = 0.02
+    x, y = create_sinewave(duration, frequency, stepsize)
+
+    # create a new file overwriting any existing content
+    file_name = 'regular_data_example.h5'
+    file = nix.File.open(file_name, nix.FileMode.Overwrite)
+
+    # create a 'Block' that represents a grouping object. Here, the recording session.
+    # it gets a name and a type
+    block = file.create_block("block name", "nix.session")
+
+    # create a 'DataArray' to take the sinewave, add some information about the signal
+    data = block.create_data_array("sinewave", "nix.regular_sampled", data=y)
+    data.unit = "mV"
+    data.label = "voltage"
+    # add a descriptor for the xaxis
+    dim = data.append_sampled_dimension(stepsize)
+    dim.unit = "s"
+    dim.label = "time"
+    dim.offset = 0.0 # optional
+
+    # let's plot the data from the stored information
+    plot_data(data)
+    file.close()
