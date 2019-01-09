@@ -5,7 +5,7 @@ Installation Guidelines
 Dependencies
 ============
 
-NIXPy is a reimplementation of the `NIX`_ library and file format for Python.
+`NIXPy`_ is a reimplementation of the `NIX`_ library and file format for Python.
 NIXPy depends on `h5py`_, the Python interface to the HDF5 data format and numpy .
 
 The installation instructions below describe how to build or install NIXPy as a standalone, pure Python version of NIX.
@@ -17,6 +17,7 @@ Dependencies:
 
 .. _NIX: https://github.com/G-Node/nix
 .. _h5py: http://www.h5py.org/
+.. _NIXPy: https://github.com/G-Node/nixpy
 
 
 Installation instructions
