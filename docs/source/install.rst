@@ -6,7 +6,7 @@ Dependencies
 ============
 
 NIXPy is a reimplementation of the `NIX`_ library and file format for Python.
-Since NIX is built upon HDF5, NIXPy depends on `h5py`_, the Python interface to the HDF5 data format.
+Since NIX is built upon HDF5, NIXPy depends on `h5py`_, the Python interface to the HDF5 data format and numpy .
 
 NIXPy can also be used as an interface for the original `NIX`_ library.
 `NIX`_ is therefore an optional dependency, if NIXPy is to be used in this mode.
@@ -26,13 +26,14 @@ Optional dependencies (see `advanced installation`_ instructions):
 .. _NIX: https://github.com/G-Node/nix
 .. _h5py: http://www.h5py.org/
 
+
 Installation instructions
 =========================
 
-The latest stable release of NIXPy is available on PyPi as `nixio`_.
+The latest release of NIXPy is available on PyPi as `nixio`_.
 Therefore, the simplest way to install NIXPy is to use pip::
 
-    pip install nixio
+    pip install nixio --pre
 
 .. _nixio: https://pypi.python.org/pypi/nixio/
 
@@ -131,8 +132,8 @@ Build NIXPy from Source
 
 If you want to use the latest development version or in cases where the provided installers or packages can't be used,
 it is possible to build and install NIXPy from sources.
-Instructions for building NIX on Linux can be found in the `NIXPy README.rst`_ file.
-For the Windows platform those instructions are described in the `NIXPy Win32.md`_ file.
+Instructions for building NIX on Linux can be found in the `NIX install_linux.md`_ file.
+For the Windows platform those instructions are described in the `NIX Win.md`_ file.
 
-.. _NIXPy README.rst: https://github.com/G-Node/nixpy/blob/master/README.rst#getting-started-linux
-.. _NIXPy Win32.md: https://github.com/G-Node/nixpy/blob/master/Win32.md
+.. _NIX install_linux.md: https://github.com/G-Node/nix/blob/master/docs/install_linux.md
+.. _NIX Win.md: https://github.com/G-Node/nix/blob/master/docs/install_win.md

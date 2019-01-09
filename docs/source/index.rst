@@ -20,8 +20,7 @@ The following sections should help you getting started with nixpy.
 
 API Documentation
 =================
-
-TODO write something
+The API documentation for Data and Metadata
 
 .. toctree::
    :maxdepth: 2
