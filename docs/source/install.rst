@@ -23,16 +23,23 @@ Dependencies:
 Installation instructions
 =========================
 
-The latest release of NIXPy is available on PyPi as `nixio`_.
+The latest stable release of NIXPy is available on PyPi as `nixio`_.
 Therefore, the simplest way to install NIXPy is to use pip::
 
-    pip install nixio --pre
+    pip install nixio
 
 .. _nixio: https://pypi.python.org/pypi/nixio/
 
 
 .. _advanced installation:
 
+Install developer version
+---------------------------
+The beta version (latest developed) of NIXPy is also on PyPi and you can install it with a command::
+
+  pip install nixio --pre
+
+.. _nixio: https://pypi.python
 
 Build NIXPy from Source
 -----------------------
