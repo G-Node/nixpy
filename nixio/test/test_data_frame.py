@@ -148,7 +148,7 @@ class TestDataFrame(unittest.TestCase):
         k = np.array(self.df1[0:10]["trial_col"], dtype=np.int64)
         np.testing.assert_almost_equal(k, y)
         # too short coulmn
-        sh_col = np.arange(start=16000, stop=16100, step=1)
+        sh_col = np.arange(start=16000, stop=16003, step=1)
         self.assertRaises(ValueError, lambda:
                         self.df1.append_column(sh_col, name='sh_col'))
         # too long column
