@@ -32,9 +32,9 @@ from .compression import Compression
 # version
 from .info import VERSION as __version__
 
-__all__ = ("File", "Block", "Group", "DataArray", "DataFrame", "Tag", "MultiTag", "Source",
-           "Section", "S", "Feature", "Property", "OdmlType",
-           "SampledDimension", "RangeDimension", "SetDimension",
+__all__ = ("File", "Block", "Group", "DataArray", "DataFrame", "Tag",
+           "MultiTag", "Source", "Section", "S", "Feature", "Property",
+           "OdmlType", "SampledDimension", "RangeDimension", "SetDimension",
            "FileMode", "DataSliceMode", "DataType", "DimensionType",
            "LinkType", "Compression")
 __author__ = ('Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, '

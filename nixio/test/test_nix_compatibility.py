@@ -506,8 +506,10 @@ def test_full_file(tmpdir):
     group.data_arrays.append(da)
 
     df = block.create_data_frame("adataframe", "4-column df",
-                                 col_dict=OrderedDict([('name', str), ('id',
-                                   int), ('time', float), ('Adjusted', bool)]),
+                                 col_dict=OrderedDict([('name', str),
+                                                       ('id', int),
+                                                       ('time', float),
+                                                       ('Adjusted', bool)]),
                                  data=[["Bob", 9, 11.28, False],
                                        ["Jane", 10, 14.37, True]])
     df.append_rows([["Alice", 2, 3.7, False]])

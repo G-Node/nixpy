@@ -2,9 +2,10 @@
 
 from __future__ import (absolute_import, division, print_function)
 try:
-    from collections.abc import Iterable, OrderedDict
+    from collections.abc import Iterable
 except ImportError:
-    from collections import Iterable, OrderedDict
+    from collections import Iterable
+from collections import OrderedDict
 from inspect import isclass
 import numpy as np
 from .exceptions import OutOfBounds
@@ -25,9 +26,10 @@ class DataFrame(Entity, DataSet):
         self._rows = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, shape, col_dtype, compression):
-
-        newentity = super(DataFrame, cls)._create_new(nixparent, h5parent, name, type_)
+    def _create_new(cls, nixparent, h5parent,
+                    name, type_, shape, col_dtype, compression):
+        newentity = super(DataFrame, cls)._create_new(nixparent, h5parent,
+                                                      name, type_)
         newentity._h5group.create_dataset("data", (shape, ), col_dtype)
         return newentity
 
@@ -38,7 +40,8 @@ class DataFrame(Entity, DataSet):
             raise ValueError("Too much entries for column in this dataframe")
         if datatype is None:
             datatype = DataType.get_dtype(column[0])
-        if isclass(datatype) and any(issubclass(datatype, st) for st in string_types):
+        if isclass(datatype) and any(issubclass(datatype, st)
+                                     for st in string_types):
             datatype = util.vlen_str_dtype
         dt_arr = [(n, dty) for n, dty in zip(self.column_names, self.dtype)]
         dt_arr.append((name, datatype))
@@ -56,7 +59,8 @@ class DataFrame(Entity, DataSet):
         self._h5group.create_dataset("data", (self.shape[0],), dt)
         self.write_direct(farr)
 
-    def append_rows(self, data):  # In Python2, the data supplied must be iterable (not np arrays)
+    def append_rows(self, data):
+        # In Python2, the data supplied must be iterable (not np arrays)
         li_data = []
         for d in data:
             d = tuple(d)
@@ -77,7 +81,7 @@ class DataFrame(Entity, DataSet):
             rows[name] = cell
             self.write_rows(rows=[rows], index=[i])
 
-# TODO: for read column add a Mode that break down the tuples
+    # TODO: for read column add a Mode that break down the tuples
     def read_columns(self, index=None, name=None, sl=None):
         if index is None and name is None:
             raise ValueError("Either index or name must not be None")
@@ -96,10 +100,15 @@ class DataFrame(Entity, DataSet):
 
     def write_rows(self, rows, index):
         if len(rows) != len(index):
-            raise IndexError("Length of row changed and index specified do not match")
+            raise IndexError(
+                "Number of rows ({}) does not match "
+                "length of indexes ({})".format(len(rows), len(index))
+            )
         x, = self.shape
         if max(index) > (x - 1):
-            raise OutOfBounds("Row index should not exceed the existing no. of rows")
+            raise OutOfBounds(
+                "Row index exceeds the existing number of rows"
+            )
         if len(index) == 1:
             rows = tuple(rows[0])
             self._write_data(rows, sl=index)
@@ -118,7 +127,8 @@ class DataFrame(Entity, DataSet):
     def write_cell(self, cell, position=None, col_name=None, row_idx=None):
         if position is not None:
             if len(position) != 2:
-                raise ValueError('not a position')
+                raise ValueError("position is invalid: "
+                                 "need row and column index")
             x, y = position
             targeted_row = self.read_rows(x)
             targeted_row[y] = cell
@@ -170,7 +180,7 @@ class DataFrame(Entity, DataSet):
         with open(filename, mode, newline='') as csvfile:
             dw = csv.DictWriter(csvfile, fieldnames=self.column_names)
             dw.writeheader()
-            di = dict()  # this dict make the iter below quicker compared to using self in L172
+            di = dict()
             for n in self.column_names:
                 n = str(n)
                 di[n] = list(self[n])
@@ -199,15 +209,16 @@ class DataFrame(Entity, DataSet):
     @property
     def columns(self):
         if self.units:
-            cols = [(n, dt, u) for n, dt, u in zip(self.column_names, self.dtype, self.units)]
+            cols = [(n, dt, u) for n, dt, u in
+                    zip(self.column_names, self.dtype, self.units)]
         else:
-            cols = [(n, dt, None) for n, dt in zip(self.column_names, self.dtype)]
+            cols = [(n, dt, None) for n, dt in
+                    zip(self.column_names, self.dtype)]
         return cols
 
     @property
     def column_names(self):
         dt = self._h5group.group["data"].dtype
-        # cn = dt.fields.keys()
         return dt.names
 
     @property
