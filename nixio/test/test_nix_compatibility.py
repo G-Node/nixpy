@@ -11,27 +11,14 @@ try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
+from collections import OrderedDict
 from six import string_types
 from subprocess import Popen, PIPE
 import numpy as np
-import tempfile
 import pytest
-from collections import OrderedDict
 
 import nixio as nix
-from .xcompat.compile import maketests
 
-
-BINDIR = tempfile.mkdtemp(prefix="nixpy-tests-")
-
-# skip these tests if nix isn't available
-if pytest.config.getoption("--force-compat"):
-    print("Forcing compatibility tests")
-    maketests(BINDIR)
-else:
-    pytestmark = pytest.mark.skipif(
-        "skip()",
-        reason="Compatibility tests require the C++ NIX library")
 
 dtypes = (
     nix.DataType.UInt8,
@@ -49,10 +36,6 @@ dtypes = (
 )
 
 
-def skip():
-    return not maketests(BINDIR)
-
-
 def validate(fname):
     """
     Runs the nix validation function on the given file.
@@ -60,10 +43,7 @@ def validate(fname):
     runcpp("validate", fname)
 
 
-def runcpp(command, *args):
-    cmdbin = os.path.join(BINDIR, command)
-    cmdargs = [cmdbin]
-    cmdargs.extend(args)
+def runcpp(*cmdargs):
     proc = Popen(cmdargs, stdout=PIPE, stderr=PIPE)
     proc.wait()
     stdout = proc.stdout.read().decode()
@@ -74,7 +54,8 @@ def runcpp(command, *args):
         raise ValueError(stdout+stderr)
 
 
-def test_blocks(tmpdir):
+@pytest.mark.compatibility
+def test_blocks(tmpdir, bindir):
     nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     for idx in range(10):
@@ -85,10 +66,12 @@ def test_blocks(tmpdir):
 
     nix_file.close()
     # validate(nixfilepath)
-    runcpp("readblocks", nixfilepath)
+    cmd = os.path.join(bindir, "readblocks")
+    runcpp(cmd, nixfilepath)
 
 
-def test_groups(tmpdir):
+@pytest.mark.compatibility
+def test_groups(tmpdir, bindir):
     nixfilepath = os.path.join(str(tmpdir), "grouptest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("test_block", "blocktype")
@@ -99,9 +82,11 @@ def test_groups(tmpdir):
 
     nix_file.close()
     # validate(nixfilepath)
-    runcpp("readgroups", nixfilepath)
+    cmd = os.path.join(bindir, "readgroups")
+    runcpp(cmd, nixfilepath)
 
 
+@pytest.mark.compatibility
 def _test_data_arrays(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "arraytest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
@@ -126,6 +111,7 @@ def _test_data_arrays(tmpdir):
     # validate(nixfilepath)
 
 
+@pytest.mark.compatibility
 def _test_data_frames(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "frametest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
@@ -150,6 +136,7 @@ def _test_data_frames(tmpdir):
     # validate(nixfilepath)
 
 
+@pytest.mark.compatibility
 def _test_tags(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "tagtest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
@@ -172,6 +159,7 @@ def _test_tags(tmpdir):
     # validate(nixfilepath)
 
 
+@pytest.mark.compatibility
 def _test_multi_tags(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "mtagtest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
@@ -194,6 +182,7 @@ def _test_multi_tags(tmpdir):
     # validate(nixfilepath)
 
 
+@pytest.mark.compatibility
 def _test_sources(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "sourcetest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
@@ -225,6 +214,7 @@ def _test_sources(tmpdir):
     # validate(nixfilepath)
 
 
+@pytest.mark.compatibility
 def _test_dimensions(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "dimtest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
@@ -265,6 +255,7 @@ def _test_dimensions(tmpdir):
     # validate(nixfilepath)
 
 
+@pytest.mark.compatibility
 def _test_tag_features(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "feattest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
@@ -289,6 +280,7 @@ def _test_tag_features(tmpdir):
     # validate(nixfilepath)
 
 
+@pytest.mark.compatibility
 def test_multi_tag_features(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "mtagfeattest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
@@ -363,6 +355,7 @@ def test_multi_tag_features(tmpdir):
     # validate(nixfilepath)
 
 
+@pytest.mark.compatibility
 def test_multi_tag_references(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
@@ -394,6 +387,7 @@ def test_multi_tag_references(tmpdir):
     # validate(nixfilepath)
 
 
+@pytest.mark.compatibility
 def test_properties(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "proptest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
@@ -421,6 +415,7 @@ def test_properties(tmpdir):
     # validate(nixfilepath)
 
 
+@pytest.mark.compatibility
 def test_sections(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "sectiontest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
@@ -444,6 +439,7 @@ def test_sections(tmpdir):
     # validate(nixfilepath)
 
 
+@pytest.mark.compatibility
 def test_full_write(tmpdir):
     # Create a fully-featured nix file
     nixfilepath = os.path.join(str(tmpdir), "fulltest.nix")
@@ -468,7 +464,8 @@ def test_full_write(tmpdir):
     # validate(nixfilepath)
 
 
-def test_full_file(tmpdir):
+@pytest.mark.compatibility
+def test_full_file(tmpdir, bindir):
     nixfilepath = os.path.join(str(tmpdir), "filetest-writepy.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
 
@@ -642,7 +639,8 @@ def test_full_file(tmpdir):
                                      dtype=dt, data=dt(0))
 
     nix_file.close()
-    runcpp("readfullfile", nixfilepath)
+    cmd = os.path.join(bindir, "readfullfile")
+    runcpp(cmd, nixfilepath)
     # validate(nixfilepath)
 
 
@@ -677,9 +675,11 @@ def compare(exp, actual):
     assert exp == actual, "Expected {}, got {}".format(exp, actual)
 
 
-def test_full_file_read(tmpdir):
+@pytest.mark.compatibility
+def test_full_file_read(tmpdir, bindir):
     nixfilepath = os.path.join(str(tmpdir), "filetest-readpy.nix")
-    runcpp("writefullfile", nixfilepath)
+    cmd = os.path.join(bindir, "writefullfile")
+    runcpp(cmd, nixfilepath)
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.ReadOnly)
 
     # Check object counts
