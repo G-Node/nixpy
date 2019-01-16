@@ -14,7 +14,10 @@ except ImportError:
 import numpy as np
 from inspect import isclass
 from six import string_types
-from collections import OrderedDict  # using it for python2.7
+try:
+    from collections.abc import OrderedDict
+except ImportError:
+    from collections import OrderedDict
 import sys
 
 from .util import find as finders
@@ -194,12 +197,13 @@ class Block(Entity):
                           col_dtypes=None, data=None,
                           compression=Compression.No):
 
-        if isinstance(col_dict, dict) and not \
-                isinstance(col_dict, OrderedDict) and sys.version_info[0] < 3:
+        if (isinstance(col_dict, dict)
+                and not isinstance(col_dict, OrderedDict)
+                and sys.version_info[0] < 3):
             raise TypeError("Python 2 users should use name_list "
-                      "or OrderedDict created with LIST and TUPLES"
-                      " to create DataFrames as the order "
-                      "of the columns cannot be maintained in Py2")
+                            "or OrderedDict created with LIST and TUPLES "
+                            "to create DataFrames as the order "
+                            "of the columns cannot be maintained in Py2")
 
         if data is not None:
             shape = len(data)
@@ -210,14 +214,18 @@ class Block(Entity):
         if col_dict is None:
             if col_names is not None:
                 if col_dtypes is not None:
-                    col_dict = OrderedDict((str(nam), dt)
-                                    for nam, dt in zip(col_names, col_dtypes))
+                    col_dict = OrderedDict(
+                        (str(nam), dt)
+                        for nam, dt in zip(col_names, col_dtypes)
+                    )
                 elif col_dtypes is None and data is not None:
                     col_dtypes = []
                     for x in data[0]:
                         col_dtypes.append(type(x))
-                    col_dict = OrderedDict((str(nam), dt)
-                                    for nam, dt in zip(col_names, col_dtypes))
+                    col_dict = OrderedDict(
+                        (str(nam), dt)
+                        for nam, dt in zip(col_names, col_dtypes)
+                    )
                 else:  # col_dtypes is None and data is None
                     raise (ValueError,
                            "The data type of each column have to be specified")
@@ -233,7 +241,8 @@ class Block(Entity):
                             col_dict = OrderedDict(zip(cn, raw_dt_list))
 
                 else:
-            # data is None or type(data[0]) != np.void /data_type doesnt matter
+                    # data is None or type(data[0]) != np.void
+                    # data_type doesnt matter
                     raise (ValueError,
                            "No information about column names is provided!")
 

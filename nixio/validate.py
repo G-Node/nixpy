@@ -1,7 +1,10 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from .util import units
-from collections import OrderedDict
+try:
+    from collections.abc import OrderedDict
+except ImportError:
+    from collections import OrderedDict
 
 
 class Validate:

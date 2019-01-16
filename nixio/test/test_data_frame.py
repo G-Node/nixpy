@@ -4,7 +4,10 @@ from .tmp import TempDir
 import os
 import numpy as np
 from six import string_types
-from collections import OrderedDict
+try:
+    from collections.abc import OrderedDict
+except ImportError:
+    from collections import OrderedDict
 import sys
 
 
@@ -17,7 +20,7 @@ class TestDataFrame(unittest.TestCase):
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         di = OrderedDict([('name', np.int64), ('id', str), ('time', float),
-                                    ('sig1', np.float64), ('sig2', np.int32)])
+                          ('sig1', np.float64), ('sig2', np.int32)])
         arr = [(1, "a", 20.18, 5.0, 100), (2, 'b', 20.09, 5.5, 101),
                (2, 'c', 20.05, 5.1, 100), (1, "d", 20.15, 5.3, 150),
                (2, 'e', 20.23, 5.7, 200), (2, 'f', 20.07, 5.2, 300),
@@ -30,7 +33,8 @@ class TestDataFrame(unittest.TestCase):
         self.df2 = self.block.create_data_frame("other df", "signal2",
                                                 data=arr, col_dict=di)
         self.df3 = self.block.create_data_frame("reference df", "signal3",
-                                            data=other_arr, col_dict=other_di)
+                                                data=other_arr,
+                                                col_dict=other_di)
         self.dtype = self.df1._h5group.group["data"].dtype
 
     def tearDown(self):
@@ -41,8 +45,8 @@ class TestDataFrame(unittest.TestCase):
         arr = np.arange(999).reshape((333, 3))
         namelist = np.array(['name', 'id', 'time'])
         dtlist = np.array([int, str, float])
-        new_df = self.blk.create_data_frame('test1', 'for_test',
-                            col_names=namelist, col_dtypes=dtlist, data=arr)
+        self.blk.create_data_frame('test1', 'for_test', col_names=namelist,
+                                   col_dtypes=dtlist, data=arr)
 
     def test_data_frame_eq(self):
         assert self.df1 == self.df1
@@ -57,7 +61,8 @@ class TestDataFrame(unittest.TestCase):
         namelist = np.array(['name', 'id', 'time', 'sig1', 'sig2'])
         dtlist = np.array([np.int64, str, float, np.float64, np.int32])
         df_li = self.block.create_data_frame("test_list", "make_of_list",
-                               data=arr, col_names=namelist, col_dtypes=dtlist)
+                                             data=arr, col_names=namelist,
+                                             col_dtypes=dtlist)
         assert df_li.column_names == self.df1.column_names
         assert df_li.dtype == self.df1.dtype
         for i in df_li[:]:
@@ -142,19 +147,19 @@ class TestDataFrame(unittest.TestCase):
     def test_append_column(self):
         y = np.arange(start=16000, stop=16010, step=1)
         self.df1.append_column(y, name='trial_col', datatype=int)
-        assert self.df1.column_names == \
-                            ('name', 'id', 'time', 'sig1', 'sig2', 'trial_col')
+        assert self.df1.column_names == ('name', 'id', 'time',
+                                         'sig1', 'sig2', 'trial_col')
         assert len(self.df1.dtype) == 6
         k = np.array(self.df1[0:10]["trial_col"], dtype=np.int64)
         np.testing.assert_almost_equal(k, y)
-        # too short coulmn
+        # too short column
         sh_col = np.arange(start=16000, stop=16003, step=1)
-        self.assertRaises(ValueError, lambda:
-                        self.df1.append_column(sh_col, name='sh_col'))
+        with self.assertRaises(ValueError):
+            self.df1.append_column(sh_col, name='sh_col')
         # too long column
         long = np.arange(start=16000, stop=16500, step=1)
-        self.assertRaises(ValueError, lambda:
-                        self.df1.append_column(long, name='long'))
+        with self.assertRaises(ValueError):
+            self.df1.append_column(long, name='long')
 
     def test_append_rows(self):
         # append single row
@@ -182,12 +187,12 @@ class TestDataFrame(unittest.TestCase):
         # create df with incorrect dimension to see if Error is raised
         arr = np.arange(1000).reshape(10, 10, 10)
         if sys.version_info[0] == 3:
-            self.assertRaises(ValueError,
-                          lambda: self.block.create_data_frame('err', 'err',
-                                                {'name': np.int64}, data=arr))
+            with self.assertRaises(ValueError):
+                self.block.create_data_frame('err', 'err',
+                                             {'name': np.int64},
+                                             data=arr)
 
     def test_data_type(self):
         assert self.df1.dtype[4] == np.int32
         assert self.df1.dtype[0] != self.df1.dtype[4]
         assert self.df1.dtype[2] == self.df1.dtype[3]
-
