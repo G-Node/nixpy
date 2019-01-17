@@ -328,7 +328,7 @@ class TestMultiTags(unittest.TestCase):
         assert(len(posdata.shape) == 3)
         assert(posdata.shape == (1, 1, 1))
         assert(np.isclose(posdata[0, 0, 0], data[1, 1, 0]))
- 
+
         segdata = segtag.retrieve_data(0, 0)
         assert(len(segdata.shape) == 3)
         assert(segdata.shape == (2, 6, 2))
@@ -336,25 +336,6 @@ class TestMultiTags(unittest.TestCase):
         segdata = segtag.retrieve_data(1, 0)
         assert(len(segdata.shape) == 3)
         assert(segdata.shape == (1, 5, 1))
-
-        # retrieve all positions for all references
-        for ridx, ref in enumerate(mtag.references):
-            for pidx, p in enumerate(mtag.positions):
-                mtag.retrieve_data(pidx, ridx)
-
-    def test_multi_tag_retrieve_data_1d(self):
-        # MultiTags to vectors behave a bit differently
-        # Testing separately
-        oneddata = self.block.create_data_array("1dda", "data",
-                                                data=list(range(100)))
-        oneddata.append_sampled_dimension(0.1)
-        onedpos = self.block.create_data_array("1dpos", "positions",
-                                               data=[1, 9, 34])
-        onedmtag = self.block.create_multi_tag("2dmt", "mtag",
-                                               positions=onedpos)
-        onedmtag.references.append(oneddata)
-        for pidx, p in enumerate(onedmtag.positions):
-            onedmtag.retrieve_data(pidx, 0)
 
         # retrieve all positions for all references
         for ridx, ref in enumerate(mtag.references):
@@ -433,8 +414,8 @@ class TestMultiTags(unittest.TestCase):
 
         # disabled, don't understand how it could ever have worked,
         # there are only 3 positions
-        # data_view = self.feature_tag.retrieve_feature_data(9, 0)
-        # assert(np.sum(data_view[:, :]) == 9055)
+        data_view = self.feature_tag.retrieve_feature_data(9, 0)
+        assert(np.sum(data_view[:, :]) == 9055)
 
         # untagged feature
         data_view = self.feature_tag.retrieve_feature_data(0, 2)
@@ -459,8 +440,8 @@ class TestMultiTags(unittest.TestCase):
         assert(np.sum(feat_data) == 55)
 
         # disabled, there are only 3 positions
-        #data_view = self.feature_tag.retrieve_feature_data(9, index_data.name)
-        #assert(np.sum(data_view[:, :]) == 9055)
+        data_view = self.feature_tag.retrieve_feature_data(9, index_data.name)
+        assert(np.sum(data_view[:, :]) == 9055)
 
         # tagged feature
         data_view = self.feature_tag.retrieve_feature_data(0, tagged_data.name)
