@@ -160,6 +160,7 @@ class MultiTag(BaseTag):
                     unit = units[idx]
                 stop = self._pos_to_idx(dimpos.item(idx) + extent[idx],
                                         unit, dim)
+                stop += 1
                 minstop = starts[idx] + 1
                 stops.append(max(stop, minstop))
         else:
