@@ -12,7 +12,7 @@ Versions
 --------
 
 This repository's `master` is the development branch of *NIXPY*.
-It is not guaranteed to build or work properly with the *NIX* (HDF5) backend.
+It is not guaranteed to build or work properly.
 At times it may not even work at all.
 We strongly recommend using the latest stable version, which can be found on PyPI as nixio_.
 

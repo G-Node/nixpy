@@ -1,21 +1,18 @@
-# Copyright (c) 2014, German Neuroinformatics Node (G-Node)
+# -*- coding: utf-8 -*-
+# Copyright © 2014, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
-from __future__ import (absolute_import, division, print_function)
 import os
-
 import unittest
 import numpy as np
 
 import nixio as nix
+from .tmp import TempDir
 
-
-skip_cpp = not hasattr(nix, "core")
 
 test_range = tuple([float(i) for i in range(10)])
 test_sampl = 0.1
@@ -23,14 +20,12 @@ test_label = "test label"
 test_labels = tuple([str(i) + "_label" for i in range(10)])
 
 
-class DimensionTestBase(unittest.TestCase):
-
-    backend = None
-    testfilename = "dimtest.h5"
+class TestDimension(unittest.TestCase):
 
     def setUp(self):
-        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.tmpdir = TempDir("dimtest")
+        self.testfilename = os.path.join(self.tmpdir.path, "dimtest.nix")
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         self.array = self.block.create_data_array("test array", "signal",
                                                   nix.DataType.Float, (0, ))
@@ -42,11 +37,12 @@ class DimensionTestBase(unittest.TestCase):
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_set_dimension(self):
         assert(self.set_dim.index == 1)
         assert(self.set_dim.dimension_type == nix.DimensionType.Set)
+        assert(self.array.dimensions[0].index == 1)
 
         assert(self.set_dim.labels == ())
         self.set_dim.labels = test_labels
@@ -55,6 +51,7 @@ class DimensionTestBase(unittest.TestCase):
     def test_sample_dimension(self):
         assert(self.sample_dim.index == 2)
         assert(self.sample_dim.dimension_type == nix.DimensionType.Sample)
+        assert(self.array.dimensions[1].index == 2)
 
         assert(self.sample_dim.label is None)
         self.sample_dim.label = test_label
@@ -99,6 +96,7 @@ class DimensionTestBase(unittest.TestCase):
     def test_range_dimension(self):
         assert(self.range_dim.index == 3)
         assert(self.range_dim.dimension_type == nix.DimensionType.Range)
+        assert(self.array.dimensions[2].index == 3)
 
         assert(self.range_dim.label is None)
         self.range_dim.label = test_label
@@ -145,13 +143,48 @@ class DimensionTestBase(unittest.TestCase):
         assert(da.dimensions[0].unit == da.unit)
         assert(np.all(da.dimensions[0].ticks == da[:]))
 
+    def test_set_dim_label_resize(self):
+        setdim = self.array.append_set_dimension()
+        labels = ["A", "B"]
+        setdim.labels = labels
+        assert tuple(labels) == setdim.labels
 
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestDimensionsCPP(DimensionTestBase):
+        newlabels = ["C", "B", "A"]
+        setdim.labels = newlabels
+        assert tuple(newlabels) == setdim.labels
 
-    backend = "hdf5"
+    def test_range_dim_ticks_resize(self):
+        rangedim = self.array.append_range_dimension([1, 2, 100])
+        ticks = [1, 1, 30]
+        rangedim.ticks = ticks
+        assert tuple(ticks) == rangedim.ticks
 
+        newticks = [2, 4, 300, 800]
+        rangedim.ticks = newticks
+        assert tuple(newticks) == rangedim.ticks
 
-class TestDimensionsPy(DimensionTestBase):
+    def test_append_dim_init(self):
+        slabels = ["label A", "label B"]
+        setdim = self.array.append_set_dimension(slabels)
+        assert tuple(slabels) == setdim.labels
 
-    backend = "h5py"
+        rticks = [1, 2, 10.3]
+        rlabel = "range-label"
+        runit = "ms"
+        rdim = self.array.append_range_dimension(rticks, rlabel, runit)
+        assert tuple(rticks) == rdim.ticks
+        assert rlabel == rdim.label
+        assert runit == rdim.unit
+
+        sinterval = 0.25
+        slabel = "sample label"
+        sunit = "us"
+        soffset = 10
+        smpldim = self.array.append_sampled_dimension(sinterval,
+                                                      slabel,
+                                                      sunit,
+                                                      soffset)
+        assert sinterval == smpldim.sampling_interval
+        assert slabel == smpldim.label
+        assert sunit == smpldim.unit
+        assert soffset == smpldim.offset

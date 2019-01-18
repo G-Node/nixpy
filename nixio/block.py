@@ -1,4 +1,5 @@
-# Copyright (c) 2014, German Neuroinformatics Node (G-Node)
+# -*- coding: utf-8 -*-
+# Copyright © 2014, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
 #
@@ -6,64 +7,140 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from __future__ import (absolute_import, division, print_function)
-
-from .util import find as finders
-from .util.proxy_list import ProxyList
-from .compression import Compression
-import numpy as np
-
 try:
     from sys import maxint
 except ImportError:
     from sys import maxsize as maxint
+import numpy as np
+from inspect import isclass
+from six import string_types
+try:
+    from collections.abc import OrderedDict
+except ImportError:
+    from collections import OrderedDict
+import sys
+
+from .util import find as finders
+from .compression import Compression
+
+from .entity import Entity
+from .exceptions import exceptions
+from .group import Group
+from .data_array import DataArray
+from .data_frame import DataFrame
+from .multi_tag import MultiTag
+from .tag import Tag
+from .source import Source
+from . import util
+from .container import Container, SourceContainer
+from .section import Section
 
 
-class SourceProxyList(ProxyList):
+class Block(Entity):
 
-    def __init__(self, obj):
-        super(SourceProxyList, self).__init__(obj, "_source_count",
-                                              "_get_source_by_id",
-                                              "_get_source_by_pos",
-                                              "_delete_source_by_id")
+    def __init__(self, nixparent, h5group, compression=Compression.Auto):
+        super(Block, self).__init__(nixparent, h5group)
+        self._groups = None
+        self._data_arrays = None
+        self._tags = None
+        self._multi_tags = None
+        self._sources = None
+        self._compr = compression
+        self._data_frames = None
 
+    @classmethod
+    def _create_new(cls, nixparent, h5parent, name, type_, compression):
+        newentity = super(Block, cls)._create_new(nixparent, h5parent,
+                                                  name, type_)
+        newentity._compr = compression
+        return newentity
 
-class DataArrayProxyList(ProxyList):
+    # MultiTag
+    def create_multi_tag(self, name, type_, positions):
+        """
+        Create a new multi tag for this block.
 
-    def __init__(self, obj):
-        super(DataArrayProxyList, self).__init__(obj, "_data_array_count",
-                                                 "_get_data_array_by_id",
-                                                 "_get_data_array_by_pos",
-                                                 "_delete_data_array_by_id")
+        :param name: The name of the tag to create.
+        :type name: str
+        :param type_: The type of tag.
+        :type type_: str
+        :param positions: A data array defining all positions of the tag.
+        :type positions: DataArray
 
+        :returns: The newly created tag.
+        :rtype: MultiTag
+        """
+        util.check_entity_name_and_type(name, type_)
+        util.check_entity_input(positions)
+        if not isinstance(positions, DataArray):
+            raise TypeError("DataArray expected for 'positions'")
+        multi_tags = self._h5group.open_group("multi_tags")
+        if name in multi_tags:
+            raise exceptions.DuplicateName("create_multi_tag")
+        mtag = MultiTag._create_new(self, multi_tags, name, type_, positions)
+        return mtag
 
-class MultiTagProxyList(ProxyList):
+    # Tag
+    def create_tag(self, name, type_, position):
+        """
+        Create a new tag for this block.
 
-    def __init__(self, obj):
-        super(MultiTagProxyList, self).__init__(obj, "_multi_tag_count",
-                                                "_get_multi_tag_by_id",
-                                                "_get_multi_tag_by_pos",
-                                                "_delete_multi_tag_by_id")
+        :param name: The name of the tag to create.
+        :type name: str
+        :param type_: The type of tag.
+        :type type_: str
+        :param position: Coordinates of the start position
+                         in units of the respective data dimension.
 
+        :returns: The newly created tag.
+        :rtype: Tag
+        """
+        util.check_entity_name_and_type(name, type_)
+        tags = self._h5group.open_group("tags")
+        if name in tags:
+            raise exceptions.DuplicateName("create_tag")
+        tag = Tag._create_new(self, tags, name, type_, position)
+        return tag
 
-class TagProxyList(ProxyList):
+    # Source
+    def create_source(self, name, type_):
+        """
+        Create a new source on this block.
 
-    def __init__(self, obj):
-        super(TagProxyList, self).__init__(obj, "_tag_count", "_get_tag_by_id",
-                                           "_get_tag_by_pos",
-                                           "_delete_tag_by_id")
+        :param name: The name of the source to create.
+        :type name: str
+        :param type_: The type of the source.
+        :type type_: str
 
+        :returns: The newly created source.
+        :rtype: Source
+        """
+        util.check_entity_name_and_type(name, type_)
+        sources = self._h5group.open_group("sources")
+        if name in sources:
+            raise exceptions.DuplicateName("create_source")
+        src = Source._create_new(self, sources, name, type_)
+        return src
 
-class GroupProxyList(ProxyList):
+    # Group
+    def create_group(self, name, type_):
+        """
+        Create a new group on this block.
 
-    def __init__(self, obj):
-        super(GroupProxyList, self).__init__(obj, "_group_count",
-                                             "_get_group_by_id",
-                                             "_get_group_by_pos",
-                                             "_delete_group_by_id")
+        :param name: The name of the group to create.
+        :type name: str
+        :param type_: The type of the group.
+        :type type_: str
 
-
-class BlockMixin(object):
+        :returns: The newly created group.
+        :rtype: Group
+        """
+        util.check_entity_name_and_type(name, type_)
+        groups = self._h5group.open_group("groups")
+        if name in groups:
+            raise exceptions.DuplicateName("open_group")
+        grp = Group._create_new(self, groups, name, type_)
+        return grp
 
     def create_data_array(self, name, array_type, dtype=None, shape=None,
                           data=None, compression=Compression.Auto):
@@ -104,11 +181,92 @@ class BlockMixin(object):
                     raise ValueError("Shape must equal data.shape")
             else:
                 shape = data.shape
-        da = self._create_data_array(name, array_type, dtype, shape,
-                                     compression)
+        util.check_entity_name_and_type(name, array_type)
+        data_arrays = self._h5group.open_group("data_arrays")
+        if name in data_arrays:
+            raise exceptions.DuplicateName("create_data_array")
+        if compression == Compression.Auto:
+            compression = self._compr
+        da = DataArray._create_new(self, data_arrays, name, array_type,
+                                   dtype, shape, compression)
         if data is not None:
             da.write_direct(data)
         return da
+
+    def create_data_frame(self, name, type_, col_dict=None, col_names=None,
+                          col_dtypes=None, data=None,
+                          compression=Compression.No):
+
+        if (isinstance(col_dict, dict)
+                and not isinstance(col_dict, OrderedDict)
+                and sys.version_info[0] < 3):
+            raise TypeError("Python 2 users should use name_list "
+                            "or OrderedDict created with LIST and TUPLES "
+                            "to create DataFrames as the order "
+                            "of the columns cannot be maintained in Py2")
+
+        if data is not None:
+            shape = len(data)
+        else:
+            shape = 0
+        data_frames = self._h5group.open_group("data_frames")
+
+        if col_dict is None:
+            if col_names is not None:
+                if col_dtypes is not None:
+                    col_dict = OrderedDict(
+                        (str(nam), dt)
+                        for nam, dt in zip(col_names, col_dtypes)
+                    )
+                elif col_dtypes is None and data is not None:
+                    col_dtypes = []
+                    for x in data[0]:
+                        col_dtypes.append(type(x))
+                    col_dict = OrderedDict(
+                        (str(nam), dt)
+                        for nam, dt in zip(col_names, col_dtypes)
+                    )
+                else:  # col_dtypes is None and data is None
+                    raise (ValueError,
+                           "The data type of each column have to be specified")
+            else:  # if col_names is None
+                if data is not None and type(data[0]) == np.void:
+                    col_dtype = data[0].dtype
+                    for i, dt in enumerate(col_dtype.fields.values()):
+                        if dt[0] == np.dtype(str):
+                            cn = list(col_dtype.fields.keys())
+                            raw_dt = col_dtype.fields.values()
+                            raw_dt = list(raw_dt)
+                            raw_dt_list = [ele[0] for ele in raw_dt]
+                            col_dict = OrderedDict(zip(cn, raw_dt_list))
+
+                else:
+                    # data is None or type(data[0]) != np.void
+                    # data_type doesnt matter
+                    raise (ValueError,
+                           "No information about column names is provided!")
+
+        if col_dict is not None:
+            for nam, dt in col_dict.items():
+                if isclass(dt):
+                    if any(issubclass(dt, st) for st in string_types) \
+                            or issubclass(dt, np.string_):
+                        col_dict[nam] = util.vlen_str_dtype
+            dt_arr = list(col_dict.items())
+            col_dtype = np.dtype(dt_arr)
+
+        df = DataFrame._create_new(self, data_frames, name,
+                                   type_, shape, col_dtype, compression)
+
+        if data is not None:
+            if type(data[0]) == np.void:
+                data = np.ascontiguousarray(data, dtype=col_dtype)
+                df.write_direct(data)
+            else:
+                data = list(map(tuple, data))
+                arr = np.ascontiguousarray(data, dtype=col_dtype)
+                df.write_direct(arr)
+        return df
 
     def find_sources(self, filtr=lambda _: True, limit=None):
         """
@@ -139,11 +297,9 @@ class BlockMixin(object):
         via their index or by their id. Sources can be deleted from the list.
         Adding sources is done using the Blocks create_source method.
         This is a read only attribute.
-
-        :type: ProxyList of Source entities.
         """
-        if not hasattr(self, "_sources"):
-            setattr(self, "_sources", SourceProxyList(self))
+        if self._sources is None:
+            self._sources = SourceContainer("sources", self, Source)
         return self._sources
 
     @property
@@ -153,11 +309,9 @@ class BlockMixin(object):
         be obtained via their index or by their id. Tags can be deleted from
         the list. Adding tags is done using the Blocks create_multi_tag method.
         This is a read only attribute.
-
-        :type: ProxyList of MultiTag entities.
         """
-        if not hasattr(self, "_multi_tags"):
-            setattr(self, "_multi_tags", MultiTagProxyList(self))
+        if self._multi_tags is None:
+            self._multi_tags = Container("multi_tags", self, MultiTag)
         return self._multi_tags
 
     @property
@@ -167,11 +321,9 @@ class BlockMixin(object):
         via their index or by their id. Tags can be deleted from the list.
         Adding tags is done using the Blocks create_tag method.
         This is a read only attribute.
-
-        :type: ProxyList of Tag entities.
         """
-        if not hasattr(self, "_tags"):
-            setattr(self, "_tags", TagProxyList(self))
+        if self._tags is None:
+            self._tags = Container("tags", self, Tag)
         return self._tags
 
     @property
@@ -182,12 +334,16 @@ class BlockMixin(object):
         deleted from the list. Adding a data array is done using the Blocks
         create_data_array method.
         This is a read only attribute.
-
-        :type: ProxyList of DataArray entities.
         """
-        if not hasattr(self, "_data_arrays"):
-            setattr(self, "_data_arrays", DataArrayProxyList(self))
+        if self._data_arrays is None:
+            self._data_arrays = Container("data_arrays", self, DataArray)
         return self._data_arrays
+
+    @property
+    def data_frames(self):
+        if self._data_frames is None:
+            self._data_frames = Container("data_frames", self, DataFrame)
+        return self._data_frames
 
     @property
     def groups(self):
@@ -196,21 +352,18 @@ class BlockMixin(object):
         obtained via their index or by their id. Groups can be deleted from the
         list. Adding a Group is done using the Blocks create_group method.
         This is a read only attribute.
-
-        :type: ProxyList of Group entities.
         """
-        if not hasattr(self, "_groups"):
-            setattr(self, "_groups", GroupProxyList(self))
+        if self._groups is None:
+            self._groups = Container("groups", self, Group)
         return self._groups
 
     def __eq__(self, other):
         """
-        Two blocks are considered equal when they have the same id.
+        Two Blocks are considered equal when they have the same id.
         """
         if hasattr(other, "id"):
             return self.id == other.id
-        else:
-            return False
+        return False
 
     def __hash__(self):
         """
@@ -219,3 +372,29 @@ class BlockMixin(object):
         implemented or escaped
         """
         return hash(self.id)
+
+    # metadata
+    @property
+    def metadata(self):
+        """
+        Associated metadata of the entity. Sections attached to the entity via
+        this attribute can provide additional annotations. This is an optional
+        read-write property, and can be None if no metadata is available.
+
+        :type: Section
+        """
+        if "metadata" in self._h5group:
+            return Section(None, self._h5group.open_group("metadata"))
+        else:
+            return None
+
+    @metadata.setter
+    def metadata(self, sect):
+        if not isinstance(sect, Section):
+            raise TypeError("{} is not of type Section".format(sect))
+        self._h5group.create_link(sect, "metadata")
+
+    @metadata.deleter
+    def metadata(self):
+        if "metadata" in self._h5group:
+            self._h5group.delete("metadata")

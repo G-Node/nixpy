@@ -1,23 +1,317 @@
-# Copyright (c) 2014, German Neuroinformatics Node (G-Node)
+# -*- coding: utf-8 -*-
+# Copyright © 2016, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from numbers import Number
+from enum import Enum
 
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from .data_view import DataView
+from .data_set import DataSet
+from .entity import Entity
+from .source_link_container import SourceLinkContainer
+from .datatype import DataType
+from .dimensions import (Dimension, SampledDimension, RangeDimension,
+                         SetDimension, DimensionType, DimensionContainer)
+from . import util
+from .compression import Compression
 
-import sys
-from numbers import Integral
-
-from nixio.dimension_type import DimensionType
-
-import numpy as np
+from .exceptions import InvalidUnit
+from .section import Section
 
 
-class DataArrayMixin(object):
+class DataSliceMode(Enum):
+    Index = 1
+    Data = 2
+
+
+class DataArray(Entity, DataSet):
+
+    def __init__(self, nixparent, h5group):
+        super(DataArray, self).__init__(nixparent, h5group)
+        self._sources = None
+        self._dimensions = None
+
+    @classmethod
+    def _create_new(cls, nixparent, h5parent, name, type_, data_type, shape,
+                    compression):
+        newentity = super(DataArray, cls)._create_new(nixparent, h5parent,
+                                                      name, type_)
+        datacompr = False
+        if compression == Compression.DeflateNormal:
+            datacompr = True
+        newentity._h5group.create_dataset("data", shape, data_type, datacompr)
+        return newentity
+
+    def _read_data(self, sl=None):
+        coeff = self.polynom_coefficients
+        origin = self.expansion_origin
+        sup = super(DataArray, self)
+        if len(coeff) or origin:
+            if not origin:
+                origin = 0.0
+
+            # when there are coefficients, convert the dtype of the returned
+            # data array to double
+            data = sup._read_data(sl).astype(DataType.Double)
+            util.apply_polynomial(coeff, origin, data)
+        else:
+            data = sup._read_data(sl)
+        return data
+
+    @property
+    def sources(self):
+        """
+        A property containing all Sources referenced by the DataArray. Sources
+        can be obtained by index or their id. Sources can be removed from the
+        list, but removing a referenced Source will not remove it from the
+        file. New Sources can be added using the append method of the list.
+        This is a read only attribute.
+        """
+        if self._sources is None:
+            self._sources = SourceLinkContainer(self)
+        return self._sources
+
+    def append_set_dimension(self, labels=None):
+        """
+        Append a new SetDimension to the list of existing dimension
+        descriptors.
+
+        :returns: The newly created SetDimension.
+        :rtype: SetDimension
+        """
+        dimgroup = self._h5group.open_group("dimensions")
+        index = len(dimgroup) + 1
+        setdim = SetDimension._create_new(dimgroup, index)
+        if labels:
+            setdim.labels = labels
+        return setdim
+
+    def append_sampled_dimension(self, sampling_interval, label=None,
+                                 unit=None, offset=None):
+        """
+        Append a new SampledDimension to the list of existing dimension
+        descriptors.
+
+        :param sampling_interval: The sampling interval of the SetDimension
+                                  to create.
+        :type sampling_interval: float
+
+        :returns: The newly created SampledDimension.
+        :rtype: SampledDimension
+        """
+        dimgroup = self._h5group.open_group("dimensions")
+        index = len(dimgroup) + 1
+        smpldim = SampledDimension._create_new(dimgroup, index,
+                                               sampling_interval)
+        if label:
+            smpldim.label = label
+        if unit:
+            smpldim.unit = unit
+        if offset:
+            smpldim.offset = offset
+        return smpldim
+
+    def append_range_dimension(self, ticks, label=None, unit=None):
+        """
+        Append a new RangeDimension to the list of existing dimension
+        descriptors.
+
+        :param ticks: The ticks of the RangeDimension to create.
+        :type ticks: list of float
+
+        :returns: The newly created RangeDimension.
+        :rtype: RangeDimension
+        """
+        dimgroup = self._h5group.open_group("dimensions")
+        index = len(dimgroup) + 1
+        rdim = RangeDimension._create_new(dimgroup, index, ticks)
+        if label:
+            rdim.label = label
+            rdim.unit = unit
+        return rdim
+
+    def append_alias_range_dimension(self):
+        """
+        Append a new RangeDimension that uses the data stored in this
+        DataArray as ticks. This works only(!) if the DataArray is 1-D and
+        the stored data is numeric. A ValueError will be raised otherwise.
+
+        :returns: The created dimension descriptor.
+        :rtype: RangeDimension
+        """
+        if (len(self.data_extent) > 1 or
+                not DataType.is_numeric_dtype(self.dtype)):
+            raise ValueError("AliasRangeDimensions only allowed for 1D "
+                             "numeric DataArrays.")
+        if self._dimension_count() > 0:
+            raise ValueError("Cannot append additional alias dimension. "
+                             "There must only be one!")
+        dimgroup = self._h5group.open_group("dimensions")
+        # check if existing unit is SI
+        if self.unit:
+            u = self.unit
+            if not (util.units.is_si(u) or util.units.is_compound(u)):
+                raise InvalidUnit(
+                    "AliasRangeDimensions are only allowed when SI or "
+                    "composites of SI units are used. "
+                    "Current SI unit is {}".format(u),
+                    "DataArray.append_alias_range_dimension"
+                )
+        return RangeDimension._create_new_alias(dimgroup, 1, self)
+
+    def delete_dimensions(self):
+        """
+        Delete all the dimension descriptors for this DataArray.
+        """
+        dimgroup = self._h5group.open_group("dimensions")
+        ndims = len(dimgroup)
+        for idx in range(ndims):
+            del dimgroup[str(idx+1)]
+        return True
+
+    def _dimension_count(self):
+        return len(self._h5group.open_group("dimensions"))
+
+    def _get_dimension_by_pos(self, index):
+        h5dim = self._h5group.open_group("dimensions").open_group(str(index))
+        dimtype = h5dim.get_attr("dimension_type")
+        if dimtype == DimensionType.Sample:
+            return SampledDimension(h5dim, index)
+        elif dimtype == DimensionType.Range:
+            return RangeDimension(h5dim, index)
+        elif dimtype == DimensionType.Set:
+            return SetDimension(h5dim, index)
+        else:
+            raise TypeError("Invalid Dimension object in file.")
+
+    @property
+    def dtype(self):
+        """
+        The data type of the data stored in the DataArray.
+        This is a read only property.
+
+        :return: DataType
+        """
+        return self._h5group.group["data"].dtype
+
+    @property
+    def polynom_coefficients(self):
+        """
+        The polynomial coefficients for the calibration. By default this is
+        set to a {0.0, 1.0} for a linear calibration with zero offset.
+        This is a read-write property and can be set to None
+
+        :type: list of float
+        """
+        return tuple(self._h5group.get_data("polynom_coefficients"))
+
+    @polynom_coefficients.setter
+    def polynom_coefficients(self, coeff):
+        if not coeff:
+            if self._h5group.has_data("polynom_coefficients"):
+                del self._h5group["polynom_coefficients"]
+        else:
+            dtype = DataType.Double
+            self._h5group.write_data("polynom_coefficients", coeff, dtype)
+
+    @property
+    def expansion_origin(self):
+        """
+        The expansion origin of the calibration polynomial.
+        This is a read-write property and can be set to None.
+        The default value is 0.
+
+        :type: float
+        """
+        return self._h5group.get_attr("expansion_origin")
+
+    @expansion_origin.setter
+    def expansion_origin(self, eo):
+        util.check_attr_type(eo, Number)
+        self._h5group.set_attr("expansion_origin", eo)
+
+    @property
+    def label(self):
+        """
+        The label of the DataArray. The label corresponds to the label of the
+        x-axis of a plot. This is a read-write property and can be set to
+        None.
+
+        :type: str
+        """
+        return self._h5group.get_attr("label")
+
+    @label.setter
+    def label(self, l):
+        util.check_attr_type(l, str)
+        self._h5group.set_attr("label", l)
+
+    @property
+    def unit(self):
+        """
+        The unit of the values stored in the DataArray. This is a read-write
+        property and can be set to None.
+
+        :type: str
+        """
+        return self._h5group.get_attr("unit")
+
+    @unit.setter
+    def unit(self, u):
+        if u:
+            u = util.units.sanitizer(u)
+        if u == "":
+            u = None
+        util.check_attr_type(u, str)
+        if (self._dimension_count() == 1 and
+                self.dimensions[0].dimension_type == DimensionType.Range and
+                self.dimensions[0].is_alias and u is not None):
+            if not (util.units.is_si(u) or util.units.is_compound(u)):
+                raise InvalidUnit(
+                    "[{}]: Non-SI units are not allowed if the DataArray "
+                    "has an AliasRangeDimension.".format(u),
+                    "DataArray.unit"
+                )
+        self._h5group.set_attr("unit", u)
+
+    def get_slice(self, positions, extents=None, mode=DataSliceMode.Index):
+        datadim = len(self.shape)
+        if not len(positions) == datadim:
+            raise IndexError("Number of positions given ({}) does not match "
+                             "number of data dimensions ({})".format(
+                                 len(positions), datadim
+                             ))
+        if extents and not len(extents) == datadim:
+            raise IndexError("Number of extents given ({}) does not match "
+                             "number of data dimensions ({})".format(
+                                 len(extents), datadim
+                             ))
+        if mode == DataSliceMode.Index:
+            sl = tuple(slice(p, p+e) for p, e in zip(positions, extents))
+            return DataView(self, sl)
+        elif mode == DataSliceMode.Data:
+            return self._get_slice_bydim(positions, extents)
+        else:
+            raise ValueError("Invalid slice mode specified. "
+                             "Supported modes are DataSliceMode.Index and "
+                             "DataSliceMode.Data")
+
+    def _get_slice_bydim(self, positions, extents):
+        dpos, dext = [], []
+        for dim, pos, ext in zip(self.dimensions, positions, extents):
+            if dim.dimension_type in (DimensionType.Sample,
+                                      DimensionType.Range):
+                dpos.append(dim.index_of(pos))
+                dext.append(dim.index_of(pos+ext)-dpos[-1])
+            elif dim.dimension_type == DimensionType.Set:
+                dpos.append(int(pos))
+                dext.append(int(ext))
+        sl = tuple(slice(p, p+e) for p, e in zip(dpos, dext))
+        return DataView(self, sl)
 
     @property
     def data(self):
@@ -39,10 +333,11 @@ class DataArrayMixin(object):
         respective append methods for dimension descriptors.
         This is a read only attribute.
 
-        :type: ProxyList of dimension descriptors.
+        :type: Container of dimension descriptors.
         """
-        if not hasattr(self, "_dimensions"):
-            setattr(self, "_dimensions", DimensionProxyList(self))
+        if self._dimensions is None:
+            self._dimensions = DimensionContainer("dimensions", self,
+                                                  Dimension)
         return self._dimensions
 
     def __eq__(self, other):
@@ -59,285 +354,29 @@ class DataArrayMixin(object):
         """
         return hash(self.id)
 
-
-class SetDimensionMixin(object):
-
-    dimension_type = DimensionType.Set
-
-
-class RangeDimensionMixin(object):
-
-    dimension_type = DimensionType.Range
-
-
-class SampleDimensionMixin(object):
-
-    dimension_type = DimensionType.Sample
-
-
-class DimensionProxyList(object):
-    """
-    List proxy for the dimensions of a data array.
-    """
-
-    def __init__(self, obj):
-        self.__obj = obj
-
-    def __len__(self):
-        return self.__obj._dimension_count()
-
-    def __getitem__(self, key):
-        if isinstance(key, int):
-            length = self.__obj._dimension_count()
-
-            if key < 0:
-                key = length + key
-
-            if key >= length or key < 0:
-                raise KeyError("Index out of bounds: " + str(key))
-
-            return self.__obj._get_dimension_by_pos(key + 1)
-        else:
-            raise TypeError("The key must be an int but was: " + type(key))
-
-    def __iter__(self):
-        for i in range(0, len(self)):
-            yield self.__obj._get_dimension_by_pos(i + 1)
-
-    def __str__(self):
-        str_list = [str(e) for e in list(self)]
-        return "[" + ", ".join(str_list) + "]"
-
-    def __repr__(self):
-        return str(self)
-
-
-class DataSetMixin(object):
-    """
-    Data IO object for DataArray.
-    """
-
-    def __array__(self):
-        raw = np.empty(self.shape, dtype=self.dtype)
-        self.read_direct(raw)
-        return raw
-
-    def __getitem__(self, index):
-        index = self.__index_to_tuple(index)
-        if len(index) < 1:
-            return np.array(self)
-        # if we got to here we have a tuple with len >= 1
-        count, offset, shape = self.__tuple_to_count_offset_shape(index)
-        if any(o+c > s for o, c, s in zip(offset, count, self.shape)):
-            raise IndexError("index is out of bounds")
-
-        raw = np.empty(shape, dtype=self.dtype)
-
-        if hasattr(self, "polynom_coefficients") and self.polynom_coefficients:
-            # if there are coefficients, convert the dtype of the returned data
-            # array to double
-            raw.dtype = np.float64
-        self._read_data(raw, count, offset)
-
-        return raw
-
-    def __setitem__(self, index, value):
-        index = self.__index_to_tuple(index)
-        if len(index) < 1:
-            shape = self.shape
-            count, offset = shape, tuple([0]*len(shape))
-        else:
-            count, offset, _ = self.__tuple_to_count_offset_shape(index)
-
-        # NB: np.ascontiguousarray does not copy the array if it is
-        # already in c-contiguous form
-        raw = np.ascontiguousarray(value)
-        self._write_data(raw, count, offset)
-
-    def __len__(self):
-        s = self.len()
-
-        # PyObject_Size returns a Py_ssize_t, which is the same as the
-        # systems size_t type but signed, i.e. ssize_t. (cf. PEP 0353)
-        # The maximum positive integer that Py_ssize_t can hold is
-        # exposed via sys.maxsize.
-        # Since self.shape can contain longs we need to check for that
-        if s > sys.maxsize:
-            estr = ("DataSet's shape[0] is too big for Python's __len__. "
-                    "Use DataSet.len() instead")
-            raise OverflowError(estr)
-        return s
-
-    def __iter__(self):
-        for idx in range(self.len()):
-            yield self[idx]
-
-    def len(self):
-        """
-        Length of the first dimension. Equivalent to `DataSet.shape[0]`.
-
-        :type: int or long
-        """
-        return self.shape[0]
-
+    # metadata
     @property
-    def shape(self):
-        """
-        :type: tuple of data array dimensions.
-        """
-        return self.data_extent
-
-    @property
-    def size(self):
-        """
-        Number of elements in the DataSet, i.e. the product of the
-        elements in :attr:`~nixio.data_array.DataSet.shape`.
-
-        :type: int
-        """
-        return np.prod(self.shape)
-
-    @property
-    def dtype(self):
-        """
-        :type: :class:`numpy.dtype` object holding type infromation about
-               the data stored in the DataSet.
-        """
-        return np.dtype(self._get_dtype())
-
-    def write_direct(self, data):
-        """
-        Directly write all of ``data`` to the
-        :class:`~nixio.data_array.DataSet`.  The supplied data must be a
-        :class:`numpy.ndarray` that matches the DataSet's shape and must have
-        C-style contiguous memory layout (see :attr:`numpy.ndarray.flags` and
-        :class:`~numpy.ndarray` for more information).
-
-        :param data: The array which contents is being written
-        :type data: :class:`numpy.ndarray`
-        """
-        self._write_data(data, (), ())
-
-    def read_direct(self, data):
-        """
-        Directly read all data stored in the :class:`~nixio.data_array.DataSet`
-        into ``data``. The supplied data must be a :class:`numpy.ndarray` that
-        matches the DataSet's shape, must have C-style contiguous memory layout
-        and must be writeable (see :attr:`numpy.ndarray.flags` and
-        :class:`~numpy.ndarray` for more information).
-
-        :param data: The array where data is being read into
-        :type data: :class:`numpy.ndarray`
+    def metadata(self):
         """
 
-        self._read_data(data, (), ())
+        Associated metadata of the entity. Sections attached to the entity via
+        this attribute can provide additional annotations. This is an optional
+        read-write property, and can be None if no metadata is available.
 
-    def append(self, data, axis=0):
+        :type: Section
         """
-        Append ``data`` to the DataSet along the ``axis`` specified.
-
-        :param data: The data to append. Shape must agree except for the
-        specified axis
-        :param axis: Along which axis to append the data to
-        """
-        data = np.ascontiguousarray(data)
-
-        if len(self.shape) != len(data.shape):
-            raise ValueError(
-                "Data and DataArray must have the same dimensionality"
-            )
-
-        if any([s != ds for i, (s, ds) in
-                enumerate(zip(self.shape, data.shape)) if i != axis]):
-            raise ValueError("Shape of data and shape of DataArray must match "
-                             "in all dimension but axis!")
-
-        offset = tuple(0 if i != axis else x for i, x in enumerate(self.shape))
-        count = data.shape
-        enlarge = tuple(self.shape[i] + (0 if i != axis else x)
-                        for i, x in enumerate(data.shape))
-        self.data_extent = enlarge
-        self._write_data(data, count, offset)
-
-    @staticmethod
-    def __index_to_tuple(index):
-        if isinstance(index, tuple):
-            return index
-        elif isinstance(index, Integral) or isinstance(index, slice):
-            return (index, )
-        elif isinstance(index, type(Ellipsis)):
-            return ()
+        if "metadata" in self._h5group:
+            return Section(None, self._h5group.open_group("metadata"))
         else:
-            raise IndexError("Unsupported index")
+            return None
 
-    @staticmethod
-    def __complete_slices(shape, index):
-        if isinstance(index, slice):
-            if index.step is not None:
-                raise IndexError('Invalid index, stepping unsupported')
-            start = index.start
-            stop = index.stop
-            if start is None:
-                start = 0
-            elif start < 0:
-                start = shape + start
-            if stop is None:
-                stop = shape
-            elif stop < 0:
-                stop = shape + stop
-            index = slice(start, stop, index.step)
-        elif isinstance(index, Integral):
-            if index < 0:
-                index = shape + index
-                index = slice(index, index+1)
-            else:
-                index = slice(index, index+1)
-        elif index is None:
-            index = slice(0, shape)
-        else:
-            raise IndexError('Invalid index')
-        return index
+    @metadata.setter
+    def metadata(self, sect):
+        if not isinstance(sect, Section):
+            raise TypeError("{} is not of type Section".format(sect))
+        self._h5group.create_link(sect, "metadata")
 
-    @staticmethod
-    def __fill_none(shape, index, to_replace=1):
-        size = len(shape) - len(index) + to_replace
-        return tuple([None] * size)
-
-    def __tuple_to_count_offset_shape(self, index):
-        # precondition: type(index) == tuple and len(index) >= 1
-        fill_none = self.__fill_none
-        shape = self.shape
-
-        if index[0] is Ellipsis:
-            index = fill_none(shape, index) + index[1:]
-        if index[-1] is Ellipsis:
-            # if we have a trailing ellipsis we just cut it away
-            # and let complete_slices do the right thing
-            index = index[:-1]
-
-        # here we handle Ellipsis in the middle of the tuple
-        # we *can* only handle one, if there are more, then
-        # __complete_slices will raise a InvalidIndex error
-        pos = index.index(Ellipsis) if Ellipsis in index else -1
-        if pos > -1:
-            index = index[:pos] + fill_none(shape, index) + index[pos+1:]
-
-        # in python3 map does not work with None therefore if
-        # len(shape) != len(index) we wont get the expected
-        # result. We therefore need to fill up the missing values
-        index = index + fill_none(shape, index, to_replace=0)
-
-        completed = list(map(self.__complete_slices, shape, index))
-        combined = list(map(lambda s: (s.start, s.stop), completed))
-        count = tuple(x[1] - x[0] for x in combined)
-        offset = [x for x in zip(*combined)][0]
-
-        # drop all indices from count that came from single ints
-        # NB: special case when we only have ints, e.g. (int, ) then
-        # we get back the empty tuple and this is what we want,
-        # because it indicates a scalar result
-        squeezed = map(lambda i, c: c if type(i) != int
-                       else None, index, count)
-        shape = list(filter(lambda x: x is not None, squeezed))
-
-        return count, offset, shape
+    @metadata.deleter
+    def metadata(self):
+        if "metadata" in self._h5group:
+            self._h5group.delete("metadata")

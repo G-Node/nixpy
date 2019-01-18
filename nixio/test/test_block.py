@@ -1,30 +1,23 @@
-# Copyright (c) 2014, German Neuroinformatics Node (G-Node)
+# -*- coding: utf-8 -*-
+# Copyright © 2014, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
-from __future__ import (absolute_import, division, print_function)
 import os
-
 import unittest
-
 import nixio as nix
+from .tmp import TempDir
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
-class BlockTestBase(unittest.TestCase):
-
-    backend = None
-    testfilename = "blocktest.h5"
+class TestBlock(unittest.TestCase):
 
     def setUp(self):
-        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.tmpdir = TempDir("blocktest")
+        self.testfilename = os.path.join(self.tmpdir.path, "blocktest.nix")
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         self.other = self.file.create_block("other block", "recordingsession")
 
@@ -32,7 +25,7 @@ class BlockTestBase(unittest.TestCase):
         del self.file.blocks[self.block.id]
         del self.file.blocks[self.other.id]
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_block_eq(self):
         assert(self.block == self.block)
@@ -192,14 +185,3 @@ class BlockTestBase(unittest.TestCase):
         del self.block.groups[0]
 
         assert(len(self.block.groups) == 0)
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestBlockCPP(BlockTestBase):
-
-    backend = "hdf5"
-
-
-class TestBlockPy(BlockTestBase):
-
-    backend = "h5py"

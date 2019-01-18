@@ -1,4 +1,5 @@
-# Copyright (c) 2014, German Neuroinformatics Node (G-Node)
+# -*- coding: utf-8 -*-
+# Copyright © 2014, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
 #
@@ -29,13 +30,7 @@ def _find_sources(with_sources, filtr, limit):
     result = []
     level = 0
 
-    sourcecls = (nixio.pycore.Source,)
-    try:
-        sourcecls += (nixio.core.Source,)
-    except AttributeError:
-        pass
-
-    if isinstance(with_sources, sourcecls):
+    if isinstance(with_sources, nixio.source.Source):
         fifo.append(Cont(with_sources, level))
     else:
         level += 1
@@ -64,13 +59,7 @@ def _find_sections(with_sections, filtr, limit):
     result = []
     level = 0
 
-    sectioncls = (nixio.pycore.Section,)
-    try:
-        sectioncls += (nixio.core.Section,)
-    except AttributeError:
-        pass
-
-    if isinstance(with_sections, sectioncls):
+    if isinstance(with_sections, nixio.Section):
         fifo.append(Cont(with_sections, level))
     else:
         level += 1

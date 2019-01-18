@@ -1,30 +1,24 @@
-# Copyright (c) 2014, German Neuroinformatics Node (G-Node)
+# -*- coding: utf-8 -*-
+# Copyright © 2014, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
 #
 # Redistribution and use in section and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
-from __future__ import (absolute_import, division, print_function)
 import os
-
 import unittest
 import numpy as np
 import nixio as nix
+from .tmp import TempDir
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
-class TagTestBase(unittest.TestCase):
-
-    backend = None
-    testfilename = "tagtest.h5"
+class TestTags(unittest.TestCase):
 
     def setUp(self):
-        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.tmpdir = TempDir("tagtest")
+        self.testfilename = os.path.join(self.tmpdir.path, "tagtest.nix")
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
 
         self.my_array = self.block.create_data_array("my array", "test",
@@ -45,7 +39,7 @@ class TagTestBase(unittest.TestCase):
     def tearDown(self):
         del self.file.blocks[self.block.id]
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_tag_eq(self):
         assert(self.my_tag == self.my_tag)
@@ -271,14 +265,3 @@ class TagTestBase(unittest.TestCase):
 
         assert(data1.size == 1)
         assert(data2.size == 3)
-
-
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestTagCPP(TagTestBase):
-
-    backend = "hdf5"
-
-
-class TestTagPy(TagTestBase):
-
-    backend = "h5py"

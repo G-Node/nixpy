@@ -1,37 +1,32 @@
-# Copyright (c) 2014, German Neuroinformatics Node (G-Node)
+# -*- coding: utf-8 -*-
+# Copyright © 2014, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
-from __future__ import (absolute_import, division, print_function)
 import os
-
 import unittest
 import h5py
+import numpy as np
 
 import nixio as nix
-import nixio.pycore.file as filepy
-from nixio.pycore.exceptions.exceptions import InvalidFile
+import nixio.file as filepy
+from nixio.exceptions import InvalidFile
+from .tmp import TempDir
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
-class FileTestBase(unittest.TestCase):
-
-    backend = None
-    testfilename = "filetest.h5"
+class TestFile(unittest.TestCase):
 
     def setUp(self):
-        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.tmpdir = TempDir("filetest")
+        self.testfilename = os.path.join(self.tmpdir.path, "filetest.nix")
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
 
     def tearDown(self):
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_file_format(self):
         assert(self.file.format == "nix")
@@ -117,13 +112,13 @@ class FileTestBase(unittest.TestCase):
         datablock = self.file.blocks[datablockname]
         for idx in range(7):
             name = "data_" + str(idx)
-            da = datablock.create_data_array(name, "thedata", data=[0])
+            da = datablock.create_data_array(name, "thedata",
+                                             data=np.array([0]))
             da.definition = "da definition"
             danames.append(name)
         self.file.close()
 
-        self.file = nix.File.open(self.testfilename, nix.FileMode.ReadOnly,
-                                  backend=self.backend)
+        self.file = nix.File.open(self.testfilename, nix.FileMode.ReadOnly)
 
         for idx in range(len(self.file.blocks)):
             self.assertEqual(blknames[idx], self.file.blocks[idx].name)
@@ -133,36 +128,22 @@ class FileTestBase(unittest.TestCase):
             self.assertEqual(danames[idx], datablock.data_arrays[idx].name)
 
     def test_context_open(self):
-        fname = "contextopen.nix"
-        with nix.File.open(fname, nix.FileMode.Overwrite,
-                           backend=self.backend) as nf:
+        fname = os.path.join(self.tmpdir.path, "contextopen.nix")
+        with nix.File.open(fname, nix.FileMode.Overwrite) as nf:
             nf.create_block("blocky", "test-block")
 
-        with nix.File.open(fname, nix.FileMode.ReadOnly,
-                           backend=self.backend) as nf:
+        with nix.File.open(fname, nix.FileMode.ReadOnly) as nf:
             self.assertEqual(nf.blocks[0].name, "blocky")
 
 
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestFileCPP(FileTestBase):
-
-    backend = "hdf5"
-
-
-class TestFilePy(FileTestBase):
+class TestFileVer(unittest.TestCase):
 
     backend = "h5py"
-
-
-class TestFileVerPy(unittest.TestCase):
-
-    backend = "h5py"
-    testfilename = "versiontest.h5"
     filever = filepy.HDF_FF_VERSION
     fformat = filepy.FILE_FORMAT
 
     def try_open(self, mode):
-        f = nix.File.open(self.testfilename, mode, backend=self.backend)
+        f = nix.File.open(self.testfilename, mode)
         f.close()
 
     def set_header(self, fformat=None, version=None):
@@ -179,12 +160,14 @@ class TestFileVerPy(unittest.TestCase):
             self.h5root.create_group("metadata")
 
     def setUp(self):
+        self.tmpdir = TempDir("vertest")
+        self.testfilename = os.path.join(self.tmpdir.path, "vertest.nix")
         self.h5file = h5py.File(self.testfilename, mode="w")
         self.h5root = self.h5file["/"]
 
     def tearDown(self):
         self.h5file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_read_write(self):
         self.set_header()

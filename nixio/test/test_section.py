@@ -1,30 +1,23 @@
-# Copyright (c) 2014, German Neuroinformatics Node (G-Node)
+# -*- coding: utf-8 -*-
+# Copyright © 2014, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
 #
 # Redistribution and use in section and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-
-from __future__ import (absolute_import, division, print_function)
 import os
-
 import unittest
-
 import nixio as nix
+from .tmp import TempDir
 
 
-skip_cpp = not hasattr(nix, "core")
-
-
-class SectionTestBase(unittest.TestCase):
-
-    backend = None
-    testfilename = "sectiontest.h5"
+class TestSections(unittest.TestCase):
 
     def setUp(self):
-        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite,
-                                  backend=self.backend)
+        self.tmpdir = TempDir("sectiontest")
+        self.testfilename = os.path.join(self.tmpdir.path, "sectiontest.nix")
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.section = self.file.create_section("test section",
                                                 "recordingsession")
         self.other = self.file.create_section("other section",
@@ -34,7 +27,7 @@ class SectionTestBase(unittest.TestCase):
         del self.file.sections[self.section.id]
         del self.file.sections[self.other.id]
         self.file.close()
-        os.remove(self.testfilename)
+        self.tmpdir.cleanup()
 
     def test_section_eq(self):
         assert(self.section == self.section)
@@ -43,6 +36,24 @@ class SectionTestBase(unittest.TestCase):
 
     def test_section_id(self):
         assert(self.section.id is not None)
+
+        # Check setting id on section via file create
+        oid = "4a6e8483-0a9a-464d-bdd9-b39818334bcd"
+        sec = self.file.create_section("assign id", "sec type", oid)
+        assert (sec.id == oid)
+
+        nonid = "I am not a proper uuid"
+        sec = self.file.create_section("invalid id", "sec type", nonid)
+        assert (sec.id != nonid)
+
+        # Check setting id on section via section create
+        oid = "4a6e8483-0a9a-464d-bdd9-b39818334bcd"
+        sub_sec = sec.create_section("assign id", "sec type", oid)
+        assert (sub_sec.id == oid)
+
+        nonid = "I am not a proper uuid"
+        sub_sec = sec.create_section("invalid id", "sec type", nonid)
+        assert (sub_sec.id != nonid)
 
     def test_section_name(self):
         assert(self.section.name is not None)
@@ -66,15 +77,6 @@ class SectionTestBase(unittest.TestCase):
         self.section.definition = None
         assert(self.section.definition is None)
 
-    def test_section_mapping(self):
-        assert(self.section.mapping is None)
-
-        self.section.mapping = "mapping"
-        assert(self.section.mapping == "mapping")
-
-        self.section.mapping = None
-        assert(self.section.mapping is None)
-
     def test_section_repository(self):
         assert(self.section.repository is None)
 
@@ -83,6 +85,16 @@ class SectionTestBase(unittest.TestCase):
 
         self.section.repository = None
         assert(self.section.repository is None)
+
+    def test_property_reference(self):
+        assert(self.section.reference is None)
+
+        self.section.reference = "reference"
+        assert(self.section.reference == "reference")
+
+        self.section.reference = None
+        assert(self.section.reference is None)
+        self.section.reference = None
 
     def test_section_sections(self):
         assert(len(self.section.sections) == 0)
@@ -149,10 +161,11 @@ class SectionTestBase(unittest.TestCase):
         for p in self.section:
             assert(p in self.section)
 
-        assert(self.section.has_property_by_name("test prop"))
-        assert(not self.section.has_property_by_name("notexist"))
-        assert(self.section.get_property_by_name("test prop") is not None)
-        assert(self.section.get_property_by_name("notexist") is None)
+        assert("test prop" in self.section)
+        assert("notexist" not in self.section)
+        assert(self.section["test prop"] is not None)
+        # NOTE: the following raises KeyError: Do we want it to return None?
+        # assert(self.section["notexist"] is None)
 
         assert(len(self.section.inherited_properties()) == 1)
 
@@ -172,9 +185,18 @@ class SectionTestBase(unittest.TestCase):
         self.section['ep_int'] = 23
         self.section['ep_float'] = 42.0
         self.section['ep_list'] = [1, 2, 3]
-        self.section['ep_val'] = nix.Value(1.0)
+        self.section['ep_val'] = 1.0
 
         self.section['ep_val'] = 2.0
+
+        # prop creation through create_property
+        self.section.create_property('cp_str', 'str')
+        self.section.create_property('cp_int', 23)
+        self.section.create_property('cp_float', 42.0)
+        self.section.create_property('cp_list', [1, 2, 3])
+        self.section.create_property('cp_val', 1.0)
+
+        self.section.props["cp_str"].values = "anotherstr"
 
         res = [x in self.section for x in ['ep_str', 'ep_int', 'ep_float']]
         assert(all(res))
@@ -186,7 +208,8 @@ class SectionTestBase(unittest.TestCase):
 
         def create_hetero_section():
             self.section['ep_ex'] = [1, 1.0]
-        self.assertRaises(ValueError, create_hetero_section)
+
+        self.assertRaises(TypeError, create_hetero_section)
 
         sections = [x.id for x in self.section]
         for x in sections:
@@ -247,13 +270,21 @@ class SectionTestBase(unittest.TestCase):
         self.assertEqual(len(self.section.referring_sources), 0)
         self.assertEqual(self.other.referring_sources[0].id, src.id)
 
+    def test_section_link(self):
+        self.section.create_property("PropOnSection", "value")
 
-@unittest.skipIf(skip_cpp, "HDF5 backend not available.")
-class TestSectionCPP(SectionTestBase):
+        self.assertIn("PropOnSection", self.section)
+        self.assertEqual("value", self.section["PropOnSection"])
 
-    backend = "hdf5"
+        self.assertNotIn("PropOnSection", self.other)
+        with self.assertRaises(KeyError):
+            self.other["PropOnSection"]
 
+        self.other.link = self.section
 
-class TestSectionPy(SectionTestBase):
+        self.assertNotIn("PropOnSection", self.other)
+        with self.assertRaises(KeyError):
+            self.other["PropOnSection"]
 
-    backend = "h5py"
+        inhpropnames = [p.name for p in self.other.inherited_properties()]
+        self.assertIn("PropOnSection", inhpropnames)

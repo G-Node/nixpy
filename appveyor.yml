@@ -1,11 +1,16 @@
 version: 1.4.{build}
 
+image: Visual Studio 2017
+
 environment:
 
-  NIX_VERSION: 1.4.0
-  NIX_BUILD_DIR: C:\nix_build
+  NIX_VERSION: 1.4.1
   DEPLOY_DIR: deploy
-  BOOST_ROOT: C:\Libraries\boost_1_62_0
+  NIX_DIR: C:\nix
+  NIX_INCDIR: C:\nix\include
+  NIX_LIBDIR: C:\nix\lib
+  BOOST_INCDIR: C:\Libraries\boost_1_67_0\lib64-msvc-14.1
+  BOOST_LIBDIR: C:\Libraries\boost_1_67_0\lib64-msvc-14.1
 
   NIX_APPVEYOR_ROOT: https://ci.appveyor.com/api/projects/stoewer/nix/artifacts/build
 
@@ -15,107 +20,84 @@ environment:
     - PYTHON: "C:\\Python27"
       pyver: 2
       bits: 32
-      withnix: "--without-nix"
-    # - PYTHON: "C:\\Python27"
-    #   bits: 32
-    #   withnix: "--with-nix"
 
     # Python 3.6 32 bit
     - PYTHON: "C:\\Python36"
       pyver: 3
       bits: 32
-      withnix: "--without-nix"
-    # - PYTHON: "C:\\Python36"
-    #   bits: 32
-    #   withnix: "--with-nix"
+
+    # Python 3.7 32 bit
+    - PYTHON: "C:\\Python37"
+      pyver: 3
+      bits: 32
 
     # Python 2.7 64 bit
     - PYTHON: "C:\\Python27-x64"
       pyver: 2
       bits: 64
-      withnix: "--without-nix"
-    # - PYTHON: "C:\\Python27-x64"
-    #   bits: 64
-    #   withnix: "--with-nix"
 
     # Python 3.6 64 bit
     - PYTHON: "C:\\Python36-x64"
       pyver: 3
       bits: 64
-      withnix: "--without-nix"
-      RDP: "no"
-    # - PYTHON: "C:\\Python36-x64"
-    #   bits: 64
-    #   withnix: "--with-nix"
 
-matrix:
-    allow_failures:
-        - withnix: "--with-nix"
+    # Python 3.7 64 bit
+    - PYTHON: "C:\\Python37-x64"
+      pyver: 3
+      bits: 64
+      RDP: "no"
 
 init:
   - "ECHO %PYTHON% %vcvars% (%bits%)"
-  - ps: $env:PATH = "$env:PYTHON;$env:PATH;C:\Program Files\7-Zip;$env:NIX_BUILD_DIR\nix\bin"
+  - ps: $env:PATH = "$env:PYTHON;$env:PATH;C:\Program Files\7-Zip;$env:NIX_DIR\bin"
   - python -c "import sys;print('Python version is {}'.format(sys.version))"
 
 install:
+  # TODO: Uncomment when cross-compatibility tests are fixed
+  # - ps: |
+  #     if ($env:bits -eq "64") {
+  #         $env:vcvars = "x86_amd64"
+  #         $env:avjob = "job=Environment%3A%20PLATFORM%3Dx64%2C%20CONFIGURATION%3DRelease"
+  #         $env:avfname = "nix-$env:NIX_VERSION-win64.exe"
+  #     } else {
+  #         $env:vcvars = "x86"
+  #         $env:avjob = "job=Environment%3A%20PLATFORM%3Dx86%2C%20CONFIGURATION%3DRelease"
+  #         $env:avfname = "nix-$env:NIX_VERSION-win32.exe"
 
-    - ps: |
-        if ($env:bits -eq "64") {
-            $env:vcvars = "x86_amd64"
-            $env:avjob = "job=Environment%3A%20PLATFORM%3Dx64%2C%20CONFIGURATION%3DRelease"
-            $env:avfname = "nix-$env:NIX_VERSION-win64.exe"
-        } else {
-            $env:vcvars = "x86"
-            $env:avjob = "job=Environment%3A%20PLATFORM%3Dx86%2C%20CONFIGURATION%3DRelease"
-            $env:avfname = "nix-$env:NIX_VERSION-win32.exe"
-        }
-    - python -m pip install --upgrade pip
-    - ps: |
-        if ($env:pyver -eq "2") {
-            python -m pip install enum34
-        }
-
-    - ps: |
-        if ($env:withnix -eq "--with-nix") {
-            mkdir "$env:NIX_BUILD_DIR"
-            cd "$env:NIX_BUILD_DIR"
-            mkdir nix
-            cd nix
-
-            $env:nix_exe_url = "$env:NIX_APPVEYOR_ROOT/$env:avfname`?$env:avjob"
-            Write-Host "Downloading $env:nix_exe_url"
-
-            Invoke-WebRequest -URI $env:nix_exe_url -OutFile "nix.exe"
-
-            7z x nix.exe
-
-            cd ..
-
-            $env:BOOST_INC_DIR = "$env:BOOST_ROOT\include"
-            $env:BOOST_LIB_DIR = "$env:BOOST_ROOT\lib"
-        }
-
-    - python -m pip install numpy h5py wheel
-
-    - ps: cd "$env:APPVEYOR_BUILD_FOLDER"
-
-    - ps: $env:DISTUTILS_USE_SDK = "1"
-
-    - ps: $env:MSSdk = "1"
+  #     }
+  # - ps: |
+  #     if ($env:pyver -eq "2") {
+  #         python -m pip install enum34
+  #     }
+  # - call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat"
+  # - ps: mkdir "$env:NIX_DIR"
+  # - ps: cd "$env:NIX_DIR"
+  # - ps: |
+  #     $env:nix_exe_url = "$env:NIX_APPVEYOR_ROOT/$env:avfname`?$env:avjob"
+  #     Write-Host "Downloading $env:nix_exe_url"
+  #     Invoke-WebRequest -URI $env:nix_exe_url -OutFile "nix.exe"
+  # - 7z x nix.exe
+  # - cd ..
+  - python -m pip install numpy h5py wheel pytest-xdist
+  - ps: cd "$env:APPVEYOR_BUILD_FOLDER"
+  - set DISTUTILS_USE_SDK="1"
+  - set MSSdk="1"
 
 build_script:
-    - python setup.py build %withnix%
+  - python setup.py build
 
 test_script:
-    - python setup.py test
+  # TODO: Force cross-compatibility tests
+  # - python setup.py test --addopts "--force-compat"
+  - python setup.py test --addopts "-nauto"
 
 after_test:
-    - ps: mkdir "$env:DEPLOY_DIR"
-    - python setup.py bdist_wheel -d %DEPLOY_DIR% %withnix%
+  - ps: mkdir "$env:DEPLOY_DIR"
+  - python setup.py bdist_wheel -d %DEPLOY_DIR% %withnix%
 
 artifacts:
-- path: $(DEPLOY_DIR)\*
-  name: wheels
+  - path: $(DEPLOY_DIR)\*
+    name: wheels
 
 on_finish:
   - ps: |
