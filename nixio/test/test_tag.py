@@ -264,4 +264,4 @@ class TestTags(unittest.TestCase):
         data2 = pos_tag.retrieve_feature_data(ramp_feat.name)
 
         assert(data1.size == 1)
-        assert(data2.size == 2)
+        assert(data2.size == 3)
