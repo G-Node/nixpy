@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Copyright © 2014 German Neuroinformatics Node (G-Node)
+"""
+ Copyright © 2014 German Neuroinformatics Node (G-Node)
 
  All rights reserved.
 
@@ -13,8 +14,8 @@
 
  This tutorial shows how to store image data in nix-files.
  See https://github.com/G-node/nix/wiki for more information.
- 
- We use the "Lenna" image in this tutorial.  
+
+ We use the "Lenna" image in this tutorial.
 
  "Lenna" by Original full portrait: "Playmate of the Month". Playboy
  Magazine. November 1972, photographed by Dwight Hooker.This 512x512
@@ -27,7 +28,7 @@
 
 import nixio as nix
 import numpy as np
-import Image as img
+from PIL import Image as img
 
 
 def load_image():
@@ -43,7 +44,7 @@ def plot_data(data_array):
     img_data = np.array(img_data, dtype='uint8')
     new_img = img.fromarray(img_data)
     new_img.show()
-        
+
 
 if __name__ == '__main__':
     img_data, channels = load_image()
@@ -52,7 +53,7 @@ if __name__ == '__main__':
     file = nix.File.open(file_name, nix.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.
-    # it gets a name and a type 
+    # it gets a name and a type
     block = file.create_block("block name", "nix.session")
 
     # create a 'DataArray' to take the sinewave, add some information about the signal
@@ -64,7 +65,7 @@ if __name__ == '__main__':
     width_dim.label = "width"
     color_dim = data.append_set_dimension()
     color_dim.labels = channels
-    
+
     # let's plot the data from the stored information
     plot_data(data)
     file.close()

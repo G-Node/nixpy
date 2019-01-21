@@ -75,7 +75,7 @@ class DataArray(Entity, DataSet):
             self._sources = SourceLinkContainer(self)
         return self._sources
 
-    def append_set_dimension(self):
+    def append_set_dimension(self, labels=None):
         """
         Append a new SetDimension to the list of existing dimension
         descriptors.
@@ -85,9 +85,13 @@ class DataArray(Entity, DataSet):
         """
         dimgroup = self._h5group.open_group("dimensions")
         index = len(dimgroup) + 1
-        return SetDimension._create_new(dimgroup, index)
+        setdim = SetDimension._create_new(dimgroup, index)
+        if labels:
+            setdim.labels = labels
+        return setdim
 
-    def append_sampled_dimension(self, sampling_interval):
+    def append_sampled_dimension(self, sampling_interval, label=None,
+                                 unit=None, offset=None):
         """
         Append a new SampledDimension to the list of existing dimension
         descriptors.
@@ -101,9 +105,17 @@ class DataArray(Entity, DataSet):
         """
         dimgroup = self._h5group.open_group("dimensions")
         index = len(dimgroup) + 1
-        return SampledDimension._create_new(dimgroup, index, sampling_interval)
+        smpldim = SampledDimension._create_new(dimgroup, index,
+                                               sampling_interval)
+        if label:
+            smpldim.label = label
+        if unit:
+            smpldim.unit = unit
+        if offset:
+            smpldim.offset = offset
+        return smpldim
 
-    def append_range_dimension(self, ticks):
+    def append_range_dimension(self, ticks, label=None, unit=None):
         """
         Append a new RangeDimension to the list of existing dimension
         descriptors.
@@ -116,7 +128,11 @@ class DataArray(Entity, DataSet):
         """
         dimgroup = self._h5group.open_group("dimensions")
         index = len(dimgroup) + 1
-        return RangeDimension._create_new(dimgroup, index, ticks)
+        rdim = RangeDimension._create_new(dimgroup, index, ticks)
+        if label:
+            rdim.label = label
+            rdim.unit = unit
+        return rdim
 
     def append_alias_range_dimension(self):
         """

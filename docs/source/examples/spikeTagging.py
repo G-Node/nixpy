@@ -25,7 +25,7 @@ import matplotlib.pylab as plt
 
 
 def fake_neuron():
-    lif_model = lif.lif()
+    lif_model = lif.LIF()
     t, v, spike_times = lif_model.run_const_stim(10000, 0.005)
     return t, v, spike_times
 

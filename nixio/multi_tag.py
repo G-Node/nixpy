@@ -138,7 +138,10 @@ class MultiTag(BaseTag):
                 ext_size[1] > len(data.dimensions)):
             raise incdim_exception
 
-        dimpos = positions[index, 0:len(data.dimensions)]
+        if len(pos_size) == 1:
+            dimpos = positions[0:len(data.dimensions)]
+        else:
+            dimpos = positions[index, 0:len(data.dimensions)]
         units = self.units
         starts, stops = list(), list()
         for idx in range(dimpos.size):
@@ -157,6 +160,7 @@ class MultiTag(BaseTag):
                     unit = units[idx]
                 stop = self._pos_to_idx(dimpos.item(idx) + extent[idx],
                                         unit, dim)
+                stop += 1
                 minstop = starts[idx] + 1
                 stops.append(max(stop, minstop))
         else:

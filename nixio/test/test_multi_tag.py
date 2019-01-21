@@ -257,12 +257,12 @@ class TestMultiTags(unittest.TestCase):
         dim.unit = 's'
 
         pos = block.create_data_array('pos1', 'positions',
-                                      data=np.array([0.]).reshape((1, 1)))
+                                      data=np.array([0.]).reshape(1, 1))
         pos.append_set_dimension()
         pos.append_set_dimension()
         pos.unit = 'ms'
         ext = block.create_data_array('ext1', 'extents',
-                                      data=np.array([2000.]).reshape((1, 1)))
+                                      data=np.array([2000.]).reshape(1, 1))
         ext.append_set_dimension()
         ext.append_set_dimension()
         ext.unit = 'ms'
@@ -272,18 +272,18 @@ class TestMultiTags(unittest.TestCase):
         mtag.units = ['ms']
         mtag.references.append(da)
 
-        assert(mtag.retrieve_data(0, 0).shape == (2000,))
-        assert(np.array_equal(y[:2000], mtag.retrieve_data(0, 0)[:]))
+        assert(mtag.retrieve_data(0, 0).shape == (2001,))
+        assert(np.array_equal(y[:2001], mtag.retrieve_data(0, 0)[:]))
 
         # get by name
         data = mtag.retrieve_data(0, da.name)
-        assert(data.shape == (2000,))
-        assert(np.array_equal(y[:2000], data[:]))
+        assert(data.shape == (2001,))
+        assert(np.array_equal(y[:2001], data[:]))
 
         # get by id
         data = mtag.retrieve_data(0, da.id)
-        assert(data.shape == (2000,))
-        assert(np.array_equal(y[:2000], data[:]))
+        assert(data.shape == (2001,))
+        assert(np.array_equal(y[:2001], data[:]))
 
         # multi dimensional data
         sample_iv = 1.0
@@ -295,7 +295,7 @@ class TestMultiTags(unittest.TestCase):
         pos.append_set_dimension()
         pos.append_set_dimension()
         ext = self.block.create_data_array("ext", "test",
-                                           data=[[2, 5, 2],
+                                           data=[[1, 5, 2],
                                                  [0, 4, 1]])
         ext.append_set_dimension()
         ext.append_set_dimension()
@@ -331,11 +331,30 @@ class TestMultiTags(unittest.TestCase):
 
         segdata = segtag.retrieve_data(0, 0)
         assert(len(segdata.shape) == 3)
-        assert(segdata.shape == (2, 5, 2))
+        assert(segdata.shape == (2, 6, 2))
 
         segdata = segtag.retrieve_data(1, 0)
         assert(len(segdata.shape) == 3)
-        assert(segdata.shape == (1, 4, 1))
+        assert(segdata.shape == (1, 5, 1))
+
+        # retrieve all positions for all references
+        for ridx, ref in enumerate(mtag.references):
+            for pidx, p in enumerate(mtag.positions):
+                mtag.retrieve_data(pidx, ridx)
+
+    def test_multi_tag_retrieve_data_1d(self):
+        # MultiTags to vectors behave a bit differently
+        # Testing separately
+        oneddata = self.block.create_data_array("1dda", "data",
+                                                data=list(range(100)))
+        oneddata.append_sampled_dimension(0.1)
+        onedpos = self.block.create_data_array("1dpos", "positions",
+                                               data=[1, 9, 34])
+        onedmtag = self.block.create_multi_tag("2dmt", "mtag",
+                                               positions=onedpos)
+        onedmtag.references.append(oneddata)
+        for pidx, p in enumerate(onedmtag.positions):
+            onedmtag.retrieve_data(pidx, 0)
 
     def test_multi_tag_feature_data(self):
         index_data = self.block.create_data_array("indexed feature data",
@@ -393,6 +412,8 @@ class TestMultiTags(unittest.TestCase):
         assert(feat_data.size == 10)
         assert(np.sum(feat_data) == 55)
 
+        # disabled, don't understand how it could ever have worked,
+        # there are only 3 positions
         data_view = self.feature_tag.retrieve_feature_data(9, 0)
         assert(np.sum(data_view[:, :]) == 9055)
 
@@ -418,6 +439,7 @@ class TestMultiTags(unittest.TestCase):
         assert(feat_data.size == 10)
         assert(np.sum(feat_data) == 55)
 
+        # disabled, there are only 3 positions
         data_view = self.feature_tag.retrieve_feature_data(9, index_data.name)
         assert(np.sum(data_view[:, :]) == 9055)
 

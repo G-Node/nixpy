@@ -27,7 +27,7 @@
 
 import nixio as nix
 import numpy as np
-import Image as img
+from PIL import Image as img
 import matplotlib.pyplot as plt
 
 
@@ -64,7 +64,7 @@ def plot_roi_data(tag):
     for p in range(position_count):
         roi_data = tag.retrieve_data(p, 0)[:]
         roi_data = np.array(roi_data, dtype='uint8')
-        ax = plt.gcf().add_subplot(position_count, 1, p)
+        ax = plt.gcf().add_subplot(position_count, 1, p+1)
         image = img.fromarray(roi_data)
         ax.imshow(image)
     plt.savefig('retrieved_rois.png')
@@ -93,12 +93,12 @@ if __name__ == '__main__':
     color_dim.labels = channels
 
     # some space for three regions-of-interest
-    roi_starts = np.zeros((3, 3))
+    roi_starts = np.zeros((3, 3), dtype=int)
     roi_starts[0, :] = [250, 245, 0]
     roi_starts[1, :] = [250, 315, 0]
     roi_starts[2, :] = [340, 260, 0]
 
-    roi_extents = np.zeros((3, 3))
+    roi_extents = np.zeros((3, 3), dtype=int)
     roi_extents[0, :] = [30, 45, 3]
     roi_extents[1, :] = [30, 40, 3]
     roi_extents[2, :] = [25, 65, 3]

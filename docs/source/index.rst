@@ -1,5 +1,5 @@
 ================================
-NIX Python Binding Documentation
+NIXIO Python Package for NIX Datafiles
 ================================
 
 The nixpy module contains the python binding to the nix c++ library. In order
@@ -20,8 +20,7 @@ The following sections should help you getting started with nixpy.
 
 API Documentation
 =================
-
-TODO write something
+The API documentation for Data and Metadata
 
 .. toctree::
    :maxdepth: 2

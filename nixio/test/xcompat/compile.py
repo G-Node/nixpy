@@ -28,10 +28,14 @@ def cc(filenames, dest,
     compiler = ccompiler.new_compiler()
 
     distutils.sysconfig.customize_compiler(compiler)
-    compiler.set_library_dirs(library_dirs)
-    compiler.set_include_dirs(include_dirs)
-    compiler.set_libraries(libraries)
-    compiler.set_runtime_library_dirs(runtime_lib_dirs)
+    if library_dirs:
+        compiler.set_library_dirs(library_dirs)
+    if include_dirs:
+        compiler.set_include_dirs(include_dirs)
+    if libraries:
+        compiler.set_libraries(libraries)
+    if runtime_lib_dirs:
+        compiler.set_runtime_library_dirs(runtime_lib_dirs)
 
     try:
         objnames = compiler.compile(filenames, output_dir=dest,
@@ -51,14 +55,28 @@ def maketests(dest):
     scriptloc, _ = os.path.split(os.path.abspath(__file__))
     os.chdir(scriptloc)
     filenames = glob("*.cpp")
-    nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include/nixio-1.0')
-    nix_lib_dir = os.getenv('NIX_LIBDIR', '/usr/local/lib')
 
-    boost_inc_dir = os.getenv('BOOST_INCDIR', '/usr/local/include')
-    boost_lib_dir = os.getenv('BOOST_LIBDIR', '/usr/local/lib')
-    library_dirs = [boost_lib_dir, nix_lib_dir]
-    include_dirs = [boost_inc_dir, nix_inc_dir, 'src']
-    runtime_dirs = ["/usr/local/lib"]
+    # look for libs and headers in both /usr/ and /usr/local/
+    library_dirs = ["/usr/lib", "/usr/local/lib"]
+    libenv = os.getenv("NIX_LIBDIR", None)
+    if libenv:
+        library_dirs.append(libenv)
+
+    include_dirs = ["/usr/include/", "/usr/local/include",
+                    "/usr/include/nixio-1.0", "/usr/local/include/nixio-1.0",
+                    "src"]
+    incenv = os.getenv("NIX_INCDIR", None)
+    if incenv:
+        include_dirs.append(libenv)
+
+    boost_libenv = os.getenv("BOOST_LIBDIR", None)
+    if boost_libenv:
+        library_dirs.append(boost_libenv)
+    boost_incenv = os.getenv("BOOST_INCDIR", None)
+    if boost_incenv:
+        include_dirs.append(boost_incenv)
+
+    runtime_dirs = ["/usr/lib", "/usr/local/lib"]
     llp = os.getenv("LD_LIBRARY_PATH", None)
     if llp is not None:
         runtime_dirs.append(llp)

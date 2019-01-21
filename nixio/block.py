@@ -12,6 +12,13 @@ try:
 except ImportError:
     from sys import maxsize as maxint
 import numpy as np
+from inspect import isclass
+from six import string_types
+try:
+    from collections.abc import OrderedDict
+except ImportError:
+    from collections import OrderedDict
+import sys
 
 from .util import find as finders
 from .compression import Compression
@@ -20,6 +27,7 @@ from .entity import Entity
 from .exceptions import exceptions
 from .group import Group
 from .data_array import DataArray
+from .data_frame import DataFrame
 from .multi_tag import MultiTag
 from .tag import Tag
 from .source import Source
@@ -38,6 +46,7 @@ class Block(Entity):
         self._multi_tags = None
         self._sources = None
         self._compr = compression
+        self._data_frames = None
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name, type_, compression):
@@ -184,6 +193,81 @@ class Block(Entity):
             da.write_direct(data)
         return da
 
+    def create_data_frame(self, name, type_, col_dict=None, col_names=None,
+                          col_dtypes=None, data=None,
+                          compression=Compression.No):
+
+        if (isinstance(col_dict, dict)
+                and not isinstance(col_dict, OrderedDict)
+                and sys.version_info[0] < 3):
+            raise TypeError("Python 2 users should use name_list "
+                            "or OrderedDict created with LIST and TUPLES "
+                            "to create DataFrames as the order "
+                            "of the columns cannot be maintained in Py2")
+
+        if data is not None:
+            shape = len(data)
+        else:
+            shape = 0
+        data_frames = self._h5group.open_group("data_frames")
+
+        if col_dict is None:
+            if col_names is not None:
+                if col_dtypes is not None:
+                    col_dict = OrderedDict(
+                        (str(nam), dt)
+                        for nam, dt in zip(col_names, col_dtypes)
+                    )
+                elif col_dtypes is None and data is not None:
+                    col_dtypes = []
+                    for x in data[0]:
+                        col_dtypes.append(type(x))
+                    col_dict = OrderedDict(
+                        (str(nam), dt)
+                        for nam, dt in zip(col_names, col_dtypes)
+                    )
+                else:  # col_dtypes is None and data is None
+                    raise (ValueError,
+                           "The data type of each column have to be specified")
+            else:  # if col_names is None
+                if data is not None and type(data[0]) == np.void:
+                    col_dtype = data[0].dtype
+                    for i, dt in enumerate(col_dtype.fields.values()):
+                        if dt[0] == np.dtype(str):
+                            cn = list(col_dtype.fields.keys())
+                            raw_dt = col_dtype.fields.values()
+                            raw_dt = list(raw_dt)
+                            raw_dt_list = [ele[0] for ele in raw_dt]
+                            col_dict = OrderedDict(zip(cn, raw_dt_list))
+
+                else:
+                    # data is None or type(data[0]) != np.void
+                    # data_type doesnt matter
+                    raise (ValueError,
+                           "No information about column names is provided!")
+
+        if col_dict is not None:
+            for nam, dt in col_dict.items():
+                if isclass(dt):
+                    if any(issubclass(dt, st) for st in string_types) \
+                            or issubclass(dt, np.string_):
+                        col_dict[nam] = util.vlen_str_dtype
+            dt_arr = list(col_dict.items())
+            col_dtype = np.dtype(dt_arr)
+
+        df = DataFrame._create_new(self, data_frames, name,
+                                   type_, shape, col_dtype, compression)
+
+        if data is not None:
+            if type(data[0]) == np.void:
+                data = np.ascontiguousarray(data, dtype=col_dtype)
+                df.write_direct(data)
+            else:
+                data = list(map(tuple, data))
+                arr = np.ascontiguousarray(data, dtype=col_dtype)
+                df.write_direct(arr)
+        return df
+
     def find_sources(self, filtr=lambda _: True, limit=None):
         """
         Get all sources in this block recursively.
@@ -254,6 +338,12 @@ class Block(Entity):
         if self._data_arrays is None:
             self._data_arrays = Container("data_arrays", self, DataArray)
         return self._data_arrays
+
+    @property
+    def data_frames(self):
+        if self._data_frames is None:
+            self._data_frames = Container("data_frames", self, DataFrame)
+        return self._data_frames
 
     @property
     def groups(self):

@@ -21,11 +21,12 @@ from .hdf5.h5group import H5Group
 from .block import Block
 from .section import Section
 from .container import Container, SectionContainer
-from .exceptions import exceptions
 from . import util
+from .exceptions import InvalidFile, DuplicateName
 from .util import find as finders
-
+from .validate import Validate
 from .compression import Compression
+from .dimensions import RangeDimension, SetDimension, SampledDimension
 
 
 FILE_FORMAT = "nix"
@@ -150,7 +151,7 @@ class File(object):
 
     def _check_header(self, mode):
         if self.format != FILE_FORMAT:
-            raise exceptions.InvalidFile
+            raise InvalidFile
 
         if mode == FileMode.ReadWrite:
             if not can_write(self):
@@ -262,6 +263,47 @@ class File(object):
         except ValueError:
             return False
 
+    def validate(self):
+        validator = Validate(self)
+        validator.check_file()
+        validator.form_dict()
+        errors = validator.errors
+        for bi, blk in enumerate(self.blocks):
+            validator.check_blocks(blk, bi)
+            for gi, grp in enumerate(blk.groups):
+                validator.check_groups(grp, gi, bi)
+            for di, da in enumerate(blk.data_arrays):
+                validator.check_data_arrays(da, di, bi)
+                for dimi, dim in enumerate(da.dimensions):
+                    if isinstance(dim, RangeDimension):
+                        validator.check_range_dim(dim, dimi, di, bi)
+                    if isinstance(dim, SetDimension):
+                        validator.check_set_dim(dim, dimi, di, bi)
+                    if isinstance(dim, SampledDimension):
+                        validator.check_sampled_dim(dim, dimi, di, bi)
+            for mti, mt in enumerate(blk.multi_tags):
+                validator.check_multi_tag(mt, mti, bi)
+                for fi, fea in enumerate(mt.features):
+                    validator.check_features(fea, 'multi_tags', bi, mti, fi)
+            for ti, tag in enumerate(blk.tags):
+                validator.check_tag(tag, ti, bi)
+                for fi, fea in enumerate(tag.features):
+                    validator.check_features(fea, 'tags', bi, ti, fi)
+            for src in blk.find_sources():
+                validator.check_sources(src, bi)
+
+        for si, sec in enumerate(self.find_sections()):
+            validator.check_section(sec, si)
+            for pi, prop in enumerate(sec.props):
+                validator.check_property(prop, pi, si)
+
+        if validator.error_count:
+            print("{} errors found".format(validator.error_count))
+            return errors
+        else:
+            print("No errors found: The file is a valid NIX file")
+            return errors
+
     def flush(self):
         self._h5file.flush()
 
@@ -312,7 +354,7 @@ class File(object):
         :rtype: Section
         """
         if name in self.metadata:
-            raise exceptions.DuplicateName("create_section")
+            raise DuplicateName("create_section")
         sec = Section._create_new(self, self.metadata, name, type_, oid)
         return sec
 

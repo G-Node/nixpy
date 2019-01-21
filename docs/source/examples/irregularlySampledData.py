@@ -21,7 +21,7 @@ import matplotlib.pylab as plt
 
 
 def create_data(duration, interval):
-    times = np.around(np.cumsum(np.random.poisson(interval*1000, 1.5*duration/interval))/1000., 3)
+    times = np.around(np.cumsum(np.random.poisson(interval*1000, int(1.5*duration/interval)))/1000., 3)
     times = times[times <= duration]
     x = np.arange(0, times[-1] * 2 * np.pi, 0.001)
     y = np.sin(5 * x)
@@ -31,7 +31,7 @@ def create_data(duration, interval):
 def plot_data(data_array):
     x_axis = data_array.dimensions[0]
     x = list(x_axis.ticks)
-    y = data_array.data
+    y = data_array[:]
     plt.plot(x, y, marker='o', color='dodgerblue')
     plt.xlabel(x_axis.label + " [" + x_axis.unit + "]")
     plt.ylabel(data_array.label + " [" + data_array.unit + "]")

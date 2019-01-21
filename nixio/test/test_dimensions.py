@@ -80,6 +80,7 @@ class TestDimension(unittest.TestCase):
 
         assert(self.sample_dim.index_of(3.14) == 0)
         assert(self.sample_dim.index_of(23.) == 10)
+        assert(type(self.sample_dim.index_of(23.) == int))
 
         assert(self.sample_dim.position_at(0) == 3.)
         assert(self.sample_dim.position_at(200) == 200*2.+3.)
@@ -87,6 +88,10 @@ class TestDimension(unittest.TestCase):
         assert(len(self.sample_dim.axis(10)) == 10)
         assert(self.sample_dim.axis(10)[0] == 3.)
         assert(self.sample_dim.axis(10)[-1] == 9*2.+3.)
+
+        assert(len(self.sample_dim.axis(10, 2)) == 10)
+        assert(self.sample_dim.axis(10, 2)[0] == 2 * 2. + 3.)
+        assert(self.sample_dim.axis(10, 2)[-1] == (9 + 2) * 2. + 3.)
 
     def test_range_dimension(self):
         assert(self.range_dim.index == 3)
@@ -111,7 +116,7 @@ class TestDimension(unittest.TestCase):
         assert(self.range_dim.ticks == other)
 
         assert(self.range_dim.index_of(0.) == 0)
-        assert(self.range_dim.index_of(10.) == (np.ceil(10./3.14)))
+        assert(self.range_dim.index_of(10.) == (np.floor(10./3.14)))
         assert(self.range_dim.index_of(100.) == 9)
         assert(self.range_dim.index_of(-100.) == 0)
 
@@ -137,3 +142,49 @@ class TestDimension(unittest.TestCase):
         assert(da.dimensions[0].label == da.label)
         assert(da.dimensions[0].unit == da.unit)
         assert(np.all(da.dimensions[0].ticks == da[:]))
+
+    def test_set_dim_label_resize(self):
+        setdim = self.array.append_set_dimension()
+        labels = ["A", "B"]
+        setdim.labels = labels
+        assert tuple(labels) == setdim.labels
+
+        newlabels = ["C", "B", "A"]
+        setdim.labels = newlabels
+        assert tuple(newlabels) == setdim.labels
+
+    def test_range_dim_ticks_resize(self):
+        rangedim = self.array.append_range_dimension([1, 2, 100])
+        ticks = [1, 1, 30]
+        rangedim.ticks = ticks
+        assert tuple(ticks) == rangedim.ticks
+
+        newticks = [2, 4, 300, 800]
+        rangedim.ticks = newticks
+        assert tuple(newticks) == rangedim.ticks
+
+    def test_append_dim_init(self):
+        slabels = ["label A", "label B"]
+        setdim = self.array.append_set_dimension(slabels)
+        assert tuple(slabels) == setdim.labels
+
+        rticks = [1, 2, 10.3]
+        rlabel = "range-label"
+        runit = "ms"
+        rdim = self.array.append_range_dimension(rticks, rlabel, runit)
+        assert tuple(rticks) == rdim.ticks
+        assert rlabel == rdim.label
+        assert runit == rdim.unit
+
+        sinterval = 0.25
+        slabel = "sample label"
+        sunit = "us"
+        soffset = 10
+        smpldim = self.array.append_sampled_dimension(sinterval,
+                                                      slabel,
+                                                      sunit,
+                                                      soffset)
+        assert sinterval == smpldim.sampling_interval
+        assert slabel == smpldim.label
+        assert sunit == smpldim.unit
+        assert soffset == smpldim.offset
