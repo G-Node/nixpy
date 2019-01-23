@@ -7,7 +7,10 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from collections import Sequence, Iterable
+try:
+    from collections.abc import Sequence, Iterable
+except ImportError:
+    from collections import Sequence, Iterable
 from enum import Enum
 from numbers import Number
 from six import string_types
@@ -147,6 +150,7 @@ class Property(Entity):
     @uncertainty.setter
     def uncertainty(self, uncertainty):
         util.check_attr_type(uncertainty, Number)
+        uncertainty = float(uncertainty) if uncertainty is not None else None
         self._h5dataset.set_attr("uncertainty", uncertainty)
 
     @property
@@ -314,3 +318,25 @@ class Property(Entity):
         implemented or escaped
         """
         return hash(self.id)
+
+    def pprint(self, indent=2, max_length=80, current_depth=-1):
+        property_spaces = ""
+        prefix = ""
+        if current_depth >= 0:
+            property_spaces = " " * ((current_depth + 2) * indent)
+            prefix = "|-"
+        if self.unit is None:
+            value_string = str(self.values)
+        else:
+            value_string = "{}{}".format(self.values, self.unit)
+        p_len = len(property_spaces) + len(self.name) + len(value_string)
+        if p_len >= max_length - 4:
+            split_len = int((max_length - len(property_spaces)
+                             + len(self.name) - len(prefix))/2)
+            str1 = value_string[0: split_len]
+            str2 = value_string[-split_len:]
+            print(("{}{} {}: {} ... {}".format(property_spaces, prefix,
+                                               self.name, str1, str2)))
+        else:
+            print(("{}{} {}: {}".format(property_spaces, prefix, self.name,
+                                        value_string)))

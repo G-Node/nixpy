@@ -10,7 +10,10 @@ try:
     from sys import maxint
 except ImportError:
     from sys import maxsize as maxint
-from collections import Sequence, Iterable
+try:
+    from collections.abc import Sequence, Iterable
+except ImportError:
+    from collections import Sequence, Iterable
 from six import string_types
 
 from .container import Container, SectionContainer
@@ -436,3 +439,22 @@ class Section(Entity):
         if self._properties is None:
             self._properties = Container("properties", self, Property)
         return self._properties
+
+    def pprint(self, indent=2, max_depth=1, max_length=80, current_depth=0):
+        spaces = " " * (current_depth * indent)
+        sec_str = "{} {} [{}]".format(spaces, self.name, self.type)
+        print(sec_str)
+        for p in self.props:
+            p.pprint(current_depth=current_depth, indent=indent,
+                     max_length=max_length)
+        if max_depth == -1 or current_depth < max_depth:
+            for s in self.sections:
+                s.pprint(current_depth=current_depth+1, max_depth=max_depth,
+                         indent=indent, max_length=max_length)
+        elif max_depth == current_depth:
+            child_sec_indent = spaces + " " * indent
+            more_indent = spaces + " " * (current_depth + 2 * indent)
+            for s in self.sections:
+                print("{} {} [{}]\n{}[...]".format(child_sec_indent,
+                                                   s.name, s.type,
+                                                   more_indent))

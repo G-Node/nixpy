@@ -13,8 +13,8 @@
 
  This tutorial shows how to store image data in nix-files.
  See https://github.com/G-node/nix/wiki for more information.
- 
- We use the "Lenna" image in this tutorial.  
+
+ We use the "Lenna" image in this tutorial.
 
  "Lenna" by Original full portrait: "Playmate of the Month". Playboy
  Magazine. November 1972, photographed by Dwight Hooker.This 512x512
@@ -27,7 +27,7 @@
 
 import nixio as nix
 import numpy as np
-import Image as img
+from PIL import Image as img
 import matplotlib.pyplot as plt
 
 
@@ -49,7 +49,7 @@ def print_metadata_table(section, ax):
         nrows, ncols = len(cell_text)+1, len(columns)
         ax.axis('off')
         the_table = ax.table(cellText=cell_text,
-                               colLabels=columns, 
+                               colLabels=columns,
                                loc='center')
         for cell in the_table.get_children():
             cell.set_height(.075)
@@ -72,13 +72,13 @@ def plot_data(data_array):
     fig = plt.figure()
     img_axis = fig.add_subplot(121)
     img_axis.imshow(new_img)
-    
+
     info_axis = fig.add_subplot(122)
     print_metadata_table(data.metadata, info_axis)
     fig.subplots_adjust(left=0.075, right=0.975, bottom=0.075, top=0.975)
     fig.savefig('image_with_metadata.png')
     fig.show()
-        
+
 
 def add_image_information(nix_file):
     section = nix_file.create_section('Image metadata', 'image_source')

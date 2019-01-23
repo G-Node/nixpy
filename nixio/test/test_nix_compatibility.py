@@ -7,27 +7,18 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import os
-from collections import Iterable
+try:
+    from collections.abc import Iterable
+except ImportError:
+    from collections import Iterable
+from collections import OrderedDict
 from six import string_types
 from subprocess import Popen, PIPE
 import numpy as np
-import tempfile
 import pytest
 
 import nixio as nix
-from .xcompat.compile import maketests
 
-
-BINDIR = tempfile.mkdtemp(prefix="nixpy-tests-")
-
-# skip these tests if nix isn't available
-if pytest.config.getoption("--force-compat"):
-    print("Forcing compatibility tests")
-    maketests(BINDIR)
-else:
-    pytestmark = pytest.mark.skipif(
-        "skip()",
-        reason="Compatibility tests require the C++ NIX library")
 
 dtypes = (
     nix.DataType.UInt8,
@@ -45,10 +36,6 @@ dtypes = (
 )
 
 
-def skip():
-    return not maketests(BINDIR)
-
-
 def validate(fname):
     """
     Runs the nix validation function on the given file.
@@ -56,10 +43,7 @@ def validate(fname):
     runcpp("validate", fname)
 
 
-def runcpp(command, *args):
-    cmdbin = os.path.join(BINDIR, command)
-    cmdargs = [cmdbin]
-    cmdargs.extend(args)
+def runcpp(*cmdargs):
     proc = Popen(cmdargs, stdout=PIPE, stderr=PIPE)
     proc.wait()
     stdout = proc.stdout.read().decode()
@@ -70,7 +54,8 @@ def runcpp(command, *args):
         raise ValueError(stdout+stderr)
 
 
-def test_blocks(tmpdir):
+@pytest.mark.compatibility
+def test_blocks(tmpdir, bindir):
     nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     for idx in range(10):
@@ -81,10 +66,12 @@ def test_blocks(tmpdir):
 
     nix_file.close()
     # validate(nixfilepath)
-    runcpp("readblocks", nixfilepath)
+    cmd = os.path.join(bindir, "readblocks")
+    runcpp(cmd, nixfilepath)
 
 
-def test_groups(tmpdir):
+@pytest.mark.compatibility
+def test_groups(tmpdir, bindir):
     nixfilepath = os.path.join(str(tmpdir), "grouptest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("test_block", "blocktype")
@@ -95,10 +82,12 @@ def test_groups(tmpdir):
 
     nix_file.close()
     # validate(nixfilepath)
-    runcpp("readgroups", nixfilepath)
+    cmd = os.path.join(bindir, "readgroups")
+    runcpp(cmd, nixfilepath)
 
 
-def test_data_arrays(tmpdir):
+@pytest.mark.compatibility
+def _test_data_arrays(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "arraytest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "blocktype")
@@ -122,7 +111,33 @@ def test_data_arrays(tmpdir):
     # validate(nixfilepath)
 
 
-def test_tags(tmpdir):
+@pytest.mark.compatibility
+def _test_data_frames(tmpdir):
+    nixfilepath = os.path.join(str(tmpdir), "frametest.nix")
+    nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
+    print(nixfilepath, nix_file)
+    blk = nix_file.create_block("testblock", "blocktype")
+    grp = blk.create_group("testgroup", "grouptype")
+    arr = np.arange(999).reshape((333, 3))
+
+    for idx in range(7):
+        cn = []
+        dt_list = []
+        di = dict(zip(cn, dt_list))
+        di = {'name': int, 'id': str, 'time': float}
+        arr = np.arange(999).reshape((333, 3))
+        df = blk.create_data_frame("df_" + str(idx), "dataframe", col_dict=di,
+                                   data=arr)
+        df.definition = "da definition " + str(idx)
+        df.force_created_at(np.random.randint(1000000000))
+        df.label = "data label " + str(idx)
+
+    nix_file.close()
+    # validate(nixfilepath)
+
+
+@pytest.mark.compatibility
+def _test_tags(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "tagtest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "blocktype")
@@ -144,7 +159,8 @@ def test_tags(tmpdir):
     # validate(nixfilepath)
 
 
-def test_multi_tags(tmpdir):
+@pytest.mark.compatibility
+def _test_multi_tags(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "mtagtest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "blocktype")
@@ -166,7 +182,8 @@ def test_multi_tags(tmpdir):
     # validate(nixfilepath)
 
 
-def test_sources(tmpdir):
+@pytest.mark.compatibility
+def _test_sources(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "sourcetest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "sourcetest")
@@ -197,7 +214,8 @@ def test_sources(tmpdir):
     # validate(nixfilepath)
 
 
-def test_dimensions(tmpdir):
+@pytest.mark.compatibility
+def _test_dimensions(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "dimtest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "dimtest")
@@ -237,7 +255,8 @@ def test_dimensions(tmpdir):
     # validate(nixfilepath)
 
 
-def test_tag_features(tmpdir):
+@pytest.mark.compatibility
+def _test_tag_features(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "feattest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "feattest")
@@ -261,6 +280,7 @@ def test_tag_features(tmpdir):
     # validate(nixfilepath)
 
 
+@pytest.mark.compatibility
 def test_multi_tag_features(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "mtagfeattest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
@@ -335,6 +355,7 @@ def test_multi_tag_features(tmpdir):
     # validate(nixfilepath)
 
 
+@pytest.mark.compatibility
 def test_multi_tag_references(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
@@ -366,6 +387,7 @@ def test_multi_tag_references(tmpdir):
     # validate(nixfilepath)
 
 
+@pytest.mark.compatibility
 def test_properties(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "proptest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
@@ -393,6 +415,7 @@ def test_properties(tmpdir):
     # validate(nixfilepath)
 
 
+@pytest.mark.compatibility
 def test_sections(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "sectiontest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
@@ -416,6 +439,7 @@ def test_sections(tmpdir):
     # validate(nixfilepath)
 
 
+@pytest.mark.compatibility
 def test_full_write(tmpdir):
     # Create a fully-featured nix file
     nixfilepath = os.path.join(str(tmpdir), "fulltest.nix")
@@ -440,7 +464,8 @@ def test_full_write(tmpdir):
     # validate(nixfilepath)
 
 
-def test_full_file(tmpdir):
+@pytest.mark.compatibility
+def test_full_file(tmpdir, bindir):
     nixfilepath = os.path.join(str(tmpdir), "filetest-writepy.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
 
@@ -476,6 +501,15 @@ def test_full_file(tmpdir):
     setdim.labels = ["a", "b"]
     group = block.groups[0]
     group.data_arrays.append(da)
+
+    df = block.create_data_frame("adataframe", "4-column df",
+                                 col_dict=OrderedDict([('name', str),
+                                                       ('id', int),
+                                                       ('time', float),
+                                                       ('Adjusted', bool)]),
+                                 data=[["Bob", 9, 11.28, False],
+                                       ["Jane", 10, 14.37, True]])
+    df.append_rows([["Alice", 2, 3.7, False]])
 
     featda = block.create_data_array("feat-da", "tag-feature",
                                      data=[0.4, 0.41, 0.49, 0.1, 0.1, 0.1])
@@ -605,7 +639,8 @@ def test_full_file(tmpdir):
                                      dtype=dt, data=dt(0))
 
     nix_file.close()
-    runcpp("readfullfile", nixfilepath)
+    cmd = os.path.join(bindir, "readfullfile")
+    runcpp(cmd, nixfilepath)
     # validate(nixfilepath)
 
 
@@ -640,9 +675,11 @@ def compare(exp, actual):
     assert exp == actual, "Expected {}, got {}".format(exp, actual)
 
 
-def test_full_file_read(tmpdir):
+@pytest.mark.compatibility
+def test_full_file_read(tmpdir, bindir):
     nixfilepath = os.path.join(str(tmpdir), "filetest-readpy.nix")
-    runcpp("writefullfile", nixfilepath)
+    cmd = os.path.join(bindir, "writefullfile")
+    runcpp(cmd, nixfilepath)
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.ReadOnly)
 
     # Check object counts
@@ -705,6 +742,21 @@ def test_full_file_read(tmpdir):
     dim = da.dimensions[1]
     compare(nix.DimensionType.Set, dim.dimension_type)
     compare(["a", "b"], dim.labels)
+
+    # Data Frame
+    df = block.data_frames[0]
+    compare("table", df.name)
+    compare("filing", df.type)
+    dt = (nix.util.util.vlen_str_dtype,
+          nix.DataType.Double, nix.DataType.Int64, nix.DataType.Bool)
+    compare(dt, df.dtype)
+    col_name = ("str", "Double", "int64", "bool")
+    compare(col_name, df.column_names)
+    combine_dt = np.dtype([(n, dty) for n, dty in zip(col_name, dt)])
+    arr = np.array([(b"exp1", 42.1, 10, False),
+                    (b"exp2", 30.2, 4, True)], dtype=combine_dt)
+    compare(arr, df[:])
+    # could not test shape because it will write data
 
     # Tag
     tag = block.tags[0]

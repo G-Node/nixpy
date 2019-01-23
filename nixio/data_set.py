@@ -98,7 +98,6 @@ class DataSet(object):
         :param axis: Along which axis to append the data to
         """
         data = np.ascontiguousarray(data)
-
         if len(self.shape) != len(data.shape):
             raise ValueError(
                 "Data and DataArray must have the same dimensionality"

@@ -132,6 +132,32 @@ int main(int argc, char* argv[]) {
     setdim = dim;
     errcount += compare({"a", "b"}, setdim.labels());
 
+    // DataFrame
+    auto df = block.getDataFrame(0);
+    size_t n = 3;
+    std::vector<float_t> dou_out(n);
+    std::vector<std::string> str_out(n);
+    errcount += compare("adataframe", df.name());
+    errcount += compare("4-column df", df.type());
+    errcount += compare(nix::ndsize_t{n}, df.rows());
+    errcount += compare(df.readRow(nix::ndsize_t{0}), {nix::Variant("Bob"),
+                                nix::Variant(int64_t(9)), nix::Variant(11.28), nix::Variant(false)});
+    df.readColumn(0, str_out);
+    errcount += compare(str_out, {"Bob", "Jane", "Alice"});
+    df.readColumn(2, dou_out);
+    errcount += compare(dou_out, {11.28, 14.37, 3.7});
+    nix::ndsize_t rown = 1;
+    std::vector<nix::Cell> cells = df.readCells(rown, {"name", "Adjusted"});
+    std::vector<nix::Cell> def_cells = {
+    {"name", nix::Variant{"Jane"}},
+    {"Adjusted", nix::Variant{true}}
+    };
+    errcount += compare(cells, def_cells);
+    std::vector<nix::Column> cols = df.columns();
+    for(size_t i = 0; i <  cols.size(); i++){
+        errcount += compare("", cols[i].unit);
+    }
+
     // Tag
     auto tag = block.getTag(0);
     errcount += compare("tagu", tag.name());

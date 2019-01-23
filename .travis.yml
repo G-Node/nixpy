@@ -23,9 +23,25 @@ matrix:
     - language: generic
       os: osx
       env: pymajor=2
+      addons:
+        homebrew:
+          packages:
+            - python2
+            - cmake
+            - cppunit
+            - hdf5
+            - numpy
     - language: generic
       os: osx
       env: pymajor=3
+      addons:
+        homebrew:
+          packages:
+            - python3
+            - cmake
+            - cppunit
+            - hdf5
+            - numpy
 
 addons:
   apt:
@@ -40,15 +56,9 @@ before_install:
   - export NIX_INCDIR=${nixprefix}/include/nixio-1.0
   - export NIX_LIBDIR=${nixprefix}/lib
   - export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:${nixprefix}/lib/pkgconfig
-  - if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then
-      brew upgrade cmake;
-      brew install cppunit hdf5;
-      if [[ "${pymajor}" == "3" ]]; then
-        brew upgrade python${pymajor} || true;
-      else
-        alias pip2='pip';
-      fi;
-    fi
+  - alias pip2='pip'
+  - if [[ "${TRAVIS_OS_NAME}" != "osx" ]]; then pip${pymajor} install --upgrade numpy; fi
+  - pip${pymajor} install --upgrade coveralls h5py pytest-xdist;
   - git clone --branch ${NIX_BRANCH} https://github.com/G-Node/nix /tmp/libnix
   - pushd /tmp/libnix
   - mkdir build
@@ -59,7 +69,6 @@ before_install:
   - popd
   - popd
   - which pip${pymajor}
-  - pip${pymajor} install --upgrade --no-binary ":all:" numpy coveralls h5py pytest-xdist
   - which python${pymajor}
   - python${pymajor} --version
 
@@ -68,9 +77,9 @@ install:
 
 script:
   - if [[ "${coveralls}" == 1 ]]; then
-      coverage run --source=nixio setup.py test --addopts "--force-compat -s" && coverage report -m;
+      coverage run --source=nixio setup.py test --addopts "--nix-compat -s" && coverage report -m;
     else
-      python${pymajor} setup.py test --addopts "--force-compat -s -nauto";
+      python${pymajor} setup.py test --addopts "--nix-compat -s -nauto";
     fi
 
 after_success:

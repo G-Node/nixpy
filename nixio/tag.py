@@ -221,7 +221,7 @@ class Tag(BaseTag):
             stop = 0
             if idx < len(extent):
                 ext = extent[idx]
-                stop = self._pos_to_idx(pos + ext, unit, dim)
+                stop = self._pos_to_idx(pos + ext, unit, dim) + 1
             if stop == 0:
                 stop = start + 1
             refslice.append(slice(start, stop))
