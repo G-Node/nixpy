@@ -124,7 +124,7 @@ def update_info(newver):
     with open(infofn, "w") as infofile:
         infodict["VERSION"] = newverstring
         infodict["RELEASE"] = newrelstring
-        json.dump(infodict, infofile)
+        json.dump(infodict, infofile, indent=4)
 
     return True
 
@@ -246,16 +246,28 @@ def main():
     if len(sys.argv) < 2:
         die("Specify version")
 
-    newverstr = sys.argv[1]
+    args = sys.argv[1:]
+
+    skipchg = False
+    if "--skip-changes" in args:
+        print("Skipping changes for README, info, and CI configs")
+        skipchg = True
+        args.remove("--skip-changes")
+
+    newverstr = args[0]
     prepline = "Preparing new release: {}".format(newverstr)
     banner = "="*len(prepline) + "\n" + prepline + "\n" + "="*len(prepline)
     banner = bold_begin + banner + bold_end
     print(banner)
 
-    chg = update_readme() | update_info(newverstr) | update_ci_confs(newverstr)
-    if chg:
-        print("Files have changed. Commit these changes and rerun the script.")
-        sys.exit(0)
+    if not skipchg:
+        chg = (update_readme() |
+               update_info(newverstr) |
+               update_ci_confs(newverstr))
+        if chg:
+            print("Files have changed. "
+                  "Commit these changes and rerun the script.")
+            sys.exit(0)
 
     check_git_status()  # might have been external changes (?) check again
 

@@ -338,7 +338,7 @@ class File(object):
         return block
 
     # Section
-    def create_section(self, name, type_, oid=None):
+    def create_section(self, name, type_="undefined", oid=None):
         """
         Create a new metadata section inside the file.
 
