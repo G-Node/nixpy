@@ -74,14 +74,16 @@ class TestValidate (unittest.TestCase):
                           'Name of Group is missing']
 
     def test_check_data_arrays(self):
-        da1 = self.block1.data_arrays[0]
+        da1 = self.block1.create_data_array("u", "something",
+                            dtype=int, data=np.random.randint(10, size=(5,5)))
         da1.append_range_dimension([1, 2, 3, 4, 5, 6, 7, 8, 9])
         da1.append_set_dimension()
         da1.dimensions[1].labels = ["A", "B", "C", "D"]
         da1._h5group.set_attr("unit", "abcde")
         da1._h5group.set_attr("type", None)
         da1._h5group.set_attr("expansion_origin", 0.11)  # poly not set
-        self.validator.check_data_arrays(da1, 0, 0)
+        self.validator.form_dict()
+        self.validator.check_data_arrays(da1, 4, 0)
         da_warn1 = 'Type of DataArray is missing'
         da_warn2 = ('In some Range Dimensions, '
                     'the number of ticks differ from the data entries')
@@ -90,7 +92,7 @@ class TestValidate (unittest.TestCase):
         da_warn4 = 'Invalid units'
         da_warn5 = ('Expansion origins exist '
                     'but polynomial coefficients are missing')
-        da_err = self.validator.errors['blocks'][0]['data_arrays'][0]['errors']
+        da_err = self.validator.errors['blocks'][0]['data_arrays'][4]['errors']
         assert da_warn1 in da_err
         assert da_warn2 in da_err
         assert da_warn3 in da_err
@@ -107,6 +109,11 @@ class TestValidate (unittest.TestCase):
                           "origins are missing"]
         # Dimension mismatch missed out as change data_extent attr
         # will also change shape
+
+        da3 = self.block1.data_arrays[0]
+        self.validator.check_data_arrays(da3, 0, 0)
+        da_err = self.validator.errors['blocks'][0]['data_arrays'][0]['errors']
+        assert da_err == ["Dimension mismatch"]
 
     def test_check_tags(self):
         tag1 = self.block1.tags[0]
@@ -260,7 +267,6 @@ class TestValidate (unittest.TestCase):
         prop1 = section.create_property("prop2", values_or_dtype=[1, 2, 3, 4])
         prop1.delete_values()
         prop1._h5group.set_attr('name', None)
-        print(prop1.name)
         # check3
         prop2 = section.create_property("prop3", values_or_dtype=[1, 2, 3, 4])
         prop2.unit = "invalidu"
@@ -338,7 +344,6 @@ class TestValidate (unittest.TestCase):
         src1 = self.block1.create_source("src1", "testing_src")
         da1.sources.append(src1)
         src1._h5group.set_attr('name', None)
-        print(da1.sources)
         self.validator.form_dict()
         self.validator.check_sources(src1, 0)
         err = self.validator.errors['blocks'][0]['sources']
