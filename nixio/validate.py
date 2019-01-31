@@ -98,7 +98,6 @@ class Validate:
             return None
 
     def check_data_arrays(self, da, da_idx, blk_idx):
-        # TODO: seperate da and dim checking
         da_error_list = []
         if self.check_for_basics(da):
             da_error_list.extend(self.check_for_basics(da))
@@ -108,23 +107,35 @@ class Validate:
         if dim != len_dim:
             da_error_list.append("Dimension mismatch")
 
+        if len(dim) != len(da.dimensions):
+            da_error_list.append("Dimension mismatch")
+
         if da.dimensions:
-            for dim in da.dimensions:
+            for i, dim in enumerate(da.dimensions):
                 if dim.dimension_type == 'range':
-                    if len(dim.ticks) != len(da):
-                        # if data_extent is used instead of len()
-                        # tuple will be observed, eg (1200,)
-                        da_error_list.append(
-                            "In some Range Dimensions, the number"
-                            " of ticks differ from the data entries"
-                        )
+                    try:
+                        if len(dim.ticks) != da.data_extent[i]:
+                            # if data_extent is used instead of len()
+                            # tuple will be observed, eg (1200,)
+                            da_error_list.append(
+                                "In some Range Dimensions, the number"
+                                " of ticks differ from the data entries"
+                            )
+                    except IndexError:
+                        raise IndexError("Dimension of Dataarray and "
+                                         "Number of Dimension object Mismatch")
+
                 if dim.dimension_type == 'set':
                     # same as above
-                    if len(dim.labels) != len(da):
-                        da_error_list.append(
-                            "In some Set Dimensions, the number "
-                            "of labels differ from the data entries"
-                        )
+                    try:
+                        if len(dim.labels) != da.data_extent[i]:
+                            da_error_list.append(
+                                "In some Set Dimensions, the number "
+                                "of labels differ from the data entries"
+                            )
+                    except IndexError:
+                        raise IndexError("Dimension of Dataarray and "
+                                         "Number of Dimension object Mismatch")
 
         unit = da.unit
         if unit and not units.is_si(unit):
