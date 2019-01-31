@@ -87,7 +87,7 @@ def test_groups(tmpdir, bindir):
 
 
 @pytest.mark.compatibility
-def _test_data_arrays(tmpdir):
+def _test_data_arrays(tmpdir, bindir):
     nixfilepath = os.path.join(str(tmpdir), "arraytest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("testblock", "blocktype")
@@ -112,7 +112,7 @@ def _test_data_arrays(tmpdir):
 
 
 @pytest.mark.compatibility
-def _test_data_frames(tmpdir):
+def test_data_frames(tmpdir, bindir):
     nixfilepath = os.path.join(str(tmpdir), "frametest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     blk = nix_file.create_block("test_block", "blocktype")
@@ -131,15 +131,16 @@ def _test_data_frames(tmpdir):
                             data=arr)
         df.force_created_at(np.random.randint(1000000000))
         if idx == 4:
-            str_arr = np.array(['119741023950123956123',
-                        'asd908v*6a-sd','a'*50, ' '])
-            df.append_column(str_arr, "somelongstr"*3)
+            str_arr = ['119741023950123956123',
+                        'asd908v*6a-sd','a'*50, ' ']
+            df.append_column(str_arr, "somelongstr", str)
         elif idx== 5:
             new_row = [('Dallas', 111, 123.445, 546.555, True)]
             df.append_rows(new_row)
     nix_file.close()
     # validate(nixfilepath)
-    runcpp("readdataframes", nixfilepath)
+    cmd = os.path.join(bindir, "readdataframes")
+    runcpp(cmd, nixfilepath)
 
 
 @pytest.mark.compatibility

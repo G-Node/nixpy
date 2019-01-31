@@ -34,6 +34,7 @@ class DataFrame(Entity, DataSet):
         return newentity
 
     def append_column(self, column, name, datatype=None):
+        # datatype is better included for strings
         if len(column) < len(self):
             raise ValueError("Not enough entries for column in this dataframe")
         elif len(column) > len(self):
