@@ -87,28 +87,30 @@ def test_groups(tmpdir, bindir):
 
 
 @pytest.mark.compatibility
-def _test_data_arrays(tmpdir, bindir):
+def test_data_arrays(tmpdir, bindir):
     nixfilepath = os.path.join(str(tmpdir), "arraytest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
-    blk = nix_file.create_block("testblock", "blocktype")
-    grp = blk.create_group("testgroup", "grouptype")
+    blk = nix_file.create_block("test_block", "blocktype")
+    grp = blk.create_group("test_group", "grouptype")
 
     for idx in range(7):
         da = blk.create_data_array("data_" + str(idx), "thedata",
-                                   data=np.random.random(40))
-        da.definition = "da definition " + str(sum(da[:]))
+                                   data=np.arange(40, 80).reshape((2,20)))
+        da.definition = "da definition " + str(idx)
         da.force_created_at(np.random.randint(1000000000))
         da.label = "data label " + str(idx)
         da.unit = "mV"
 
         if (idx % 2) == 0:
-            da.expansion_origin = np.random.random()*100
+            da.expansion_origin = 100
             grp.data_arrays.append(da)
         if (idx % 3) == 0:
-            da.polynom_coefficients = tuple(np.random.random(3))
+            da.polynom_coefficients = (0.1, 0.2, 0.3)
 
     nix_file.close()
     # validate(nixfilepath)
+    cmd = os.path.join(bindir, "readdataarrays")
+    runcpp(cmd, nixfilepath)
 
 
 @pytest.mark.compatibility

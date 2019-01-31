@@ -18,11 +18,9 @@ int main(int argc, char* argv[]) {
         errcount += compare(true, block.hasDataFrame(expname));
         if (idx == 4){
             errcount += compare(6, static_cast<int>(df.columns().size()));
-            }
-        else if (idx == 5) {
+            } else if (idx == 5) {
         errcount += compare(5, static_cast<int>(df.rows()));
-        }
-        else{
+        } else{
             errcount += compare(5, static_cast<int>(df.columns().size()));
             errcount += compare(4, static_cast<int>(df.rows()));
             }
@@ -31,5 +29,6 @@ int main(int argc, char* argv[]) {
         errcount += compare(expname, df.name());
         errcount += compare(exptp, df.type());
     }
+    errcount += compare(idx, df_no);
     return errcount;
 }
