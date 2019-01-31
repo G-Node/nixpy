@@ -115,25 +115,31 @@ def _test_data_arrays(tmpdir):
 def _test_data_frames(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "frametest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
-    print(nixfilepath, nix_file)
-    blk = nix_file.create_block("testblock", "blocktype")
-    grp = blk.create_group("testgroup", "grouptype")
-    arr = np.arange(999).reshape((333, 3))
+    blk = nix_file.create_block("test_block", "blocktype")
+    dt_full_list = [str, nix.DataType.Int64,
+                    nix.DataType.Float, nix.DataType.Float, nix.DataType.Bool]
+
 
     for idx in range(7):
-        cn = []
-        dt_list = []
-        di = dict(zip(cn, dt_list))
-        di = {'name': int, 'id': str, 'time': float}
-        arr = np.arange(999).reshape((333, 3))
-        df = blk.create_data_frame("df_" + str(idx), "dataframe", col_dict=di,
-                                   data=arr)
-        df.definition = "da definition " + str(idx)
+        col_names = ['name', 'id', 'exp1', 'exp2', 'Valid']
+        arr = [('Alice', 1234590, 1234.1245614e+9, 1034545e-8, False),
+               ('Bob', 9874542, 12.335205e-9, 123958e+9, True),
+               ('Jane', 9874542123, 12.5335205e-1, 123958e+29, True),
+               ('Chris', 9, 12.335205e-19, 123958e+19, False)]
+        df = blk.create_data_frame("df_" + str(idx), "df type " + str(idx),
+                            col_names= col_names, col_dtypes=dt_full_list,
+                            data=arr)
         df.force_created_at(np.random.randint(1000000000))
-        df.label = "data label " + str(idx)
-
+        if idx == 4:
+            str_arr = np.array(['119741023950123956123',
+                        'asd908v*6a-sd','a'*50, ' '])
+            df.append_column(str_arr, "somelongstr"*3)
+        elif idx== 5:
+            new_row = [('Dallas', 111, 123.445, 546.555, True)]
+            df.append_rows(new_row)
     nix_file.close()
     # validate(nixfilepath)
+    runcpp("readdataframes", nixfilepath)
 
 
 @pytest.mark.compatibility
