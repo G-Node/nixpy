@@ -108,7 +108,11 @@ def test_data_arrays(tmpdir, bindir):
             da.polynom_coefficients = (0.1, 0.2, 0.3)
             da.type = "somedataarray"
         if idx == 5:
-            da.append_range_dimension(["a", "b"])
+            da.append_range_dimension([1.2, 2.4])
+            da.dimensions[0].unit = "ms"
+        if idx == 6:
+            da.append_set_dimension(["a", "b"])
+            da.append_sampled_dimension(1.0, 'dim_label', 's', 1.0)
 
     nix_file.close()
     # validate(nixfilepath)

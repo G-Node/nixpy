@@ -28,6 +28,31 @@ int main(int argc, char* argv[]) {
         } else{
             errcount += compare(static_cast<int>(da.polynomCoefficients().size()), 0);
         }
+        // dimensions
+        if (idx == 5){
+            auto rd = da.getDimension(1);
+            errcount += compare(rd.dimensionType(), nix::DimensionType::Range);
+            nix::RangeDimension rangeDim;
+            rangeDim = rd;
+            std::string u = "ms";
+            errcount += compare(*rangeDim.unit(), u);
+            errcount += compare(rangeDim.ticks(), {1.2 ,2.4});
+            errcount += compare(*da.unit(), "mV");
+        } else if (idx == 6){
+            auto setd = da.getDimension(1);
+            auto sampled = da.getDimension(2);
+            errcount += compare(setd.dimensionType(), nix::DimensionType::Set);
+            errcount += compare(sampled.dimensionType(), nix::DimensionType::Sample);
+            nix::SetDimension setDim;
+            setDim = setd;
+            nix::SampledDimension sampledDim;
+            sampledDim = sampled;
+            errcount += compare(*sampledDim.unit(), "s");
+            errcount += compare(*sampledDim.label(), "dim_label");
+            errcount += compare(sampledDim.samplingInterval(), 1.0);
+            errcount += compare(*sampledDim.offset(), 1.0);
+            errcount += compare(setDim.labels(), {"a", "b"});
+        }
 
         expdef = "da definition " + nix::util::numToStr(idx++);
         errcount += compare(expname, da.name());
