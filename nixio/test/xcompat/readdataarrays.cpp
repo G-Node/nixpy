@@ -1,10 +1,6 @@
 #include "testutil.hpp"
 #include <nix.hpp>
 
-bool compareDouble(double a, double b){
-    return std::fabs(a-b) < 1e-10;
-    }
-
 
 int main(int argc, char* argv[]) {
     if (argc != 2) {
@@ -24,8 +20,7 @@ int main(int argc, char* argv[]) {
             const auto &group  = block.getGroup("test_group");
             size_t z = idx/2;
             errcount += compare(group.getDataArray(z).name(), da.name());
-        } else{
-            errcount += compareDouble(*da.expansionOrigin(), 0.0);
+            errcount += compare(group.getDataArray(z).id(), block.getDataArray(idx).id());
         }
         if (idx%3 == 0){
             std::vector<double> tmpPoly = {0.1, 0.2, 0.3};

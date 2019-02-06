@@ -100,12 +100,15 @@ def test_data_arrays(tmpdir, bindir):
         da.force_created_at(np.random.randint(1000000000))
         da.label = "data label " + str(idx)
         da.unit = "mV"
-
+        da.expansion_origin = 0.0
         if (idx % 2) == 0:
-            da.expansion_origin = 100
+            da.expansion_origin = 100.0
             grp.data_arrays.append(da)
         if (idx % 3) == 0:
             da.polynom_coefficients = (0.1, 0.2, 0.3)
+            da.type = "somedataarray"
+        if idx == 5:
+            da.append_range_dimension(["a", "b"])
 
     nix_file.close()
     # validate(nixfilepath)
