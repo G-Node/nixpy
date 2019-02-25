@@ -228,6 +228,9 @@ class Tag(BaseTag):
         return tuple(refslice)
 
     def retrieve_data(self, refidx):
+        return self.tagged_data(refidx)
+
+    def tagged_data(self, refidx):
         references = self.references
         position = self.position
         extent = self.extent
@@ -244,7 +247,7 @@ class Tag(BaseTag):
             raise IncompatibleDimensions(
                 "Number of dimensions in position or extent do not match "
                 "dimensionality of data",
-                "Tag.retrieve_data")
+                "Tag.tagged_data")
 
         slices = self._calc_data_slices(ref)
         if not self._slices_in_data(ref, slices):
@@ -253,6 +256,9 @@ class Tag(BaseTag):
         return DataView(ref, slices)
 
     def retrieve_feature_data(self, featidx):
+        return self.feature_data(featidx)
+
+    def feature_data(self, featidx):
         if len(self.features) == 0:
             raise OutOfBounds(
                 "There are no features associated with this tag!"
