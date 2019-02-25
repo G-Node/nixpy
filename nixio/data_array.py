@@ -6,6 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+import warnings
 from numbers import Number
 from enum import Enum
 
@@ -320,7 +321,6 @@ class DataArray(Entity, DataSet):
 
         :type: :class:`~nixio.data_array.DataArray`
         """
-        import warnings
         warnings.warn("Call to deprecated property DataArray.data",
                       category=DeprecationWarning)
         return self
