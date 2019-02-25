@@ -169,6 +169,9 @@ class MultiTag(BaseTag):
         return tuple(slice(start, stop) for start, stop in zip(starts, stops))
 
     def retrieve_data(self, posidx, refidx):
+        return self.tagged_data(posidx, refidx)
+
+    def tagged_data(self, posidx, refidx):
         references = self.references
         positions = self.positions
         extents = self.extents
@@ -185,14 +188,14 @@ class MultiTag(BaseTag):
             raise IncompatibleDimensions(
                 "Number of dimensions in position or extent do not match "
                 "dimensionality of data",
-                "MultiTag.retrieve_data")
+                "MultiTag.tagged_data")
         if len(positions.data_extent) > 1:
             if (positions.data_extent[1] > dimcount or
                     extents and extents.data_extent[1] > dimcount):
                 raise IncompatibleDimensions(
                     "Number of dimensions in position or extent do not match "
                     "dimensionality of data",
-                    "MultiTag.retrieve_data")
+                    "MultiTag.tagged_data")
         slices = self._calc_data_slices(ref, posidx)
 
         if not self._slices_in_data(ref, slices):
@@ -201,6 +204,9 @@ class MultiTag(BaseTag):
         return DataView(ref, slices)
 
     def retrieve_feature_data(self, posidx, featidx):
+        return self.feature_data(posidx, featidx)
+
+    def feature_data(self, posidx, featidx):
         if len(self.features) == 0:
             raise OutOfBounds(
                 "There are no features associated with this tag!"
