@@ -245,7 +245,7 @@ class TestMultiTags(unittest.TestCase):
 
         assert(len(self.my_tag.features) == 0)
 
-    def test_multi_tag_retrieve_data(self):
+    def test_multi_tag_tagged_data(self):
         sample_iv = 0.001
         x = np.arange(0, 10, sample_iv)
         y = np.sin(2*np.pi*x)
@@ -272,16 +272,16 @@ class TestMultiTags(unittest.TestCase):
         mtag.units = ['ms']
         mtag.references.append(da)
 
-        assert(mtag.retrieve_data(0, 0).shape == (2001,))
-        assert(np.array_equal(y[:2001], mtag.retrieve_data(0, 0)[:]))
+        assert(mtag.tagged_data(0, 0).shape == (2001,))
+        assert(np.array_equal(y[:2001], mtag.tagged_data(0, 0)[:]))
 
         # get by name
-        data = mtag.retrieve_data(0, da.name)
+        data = mtag.tagged_data(0, da.name)
         assert(data.shape == (2001,))
         assert(np.array_equal(y[:2001], data[:]))
 
         # get by id
-        data = mtag.retrieve_data(0, da.id)
+        data = mtag.tagged_data(0, da.id)
         assert(data.shape == (2001,))
         assert(np.array_equal(y[:2001], data[:]))
 
@@ -319,30 +319,30 @@ class TestMultiTags(unittest.TestCase):
         segtag.extents = ext
         segtag.units = units
 
-        posdata = postag.retrieve_data(0, 0)
+        posdata = postag.tagged_data(0, 0)
         assert(len(posdata.shape) == 3)
         assert(posdata.shape == (1, 1, 1))
         assert(np.isclose(posdata[0, 0, 0], data[1, 1, 0]))
 
-        posdata = postag.retrieve_data(1, 0)
+        posdata = postag.tagged_data(1, 0)
         assert(len(posdata.shape) == 3)
         assert(posdata.shape == (1, 1, 1))
         assert(np.isclose(posdata[0, 0, 0], data[1, 1, 0]))
 
-        segdata = segtag.retrieve_data(0, 0)
+        segdata = segtag.tagged_data(0, 0)
         assert(len(segdata.shape) == 3)
         assert(segdata.shape == (2, 6, 2))
 
-        segdata = segtag.retrieve_data(1, 0)
+        segdata = segtag.tagged_data(1, 0)
         assert(len(segdata.shape) == 3)
         assert(segdata.shape == (1, 5, 1))
 
         # retrieve all positions for all references
         for ridx, ref in enumerate(mtag.references):
             for pidx, p in enumerate(mtag.positions):
-                mtag.retrieve_data(pidx, ridx)
+                mtag.tagged_data(pidx, ridx)
 
-    def test_multi_tag_retrieve_data_1d(self):
+    def test_multi_tag_tagged_data_1d(self):
         # MultiTags to vectors behave a bit differently
         # Testing separately
         oneddata = self.block.create_data_array("1dda", "data",
@@ -354,7 +354,7 @@ class TestMultiTags(unittest.TestCase):
                                                positions=onedpos)
         onedmtag.references.append(oneddata)
         for pidx, p in enumerate(onedmtag.positions):
-            onedmtag.retrieve_data(pidx, 0)
+            onedmtag.tagged_data(pidx, 0)
 
     def test_multi_tag_feature_data(self):
         index_data = self.block.create_data_array("indexed feature data",
@@ -407,50 +407,50 @@ class TestMultiTags(unittest.TestCase):
         assert(len(self.feature_tag.features) == 3)
 
         # indexed feature
-        feat_data = self.feature_tag.retrieve_feature_data(0, 0)
+        feat_data = self.feature_tag.feature_data(0, 0)
         assert(len(feat_data.shape) == 2)
         assert(feat_data.size == 10)
         assert(np.sum(feat_data) == 55)
 
         # disabled, don't understand how it could ever have worked,
         # there are only 3 positions
-        data_view = self.feature_tag.retrieve_feature_data(9, 0)
+        data_view = self.feature_tag.feature_data(9, 0)
         assert(np.sum(data_view[:, :]) == 9055)
 
         # untagged feature
-        data_view = self.feature_tag.retrieve_feature_data(0, 2)
+        data_view = self.feature_tag.feature_data(0, 2)
         assert(data_view.size == 100)
 
-        data_view = self.feature_tag.retrieve_feature_data(0, 2)
+        data_view = self.feature_tag.feature_data(0, 2)
         assert(data_view.size == 100)
         assert(np.sum(data_view) == total)
 
         # tagged feature
-        data_view = self.feature_tag.retrieve_feature_data(0, 1)
+        data_view = self.feature_tag.feature_data(0, 1)
         assert(len(data_view.shape) == 3)
 
-        data_view = self.feature_tag.retrieve_feature_data(1, 1)
+        data_view = self.feature_tag.feature_data(1, 1)
         assert(len(data_view.shape) == 3)
 
         # === retrieve by name ===
         # indexed feature
-        feat_data = self.feature_tag.retrieve_feature_data(0, index_data.name)
+        feat_data = self.feature_tag.feature_data(0, index_data.name)
         assert(len(feat_data.shape) == 2)
         assert(feat_data.size == 10)
         assert(np.sum(feat_data) == 55)
 
         # disabled, there are only 3 positions
-        data_view = self.feature_tag.retrieve_feature_data(9, index_data.name)
+        data_view = self.feature_tag.feature_data(9, index_data.name)
         assert(np.sum(data_view[:, :]) == 9055)
 
         # tagged feature
-        data_view = self.feature_tag.retrieve_feature_data(0, tagged_data.name)
+        data_view = self.feature_tag.feature_data(0, tagged_data.name)
         assert(len(data_view.shape) == 3)
 
-        data_view = self.feature_tag.retrieve_feature_data(1, tagged_data.name)
+        data_view = self.feature_tag.feature_data(1, tagged_data.name)
         assert(len(data_view.shape) == 3)
 
         def out_of_bounds():
-            self.feature_tag.retrieve_feature_data(2, 1)
+            self.feature_tag.feature_data(2, 1)
 
         self.assertRaises(IndexError,  out_of_bounds)
