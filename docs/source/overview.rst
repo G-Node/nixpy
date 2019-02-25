@@ -349,7 +349,7 @@ In NIX we accept only SI units (plus dB, %) wherever units can be
 given. We also accept compound units like *mV/cm*. Units are most of
 the times handled transparently. That is, when you tag a region of
 data that has been specified with a time axis in seconds and use
-e.g. the *tag.retrieve_data* method to get this data slice, the API
+e.g. the *tag.tagged_data* method to get this data slice, the API
 will handle unit scaling. The correct data will be returned even if
 the tag's position is given in *ms*.
 
