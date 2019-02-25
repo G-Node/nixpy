@@ -6,6 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+import warnings
 from .tag import BaseTag, FeatureContainer
 from .container import LinkContainer
 from .feature import Feature
@@ -169,6 +170,9 @@ class MultiTag(BaseTag):
         return tuple(slice(start, stop) for start, stop in zip(starts, stops))
 
     def retrieve_data(self, posidx, refidx):
+        msg = ("Call to deprecated method MultiTag.retrieve_data. "
+               "Use MultiTag.tagged_data instead.")
+        warnings.warn(msg, category=DeprecationWarning)
         return self.tagged_data(posidx, refidx)
 
     def tagged_data(self, posidx, refidx):
@@ -204,6 +208,9 @@ class MultiTag(BaseTag):
         return DataView(ref, slices)
 
     def retrieve_feature_data(self, posidx, featidx):
+        msg = ("Call to deprecated method MultiTag.retrieve_feature_data. "
+               "Use MultiTag.feature_data instead.")
+        warnings.warn(msg, category=DeprecationWarning)
         return self.feature_data(posidx, featidx)
 
     def feature_data(self, posidx, featidx):

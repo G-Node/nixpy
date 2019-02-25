@@ -6,6 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+import warnings
 
 import numpy as np
 
@@ -228,6 +229,9 @@ class Tag(BaseTag):
         return tuple(refslice)
 
     def retrieve_data(self, refidx):
+        msg = ("Call to deprecated method Tag.retrieve_data. "
+               "Use Tag.tagged_data instead.")
+        warnings.warn(msg, category=DeprecationWarning)
         return self.tagged_data(refidx)
 
     def tagged_data(self, refidx):
@@ -256,6 +260,9 @@ class Tag(BaseTag):
         return DataView(ref, slices)
 
     def retrieve_feature_data(self, featidx):
+        msg = ("Call to deprecated method Tag.retrieve_feature_data. "
+               "Use Tag.feature_data instead.")
+        warnings.warn(msg, category=DeprecationWarning)
         return self.feature_data(featidx)
 
     def feature_data(self, featidx):
