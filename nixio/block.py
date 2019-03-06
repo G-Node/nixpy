@@ -298,8 +298,8 @@ class Block(Entity):
                 self._pp(da, max_length, indent*2, extra)
                 for dim in da.dimensions:
                     self._pp(dim, max_length, indent * 3, False)
-            # for df in grp.data_frames:
-            #     self._pp(df, max_length, indent*2)
+            for df in grp.data_frames:
+                self._pp(df, max_length, indent*2)
             for tag in grp.tags:
                 self._pp(tag, max_length, indent*2, extra)
                 for fe in tag.features:

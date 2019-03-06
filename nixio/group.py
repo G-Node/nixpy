@@ -49,6 +49,14 @@ class Group(Entity):
 
     @property
     def data_frames(self):
+        """
+        A property containing all data frames referenced by the group.
+        Referenced data frames can be obtained by index or their id. References
+        can be removed from the list, removing a referenced DataFrame will not
+        remove it from the file. New references can be added using the append
+        method of the list.
+        This is a read only attribute.
+        """
         if self._data_frames is None:
             self._data_frames = LinkContainer("data_frames", self, DataFrame,
                                               self._parent.data_frames)
