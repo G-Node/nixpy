@@ -22,6 +22,7 @@ class Group(Entity):
     def __init__(self, nixparent, h5group):
         super(Group, self).__init__(nixparent, h5group)
         self._data_arrays = None
+        self._data_frames = None
         self._tags = None
         self._multi_tags = None
         self._sources = None
