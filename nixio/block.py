@@ -290,6 +290,54 @@ class Block(Entity):
             limit = maxint
         return finders._find_sources(self, filtr, limit)
 
+    def pprint(self, indent=2, max_row=50, max_length=80, max_depth=2):
+        spaces = " " * (0 * indent)
+        p = "{} {} {}".format(spaces,  self.name, self.type)
+        print(p)
+        for grp in self.groups:
+            self._pp(grp, max_length, indent)
+            for da in grp.data_arrays:
+                self._pp(da, max_length, indent*2)
+                for dim in da.dimensions:
+                    self._pp(dim, max_length, indent * 3)
+            for df in grp.data_frames:
+                self._pp(df, max_length, indent*2)
+            for tag in grp.tags:
+                self._pp(tag, max_length, indent*2)
+                for fe in tag.features:
+                    self._pp(fe, max_length, indent *3)
+            for mt in grp.multi_tags:
+                self._pp(mt, max_length, indent*2)
+                for fe in tag.features:
+                    self._pp(fe, max_length, indent *3)
+        for da in self.data_arrays:
+            self._pp(da, max_length, indent)
+            for dim in da.dimensions:
+                self._pp(dim, max_length, indent*2)
+        for df in self.data_frames:
+            self._pp(df, max_length, indent)
+        for tag in self.tags:
+            self._pp(tag, max_length, indent)
+            for fe in tag.features:
+                self._pp(fe, max_length, indent*2)
+        for mt in self.multi_tags:
+            self._pp(mt, max_length, indent)
+            for fe in tag.features:
+                self._pp(fe, max_length, indent*2)
+
+    @staticmethod
+    def _pp(obj, ml, indent):
+        spaces = " " * (indent)
+        prefix = "|-"
+        p = "{}{}{} {}".format(spaces, prefix, obj.name, obj.type)
+        if len(p) > ml - 4:
+            split_len = int(ml/2)
+            str1 = p[0:split_len]
+            str2 = p[-split_len: ]
+            print("{} ... {}".format(str1, str2))
+        else:
+            print(p)
+
     @property
     def sources(self):
         """
