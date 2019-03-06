@@ -9,6 +9,7 @@
 
 from .entity import Entity
 from .data_array import DataArray
+from .data_frame import DataFrame
 from .tag import Tag
 from .multi_tag import MultiTag
 from .container import LinkContainer
@@ -45,6 +46,13 @@ class Group(Entity):
             self._data_arrays = LinkContainer("data_arrays", self, DataArray,
                                               self._parent.data_arrays)
         return self._data_arrays
+
+    @property
+    def data_frames(self):
+        if self._data_frames is None:
+            self._data_frames = LinkContainer("data_frames", self, DataFrame,
+                                              self._parent.data_frames)
+        return self._data_frames
 
     @property
     def tags(self):
