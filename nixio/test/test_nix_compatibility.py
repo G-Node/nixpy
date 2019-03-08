@@ -48,8 +48,6 @@ def runcpp(*cmdargs):
     proc.wait()
     stdout = proc.stdout.read().decode()
     stderr = proc.stderr.read().decode()
-    # print(stdout)
-    # print(stderr)
     if proc.returncode:
         raise ValueError(stdout+stderr)
 
@@ -151,28 +149,42 @@ def test_data_frames(tmpdir, bindir):
     cmd = os.path.join(bindir, "readdataframes")
     runcpp(cmd, nixfilepath)
 
-
 @pytest.mark.compatibility
-def _test_tags(tmpdir):
+def test_tags(tmpdir, bindir):
     nixfilepath = os.path.join(str(tmpdir), "tagtest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
-    blk = nix_file.create_block("testblock", "blocktype")
-    grp = blk.create_group("testgroup", "grouptype")
+    blk = nix_file.create_block("test_block", "blocktype")
+    grp = blk.create_group("test_group", "grouptype")
+    da1 = blk.create_data_array("feature_tag", "afea",
+                                data=np.random.random(20))
 
-    for idx in range(16):
-        tag = blk.create_tag("tag_" + str(idx), "atag",
-                             np.random.random(idx*2))
+    for idx in range(8):
+        if idx == 2:
+            tag = blk.create_tag("tag_" + str(idx), "atag",
+                                    [0, 10, 10**2, 10**3, 10**4])
+        else:
+            tag = blk.create_tag("tag_" + str(idx), "atag",
+                                    np.random.random(idx*2))
         tag.definition = "tag def " + str(idx)
-        tag.extent = np.random.random(idx*2)
-
-        tag.units = ["mV", "s"]
+        if idx ==2:
+            tag.extent = np.random.random(5)
+        else:
+            tag.extent = np.random.random(idx*2)
+        if idx == 0:
+            tag.units = ["V", "ms"]
+        else:
+            tag.units = ["mV", "s"]
         tag.force_created_at(np.random.randint(100000000))
 
         if (idx % 3) == 0:
             grp.tags.append(tag)
 
+        if idx == 5:
+            tag.create_feature(da1, "Tagged")
     nix_file.close()
     # validate(nixfilepath)
+    cmd = os.path.join(bindir, "readtags")
+    runcpp(cmd, nixfilepath)
 
 
 @pytest.mark.compatibility
