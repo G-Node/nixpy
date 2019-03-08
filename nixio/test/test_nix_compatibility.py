@@ -188,27 +188,50 @@ def test_tags(tmpdir, bindir):
 
 
 @pytest.mark.compatibility
-def _test_multi_tags(tmpdir):
+def test_multi_tags(tmpdir, bindir):
     nixfilepath = os.path.join(str(tmpdir), "mtagtest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
-    blk = nix_file.create_block("testblock", "blocktype")
-    grp = blk.create_group("testgroup", "grouptype")
+    blk = nix_file.create_block("test_block", "blocktype")
+    grp = blk.create_group("test_group", "grouptype")
 
     for idx in range(11):
-        posda = blk.create_data_array("pos_" + str(idx), "positions",
-                                      data=np.random.random(idx*10))
-        extda = blk.create_data_array("ext_" + str(idx), "extents",
-                                      data=np.random.random(idx*10))
-        mtag = blk.create_multi_tag("mtag_" + str(idx), "some multi tag",
+        if idx == 5:
+            posda = blk.create_data_array("pos_" + str(idx), "positions",
+                                          data=np.random.random((idx, idx)))
+            extda = blk.create_data_array("ext_" + str(idx), "extents",
+                                          data=np.random.random((idx, idx)))
+
+        else:
+            posda = blk.create_data_array("pos_" + str(idx), "positions",
+                                          data=np.random.random(idx*10))
+            extda = blk.create_data_array("ext_" + str(idx), "extents",
+                                          data=np.random.random(idx*10))
+        mt = blk.create_multi_tag("mt_" + str(idx), "some multi tag",
                                     posda)
-        mtag.extents = extda
+        if idx == 3:
+            feada = blk.create_data_array("feature", "afea",
+                                data=np.random.random(200))
+            mt.create_feature(feada, "Tagged")
 
-        if (idx % 2) == 0:
-            grp.multi_tags.append(mtag)
+        if idx != 1:
+            mt.extents = extda
+        if idx == 2:
+            refda = blk.create_data_array("ref", "reference",
+                                          data=np.random.random(13))
+            refda.append_range_dimension([0.1, 0.2, 0.3], "A", "s")
+            mt.references.append(refda)
+            mt.units = ["ms"]
+        else:
+            mt.units = ["mV", "s", "Hz"]
 
+        if (idx % 3) == 0:
+            grp.multi_tags.append(mt)
+        mt.definition = "mt def " + str(idx*10)
+        mt.force_created_at(np.random.randint(100000000))
     nix_file.close()
     # validate(nixfilepath)
-
+    cmd = os.path.join(bindir, "readmultitags")
+    runcpp(cmd, nixfilepath)
 
 @pytest.mark.compatibility
 def _test_sources(tmpdir):
