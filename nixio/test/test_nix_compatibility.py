@@ -93,7 +93,7 @@ def test_data_arrays(tmpdir, bindir):
 
     for idx in range(7):
         da = blk.create_data_array("data_" + str(idx), "thedata",
-                                   data=np.arange(40, 80).reshape((2,20)))
+                                   data=np.arange(40, 80).reshape((2, 20)))
         da.definition = "da definition " + str(idx)
         da.force_created_at(np.random.randint(1000000000))
         da.label = "data label " + str(idx)
@@ -126,7 +126,6 @@ def test_data_frames(tmpdir, bindir):
     dt_full_list = [str, nix.DataType.Int64,
                     nix.DataType.Float, nix.DataType.Float, nix.DataType.Bool]
 
-
     for idx in range(7):
         col_names = ['name', 'id', 'exp1', 'exp2', 'Valid']
         arr = [('Alice', 1234590, 1234.1245614e+9, 1034545e-8, False),
@@ -134,20 +133,20 @@ def test_data_frames(tmpdir, bindir):
                ('Jane', 9874542123, 12.5335205e-1, 123958e+29, True),
                ('Chris', 9, 12.335205e-19, 123958e+19, False)]
         df = blk.create_data_frame("df_" + str(idx), "df type " + str(idx),
-                            col_names= col_names, col_dtypes=dt_full_list,
-                            data=arr)
+                                   col_names=col_names, col_dtypes=dt_full_list,
+                                   data=arr)
         df.force_created_at(np.random.randint(1000000000))
         if idx == 4:
-            str_arr = ['119741023950123956123',
-                        'asd908v*6a-sd','a'*50, ' ']
+            str_arr = ['119741023950123956123', 'asd908v*6a-sd', 'a'*50, ' ']
             df.append_column(str_arr, "somelongstr", str)
-        elif idx== 5:
+        elif idx == 5:
             new_row = [('Dallas', 111, 123.445, 546.555, True)]
             df.append_rows(new_row)
     nix_file.close()
     # validate(nixfilepath)
     cmd = os.path.join(bindir, "readdataframes")
     runcpp(cmd, nixfilepath)
+
 
 @pytest.mark.compatibility
 def test_tags(tmpdir, bindir):
@@ -161,12 +160,12 @@ def test_tags(tmpdir, bindir):
     for idx in range(8):
         if idx == 2:
             tag = blk.create_tag("tag_" + str(idx), "atag",
-                                    [0, 10, 10**2, 10**3, 10**4])
+                                 [0, 10, 10**2, 10**3, 10**4])
         else:
             tag = blk.create_tag("tag_" + str(idx), "atag",
-                                    np.random.random(idx*2))
+                                 np.random.random(idx*2))
         tag.definition = "tag def " + str(idx)
-        if idx ==2:
+        if idx == 2:
             tag.extent = np.random.random(5)
         else:
             tag.extent = np.random.random(idx*2)
@@ -206,11 +205,10 @@ def test_multi_tags(tmpdir, bindir):
                                           data=np.random.random(idx*10))
             extda = blk.create_data_array("ext_" + str(idx), "extents",
                                           data=np.random.random(idx*10))
-        mt = blk.create_multi_tag("mt_" + str(idx), "some multi tag",
-                                    posda)
+        mt = blk.create_multi_tag("mt_" + str(idx), "some multi tag", posda)
         if idx == 3:
             feada = blk.create_data_array("feature", "afea",
-                                data=np.random.random(200))
+                                          data=np.random.random(200))
             mt.create_feature(feada, "Tagged")
 
         if idx != 1:
@@ -232,6 +230,7 @@ def test_multi_tags(tmpdir, bindir):
     # validate(nixfilepath)
     cmd = os.path.join(bindir, "readmultitags")
     runcpp(cmd, nixfilepath)
+
 
 @pytest.mark.compatibility
 def _test_sources(tmpdir):
@@ -346,7 +345,6 @@ def test_multi_tag_features(tmpdir):
     dim2.unit = "ms"
 
     data1 = np.zeros((10, 10))
-    value = 0.0
     total = 0.0
     for i in range(10):
         value = 100 * i
