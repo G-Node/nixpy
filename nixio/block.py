@@ -295,17 +295,17 @@ class Block(Entity):
         for grp in self.groups:
             self._pp(grp, max_length, indent, False)
             for da in grp.data_arrays:
-                self._pp(da, max_length, indent * 2, extra)
+                self._pp(da, max_length, indent * 2, extra, True)
                 for dim in da.dimensions:
                     self._pp(dim, max_length, indent * 3, False)
             for df in grp.data_frames:
-                self._pp(df, max_length, indent * 2, extra)
+                self._pp(df, max_length, indent * 2, extra, True)
             for tag in grp.tags:
-                self._pp(tag, max_length, indent * 2, extra)
+                self._pp(tag, max_length, indent * 2, extra, True)
                 for fe in tag.features:
                     self._pp(fe, max_length, indent * 3, False)
             for mt in grp.multi_tags:
-                self._pp(mt, max_length, indent * 2, extra)
+                self._pp(mt, max_length, indent * 2, extra, True)
                 for fe in mt.features:
                     self._pp(fe, max_length, indent * 3, False)
         for da in self.data_arrays:
@@ -324,9 +324,12 @@ class Block(Entity):
                 self._pp(fe, max_length, indent * 2, False)
 
     @staticmethod
-    def _pp(obj, ml, indent, ex):
+    def _pp(obj, ml, indent, ex, grp=False):
         spaces = " " * (indent)
-        prefix = "|-"
+        if grp == True:
+            prefix = "*"
+        else:
+            prefix = ""
         if ex:
             stat = ""
             if isinstance(obj, MultiTag):
