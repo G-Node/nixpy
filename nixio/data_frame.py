@@ -19,6 +19,7 @@ from .entity import Entity
 from . import util
 from .data_set import DataSet
 from .datatype import DataType
+from .section import Section
 from six import string_types
 import csv
 
@@ -248,3 +249,31 @@ class DataFrame(Entity, DataSet):
         df_shape = tuple(df_shape)
         self._h5group.set_attr("df_shape", df_shape)
         return self._h5group.get_attr("df_shape")
+
+    # metadata
+    @property
+    def metadata(self):
+        """
+
+        Associated metadata of the entity. Sections attached to the entity via
+        this attribute can provide additional annotations. This is an optional
+        read-write property, and can be None if no metadata is available.
+
+        :type: Section
+        """
+        if "metadata" in self._h5group:
+            return Section(None, self._h5group.open_group("metadata"))
+        else:
+            return None
+
+    @metadata.setter
+    def metadata(self, sect):
+        if not isinstance(sect, Section):
+            raise TypeError("{} is not of type Section".format(sect))
+        self._h5group.create_link(sect, "metadata")
+
+    @metadata.deleter
+    def metadata(self):
+        if "metadata" in self._h5group:
+            self._h5group.delete("metadata")
+
