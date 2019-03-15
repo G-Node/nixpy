@@ -41,7 +41,17 @@ class DataFrame(Entity, DataSet):
         return newentity
 
     def append_column(self, column, name, datatype=None):
-        # datatype is better included for strings
+        """
+        Append a new column to the DataFrame
+        In case of string, it will be better to set explicitly the datatype.
+
+        :param column: The new column
+        :type column: array-like data
+        :param name: The name of new column
+        :type name: str
+        :param datatype: The DataType of new column
+        :type datatype: DataType
+        """
         if len(column) < len(self):
             raise ValueError("Not enough entries for column in this dataframe")
         elif len(column) > len(self):
@@ -68,7 +78,13 @@ class DataFrame(Entity, DataSet):
         self.write_direct(farr)
 
     def append_rows(self, data):
-        # In Python2, the data supplied must be iterable (not np arrays)
+        """
+        Append a new row to the DataFrame
+        In Python2, the data supplied must be iterable (not np arrays)
+
+        :param data: The new row
+        :type data: array-like data
+        """
         li_data = []
         for d in data:
             d = tuple(d)
@@ -77,6 +93,17 @@ class DataFrame(Entity, DataSet):
         self.append(pro_data, axis=0)
 
     def write_column(self, column, index=None, name=None):
+        """
+        Overwrite an existing column.
+        Either index or name of the column should be provided.
+
+        :param column: The new column
+        :type column: array-like data
+        :param index: The index of the column that is written to
+        :type index: string
+        :param name: The name of the column that is written to
+        :type name: str
+        """
         if len(column) != self.shape[0]:
             raise ValueError('If there are missing data, please fill in None')
         if not index and not name:
@@ -91,6 +118,16 @@ class DataFrame(Entity, DataSet):
 
     # TODO: for read column add a Mode that break down the tuples
     def read_columns(self, index=None, name=None, sl=None):
+        """
+        Read one or multiple (part of) column(s) in the DataFrame
+
+        :param index: Index of column(s) to be returned
+        :type index: list of int
+        :param name: Name of column(s) to be returned
+        :type name: list of str
+        :param sl: The part of each column to be returned
+        :type sl: slice
+        """
         if index is None and name is None:
             raise ValueError("Either index or name must not be None")
         if name is None:
@@ -107,6 +144,14 @@ class DataFrame(Entity, DataSet):
         return get_col
 
     def write_rows(self, rows, index):
+        """
+        Overwrite one or multiple existing row(s)
+
+        :param rows: The new rows(s) and their data
+        :type rows: array-like data
+        :param index: Index of rows(s) to be overwritten
+        :type index: list of int
+        """
         if len(rows) != len(index):
             raise IndexError(
                 "Number of rows ({}) does not match "
@@ -127,12 +172,32 @@ class DataFrame(Entity, DataSet):
             self._write_data(cr_list, sl=index)
 
     def read_rows(self, index):
+        """
+        Read one or multiple row(s) in the DataFrame
+
+        :param index: Index of row(s) to be returned
+        :type index: list of int
+        """
         if isinstance(index, Iterable):
             index = list(index)
         get_row = self._read_data(sl=(index,))
         return get_row
 
+    # TODO: allow writing multiple cells at the same time
     def write_cell(self, cell, position=None, col_name=None, row_idx=None):
+        """
+        Overwrite a cell in the DataFrame
+
+        :param cell: The new cell
+        :type cell: same type as the specified column
+        :param position: Position of the targeted cell
+        :type position: tuple or list or array with length 2
+        :param col_name: The column name in which the targeted cell belongs to
+        :type col_name: str
+        :param row_idx: A length 1 list that specify on
+                        which row the targeted cell is located
+        :type row_idx: list of int
+         """
         if position is not None:
             if len(position) != 2:
                 raise ValueError("position is invalid: "
@@ -149,6 +214,17 @@ class DataFrame(Entity, DataSet):
             self._write_data(targeted_row, sl=row_idx)
 
     def read_cell(self, position=None, col_name=None, row_idx=None):
+        """
+        Read a cell in the DataFrame
+
+        :param position: Position of the targeted cell
+        :type position: tuple or list or array with length 2
+        :param col_name: The column name in which the targeted cell belongs to
+        :type col_name: str
+        :param row_idx: A length 1 list that specify on
+                         which row the targeted cell is located
+        :type row_idx: list of int
+        """
         if position is not None:
             if len(position) != 2:
                 raise ValueError('Not a position')
@@ -161,7 +237,11 @@ class DataFrame(Entity, DataSet):
             cell = cell[0]
             return cell
 
+    # TODO: allow printing part of the DataFrame
     def print_table(self):
+        """
+        Print the whole DataFrame as a table
+        """
         row_form = "{:^10}" * (len(self.column_names) + 1)
         print(row_form.format(" ", *self.column_names))
         if self.units:
@@ -181,10 +261,21 @@ class DataFrame(Entity, DataSet):
         return None
 
     def row_count(self):
+        """
+        Return the total number of rows
+        """
         count = len(self)
         return count
 
     def write_to_csv(self, filename, mode='w'):
+        """
+        Export the whole DataFrame to a CSV file
+
+        :param filename: The resulted/ targeted CSV file to write to/ create
+        :type filename: str
+        :param mode: The column name in which the targeted cell belongs to
+        :type mode: str
+        """
         with open(filename, mode, newline='') as csvfile:
             dw = csv.DictWriter(csvfile, fieldnames=self.column_names)
             dw.writeheader()
@@ -204,6 +295,12 @@ class DataFrame(Entity, DataSet):
 
     @property
     def units(self):
+        """
+        The unit of the values stored in the DataFrame.
+        This is a read-write property and can be set to None.
+
+        :type: array of str
+        """
         return self._h5group.get_attr("units")
 
     @units.setter
@@ -216,6 +313,13 @@ class DataFrame(Entity, DataSet):
 
     @property
     def columns(self):
+        """
+        The dtype is the list of names and data types
+        of all columns in the DatFrame.
+        This is a read only property.
+
+        :type: list of tuples
+        """
         if self.units:
             cols = [(n, dt, u) for n, dt, u in
                     zip(self.column_names, self.dtype, self.units)]
@@ -226,11 +330,23 @@ class DataFrame(Entity, DataSet):
 
     @property
     def column_names(self):
+        """
+        The dtype is the list of names of all columns in the DatFrame.
+        This is a read only property.
+
+        :type: list of str
+        """
         dt = self._h5group.group["data"].dtype
         return dt.names
 
     @property
     def dtype(self):
+        """
+        The dtype is the list of DataTypes of all columns in the DatFrame.
+        This is a read only property.
+
+        :type: list of DataType
+        """
         dt = self._h5group.group["data"].dtype
         key = self.column_names
         di = OrderedDict()
@@ -243,6 +359,13 @@ class DataFrame(Entity, DataSet):
 
     @property
     def df_shape(self):
+        """
+        The df_shape is the shape of the DataFrame
+        in (number of rows, number of columns) format.
+        This is a read only property.
+
+        :type: tuple
+        """
         x = len(self._h5group.group["data"])
         y = len(self.column_names)
         df_shape = (x, y)
@@ -250,7 +373,6 @@ class DataFrame(Entity, DataSet):
         self._h5group.set_attr("df_shape", df_shape)
         return self._h5group.get_attr("df_shape")
 
-    # metadata
     @property
     def metadata(self):
         """
