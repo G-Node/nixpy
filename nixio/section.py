@@ -366,20 +366,6 @@ class Section(Entity):
             self._sections = SectionContainer("sections", self, Section)
         return self._sections
 
-    def __eq__(self, other):
-        if hasattr(other, "id"):
-            return self.id == other.id
-
-        return False
-
-    def __hash__(self):
-        """
-        overwriting method __eq__ blocks inheritance of __hash__ in Python 3
-        hash has to be either explicitly inherited from parent class,
-        implemented or escaped
-        """
-        return hash(self.id)
-
     def __len__(self):
         return len(self.props)
 
