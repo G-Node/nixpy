@@ -79,7 +79,7 @@ class Validate:
 
     def check_file(self):
         """
-        Check if the file meet the nix requirements on file level.
+        Check if the file meets the NIX requirements at the file level.
 
         :returns: The error dictionary with errors appended on the file level
         :rtype: Dictionary
@@ -97,7 +97,7 @@ class Validate:
 
     def check_blocks(self, block, blk_idx):
         """
-        Check if the file meet the nix requirements on block level.
+        Check if the file meets the NIX requirements at the block level.
 
         :returns: The error dictionary with errors appended on the block level
         :rtype: Dictionary
@@ -110,7 +110,7 @@ class Validate:
 
     def check_groups(self, group, grp_idx, blk_idx):
         """
-        Check if the file meet the nix requirements on the group level.
+        Check if the file meets the NIX requirements at the group level.
 
         :returns: The error dict with errors appended on group level or None
         :rtype: Dictionary or None if no errors found
@@ -127,7 +127,7 @@ class Validate:
 
     def check_data_arrays(self, da, da_idx, blk_idx):
         """
-        Check if the file meet the nix requirements on DataArray level.
+        Check if the file meets the NIX requirements at the DataArray level.
 
         :returns: The error dictionary with errors appended on DataArray level
         :rtype: Dictionary
@@ -193,7 +193,7 @@ class Validate:
 
     def check_tag(self, tag, tag_idx, blk_idx):
         """
-        Check if the file meet the nix requirements on tag level.
+        Check if the file meets the NIX requirements at the tag level.
 
         :returns: The error dictionary with errors appended on Tag level
         :rtype: Dictionary
@@ -303,7 +303,7 @@ class Validate:
 
     def check_section(self, section, sec_idx):
         """
-        Check if the file meet the nix requirements on section level.
+        Check if the file meets the NIX requirements at the section level.
 
         :returns: The error dictionary with errors appended on section level
         :rtype: Dictionary
@@ -330,7 +330,7 @@ class Validate:
 
     def check_features(self, feat, parent, blk_idx, tag_idx, fea_idx):
         """
-        Check if the file meet the nix requirements on feature level.
+        Check if the file meets the NIX requirements at the feature level.
 
         :returns: The error dictionary with errors appended on feature level
         :rtype: Dictionary
@@ -349,7 +349,7 @@ class Validate:
 
     def check_sources(self, src, blk_idx):
         """
-        Check if the file meet the nix requirements on source level.
+        Check if the file meets the NIX requirements at the source level.
 
         :returns: The error dictionary with errors appended on source level
         :rtype: Dictionary or None if no errors
@@ -373,7 +373,7 @@ class Validate:
 
     def check_range_dim(self, r_dim, dim_idx, da_idx, blk_idx):
         """
-        Check if the file meet the nix requirements for range dimensions.
+        Check if the file meets the NIX requirements for range dimensions.
 
         :returns: The error dictionary with errors appended on range dimensions
         :rtype: Dictionary
@@ -403,7 +403,7 @@ class Validate:
 
     def check_set_dim(self, set_dim, dim_idx, da_idx, blk_idx):
         """
-        Check if the file meet the nix requirements for set dimensions.
+        Check if the file meets the NIX requirements for set dimensions.
 
         :returns: The error dictionary with errors appended on set dimensions
         :rtype: Dictionary
@@ -421,7 +421,7 @@ class Validate:
 
     def check_sampled_dim(self, sam_dim, dim_idx, da_idx, blk_idx):
         """
-        Check if the file meet the nix requirements for sampled dimensions.
+        Check if the file meets the NIX requirements for sampled dimensions.
 
         :returns: The error dict with errors appended on sampled dimensions
         :rtype: Dictionary

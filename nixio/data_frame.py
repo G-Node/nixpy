@@ -79,8 +79,7 @@ class DataFrame(Entity, DataSet):
 
     def append_rows(self, data):
         """
-        Append a new row to the DataFrame
-        In Python2, the data supplied must be iterable (not np arrays)
+        Append a new row to the DataFrame. The data supplied must be iterable.
 
         :param data: The new row
         :type data: array-like data
@@ -376,7 +375,6 @@ class DataFrame(Entity, DataSet):
     @property
     def metadata(self):
         """
-
         Associated metadata of the entity. Sections attached to the entity via
         this attribute can provide additional annotations. This is an optional
         read-write property, and can be None if no metadata is available.
