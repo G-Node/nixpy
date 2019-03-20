@@ -310,6 +310,28 @@ class File(object):
             print("No errors found: The file is a valid NIX file")
             return errors
 
+        # TODO: if same file, set_attr("entity_id", id_)
+
+    def copy_block(self, obj):
+        if not isinstance(obj, Block):
+            raise TypeError("Object to be copied is not a Block")
+
+        h5_parent = obj._parent
+        clsname = "data"
+        src = "{}/{}".format(clsname, obj.name)
+        h5_parent._h5group.copy(source=src, dest=self._h5group,
+                                name=str(obj.name), cls=clsname)
+
+    def copy_section(self, obj):
+        if not isinstance(obj, Section):
+            raise TypeError("Object to be copied is not a Section")
+
+        h5_parent = obj._parent
+        clsname = "metadata"
+        src = "{}/{}".format(clsname, obj.name)
+        h5_parent._h5group.copy(source=src, dest=self._h5group,
+                                name=str(obj.name), cls=clsname)
+
     def flush(self):
         self._h5file.flush()
 

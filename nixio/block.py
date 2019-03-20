@@ -388,6 +388,46 @@ class Block(Entity):
             else:
                 print(n)
 
+    def copy_data_array(self, obj):
+        if not isinstance(obj, DataArray):
+            raise TypeError("Object to be copied is not a DataArray")
+
+        h5_parent = obj._parent
+        clsname = "data_arrays"
+        src = "{}/{}".format(clsname, obj.name)
+        h5_parent._h5group.copy(source=src, dest=self._h5group,
+                                name=str(obj.name), cls=clsname)
+
+    def copy_data_frame(self, obj):
+        if not isinstance(obj, DataFrame):
+            raise TypeError("Object to be copied is not a DataFrame")
+
+        h5_parent = obj._parent
+        clsname = "data_frames"
+        src = "{}/{}".format(clsname, obj.name)
+        h5_parent._h5group.copy(source=src, dest=self._h5group,
+                                name=str(obj.name), cls=clsname)
+
+    def copy_multi_tag(self, obj):
+        if not isinstance(obj, MultiTag):
+            raise TypeError("Object to be copied is not a MultiTag")
+
+        h5_parent = obj._parent
+        clsname = "multi_tags"
+        src = "{}/{}".format(clsname, obj.name)
+        h5_parent._h5group.copy(source=src, dest=self._h5group,
+                                name=str(obj.name), cls=clsname)
+
+    def copy_tag(self, obj):
+        if not isinstance(obj, Tag):
+            raise TypeError("Object to be copied is not a Tag")
+
+        h5_parent = obj._parent
+        clsname = "tags"
+        src = "{}/{}".format(clsname, obj.name)
+        h5_parent._h5group.copy(source=src, dest=self._h5group,
+                                name=str(obj.name), cls=clsname)
+
     @property
     def sources(self):
         """
