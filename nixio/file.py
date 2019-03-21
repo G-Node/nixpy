@@ -264,6 +264,12 @@ class File(object):
             return False
 
     def validate(self):
+        """
+        Checks if the file is a valid nix file.
+
+        :returns: A dict which contains all objects in file and related errors
+        :rtype: Dictionary
+        """
         validator = Validate(self)
         validator.check_file()
         validator.form_dict()

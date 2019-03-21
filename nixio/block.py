@@ -196,7 +196,31 @@ class Block(Entity):
     def create_data_frame(self, name, type_, col_dict=None, col_names=None,
                           col_dtypes=None, data=None,
                           compression=Compression.No):
+        """
+         Create a new data frame for this block. Either ``col_dict``
+         or ``col_name`` and ``col_dtypes`` must be given.
+         If both are given, ``col_dict`` will be used.
 
+         :param name: The name of the data frame to create.
+         :type name: str
+         :param type_: The type of the data frame.
+         :type type_: str
+         :param col_dict: The dictionary that specify column
+                          names and data type in each column
+         :type col_dict:dict or OrderedDict of {str: type}
+         :param col_names: The collection of name of all columns in order
+         :type col_names: tuples or list or np.array of string
+         :param col_dtypes: The collection of data type of all columns in order
+         :type col_dtypes: tuples or list or np.array of type
+         :param data: Data to write after storage has been created
+         :type data: array-like data with compound data type
+                     as specified in the columns
+         :param compression: En-/disable dataset compression.
+         :type compression: :class:`~nixio.Compression`
+
+         :returns: The newly created data frame.
+         :rtype: :class:`~nixio.DataFrame`
+         """
         if (isinstance(col_dict, dict)
                 and not isinstance(col_dict, OrderedDict)
                 and sys.version_info[0] < 3):
@@ -430,22 +454,6 @@ class Block(Entity):
         if self._groups is None:
             self._groups = Container("groups", self, Group)
         return self._groups
-
-    def __eq__(self, other):
-        """
-        Two Blocks are considered equal when they have the same id.
-        """
-        if hasattr(other, "id"):
-            return self.id == other.id
-        return False
-
-    def __hash__(self):
-        """
-        overwriting method __eq__ blocks inheritance of __hash__ in Python 3
-        hash has to be either explicitly inherited from parent class,
-        implemented or escaped
-        """
-        return hash(self.id)
 
     # metadata
     @property

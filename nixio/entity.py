@@ -139,12 +139,19 @@ class Entity(object):
         self._h5group.set_attr("type", t)
 
     def __eq__(self, other):
+        """
+        Two Entities are considered equal when they have the same id.
+        """
         if hasattr(other, "id"):
             return self.id == other.id
-        else:
-            return False
+        return False
 
     def __hash__(self):
+        """
+        overwriting method __eq__ blocks inheritance of __hash__ in Python 3
+        hash has to be either explicitly inherited from parent class,
+        implemented or escaped
+        """
         return hash(self.id)
 
     def __str__(self):

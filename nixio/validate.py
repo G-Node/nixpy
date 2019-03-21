@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+# Copyright © 2019, German Neuroinformatics Node (G-Node)
+#
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted under the terms of the BSD License. See
+# LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from .util import units
@@ -20,6 +28,9 @@ class Validate:
         self.error_count = 0
 
     def form_dict(self):
+        """
+        Form a empty dict that has same structure as the data tree in the file.
+        """
         file = self.file
         self.error_count = 0
 
@@ -67,7 +78,12 @@ class Validate:
                     tag['features'].append(fea_dict)
 
     def check_file(self):
+        """
+        Check if the file meets the NIX requirements at the file level.
 
+        :returns: The error dictionary with errors appended on the file level
+        :rtype: Dictionary
+        """
         file_err_list = []
         if not self.file.created_at:
             file_err_list.append("date is not set!")
@@ -80,6 +96,12 @@ class Validate:
         return self.errors
 
     def check_blocks(self, block, blk_idx):
+        """
+        Check if the file meets the NIX requirements at the block level.
+
+        :returns: The error dictionary with errors appended on the block level
+        :rtype: Dictionary
+        """
         blk_err_list = self.check_for_basics(block)
 
         self.errors['blocks'][blk_idx]['errors'] = blk_err_list
@@ -87,6 +109,12 @@ class Validate:
         return self.errors
 
     def check_groups(self, group, grp_idx, blk_idx):
+        """
+        Check if the file meets the NIX requirements at the group level.
+
+        :returns: The error dict with errors appended on group level or None
+        :rtype: Dictionary or None if no errors found
+        """
         grp_err_list = self.check_for_basics(group)
 
         if grp_err_list:
@@ -98,6 +126,12 @@ class Validate:
             return None
 
     def check_data_arrays(self, da, da_idx, blk_idx):
+        """
+        Check if the file meets the NIX requirements at the DataArray level.
+
+        :returns: The error dictionary with errors appended on DataArray level
+        :rtype: Dictionary
+        """
         da_error_list = []
         if self.check_for_basics(da):
             da_error_list.extend(self.check_for_basics(da))
@@ -158,6 +192,12 @@ class Validate:
         return self.errors
 
     def check_tag(self, tag, tag_idx, blk_idx):
+        """
+        Check if the file meets the NIX requirements at the tag level.
+
+        :returns: The error dictionary with errors appended on Tag level
+        :rtype: Dictionary
+        """
         tag_err_list = []
 
         if not tag.position:
@@ -262,6 +302,12 @@ class Validate:
         return self.errors
 
     def check_section(self, section, sec_idx):
+        """
+        Check if the file meets the NIX requirements at the section level.
+
+        :returns: The error dictionary with errors appended on section level
+        :rtype: Dictionary
+        """
         sec = self.errors['sections'][sec_idx]
         sec['errors'] = self.check_for_basics(section)
         self.error_count += len(self.check_for_basics(section))
@@ -283,6 +329,12 @@ class Validate:
         return self.errors
 
     def check_features(self, feat, parent, blk_idx, tag_idx, fea_idx):
+        """
+        Check if the file meets the NIX requirements at the feature level.
+
+        :returns: The error dictionary with errors appended on feature level
+        :rtype: Dictionary
+        """
         fea_err_list = []
         # will raise RuntimeError for both, actually no need to check
         if not feat.link_type:
@@ -296,6 +348,12 @@ class Validate:
         return self.errors
 
     def check_sources(self, src, blk_idx):
+        """
+        Check if the file meets the NIX requirements at the source level.
+
+        :returns: The error dictionary with errors appended on source level
+        :rtype: Dictionary or None if no errors
+        """
         if self.check_for_basics(src):
             blk = self.errors['blocks'][blk_idx]
             blk['sources'] = self.check_for_basics(src)
@@ -304,6 +362,9 @@ class Validate:
         return None
 
     def check_dim(self, dimen):
+        """
+        General checks for all dimensions
+        """
         # call it in file after the index problem is fixed
         # call it in other check dim function / don't call alone
         if dimen.index and dimen.index > 0:
@@ -311,6 +372,12 @@ class Validate:
         return 'index must > 0'
 
     def check_range_dim(self, r_dim, dim_idx, da_idx, blk_idx):
+        """
+        Check if the file meets the NIX requirements for range dimensions.
+
+        :returns: The error dictionary with errors appended on range dimensions
+        :rtype: Dictionary
+        """
         rdim_err_list = []
 
         if self.check_dim(r_dim):
@@ -335,6 +402,12 @@ class Validate:
         return self.errors
 
     def check_set_dim(self, set_dim, dim_idx, da_idx, blk_idx):
+        """
+        Check if the file meets the NIX requirements for set dimensions.
+
+        :returns: The error dictionary with errors appended on set dimensions
+        :rtype: Dictionary
+        """
         if self.check_dim(set_dim):
             da = self.errors['blocks'][blk_idx]['data_arrays'][da_idx]
             da['dimensions'][dim_idx]['errors'].append(self.check_dim(set_dim))
@@ -347,6 +420,12 @@ class Validate:
         return self.errors
 
     def check_sampled_dim(self, sam_dim, dim_idx, da_idx, blk_idx):
+        """
+        Check if the file meets the NIX requirements for sampled dimensions.
+
+        :returns: The error dict with errors appended on sampled dimensions
+        :rtype: Dictionary
+        """
         sdim_err_list = []
 
         if self.check_dim(sam_dim):
@@ -373,6 +452,9 @@ class Validate:
         return self.errors
 
     def check_for_basics(self, entity):
+        """
+        General check for the nix requirements applicable for all nix Objects
+        """
         basic_check_list = []
         typename = type(entity).__name__
         if not entity.type:
@@ -385,6 +467,9 @@ class Validate:
         return basic_check_list
 
     def get_dim_units(self, data_arrays):
+        """
+        Help function to collect the units of the dimensions of a data array
+        """
         unit_list = []
         for dim in data_arrays.dimensions:
             if dim.dimension_type == 'range':

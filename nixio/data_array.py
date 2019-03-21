@@ -340,20 +340,6 @@ class DataArray(Entity, DataSet):
                                                   Dimension)
         return self._dimensions
 
-    def __eq__(self, other):
-        if hasattr(other, "id"):
-            return self.id == other.id
-        else:
-            return False
-
-    def __hash__(self):
-        """
-        Overwriting method __eq__ blocks inheritance of __hash__ in Python 3
-        hash has to be either explicitly inherited from parent class,
-        implemented or escaped
-        """
-        return hash(self.id)
-
     # metadata
     @property
     def metadata(self):
