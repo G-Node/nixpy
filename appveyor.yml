@@ -12,7 +12,7 @@ environment:
   BOOST_INCDIR: C:\Libraries\boost_1_67_0\lib64-msvc-14.1
   BOOST_LIBDIR: C:\Libraries\boost_1_67_0\lib64-msvc-14.1
 
-  NIX_APPVEYOR_ROOT: https://ci.appveyor.com/api/projects/stoewer/nix/artifacts/build
+  NIX_APPVEYOR_ROOT: https://ci.appveyor.com/api/projects/G-Node/nix/artifacts/build
 
 
   matrix:
