@@ -259,7 +259,8 @@ class Section(Entity):
     @property
     def referring_blocks(self):
         f = self.file
-        return list(blk for blk in f.blocks if blk.metadata.id == self.id)
+        return list(blk for blk in f.blocks
+                    if blk.metadata is not None and blk.metadata.id == self.id)
 
     @property
     def referring_groups(self):
@@ -267,7 +268,8 @@ class Section(Entity):
         groups = []
         for blk in f.blocks:
             groups.extend(grp for grp in blk.groups
-                          if grp.metadata.id == self.id)
+                          if (grp.metadata is not None and
+                              grp.metadata.id == self.id))
         return groups
 
     @property
@@ -276,7 +278,8 @@ class Section(Entity):
         data_arrays = []
         for blk in f.blocks:
             data_arrays.extend(da for da in blk.data_arrays
-                               if da.metadata.id == self.id)
+                               if (da.metadata is not None and
+                                   da.metadata.id == self.id))
         return data_arrays
 
     @property
@@ -285,7 +288,8 @@ class Section(Entity):
         tags = []
         for blk in f.blocks:
             tags.extend(tg for tg in blk.tags
-                        if tg.metadata.id == self.id)
+                        if (tg.metadata is not None and
+                            tg.metadata.id == self.id))
         return tags
 
     @property
@@ -294,7 +298,8 @@ class Section(Entity):
         multi_tags = []
         for blk in f.blocks:
             multi_tags.extend(mt for mt in blk.multi_tags
-                              if mt.metadata.id == self.id)
+                              if (mt.metadata is not None and
+                                  mt.metadata.id == self.id))
         return multi_tags
 
     @property
@@ -303,7 +308,8 @@ class Section(Entity):
         sources = []
         for blk in f.blocks:
             sources.extend(src for src in blk.sources
-                           if src.metadata.id == self.id)
+                           if (src.metadata is not None and
+                               src.metadata.id == self.id))
         return sources
 
     def find_sections(self, filtr=lambda _: True, limit=None):
