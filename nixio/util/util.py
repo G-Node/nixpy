@@ -168,4 +168,3 @@ def link_type_from_string(ltstr):
         return LinkType.Untagged
     else:
         raise RuntimeError("Invalid string for LinkType")
-

@@ -327,8 +327,11 @@ class File(object):
             raise TypeError("Object to be copied is not a Section")
 
         h5_parent = obj._parent
+        if obj._sec_parent:
+            src = "{}/{}".format("sections", obj.name)
+        else:
+            src = "{}/{}".format("metadata", obj.name)
         clsname = "metadata"
-        src = "{}/{}".format(clsname, obj.name)
         h5_parent._h5group.copy(source=src, dest=self._h5group,
                                 name=str(obj.name), cls=clsname)
 

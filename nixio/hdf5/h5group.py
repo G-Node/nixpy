@@ -280,8 +280,7 @@ class H5Group(object):
         return result
 
     def copy(self, source, dest, name=None, cls=None):
-
-        grp =self.group
+        grp = self.group
         dest.open_group(cls, create=True)
         dest_grp = dest.group[cls]
         grp.copy(source=source, dest=dest_grp, name=name)
