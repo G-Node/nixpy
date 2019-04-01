@@ -350,7 +350,7 @@ class Block(Entity):
     @staticmethod
     def _pp(obj, ml, indent, ex, grp=False):
         spaces = " " * (indent)
-        if grp == True:
+        if grp:
             prefix = "*"
         else:
             prefix = ""
@@ -396,7 +396,7 @@ class Block(Entity):
         clsname = "data_arrays"
         src = "{}/{}".format(clsname, obj.name)
         da = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                name=str(obj.name), cls=clsname)
+                                     name=str(obj.name), cls=clsname)
 
         if change_id:
             id_ = util.create_id()
@@ -413,7 +413,7 @@ class Block(Entity):
         clsname = "data_frames"
         src = "{}/{}".format(clsname, obj.name)
         df = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                name=str(obj.name), cls=clsname)
+                                     name=str(obj.name), cls=clsname)
         if change_id:
             id_ = util.create_id()
             df.attrs.modify("entity_id", np.string_(id_))
@@ -429,7 +429,7 @@ class Block(Entity):
         clsname = "multi_tags"
         src = "{}/{}".format(clsname, obj.name)
         mt = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                name=str(obj.name), cls=clsname)
+                                     name=str(obj.name), cls=clsname)
 
         if change_id:
             id_ = util.create_id()
@@ -446,7 +446,7 @@ class Block(Entity):
         clsname = "tags"
         src = "{}/{}".format(clsname, obj.name)
         tag = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                name=str(obj.name), cls=clsname)
+                                      name=str(obj.name), cls=clsname)
 
         if change_id:
             id_ = util.create_id()

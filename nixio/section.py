@@ -463,7 +463,7 @@ class Section(Entity):
 
         clsname = "sections"
         sec = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                name=str(obj.name), cls=clsname)
+                                      name=str(obj.name), cls=clsname)
         if change_id:
             id_ = util.create_id()
             sec.attrs.modify("entity_id", np.string_(id_))
@@ -479,7 +479,7 @@ class Section(Entity):
         clsname = "properties"
         src = "{}/{}".format(clsname, obj.name)
         p = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                name=str(obj.name), cls=clsname)
+                                    name=str(obj.name), cls=clsname)
         if change_id:
             id_ = util.create_id()
             p.attrs.modify("entity_id", np.string_(id_))

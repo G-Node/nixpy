@@ -320,7 +320,7 @@ class File(object):
         clsname = "data"
         src = "{}/{}".format(clsname, obj.name)
         b = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                name=str(obj.name), cls=clsname)
+                                    name=str(obj.name), cls=clsname)
         if change_id:
             def change_id(_, grp):
                 if "entity_id" in grp.attrs:
@@ -344,7 +344,7 @@ class File(object):
             src = "{}/{}".format("metadata", obj.name)
         clsname = "metadata"
         sec = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                name=str(obj.name), cls=clsname)
+                                      name=str(obj.name), cls=clsname)
 
         if change_id:
             def change_id(_, grp):
