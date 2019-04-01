@@ -284,6 +284,7 @@ class H5Group(object):
         dest.open_group(cls, create=True)
         dest_grp = dest.group[cls]
         grp.copy(source=source, dest=dest_grp, name=name)
+        return dest_grp[name]
 
     @property
     def file(self):

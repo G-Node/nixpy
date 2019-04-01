@@ -15,7 +15,7 @@ try:
 except ImportError:
     from collections import Sequence, Iterable
 from six import string_types
-
+import numpy as np
 from .container import Container, SectionContainer
 from .datatype import DataType
 from .entity import Entity
@@ -451,7 +451,7 @@ class Section(Entity):
                                                    s.name, s.type,
                                                    more_indent))
 
-    def copy_section(self, obj):
+    def copy_section(self, obj, change_id=False):
         if not isinstance(obj, Section):
             raise TypeError("Object to be copied is not a Section")
 
@@ -462,15 +462,33 @@ class Section(Entity):
             src = "{}/{}".format("metadata", obj.name)
 
         clsname = "sections"
-        h5_parent._h5group.copy(source=src, dest=self._h5group,
+        sec = h5_parent._h5group.copy(source=src, dest=self._h5group,
                                 name=str(obj.name), cls=clsname)
+        if change_id:
+            id_ = util.create_id()
+            sec.attrs.modify("entity_id", np.string_(id_))
+            sec.visititems(self._change_id)
 
-    def copy_property(self, obj):
+        return self.sections[obj.name]
+
+    def copy_property(self, obj, change_id=False):
         if not isinstance(obj, Property):
             raise TypeError("Object to be copied is not a Property")
 
         h5_parent = obj._parent
         clsname = "properties"
         src = "{}/{}".format(clsname, obj.name)
-        h5_parent._h5group.copy(source=src, dest=self._h5group,
+        p = h5_parent._h5group.copy(source=src, dest=self._h5group,
                                 name=str(obj.name), cls=clsname)
+        if change_id:
+            id_ = util.create_id()
+            p.attrs.modify("entity_id", np.string_(id_))
+            p.visititems(self._change_id)
+
+        return self.props[obj.name]
+
+    @staticmethod
+    def _change_id(_, grp):
+        if "entity_id" in grp.attrs:
+            id_ = util.create_id()
+            grp.attrs.modify("entity_id", np.string_(id_))

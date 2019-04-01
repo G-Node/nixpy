@@ -388,45 +388,78 @@ class Block(Entity):
             else:
                 print(n)
 
-    def copy_data_array(self, obj):
+    def copy_data_array(self, obj, change_id=False):
         if not isinstance(obj, DataArray):
             raise TypeError("Object to be copied is not a DataArray")
 
         h5_parent = obj._parent
         clsname = "data_arrays"
         src = "{}/{}".format(clsname, obj.name)
-        h5_parent._h5group.copy(source=src, dest=self._h5group,
+        da = h5_parent._h5group.copy(source=src, dest=self._h5group,
                                 name=str(obj.name), cls=clsname)
 
-    def copy_data_frame(self, obj):
+        if change_id:
+            id_ = util.create_id()
+            da.attrs.modify("entity_id", np.string_(id_))
+            da.visititems(self._change_id)
+
+        return self.data_arrays[obj.name]
+
+    def copy_data_frame(self, obj, change_id=False):
         if not isinstance(obj, DataFrame):
             raise TypeError("Object to be copied is not a DataFrame")
 
         h5_parent = obj._parent
         clsname = "data_frames"
         src = "{}/{}".format(clsname, obj.name)
-        h5_parent._h5group.copy(source=src, dest=self._h5group,
+        df = h5_parent._h5group.copy(source=src, dest=self._h5group,
                                 name=str(obj.name), cls=clsname)
+        if change_id:
+            id_ = util.create_id()
+            df.attrs.modify("entity_id", np.string_(id_))
+            df.visititems(self._change_id)
 
-    def copy_multi_tag(self, obj):
+        return self.data_frames[obj.name]
+
+    def copy_multi_tag(self, obj, change_id=False):
         if not isinstance(obj, MultiTag):
             raise TypeError("Object to be copied is not a MultiTag")
 
         h5_parent = obj._parent
         clsname = "multi_tags"
         src = "{}/{}".format(clsname, obj.name)
-        h5_parent._h5group.copy(source=src, dest=self._h5group,
+        mt = h5_parent._h5group.copy(source=src, dest=self._h5group,
                                 name=str(obj.name), cls=clsname)
 
-    def copy_tag(self, obj):
+        if change_id:
+            id_ = util.create_id()
+            mt.attrs.modify("entity_id", np.string_(id_))
+            mt.visititems(self._change_id)
+
+        return self.multi_tags[obj.name]
+
+    def copy_tag(self, obj, change_id=False):
         if not isinstance(obj, Tag):
             raise TypeError("Object to be copied is not a Tag")
 
         h5_parent = obj._parent
         clsname = "tags"
         src = "{}/{}".format(clsname, obj.name)
-        h5_parent._h5group.copy(source=src, dest=self._h5group,
+        tag = h5_parent._h5group.copy(source=src, dest=self._h5group,
                                 name=str(obj.name), cls=clsname)
+
+        if change_id:
+            id_ = util.create_id()
+            tag.attrs.modify("entity_id", np.string_(id_))
+            tag.visititems(self._change_id)
+
+        return self.tags[obj.name]
+
+    @staticmethod
+    def _change_id(_, grp):
+        if "entity_id" in grp.attrs:
+            id_ = util.create_id()
+            grp.attrs.modify("entity_id", np.string_(id_))
 
     @property
     def sources(self):
