@@ -62,7 +62,7 @@ def plot_data(tag):
 def plot_roi_data(tag):
     position_count = tag.positions.shape[0]
     for p in range(position_count):
-        roi_data = tag.retrieve_data(p, 0)[:]
+        roi_data = tag.tagged_data(p, 0)[:]
         roi_data = np.array(roi_data, dtype='uint8')
         ax = plt.gcf().add_subplot(position_count, 1, p+1)
         image = img.fromarray(roi_data)

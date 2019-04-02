@@ -173,7 +173,7 @@ class TestTags(unittest.TestCase):
 
         assert(len(self.my_tag.features) == 0)
 
-    def test_tag_retrieve_data(self):
+    def test_tag_tagged_data(self):
         sample_iv = 1.0
         ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
         unit = "ms"
@@ -199,30 +199,30 @@ class TestTags(unittest.TestCase):
         segtag.extent = ext
         segtag.units = units
 
-        posdata = postag.retrieve_data(0)
+        posdata = postag.tagged_data(0)
         assert(len(posdata.shape) == 3)
         assert(posdata.shape == (1, 1, 1))
 
-        segdata = segtag.retrieve_data(0)
+        segdata = segtag.tagged_data(0)
         assert(len(segdata.shape) == 3)
         assert(segdata.shape == (1, 7, 2))
 
         # retrieve data by id and name
-        posdata = postag.retrieve_data(da.name)
+        posdata = postag.tagged_data(da.name)
         assert(len(posdata.shape) == 3)
         assert(posdata.shape == (1, 1, 1))
-        segdata = segtag.retrieve_data(da.name)
+        segdata = segtag.tagged_data(da.name)
         assert(len(segdata.shape) == 3)
         assert(segdata.shape == (1, 7, 2))
 
-        posdata = postag.retrieve_data(da.id)
+        posdata = postag.tagged_data(da.id)
         assert(len(posdata.shape) == 3)
         assert(posdata.shape == (1, 1, 1))
-        segdata = segtag.retrieve_data(da.id)
+        segdata = segtag.tagged_data(da.id)
         assert(len(segdata.shape) == 3)
         assert(segdata.shape == (1, 7, 2))
 
-    def test_tag_retrieve_feature_data(self):
+    def test_tag_feature_data(self):
         number_feat = self.block.create_data_array("number feature", "test",
                                                    data=10.)
         ramp_data = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
@@ -241,9 +241,9 @@ class TestTags(unittest.TestCase):
         pos_tag.create_feature(ramp_feat, nix.LinkType.Untagged)
         assert(len(pos_tag.features) == 3)
 
-        data1 = pos_tag.retrieve_feature_data(0)
-        data2 = pos_tag.retrieve_feature_data(1)
-        data3 = pos_tag.retrieve_feature_data(2)
+        data1 = pos_tag.feature_data(0)
+        data2 = pos_tag.feature_data(1)
+        data3 = pos_tag.feature_data(2)
 
         assert(data1.size == 1)
         assert(data2.size == 1)
@@ -251,17 +251,17 @@ class TestTags(unittest.TestCase):
 
         # make the tag pointing to a slice
         pos_tag.extent = [2.0]
-        data1 = pos_tag.retrieve_feature_data(0)
-        data2 = pos_tag.retrieve_feature_data(1)
-        data3 = pos_tag.retrieve_feature_data(2)
+        data1 = pos_tag.feature_data(0)
+        data2 = pos_tag.feature_data(1)
+        data3 = pos_tag.feature_data(2)
 
         assert(data1.size == 1)
         assert(data2.size == 3)
         assert(data3.size == len(ramp_data))
 
         # get by name
-        data1 = pos_tag.retrieve_feature_data(number_feat.name)
-        data2 = pos_tag.retrieve_feature_data(ramp_feat.name)
+        data1 = pos_tag.feature_data(number_feat.name)
+        data2 = pos_tag.feature_data(ramp_feat.name)
 
         assert(data1.size == 1)
         assert(data2.size == 3)

@@ -59,6 +59,13 @@ class Dimension(object):
     def index(self):
         return self.dim_index
 
+    def __str__(self):
+        return "{}: {{index = {}}}".format(
+            type(self).__name__, self.index
+        )
+
+    def __repr__(self):
+        return self.__str__()
 
 class SampledDimension(Dimension):
 

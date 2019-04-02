@@ -238,6 +238,8 @@ class TestSections(unittest.TestCase):
         otherblock = self.file.create_block("b block", "block with metadata")
         otherblock.metadata = self.other
 
+        self.file.create_block("c block", "block without metadata")
+
         self.assertEqual(len(self.section.referring_blocks), 1)
         self.assertEqual(len(self.other.referring_blocks), 1)
         self.assertEqual(self.section.referring_blocks[0], block)
@@ -248,24 +250,30 @@ class TestSections(unittest.TestCase):
         da_two = block.create_data_array("foobar", "data_array", data=[1])
         da_two.metadata = self.other
 
+        block.create_data_array("nomd", "data_array", data=[9])
+
         self.assertEqual(len(self.other.referring_data_arrays), 2)
         self.assertIn(da_one, self.other.referring_data_arrays)
         self.assertIn(da_two, self.other.referring_data_arrays)
 
         tag = block.create_tag("tago", "tagtype", [1, 1])
         tag.metadata = self.section
+
+        block.create_tag("tagi", "tagtype", [1, 10])
         self.assertEqual(len(self.section.referring_tags), 1)
         self.assertEqual(len(self.other.referring_tags), 0)
         self.assertEqual(self.section.referring_tags[0].id, tag.id)
 
         mtag = block.create_multi_tag("MultiTagName", "MultiTagType", da_one)
         mtag.metadata = self.section
+        block.create_multi_tag("MtagNOMD", "MultiTagType", da_one)
         self.assertEqual(len(self.section.referring_multi_tags), 1)
         self.assertEqual(len(self.other.referring_multi_tags), 0)
         self.assertEqual(self.section.referring_multi_tags[0].id, mtag.id)
 
         src = block.create_source("sauce", "stype")
         src.metadata = self.other
+        block.create_source("nosauce", "stype")
         self.assertEqual(len(self.other.referring_sources), 1)
         self.assertEqual(len(self.section.referring_sources), 0)
         self.assertEqual(self.other.referring_sources[0].id, src.id)

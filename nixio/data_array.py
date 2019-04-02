@@ -6,6 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+import warnings
 from numbers import Number
 from enum import Enum
 
@@ -320,7 +321,6 @@ class DataArray(Entity, DataSet):
 
         :type: :class:`~nixio.data_array.DataArray`
         """
-        import warnings
         warnings.warn("Call to deprecated property DataArray.data",
                       category=DeprecationWarning)
         return self
@@ -339,20 +339,6 @@ class DataArray(Entity, DataSet):
             self._dimensions = DimensionContainer("dimensions", self,
                                                   Dimension)
         return self._dimensions
-
-    def __eq__(self, other):
-        if hasattr(other, "id"):
-            return self.id == other.id
-        else:
-            return False
-
-    def __hash__(self):
-        """
-        Overwriting method __eq__ blocks inheritance of __hash__ in Python 3
-        hash has to be either explicitly inherited from parent class,
-        implemented or escaped
-        """
-        return hash(self.id)
 
     # metadata
     @property

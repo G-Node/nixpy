@@ -196,7 +196,31 @@ class Block(Entity):
     def create_data_frame(self, name, type_, col_dict=None, col_names=None,
                           col_dtypes=None, data=None,
                           compression=Compression.No):
+        """
+         Create a new data frame for this block. Either ``col_dict``
+         or ``col_name`` and ``col_dtypes`` must be given.
+         If both are given, ``col_dict`` will be used.
 
+         :param name: The name of the data frame to create.
+         :type name: str
+         :param type_: The type of the data frame.
+         :type type_: str
+         :param col_dict: The dictionary that specify column
+                          names and data type in each column
+         :type col_dict:dict or OrderedDict of {str: type}
+         :param col_names: The collection of name of all columns in order
+         :type col_names: tuples or list or np.array of string
+         :param col_dtypes: The collection of data type of all columns in order
+         :type col_dtypes: tuples or list or np.array of type
+         :param data: Data to write after storage has been created
+         :type data: array-like data with compound data type
+                     as specified in the columns
+         :param compression: En-/disable dataset compression.
+         :type compression: :class:`~nixio.Compression`
+
+         :returns: The newly created data frame.
+         :rtype: :class:`~nixio.DataFrame`
+         """
         if (isinstance(col_dict, dict)
                 and not isinstance(col_dict, OrderedDict)
                 and sys.version_info[0] < 3):
@@ -290,6 +314,80 @@ class Block(Entity):
             limit = maxint
         return finders._find_sources(self, filtr, limit)
 
+    def pprint(self, indent=2, max_length=120, extra=True):
+        print(self)
+        for grp in self.groups:
+            self._pp(grp, max_length, indent, False)
+            for da in grp.data_arrays:
+                self._pp(da, max_length, indent * 2, extra, True)
+                for dim in da.dimensions:
+                    self._pp(dim, max_length, indent * 3, False)
+            for df in grp.data_frames:
+                self._pp(df, max_length, indent * 2, extra, True)
+            for tag in grp.tags:
+                self._pp(tag, max_length, indent * 2, extra, True)
+                for fe in tag.features:
+                    self._pp(fe, max_length, indent * 3, False)
+            for mt in grp.multi_tags:
+                self._pp(mt, max_length, indent * 2, extra, True)
+                for fe in mt.features:
+                    self._pp(fe, max_length, indent * 3, False)
+        for da in self.data_arrays:
+            self._pp(da, max_length, indent, extra)
+            for dim in da.dimensions:
+                self._pp(dim, max_length, indent * 2, False)
+        for df in self.data_frames:
+            self._pp(df, max_length, indent, extra)
+        for tag in self.tags:
+            self._pp(tag, max_length, indent, extra)
+            for fe in tag.features:
+                self._pp(fe, max_length, indent * 2, False)
+        for mt in self.multi_tags:
+            self._pp(mt, max_length, indent, extra)
+            for fe in mt.features:
+                self._pp(fe, max_length, indent * 2, False)
+
+    @staticmethod
+    def _pp(obj, ml, indent, ex, grp=False):
+        spaces = " " * (indent)
+        if grp == True:
+            prefix = "*"
+        else:
+            prefix = ""
+        if ex:
+            stat = ""
+            if isinstance(obj, MultiTag):
+                stat = "Position Shape:{} Units: {}".format(
+                    obj.positions.shape,
+                    obj.units)
+            elif isinstance(obj, Tag):
+                stat = "Position Length:{} Units: {}".format(len(obj.position),
+                                                             obj.units)
+            elif isinstance(obj, DataFrame):
+                stat = "Shape: {} Columns:{}".format(obj.shape,
+                                                     obj.column_names)
+            elif isinstance(obj, DataArray):
+                stat = "Shape: {} Unit:{}".format(obj.shape, obj.unit)
+            p = "{}{}{}".format(spaces, prefix, obj)
+            n = "{}  {}".format(spaces, stat)
+        else:
+            p = "{}{}{}".format(spaces, prefix, obj)
+        if len(p) > ml - 4:
+            split_len = int(ml / 2)
+            str1 = p[0:split_len]
+            str2 = p[-split_len:]
+            print("{} ... {}".format(str1, str2))
+        else:
+            print(p)
+        if ex:
+            if len(n) > ml - 4:
+                split_len = int(ml / 2)
+                nstr1 = n[0:split_len]
+                nstr2 = n[-split_len:]
+                print("{} ... {}".format(nstr1, nstr2))
+            else:
+                print(n)
+
     @property
     def sources(self):
         """
@@ -356,22 +454,6 @@ class Block(Entity):
         if self._groups is None:
             self._groups = Container("groups", self, Group)
         return self._groups
-
-    def __eq__(self, other):
-        """
-        Two Blocks are considered equal when they have the same id.
-        """
-        if hasattr(other, "id"):
-            return self.id == other.id
-        return False
-
-    def __hash__(self):
-        """
-        overwriting method __eq__ blocks inheritance of __hash__ in Python 3
-        hash has to be either explicitly inherited from parent class,
-        implemented or escaped
-        """
-        return hash(self.id)
 
     # metadata
     @property

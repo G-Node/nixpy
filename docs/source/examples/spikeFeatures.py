@@ -59,7 +59,7 @@ def plot_data(tag):
 
     feature_data_array = tag.features[0].data
     snippets = tag.features[0].data[:]
-    single_snippet = tag.retrieve_feature_data(3, 0)[:]
+    single_snippet = tag.feature_data(3, 0)[:]
 
     snippet_time_dim = feature_data_array.dimensions[1]
     snippet_time = snippet_time_dim.axis(feature_data_array.data_extent[1])

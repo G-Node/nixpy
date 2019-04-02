@@ -37,8 +37,8 @@ List of Tutorials
 
 * Retrieve data 
  
-  * :ref:`retrieve_tagged_data`
-  * :ref:`retrieve_feature_data`
+  * :ref:`tagged_data`
+  * :ref:`feature_data`
 
 * Additional information
 
@@ -262,7 +262,7 @@ Source code for this example: :download:`spikeTagging.py <examples/spikeTagging.
 :ref:`toc`
 
 
-.. _retrieve_tagged_data:
+.. _tagged_data:
 
 Retrieving tagged regions
 """""""""""""""""""""""""
@@ -388,7 +388,7 @@ Source code for this example: :download:`spikeFeatures.py <examples/spikeFeature
 :ref:`toc`
 
 
-.. _retrieve_feature_data:
+.. _feature_data:
 
 Retrieving feature data
 """""""""""""""""""""""
