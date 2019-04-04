@@ -388,7 +388,7 @@ class Block(Entity):
             else:
                 print(n)
 
-    def copy_data_array(self, obj, change_id=False):
+    def copy_data_array(self, obj, keep_id=True):
         if not isinstance(obj, DataArray):
             raise TypeError("Object to be copied is not a DataArray")
 
@@ -398,14 +398,14 @@ class Block(Entity):
         da = h5_parent._h5group.copy(source=src, dest=self._h5group,
                                      name=str(obj.name), cls=clsname)
 
-        if change_id:
+        if not keep_id:
             id_ = util.create_id()
             da.attrs.modify("entity_id", np.string_(id_))
             da.visititems(self._change_id)
 
         return self.data_arrays[obj.name]
 
-    def copy_data_frame(self, obj, change_id=False):
+    def copy_data_frame(self, obj, keep_id=True):
         if not isinstance(obj, DataFrame):
             raise TypeError("Object to be copied is not a DataFrame")
 
@@ -414,14 +414,14 @@ class Block(Entity):
         src = "{}/{}".format(clsname, obj.name)
         df = h5_parent._h5group.copy(source=src, dest=self._h5group,
                                      name=str(obj.name), cls=clsname)
-        if change_id:
+        if not keep_id:
             id_ = util.create_id()
             df.attrs.modify("entity_id", np.string_(id_))
             df.visititems(self._change_id)
 
         return self.data_frames[obj.name]
 
-    def copy_multi_tag(self, obj, change_id=False):
+    def copy_multi_tag(self, obj, keep_id=True):
         if not isinstance(obj, MultiTag):
             raise TypeError("Object to be copied is not a MultiTag")
 
@@ -431,14 +431,14 @@ class Block(Entity):
         mt = h5_parent._h5group.copy(source=src, dest=self._h5group,
                                      name=str(obj.name), cls=clsname)
 
-        if change_id:
+        if not keep_id:
             id_ = util.create_id()
             mt.attrs.modify("entity_id", np.string_(id_))
             mt.visititems(self._change_id)
 
         return self.multi_tags[obj.name]
 
-    def copy_tag(self, obj, change_id=False):
+    def copy_tag(self, obj, keep_id=True):
         if not isinstance(obj, Tag):
             raise TypeError("Object to be copied is not a Tag")
 
@@ -448,7 +448,7 @@ class Block(Entity):
         tag = h5_parent._h5group.copy(source=src, dest=self._h5group,
                                       name=str(obj.name), cls=clsname)
 
-        if change_id:
+        if not keep_id:
             id_ = util.create_id()
             tag.attrs.modify("entity_id", np.string_(id_))
             tag.visititems(self._change_id)

@@ -451,7 +451,7 @@ class Section(Entity):
                                                    s.name, s.type,
                                                    more_indent))
 
-    def copy_section(self, obj, change_id=False):
+    def copy_section(self, obj, children=True, keep_id=True):
         if not isinstance(obj, Section):
             raise TypeError("Object to be copied is not a Section")
 
@@ -463,15 +463,17 @@ class Section(Entity):
 
         clsname = "sections"
         sec = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                      name=str(obj.name), cls=clsname)
-        if change_id:
+                                      name=str(obj.name),
+                                      cls=clsname, shallow=not children)
+
+        if not keep_id:
             id_ = util.create_id()
             sec.attrs.modify("entity_id", np.string_(id_))
             sec.visititems(self._change_id)
 
         return self.sections[obj.name]
 
-    def copy_property(self, obj, change_id=False):
+    def copy_property(self, obj, keep_id=True):
         if not isinstance(obj, Property):
             raise TypeError("Object to be copied is not a Property")
 
@@ -480,7 +482,7 @@ class Section(Entity):
         src = "{}/{}".format(clsname, obj.name)
         p = h5_parent._h5group.copy(source=src, dest=self._h5group,
                                     name=str(obj.name), cls=clsname)
-        if change_id:
+        if not keep_id:
             id_ = util.create_id()
             p.attrs.modify("entity_id", np.string_(id_))
             p.visititems(self._change_id)

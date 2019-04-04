@@ -312,7 +312,7 @@ class File(object):
 
         # TODO: if same file, set_attr("entity_id", id_)
 
-    def copy_block(self, obj, change_id=False):
+    def copy_block(self, obj, keep_id=True):
         if not isinstance(obj, Block):
             raise TypeError("Object to be copied is not a Block")
 
@@ -321,7 +321,7 @@ class File(object):
         src = "{}/{}".format(clsname, obj.name)
         b = h5_parent._h5group.copy(source=src, dest=self._h5group,
                                     name=str(obj.name), cls=clsname)
-        if change_id:
+        if not keep_id:
             def change_id(_, grp):
                 if "entity_id" in grp.attrs:
                     id_ = util.create_id()
@@ -333,7 +333,7 @@ class File(object):
 
         return self.blocks[obj.name]
 
-    def copy_section(self, obj, change_id=False):
+    def copy_section(self, obj, children=True, keep_id=True):
         if not isinstance(obj, Section):
             raise TypeError("Object to be copied is not a Section")
 
@@ -344,9 +344,14 @@ class File(object):
             src = "{}/{}".format("metadata", obj.name)
         clsname = "metadata"
         sec = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                      name=str(obj.name), cls=clsname)
+                                      name=str(obj.name),
+                                      cls=clsname, shallow=not children)
 
-        if change_id:
+        if not children:
+            for p in obj.props:
+                self.sections[obj.name].copy_property(p, keep_id)
+
+        if not keep_id:
             def change_id(_, grp):
                 if "entity_id" in grp.attrs:
                     id_ = util.create_id()

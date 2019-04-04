@@ -279,11 +279,11 @@ class H5Group(object):
         self.group.visititems(match)
         return result
 
-    def copy(self, source, dest, name=None, cls=None):
+    def copy(self, source, dest, name=None, cls=None, shallow=False):
         grp = self.group
         dest.open_group(cls, create=True)
         dest_grp = dest.group[cls]
-        grp.copy(source=source, dest=dest_grp, name=name)
+        grp.copy(source=source, dest=dest_grp, name=name, shallow=shallow)
         return dest_grp[name]
 
     @property
