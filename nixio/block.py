@@ -56,7 +56,8 @@ class Block(Entity):
         return newentity
 
     # MultiTag
-    def create_multi_tag(self, name, type_, positions):
+    def create_multi_tag(self, name="", type_="", positions=0,
+                         copy_from=None, keep_copy_id=True):
         """
         Create a new multi tag for this block.
 
@@ -70,6 +71,12 @@ class Block(Entity):
         :returns: The newly created tag.
         :rtype: MultiTag
         """
+        if copy_from:
+            if not isinstance(copy_from, MultiTag):
+                raise TypeError("Object to be copied is not a MultiTag")
+            id = self._copy_objects(copy_from, "multi_tags", keep_copy_id)
+            return self.multi_tags[id]
+
         util.check_entity_name_and_type(name, type_)
         util.check_entity_input(positions)
         if not isinstance(positions, DataArray):
@@ -81,7 +88,8 @@ class Block(Entity):
         return mtag
 
     # Tag
-    def create_tag(self, name, type_, position):
+    def create_tag(self, name="", type_="", position=0,
+                   copy_from=None, keep_copy_id=True):
         """
         Create a new tag for this block.
 
@@ -95,6 +103,12 @@ class Block(Entity):
         :returns: The newly created tag.
         :rtype: Tag
         """
+        if copy_from:
+            if not isinstance(copy_from, Tag):
+                raise TypeError("Object to be copied is not a Tag")
+            id = self._copy_objects(copy_from, "tags", keep_copy_id)
+            return self.tags[id]
+
         util.check_entity_name_and_type(name, type_)
         tags = self._h5group.open_group("tags")
         if name in tags:
@@ -142,8 +156,9 @@ class Block(Entity):
         grp = Group._create_new(self, groups, name, type_)
         return grp
 
-    def create_data_array(self, name, array_type, dtype=None, shape=None,
-                          data=None, compression=Compression.Auto):
+    def create_data_array(self, name="", array_type="", dtype=None, shape=None,
+                          data=None, compression=Compression.Auto,
+                          copy_from=None, keep_copy_id=True):
         """
         Create a new data array for this block. Either ``shape``
         or ``data`` must be given. If both are given their shape must agree.
@@ -166,6 +181,12 @@ class Block(Entity):
         :returns: The newly created data array.
         :rtype: :class:`~nixio.DataArray`
         """
+
+        if copy_from:
+            if not isinstance(copy_from, DataArray):
+                raise TypeError("Object to be copied is not a DataArray")
+            id = self._copy_objects(copy_from, "data_arrays", keep_copy_id)
+            return self.data_arrays[id]
 
         if data is None:
             if shape is None:
@@ -193,9 +214,10 @@ class Block(Entity):
             da.write_direct(data)
         return da
 
-    def create_data_frame(self, name, type_, col_dict=None, col_names=None,
+    def create_data_frame(self, name="", type_="", col_dict=None, col_names=None,
                           col_dtypes=None, data=None,
-                          compression=Compression.No):
+                          compression=Compression.No,
+                          copy_from=None, keep_copy_id=True):
         """
          Create a new data frame for this block. Either ``col_dict``
          or ``col_name`` and ``col_dtypes`` must be given.
@@ -221,6 +243,13 @@ class Block(Entity):
          :returns: The newly created data frame.
          :rtype: :class:`~nixio.DataFrame`
          """
+        if copy_from:
+            if not isinstance(copy_from, DataFrame):
+                raise TypeError("Object to be copied is not a DataFrame")
+            id = self._copy_objects(copy_from, "data_frames", keep_copy_id)
+            return self.data_frames[id]
+
+        util.check_entity_name_and_type(name, type_)
         if (isinstance(col_dict, dict)
                 and not isinstance(col_dict, OrderedDict)
                 and sys.version_info[0] < 3):
@@ -388,78 +417,14 @@ class Block(Entity):
             else:
                 print(n)
 
-    def copy_data_array(self, obj, keep_id=True):
-        if not isinstance(obj, DataArray):
-            raise TypeError("Object to be copied is not a DataArray")
-
-        h5_parent = obj._parent
-        clsname = "data_arrays"
+    def _copy_objects(self, obj, clsname, keep_id=True):
         src = "{}/{}".format(clsname, obj.name)
-        da = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                     name=str(obj.name), cls=clsname)
+        o = obj._parent._h5group.copy(source=src, dest=self._h5group,
+                                    name=str(obj.name), cls=clsname,
+                                    keep_id=keep_id)
 
-        if not keep_id:
-            id_ = util.create_id()
-            da.attrs.modify("entity_id", np.string_(id_))
-            da.visititems(self._change_id)
+        return o.attrs["entity_id"]
 
-        return self.data_arrays[obj.name]
-
-    def copy_data_frame(self, obj, keep_id=True):
-        if not isinstance(obj, DataFrame):
-            raise TypeError("Object to be copied is not a DataFrame")
-
-        h5_parent = obj._parent
-        clsname = "data_frames"
-        src = "{}/{}".format(clsname, obj.name)
-        df = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                     name=str(obj.name), cls=clsname)
-        if not keep_id:
-            id_ = util.create_id()
-            df.attrs.modify("entity_id", np.string_(id_))
-            df.visititems(self._change_id)
-
-        return self.data_frames[obj.name]
-
-    def copy_multi_tag(self, obj, keep_id=True):
-        if not isinstance(obj, MultiTag):
-            raise TypeError("Object to be copied is not a MultiTag")
-
-        h5_parent = obj._parent
-        clsname = "multi_tags"
-        src = "{}/{}".format(clsname, obj.name)
-        mt = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                     name=str(obj.name), cls=clsname)
-
-        if not keep_id:
-            id_ = util.create_id()
-            mt.attrs.modify("entity_id", np.string_(id_))
-            mt.visititems(self._change_id)
-
-        return self.multi_tags[obj.name]
-
-    def copy_tag(self, obj, keep_id=True):
-        if not isinstance(obj, Tag):
-            raise TypeError("Object to be copied is not a Tag")
-
-        h5_parent = obj._parent
-        clsname = "tags"
-        src = "{}/{}".format(clsname, obj.name)
-        tag = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                      name=str(obj.name), cls=clsname)
-
-        if not keep_id:
-            id_ = util.create_id()
-            tag.attrs.modify("entity_id", np.string_(id_))
-            tag.visititems(self._change_id)
-
-        return self.tags[obj.name]
-
-    @staticmethod
-    def _change_id(_, grp):
-        if "entity_id" in grp.attrs:
-            id_ = util.create_id()
-            grp.attrs.modify("entity_id", np.string_(id_))
 
     @property
     def sources(self):

@@ -88,7 +88,8 @@ class Section(Entity):
         return sec
 
     # Property
-    def create_property(self, name, values_or_dtype, oid=None):
+    def create_property(self, name="", values_or_dtype=0, oid=None,
+                        copy_from=None, keep_copy_id=True):
         """
         Add a new property to the section.
 
@@ -103,6 +104,19 @@ class Section(Entity):
         :returns: The newly created property.
         :rtype: Property
         """
+        if copy_from:
+            if not isinstance(copy_from, Property):
+                raise TypeError("Object to be copied is not a Property")
+            clsname = "properties"
+            src = "{}/{}".format(clsname, copy_from.name)
+            p = copy_from._parent._h5group.copy(source=src, dest=self._h5group,
+                                                name=str(copy_from.name),
+                                                cls=clsname,
+                                                keep_id=keep_copy_id)
+
+            id = p.attrs["entity_id"]
+            return self.props[id]
+
         vals = values_or_dtype
 
         properties = self._h5group.open_group("properties", True)
@@ -147,6 +161,27 @@ class Section(Entity):
         prop.values = vals
 
         return prop
+
+    def copy_section(self, obj, children=True, keep_id=True):
+        if not isinstance(obj, Section):
+            raise TypeError("Object to be copied is not a Section")
+
+        if obj._sec_parent:
+            src = "{}/{}".format("sections", obj.name)
+        else:
+            src = "{}/{}".format("metadata", obj.name)
+
+        clsname = "sections"
+        sec = obj._parent._h5group.copy(source=src, dest=self._h5group,
+                                    name=str(obj.name), cls=clsname,
+                                    keep_id=keep_id)
+
+        if not children:
+            for p in obj.props:
+                self.sections[obj.name].create_property(copy_from=p,
+                                                        keep_copy_id=keep_id)
+
+        return self.sections[sec.attrs["entity_id"]]
 
     @property
     def reference(self):
@@ -450,44 +485,6 @@ class Section(Entity):
                 print("{} {} [{}]\n{}[...]".format(child_sec_indent,
                                                    s.name, s.type,
                                                    more_indent))
-
-    def copy_section(self, obj, children=True, keep_id=True):
-        if not isinstance(obj, Section):
-            raise TypeError("Object to be copied is not a Section")
-
-        h5_parent = obj._parent
-        if obj._sec_parent:
-            src = "{}/{}".format("sections", obj.name)
-        else:
-            src = "{}/{}".format("metadata", obj.name)
-
-        clsname = "sections"
-        sec = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                      name=str(obj.name),
-                                      cls=clsname, shallow=not children)
-
-        if not keep_id:
-            id_ = util.create_id()
-            sec.attrs.modify("entity_id", np.string_(id_))
-            sec.visititems(self._change_id)
-
-        return self.sections[obj.name]
-
-    def copy_property(self, obj, keep_id=True):
-        if not isinstance(obj, Property):
-            raise TypeError("Object to be copied is not a Property")
-
-        h5_parent = obj._parent
-        clsname = "properties"
-        src = "{}/{}".format(clsname, obj.name)
-        p = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                    name=str(obj.name), cls=clsname)
-        if not keep_id:
-            id_ = util.create_id()
-            p.attrs.modify("entity_id", np.string_(id_))
-            p.visititems(self._change_id)
-
-        return self.props[obj.name]
 
     @staticmethod
     def _change_id(_, grp):

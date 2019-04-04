@@ -312,54 +312,23 @@ class File(object):
 
         # TODO: if same file, set_attr("entity_id", id_)
 
-    def copy_block(self, obj, keep_id=True):
-        if not isinstance(obj, Block):
-            raise TypeError("Object to be copied is not a Block")
-
-        h5_parent = obj._parent
-        clsname = "data"
-        src = "{}/{}".format(clsname, obj.name)
-        b = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                    name=str(obj.name), cls=clsname)
-        if not keep_id:
-            def change_id(_, grp):
-                if "entity_id" in grp.attrs:
-                    id_ = util.create_id()
-                    grp.attrs.modify("entity_id", np.string_(id_))
-
-            id_ = util.create_id()
-            b.attrs.modify("entity_id", np.string_(id_))
-            b.visititems(change_id)
-
-        return self.blocks[obj.name]
-
     def copy_section(self, obj, children=True, keep_id=True):
         if not isinstance(obj, Section):
             raise TypeError("Object to be copied is not a Section")
 
-        h5_parent = obj._parent
         if obj._sec_parent:
             src = "{}/{}".format("sections", obj.name)
         else:
             src = "{}/{}".format("metadata", obj.name)
         clsname = "metadata"
-        sec = h5_parent._h5group.copy(source=src, dest=self._h5group,
-                                      name=str(obj.name),
-                                      cls=clsname, shallow=not children)
+        sec = obj._parent._h5group.copy(source=src, dest=self._h5group,
+                                      name=str(obj.name), cls=clsname,
+                                      shallow=not children, keep_id=keep_id)
 
         if not children:
             for p in obj.props:
-                self.sections[obj.name].copy_property(p, keep_id)
-
-        if not keep_id:
-            def change_id(_, grp):
-                if "entity_id" in grp.attrs:
-                    id_ = util.create_id()
-                    grp.attrs.modify("entity_id", np.string_(id_))
-
-            id_ = util.create_id()
-            sec.attrs.modify("entity_id", np.string_(id_))
-            sec.visititems(change_id)
+                self.sections[obj.name].create_property(copy_from=p,
+                                                        keep_copy_id=keep_id)
 
         return self.sections[obj.name]
 
@@ -376,7 +345,8 @@ class File(object):
         self._h5file.close()
 
     # Block
-    def create_block(self, name, type_, compression=Compression.Auto):
+    def create_block(self, name="", type_="", compression=Compression.Auto,
+                     copy_from=None, keep_copy_id=True):
         """
         Create a new block inside the file.
 
@@ -389,6 +359,18 @@ class File(object):
         :returns: The newly created block.
         :rtype: Block
         """
+        if copy_from:
+            if not isinstance(copy_from, Block):
+                raise TypeError("Object to be copied is not a Block")
+            clsname = "data"
+            src = "{}/{}".format(clsname, copy_from.name)
+            b = copy_from._parent._h5group.copy(source=src, dest=self._h5group,
+                                                name=str(copy_from.name),
+                                                cls=clsname,
+                                                keep_id=keep_copy_id)
+
+            id =  b.attrs["entity_id"]
+            return self.blocks[id]
         if name in self._data:
             raise ValueError("Block with the given name already exists!")
         if compression == Compression.Auto:

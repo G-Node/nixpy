@@ -9,6 +9,7 @@
 
 import h5py
 import numpy as np
+from warnings import warn
 
 from .h5dataset import H5DataSet
 from ..datatype import DataType
@@ -279,12 +280,23 @@ class H5Group(object):
         self.group.visititems(match)
         return result
 
-    def copy(self, source, dest, name=None, cls=None, shallow=False):
+    def copy(self, source, dest, name=None, cls=None, shallow=False,
+             keep_id=True):
         grp = self.group
         dest.open_group(cls, create=True)
         dest_grp = dest.group[cls]
         grp.copy(source=source, dest=dest_grp, name=name, shallow=shallow)
-        return dest_grp[name]
+
+        g = dest_grp[name]
+        if not keep_id:
+            def change_id(_, grp):
+                if "entity_id" in grp.attrs:
+                    id_ = util.create_id()
+                    grp.attrs.modify("entity_id", np.string_(id_))
+            id_ = util.create_id()
+            g.attrs.modify("entity_id", np.string_(id_))
+            g.visititems(change_id)
+        return g
 
     @property
     def file(self):
