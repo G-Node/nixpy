@@ -296,3 +296,21 @@ class TestSections(unittest.TestCase):
 
         inhpropnames = [p.name for p in self.other.inherited_properties()]
         self.assertIn("PropOnSection", inhpropnames)
+
+    # Test for copying props and sections on sections
+    def test_copy_on_sections(self):
+        tarfilename = os.path.join(self.tmpdir.path, "destination.nix")
+        tarfile = nix.File.open(tarfilename, nix.FileMode.Overwrite)
+        sec1 = self.section
+        prop1 = sec1.create_property("prop from origin",
+                                     values_or_dtype=[1, 2, 3])
+        sec2 = sec1.create_section("nested sec", 'test nested')
+        tarsec = tarfile.create_section("tar sec", "tar")
+        tarsec.create_property(copy_from=prop1)
+        assert prop1 == tarsec.props[0]
+        tarsec.copy_section(sec1)
+        tarsec.copy_section(sec2)
+        assert sec1 == tarsec.sections[0]
+        assert sec2 == tarsec.sections[1]
+        assert sec1.sections[0] == tarsec.sections[1]
+        tarfile.close()

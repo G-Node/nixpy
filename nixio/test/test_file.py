@@ -135,6 +135,36 @@ class TestFile(unittest.TestCase):
         with nix.File.open(fname, nix.FileMode.ReadOnly) as nf:
             self.assertEqual(nf.blocks[0].name, "blocky")
 
+    def test_copy_on_file(self):
+        tar_filename = os.path.join(self.tmpdir.path, "copytarget.nix")
+        tar_file = nix.File.open(tar_filename, nix.FileMode.Overwrite)
+        blk1 = self.file.create_block("t111t bk", "testcopy")
+        blk2 = tar_file.create_block("blk2", "blk")
+        blk1.create_data_array("da1", 'grp da1', data=[(1,2,3)])
+        da2 = blk2.create_data_array("da2", 'grp da2', data=[(4,5,6)])
+        blk2.create_multi_tag("mt2", "useless", da2)
+        sec1 = self.file.create_section("test sec", 'test')
+        sec1.create_section("child sec", "child")
+        ori_prop = sec1.create_property("prop origin", values_or_dtype=[1,2,3])
+        tar_file.create_block(copy_from=blk1, keep_copy_id=False)
+        copied_sec = tar_file.copy_section(sec1, children=False, keep_id=True)
+        assert tar_file.sections[0].name == sec1.name
+        assert tar_file.blocks[1].name == blk1.name
+        assert tar_file.blocks[1].data_arrays[0].name == blk1.data_arrays[0].name
+        assert tar_file.blocks[1].data_arrays[0].id != blk1.data_arrays[0].id
+        assert tar_file.sections[0] == sec1
+        assert len(self.file.find_sections()) == 2
+        assert len(tar_file.find_sections()) == 1
+        assert copied_sec.props[0] == ori_prop # Properties are still there
+        assert not copied_sec.sections # children is False
+        tar_file.close()
+        # test copying on the same file
+        self.assertRaises(NameError, lambda: self.file.create_block(
+            copy_from=blk1))
+        self.file.create_block(name="111", copy_from=blk1)
+        assert self.file.blocks[0] == self.file.blocks[1]  # ID stays the same
+        assert self.file.blocks[0].name != self.file.blocks[1].name
+
 
 class TestFileVer(unittest.TestCase):
 
@@ -214,3 +244,4 @@ class TestFileVer(unittest.TestCase):
         self.set_header(fformat="NOT_A_NIX_FILE")
         with self.assertRaises(InvalidFile):
             self.try_open(nix.FileMode.ReadOnly)
+
