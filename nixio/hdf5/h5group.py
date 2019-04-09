@@ -290,10 +290,10 @@ class H5Group(object):
         g = dest_grp[name]
         g.attrs["name"] = name
         if not keep_id:
-            def change_id(_, grp):
-                if "entity_id" in grp.attrs:
+            def change_id(_, igrp):
+                if "entity_id" in igrp.attrs:
                     id_ = util.create_id()
-                    grp.attrs.modify("entity_id", np.string_(id_))
+                    igrp.attrs.modify("entity_id", np.string_(id_))
             id_ = util.create_id()
             g.attrs.modify("entity_id", np.string_(id_))
             g.visititems(change_id)

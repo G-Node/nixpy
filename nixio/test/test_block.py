@@ -195,10 +195,11 @@ class TestBlock(unittest.TestCase):
         mt = self.block.create_multi_tag("mt1", "some mt", da)
         namelist = ['name', 'id', 'time']
         dtlist = [nix.DataType.Int64, str,
-                           nix.DataType.Float]
+                  nix.DataType.Float]
         arr = [(1, "cat", 20.18), (2, 'dog', 20.15), (2, 'dog', 20.15)]
-        df = self.block.create_data_frame('test1', 'for_test', col_names=namelist,
-                                   col_dtypes=dtlist, data=arr)
+        df = self.block.create_data_frame('test1', 'for_test',
+                                          col_names=namelist,
+                                          col_dtypes=dtlist, data=arr)
         tag = self.block.create_tag("a tag", "some tag", position=(4, 5, 6))
         blk2.create_multi_tag(copy_from=mt)
         blk2.create_data_array(copy_from=da)

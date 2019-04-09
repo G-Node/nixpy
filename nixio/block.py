@@ -59,14 +59,18 @@ class Block(Entity):
     def create_multi_tag(self, name="", type_="", positions=0,
                          copy_from=None, keep_copy_id=True):
         """
-        Create a new multi tag for this block.
+        Create/copy a new multi tag for this block.
 
-        :param name: The name of the tag to create.
+        :param name: The name of the tag to create/copy.
         :type name: str
         :param type_: The type of tag.
         :type type_: str
         :param positions: A data array defining all positions of the tag.
         :type positions: DataArray
+        :param copy_from: The MultiTag to be copied, None in normal mode
+        :type copy_from: MultiTag
+        :param keep_copy_id: Specify if the id should be copied in copy mode
+        :type keep_copy_id: bool
 
         :returns: The newly created tag.
         :rtype: MultiTag
@@ -92,14 +96,18 @@ class Block(Entity):
     def create_tag(self, name="", type_="", position=0,
                    copy_from=None, keep_copy_id=True):
         """
-        Create a new tag for this block.
+        Create/copy a new tag for this block.
 
-        :param name: The name of the tag to create.
+        :param name: The name of the tag to create/copy.
         :type name: str
         :param type_: The type of tag.
         :type type_: str
         :param position: Coordinates of the start position
                          in units of the respective data dimension.
+        :param copy_from: The Tag to be copied, None in normal mode
+        :type copy_from: Tag
+        :param keep_copy_id: Specify if the id should be copied in copy mode
+        :type keep_copy_id: bool
 
         :returns: The newly created tag.
         :rtype: Tag
@@ -161,12 +169,12 @@ class Block(Entity):
                           data=None, compression=Compression.Auto,
                           copy_from=None, keep_copy_id=True):
         """
-        Create a new data array for this block. Either ``shape``
+        Create/copy a new data array for this block. Either ``shape``
         or ``data`` must be given. If both are given their shape must agree.
         If ``dtype`` is not specified it will default to 64-bit floating
         points.
 
-        :param name: The name of the data array to create.
+        :param name: The name of the data array to create/copy.
         :type name: str
         :param array_type: The type of the data array.
         :type array_type: str
@@ -178,6 +186,10 @@ class Block(Entity):
         :type data: array-like data
         :param compression: En-/disable dataset compression.
         :type compression: :class:`~nixio.Compression`
+        :param copy_from: The DataArray to be copied, None in normal mode
+        :type copy_from: DataArray
+        :param keep_copy_id: Specify if the id should be copied in copy mode
+        :type keep_copy_id: bool
 
         :returns: The newly created data array.
         :rtype: :class:`~nixio.DataArray`
@@ -216,16 +228,16 @@ class Block(Entity):
             da.write_direct(data)
         return da
 
-    def create_data_frame(self, name="", type_="", col_dict=None, col_names=None,
-                          col_dtypes=None, data=None,
+    def create_data_frame(self, name="", type_="", col_dict=None,
+                          col_names=None, col_dtypes=None, data=None,
                           compression=Compression.No,
                           copy_from=None, keep_copy_id=True):
         """
-         Create a new data frame for this block. Either ``col_dict``
+         Create/copy a new data frame for this block. Either ``col_dict``
          or ``col_name`` and ``col_dtypes`` must be given.
          If both are given, ``col_dict`` will be used.
 
-         :param name: The name of the data frame to create.
+         :param name: The name of the data frame to create/copy.
          :type name: str
          :param type_: The type of the data frame.
          :type type_: str
@@ -241,6 +253,10 @@ class Block(Entity):
                      as specified in the columns
          :param compression: En-/disable dataset compression.
          :type compression: :class:`~nixio.Compression`
+         :param copy_from: The DataFrame to be copied, None in normal mode
+         :type copy_from: DataFrame
+         :param keep_copy_id: Specify if the id should be copied in copy mode
+         :type keep_copy_id: bool
 
          :returns: The newly created data frame.
          :rtype: :class:`~nixio.DataFrame`
@@ -430,11 +446,10 @@ class Block(Entity):
                             "provide a new name when copying destination "
                             "is the same as the source parent")
         o = obj._parent._h5group.copy(source=src, dest=self._h5group,
-                                    name=name, cls=clsname,
-                                    keep_id=keep_id)
+                                      name=name, cls=clsname,
+                                      keep_id=keep_id)
 
         return o.attrs["entity_id"]
-
 
     @property
     def sources(self):

@@ -93,13 +93,17 @@ class Section(Entity):
         """
         Add a new property to the section.
 
-        :param name: The name of the property to create.
+        :param name: The name of the property to create/copy.
         :type name: str
         :param values_or_dtype: The values of the property or a valid DataType.
         :type values_or_dtype: list of values or a DataType
         :param oid: object id, UUID string as specified in RFC 4122. If no id
                     is provided, an id will be generated and assigned.
         :type oid: str
+        :param copy_from: The Property to be copied, None in normal mode
+        :type copy_from: Property
+        :param keep_copy_id: Specify if the id should be copied in copy mode
+        :type keep_copy_id: bool
 
         :returns: The newly created property.
         :rtype: Property
@@ -121,8 +125,8 @@ class Section(Entity):
                                                 cls=clsname,
                                                 keep_id=keep_copy_id)
 
-            id = p.attrs["entity_id"]
-            return self.props[id]
+            id_ = p.attrs["entity_id"]
+            return self.props[id_]
 
         vals = values_or_dtype
 
@@ -170,6 +174,21 @@ class Section(Entity):
         return prop
 
     def copy_section(self, obj, children=True, keep_id=True, name=""):
+        """
+        Copy a section to the section.
+
+        :param obj: The Section to be copied
+        :type obj: Section
+        :param children: Specify if the copy should be recursive
+        :type children: bool
+        :param keep_id: Specify if the id should be kept
+        :type keep_id: bool
+        :param name: Name of copied section, Default is name of source section
+        :type name: str
+
+        :returns: The copied section
+        :rtype: Section
+        """
         if not isinstance(obj, Section):
             raise TypeError("Object to be copied is not a Section")
 
@@ -187,8 +206,8 @@ class Section(Entity):
                             "provide a new name when copying destination "
                             "is the same as the source parent")
         sec = obj._parent._h5group.copy(source=src, dest=self._h5group,
-                                    name=name, cls=clsname,
-                                    keep_id=keep_id)
+                                        name=name, cls=clsname,
+                                        keep_id=keep_id)
 
         if not children:
             for p in obj.props:
