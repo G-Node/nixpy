@@ -288,6 +288,7 @@ class H5Group(object):
         grp.copy(source=source, dest=dest_grp, name=name, shallow=shallow)
 
         g = dest_grp[name]
+        g.attrs["name"] = name
         if not keep_id:
             def change_id(_, grp):
                 if "entity_id" in grp.attrs:

@@ -74,7 +74,8 @@ class Block(Entity):
         if copy_from:
             if not isinstance(copy_from, MultiTag):
                 raise TypeError("Object to be copied is not a MultiTag")
-            id = self._copy_objects(copy_from, "multi_tags", keep_copy_id)
+            id = self._copy_objects(copy_from, "multi_tags",
+                                    keep_copy_id, name)
             return self.multi_tags[id]
 
         util.check_entity_name_and_type(name, type_)
@@ -106,7 +107,7 @@ class Block(Entity):
         if copy_from:
             if not isinstance(copy_from, Tag):
                 raise TypeError("Object to be copied is not a Tag")
-            id = self._copy_objects(copy_from, "tags", keep_copy_id)
+            id = self._copy_objects(copy_from, "tags", keep_copy_id, name)
             return self.tags[id]
 
         util.check_entity_name_and_type(name, type_)
@@ -185,7 +186,8 @@ class Block(Entity):
         if copy_from:
             if not isinstance(copy_from, DataArray):
                 raise TypeError("Object to be copied is not a DataArray")
-            id = self._copy_objects(copy_from, "data_arrays", keep_copy_id)
+            id = self._copy_objects(copy_from, "data_arrays",
+                                    keep_copy_id, name)
             return self.data_arrays[id]
 
         if data is None:
@@ -246,7 +248,8 @@ class Block(Entity):
         if copy_from:
             if not isinstance(copy_from, DataFrame):
                 raise TypeError("Object to be copied is not a DataFrame")
-            id = self._copy_objects(copy_from, "data_frames", keep_copy_id)
+            id = self._copy_objects(copy_from, "data_frames",
+                                    keep_copy_id, name)
             return self.data_frames[id]
 
         util.check_entity_name_and_type(name, type_)
@@ -417,10 +420,17 @@ class Block(Entity):
             else:
                 print(n)
 
-    def _copy_objects(self, obj, clsname, keep_id=True):
+    def _copy_objects(self, obj, clsname, keep_id=True, name=""):
         src = "{}/{}".format(clsname, obj.name)
+        if not name:
+            name = str(obj.name)
+        ogrp = self._h5group.open_group(clsname, True)
+        if name in ogrp:
+            raise NameError("Name already exist. Possible solution is to "
+                            "provide a new name when copying destination "
+                            "is the same as the source parent")
         o = obj._parent._h5group.copy(source=src, dest=self._h5group,
-                                    name=str(obj.name), cls=clsname,
+                                    name=name, cls=clsname,
                                     keep_id=keep_id)
 
         return o.attrs["entity_id"]

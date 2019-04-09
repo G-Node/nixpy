@@ -312,7 +312,7 @@ class File(object):
 
         # TODO: if same file, set_attr("entity_id", id_)
 
-    def copy_section(self, obj, children=True, keep_id=True):
+    def copy_section(self, obj, children=True, keep_id=True, name=""):
         if not isinstance(obj, Section):
             raise TypeError("Object to be copied is not a Section")
 
@@ -321,9 +321,16 @@ class File(object):
         else:
             src = "{}/{}".format("metadata", obj.name)
         clsname = "metadata"
-        sec = obj._parent._h5group.copy(source=src, dest=self._h5group,
-                                      name=str(obj.name), cls=clsname,
-                                      shallow=not children, keep_id=keep_id)
+        if not name:
+            name = str(obj.name)
+        sec = self._h5group.open_group("sections", True)
+        if name in sec:
+            raise NameError("Name already exist. Possible solution is to "
+                            "provide a new name when copying destination "
+                            "is the same as the source parent")
+        obj._parent._h5group.copy(source=src, dest=self._h5group,
+                                  name=name, cls=clsname,
+                                  shallow=not children, keep_id=keep_id)
 
         if not children:
             for p in obj.props:
@@ -364,8 +371,14 @@ class File(object):
                 raise TypeError("Object to be copied is not a Block")
             clsname = "data"
             src = "{}/{}".format(clsname, copy_from.name)
+            if not name:
+                name = str(copy_from.name)
+            if name in self._data:
+                raise NameError("Name already exist. Possible solution is to "
+                                "provide a new name when copying destination "
+                                "is the same as the source parent")
             b = copy_from._parent._h5group.copy(source=src, dest=self._h5group,
-                                                name=str(copy_from.name),
+                                                name=name,
                                                 cls=clsname,
                                                 keep_id=keep_copy_id)
 

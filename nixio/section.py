@@ -109,8 +109,15 @@ class Section(Entity):
                 raise TypeError("Object to be copied is not a Property")
             clsname = "properties"
             src = "{}/{}".format(clsname, copy_from.name)
+            if not name:
+                name = str(copy_from.name)
+            properties = self._h5group.open_group("properties", True)
+            if name in properties:
+                raise NameError("Name already exist. Possible solution is to "
+                                "provide a new name when copying destination "
+                                "is the same as the source parent")
             p = copy_from._parent._h5group.copy(source=src, dest=self._h5group,
-                                                name=str(copy_from.name),
+                                                name=name,
                                                 cls=clsname,
                                                 keep_id=keep_copy_id)
 
@@ -162,7 +169,7 @@ class Section(Entity):
 
         return prop
 
-    def copy_section(self, obj, children=True, keep_id=True):
+    def copy_section(self, obj, children=True, keep_id=True, name=""):
         if not isinstance(obj, Section):
             raise TypeError("Object to be copied is not a Section")
 
@@ -172,8 +179,15 @@ class Section(Entity):
             src = "{}/{}".format("metadata", obj.name)
 
         clsname = "sections"
+        if not name:
+            name = str(obj.name)
+        sec = self._h5group.open_group("sections", True)
+        if name in sec:
+            raise NameError("Name already exist. Possible solution is to "
+                            "provide a new name when copying destination "
+                            "is the same as the source parent")
         sec = obj._parent._h5group.copy(source=src, dest=self._h5group,
-                                    name=str(obj.name), cls=clsname,
+                                    name=name, cls=clsname,
                                     keep_id=keep_id)
 
         if not children:
