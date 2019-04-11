@@ -130,8 +130,8 @@ class File(object):
             self.force_created_at()
         if "updated_at" not in self._h5file.attrs:
             self.force_updated_at()
-            self.time_auto_update = auto_update_time
-        if "time_auto_update" not in self._h5file.attrs:
+        self.time_auto_update = auto_update_time
+        if mode != FileMode.ReadOnly:
             self._h5file.attrs["time_auto_update"] = auto_update_time
         if compression == Compression.Auto:
             compression = Compression.No
