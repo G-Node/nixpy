@@ -252,7 +252,7 @@ class Section(Entity):
             sec = rootsec.find_sections(filtr=lambda x: x.id == id_or_sec)
 
         self._h5group.create_link(sec, "link")
-        if self._h5group.group.file.attrs["auto_update"]:
+        if self._h5group.group.file.attrs["time_auto_update"]:
             self.force_updated_at()
 
     def inherited_properties(self):
