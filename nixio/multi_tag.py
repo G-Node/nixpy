@@ -52,7 +52,8 @@ class MultiTag(BaseTag):
         if "positions" in self._h5group:
             del self._h5group["positions"]
         self._h5group.create_link(da, "positions")
-        self.force_updated_at()
+        if self._parent._parent.time_auto_update:
+            self.force_updated_at()
 
     @property
     def extents(self):
@@ -73,6 +74,8 @@ class MultiTag(BaseTag):
             del self._h5group["extents"]
         else:
             self._h5group.create_link(da, "extents")
+        if self._parent._parent.time_auto_update:
+            self.force_updated_at()
 
     @property
     def references(self):
