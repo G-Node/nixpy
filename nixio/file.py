@@ -310,6 +310,50 @@ class File(object):
             print("No errors found: The file is a valid NIX file")
             return errors
 
+        # TODO: if same file, set_attr("entity_id", id_)
+
+    def copy_section(self, obj, children=True, keep_id=True, name=""):
+        """
+        Copy a section to the file.
+
+        :param obj: The Section to be copied
+        :type obj: Section
+        :param children: Specify if the copy should be recursive
+        :type children: bool
+        :param keep_id: Specify if the id should be kept
+        :type keep_id: bool
+        :param name: Name of copied section, Default is name of source section
+        :type name: str
+
+        :returns: The copied section
+        :rtype: Section
+        """
+        if not isinstance(obj, Section):
+            raise TypeError("Object to be copied is not a Section")
+
+        if obj._sec_parent:
+            src = "{}/{}".format("sections", obj.name)
+        else:
+            src = "{}/{}".format("metadata", obj.name)
+        clsname = "metadata"
+        if not name:
+            name = str(obj.name)
+        sec = self._h5group.open_group("sections", True)
+        if name in sec:
+            raise NameError("Name already exist. Possible solution is to "
+                            "provide a new name when copying destination "
+                            "is the same as the source parent")
+        obj._parent._h5group.copy(source=src, dest=self._h5group,
+                                  name=name, cls=clsname,
+                                  shallow=not children, keep_id=keep_id)
+
+        if not children:
+            for p in obj.props:
+                self.sections[obj.name].create_property(copy_from=p,
+                                                        keep_copy_id=keep_id)
+
+        return self.sections[obj.name]
+
     def flush(self):
         self._h5file.flush()
 
@@ -323,7 +367,8 @@ class File(object):
         self._h5file.close()
 
     # Block
-    def create_block(self, name, type_, compression=Compression.Auto):
+    def create_block(self, name="", type_="", compression=Compression.Auto,
+                     copy_from=None, keep_copy_id=True):
         """
         Create a new block inside the file.
 
@@ -332,10 +377,32 @@ class File(object):
         :param type_: The type of the block.
         :type type_: str
         :param compression: No, DeflateNormal, Auto (default: Auto)
+        :param copy_from: The Block to be copied, None in normal mode
+        :type copy_from: Block
+        :param keep_copy_id: Specify if the id should be copied in copy mode
+        :type keep_copy_id: bool
 
         :returns: The newly created block.
         :rtype: Block
         """
+        if copy_from:
+            if not isinstance(copy_from, Block):
+                raise TypeError("Object to be copied is not a Block")
+            clsname = "data"
+            src = "{}/{}".format(clsname, copy_from.name)
+            if not name:
+                name = str(copy_from.name)
+            if name in self._data:
+                raise NameError("Name already exist. Possible solution is to "
+                                "provide a new name when copying destination "
+                                "is the same as the source parent")
+            b = copy_from._parent._h5group.copy(source=src, dest=self._h5group,
+                                                name=name,
+                                                cls=clsname,
+                                                keep_id=keep_copy_id)
+            id_ = b.attrs["entity_id"]
+            return self.blocks[id_]
+
         if name in self._data:
             raise ValueError("Block with the given name already exists!")
         if compression == Compression.Auto:

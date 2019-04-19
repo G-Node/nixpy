@@ -56,20 +56,32 @@ class Block(Entity):
         return newentity
 
     # MultiTag
-    def create_multi_tag(self, name, type_, positions):
+    def create_multi_tag(self, name="", type_="", positions=0,
+                         copy_from=None, keep_copy_id=True):
         """
-        Create a new multi tag for this block.
+        Create/copy a new multi tag for this block.
 
-        :param name: The name of the tag to create.
+        :param name: The name of the tag to create/copy.
         :type name: str
         :param type_: The type of tag.
         :type type_: str
         :param positions: A data array defining all positions of the tag.
         :type positions: DataArray
+        :param copy_from: The MultiTag to be copied, None in normal mode
+        :type copy_from: MultiTag
+        :param keep_copy_id: Specify if the id should be copied in copy mode
+        :type keep_copy_id: bool
 
         :returns: The newly created tag.
         :rtype: MultiTag
         """
+        if copy_from:
+            if not isinstance(copy_from, MultiTag):
+                raise TypeError("Object to be copied is not a MultiTag")
+            id = self._copy_objects(copy_from, "multi_tags",
+                                    keep_copy_id, name)
+            return self.multi_tags[id]
+
         util.check_entity_name_and_type(name, type_)
         util.check_entity_input(positions)
         if not isinstance(positions, DataArray):
@@ -81,20 +93,31 @@ class Block(Entity):
         return mtag
 
     # Tag
-    def create_tag(self, name, type_, position):
+    def create_tag(self, name="", type_="", position=0,
+                   copy_from=None, keep_copy_id=True):
         """
-        Create a new tag for this block.
+        Create/copy a new tag for this block.
 
-        :param name: The name of the tag to create.
+        :param name: The name of the tag to create/copy.
         :type name: str
         :param type_: The type of tag.
         :type type_: str
         :param position: Coordinates of the start position
                          in units of the respective data dimension.
+        :param copy_from: The Tag to be copied, None in normal mode
+        :type copy_from: Tag
+        :param keep_copy_id: Specify if the id should be copied in copy mode
+        :type keep_copy_id: bool
 
         :returns: The newly created tag.
         :rtype: Tag
         """
+        if copy_from:
+            if not isinstance(copy_from, Tag):
+                raise TypeError("Object to be copied is not a Tag")
+            id = self._copy_objects(copy_from, "tags", keep_copy_id, name)
+            return self.tags[id]
+
         util.check_entity_name_and_type(name, type_)
         tags = self._h5group.open_group("tags")
         if name in tags:
@@ -142,15 +165,16 @@ class Block(Entity):
         grp = Group._create_new(self, groups, name, type_)
         return grp
 
-    def create_data_array(self, name, array_type, dtype=None, shape=None,
-                          data=None, compression=Compression.Auto):
+    def create_data_array(self, name="", array_type="", dtype=None, shape=None,
+                          data=None, compression=Compression.Auto,
+                          copy_from=None, keep_copy_id=True):
         """
-        Create a new data array for this block. Either ``shape``
+        Create/copy a new data array for this block. Either ``shape``
         or ``data`` must be given. If both are given their shape must agree.
         If ``dtype`` is not specified it will default to 64-bit floating
         points.
 
-        :param name: The name of the data array to create.
+        :param name: The name of the data array to create/copy.
         :type name: str
         :param array_type: The type of the data array.
         :type array_type: str
@@ -162,10 +186,21 @@ class Block(Entity):
         :type data: array-like data
         :param compression: En-/disable dataset compression.
         :type compression: :class:`~nixio.Compression`
+        :param copy_from: The DataArray to be copied, None in normal mode
+        :type copy_from: DataArray
+        :param keep_copy_id: Specify if the id should be copied in copy mode
+        :type keep_copy_id: bool
 
         :returns: The newly created data array.
         :rtype: :class:`~nixio.DataArray`
         """
+
+        if copy_from:
+            if not isinstance(copy_from, DataArray):
+                raise TypeError("Object to be copied is not a DataArray")
+            id = self._copy_objects(copy_from, "data_arrays",
+                                    keep_copy_id, name)
+            return self.data_arrays[id]
 
         if data is None:
             if shape is None:
@@ -193,15 +228,16 @@ class Block(Entity):
             da.write_direct(data)
         return da
 
-    def create_data_frame(self, name, type_, col_dict=None, col_names=None,
-                          col_dtypes=None, data=None,
-                          compression=Compression.No):
+    def create_data_frame(self, name="", type_="", col_dict=None,
+                          col_names=None, col_dtypes=None, data=None,
+                          compression=Compression.No,
+                          copy_from=None, keep_copy_id=True):
         """
-         Create a new data frame for this block. Either ``col_dict``
+         Create/copy a new data frame for this block. Either ``col_dict``
          or ``col_name`` and ``col_dtypes`` must be given.
          If both are given, ``col_dict`` will be used.
 
-         :param name: The name of the data frame to create.
+         :param name: The name of the data frame to create/copy.
          :type name: str
          :param type_: The type of the data frame.
          :type type_: str
@@ -217,10 +253,22 @@ class Block(Entity):
                      as specified in the columns
          :param compression: En-/disable dataset compression.
          :type compression: :class:`~nixio.Compression`
+         :param copy_from: The DataFrame to be copied, None in normal mode
+         :type copy_from: DataFrame
+         :param keep_copy_id: Specify if the id should be copied in copy mode
+         :type keep_copy_id: bool
 
          :returns: The newly created data frame.
          :rtype: :class:`~nixio.DataFrame`
          """
+        if copy_from:
+            if not isinstance(copy_from, DataFrame):
+                raise TypeError("Object to be copied is not a DataFrame")
+            id = self._copy_objects(copy_from, "data_frames",
+                                    keep_copy_id, name)
+            return self.data_frames[id]
+
+        util.check_entity_name_and_type(name, type_)
         if (isinstance(col_dict, dict)
                 and not isinstance(col_dict, OrderedDict)
                 and sys.version_info[0] < 3):
@@ -350,7 +398,7 @@ class Block(Entity):
     @staticmethod
     def _pp(obj, ml, indent, ex, grp=False):
         spaces = " " * (indent)
-        if grp == True:
+        if grp:
             prefix = "*"
         else:
             prefix = ""
@@ -387,6 +435,21 @@ class Block(Entity):
                 print("{} ... {}".format(nstr1, nstr2))
             else:
                 print(n)
+
+    def _copy_objects(self, obj, clsname, keep_id=True, name=""):
+        src = "{}/{}".format(clsname, obj.name)
+        if not name:
+            name = str(obj.name)
+        ogrp = self._h5group.open_group(clsname, True)
+        if name in ogrp:
+            raise NameError("Name already exist. Possible solution is to "
+                            "provide a new name when copying destination "
+                            "is the same as the source parent")
+        o = obj._parent._h5group.copy(source=src, dest=self._h5group,
+                                      name=name, cls=clsname,
+                                      keep_id=keep_id)
+
+        return o.attrs["entity_id"]
 
     @property
     def sources(self):
