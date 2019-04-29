@@ -119,7 +119,7 @@ class File(object):
         self._h5file = h5py.File(fid)
         self._root = H5Group(self._h5file, "/", create=True)
         self._h5group = self._root  # to match behaviour of other objects
-        self.time_auto_update = True
+        self._time_auto_update = True
         if new:
             self._create_header()
         self._check_header(mode)
@@ -131,8 +131,6 @@ class File(object):
         if "updated_at" not in self._h5file.attrs:
             self.force_updated_at()
         self.time_auto_update = auto_update_time
-        if mode != FileMode.ReadOnly:
-            self._h5file.attrs["time_auto_update"] = auto_update_time
         if compression == Compression.Auto:
             compression = Compression.No
         self._compr = compression
@@ -146,14 +144,6 @@ class File(object):
         if backend is not None:
             warn("Backend selection is deprecated. Ignoring value.")
         return cls(path, mode, compression, auto_update_time)
-
-    def time_auto_update_off(self):
-        self.time_auto_update = False
-        self._h5file.attrs["time_auto_update"] = self.time_auto_update
-
-    def time_auto_update_on(self):
-        self.time_auto_update = True
-        self._h5file.attrs["time_auto_update"] = self.time_auto_update
 
     def _create_header(self):
         self.format = FILE_FORMAT
@@ -214,6 +204,20 @@ class File(object):
         self._root.set_attr("format", f.encode("ascii"))
         if self.time_auto_update:
             self.force_updated_at()
+
+    @property
+    def time_auto_update(self):
+        """
+        A user defined flag which decided if time should always be updated
+        when properties are changed.
+
+        :type: bool
+        """
+        return self._time_auto_update
+
+    @time_auto_update.setter
+    def time_auto_update(self, bool):
+        self._time_auto_update = bool
 
     @property
     def created_at(self):

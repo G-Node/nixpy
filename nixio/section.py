@@ -224,7 +224,7 @@ class Section(Entity):
     def reference(self, ref):
         util.check_attr_type(ref, str)
         self._h5group.set_attr("reference", ref)
-        if self._h5group.group.file.attrs["time_auto_update"]:
+        if self.file.time_auto_update:
             self.force_updated_at()
 
     @property
@@ -252,7 +252,7 @@ class Section(Entity):
             sec = rootsec.find_sections(filtr=lambda x: x.id == id_or_sec)
 
         self._h5group.create_link(sec, "link")
-        if self._h5group.group.file.attrs["time_auto_update"]:
+        if self.file.time_auto_update:
             self.force_updated_at()
 
     def inherited_properties(self):
@@ -276,7 +276,7 @@ class Section(Entity):
     def repository(self, r):
         util.check_attr_type(r, str)
         self._h5group.set_attr("repository", r)
-        if self._h5group.group.file.attrs["time_auto_update"]:
+        if self.file.time_auto_update:
             self.force_updated_at()
 
     @property
