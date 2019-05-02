@@ -309,6 +309,8 @@ class DataFrame(Entity, DataSet):
             util.check_attr_type(i, str)
         u = np.array(u, dtype=util.vlen_str_dtype)
         self._h5group.set_attr("units", u)
+        if self._parent._parent.time_auto_update:
+            self.force_updated_at()
 
     @property
     def columns(self):
