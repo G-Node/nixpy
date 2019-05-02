@@ -216,8 +216,8 @@ class File(object):
         return self._time_auto_update
 
     @time_auto_update.setter
-    def time_auto_update(self, bool):
-        self._time_auto_update = bool
+    def time_auto_update(self, auto_update_flag):
+        self._time_auto_update = auto_update_flag
 
     @property
     def created_at(self):
