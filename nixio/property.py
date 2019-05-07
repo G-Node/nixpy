@@ -115,6 +115,15 @@ class Property(Entity):
 
         return newentity
 
+    def append_values(self, data):
+        """Method for appending values to existing values"""
+        arr = np.array(data).flatten('C')
+        ds = self._h5dataset.dataset
+        src_len = len(self.values)
+        dlen = len(arr)
+        ds.resize((src_len+dlen,))
+        ds.write_direct(arr, dest_sel=np.s_[src_len: src_len+dlen])
+
     @property
     def name(self):
         return self._h5dataset.get_attr("name")
