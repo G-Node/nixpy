@@ -320,6 +320,9 @@ class Property(Entity):
         return hash(self.id)
 
     def pprint(self, indent=2, max_length=80, current_depth=-1):
+        """
+        Pretty print method. Method is called in Section.pprint()
+        """
         property_spaces = ""
         prefix = ""
         if current_depth >= 0:

@@ -233,34 +233,34 @@ class Block(Entity):
                           compression=Compression.No,
                           copy_from=None, keep_copy_id=True):
         """
-         Create/copy a new data frame for this block. Either ``col_dict``
-         or ``col_name`` and ``col_dtypes`` must be given.
-         If both are given, ``col_dict`` will be used.
+        Create/copy a new data frame for this block. Either ``col_dict``
+        or ``col_name`` and ``col_dtypes`` must be given.
+        If both are given, ``col_dict`` will be used.
 
-         :param name: The name of the data frame to create/copy.
-         :type name: str
-         :param type_: The type of the data frame.
-         :type type_: str
-         :param col_dict: The dictionary that specify column
-                          names and data type in each column
-         :type col_dict:dict or OrderedDict of {str: type}
-         :param col_names: The collection of name of all columns in order
-         :type col_names: tuples or list or np.array of string
-         :param col_dtypes: The collection of data type of all columns in order
-         :type col_dtypes: tuples or list or np.array of type
-         :param data: Data to write after storage has been created
-         :type data: array-like data with compound data type
-                     as specified in the columns
-         :param compression: En-/disable dataset compression.
-         :type compression: :class:`~nixio.Compression`
-         :param copy_from: The DataFrame to be copied, None in normal mode
-         :type copy_from: DataFrame
-         :param keep_copy_id: Specify if the id should be copied in copy mode
-         :type keep_copy_id: bool
+        :param name: The name of the data frame to create/copy.
+        :type name: str
+        :param type_: The type of the data frame.
+        :type type_: str
+        :param col_dict: The dictionary that specifies column
+                         names and data type in each column
+        :type col_dict: dict or OrderedDict of {str: type}
+        :param col_names: The collection of name of all columns in order
+        :type col_names: tuples or list or np.array of string
+        :param col_dtypes: The collection of data type of all columns in order
+        :type col_dtypes: tuples or list or np.array of type
+        :param data: Data to write after storage has been created
+        :type data: array-like data with compound data type
+                    as specified in the columns
+        :param compression: En-/disable dataset compression.
+        :type compression: :class:`~nixio.Compression`
+        :param copy_from: The DataFrame to be copied, None in normal mode
+        :type copy_from: DataFrame
+        :param keep_copy_id: Specify if the id should be copied in copy mode
+        :type keep_copy_id: bool
 
-         :returns: The newly created data frame.
-         :rtype: :class:`~nixio.DataFrame`
-         """
+        :returns: The newly created data frame.
+        :rtype: :class:`~nixio.DataFrame`
+        """
         if copy_from:
             if not isinstance(copy_from, DataFrame):
                 raise TypeError("Object to be copied is not a DataFrame")

@@ -507,6 +507,19 @@ class Section(Entity):
         return self._properties
 
     def pprint(self, indent=2, max_depth=1, max_length=80, current_depth=0):
+        """
+        Pretty print method.
+        
+        :param indent: The number of indentation spaces per recursion
+        :type indent:  int
+        :param max_depth: The maximum times of recursion
+        :type max_depth:  int
+        :param max_length: The maximum length of each line of output
+        :type max_length:  int
+        :param current_depth: The current times of recursion
+        :type current_depth:  int
+        """
+
         spaces = " " * (current_depth * indent)
         sec_str = "{} {} [{}]".format(spaces, self.name, self.type)
         print(sec_str)

@@ -94,7 +94,7 @@ class DataSet(object):
         Append ``data`` to the DataSet along the ``axis`` specified.
 
         :param data: The data to append. Shape must agree except for the
-        specified axis
+                     specified axis
         :param axis: Along which axis to append the data to
         """
         data = np.ascontiguousarray(data)
