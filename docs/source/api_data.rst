@@ -9,7 +9,7 @@ File
 ====
 
 A File represents a specific data source of a NIX back-end for example an NIX HDF5 file. All entities of the nix data
-model (except the Value entity) must exist in the context of an open File object. Therefore NIX entities can't be
+model must exist in the context of an open File object. Therefore NIX entities can't be
 initialized via their constructors but only through the factory methods of their respective parent entity.
 
 Working with files
@@ -44,7 +44,7 @@ Block
 
 The Block entity is a top-level, summarizing element that allows to
 group the other data entities belonging for example to the same recording session.
-All data entities such as Source, DataArray, Tag and
+All data entities such as Source, DataArray, DataFrame, Tag and
 MultiTag have to be associated with one Block.
 
 Create a new Block
@@ -62,7 +62,7 @@ Working with blocks
 -------------------
 
 After a block was created it can be used to create further entities. See the documentation of
-Source, DataArray, Tag and MultiTag for more information. The next example shows how some
+Source, DataArray, DataFrame, Tag and MultiTag for more information. The next example shows how some
 properties of a block can be accessed.
 
 .. code-block:: python
@@ -153,6 +153,27 @@ The DataSet object is used for data input/output to the underlying storage.
     :inherited-members:
     :undoc-members:
 
+DataFrame
+=========
+
+The DataFrame presents data in a rows-and-columns format.
+
+Create and delete a DataFrame
+-----------------------------
+
+.. code-block:: python
+   :linenos:
+
+   data_array = block.create_data_frame("table", "df", col_dict={}, data=[]);
+   del block.data_frames[data_frame]
+
+DataFrame API
+-------------
+
+.. autoclass:: nixio.DataFrame
+    :members:
+    :inherited-members:
+    :undoc-members:
 
 Tags
 ====
@@ -217,7 +238,7 @@ link from the group.
 .. code-block:: python
    :linenos:
 
-   data_array = block.crate_data_array("matrix", "data");
+   data_array = block.create_data_array("matrix", "data");
    tag = block.create_tag("a tag", "event", [0.0, 1.0])
    group = block.create_group("things that belong together", "group")
    group.tags.append(tag)

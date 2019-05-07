@@ -241,9 +241,9 @@ class Block(Entity):
         :type name: str
         :param type_: The type of the data frame.
         :type type_: str
-        :param col_dict: The dictionary that specify column
+        :param col_dict: The dictionary that specifies column
                          names and data type in each column
-        :type col_dict:dict or OrderedDict of {str: type}
+        :type col_dict: dict or OrderedDict of {str: type}
         :param col_names: The collection of name of all columns in order
         :type col_names: tuples or list or np.array of string
         :param col_dtypes: The collection of data type of all columns in order
