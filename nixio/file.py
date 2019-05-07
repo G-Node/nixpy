@@ -30,7 +30,7 @@ from .dimensions import RangeDimension, SetDimension, SampledDimension
 
 
 FILE_FORMAT = "nix"
-HDF_FF_VERSION = (1, 1, 0)
+HDF_FF_VERSION = (1, 1, 1)
 
 
 def can_write(nixfile):
