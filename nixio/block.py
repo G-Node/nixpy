@@ -362,8 +362,12 @@ class Block(Entity):
             limit = maxint
         return finders._find_sources(self, filtr, limit)
 
-    def pprint(self, indent=2, max_length=120, extra=True):
-        print(self)
+    def pprint(self, indent=2, max_length=120, extra=True, file=False):
+        if file:
+            print(" ",self)
+            indent = indent + 2
+        else:
+            print(self)
         for grp in self.groups:
             self._pp(grp, max_length, indent, False)
             for da in grp.data_arrays:

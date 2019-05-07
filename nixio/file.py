@@ -328,6 +328,17 @@ class File(object):
             print("No errors found: The file is a valid NIX file")
             return errors
 
+    def pprint(self, indent=2, max_length=120, extra=True):
+        print("File: name = {}".format(self._h5group.group.file.filename))
+        if self.blocks:
+            for blk in self.blocks:
+                blk.pprint(indent=indent,
+                           max_length=max_length, extra=extra, file=True)
+        if self.sections:
+            for sec in self.sections:
+                sec.pprint(indent=indent,
+                           max_length=max_length, current_depth=1)
+
         # TODO: if same file, set_attr("entity_id", id_)
 
     def copy_section(self, obj, children=True, keep_id=True, name=""):
