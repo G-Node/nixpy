@@ -94,7 +94,7 @@ and tags will be removed too.
 Block API
 ---------
 
-.. autoclass:: nixio.pycore.Block
+.. autoclass:: nixio.Block
     :members:
     :inherited-members:
     :undoc-members:
@@ -138,7 +138,7 @@ DataArrays constructors for this purpose.
 DataArray API
 -------------
 
-.. autoclass:: nixio.pycore.DataArray
+.. autoclass:: nixio.DataArray
     :members:
     :inherited-members:
     :undoc-members:
@@ -148,7 +148,7 @@ DataSet
 
 The DataSet object is used for data input/output to the underlying storage.
 
-.. autoclass:: nixio.pycore.data_array.DataSet
+.. autoclass:: nixio.data_array.DataSet
     :members:
     :inherited-members:
     :undoc-members:
@@ -180,7 +180,7 @@ signal) that was applied in a certain interval during the recording.
 Tag API
 -------
 
-.. autoclass:: nixio.pycore.Tag
+.. autoclass:: nixio.Tag
     :members:
     :inherited-members:
     :undoc-members:
@@ -188,7 +188,7 @@ Tag API
 MultiTag API
 ------------
 
-.. autoclass:: nixio.pycore.MultiTag
+.. autoclass:: nixio.MultiTag
     :members:
     :inherited-members:
     :undoc-members:
@@ -196,7 +196,7 @@ MultiTag API
 Source
 ======
 
-.. autoclass:: nixio.pycore.Source
+.. autoclass:: nixio.Source
     :members:
     :inherited-members:
     :undoc-members:
@@ -230,7 +230,7 @@ link from the group.
 Group API
 ---------
 
-.. autoclass:: nixio.pycore.Group
+.. autoclass:: nixio.Group
     :members:
     :inherited-members:
     :undoc-members:
