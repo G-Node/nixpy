@@ -328,7 +328,30 @@ class File(object):
             print("No errors found: The file is a valid NIX file")
             return errors
 
-        # TODO: if same file, set_attr("entity_id", id_)
+    def pprint(self, indent=2, max_length=120, extra=True, max_depth=3):
+        """
+        Pretty Printing the Data and MetaData Tree of the whole File
+
+        :param indent: The length of one indentation space
+        :type indent: int
+        :param max_length: Maximum length of each line of output
+        :type max_length: int
+        :param extra: True to print extra information of Entities
+        :type extra: bool
+        :param max_depth: Maximum recursion being printed in MetaData tree
+        :type max_depth: int
+        """
+        print("File: name = {}".format(self._h5group.group.file.filename))
+        if self.blocks:
+            for blk in self.blocks:
+                blk.pprint(indent=indent,
+                           max_length=max_length, extra=extra, start_depth=1)
+        if self.sections:
+            for sec in self.sections:
+                sec.pprint(indent=indent, max_depth=max_depth,
+                           max_length=max_length, current_depth=1)
+
+    # TODO: if same file, set_attr("entity_id", id_)
 
     def copy_section(self, obj, children=True, keep_id=True, name=""):
         """

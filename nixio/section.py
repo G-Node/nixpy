@@ -521,7 +521,7 @@ class Section(Entity):
         """
 
         spaces = " " * (current_depth * indent)
-        sec_str = "{} {} [{}]".format(spaces, self.name, self.type)
+        sec_str = "{}{} [{}]".format(spaces, self.name, self.type)
         print(sec_str)
         for p in self.props:
             p.pprint(current_depth=current_depth, indent=indent,
