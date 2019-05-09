@@ -363,6 +363,18 @@ class Block(Entity):
         return finders._find_sources(self, filtr, limit)
 
     def pprint(self, indent=2, max_length=120, extra=True, start_depth=0):
+        """
+        Pretty Printing the Data and MetaData Tree of the whole File
+
+        :param indent: The length of one indentation space
+        :type indent: int
+        :param max_length: Maximum length of each line of output
+        :type max_length: int
+        :param extra: True to print extra information of Entities
+        :type extra: bool
+        :param start_depth: Starting depth of indentation
+        :type start_depth: int
+        """
         print("{}{}".format(" " * indent*start_depth, self))
         for grp in self.groups:
             self._pp(grp, max_length, indent*(start_depth + 1), False)
