@@ -333,7 +333,7 @@ class File(object):
         if self.blocks:
             for blk in self.blocks:
                 blk.pprint(indent=indent,
-                           max_length=max_length, extra=extra, file=True)
+                           max_length=max_length, extra=extra, start_depth=1)
         if self.sections:
             for sec in self.sections:
                 sec.pprint(indent=indent,

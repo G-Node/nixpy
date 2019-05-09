@@ -362,46 +362,45 @@ class Block(Entity):
             limit = maxint
         return finders._find_sources(self, filtr, limit)
 
-    def pprint(self, indent=2, max_length=120, extra=True, file=False):
-        if file:
-            print(" ",self)
-            indent = indent + 2
-        else:
-            print(self)
+    def pprint(self, indent=2, max_length=120, extra=True, start_depth=0):
+        print("{}{}".format(" " * indent*start_depth, self))
         for grp in self.groups:
-            self._pp(grp, max_length, indent, False)
+            self._pp(grp, max_length, indent*(start_depth + 1), False)
             for da in grp.data_arrays:
-                self._pp(da, max_length, indent * 2, extra, True)
+                self._pp(da, max_length, indent*(start_depth + 2)
+                         , extra, True)
                 for dim in da.dimensions:
-                    self._pp(dim, max_length, indent * 3, False)
+                    self._pp(dim, max_length, indent*(start_depth + 3), False)
             for df in grp.data_frames:
-                self._pp(df, max_length, indent * 2, extra, True)
+                self._pp(df, max_length,
+                         indent*(start_depth + 2), extra, True)
             for tag in grp.tags:
-                self._pp(tag, max_length, indent * 2, extra, True)
+                self._pp(tag, max_length,
+                        indent*(start_depth + 2), extra, True)
                 for fe in tag.features:
-                    self._pp(fe, max_length, indent * 3, False)
+                    self._pp(fe, max_length, indent*(start_depth + 3), False)
             for mt in grp.multi_tags:
-                self._pp(mt, max_length, indent * 2, extra, True)
+                self._pp(mt, max_length, indent*(start_depth + 2), extra, True)
                 for fe in mt.features:
-                    self._pp(fe, max_length, indent * 3, False)
+                    self._pp(fe, max_length, indent*(start_depth + 3), False)
         for da in self.data_arrays:
-            self._pp(da, max_length, indent, extra)
+            self._pp(da, max_length, indent*(start_depth + 1), extra)
             for dim in da.dimensions:
-                self._pp(dim, max_length, indent * 2, False)
+                self._pp(dim, max_length, indent*(start_depth + 2), False)
         for df in self.data_frames:
-            self._pp(df, max_length, indent, extra)
+            self._pp(df, max_length, indent*(start_depth + 1), extra)
         for tag in self.tags:
-            self._pp(tag, max_length, indent, extra)
+            self._pp(tag, max_length, indent*(start_depth + 1), extra)
             for fe in tag.features:
-                self._pp(fe, max_length, indent * 2, False)
+                self._pp(fe, max_length, indent*(start_depth + 2), False)
         for mt in self.multi_tags:
-            self._pp(mt, max_length, indent, extra)
+            self._pp(mt, max_length, indent*(start_depth + 1), extra)
             for fe in mt.features:
-                self._pp(fe, max_length, indent * 2, False)
+                self._pp(fe, max_length, indent*(start_depth + 2), False)
 
     @staticmethod
     def _pp(obj, ml, indent, ex, grp=False):
-        spaces = " " * (indent)
+        spaces = " "*(indent)
         if grp:
             prefix = "*"
         else:
@@ -425,7 +424,7 @@ class Block(Entity):
         else:
             p = "{}{}{}".format(spaces, prefix, obj)
         if len(p) > ml - 4:
-            split_len = int(ml / 2)
+            split_len = int(ml/2)
             str1 = p[0:split_len]
             str2 = p[-split_len:]
             print("{} ... {}".format(str1, str2))
@@ -433,7 +432,7 @@ class Block(Entity):
             print(p)
         if ex:
             if len(n) > ml - 4:
-                split_len = int(ml / 2)
+                split_len = int(ml/2)
                 nstr1 = n[0:split_len]
                 nstr2 = n[-split_len:]
                 print("{} ... {}".format(nstr1, nstr2))
