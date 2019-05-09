@@ -8,9 +8,9 @@
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
 try:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Sequence
 except ImportError:
-    from collections import Iterable
+    from collections import Iterable, Sequence
 from collections import OrderedDict
 from inspect import isclass
 import numpy as np
@@ -147,10 +147,15 @@ class DataFrame(Entity, DataSet):
         Overwrite one or multiple existing row(s)
 
         :param rows: The new rows(s) and their data
-        :type rows: array-like data
+        :type rows: (nested) array-like data
         :param index: Index of rows(s) to be overwritten
         :type index: list of int
         """
+        if not isinstance(rows[0], (Iterable, np.void)):
+            if len(index) != 1:
+                raise TypeError("Rows should be in nested form")
+            else:
+                rows = [rows]
         if len(rows) != len(index):
             raise IndexError(
                 "Number of rows ({}) does not match "
