@@ -115,15 +115,6 @@ class Property(Entity):
 
         return newentity
 
-    def append_values(self, data):
-        """Method for appending values to existing values"""
-        arr = np.array(data).flatten('C')
-        ds = self._h5dataset.dataset
-        src_len = len(self.values)
-        dlen = len(arr)
-        ds.resize((src_len+dlen,))
-        ds.write_direct(arr, dest_sel=np.s_[src_len: src_len+dlen])
-
     @property
     def name(self):
         return self._h5dataset.get_attr("name")
@@ -284,6 +275,38 @@ class Property(Entity):
         data = np.array(vals, dtype=vtype)
 
         self._h5dataset.write_data(data)
+
+    def extend_values(self, data):
+        """
+        Extends values to existing data.
+        Suitable when new data is nested or original data is long.
+        """
+        if not isinstance(data, (Sequence, Iterable)):
+            data = [data]
+        sing_val = data[0]
+        # Will raise an error, if the data type of the first value is not valid
+        vtype = DataType.get_dtype(sing_val)
+
+        # Check if the data type has changed and raise an exception otherwise.
+        if vtype != self.data_type:
+            raise TypeError("New data type '{}' is inconsistent with the "
+                            "Properties data type '{}'".format(vtype,
+                                                               self.data_type))
+        # Check all values for data type consistency to ensure clean value add.
+        # Will raise an exception otherwise.
+
+        for val in data:
+            if DataType.get_dtype(val) != vtype:
+                raise TypeError("Array contains inconsistent values. "
+                                "Only values of type '{}' can be "
+                                "appended".format(vtype))
+
+        arr = np.array(data, dtype=vtype).flatten('C')
+        ds = self._h5dataset
+        src_len = len(self.values)
+        dlen = len(arr)
+        ds.shape = (src_len+dlen,)
+        ds.dataset.write_direct(arr, dest_sel=np.s_[src_len: src_len+dlen])
 
     @property
     def data_type(self):
