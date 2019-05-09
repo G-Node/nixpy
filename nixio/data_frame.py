@@ -115,8 +115,7 @@ class DataFrame(Entity, DataSet):
             rows[name] = cell
             self.write_rows(rows=[rows], index=[i])
 
-    # TODO: for read column add a Mode that break down the tuples
-    def read_columns(self, index=None, name=None, sl=None):
+    def read_columns(self, index=None, name=None, sl=None, group_by_cols=False):
         """
         Read one or multiple (part of) column(s) in the DataFrame
 
@@ -126,6 +125,10 @@ class DataFrame(Entity, DataSet):
         :type name: list of str
         :param sl: The part of each column to be returned
         :type sl: slice
+        :param group_by_cols: True for group return values by columns,
+                              False for group by rows.
+                              Only applicable for reading multiple columns
+        :type group_by_cols: bool
         """
         if index is None and name is None:
             raise ValueError("Either index or name must not be None")
@@ -137,10 +140,20 @@ class DataFrame(Entity, DataSet):
             slic = np.s_[:]
         else:
             slic = np.s_[sl]
-        get_col = self._read_data(sl=slic)[name]
         if len(name) == 1:
+            get_col = self._read_data(sl=slic)[name]
             get_col = [i[0] for i in get_col]
-        return get_col
+            return get_col
+        if group_by_cols:
+            gcol = []
+            for n in name:
+                get_col = self._read_data(sl=slic)[n]
+                get_col = [i for i in get_col]
+                gcol.append(get_col)
+            return gcol
+        else:
+            get_col = self._read_data(sl=slic)[name]
+            return get_col
 
     def write_rows(self, rows, index):
         """
