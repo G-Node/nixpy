@@ -24,9 +24,9 @@ class DimensionContainer(Container):
 
     def _inst_item(self, item):
         cls = {
-            DimensionType.Range: RangeDimension,
-            DimensionType.Sample: SampledDimension,
-            DimensionType.Set: SetDimension,
+            DimensionType.Range.value: RangeDimension,
+            DimensionType.Sample.value: SampledDimension,
+            DimensionType.Set.value: SetDimension,
         }[item.get_attr("dimension_type")]
         idx = item.name
         return cls(item, idx)
@@ -50,10 +50,9 @@ class Dimension(object):
 
     @dimension_type.setter
     def dimension_type(self, dimtype):
-        if dimtype not in (DimensionType.Sample, DimensionType.Range,
-                           DimensionType.Set):
+        if dimtype not in DimensionType:
             raise ValueError("Invalid dimension type.")
-        self._h5group.set_attr("dimension_type", dimtype)
+        self._h5group.set_attr("dimension_type", dimtype.value)
 
     @property
     def index(self):

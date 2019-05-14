@@ -114,12 +114,12 @@ class BaseTag(Entity):
     @staticmethod
     def _pos_to_idx(pos, unit, dim):
         dimtype = dim.dimension_type
-        if dimtype == DimensionType.Set:
+        if dimtype == DimensionType.Set.value:
             dimunit = None
         else:
             dimunit = dim.unit
         scaling = 1.0
-        if dimtype == DimensionType.Sample:
+        if dimtype == DimensionType.Sample.value:
             if not dimunit and unit is not None:
                 raise IncompatibleDimensions(
                     "Units of position and SampledDimension "
@@ -136,7 +136,7 @@ class BaseTag(Entity):
                     )
 
             index = dim.index_of(pos * scaling)
-        elif dimtype == DimensionType.Set:
+        elif dimtype == DimensionType.Set.value:
             if unit and unit != "none":
                 raise IncompatibleDimensions(
                     "Cannot apply a position with unit to a SetDimension",

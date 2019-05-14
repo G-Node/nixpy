@@ -186,11 +186,11 @@ class DataArray(Entity, DataSet):
     def _get_dimension_by_pos(self, index):
         h5dim = self._h5group.open_group("dimensions").open_group(str(index))
         dimtype = h5dim.get_attr("dimension_type")
-        if dimtype == DimensionType.Sample:
+        if DimensionType(dimtype) == DimensionType.Sample:
             return SampledDimension(h5dim, index)
-        elif dimtype == DimensionType.Range:
+        elif DimensionType(dimtype) == DimensionType.Range:
             return RangeDimension(h5dim, index)
-        elif dimtype == DimensionType.Set:
+        elif DimensionType(dimtype) == DimensionType.Set:
             return SetDimension(h5dim, index)
         else:
             raise TypeError("Invalid Dimension object in file.")
@@ -281,7 +281,7 @@ class DataArray(Entity, DataSet):
             u = None
         util.check_attr_type(u, str)
         if (self._dimension_count() == 1 and
-                self.dimensions[0].dimension_type == DimensionType.Range and
+            self.dimensions[0].dimension_type == DimensionType.Range.value and
                 self.dimensions[0].is_alias and u is not None):
             if not (util.units.is_si(u) or util.units.is_compound(u)):
                 raise InvalidUnit(
@@ -318,11 +318,11 @@ class DataArray(Entity, DataSet):
     def _get_slice_bydim(self, positions, extents):
         dpos, dext = [], []
         for dim, pos, ext in zip(self.dimensions, positions, extents):
-            if dim.dimension_type in (DimensionType.Sample,
+            if DimensionType(dim.dimension_type) in (DimensionType.Sample,
                                       DimensionType.Range):
                 dpos.append(dim.index_of(pos))
                 dext.append(dim.index_of(pos+ext)-dpos[-1])
-            elif dim.dimension_type == DimensionType.Set:
+            elif DimensionType(dim.dimension_type) == DimensionType.Set:
                 dpos.append(int(pos))
                 dext.append(int(ext))
         sl = tuple(slice(p, p+e) for p, e in zip(dpos, dext))

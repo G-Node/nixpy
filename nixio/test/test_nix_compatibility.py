@@ -783,13 +783,13 @@ def test_full_file_read(tmpdir, bindir):
 
     # DataArray dimensions
     dim = da.dimensions[0]
-    compare(nix.DimensionType.Sample, dim.dimension_type)
+    compare(nix.DimensionType.Sample.value, dim.dimension_type)
     compare(0.1, dim.sampling_interval)
     compare("ms", dim.unit)
     compare("time", dim.label)
 
     dim = da.dimensions[1]
-    compare(nix.DimensionType.Set, dim.dimension_type)
+    compare(nix.DimensionType.Set.value, dim.dimension_type)
     compare(["a", "b"], dim.labels)
 
     # Data Frame
@@ -851,19 +851,19 @@ def test_full_file_read(tmpdir, bindir):
     # MultiTag Position and Extent dimensions
     compare(2, len(posmt.dimensions))
     dim = posmt.dimensions[1]
-    compare(nix.DimensionType.Set, dim.dimension_type)
+    compare(nix.DimensionType.Set.value, dim.dimension_type)
 
     dim = posmt.dimensions[0]
-    compare(nix.DimensionType.Sample, dim.dimension_type)
+    compare(nix.DimensionType.Sample.value, dim.dimension_type)
     compare(0.01, dim.sampling_interval)
     compare("s", dim.unit)
 
     compare(2, len(extmt.dimensions))
     dim = extmt.dimensions[1]
-    compare(nix.DimensionType.Set, dim.dimension_type)
+    compare(nix.DimensionType.Set.value, dim.dimension_type)
 
     dim = extmt.dimensions[0]
-    compare(nix.DimensionType.Sample, dim.dimension_type)
+    compare(nix.DimensionType.Sample.value, dim.dimension_type)
     compare(0.01, dim.sampling_interval)
     compare("s", dim.unit)
 
@@ -967,7 +967,7 @@ def test_full_file_read(tmpdir, bindir):
     compare("uA", da.unit)
     compare(nix.DataType.Int32, da.data_type)
     dim = da.dimensions[0]
-    compare(nix.DimensionType.Range, dim.dimension_type)
+    compare(nix.DimensionType.Range.value, dim.dimension_type)
 
     # Alias range dimension
     block = nix_file.blocks[1]
@@ -977,7 +977,7 @@ def test_full_file_read(tmpdir, bindir):
     compare("alias dimension label", da.label)
     compare([24], da.shape)
     dim = da.dimensions[0]
-    compare(nix.DimensionType.Range, dim.dimension_type)
+    compare(nix.DimensionType.Range.value, dim.dimension_type)
     assert dim.is_alias
     compare(da[:], dim.ticks)
 
