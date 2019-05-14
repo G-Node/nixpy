@@ -245,30 +245,12 @@ class Property(Entity):
             self.delete_values()
             return
 
-        # Make sure all values are of the same data type
-        single_val = vals
-        if (isinstance(vals, (Sequence, Iterable)) and
-                not isinstance(vals, string_types)):
-            single_val = vals[0]
-        else:
+        if not isinstance(vals, (Sequence, Iterable)) \
+                or isinstance(vals, string_types):
             vals = [vals]
 
-        # Will raise an error, if the data type of the first value is not valid
-        vtype = DataType.get_dtype(single_val)
-
-        # Check if the data type has changed and raise an exception otherwise.
-        if vtype != self.data_type:
-            raise TypeError("New data type '{}' is inconsistent with the "
-                            "Properties data type '{}'".format(vtype,
-                                                               self.data_type))
-
-        # Check all values for data type consistency to ensure clean value add.
-        # Will raise an exception otherwise.
-        for val in vals:
-            if DataType.get_dtype(val) != vtype:
-                raise TypeError("Array contains inconsistent values. "
-                                "Only values of type '{}' can be "
-                                "assigned".format(vtype))
+        # Make sure all values are of the same data type
+        vtype = self._value_type_checking(vals)
 
         self._h5dataset.shape = np.shape(vals)
 
@@ -281,32 +263,40 @@ class Property(Entity):
         Extends values to existing data.
         Suitable when new data is nested or original data is long.
         """
-        if not isinstance(data, (Sequence, Iterable)):
-            data = [data]
-        sing_val = data[0]
-        # Will raise an error, if the data type of the first value is not valid
-        vtype = DataType.get_dtype(sing_val)
-
-        # Check if the data type has changed and raise an exception otherwise.
-        if vtype != self.data_type:
-            raise TypeError("New data type '{}' is inconsistent with the "
-                            "Properties data type '{}'".format(vtype,
-                                                               self.data_type))
-        # Check all values for data type consistency to ensure clean value add.
-        # Will raise an exception otherwise.
-
-        for val in data:
-            if DataType.get_dtype(val) != vtype:
-                raise TypeError("Array contains inconsistent values. "
-                                "Only values of type '{}' can be "
-                                "appended".format(vtype))
+        vtype = self._value_type_checking(data)
 
         arr = np.array(data, dtype=vtype).flatten('C')
         ds = self._h5dataset
         src_len = len(self.values)
         dlen = len(arr)
         ds.shape = (src_len+dlen,)
-        ds.dataset.write_direct(arr, dest_sel=np.s_[src_len: src_len+dlen])
+        ds.write_data(arr, sl=np.s_[src_len: src_len+dlen])
+
+    def _value_type_checking(self, data):
+        if (isinstance(data, (Sequence, Iterable)) and
+                not isinstance(data, string_types)):
+            single_val = data[0]
+        else:
+            single_val = data
+            data = [data]
+
+        # Will raise an error, if the data type of the first value is not valid
+        vtype = DataType.get_dtype(single_val)
+
+        # Check if the data type has changed and raise an exception otherwise.
+        if vtype != self.data_type:
+            raise TypeError("New data type '{}' is inconsistent with the "
+                            "Properties data type '{}'".format(vtype,
+                                                               self.data_type))
+
+        # Check all values for data type consistency to ensure clean value add.
+        # Will raise an exception otherwise.
+        for val in data:
+            if DataType.get_dtype(val) != vtype:
+                raise TypeError("Array contains inconsistent values. "
+                                "Only values of type '{}' can be "
+                                "assigned".format(vtype))
+        return vtype
 
     @property
     def data_type(self):

@@ -166,7 +166,7 @@ class TestProperties(unittest.TestCase):
         assert(self.prop_s.values == tuple())
         assert(self.prop_s.data_type == nix.DataType.String)
 
-    def test_append(self):
+    def test_extend_values(self):
         da = (1,2,3)
         self.prop.extend_values(da)
         da = 10
