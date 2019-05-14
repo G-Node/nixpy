@@ -160,11 +160,11 @@ def link_type_to_string(lt):
 
 
 def link_type_from_string(ltstr):
-    if ltstr == "indexed":
+    if ltstr.lower() == "indexed":
         return LinkType.Indexed
-    elif ltstr == "tagged":
+    elif ltstr.lower() == "tagged":
         return LinkType.Tagged
-    elif ltstr == "untagged":
+    elif ltstr.lower() == "untagged":
         return LinkType.Untagged
     else:
         raise RuntimeError("Invalid string for LinkType")
