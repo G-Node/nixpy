@@ -254,17 +254,26 @@ class DataFrame(Entity, DataSet):
             cell = cell[0]
             return cell
 
-    # TODO: allow printing part of the DataFrame
-    def print_table(self):
+    def print_table(self, row_sl=None, col_sl=None):
         """
         Print the whole DataFrame as a table
+        :param row_sl: Rows to be printed; None for printing all rows
+        :type row_sl: slice or iterable of int
+        :param col_sl: Columns to be printed; None for printing all columns
+        :type col_sl: slice or iterable of int
         """
-        row_form = "{:^10}" * (len(self.column_names) + 1)
-        print(row_form.format(" ", *self.column_names))
-        if self.units:
-            print(row_form.format("unit", *self.units))
-        for i, row in enumerate(self._h5group.group['data'][:]):
+        if row_sl is None:
+            row_sl = np.s_[:]
+        if col_sl is None:
+            col_sl = np.s_[:]
+        cl = np.array(self.column_names)[col_sl]
+        row_form = "{:^10}" * (len(cl) + 1)
+        print(row_form.format(" ", *cl))
+        if self.units is not None:
+            print(row_form.format("unit", *self.units[col_sl]))
+        for i, row in enumerate(self._read_data(sl=row_sl)[list(cl)]):
             print(row_form.format("Data{}".format(i), *row))
+
 
     def _find_idx_by_name(self, name):
         for i, n in enumerate(self.column_names):
@@ -310,6 +319,7 @@ class DataFrame(Entity, DataSet):
             dw.writerows(complete_di_list)
             csvfile.close()
 
+    # TODO: Allow None Type for units
     @property
     def units(self):
         """
