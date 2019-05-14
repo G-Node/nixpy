@@ -200,7 +200,6 @@ class DataFrame(Entity, DataSet):
         get_row = self._read_data(sl=(index,))
         return get_row
 
-    # TODO: allow writing multiple cells at the same time
     def write_cell(self, cell, position=None, col_name=None, row_idx=None):
         """
         Overwrite a cell in the DataFrame
@@ -274,7 +273,6 @@ class DataFrame(Entity, DataSet):
         for i, row in enumerate(self._read_data(sl=row_sl)[list(cl)]):
             print(row_form.format("Data{}".format(i), *row))
 
-
     def _find_idx_by_name(self, name):
         for i, n in enumerate(self.column_names):
             if n == name:
@@ -319,7 +317,6 @@ class DataFrame(Entity, DataSet):
             dw.writerows(complete_di_list)
             csvfile.close()
 
-    # TODO: Allow None Type for units
     @property
     def units(self):
         """
@@ -333,8 +330,9 @@ class DataFrame(Entity, DataSet):
     @units.setter
     def units(self, u):
         for i in u:
-            i = util.units.sanitizer(i)
-            util.check_attr_type(i, str)
+            if i is not None:
+                i = util.units.sanitizer(i)
+                util.check_attr_type(i, str)
         u = np.array(u, dtype=util.vlen_str_dtype)
         self._h5group.set_attr("units", u)
         if self._parent._parent.time_auto_update:
