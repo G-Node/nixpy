@@ -165,3 +165,21 @@ class TestProperties(unittest.TestCase):
         self.prop_s.values = ""
         assert(self.prop_s.values == tuple())
         assert(self.prop_s.data_type == nix.DataType.String)
+
+    def test_extend_values(self):
+        da = (1,2,3)
+        self.prop.extend_values(da)
+        da = 10
+        self.prop.extend_values(da)
+        sda = ["foo", "bar"]
+        self.prop_s.extend_values(sda)
+        sda = "bla"
+        self.prop_s.extend_values(sda)
+        self.assertRaises(TypeError, lambda: self.prop_s.extend_values(1))
+        sda = ["str", 1]
+        self.assertRaises(TypeError, lambda: self.prop_s.extend_values(sda))
+        self.assertRaises(TypeError, lambda: self.prop.extend_values(1.0))
+        da = (1.1, 1.2, 1.3)
+        self.assertRaises(TypeError, lambda: self.prop.extend_values(da))
+        da = (1, 1.2)
+        self.assertRaises(TypeError, lambda: self.prop.extend_values(da))
