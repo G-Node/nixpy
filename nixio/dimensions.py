@@ -51,10 +51,8 @@ class Dimension(object):
 
     @dimension_type.setter
     def dimension_type(self, dimtype):
-        if isinstance(dimtype, string_types):
-            dimtype = DimensionType(dimtype)
         if dimtype not in DimensionType:
-            raise ValueError("Invalid dimension type.")
+            raise TypeError("Invalid dimension type.")
         self._h5group.set_attr("dimension_type", dimtype.value)
 
     @property

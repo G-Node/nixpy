@@ -84,6 +84,3 @@ class TestFeatures(unittest.TestCase):
 
     def test_create_diff_link_type_style(self):
         self.stimuli_tag.create_feature(self.movie1, nix.LinkType.Tagged)
-        self.stimuli_tag.create_feature(self.movie1, "tagged")
-        self.stimuli_tag.create_feature(self.movie1, "Tagged")
-        self.stimuli_tag.create_feature(self.movie1, "TAGGED")

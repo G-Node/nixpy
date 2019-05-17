@@ -11,6 +11,6 @@ from enum import Enum
 
 
 class LinkType(Enum):
-    Tagged = "Tagged"
-    Untagged = "Untagged"
-    Indexed = "Indexed"
+    Tagged = "tagged"
+    Untagged = "untagged"
+    Indexed = "indexed"

@@ -34,12 +34,7 @@ class Feature(Entity):
 
     @link_type.setter
     def link_type(self, lt):
-        if isinstance(lt, LinkType):
-            self._h5group.set_attr("link_type", lt.value)
-        elif isinstance(lt, string_types) and LinkType(lt.title()):
-            self._h5group.set_attr("link_type", lt.title())
-        else:
-            raise (TypeError, "Invalid LinkType")
+        self._h5group.set_attr("link_type", lt.value)
         if self._parent._parent._parent.time_auto_update:
             self.force_updated_at()
 
