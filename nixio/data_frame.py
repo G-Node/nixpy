@@ -115,7 +115,8 @@ class DataFrame(Entity, DataSet):
             rows[name] = cell
             self.write_rows(rows=[rows], index=[i])
 
-    def read_columns(self, index=None, name=None, sl=None, group_by_cols=False):
+    def read_columns(self, index=None, name=None, sl=None,
+                     group_by_cols=False):
         """
         Read one or multiple (part of) column(s) in the DataFrame
 
@@ -143,14 +144,14 @@ class DataFrame(Entity, DataSet):
         if len(name) == 1:
             get_col = self._read_data(sl=slic)[name]
             get_col = [i[0] for i in get_col]
-            return get_col
+            return np.array(get_col)
         if group_by_cols:
             gcol = []
             for n in name:
                 get_col = self._read_data(sl=slic)[n]
                 get_col = [i for i in get_col]
                 gcol.append(get_col)
-            return gcol
+            return np.array(gcol)
         else:
             get_col = self._read_data(sl=slic)[name]
             return get_col
@@ -270,8 +271,12 @@ class DataFrame(Entity, DataSet):
         print(row_form.format(" ", *cl))
         if self.units is not None:
             print(row_form.format("unit", *self.units[col_sl]))
+        if not isinstance(row_sl, Iterable):
+            ridx = list(range(len(self)))[row_sl]
+        else:
+            ridx = row_sl
         for i, row in enumerate(self._read_data(sl=row_sl)[list(cl)]):
-            print(row_form.format("Data{}".format(i), *row))
+            print(row_form.format("Data{}".format(ridx[i]), *row))
 
     def _find_idx_by_name(self, name):
         for i, n in enumerate(self.column_names):
