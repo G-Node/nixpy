@@ -8,7 +8,8 @@
 # LICENSE file in the root of the Project.
 from .entity import Entity
 from .data_array import DataArray
-from .util import util
+from .link_type import LinkType
+from six import string_types
 
 
 class Feature(Entity):
@@ -29,11 +30,16 @@ class Feature(Entity):
 
     @property
     def link_type(self):
-        return util.link_type_from_string(self._h5group.get_attr("link_type"))
+        return LinkType(self._h5group.get_attr("link_type"))
 
     @link_type.setter
     def link_type(self, lt):
-        self._h5group.set_attr("link_type", util.link_type_to_string(lt))
+        if isinstance(lt, LinkType):
+            self._h5group.set_attr("link_type", lt.value)
+        elif isinstance(lt, string_types) and LinkType(lt.title()):
+            self._h5group.set_attr("link_type", lt.title())
+        else:
+            raise (TypeError, "Invalid LinkType")
         if self._parent._parent._parent.time_auto_update:
             self.force_updated_at()
 

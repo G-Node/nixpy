@@ -345,7 +345,6 @@ class TestDataArray(unittest.TestCase):
         self.array.delete_dimensions()
         self.array.unit = None
         self.array.append_alias_range_dimension()
-        print(self.array.dimensions)
         with self.assertRaises(ValueError):
             self.array.unit = "10 * ms"
 

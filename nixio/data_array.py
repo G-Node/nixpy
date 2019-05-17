@@ -281,7 +281,7 @@ class DataArray(Entity, DataSet):
             u = None
         util.check_attr_type(u, str)
         if (self._dimension_count() == 1 and
-            self.dimensions[0].dimension_type == DimensionType.Range.value and
+            self.dimensions[0].dimension_type == DimensionType.Range and
                 self.dimensions[0].is_alias and u is not None):
             if not (util.units.is_si(u) or util.units.is_compound(u)):
                 raise InvalidUnit(
@@ -318,11 +318,11 @@ class DataArray(Entity, DataSet):
     def _get_slice_bydim(self, positions, extents):
         dpos, dext = [], []
         for dim, pos, ext in zip(self.dimensions, positions, extents):
-            if DimensionType(dim.dimension_type) in (DimensionType.Sample,
+            if dim.dimension_type in (DimensionType.Sample,
                                       DimensionType.Range):
                 dpos.append(dim.index_of(pos))
                 dext.append(dim.index_of(pos+ext)-dpos[-1])
-            elif DimensionType(dim.dimension_type) == DimensionType.Set:
+            elif dim.dimension_type == DimensionType.Set:
                 dpos.append(int(pos))
                 dext.append(int(ext))
         sl = tuple(slice(p, p+e) for p, e in zip(dpos, dext))

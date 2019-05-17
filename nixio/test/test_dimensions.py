@@ -41,7 +41,7 @@ class TestDimension(unittest.TestCase):
 
     def test_set_dimension(self):
         assert(self.set_dim.index == 1)
-        assert(self.set_dim.dimension_type == nix.DimensionType.Set.value)
+        assert(self.set_dim.dimension_type == nix.DimensionType.Set)
         assert(self.array.dimensions[0].index == 1)
 
         assert(self.set_dim.labels == ())
@@ -50,8 +50,7 @@ class TestDimension(unittest.TestCase):
 
     def test_sample_dimension(self):
         assert(self.sample_dim.index == 2)
-        assert(self.sample_dim.dimension_type ==
-               nix.DimensionType.Sample.value)
+        assert(self.sample_dim.dimension_type == nix.DimensionType.Sample)
         assert(self.array.dimensions[1].index == 2)
 
         assert(self.sample_dim.label is None)
@@ -96,7 +95,7 @@ class TestDimension(unittest.TestCase):
 
     def test_range_dimension(self):
         assert(self.range_dim.index == 3)
-        assert(self.range_dim.dimension_type == nix.DimensionType.Range.value)
+        assert(self.range_dim.dimension_type == nix.DimensionType.Range)
         assert(self.array.dimensions[2].index == 3)
 
         assert(self.range_dim.label is None)

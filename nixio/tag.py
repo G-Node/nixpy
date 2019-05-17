@@ -101,7 +101,7 @@ class BaseTag(Entity):
         """
         features = self._h5group.open_group("features")
         if isinstance(link_type, string_types):
-            link_type = util.link_type_from_string(link_type)
+            link_type = LinkType(link_type.title())
         feat = Feature._create_new(self, features, data, link_type)
         return feat
 
@@ -114,12 +114,12 @@ class BaseTag(Entity):
     @staticmethod
     def _pos_to_idx(pos, unit, dim):
         dimtype = dim.dimension_type
-        if dimtype == DimensionType.Set.value:
+        if dimtype == DimensionType.Set:
             dimunit = None
         else:
             dimunit = dim.unit
         scaling = 1.0
-        if dimtype == DimensionType.Sample.value:
+        if dimtype == DimensionType.Sample:
             if not dimunit and unit is not None:
                 raise IncompatibleDimensions(
                     "Units of position and SampledDimension "
@@ -136,7 +136,7 @@ class BaseTag(Entity):
                     )
 
             index = dim.index_of(pos * scaling)
-        elif dimtype == DimensionType.Set.value:
+        elif dimtype == DimensionType.Set:
             if unit and unit != "none":
                 raise IncompatibleDimensions(
                     "Cannot apply a position with unit to a SetDimension",

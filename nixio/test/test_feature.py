@@ -81,3 +81,9 @@ class TestFeatures(unittest.TestCase):
 
         grouptag = self.group.tags[-1]
         grouptag.create_feature(self.movie1, nix.LinkType.Tagged)
+
+    def test_create_diff_link_type_style(self):
+        self.stimuli_tag.create_feature(self.movie1, nix.LinkType.Tagged)
+        self.stimuli_tag.create_feature(self.movie1, "tagged")
+        self.stimuli_tag.create_feature(self.movie1, "Tagged")
+        self.stimuli_tag.create_feature(self.movie1, "TAGGED")
