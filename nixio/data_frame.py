@@ -8,9 +8,9 @@
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
 try:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Sequence
 except ImportError:
-    from collections import Iterable
+    from collections import Iterable, Sequence
 from collections import OrderedDict
 from inspect import isclass
 import numpy as np
@@ -115,8 +115,8 @@ class DataFrame(Entity, DataSet):
             rows[name] = cell
             self.write_rows(rows=[rows], index=[i])
 
-    # TODO: for read column add a Mode that break down the tuples
-    def read_columns(self, index=None, name=None, sl=None):
+    def read_columns(self, index=None, name=None, sl=None,
+                     group_by_cols=False):
         """
         Read one or multiple (part of) column(s) in the DataFrame
 
@@ -126,6 +126,10 @@ class DataFrame(Entity, DataSet):
         :type name: list of str
         :param sl: The part of each column to be returned
         :type sl: slice
+        :param group_by_cols: True for group return values by columns,
+                              False for group by rows.
+                              Only applicable for reading multiple columns
+        :type group_by_cols: bool
         """
         if index is None and name is None:
             raise ValueError("Either index or name must not be None")
@@ -137,20 +141,35 @@ class DataFrame(Entity, DataSet):
             slic = np.s_[:]
         else:
             slic = np.s_[sl]
-        get_col = self._read_data(sl=slic)[name]
         if len(name) == 1:
+            get_col = self._read_data(sl=slic)[name]
             get_col = [i[0] for i in get_col]
-        return get_col
+            return np.array(get_col)
+        if group_by_cols:
+            gcol = []
+            for n in name:
+                get_col = self._read_data(sl=slic)[n]
+                get_col = [i for i in get_col]
+                gcol.append(get_col)
+            return np.array(gcol)
+        else:
+            get_col = self._read_data(sl=slic)[name]
+            return get_col
 
     def write_rows(self, rows, index):
         """
         Overwrite one or multiple existing row(s)
 
         :param rows: The new rows(s) and their data
-        :type rows: array-like data
+        :type rows: (nested) array-like data
         :param index: Index of rows(s) to be overwritten
         :type index: list of int
         """
+        if not isinstance(rows[0], (Iterable, np.void)):
+            if len(index) != 1:
+                raise TypeError("Rows should be in nested form")
+            else:
+                rows = [rows]
         if len(rows) != len(index):
             raise IndexError(
                 "Number of rows ({}) does not match "
@@ -182,7 +201,6 @@ class DataFrame(Entity, DataSet):
         get_row = self._read_data(sl=(index,))
         return get_row
 
-    # TODO: allow writing multiple cells at the same time
     def write_cell(self, cell, position=None, col_name=None, row_idx=None):
         """
         Overwrite a cell in the DataFrame
@@ -236,17 +254,29 @@ class DataFrame(Entity, DataSet):
             cell = cell[0]
             return cell
 
-    # TODO: allow printing part of the DataFrame
-    def print_table(self):
+    def print_table(self, row_sl=None, col_sl=None):
         """
         Print the whole DataFrame as a table
+        :param row_sl: Rows to be printed; None for printing all rows
+        :type row_sl: slice or iterable of int
+        :param col_sl: Columns to be printed; None for printing all columns
+        :type col_sl: slice or iterable of int
         """
-        row_form = "{:^10}" * (len(self.column_names) + 1)
-        print(row_form.format(" ", *self.column_names))
-        if self.units:
-            print(row_form.format("unit", *self.units))
-        for i, row in enumerate(self._h5group.group['data'][:]):
-            print(row_form.format("Data{}".format(i), *row))
+        if row_sl is None:
+            row_sl = np.s_[:]
+        if col_sl is None:
+            col_sl = np.s_[:]
+        cl = np.array(self.column_names)[col_sl]
+        row_form = "{:^10}" * (len(cl) + 1)
+        print(row_form.format("column:", *cl))
+        if self.units is not None:
+            print(row_form.format(" unit:", *self.units[col_sl]))
+        if not isinstance(row_sl, Iterable):
+            ridx = list(range(len(self)))[row_sl]
+        else:
+            ridx = row_sl
+        for i, row in enumerate(self._read_data(sl=row_sl)[list(cl)]):
+            print(row_form.format("  [{}]:".format(ridx[i]), *row))
 
     def _find_idx_by_name(self, name):
         for i, n in enumerate(self.column_names):
@@ -305,8 +335,9 @@ class DataFrame(Entity, DataSet):
     @units.setter
     def units(self, u):
         for i in u:
-            i = util.units.sanitizer(i)
-            util.check_attr_type(i, str)
+            if i is not None:
+                i = util.units.sanitizer(i)
+                util.check_attr_type(i, str)
         u = np.array(u, dtype=util.vlen_str_dtype)
         self._h5group.set_attr("units", u)
         if self._parent._parent.time_auto_update:
