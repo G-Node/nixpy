@@ -268,15 +268,15 @@ class DataFrame(Entity, DataSet):
             col_sl = np.s_[:]
         cl = np.array(self.column_names)[col_sl]
         row_form = "{:^10}" * (len(cl) + 1)
-        print(row_form.format(" ", *cl))
+        print(row_form.format("column:", *cl))
         if self.units is not None:
-            print(row_form.format("unit", *self.units[col_sl]))
+            print(row_form.format(" unit:", *self.units[col_sl]))
         if not isinstance(row_sl, Iterable):
             ridx = list(range(len(self)))[row_sl]
         else:
             ridx = row_sl
         for i, row in enumerate(self._read_data(sl=row_sl)[list(cl)]):
-            print(row_form.format("Data{}".format(ridx[i]), *row))
+            print(row_form.format("  [{}]:".format(ridx[i]), *row))
 
     def _find_idx_by_name(self, name):
         for i, n in enumerate(self.column_names):
