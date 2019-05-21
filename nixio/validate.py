@@ -9,6 +9,7 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from .util import units
+from .dimension_type import DimensionType
 try:
     from collections.abc import OrderedDict
 except ImportError:
@@ -146,7 +147,7 @@ class Validate:
 
         if da.dimensions:
             for i, dim in enumerate(da.dimensions):
-                if dim.dimension_type == 'range':
+                if dim.dimension_type == DimensionType.Range:
                     try:
                         if len(dim.ticks) != da.data_extent[i]:
                             # if data_extent is used instead of len()
@@ -159,7 +160,7 @@ class Validate:
                         raise IndexError("Dimension of Dataarray and "
                                          "Number of Dimension object Mismatch")
 
-                if dim.dimension_type == 'set':
+                if dim.dimension_type == DimensionType.Set:
                     # same as above
                     try:
                         if len(dim.labels) != da.data_extent[i]:
@@ -221,7 +222,7 @@ class Validate:
                 unit_list = [un for un in unit_list if un]
                 dim_list = [dim for refer in tag.references
                             for dim in refer.dimensions
-                            if dim.dimension_type != 'set']
+                            if dim.dimension_type != DimensionType.Set]
                 if len(unit_list) != len(dim_list):
                     tag_err_list.append(
                         "Some dimensions of references have no units"
@@ -388,7 +389,7 @@ class Validate:
         elif not all(r_dim.ticks[i] <= r_dim.ticks[i+1]
                      for i in range(len(r_dim.ticks)-1)):
             rdim_err_list.append("Ticks are not sorted!")
-        if r_dim.dimension_type != 'range':
+        if r_dim.dimension_type != DimensionType.Range:
             rdim_err_list.append("Dimension type is not correct!")
 
         # sorting is already covered in the dimensions.py file
@@ -412,7 +413,7 @@ class Validate:
             da = self.errors['blocks'][blk_idx]['data_arrays'][da_idx]
             da['dimensions'][dim_idx]['errors'].append(self.check_dim(set_dim))
             self.error_count += 1
-        if set_dim.dimension_type != 'set':
+        if set_dim.dimension_type != DimensionType.Set:
             da = self.errors['blocks'][blk_idx]['data_arrays'][da_idx]
             dim = da['dimensions'][dim_idx]
             dim['errors'].append("Dimension type is not correct!")
@@ -435,7 +436,7 @@ class Validate:
             sdim_err_list.append("SamplingInterval is not set to valid value "
                                  "(> 0)!")
 
-        if sam_dim.dimension_type != 'sample':
+        if sam_dim.dimension_type != DimensionType.Sample:
             sdim_err_list.append("Dimension type is not correct!")
 
         if sam_dim.offset and not sam_dim.unit:
@@ -472,10 +473,7 @@ class Validate:
         """
         unit_list = []
         for dim in data_arrays.dimensions:
-            if dim.dimension_type == 'range':
+            if dim.dimension_type == DimensionType.Range or\
+                    dim.dimension_type == DimensionType.Sample:
                 unit_list.append(dim.unit)
-            if dim.dimension_type == 'sample':
-                unit_list.append(dim.unit)
-            if dim.dimension_type == 'set':
-                pass
         return unit_list

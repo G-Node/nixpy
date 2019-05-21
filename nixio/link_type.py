@@ -7,8 +7,11 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
+from enum import Enum
 
-class LinkType(object):
-    Tagged = "Tagged"
-    Untagged = "Untagged"
-    Indexed = "Indexed"
+
+class LinkType(Enum):
+    # Values of enum are also part of NIX format
+    Tagged = "tagged"
+    Untagged = "untagged"
+    Indexed = "indexed"

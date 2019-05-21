@@ -14,6 +14,7 @@ from .datatype import DataType
 from .dimension_type import DimensionType
 from . import util
 from .container import Container
+from six import string_types
 
 
 class DimensionContainer(Container):
@@ -27,7 +28,7 @@ class DimensionContainer(Container):
             DimensionType.Range: RangeDimension,
             DimensionType.Sample: SampledDimension,
             DimensionType.Set: SetDimension,
-        }[item.get_attr("dimension_type")]
+        }[DimensionType(item.get_attr("dimension_type"))]
         idx = item.name
         return cls(item, idx)
 
@@ -46,14 +47,14 @@ class Dimension(object):
 
     @property
     def dimension_type(self):
-        return self._h5group.get_attr("dimension_type")
+        return DimensionType(self._h5group.get_attr("dimension_type"))
 
     @dimension_type.setter
     def dimension_type(self, dimtype):
-        if dimtype not in (DimensionType.Sample, DimensionType.Range,
-                           DimensionType.Set):
-            raise ValueError("Invalid dimension type.")
-        self._h5group.set_attr("dimension_type", dimtype)
+        dimtype = DimensionType(dimtype)
+        if dimtype not in DimensionType:
+            raise TypeError("Invalid dimension type.")
+        self._h5group.set_attr("dimension_type", dimtype.value)
 
     @property
     def index(self):

@@ -186,11 +186,11 @@ class DataArray(Entity, DataSet):
     def _get_dimension_by_pos(self, index):
         h5dim = self._h5group.open_group("dimensions").open_group(str(index))
         dimtype = h5dim.get_attr("dimension_type")
-        if dimtype == DimensionType.Sample:
+        if DimensionType(dimtype) == DimensionType.Sample:
             return SampledDimension(h5dim, index)
-        elif dimtype == DimensionType.Range:
+        elif DimensionType(dimtype) == DimensionType.Range:
             return RangeDimension(h5dim, index)
-        elif dimtype == DimensionType.Set:
+        elif DimensionType(dimtype) == DimensionType.Set:
             return SetDimension(h5dim, index)
         else:
             raise TypeError("Invalid Dimension object in file.")
@@ -281,7 +281,7 @@ class DataArray(Entity, DataSet):
             u = None
         util.check_attr_type(u, str)
         if (self._dimension_count() == 1 and
-                self.dimensions[0].dimension_type == DimensionType.Range and
+            self.dimensions[0].dimension_type == DimensionType.Range and
                 self.dimensions[0].is_alias and u is not None):
             if not (util.units.is_si(u) or util.units.is_compound(u)):
                 raise InvalidUnit(

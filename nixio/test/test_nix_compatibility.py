@@ -179,7 +179,7 @@ def test_tags(tmpdir, bindir):
             grp.tags.append(tag)
 
         if idx == 5:
-            tag.create_feature(da1, "Tagged")
+            tag.create_feature(da1, nix.LinkType.Tagged)
     nix_file.close()
     # validate(nixfilepath)
     cmd = os.path.join(bindir, "readtags")
@@ -209,7 +209,7 @@ def test_multi_tags(tmpdir, bindir):
         if idx == 3:
             feada = blk.create_data_array("feature", "afea",
                                           data=np.random.random(200))
-            mt.create_feature(feada, "Tagged")
+            mt.create_feature(feada, nix.LinkType.Tagged)
 
         if idx != 1:
             mt.extents = extda
