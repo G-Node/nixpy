@@ -145,6 +145,12 @@ class Property(Entity):
 
     @property
     def uncertainty(self):
+        dataset = self._h5dataset
+        x, y, z = dataset._parent.file.attrs["version"]
+        if y < 1 or z < 1:
+            val = self._h5dataset.dataset[:]
+            v = val[0]["uncertainty"]
+            return v
         return self._h5dataset.get_attr("uncertainty")
 
     @uncertainty.setter
@@ -155,6 +161,12 @@ class Property(Entity):
 
     @property
     def reference(self):
+        dataset = self._h5dataset
+        x, y, z = dataset._parent.file.attrs["version"]
+        if y < 1 or z < 1:
+            val = self._h5dataset.dataset[:]
+            v = val[0]["reference"]
+            return v
         return self._h5dataset.get_attr("reference")
 
     @reference.setter
@@ -215,9 +227,21 @@ class Property(Entity):
 
         self._h5dataset.set_attr("odml_type", str(new_type))
 
+    def _read_old_values(self):
+        val = self._h5dataset.dataset[:]
+        val_tu = tuple()
+        for v in val:
+            v = v["value"]
+            val_tu += (v,)
+        return val_tu
+
     @property
     def values(self):
         dataset = self._h5dataset
+        x, y, z = dataset._parent.file.attrs["version"]
+        if y < 1 or z < 1:
+            v = self._read_old_values()
+            return v
         if not sum(dataset.shape):
             return tuple()
 
