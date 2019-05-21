@@ -98,6 +98,7 @@ class BaseTag(Entity):
         :returns: The created feature object.
         :rtype: Feature
         """
+        link_type = LinkType(link_type)
         features = self._h5group.open_group("features")
         feat = Feature._create_new(self, features, data, link_type)
         return feat

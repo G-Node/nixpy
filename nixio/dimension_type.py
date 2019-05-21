@@ -11,6 +11,7 @@ from enum import Enum
 
 
 class DimensionType(Enum):
+    # Values of enum are also part of NIX format
     Sample = "sample"
     Range = "range"
     Set = "set"

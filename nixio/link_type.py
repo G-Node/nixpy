@@ -11,6 +11,7 @@ from enum import Enum
 
 
 class LinkType(Enum):
+    # Values of enum are also part of NIX format
     Tagged = "tagged"
     Untagged = "untagged"
     Indexed = "indexed"
