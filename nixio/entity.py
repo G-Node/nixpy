@@ -165,8 +165,8 @@ class Entity(object):
         return hash(self.id)
 
     def __str__(self):
-        return "{}: {{name = {}, type = {}, id = {}}}".format(
-            type(self).__name__, self.name, self.type, self.id
+        return "{}: {{name = {}, type = {}}}".format(
+            type(self).__name__, self.name, self.type
         )
 
     def __repr__(self):
