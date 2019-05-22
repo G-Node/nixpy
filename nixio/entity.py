@@ -108,6 +108,11 @@ class Entity(object):
     def definition(self, d):
         util.check_attr_type(d, str)
         self._h5group.set_attr("definition", d)
+        par = self._parent
+        while isinstance(par, Entity):
+            par = par._parent
+        if par.time_auto_update:
+            self.force_updated_at()
 
     @property
     def name(self):
@@ -137,6 +142,11 @@ class Entity(object):
             raise AttributeError("type can't be None")
         util.check_attr_type(t, str)
         self._h5group.set_attr("type", t)
+        par = self._parent
+        while isinstance(par, Entity):
+            par = par._parent
+        if par.time_auto_update:
+            self.force_updated_at()
 
     def __eq__(self, other):
         """
@@ -155,8 +165,8 @@ class Entity(object):
         return hash(self.id)
 
     def __str__(self):
-        return "{}: {{name = {}, type = {}, id = {}}}".format(
-            type(self).__name__, self.name, self.type, self.id
+        return "{}: {{name = {}, type = {}}}".format(
+            type(self).__name__, self.name, self.type
         )
 
     def __repr__(self):

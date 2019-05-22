@@ -185,3 +185,37 @@ class TestBlock(unittest.TestCase):
         del self.block.groups[0]
 
         assert(len(self.block.groups) == 0)
+
+    def test_copy_on_block(self):
+        tar_filename = os.path.join(self.tmpdir.path, "copytarget.nix")
+        tar_file = nix.File.open(tar_filename, nix.FileMode.Overwrite)
+        blk2 = tar_file.create_block("blk2", "blk")
+        data = [(1, 2, 3), (4, 5, 6)]
+        da = self.block.create_data_array("da1", 'grp da1', data=data)
+        mt = self.block.create_multi_tag("mt1", "some mt", da)
+        namelist = ['name', 'id', 'time']
+        dtlist = [nix.DataType.Int64, str,
+                  nix.DataType.Float]
+        arr = [(1, "cat", 20.18), (2, 'dog', 20.15), (2, 'dog', 20.15)]
+        df = self.block.create_data_frame('test1', 'for_test',
+                                          col_names=namelist,
+                                          col_dtypes=dtlist, data=arr)
+        tag = self.block.create_tag("a tag", "some tag", position=(4, 5, 6))
+        blk2.create_multi_tag(copy_from=mt)
+        blk2.create_data_array(copy_from=da)
+        blk2.create_data_frame(copy_from=df)
+        blk2.create_tag(copy_from=tag)
+        assert mt == blk2.multi_tags[0]
+        assert da == blk2.data_arrays[0]
+        assert df == blk2.data_frames[0]
+        assert tag == blk2.tags[0]
+        tar_file.close()
+        self.block.create_data_array("da2", 'grp da2', data=[(1, 2, 3)])
+        da2 = self.block.data_arrays[1]
+        mt2 = self.block.multi_tags[0]
+        self.assertRaises(NameError, lambda: self.block.create_data_array(
+            copy_from=da2))
+        self.block.create_data_array(name="new da name", copy_from=da2)
+        self.block.create_multi_tag(name="new mt name", copy_from=mt2)
+        assert self.block.multi_tags[0] == mt2
+        assert self.block.data_arrays[1] == da2

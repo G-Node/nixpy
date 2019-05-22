@@ -329,14 +329,14 @@ Most of the data entities can link to metadata sections.
 .. code-block:: python
 
         sec = nix_file.create_section('recording session', 'odml.recording')
-        sec.create_property('experimenter', nix.Value('John Doe'))
-        sec.create_property('recording date', nix.Value('2014-01-01'))
+        sec.create_property('experimenter', values_or_dtype='John Doe')
+        sec.create_property('recording date', values_or_dtype='2014-01-01')
         subject = sec.create_section('subject', 'odml.subject')
-        subject.create_property('id', nix.Value('mouse xyz'))
+        subject.create_property('id', values_or_dtype='mouse xyz')
         cell = subject.create_section('cell', 'odml.cell')
-        v = nix.Value(-64.5)
-        v.uncertainty = 2.25
+        v = -64.5
         p = cell.create_property('resting potential', v)
+        p.uncertainty = 2.25
         p.unit = 'mV'
         # set the recording block metadata
         block.metadata = sec

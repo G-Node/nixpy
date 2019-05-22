@@ -35,8 +35,8 @@ directly from the respective section.
 .. code-block:: python
    :linenos:
 
-   section.create_property("one", [Value(1)])
-   section.create_property("two", [Value(2)])
+   section.create_property("one", [1])
+   section.create_property("two", [2])
 
    # iterate over properties
    for p in section:
@@ -55,7 +55,7 @@ directly from the respective section.
 Section API
 -----------
 
-.. autoclass:: nixio.pycore.Section
+.. autoclass:: nixio.Section
     :members:
     :inherited-members:
     :undoc-members:
@@ -63,15 +63,8 @@ Section API
 Property
 ========
 
-.. autoclass:: nixio.pycore.Property
+.. autoclass:: nixio.Property
     :members:
     :inherited-members:
     :undoc-members:
 
-Value
-=====
-
-.. autoclass:: nixio.Value
-    :members:
-    :inherited-members:
-    :undoc-members:

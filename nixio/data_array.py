@@ -89,6 +89,8 @@ class DataArray(Entity, DataSet):
         setdim = SetDimension._create_new(dimgroup, index)
         if labels:
             setdim.labels = labels
+        if self._parent._parent.time_auto_update:
+            self.force_updated_at()
         return setdim
 
     def append_sampled_dimension(self, sampling_interval, label=None,
@@ -114,6 +116,8 @@ class DataArray(Entity, DataSet):
             smpldim.unit = unit
         if offset:
             smpldim.offset = offset
+        if self._parent._parent.time_auto_update:
+            self.force_updated_at()
         return smpldim
 
     def append_range_dimension(self, ticks, label=None, unit=None):
@@ -133,6 +137,8 @@ class DataArray(Entity, DataSet):
         if label:
             rdim.label = label
             rdim.unit = unit
+        if self._parent._parent.time_auto_update:
+            self.force_updated_at()
         return rdim
 
     def append_alias_range_dimension(self):
@@ -180,11 +186,11 @@ class DataArray(Entity, DataSet):
     def _get_dimension_by_pos(self, index):
         h5dim = self._h5group.open_group("dimensions").open_group(str(index))
         dimtype = h5dim.get_attr("dimension_type")
-        if dimtype == DimensionType.Sample:
+        if DimensionType(dimtype) == DimensionType.Sample:
             return SampledDimension(h5dim, index)
-        elif dimtype == DimensionType.Range:
+        elif DimensionType(dimtype) == DimensionType.Range:
             return RangeDimension(h5dim, index)
-        elif dimtype == DimensionType.Set:
+        elif DimensionType(dimtype) == DimensionType.Set:
             return SetDimension(h5dim, index)
         else:
             raise TypeError("Invalid Dimension object in file.")
@@ -218,6 +224,8 @@ class DataArray(Entity, DataSet):
         else:
             dtype = DataType.Double
             self._h5group.write_data("polynom_coefficients", coeff, dtype)
+        if self._parent._parent.time_auto_update:
+            self.force_updated_at()
 
     @property
     def expansion_origin(self):
@@ -234,6 +242,8 @@ class DataArray(Entity, DataSet):
     def expansion_origin(self, eo):
         util.check_attr_type(eo, Number)
         self._h5group.set_attr("expansion_origin", eo)
+        if self._parent._parent.time_auto_update:
+            self.force_updated_at()
 
     @property
     def label(self):
@@ -250,6 +260,8 @@ class DataArray(Entity, DataSet):
     def label(self, l):
         util.check_attr_type(l, str)
         self._h5group.set_attr("label", l)
+        if self._parent._parent.time_auto_update:
+            self.force_updated_at()
 
     @property
     def unit(self):
@@ -269,7 +281,7 @@ class DataArray(Entity, DataSet):
             u = None
         util.check_attr_type(u, str)
         if (self._dimension_count() == 1 and
-                self.dimensions[0].dimension_type == DimensionType.Range and
+            self.dimensions[0].dimension_type == DimensionType.Range and
                 self.dimensions[0].is_alias and u is not None):
             if not (util.units.is_si(u) or util.units.is_compound(u)):
                 raise InvalidUnit(
@@ -278,6 +290,8 @@ class DataArray(Entity, DataSet):
                     "DataArray.unit"
                 )
         self._h5group.set_attr("unit", u)
+        if self._parent._parent.time_auto_update:
+            self.force_updated_at()
 
     def get_slice(self, positions, extents=None, mode=DataSliceMode.Index):
         datadim = len(self.shape)

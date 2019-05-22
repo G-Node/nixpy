@@ -7,8 +7,11 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
+from enum import Enum
 
-class DimensionType(object):
+
+class DimensionType(Enum):
+    # Values of enum are also part of NIX format
     Sample = "sample"
     Range = "range"
     Set = "set"

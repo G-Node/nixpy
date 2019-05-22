@@ -9,6 +9,7 @@
 import warnings
 
 import numpy as np
+from six import string_types
 
 from .entity import Entity
 from .source_link_container import SourceLinkContainer
@@ -83,6 +84,7 @@ class BaseTag(Entity):
 
             dtype = DataType.String
             self._h5group.write_data("units", sanitized, dtype)
+        if self._parent._parent.time_auto_update:
             self.force_updated_at()
 
     def create_feature(self, data, link_type):
@@ -97,6 +99,9 @@ class BaseTag(Entity):
         :returns: The created feature object.
         :rtype: Feature
         """
+        if isinstance(link_type, string_types):
+            link_type = link_type.lower()
+        link_type = LinkType(link_type)
         features = self._h5group.open_group("features")
         feat = Feature._create_new(self, features, data, link_type)
         return feat
@@ -189,6 +194,8 @@ class Tag(BaseTag):
         else:
             dtype = DataType.Double
             self._h5group.write_data("position", pos, dtype)
+        if self._parent._parent.time_auto_update:
+            self.force_updated_at()
 
     @property
     def extent(self):
@@ -208,6 +215,8 @@ class Tag(BaseTag):
         else:
             dtype = DataType.Double
             self._h5group.write_data("extent", ext, dtype)
+        if self._parent._parent.time_auto_update:
+            self.force_updated_at()
 
     def _calc_data_slices(self, data):
         refslice = list()
