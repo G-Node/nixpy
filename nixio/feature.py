@@ -34,6 +34,8 @@ class Feature(Entity):
 
     @link_type.setter
     def link_type(self, lt):
+        if isinstance(lt, string_types):
+            lt = lt.lower()
         lt = LinkType(lt)
         self._h5group.set_attr("link_type", lt.value)
         if self._parent._parent._parent.time_auto_update:

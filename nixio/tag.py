@@ -9,6 +9,7 @@
 import warnings
 
 import numpy as np
+from six import string_types
 
 from .entity import Entity
 from .source_link_container import SourceLinkContainer
@@ -98,6 +99,8 @@ class BaseTag(Entity):
         :returns: The created feature object.
         :rtype: Feature
         """
+        if isinstance(link_type, string_types):
+            link_type = link_type.lower()
         link_type = LinkType(link_type)
         features = self._h5group.open_group("features")
         feat = Feature._create_new(self, features, data, link_type)
