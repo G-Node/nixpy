@@ -2,53 +2,51 @@
 Installation Guidelines
 =======================
 
+Installation instructions
+=========================
+
+The latest stable release of NIXPy is available on PyPi as `nixio`_.
+The simplest way to install NIXPy is to use pip::
+
+    pip install nixio
+
+Install developer version
+---------------------------
+The latest unstable (beta) version of NIXPy at any given time is also on PyPi and can be installed with pip::
+
+  pip install nixio --pre
+
+*Note that this version may contain untested code and should be used for testing new features in the format.*
+
+
+Build NIXPy from Source
+-----------------------
+
+You can also build NIXPy from source, if you want to test changes that are newer than the latest beta release or want to modify the source.
+The source code is available on `GitHub`_ and can be built as follows::
+
+  git clone https://github.com/G-Node/nixpy
+  python setup.py install
+
+Alternatively, to install in one step using pip::
+
+  pip install git+https://github.com/G-Node/nixpy
+
+
 Dependencies
 ============
 
-`NIXPy`_ is a reimplementation of the `NIX`_ library and file format for Python.
 NIXPy depends on `h5py`_, the Python interface to the HDF5 data format and numpy .
 
 The installation instructions below describe how to build or install NIXPy as a standalone, pure Python version of NIX.
 
 Dependencies:
 
-- h5py: http://docs.h5py.org/en/latest/build.html
-- numpy: https://docs.scipy.org/doc/numpy-1.10.1/user/install.html
+- h5py: https://pypi.org/project/h5py/
+- numpy: https://pypi.org/project/numpy/
 
-.. _NIX: https://github.com/G-Node/nix
+.. LINKS
+.. _nixio: https://pypi.python.org/pypi/nixio/
+.. _Github: https://github.com/G-Node/nixpy/tree/no-bindings-dev
 .. _h5py: http://www.h5py.org/
 .. _NIXPy: https://github.com/G-Node/nixpy
-
-
-Installation instructions
-=========================
-
-The latest stable release of NIXPy is available on PyPi as `nixio`_.
-Therefore, the simplest way to install NIXPy is to use pip::
-
-    pip install nixio
-
-.. _nixio: https://pypi.python.org/pypi/nixio/
-
-
-.. _advanced installation:
-
-Install developer version
----------------------------
-The beta version (latest developed) of NIXPy is also on PyPi and you can install it with a command::
-
-  pip install nixio --pre
-
-.. _nixio: https://pypi.python
-
-Build NIXPy from Source
------------------------
-
-If you want to use the latest development version or in cases where the provided installers or packages can't be used,
-it is possible to build and install NIXPy from sources from `Github`_::
-
-  git clone https://github.com/G-Node/nixpy.git
-  python setup.py install
-
-
-.. _Github: https://github.com/G-Node/nixpy/tree/no-bindings-dev
