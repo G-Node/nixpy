@@ -6,9 +6,16 @@ Installation instructions
 =========================
 
 The latest stable release of NIXPy is available on PyPi as `nixio`_.
+NIXPy works with Python versions 2.7 and 3.6+ on Windows, macOS, and Linux.
 The simplest way to install NIXPy is to use pip::
 
-    pip install nixio
+  pip3 install nixio
+
+or for Python 2.7::
+
+  pip2 install nixio
+
+Further mentions of ``pip install`` imply either pip3 or pip2 can be used.
 
 Install developer version
 ---------------------------
