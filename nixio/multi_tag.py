@@ -6,6 +6,8 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from __future__ import annotations
+
 import warnings
 from .tag import BaseTag, FeatureContainer
 from .container import LinkContainer
@@ -18,24 +20,26 @@ from .exceptions import (OutOfBounds, IncompatibleDimensions,
                          UninitializedEntity)
 from .section import Section
 
+from typing import Tuple, Optional
+
 
 class MultiTag(BaseTag):
 
-    def __init__(self, nixparent, h5group):
+    def __init__(self, nixparent, h5group) -> None:
         super(MultiTag, self).__init__(nixparent, h5group)
         self._sources = None
         self._references = None
         self._features = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, positions):
+    def _create_new(cls, nixparent, h5parent, name, type_, positions) -> MultiTag:
         newentity = super(MultiTag, cls)._create_new(nixparent, h5parent,
                                                      name, type_)
         newentity.positions = positions
         return newentity
 
     @property
-    def positions(self):
+    def positions(self) -> DataArray:
         """
         The positions defined by the tag. This is a read-write property.
 
@@ -46,7 +50,7 @@ class MultiTag(BaseTag):
         return DataArray(self._parent, self._h5group.open_group("positions"))
 
     @positions.setter
-    def positions(self, da):
+    def positions(self, da) -> None:
         if da is None:
             raise TypeError("MultiTag.positions cannot be None.")
         if "positions" in self._h5group:
@@ -56,7 +60,7 @@ class MultiTag(BaseTag):
             self.force_updated_at()
 
     @property
-    def extents(self):
+    def extents(self) -> Optional[DataArray]:
         """
         The extents defined by the tag. This is an optional read-write
         property and may be set to None.
@@ -69,7 +73,7 @@ class MultiTag(BaseTag):
             return None
 
     @extents.setter
-    def extents(self, da):
+    def extents(self, da) -> None:
         if da is None:
             del self._h5group["extents"]
         else:
@@ -78,7 +82,7 @@ class MultiTag(BaseTag):
             self.force_updated_at()
 
     @property
-    def references(self):
+    def references(self) -> LinkContainer:
         """
         A property containing all data arrays referenced by the tag. Referenced
         data arrays can be obtained by index or their id. References can be
@@ -95,7 +99,7 @@ class MultiTag(BaseTag):
         return self._references
 
     @property
-    def features(self):
+    def features(self) -> FeatureContainer:
         """
         A property containing all features of the tag. Features can be obtained
         via their index or their id. Features can be deleted from the list.
@@ -108,12 +112,12 @@ class MultiTag(BaseTag):
             self._features = FeatureContainer("features", self, Feature)
         return self._features
 
-    def _get_slice(self, data, index):
+    def _get_slice(self, data, index) -> Tuple[slice]:
         offset, count = self._get_offset_and_count(data, index)
         sl = tuple(slice(o, o+c) for o, c in zip(offset, count))
         return sl
 
-    def _calc_data_slices(self, data, index):
+    def _calc_data_slices(self, data, index) -> Tuple[slice]:
         positions = self.positions
         extents = self.extents
 
@@ -172,13 +176,13 @@ class MultiTag(BaseTag):
 
         return tuple(slice(start, stop) for start, stop in zip(starts, stops))
 
-    def retrieve_data(self, posidx, refidx):
+    def retrieve_data(self, posidx, refidx) -> DataView:
         msg = ("Call to deprecated method MultiTag.retrieve_data. "
                "Use MultiTag.tagged_data instead.")
         warnings.warn(msg, category=DeprecationWarning)
         return self.tagged_data(posidx, refidx)
 
-    def tagged_data(self, posidx, refidx):
+    def tagged_data(self, posidx, refidx) -> DataView:
         references = self.references
         positions = self.positions
         extents = self.extents
@@ -210,13 +214,13 @@ class MultiTag(BaseTag):
                               "DataArray!")
         return DataView(ref, slices)
 
-    def retrieve_feature_data(self, posidx, featidx):
+    def retrieve_feature_data(self, posidx, featidx) -> DataView:
         msg = ("Call to deprecated method MultiTag.retrieve_feature_data. "
                "Use MultiTag.feature_data instead.")
         warnings.warn(msg, category=DeprecationWarning)
         return self.feature_data(posidx, featidx)
 
-    def feature_data(self, posidx, featidx):
+    def feature_data(self, posidx, featidx) -> DataView:
         if len(self.features) == 0:
             raise OutOfBounds(
                 "There are no features associated with this tag!"
@@ -257,7 +261,7 @@ class MultiTag(BaseTag):
         return DataView(da, slices)
 
     @property
-    def sources(self):
+    def sources(self) -> SourceLinkContainer:
         """
         A property containing all Sources referenced by the MultiTag. Sources
         can be obtained by index or their id. Sources can be removed from the
@@ -271,7 +275,7 @@ class MultiTag(BaseTag):
 
     # metadata
     @property
-    def metadata(self):
+    def metadata(self) -> Optional[Section]:
         """
 
         Associated metadata of the entity. Sections attached to the entity via
@@ -286,12 +290,12 @@ class MultiTag(BaseTag):
             return None
 
     @metadata.setter
-    def metadata(self, sect):
+    def metadata(self, sect) -> None:
         if not isinstance(sect, Section):
             raise TypeError("{} is not of type Section".format(sect))
         self._h5group.create_link(sect, "metadata")
 
     @metadata.deleter
-    def metadata(self):
+    def metadata(self) -> None:
         if "metadata" in self._h5group:
             self._h5group.delete("metadata")

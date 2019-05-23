@@ -22,14 +22,14 @@ class SourceLinkContainer(LinkContainer):
     # down the entire tree, as opposed to the default LinkContainer.append()
     # function which needs to only check the root Block's container.
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         """
         LinkContainer for Sources.
         """
         super(SourceLinkContainer, self).__init__("sources", parent, Source,
                                                   parent._parent.sources)
 
-    def append(self, item):
+    def append(self, item) -> None:
         if util.is_uuid(item):
             item = self._inst_item(self._backend.get_by_id(item))
 

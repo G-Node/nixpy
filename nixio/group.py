@@ -6,6 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from __future__ import annotations
 
 from .entity import Entity
 from .data_array import DataArray
@@ -16,10 +17,12 @@ from .container import LinkContainer
 from .source_link_container import SourceLinkContainer
 from .section import Section
 
+from typing import Optional
+
 
 class Group(Entity):
 
-    def __init__(self, nixparent, h5group):
+    def __init__(self, nixparent, h5group) -> None:
         super(Group, self).__init__(nixparent, h5group)
         self._data_arrays = None
         self._data_frames = None
@@ -28,13 +31,13 @@ class Group(Entity):
         self._sources = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_):
+    def _create_new(cls, nixparent, h5parent, name, type_) -> Group:
         newentity = super(Group, cls)._create_new(nixparent, h5parent,
                                                   name, type_)
         return newentity
 
     @property
-    def data_arrays(self):
+    def data_arrays(self) -> LinkContainer:
         """
         A property containing all data arrays referenced by the group.
         Referenced data arrays can be obtained by index or their id. References
@@ -49,7 +52,7 @@ class Group(Entity):
         return self._data_arrays
 
     @property
-    def data_frames(self):
+    def data_frames(self) -> LinkContainer:
         """
         A property containing all data frames referenced by the group.
         Referenced data frames can be obtained by index or their id. References
@@ -64,7 +67,7 @@ class Group(Entity):
         return self._data_frames
 
     @property
-    def tags(self):
+    def tags(self) -> LinkContainer:
         """
         A property containing all tags referenced by the group. Tags can be
         obtained by index or their id. Tags can be removed from the list,
@@ -77,7 +80,7 @@ class Group(Entity):
         return self._tags
 
     @property
-    def multi_tags(self):
+    def multi_tags(self) -> LinkContainer:
         """
         A property containing all MultiTags referenced by the group. MultiTags
         can be obtained by index or their id. MultiTags can be removed from the
@@ -91,7 +94,7 @@ class Group(Entity):
         return self._multi_tags
 
     @property
-    def sources(self):
+    def sources(self) -> LinkContainer:
         """
         A property containing all Sources referenced by the Group. Sources
         can be obtained by index or their id. Sources can be removed from the
@@ -105,7 +108,7 @@ class Group(Entity):
 
     # metadata
     @property
-    def metadata(self):
+    def metadata(self) -> Optional[Section]:
         """
 
         Associated metadata of the entity. Sections attached to the entity via
@@ -120,12 +123,12 @@ class Group(Entity):
             return None
 
     @metadata.setter
-    def metadata(self, sect):
+    def metadata(self, sect) -> None:
         if not isinstance(sect, Section):
             raise TypeError("{} is not of type Section".format(sect))
         self._h5group.create_link(sect, "metadata")
 
     @metadata.deleter
-    def metadata(self):
+    def metadata(self) -> None:
         if "metadata" in self._h5group:
             self._h5group.delete("metadata")

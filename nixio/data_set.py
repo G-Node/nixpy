@@ -7,7 +7,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import numpy as np
-
+from typing import Tuple, List
 
 class DataSet(object):
     """
@@ -30,7 +30,7 @@ class DataSet(object):
         for idx in range(self.len()):
             yield self[idx]
 
-    def len(self):
+    def len(self) -> int:
         """
         Length of the first dimension. Equivalent to `DataSet.shape[0]`.
 
@@ -39,14 +39,14 @@ class DataSet(object):
         return self.shape[0]
 
     @property
-    def shape(self):
+    def shape(self) -> Tuple[int]:
         """
         :type: tuple of data array dimensions.
         """
         return self.data_extent
 
     @property
-    def size(self):
+    def size(self) -> int:
         """
         Number of elements in the DataSet, i.e. the product of the
         elements in :attr:`~nixio.data_array.DataSet.shape`.
@@ -56,14 +56,14 @@ class DataSet(object):
         return np.prod(self.shape)
 
     @property
-    def dtype(self):
+    def dtype(self) -> np.dtype:
         """
         :type: :class:`numpy.dtype` object holding type infromation about
                the data stored in the DataSet.
         """
         return np.dtype(self._get_dtype())
 
-    def write_direct(self, data):
+    def write_direct(self, data) -> None:
         """
         Directly write all of ``data`` to the
         :class:`~nixio.data_array.DataSet`.  The supplied data must be a
@@ -76,7 +76,7 @@ class DataSet(object):
         """
         self._write_data(data)
 
-    def read_direct(self, data):
+    def read_direct(self, data) -> None:
         """
         Directly read all data stored in the :class:`~nixio.data_array.DataSet`
         into ``data``. The supplied data must be a :class:`numpy.ndarray` that
@@ -89,7 +89,7 @@ class DataSet(object):
         """
         data[:] = self._read_data()
 
-    def append(self, data, axis=0):
+    def append(self, data, axis=0) -> None:
         """
         Append ``data`` to the DataSet along the ``axis`` specified.
 
@@ -117,7 +117,7 @@ class DataSet(object):
         self._write_data(data, sl)
 
     @staticmethod
-    def __index_to_tuple(index):
+    def __index_to_tuple(index) -> Tuple:
         tidx = type(index)
 
         if tidx == tuple:
@@ -130,7 +130,7 @@ class DataSet(object):
             raise IndexError("Unsupported index")
 
     @staticmethod
-    def __complete_slices(shape, index):
+    def __complete_slices(shape, index) -> slice:
         if type(index) is slice:
             if index.step is not None:
                 raise IndexError('Invalid index, stepping unsupported')
@@ -158,11 +158,11 @@ class DataSet(object):
         return index
 
     @staticmethod
-    def __fill_none(shape, index, to_replace=1):
+    def __fill_none(shape, index, to_replace=1) -> Tuple[None]:
         size = len(shape) - len(index) + to_replace
         return tuple([None] * size)
 
-    def __tuple_to_count_offset_shape(self, index):
+    def __tuple_to_count_offset_shape(self, index) -> Tuple[Tuple, Tuple, List]:
         # precondition: type(index) == tuple and len(index) >= 1
         fill_none = self.__fill_none
         shape = self.shape
@@ -201,16 +201,16 @@ class DataSet(object):
 
         return count, offset, shape
 
-    def _write_data(self, data, sl=None):
+    def _write_data(self, data, sl=None) -> None:
         dataset = self._h5group.get_dataset("data")
         dataset.write_data(data,  sl)
 
-    def _read_data(self, sl=None):
+    def _read_data(self, sl=None) -> None:
         dataset = self._h5group.get_dataset("data")
         return dataset.read_data(sl)
 
     @property
-    def data_extent(self):
+    def data_extent(self) -> Tuple[int]:
         """
         The size of the data.
 
@@ -220,12 +220,12 @@ class DataSet(object):
         return dataset.shape
 
     @data_extent.setter
-    def data_extent(self, extent):
+    def data_extent(self, extent) -> None:
         dataset = self._h5group.get_dataset("data")
         dataset.shape = extent
 
     @property
-    def data_type(self):
+    def data_type(self) -> np.dtype:
         """
         The data type of the data stored in the DataArray. This is a read only
         property.
@@ -234,6 +234,6 @@ class DataSet(object):
         """
         return self._get_dtype()
 
-    def _get_dtype(self):
+    def _get_dtype(self) -> np.dtype:
         dataset = self._h5group.get_dataset("data")
         return dataset.dtype

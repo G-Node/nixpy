@@ -6,7 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function, annotations)
 import numpy as np
 from .util import units
 from .dimension_type import DimensionType
@@ -14,11 +14,12 @@ try:
     from collections.abc import OrderedDict
 except ImportError:
     from collections import OrderedDict
+from typing import Optional, Union, List
 
 
 class Validate:
 
-    def __init__(self, file):
+    def __init__(self, file) -> None:
         self.file = file
         self.errors = OrderedDict()
         self.errors['file_errors'] = []
@@ -28,7 +29,7 @@ class Validate:
         # if a function addressing same object is called more than once
         self.error_count = 0
 
-    def form_dict(self):
+    def form_dict(self) -> None:
         """
         Form a empty dict that has same structure as the data tree in the file.
         """
@@ -78,7 +79,7 @@ class Validate:
                     tag = self.errors['blocks'][bi]['tags'][ti]
                     tag['features'].append(fea_dict)
 
-    def check_file(self):
+    def check_file(self) -> Union[OrderedDict, dict]:
         """
         Check if the file meets the NIX requirements at the file level.
 
@@ -96,7 +97,7 @@ class Validate:
         self.error_count += len(file_err_list)
         return self.errors
 
-    def check_blocks(self, block, blk_idx):
+    def check_blocks(self, block, blk_idx) -> Union[OrderedDict, dict]:
         """
         Check if the file meets the NIX requirements at the block level.
 
@@ -109,7 +110,7 @@ class Validate:
         self.error_count += len(blk_err_list)
         return self.errors
 
-    def check_groups(self, group, grp_idx, blk_idx):
+    def check_groups(self, group, grp_idx, blk_idx) -> Union[OrderedDict, dict, None]:
         """
         Check if the file meets the NIX requirements at the group level.
 
@@ -126,7 +127,7 @@ class Validate:
         else:
             return None
 
-    def check_data_arrays(self, da, da_idx, blk_idx):
+    def check_data_arrays(self, da, da_idx, blk_idx) -> Union[OrderedDict, dict]:
         """
         Check if the file meets the NIX requirements at the DataArray level.
 
@@ -192,7 +193,7 @@ class Validate:
         self.error_count += len(da_error_list)
         return self.errors
 
-    def check_tag(self, tag, tag_idx, blk_idx):
+    def check_tag(self, tag, tag_idx, blk_idx) -> Union[OrderedDict, dict]:
         """
         Check if the file meets the NIX requirements at the tag level.
 
@@ -245,7 +246,7 @@ class Validate:
         self.error_count += len(tag_err_list)
         return self.errors
 
-    def check_multi_tag(self, mt, mt_idx, blk_idx):
+    def check_multi_tag(self, mt, mt_idx, blk_idx) -> Union[OrderedDict, dict]:
         mt_err_list = []
 
         if not mt.positions:
@@ -302,7 +303,7 @@ class Validate:
         self.error_count += len(mt_err_list)
         return self.errors
 
-    def check_section(self, section, sec_idx):
+    def check_section(self, section, sec_idx) -> Union[OrderedDict, dict]:
         """
         Check if the file meets the NIX requirements at the section level.
 
@@ -315,7 +316,7 @@ class Validate:
 
         return self.errors
 
-    def check_property(self, prop, prop_idx, sec_idx):
+    def check_property(self, prop, prop_idx, sec_idx) -> Union[OrderedDict, dict]:
         prop_err_list = []
 
         if not prop.name:
@@ -329,7 +330,7 @@ class Validate:
         self.error_count += len(prop_err_list)
         return self.errors
 
-    def check_features(self, feat, parent, blk_idx, tag_idx, fea_idx):
+    def check_features(self, feat, parent, blk_idx, tag_idx, fea_idx) -> Union[OrderedDict, dict]:
         """
         Check if the file meets the NIX requirements at the feature level.
 
@@ -348,7 +349,7 @@ class Validate:
         self.error_count += len(fea_err_list)
         return self.errors
 
-    def check_sources(self, src, blk_idx):
+    def check_sources(self, src, blk_idx) -> Union[OrderedDict, dict, None]:
         """
         Check if the file meets the NIX requirements at the source level.
 
@@ -362,7 +363,7 @@ class Validate:
             return self.errors
         return None
 
-    def check_dim(self, dimen):
+    def check_dim(self, dimen) -> Union[str, None]:
         """
         General checks for all dimensions
         """
@@ -372,7 +373,7 @@ class Validate:
             return None
         return 'index must > 0'
 
-    def check_range_dim(self, r_dim, dim_idx, da_idx, blk_idx):
+    def check_range_dim(self, r_dim, dim_idx, da_idx, blk_idx) -> Union[OrderedDict, dict]:
         """
         Check if the file meets the NIX requirements for range dimensions.
 
@@ -402,7 +403,7 @@ class Validate:
         self.error_count += len(rdim_err_list)
         return self.errors
 
-    def check_set_dim(self, set_dim, dim_idx, da_idx, blk_idx):
+    def check_set_dim(self, set_dim, dim_idx, da_idx, blk_idx) -> Union[OrderedDict, dict]:
         """
         Check if the file meets the NIX requirements for set dimensions.
 
@@ -420,7 +421,7 @@ class Validate:
             self.error_count += 1
         return self.errors
 
-    def check_sampled_dim(self, sam_dim, dim_idx, da_idx, blk_idx):
+    def check_sampled_dim(self, sam_dim, dim_idx, da_idx, blk_idx) -> Union[OrderedDict, dict]:
         """
         Check if the file meets the NIX requirements for sampled dimensions.
 
@@ -452,7 +453,7 @@ class Validate:
         self.error_count += len(sdim_err_list)
         return self.errors
 
-    def check_for_basics(self, entity):
+    def check_for_basics(self, entity) -> List[Optional[str]]:
         """
         General check for the nix requirements applicable for all nix Objects
         """
@@ -467,7 +468,7 @@ class Validate:
 
         return basic_check_list
 
-    def get_dim_units(self, data_arrays):
+    def get_dim_units(self, data_arrays) -> List[str]:
         """
         Help function to collect the units of the dimensions of a data array
         """

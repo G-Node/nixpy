@@ -6,10 +6,13 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from __future__ import annotations
+
 import warnings
 
 import numpy as np
 from six import string_types
+from typing import Tuple, Optional
 
 from .entity import Entity
 from .source_link_container import SourceLinkContainer
@@ -61,19 +64,19 @@ class BaseTag(Entity):
     """
 
     @property
-    def units(self):
+    def units(self) -> Tuple[Optional[str]]:
         """
         Property containing the units of the tag. The tag must provide a
         unit for each dimension of the position or extent vector.
         This is a read-write property.
 
-        :type: list of str
+        :type: tuple of str
         """
         return tuple(u.decode() if isinstance(u, bytes) else u
                      for u in self._h5group.get_data("units"))
 
     @units.setter
-    def units(self, units):
+    def units(self, units) -> None:
         if not units:
             if self._h5group.has_data("units"):
                 del self._h5group["units"]
@@ -89,7 +92,7 @@ class BaseTag(Entity):
         if self._parent._parent.time_auto_update:
             self.force_updated_at()
 
-    def create_feature(self, data, link_type):
+    def create_feature(self, data, link_type) -> Feature:
         """
         Create a new feature.
 
@@ -109,13 +112,13 @@ class BaseTag(Entity):
         return feat
 
     @staticmethod
-    def _slices_in_data(data, slices):
+    def _slices_in_data(data, slices) -> bool :
         dasize = data.data_extent
         stops = tuple(sl.stop for sl in slices)
         return np.all(np.less_equal(stops, dasize))
 
     @staticmethod
-    def _pos_to_idx(pos, unit, dim):
+    def _pos_to_idx(pos, unit, dim) -> int:
         dimtype = dim.dimension_type
         if dimtype == DimensionType.Set:
             dimunit = None
@@ -166,21 +169,21 @@ class BaseTag(Entity):
 
 class Tag(BaseTag):
 
-    def __init__(self, nixparent, h5group):
+    def __init__(self, nixparent, h5group) -> None:
         super(Tag, self).__init__(nixparent, h5group)
         self._sources = None
         self._references = None
         self._features = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, position):
+    def _create_new(cls, nixparent, h5parent, name, type_, position) -> Tag:
         newentity = super(Tag, cls)._create_new(nixparent, h5parent,
                                                 name, type_)
         newentity.position = position
         return newentity
 
     @property
-    def position(self):
+    def position(self) -> Optional[Tuple[float]]:
         """
         The position defined by the tag. This is a read-write property.
 
@@ -189,7 +192,7 @@ class Tag(BaseTag):
         return tuple(self._h5group.get_data("position"))
 
     @position.setter
-    def position(self, pos):
+    def position(self, pos) -> None:
         if pos is None or len(pos) == 0:
             if self._h5group.has_data("position"):
                 del self._h5group["position"]
@@ -200,7 +203,7 @@ class Tag(BaseTag):
             self.force_updated_at()
 
     @property
-    def extent(self):
+    def extent(self) -> Optional[Tuple[float]]:
         """
         The extent defined by the tag. This is an optional read-write
         property and may be set to None.
@@ -210,7 +213,7 @@ class Tag(BaseTag):
         return tuple(self._h5group.get_data("extent"))
 
     @extent.setter
-    def extent(self, ext):
+    def extent(self, ext) -> None:
         if ext is None or len(ext) == 0:
             if self._h5group.has_data("extent"):
                 del self._h5group["extent"]
@@ -220,7 +223,7 @@ class Tag(BaseTag):
         if self._parent._parent.time_auto_update:
             self.force_updated_at()
 
-    def _calc_data_slices(self, data):
+    def _calc_data_slices(self, data) -> Tuple[slice]:
         refslice = list()
         position = self.position
         extent = self.extent
@@ -239,13 +242,13 @@ class Tag(BaseTag):
             refslice.append(slice(start, stop))
         return tuple(refslice)
 
-    def retrieve_data(self, refidx):
+    def retrieve_data(self, refidx) -> DataView:
         msg = ("Call to deprecated method Tag.retrieve_data. "
                "Use Tag.tagged_data instead.")
         warnings.warn(msg, category=DeprecationWarning)
         return self.tagged_data(refidx)
 
-    def tagged_data(self, refidx):
+    def tagged_data(self, refidx) -> DataView:
         references = self.references
         position = self.position
         extent = self.extent
@@ -270,13 +273,13 @@ class Tag(BaseTag):
                               "DataArray!")
         return DataView(ref, slices)
 
-    def retrieve_feature_data(self, featidx):
+    def retrieve_feature_data(self, featidx) -> DataView:
         msg = ("Call to deprecated method Tag.retrieve_feature_data. "
                "Use Tag.feature_data instead.")
         warnings.warn(msg, category=DeprecationWarning)
         return self.feature_data(featidx)
 
-    def feature_data(self, featidx):
+    def feature_data(self, featidx) -> DataView:
         if len(self.features) == 0:
             raise OutOfBounds(
                 "There are no features associated with this tag!"
@@ -306,7 +309,7 @@ class Tag(BaseTag):
         return DataView(da, fullslices)
 
     @property
-    def references(self):
+    def references(self) -> LinkContainer:
         """
         A property containing all data arrays referenced by the tag. Referenced
         data arrays can be obtained by index or their id. References can be
@@ -323,7 +326,7 @@ class Tag(BaseTag):
         return self._references
 
     @property
-    def features(self):
+    def features(self) -> FeatureContainer:
         """
         A property containing all features of the tag. Features can be obtained
         via their index or their id. Features can be deleted from the list.
@@ -337,7 +340,7 @@ class Tag(BaseTag):
         return self._features
 
     @property
-    def sources(self):
+    def sources(self) -> SourceLinkContainer:
         """
         A property containing all Sources referenced by the Tag. Sources
         can be obtained by index or their id. Sources can be removed from the
@@ -351,7 +354,7 @@ class Tag(BaseTag):
 
     # metadata
     @property
-    def metadata(self):
+    def metadata(self) -> Optional[Section]:
         """
 
         Associated metadata of the entity. Sections attached to the entity via
@@ -366,12 +369,12 @@ class Tag(BaseTag):
             return None
 
     @metadata.setter
-    def metadata(self, sect):
+    def metadata(self, sect) -> None:
         if not isinstance(sect, Section):
             raise TypeError("{} is not of type Section".format(sect))
         self._h5group.create_link(sect, "metadata")
 
     @metadata.deleter
-    def metadata(self):
+    def metadata(self) -> None:
         if "metadata" in self._h5group:
             self._h5group.delete("metadata")

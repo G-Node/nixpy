@@ -6,9 +6,11 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from __future__ import annotations
 import warnings
 from numbers import Number
 from enum import Enum
+from typing import Iterable, Any, Tuple, Union
 
 from .data_view import DataView
 from .data_set import DataSet
@@ -31,14 +33,14 @@ class DataSliceMode(Enum):
 
 class DataArray(Entity, DataSet):
 
-    def __init__(self, nixparent, h5group):
+    def __init__(self, nixparent, h5group) -> None:
         super(DataArray, self).__init__(nixparent, h5group)
         self._sources = None
         self._dimensions = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, data_type, shape,
-                    compression):
+    def _create_new_da(cls, nixparent, h5parent, name, type_, data_type, shape,
+                    compression) -> DataArray:
         newentity = super(DataArray, cls)._create_new(nixparent, h5parent,
                                                       name, type_)
         datacompr = False
@@ -47,7 +49,7 @@ class DataArray(Entity, DataSet):
         newentity._h5group.create_dataset("data", shape, data_type, datacompr)
         return newentity
 
-    def _read_data(self, sl=None):
+    def _read_data(self, sl=None) -> Iterable:
         coeff = self.polynom_coefficients
         origin = self.expansion_origin
         sup = super(DataArray, self)
@@ -64,7 +66,7 @@ class DataArray(Entity, DataSet):
         return data
 
     @property
-    def sources(self):
+    def sources(self) -> SourceLinkContainer:
         """
         A property containing all Sources referenced by the DataArray. Sources
         can be obtained by index or their id. Sources can be removed from the
@@ -76,7 +78,7 @@ class DataArray(Entity, DataSet):
             self._sources = SourceLinkContainer(self)
         return self._sources
 
-    def append_set_dimension(self, labels=None):
+    def append_set_dimension(self, labels=None) -> SetDimension:
         """
         Append a new SetDimension to the list of existing dimension
         descriptors.
@@ -94,7 +96,7 @@ class DataArray(Entity, DataSet):
         return setdim
 
     def append_sampled_dimension(self, sampling_interval, label=None,
-                                 unit=None, offset=None):
+                                 unit=None, offset=None) -> SampledDimension:
         """
         Append a new SampledDimension to the list of existing dimension
         descriptors.
@@ -120,7 +122,7 @@ class DataArray(Entity, DataSet):
             self.force_updated_at()
         return smpldim
 
-    def append_range_dimension(self, ticks, label=None, unit=None):
+    def append_range_dimension(self, ticks, label=None, unit=None) -> RangeDimension:
         """
         Append a new RangeDimension to the list of existing dimension
         descriptors.
@@ -141,7 +143,7 @@ class DataArray(Entity, DataSet):
             self.force_updated_at()
         return rdim
 
-    def append_alias_range_dimension(self):
+    def append_alias_range_dimension(self) -> RangeDimension:
         """
         Append a new RangeDimension that uses the data stored in this
         DataArray as ticks. This works only(!) if the DataArray is 1-D and
@@ -170,7 +172,7 @@ class DataArray(Entity, DataSet):
                 )
         return RangeDimension._create_new_alias(dimgroup, 1, self)
 
-    def delete_dimensions(self):
+    def delete_dimensions(self) -> bool:
         """
         Delete all the dimension descriptors for this DataArray.
         """
@@ -180,10 +182,10 @@ class DataArray(Entity, DataSet):
             del dimgroup[str(idx+1)]
         return True
 
-    def _dimension_count(self):
+    def _dimension_count(self) -> int:
         return len(self._h5group.open_group("dimensions"))
 
-    def _get_dimension_by_pos(self, index):
+    def _get_dimension_by_pos(self, index) -> Dimension:
         h5dim = self._h5group.open_group("dimensions").open_group(str(index))
         dimtype = h5dim.get_attr("dimension_type")
         if DimensionType(dimtype) == DimensionType.Sample:
@@ -196,7 +198,7 @@ class DataArray(Entity, DataSet):
             raise TypeError("Invalid Dimension object in file.")
 
     @property
-    def dtype(self):
+    def dtype(self) -> Any:
         """
         The data type of the data stored in the DataArray.
         This is a read only property.
@@ -206,7 +208,7 @@ class DataArray(Entity, DataSet):
         return self._h5group.group["data"].dtype
 
     @property
-    def polynom_coefficients(self):
+    def polynom_coefficients(self) -> Tuple[float]:
         """
         The polynomial coefficients for the calibration. By default this is
         set to a {0.0, 1.0} for a linear calibration with zero offset.
@@ -217,7 +219,7 @@ class DataArray(Entity, DataSet):
         return tuple(self._h5group.get_data("polynom_coefficients"))
 
     @polynom_coefficients.setter
-    def polynom_coefficients(self, coeff):
+    def polynom_coefficients(self, coeff) -> None:
         if not coeff:
             if self._h5group.has_data("polynom_coefficients"):
                 del self._h5group["polynom_coefficients"]
@@ -228,7 +230,7 @@ class DataArray(Entity, DataSet):
             self.force_updated_at()
 
     @property
-    def expansion_origin(self):
+    def expansion_origin(self) -> float:
         """
         The expansion origin of the calibration polynomial.
         This is a read-write property and can be set to None.
@@ -239,14 +241,14 @@ class DataArray(Entity, DataSet):
         return self._h5group.get_attr("expansion_origin")
 
     @expansion_origin.setter
-    def expansion_origin(self, eo):
+    def expansion_origin(self, eo) -> None:
         util.check_attr_type(eo, Number)
         self._h5group.set_attr("expansion_origin", eo)
         if self._parent._parent.time_auto_update:
             self.force_updated_at()
 
     @property
-    def label(self):
+    def label(self) -> str:
         """
         The label of the DataArray. The label corresponds to the label of the
         x-axis of a plot. This is a read-write property and can be set to
@@ -257,14 +259,14 @@ class DataArray(Entity, DataSet):
         return self._h5group.get_attr("label")
 
     @label.setter
-    def label(self, l):
+    def label(self, l) -> None:
         util.check_attr_type(l, str)
         self._h5group.set_attr("label", l)
         if self._parent._parent.time_auto_update:
             self.force_updated_at()
 
     @property
-    def unit(self):
+    def unit(self) -> str:
         """
         The unit of the values stored in the DataArray. This is a read-write
         property and can be set to None.
@@ -274,7 +276,7 @@ class DataArray(Entity, DataSet):
         return self._h5group.get_attr("unit")
 
     @unit.setter
-    def unit(self, u):
+    def unit(self, u) -> None:
         if u:
             u = util.units.sanitizer(u)
         if u == "":
@@ -293,7 +295,7 @@ class DataArray(Entity, DataSet):
         if self._parent._parent.time_auto_update:
             self.force_updated_at()
 
-    def get_slice(self, positions, extents=None, mode=DataSliceMode.Index):
+    def get_slice(self, positions, extents=None, mode=DataSliceMode.Index) -> DataView:
         datadim = len(self.shape)
         if not len(positions) == datadim:
             raise IndexError("Number of positions given ({}) does not match "
@@ -315,7 +317,7 @@ class DataArray(Entity, DataSet):
                              "Supported modes are DataSliceMode.Index and "
                              "DataSliceMode.Data")
 
-    def _get_slice_bydim(self, positions, extents):
+    def _get_slice_bydim(self, positions, extents) -> DataView:
         dpos, dext = [], []
         for dim, pos, ext in zip(self.dimensions, positions, extents):
             if dim.dimension_type in (DimensionType.Sample,
@@ -329,7 +331,7 @@ class DataArray(Entity, DataSet):
         return DataView(self, sl)
 
     @property
-    def data(self):
+    def data(self) -> DataArray:
         """
         DEPRECATED DO NOT USE ANYMORE! Returns self
 
@@ -340,7 +342,7 @@ class DataArray(Entity, DataSet):
         return self
 
     @property
-    def dimensions(self):
+    def dimensions(self) -> DimensionContainer:
         """
         A property containing all dimensions of a DataArray. Dimensions can be
         obtained via their index. Adding dimensions is done using the
@@ -356,7 +358,7 @@ class DataArray(Entity, DataSet):
 
     # metadata
     @property
-    def metadata(self):
+    def metadata(self) -> Union[Section, None]:
         """
 
         Associated metadata of the entity. Sections attached to the entity via
@@ -371,12 +373,12 @@ class DataArray(Entity, DataSet):
             return None
 
     @metadata.setter
-    def metadata(self, sect):
+    def metadata(self, sect) -> None:
         if not isinstance(sect, Section):
             raise TypeError("{} is not of type Section".format(sect))
         self._h5group.create_link(sect, "metadata")
 
     @metadata.deleter
-    def metadata(self):
+    def metadata(self) -> None:
         if "metadata" in self._h5group:
             self._h5group.delete("metadata")

@@ -4,6 +4,7 @@ try:
 except ImportError:
     from collections import Iterable
 from . import util
+from typing import Generator, Tuple
 
 
 class Container(object):
@@ -23,13 +24,13 @@ class Container(object):
     checking and instantiations)
     """
 
-    def __init__(self, name, parent, itemclass):
+    def __init__(self, name, parent, itemclass) -> None:
         self._backend = parent._h5group.open_group(name)
         self._itemclass = itemclass
         self._parent = parent
         self._name = name
 
-    def _inst_item(self, item):
+    def _inst_item(self, item) -> type:
         return self._itemclass(self._parent, item)
 
     def __len__(self):
@@ -92,10 +93,10 @@ class Container(object):
         return str(self)
 
     @staticmethod
-    def _item_key(item):
+    def _item_key(item) -> str:
         return item.name
 
-    def items(self):
+    def items(self) -> Generator[Tuple[str, object], None, None]:
         for group in self._backend:
             item = self._inst_item(group)
             yield item.id, item
@@ -192,7 +193,7 @@ class LinkContainer(Container):
 
         self._backend.delete(item.id)
 
-    def append(self, item):
+    def append(self, item) -> None:
         if util.is_uuid(item):
             item = self._inst_item(self._backend.get_by_id(item))
 
@@ -204,7 +205,7 @@ class LinkContainer(Container):
 
         self._backend.create_link(item, item.id)
 
-    def extend(self, items):
+    def extend(self, items) -> None:
         if not isinstance(items, Iterable):
             raise TypeError("{} object is not iterable".format(type(items)))
         for item in items:
@@ -245,9 +246,9 @@ class LinkContainer(Container):
                 return True
         return False
 
-    def _inst_item(self, item):
+    def _inst_item(self, item) -> object:
         return self._itemclass(self._itemstore._parent, item)
 
     @staticmethod
-    def _item_key(item):
+    def _item_key(item) -> str:
         return item.id

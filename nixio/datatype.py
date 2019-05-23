@@ -30,7 +30,7 @@ class DataType(object):
     Bool = np.bool_
 
     @classmethod
-    def get_dtype(cls, value):
+    def get_dtype(cls, value) -> type:
         if isinstance(value, BOOLS):
             return cls.Bool
         elif isinstance(value, Integral):
@@ -43,7 +43,7 @@ class DataType(object):
             raise ValueError("Unknown type for value {}".format(value))
 
     @classmethod
-    def is_numeric_dtype(cls, dtype):
+    def is_numeric_dtype(cls, dtype) -> bool:
         return (dtype == cls.Int8 or
                 dtype == cls.Int16 or
                 dtype == cls.Int32 or

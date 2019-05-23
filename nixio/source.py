@@ -6,7 +6,10 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from __future__ import annotations
+
 from sys import maxsize as maxint
+from typing import Optional, List
 
 from .import exceptions
 from .entity import Entity
@@ -18,18 +21,18 @@ from .section import Section
 
 class Source(Entity):
 
-    def __init__(self, nixparent, h5group):
+    def __init__(self, nixparent, h5group) -> None:
         super(Source, self).__init__(nixparent, h5group)
         self._sources = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_):
+    def _create_new(cls, nixparent, h5parent, name, type_) -> Source:
         newentity = super(Source, cls)._create_new(nixparent, h5parent,
                                                    name, type_)
         return newentity
 
     # Source
-    def create_source(self, name, type_):
+    def create_source(self, name, type_) -> Source:
         """
         Create a new source as a child of the current Source.
 
@@ -49,7 +52,7 @@ class Source(Entity):
         return src
 
     @property
-    def referring_objects(self):
+    def referring_objects(self) -> List[Entity]:
         objs = []
         objs.extend(self.referring_data_arrays)
         objs.extend(self.referring_tags)
@@ -57,18 +60,18 @@ class Source(Entity):
         return objs
 
     @property
-    def referring_data_arrays(self):
+    def referring_data_arrays(self) -> List[Entity]:
         return [da for da in self._parent.data_arrays if self in da.sources]
 
     @property
-    def referring_tags(self):
+    def referring_tags(self) -> List[Entity]:
         return [tg for tg in self._parent.tags if self in tg.sources]
 
     @property
-    def referring_multi_tags(self):
+    def referring_multi_tags(self) -> List[Entity]:
         return [mt for mt in self._parent.multi_tags if self in mt.sources]
 
-    def find_sources(self, filtr=lambda _: True, limit=None):
+    def find_sources(self, filtr=lambda _: True, limit=None) -> List[Source]:
         """
         Get all child sources of this source recursively.
 
@@ -91,7 +94,7 @@ class Source(Entity):
         return finders._find_sources(self, filtr, limit)
 
     @property
-    def sources(self):
+    def sources(self) -> SourceContainer:
         """
         A property containing child sources of a Source. Sources can be
         obtained via their name, index, id. Sources can be deleted from the
@@ -104,7 +107,7 @@ class Source(Entity):
 
     # metadata
     @property
-    def metadata(self):
+    def metadata(self) -> Optional[Section]:
         """
 
         Associated metadata of the entity. Sections attached to the entity via
@@ -119,12 +122,12 @@ class Source(Entity):
             return None
 
     @metadata.setter
-    def metadata(self, sect):
+    def metadata(self, sect) -> None:
         if not isinstance(sect, Section):
             raise TypeError("{} is not of type Section".format(sect))
         self._h5group.create_link(sect, "metadata")
 
     @metadata.deleter
-    def metadata(self):
+    def metadata(self) -> None:
         if "metadata" in self._h5group:
             self._h5group.delete("metadata")

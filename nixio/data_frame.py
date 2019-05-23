@@ -6,7 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-from __future__ import (absolute_import, division, print_function)
+from __future__ import (absolute_import, division, print_function, annotations)
 try:
     from collections.abc import Iterable, Sequence
 except ImportError:
@@ -22,11 +22,12 @@ from .datatype import DataType
 from .section import Section
 from six import string_types
 import csv
+from typing import Union, Iterable, Any, List, Tuple, Optional
 
 
 class DataFrame(Entity, DataSet):
 
-    def __init__(self, nixparent, h5group):
+    def __init__(self, nixparent, h5group) -> None:
         super(DataFrame, self).__init__(nixparent, h5group)
         self._sources = None
         self._columns = None
@@ -34,13 +35,13 @@ class DataFrame(Entity, DataSet):
 
     @classmethod
     def _create_new(cls, nixparent, h5parent,
-                    name, type_, shape, col_dtype, compression):
+                    name, type_, shape, col_dtype, compression) ->  DataFrame:
         newentity = super(DataFrame, cls)._create_new(nixparent, h5parent,
                                                       name, type_)
         newentity._h5group.create_dataset("data", (shape, ), col_dtype)
         return newentity
 
-    def append_column(self, column, name, datatype=None):
+    def append_column(self, column, name, datatype=None) -> None:
         """
         Append a new column to the DataFrame
         In case of string, it will be better to set explicitly the datatype.
@@ -77,7 +78,7 @@ class DataFrame(Entity, DataSet):
         self._h5group.create_dataset("data", (self.shape[0],), dt)
         self.write_direct(farr)
 
-    def append_rows(self, data):
+    def append_rows(self, data) -> None:
         """
         Append a new row to the DataFrame. The data supplied must be iterable.
 
@@ -91,7 +92,7 @@ class DataFrame(Entity, DataSet):
         pro_data = np.array(li_data, dtype=self.data_type)
         self.append(pro_data, axis=0)
 
-    def write_column(self, column, index=None, name=None):
+    def write_column(self, column, index=None, name=None) -> None:
         """
         Overwrite an existing column.
         Either index or name of the column should be provided.
@@ -116,7 +117,7 @@ class DataFrame(Entity, DataSet):
             self.write_rows(rows=[rows], index=[i])
 
     def read_columns(self, index=None, name=None, sl=None,
-                     group_by_cols=False):
+                     group_by_cols=False) -> np.ndarray:
         """
         Read one or multiple (part of) column(s) in the DataFrame
 
@@ -156,7 +157,7 @@ class DataFrame(Entity, DataSet):
             get_col = self._read_data(sl=slic)[name]
             return get_col
 
-    def write_rows(self, rows, index):
+    def write_rows(self, rows, index) -> None:
         """
         Overwrite one or multiple existing row(s)
 
@@ -189,7 +190,7 @@ class DataFrame(Entity, DataSet):
                 cr_list.append(tuple(cr))
             self._write_data(cr_list, sl=index)
 
-    def read_rows(self, index):
+    def read_rows(self, index) -> np.ndarray:
         """
         Read one or multiple row(s) in the DataFrame
 
@@ -201,7 +202,7 @@ class DataFrame(Entity, DataSet):
         get_row = self._read_data(sl=(index,))
         return get_row
 
-    def write_cell(self, cell, position=None, col_name=None, row_idx=None):
+    def write_cell(self, cell, position=None, col_name=None, row_idx=None) -> None:
         """
         Overwrite a cell in the DataFrame
 
@@ -230,7 +231,7 @@ class DataFrame(Entity, DataSet):
             targeted_row[col_name] = cell
             self._write_data(targeted_row, sl=row_idx)
 
-    def read_cell(self, position=None, col_name=None, row_idx=None):
+    def read_cell(self, position=None, col_name=None, row_idx=None) -> Any:
         """
         Read a cell in the DataFrame
 
@@ -254,7 +255,7 @@ class DataFrame(Entity, DataSet):
             cell = cell[0]
             return cell
 
-    def print_table(self, row_sl=None, col_sl=None):
+    def print_table(self, row_sl=None, col_sl=None) -> None:
         """
         Print the whole DataFrame as a table
         :param row_sl: Rows to be printed; None for printing all rows
@@ -278,25 +279,25 @@ class DataFrame(Entity, DataSet):
         for i, row in enumerate(self._read_data(sl=row_sl)[list(cl)]):
             print(row_form.format("  [{}]:".format(ridx[i]), *row))
 
-    def _find_idx_by_name(self, name):
+    def _find_idx_by_name(self, name) -> Union[int, None]:
         for i, n in enumerate(self.column_names):
             if n == name:
                 return i
         return None
 
-    def _find_name_by_idx(self, idx):
+    def _find_name_by_idx(self, idx) -> Union[str, None]:
         if self.column_names[idx]:
             return self.column_names[idx]
         return None
 
-    def row_count(self):
+    def row_count(self) -> int:
         """
         Return the total number of rows
         """
         count = len(self)
         return count
 
-    def write_to_csv(self, filename, mode='w'):
+    def write_to_csv(self, filename, mode='w') -> None:
         """
         Export the whole DataFrame to a CSV file
 
@@ -323,7 +324,7 @@ class DataFrame(Entity, DataSet):
             csvfile.close()
 
     @property
-    def units(self):
+    def units(self) -> Optional[Iterable[str]]:
         """
         The unit of the values stored in the DataFrame.
         This is a read-write property and can be set to None.
@@ -333,7 +334,7 @@ class DataFrame(Entity, DataSet):
         return self._h5group.get_attr("units")
 
     @units.setter
-    def units(self, u):
+    def units(self, u) -> None:
         for i in u:
             if i is not None:
                 i = util.units.sanitizer(i)
@@ -344,7 +345,7 @@ class DataFrame(Entity, DataSet):
             self.force_updated_at()
 
     @property
-    def columns(self):
+    def columns(self) -> List[Tuple[str, np.dtype, Optional[str]]]:
         """
         The dtype is the list of names and data types
         of all columns in the DatFrame.
@@ -361,7 +362,7 @@ class DataFrame(Entity, DataSet):
         return cols
 
     @property
-    def column_names(self):
+    def column_names(self) -> Tuple[str]:
         """
         The dtype is the list of names of all columns in the DatFrame.
         This is a read only property.
@@ -372,7 +373,7 @@ class DataFrame(Entity, DataSet):
         return dt.names
 
     @property
-    def dtype(self):
+    def dtype(self) -> Tuple[np.dtype]:
         """
         The dtype is the list of DataTypes of all columns in the DatFrame.
         This is a read only property.
@@ -381,7 +382,7 @@ class DataFrame(Entity, DataSet):
         """
         dt = self._h5group.group["data"].dtype
         key = self.column_names
-        di = OrderedDict()
+        di = OrderedDict() # type: dict
         for k in key:
             di[k] = dt.fields[k]
         raw_dt = di.values()
@@ -390,7 +391,7 @@ class DataFrame(Entity, DataSet):
         return tuple(raw_dt_list)
 
     @property
-    def df_shape(self):
+    def df_shape(self) -> Iterable[int]:
         """
         The df_shape is the shape of the DataFrame
         in (number of rows, number of columns) format.
@@ -406,7 +407,7 @@ class DataFrame(Entity, DataSet):
         return self._h5group.get_attr("df_shape")
 
     @property
-    def metadata(self):
+    def metadata(self) -> Union[Section, None]:
         """
         Associated metadata of the entity. Sections attached to the entity via
         this attribute can provide additional annotations. This is an optional
@@ -420,13 +421,13 @@ class DataFrame(Entity, DataSet):
             return None
 
     @metadata.setter
-    def metadata(self, sect):
+    def metadata(self, sect) -> None:
         if not isinstance(sect, Section):
             raise TypeError("{} is not of type Section".format(sect))
         self._h5group.create_link(sect, "metadata")
 
     @metadata.deleter
-    def metadata(self):
+    def metadata(self) -> None:
         if "metadata" in self._h5group:
             self._h5group.delete("metadata")
 

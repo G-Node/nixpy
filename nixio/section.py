@@ -6,6 +6,8 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from __future__ import annotations
+
 try:
     from sys import maxint
 except ImportError:
@@ -16,6 +18,8 @@ except ImportError:
     from collections import Sequence, Iterable
 from six import string_types
 import numpy as np
+from typing import Tuple, Optional, Union, List, Generator
+
 from .container import Container, SectionContainer
 from .datatype import DataType
 from .entity import Entity
@@ -48,14 +52,14 @@ class S(object):
 
 class Section(Entity):
 
-    def __init__(self, nixparent, h5group):
+    def __init__(self, nixparent, h5group) -> None:
         super(Section, self).__init__(nixparent, h5group)
         self._sec_parent = None
         self._sections = None
         self._properties = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, oid=None):
+    def _create_new(cls, nixparent, h5parent, name, type_, oid=None) -> Section:
         newentity = super(Section, cls)._create_new(nixparent, h5parent,
                                                     name, type_)
         if util.is_uuid(oid):
@@ -64,7 +68,7 @@ class Section(Entity):
         return newentity
 
     # Section
-    def create_section(self, name, type_="undefined", oid=None):
+    def create_section(self, name, type_="undefined", oid=None) -> Section:
         """
         Creates a new subsection that is a child of this section entity.
 
@@ -89,7 +93,7 @@ class Section(Entity):
 
     # Property
     def create_property(self, name="", values_or_dtype=0, oid=None,
-                        copy_from=None, keep_copy_id=True):
+                        copy_from=None, keep_copy_id=True) -> Property:
         """
         Add a new property to the section.
 
@@ -173,7 +177,7 @@ class Section(Entity):
 
         return prop
 
-    def copy_section(self, obj, children=True, keep_id=True, name=""):
+    def copy_section(self, obj, children=True, keep_id=True, name="") -> Section:
         """
         Copy a section to the section.
 
@@ -217,18 +221,18 @@ class Section(Entity):
         return self.sections[sec.attrs["entity_id"]]
 
     @property
-    def reference(self):
+    def reference(self) -> Optional[str]:
         return self._h5group.get_attr("reference")
 
     @reference.setter
-    def reference(self, ref):
+    def reference(self, ref) -> None:
         util.check_attr_type(ref, str)
         self._h5group.set_attr("reference", ref)
         if self.file.time_auto_update:
             self.force_updated_at()
 
     @property
-    def link(self):
+    def link(self) -> Optional[Section]:
         """
         Link to another section. If a section is linked to another section,
         the linking section inherits all properties from the target section.
@@ -242,7 +246,7 @@ class Section(Entity):
         return Section(self, self._h5group.open_group("link"))
 
     @link.setter
-    def link(self, id_or_sec):
+    def link(self, id_or_sec) -> None:
         if id_or_sec is None:
             self._h5group.delete("link")
         if isinstance(id_or_sec, Section):
@@ -255,7 +259,7 @@ class Section(Entity):
         if self.file.time_auto_update:
             self.force_updated_at()
 
-    def inherited_properties(self):
+    def inherited_properties(self) -> List[Property]:
         properties = self._h5group.open_group("properties")
         inhprops = [Property(self, h5prop) for h5prop in properties]
         if self.link:
@@ -263,7 +267,7 @@ class Section(Entity):
         return inhprops
 
     @property
-    def repository(self):
+    def repository(self) -> Optional[str]:
         """
         URL to the terminology repository the section is associated with.
         This is an optional read-write property and may be set to None.
@@ -273,14 +277,14 @@ class Section(Entity):
         return self._h5group.get_attr("repository")
 
     @repository.setter
-    def repository(self, r):
+    def repository(self, r) -> None:
         util.check_attr_type(r, str)
         self._h5group.set_attr("repository", r)
         if self.file.time_auto_update:
             self.force_updated_at()
 
     @property
-    def parent(self):
+    def parent(self) -> Optional[Section]:
         """
         The parent section. This is a read-only property. For root sections
         this property is always None.
@@ -308,7 +312,7 @@ class Section(Entity):
         return None
 
     @property
-    def file(self):
+    def file(self) -> object:  # importing File may result in circular import/ Same for all referring_x
         """
         Root file object.
 
@@ -320,7 +324,7 @@ class Section(Entity):
         return par
 
     @property
-    def referring_objects(self):
+    def referring_objects(self) -> List[Entity]:
         objs = []
         objs.extend(self.referring_blocks)
         objs.extend(self.referring_groups)
@@ -331,13 +335,13 @@ class Section(Entity):
         return objs
 
     @property
-    def referring_blocks(self):
+    def referring_blocks(self) -> List[Entity]:
         f = self.file
         return list(blk for blk in f.blocks
                     if blk.metadata is not None and blk.metadata.id == self.id)
 
     @property
-    def referring_groups(self):
+    def referring_groups(self) -> List[Entity]:
         f = self.file
         groups = []
         for blk in f.blocks:
@@ -347,7 +351,7 @@ class Section(Entity):
         return groups
 
     @property
-    def referring_data_arrays(self):
+    def referring_data_arrays(self) -> List[Entity]:
         f = self.file
         data_arrays = []
         for blk in f.blocks:
@@ -357,7 +361,7 @@ class Section(Entity):
         return data_arrays
 
     @property
-    def referring_tags(self):
+    def referring_tags(self) -> List[Entity]:
         f = self.file
         tags = []
         for blk in f.blocks:
@@ -367,7 +371,7 @@ class Section(Entity):
         return tags
 
     @property
-    def referring_multi_tags(self):
+    def referring_multi_tags(self) -> List[Entity]:
         f = self.file
         multi_tags = []
         for blk in f.blocks:
@@ -377,7 +381,7 @@ class Section(Entity):
         return multi_tags
 
     @property
-    def referring_sources(self):
+    def referring_sources(self) -> List[Entity]:
         f = self.file
         sources = []
         for blk in f.blocks:
@@ -386,7 +390,7 @@ class Section(Entity):
                                src.metadata.id == self.id))
         return sources
 
-    def find_sections(self, filtr=lambda _: True, limit=None):
+    def find_sections(self, filtr=lambda _: True, limit=None) -> List[Section]:
         """
         Get all child sections recursively.
         This method traverses the trees of all sections. The traversal is
@@ -407,7 +411,7 @@ class Section(Entity):
             limit = maxint
         return finders._find_sections(self, filtr, limit)
 
-    def find_related(self, filtr=lambda _: True):
+    def find_related(self, filtr=lambda _: True) -> List[Section]:
         """
         Get all related sections of this section.
 
@@ -431,7 +435,7 @@ class Section(Entity):
         return result
 
     @property
-    def sections(self):
+    def sections(self) -> SectionContainer:
         """
         A property providing all child Sections of a Section. Child sections
         can be accessed by name, index, or id. Sections can also be deleted:
@@ -482,7 +486,7 @@ class Section(Entity):
         for name, item in self.items():
             yield item
 
-    def items(self):
+    def items(self) -> Generator[Tuple[str, Union[Property, Section]], None, None]:
         for p in self.props:
             yield (p.name, p)
         for s in self.sections:
@@ -492,7 +496,7 @@ class Section(Entity):
         return key in self.props or key in self.sections
 
     @property
-    def props(self):
+    def props(self) -> Container:
         """
         A property containing all Property entities associated with the
         section. Properties can be accessed by name, index, or id.
@@ -506,7 +510,7 @@ class Section(Entity):
             self._properties = Container("properties", self, Property)
         return self._properties
 
-    def pprint(self, indent=2, max_depth=1, max_length=80, current_depth=0):
+    def pprint(self, indent=2, max_depth=1, max_length=80, current_depth=0) -> None:
         """
         Pretty print method.
         
@@ -539,7 +543,7 @@ class Section(Entity):
                                                    more_indent))
 
     @staticmethod
-    def _change_id(_, grp):
+    def _change_id(_, grp) -> None:
         if "entity_id" in grp.attrs:
             id_ = util.create_id()
             grp.attrs.modify("entity_id", np.string_(id_))

@@ -7,18 +7,20 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
+from __future__ import annotations
 from . import util
+from typing import AnyStr
 
 
 class Entity(object):
 
-    def __init__(self, nixparent, h5group):
+    def __init__(self, nixparent, h5group) -> None:
         util.check_entity_id(h5group.get_attr("entity_id"))
         self._h5group = h5group
         self._parent = nixparent
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name=None, type_=None):
+    def _create_new(cls, nixparent, h5parent, name=None, type_=None) -> Entity:
         if name and type_:
             util.check_entity_name_and_type(name, type_)
             id_ = util.create_id()
@@ -35,7 +37,7 @@ class Entity(object):
         return newentity
 
     @property
-    def id(self):
+    def id(self) -> AnyStr:
         """
         A property providing the ID of the Entity. The id is generated
         automatically, therefore the property is read-only.
@@ -45,7 +47,7 @@ class Entity(object):
         return self._h5group.get_attr("entity_id")
 
     @property
-    def created_at(self):
+    def created_at(self) -> int:
         """
         The creation time of the entity. This is a read-only property.
         Use `force_created_at` in order to change the creation time.
@@ -54,7 +56,7 @@ class Entity(object):
         """
         return util.str_to_time(self._h5group.get_attr("created_at"))
 
-    def force_created_at(self, t=None):
+    def force_created_at(self, t=None) -> None:
         """
         Sets the creation time `created_at` to the given time
         (default: current time).
@@ -69,7 +71,7 @@ class Entity(object):
         self._h5group.set_attr("created_at", util.time_to_str(t))
 
     @property
-    def updated_at(self):
+    def updated_at(self) -> int:
         """
         The time of the last update of the entity. This is a read-only
         property. Use `force_updated_at` in order to change the update
@@ -79,7 +81,7 @@ class Entity(object):
         """
         return util.str_to_time(self._h5group.get_attr("updated_at"))
 
-    def force_updated_at(self, t=None):
+    def force_updated_at(self, t=None) -> None:
         """
         Sets the update time `updated_at` to the given time.
         (default: current time)
@@ -94,7 +96,7 @@ class Entity(object):
         self._h5group.set_attr("updated_at", util.time_to_str(t))
 
     @property
-    def definition(self):
+    def definition(self) -> AnyStr:
         """
         The definition of the entity. The definition can contain a textual
         description of the entity. This is an optional read-write
@@ -105,7 +107,7 @@ class Entity(object):
         return self._h5group.get_attr("definition")
 
     @definition.setter
-    def definition(self, d):
+    def definition(self, d) -> None:
         util.check_attr_type(d, str)
         self._h5group.set_attr("definition", d)
         par = self._parent
@@ -115,7 +117,7 @@ class Entity(object):
             self.force_updated_at()
 
     @property
-    def name(self):
+    def name(self) -> AnyStr:
         """
         The name of an entity. The name serves as a human readable
         identifier. This is a read-only property; entities cannot be
@@ -126,7 +128,7 @@ class Entity(object):
         return self._h5group.get_attr("name")
 
     @property
-    def type(self):
+    def type(self) -> AnyStr:
         """
         The type of the entity. The type is used in order to add semantic
         meaning to the entity. This is a read-write property, but it can't
@@ -137,7 +139,7 @@ class Entity(object):
         return self._h5group.get_attr("type")
 
     @type.setter
-    def type(self, t):
+    def type(self, t) -> None:
         if t is None:
             raise AttributeError("type can't be None")
         util.check_attr_type(t, str)
