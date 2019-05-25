@@ -44,6 +44,8 @@ class FeatureContainer(Container):
             raise ke
 
     def __contains__(self, item):
+        if isinstance(item, Feature):
+            item =  item.id
         if not Container.__contains__(self, item):
             # check if it contains a Feature whose data matches 'item'
             for feat in self:
