@@ -147,7 +147,7 @@ class Property(Entity):
     def uncertainty(self):
         dataset = self._h5dataset
         x, y, z = dataset._parent.file.attrs["version"]
-        if y < 1 or z < 1:
+        if x < 1 or (x == 1 and y < 1) or (x == 1 and y == 1 and z < 1):
             val = self._h5dataset.dataset[:]
             v = val[0]["uncertainty"]
             return v
@@ -163,7 +163,7 @@ class Property(Entity):
     def reference(self):
         dataset = self._h5dataset
         x, y, z = dataset._parent.file.attrs["version"]
-        if y < 1 or z < 1:
+        if x < 1 or (x == 1 and y < 1) or (x == 1 and y == 1 and z < 1):
             val = self._h5dataset.dataset[:]
             v = val[0]["reference"]
             return v
@@ -239,7 +239,7 @@ class Property(Entity):
     def values(self):
         dataset = self._h5dataset
         x, y, z = dataset._parent.file.attrs["version"]
-        if y < 1 or z < 1:
+        if x < 1 or (x == 1 and y < 1) or (x == 1 and y == 1 and z < 1):
             v = self._read_old_values()
             return v
         if not sum(dataset.shape):
