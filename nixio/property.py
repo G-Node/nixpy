@@ -13,7 +13,7 @@ except ImportError:
     from collections import Sequence, Iterable
 from enum import Enum
 from numbers import Number
-from six import string_types
+from six import string_types, ensure_str, ensure_text
 import numpy as np
 
 from .datatype import DataType
@@ -249,7 +249,7 @@ class Property(Entity):
 
         def data_to_value(dat):
             if isinstance(dat, bytes):
-                dat = dat.decode()
+                dat = ensure_str(dat)  # py2compat
             return dat
 
         values = tuple(map(data_to_value, data))
@@ -275,11 +275,10 @@ class Property(Entity):
 
         # Make sure all values are of the same data type
         vtype = self._value_type_checking(vals)
-
+        if vtype == DataType.String:
+            vals = [ensure_text(v) for v in vals]  # py2compat
         self._h5dataset.shape = np.shape(vals)
-
         data = np.array(vals, dtype=vtype)
-
         self._h5dataset.write_data(data)
 
     def extend_values(self, data):
