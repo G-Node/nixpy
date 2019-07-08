@@ -689,6 +689,12 @@ def test_full_file_write(tmpdir, bindir):
         dtypeblock.create_data_array(str(n), "dtype-test-array",
                                      dtype=dt, data=dt(0))
 
+    # Unicode DataArray on last Block
+    data = ["Καφές", "Café", "咖啡", "☕"]
+    dtypeblock.create_data_array("unicodedata", "coffeestuff",
+                                 dtype=nix.DataType.String,
+                                 data=data)
+
     nix_file.close()
     cmd = os.path.join(bindir, "readfullfile")
     runcpp(cmd, nixfilepath)
@@ -738,7 +744,7 @@ def test_full_file_read(tmpdir, bindir):
     check_block_children_counts(nix_file.blocks[0], 2, 4, 1, 1)
     check_block_children_counts(nix_file.blocks[1], 2, 2, 0, 0)
     check_block_children_counts(nix_file.blocks[2], 2, 3, 1, 1)
-    check_block_children_counts(nix_file.blocks[3], 0, 12, 0, 0)
+    check_block_children_counts(nix_file.blocks[3], 0, 13, 0, 0)
 
     check_group_children_counts(nix_file.blocks[0].groups[0], 1, 1, 0)
     check_group_children_counts(nix_file.blocks[0].groups[1], 0, 0, 0)
@@ -1041,12 +1047,20 @@ def test_full_file_read(tmpdir, bindir):
     compare(4, len(prop.values))
     compare(["Μπύρα", "Bräu", "啤酒", "🍺"], prop.values)
 
-    # TODO: Check type compatibilities
-    # for idx in range(len(dtypes)):
-    #     da = block.data_arrays[idx]
-    #     dt = dtypes[idx]
-    #     compare(dt, da.data_type)
-    #     compare([1], da.shape)
+    block = nix_file.blocks["datablock"]
+    for idx in range(len(dtypes)):
+        print(da.name)
+        da = block.data_arrays[idx]
+        dt = dtypes[idx]
+        if dt == nix.DataType.String:
+            dt = nix.util.vlen_str_dtype
+        compare(dt, da.data_type)
+        compare([0], da.shape)
+
+    da = block.data_arrays["unicodedata"]
+    unicodedata = ["Καφές", "Café", "咖啡", "☕"]
+    dadata = da[:]
+    compare(unicodedata, dadata)
 
     nix_file.close()
     # validate(nixfilepath)

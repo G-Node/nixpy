@@ -47,7 +47,7 @@ int checkObjectCounts(const nix::File &nf) {
     errcount += checkChildrenCounts(nf.getBlock(0), 2, 4, 1, 1);
     errcount += checkChildrenCounts(nf.getBlock(1), 2, 2, 0, 0);
     errcount += checkChildrenCounts(nf.getBlock(2), 2, 3, 1, 1);
-    errcount += checkChildrenCounts(nf.getBlock(3), 0, 12, 0, 0);
+    errcount += checkChildrenCounts(nf.getBlock(3), 0, 13, 0, 0);
 
     errcount += checkChildrenCounts(nf.getBlock(0).getGroup(0), 1, 1, 0);
     errcount += checkChildrenCounts(nf.getBlock(0).getGroup(1), 0, 0, 0);
@@ -424,6 +424,12 @@ int main(int argc, char* argv[]) {
         errcount += compare(dt, da.dataType());
         errcount += compare({1}, da.dataExtent());
     }
+
+    // Unicode data
+    auto unicodeda = block.getDataArray("unicodedata");
+    std::vector<std::string> unicode_array(4);
+    unicodeda.getData(nix::DataType::String, unicode_array.data(), {4}, {});
+    errcount += compare({"Καφές", "Café", "咖啡", "☕"}, unicode_array);
 
     return errcount;
 }
