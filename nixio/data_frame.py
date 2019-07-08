@@ -8,9 +8,9 @@
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
 try:
-    from collections.abc import Iterable, Sequence
+    from collections.abc import Iterable
 except ImportError:
-    from collections import Iterable, Sequence
+    from collections import Iterable
 from collections import OrderedDict
 from inspect import isclass
 import numpy as np

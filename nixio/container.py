@@ -222,8 +222,8 @@ class LinkContainer(Container):
                 for grp in self._backend:
                     if identifier == grp.get_attr("name"):
                         return self._inst_item(grp)
-                else:
-                    raise KeyError("Item not found '{}'".format(identifier))
+
+                raise KeyError("Item not found '{}'".format(identifier))
 
     def __contains__(self, item):
         # need to redefine because of id indexing/linking

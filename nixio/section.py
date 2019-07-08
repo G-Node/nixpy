@@ -473,7 +473,7 @@ class Section(Entity):
             data = [data]
 
         if key not in self.props:
-            prop = self.create_property(key, data)
+            self.create_property(key, data)
         else:
             prop = self.props[key]
             prop.values = data

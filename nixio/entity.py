@@ -156,6 +156,9 @@ class Entity(object):
             return self.id == other.id
         return False
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def __hash__(self):
         """
         overwriting method __eq__ blocks inheritance of __hash__ in Python 3
