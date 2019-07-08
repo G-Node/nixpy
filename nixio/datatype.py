@@ -26,7 +26,7 @@ class DataType(object):
     Int64 = np.int64
     Float = np.float_
     Double = np.double
-    String = np.string_
+    String = np.unicode_
     Bool = np.bool_
 
     @classmethod
