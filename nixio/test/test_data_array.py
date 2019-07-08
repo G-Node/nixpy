@@ -289,7 +289,7 @@ class TestDataArray(unittest.TestCase):
         data = ["Καφές", "Café", "咖啡", "☕"]
         da.write_direct(data)
 
-        assert [six.ensure_text(d) for d in data] == list(da[:])  # py2compat
+        assert data == list(da[:])
 
     def test_data_array_dimensions(self):
         assert(len(self.array.dimensions) == 0)
