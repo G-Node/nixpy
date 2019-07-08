@@ -303,22 +303,34 @@ class Property(Entity):
             single_val = data
             data = [data]
 
-        # Will raise an error, if the data type of the first value is not valid
-        vtype = DataType.get_dtype(single_val)
+        def check_prop_consistent(vtype):
+            # Check if the new data has the same type as the existing property
+            # data
+            if vtype != self.data_type:
+                raise TypeError("New data type '{}' is inconsistent with the "
+                                "Property's data type '{}'".format(
+                                    vtype, self.data_type))
 
-        # Check if the data type has changed and raise an exception otherwise.
-        if vtype != self.data_type:
-            raise TypeError("New data type '{}' is inconsistent with the "
-                            "Properties data type '{}'".format(vtype,
-                                                               self.data_type))
+        def check_new_data_consistent(vtype):
+            # Check if each value in the new data has the same type
+            for val in data:
+                if DataType.get_dtype(val) != vtype:
+                    raise TypeError("Array contains inconsistent values. "
+                                    "Only values of type '{}' can be "
+                                    "assigned".format(vtype))
 
-        # Check all values for data type consistency to ensure clean value add.
-        # Will raise an exception otherwise.
-        for val in data:
-            if DataType.get_dtype(val) != vtype:
-                raise TypeError("Array contains inconsistent values. "
-                                "Only values of type '{}' can be "
-                                "assigned".format(vtype))
+        if hasattr(data, "dtype"):
+            # numpy array: no need to scan values, arrays are consistent but
+            # check for 1D
+            vtype = data.dtype
+            check_prop_consistent(vtype)
+        else:
+            # Will raise an error, if the data type of the first value is not
+            # valid
+            vtype = DataType.get_dtype(single_val)
+            check_prop_consistent(vtype)
+            check_new_data_consistent(vtype)
+
         return vtype
 
     @property
