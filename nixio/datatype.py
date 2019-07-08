@@ -36,7 +36,7 @@ class DataType(object):
         elif isinstance(value, Integral):
             return cls.Int64
         elif isinstance(value, Real):
-            return cls.Float
+            return cls.Double
         elif isinstance(value, string_types):
             return cls.String
         else:
