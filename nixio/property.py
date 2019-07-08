@@ -274,7 +274,7 @@ class Property(Entity):
             vals = [vals]
 
         # Make sure all values are of the same data type
-        vtype = self._value_type_checking(vals)
+        vtype = self._check_new_value_types(vals)
         if vtype == DataType.String:
             vals = [ensure_text(v) for v in vals]  # py2compat
         self._h5dataset.shape = np.shape(vals)
@@ -286,7 +286,7 @@ class Property(Entity):
         Extends values to existing data.
         Suitable when new data is nested or original data is long.
         """
-        vtype = self._value_type_checking(data)
+        vtype = self._check_new_value_types(data)
 
         arr = np.array(data, dtype=vtype).flatten('C')
         ds = self._h5dataset
@@ -295,7 +295,7 @@ class Property(Entity):
         ds.shape = (src_len+dlen,)
         ds.write_data(arr, sl=np.s_[src_len: src_len+dlen])
 
-    def _value_type_checking(self, data):
+    def _check_new_value_types(self, data):
         if (isinstance(data, (Sequence, Iterable)) and
                 not isinstance(data, string_types)):
             single_val = data[0]
