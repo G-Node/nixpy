@@ -209,6 +209,7 @@ int main(int argc, char* argv[]) {
     othermd.createProperty("bools", {nix::Variant(true), nix::Variant(false), nix::Variant(true)});
     othermd.createProperty("string", nix::Variant("I am a string. Rawr."));
     othermd.createProperty("strings", {nix::Variant("one"), nix::Variant("two"), nix::Variant("twenty")});
+    othermd.createProperty("unicode", {nix::Variant("Μπύρα"), nix::Variant("Bräu"), nix::Variant("啤酒"), nix::Variant("🍺")});
 
     // All types of data
     block = nf.createBlock("datablock", "block of data");

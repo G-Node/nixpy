@@ -186,3 +186,20 @@ class TestProperties(unittest.TestCase):
         number_extend = (1, 1.2)
         self.assertRaises(TypeError,
                           lambda: self.prop.extend_values(number_extend))
+
+    def test_unicode_values(self):
+        sec = self.section
+        unistrings = {
+            "unlaut": ["ü"],
+            "gr": ["ω"],
+            "deg": ["°"],
+            "chinese-simplified": ["汉字"]
+        }
+
+        # test writing
+        for name, value in unistrings.items():
+            sec.create_property(name, value)
+
+        # read them back
+        for name, value in unistrings.items():
+            assert tuple(value) == sec.props[name].values

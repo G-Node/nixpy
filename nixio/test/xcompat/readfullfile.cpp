@@ -389,7 +389,7 @@ int main(int argc, char* argv[]) {
     auto othermd = proptypesmd.getSection(1);
     errcount += compare("other metadata", othermd.name());
     errcount += compare("test metadata section", othermd.type());
-    errcount += compare(nix::ndsize_t{5}, othermd.propertyCount());
+    errcount += compare(nix::ndsize_t{6}, othermd.propertyCount());
 
     prop = othermd.getProperty("bool");
     errcount += compare(nix::ndsize_t{1}, prop.valueCount());
@@ -410,6 +410,10 @@ int main(int argc, char* argv[]) {
     prop = othermd.getProperty("strings");
     errcount += compare(nix::ndsize_t{3}, prop.valueCount());
     errcount += compare({nix::Variant{"one"}, nix::Variant{"two"}, nix::Variant{"twenty"}}, prop.values());
+
+    prop = othermd.getProperty("unicode");
+    errcount += compare(nix::ndsize_t{4}, prop.valueCount());
+    errcount += compare({nix::Variant("Μπύρα"), nix::Variant("Bräu"), nix::Variant("啤酒"), nix::Variant("🍺")}, prop.values());
 
     block = nf.getBlock("datablock");
     errcount += compare("block of data", block.type());
