@@ -459,7 +459,8 @@ def test_properties(tmpdir):
 
     sec.props[0].values = [101]
     sec.props[1].values = ["foo", "bar", "baz"]
-    sec.props["prop Float"].values = [10.0, 33.3, 1.345, 90.2]
+    sec.props["prop Float"].values = np.array([10.0, 33.3, 1.345, 90.2],
+                                              dtype=nix.DataType.Float)
 
     nix_file.close()
     # validate(nixfilepath)
@@ -669,9 +670,9 @@ def test_full_file_write(tmpdir, bindir):
     numbermd = proptypesmd.create_section("numerical metadata",
                                           "test metadata section")
     numbermd["integer"] = 42
-    numbermd["float"] = 4.2
+    numbermd["double"] = 4.2
     numbermd["integers"] = [40, 41, 42, 43, 44, 45]
-    numbermd["floats"] = [1.1, 10.10]
+    numbermd["doubles"] = [1.1, 10.10]
 
     othermd = proptypesmd.create_section("other metadata",
                                          "test metadata section")

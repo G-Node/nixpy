@@ -11,9 +11,7 @@ std::vector<nix::DataType> dtypes = {
     nix::DataType::Int16,
     nix::DataType::Int32,
     nix::DataType::Int64,
-    // NOTE: NIXPy doesn't do 'Float' (32)
-    // It will probably be easier to add when the bindings are removed
-    nix::DataType::Double,
+    nix::DataType::Float,
     nix::DataType::Double,
     nix::DataType::String,
     nix::DataType::Bool
@@ -371,7 +369,7 @@ int main(int argc, char* argv[]) {
     errcount += compare(nix::ndsize_t{1}, prop.valueCount());
     errcount += compare({nix::Variant{int64_t(42)}}, prop.values());
 
-    prop = numbermd.getProperty("float");
+    prop = numbermd.getProperty("double");
     errcount += compare(nix::ndsize_t{1}, prop.valueCount());
     errcount += compare({nix::Variant{double(4.2)}}, prop.values());
 
@@ -382,7 +380,7 @@ int main(int argc, char* argv[]) {
         values[idx] = nix::Variant{int64_t(40 + idx)};
     errcount += compare(values, prop.values());
 
-    prop = numbermd.getProperty("floats");
+    prop = numbermd.getProperty("doubles");
     errcount += compare(nix::ndsize_t{2}, prop.valueCount());
     errcount += compare({nix::Variant{double(1.1)}, nix::Variant{double(10.10)}}, prop.values());
 
