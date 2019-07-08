@@ -14,17 +14,10 @@ from datetime import datetime
 from uuid import uuid4, UUID
 from ..exceptions import exceptions
 from . import names
-
-from nixio.link_type import LinkType
-
-
-try:
-    vstype = unicode
-except NameError:
-    vstype = str
+import six
 
 
-vlen_str_dtype = h5py.special_dtype(vlen=vstype)
+vlen_str_dtype = h5py.special_dtype(vlen=six.text_type)
 
 
 def create_id():
