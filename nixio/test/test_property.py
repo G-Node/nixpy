@@ -191,7 +191,7 @@ class TestProperties(unittest.TestCase):
     def test_unicode_values(self):
         sec = self.section
         unistrings = {
-            "unlaut": ["ü"],
+            "umlaut": ["ü"],
             "gr": ["ω"],
             "deg": ["°"],
             "chinese-simplified": ["汉字"]
