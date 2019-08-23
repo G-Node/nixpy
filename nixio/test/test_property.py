@@ -167,7 +167,7 @@ class TestProperties(unittest.TestCase):
         assert(self.prop_s.data_type == nix.DataType.String)
 
     def test_extend_values(self):
-        da = (1,2,3)
+        da = (1, 2, 3)
         self.prop.extend_values(da)
         da = 10
         self.prop.extend_values(da)

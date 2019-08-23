@@ -31,6 +31,7 @@ matrix:
             - cppunit
             - hdf5
             - numpy
+          update: true
     - language: generic
       os: osx
       env: pymajor=3
@@ -42,6 +43,7 @@ matrix:
             - cppunit
             - hdf5
             - numpy
+          update: true
 
 addons:
   apt:
