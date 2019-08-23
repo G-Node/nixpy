@@ -429,4 +429,3 @@ class DataFrame(Entity, DataSet):
     def metadata(self):
         if "metadata" in self._h5group:
             self._h5group.delete("metadata")
-

@@ -68,6 +68,7 @@ class Dimension(object):
     def __repr__(self):
         return self.__str__()
 
+
 class SampledDimension(Dimension):
 
     def __init__(self, h5group, index):
