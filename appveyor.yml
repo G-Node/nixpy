@@ -16,11 +16,6 @@ environment:
 
 
   matrix:
-    # Python 2.7 32 bit
-    - PYTHON: "C:\\Python27"
-      pyver: 2
-      bits: 32
-
     # Python 3.6 32 bit
     - PYTHON: "C:\\Python36"
       pyver: 3
@@ -30,11 +25,6 @@ environment:
     - PYTHON: "C:\\Python37"
       pyver: 3
       bits: 32
-
-    # Python 2.7 64 bit
-    - PYTHON: "C:\\Python27-x64"
-      pyver: 2
-      bits: 64
 
     # Python 3.6 64 bit
     - PYTHON: "C:\\Python36-x64"
