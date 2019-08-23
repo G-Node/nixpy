@@ -381,8 +381,8 @@ class Block(Entity):
         for grp in self.groups:
             self._pp(grp, max_length, indent*(start_depth + 1), False)
             for da in grp.data_arrays:
-                self._pp(da, max_length, indent*(start_depth + 2)
-                         , extra, True)
+                self._pp(da, max_length, indent*(start_depth + 2),
+                         extra, True)
                 for dim in da.dimensions:
                     self._pp(dim, max_length, indent*(start_depth + 3), False)
             for df in grp.data_frames:
@@ -390,7 +390,7 @@ class Block(Entity):
                          indent*(start_depth + 2), extra, True)
             for tag in grp.tags:
                 self._pp(tag, max_length,
-                        indent*(start_depth + 2), extra, True)
+                         indent*(start_depth + 2), extra, True)
                 for fe in tag.features:
                     self._pp(fe, max_length, indent*(start_depth + 3), False)
             for mt in grp.multi_tags:

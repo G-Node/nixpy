@@ -133,7 +133,8 @@ def test_data_frames(tmpdir, bindir):
                ('Jane', 9874542123, 12.5335205e-1, 123958e+29, True),
                ('Chris', 9, 12.335205e-19, 123958e+19, False)]
         df = blk.create_data_frame("df_" + str(idx), "df type " + str(idx),
-                                   col_names=col_names, col_dtypes=dt_full_list,
+                                   col_names=col_names,
+                                   col_dtypes=dt_full_list,
                                    data=arr)
         df.force_created_at(np.random.randint(1000000000))
         if idx == 4:

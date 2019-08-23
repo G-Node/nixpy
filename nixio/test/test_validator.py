@@ -74,8 +74,9 @@ class TestValidate (unittest.TestCase):
                           'Name of Group is missing']
 
     def test_check_data_arrays(self):
+        somedata = np.random.randint(10, size=(5, 5))
         da1 = self.block1.create_data_array("u", "something",
-                            dtype=int, data=np.random.randint(10, size=(5,5)))
+                                            dtype=int, data=somedata)
         da1.append_range_dimension([1, 2, 3, 4, 5, 6, 7, 8, 9])
         da1.append_set_dimension()
         da1.dimensions[1].labels = ["A", "B", "C", "D"]

@@ -353,7 +353,7 @@ class DataFrame(Entity, DataSet):
 
         :type: list of tuples
         """
-        if self.units:
+        if np.any(self.units):
             cols = [(n, dt, u) for n, dt, u in
                     zip(self.column_names, self.dtype, self.units)]
         else:
@@ -430,4 +430,3 @@ class DataFrame(Entity, DataSet):
     def metadata(self) -> None:
         if "metadata" in self._h5group:
             self._h5group.delete("metadata")
-

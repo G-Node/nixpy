@@ -246,4 +246,3 @@ class TestFileVer(unittest.TestCase):
         self.set_header(fformat="NOT_A_NIX_FILE")
         with self.assertRaises(InvalidFile):
             self.try_open(nix.FileMode.ReadOnly)
-
