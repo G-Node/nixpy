@@ -6,6 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from __future__ import annotations
 
 try:
     from collections.abc import Sequence, Iterable
@@ -15,6 +16,7 @@ from enum import Enum
 from numbers import Number
 from six import string_types
 import numpy as np
+from typing import Tuple, Optional, Any
 
 from .datatype import DataType
 from .entity import Entity
@@ -41,7 +43,7 @@ class OdmlType(Enum):
     def __str__(self):
         return self.value
 
-    def compatible(self, value):
+    def compatible(self, value) -> bool:
         """
         compatible returns True or False depending on whether a
         passed value can be mapped to an OdmlType or not.
@@ -69,7 +71,7 @@ class OdmlType(Enum):
         return False
 
     @classmethod
-    def get_odml_type(cls, dtype):
+    def get_odml_type(cls, dtype) -> OdmlType:
         """
         get_odml_type returns the appropriate OdmlType
         for a handed in nix value DataType.
@@ -92,12 +94,12 @@ class OdmlType(Enum):
 
 class Property(Entity):
     """An odML Property"""
-    def __init__(self, nixparent, h5dataset):
+    def __init__(self, nixparent, h5dataset) -> None:
         super(Property, self).__init__(nixparent, h5dataset)
         self._h5dataset = self._h5group
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, dtype, oid=None):
+    def _create_new(cls, nixparent, h5parent, name, dtype, oid=None) -> Property:
         util.check_entity_name(name)
         dtype = cls._make_h5_dtype(dtype)
 
@@ -116,24 +118,24 @@ class Property(Entity):
         return newentity
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._h5dataset.get_attr("name")
 
     @property
-    def definition(self):
+    def definition(self) -> Optional[str]:
         return self._h5dataset.get_attr("definition")
 
     @definition.setter
-    def definition(self, d):
+    def definition(self, d) -> None:
         util.check_attr_type(d, str)
         self._h5dataset.set_attr("definition", d)
 
     @property
-    def unit(self):
+    def unit(self) -> Optional[str]:
         return self._h5dataset.get_attr("unit")
 
     @unit.setter
-    def unit(self, new):
+    def unit(self, new) -> None:
         if new:
             new = util.units.sanitizer(new)
 
@@ -144,7 +146,7 @@ class Property(Entity):
         self._h5dataset.set_attr("unit", new)
 
     @property
-    def uncertainty(self):
+    def uncertainty(self) -> Optional[float]:
         dataset = self._h5dataset
         x, y, z = dataset._parent.file.attrs["version"]
         if x < 1 or (x == 1 and y < 1) or (x == 1 and y == 1 and z < 1):
@@ -154,13 +156,13 @@ class Property(Entity):
         return self._h5dataset.get_attr("uncertainty")
 
     @uncertainty.setter
-    def uncertainty(self, uncertainty):
+    def uncertainty(self, uncertainty) -> None:
         util.check_attr_type(uncertainty, Number)
         uncertainty = float(uncertainty) if uncertainty is not None else None
         self._h5dataset.set_attr("uncertainty", uncertainty)
 
     @property
-    def reference(self):
+    def reference(self) -> Optional[str]:
         dataset = self._h5dataset
         x, y, z = dataset._parent.file.attrs["version"]
         if x < 1 or (x == 1 and y < 1) or (x == 1 and y == 1 and z < 1):
@@ -170,39 +172,39 @@ class Property(Entity):
         return self._h5dataset.get_attr("reference")
 
     @reference.setter
-    def reference(self, ref):
+    def reference(self, ref) -> None:
         util.check_attr_type(ref, str)
         self._h5dataset.set_attr("reference", ref)
 
     @property
-    def dependency(self):
+    def dependency(self) -> Optional[str]:
         return self._h5dataset.get_attr("dependency")
 
     @dependency.setter
-    def dependency(self, dep):
+    def dependency(self, dep) -> None:
         util.check_attr_type(dep, str)
         self._h5dataset.set_attr("dependency", dep)
 
     @property
-    def dependency_value(self):
+    def dependency_value(self) -> Optional[str]:
         return self._h5dataset.get_attr("dependency_value")
 
     @dependency_value.setter
-    def dependency_value(self, depval):
+    def dependency_value(self, depval) -> None:
         util.check_attr_type(depval, str)
         self._h5dataset.set_attr("dependency_value", depval)
 
     @property
-    def value_origin(self):
+    def value_origin(self) -> Optional[str] :
         return self._h5dataset.get_attr("value_origin")
 
     @value_origin.setter
-    def value_origin(self, origin):
+    def value_origin(self, origin) -> None:
         util.check_attr_type(origin, str)
         self._h5dataset.set_attr("value_origin", origin)
 
     @property
-    def odml_type(self):
+    def odml_type(self) -> Optional[OdmlType]:
         otype = self._h5dataset.get_attr("odml_type")
         if not otype:
             return None
@@ -210,7 +212,7 @@ class Property(Entity):
         return OdmlType(otype)
 
     @odml_type.setter
-    def odml_type(self, new_type):
+    def odml_type(self, new_type) -> None:
         """
         odml_type can only be set if the handed in new type is a valid
         OdmlType and if it is compatible with the value data type of
@@ -236,7 +238,7 @@ class Property(Entity):
         return val_tu
 
     @property
-    def values(self):
+    def values(self) -> Tuple[Any]:
         dataset = self._h5dataset
         x, y, z = dataset._parent.file.attrs["version"]
         if x < 1 or (x == 1 and y < 1) or (x == 1 and y == 1 and z < 1):
@@ -257,7 +259,7 @@ class Property(Entity):
         return values
 
     @values.setter
-    def values(self, vals):
+    def values(self, vals) -> None:
         """
         Set the value of the property discarding any previous information.
 
@@ -282,7 +284,7 @@ class Property(Entity):
 
         self._h5dataset.write_data(data)
 
-    def extend_values(self, data):
+    def extend_values(self, data) -> None:
         """
         Extends values to existing data.
         Suitable when new data is nested or original data is long.
@@ -296,7 +298,7 @@ class Property(Entity):
         ds.shape = (src_len+dlen,)
         ds.write_data(arr, sl=np.s_[src_len: src_len+dlen])
 
-    def _value_type_checking(self, data):
+    def _value_type_checking(self, data) -> type:
         if (isinstance(data, (Sequence, Iterable)) and
                 not isinstance(data, string_types)):
             single_val = data[0]
@@ -323,7 +325,7 @@ class Property(Entity):
         return vtype
 
     @property
-    def data_type(self):
+    def data_type(self) -> np.dtype:
         dtype = self._h5dataset.dtype
 
         if dtype == util.vlen_str_dtype:
@@ -331,11 +333,11 @@ class Property(Entity):
 
         return dtype
 
-    def delete_values(self):
+    def delete_values(self) -> None:
         self._h5dataset.shape = (0,)
 
     @staticmethod
-    def _make_h5_dtype(valued_type):
+    def _make_h5_dtype(valued_type) -> type:
         str_ = util.vlen_str_dtype
 
         if valued_type == DataType.String:
@@ -365,7 +367,7 @@ class Property(Entity):
         """
         return hash(self.id)
 
-    def pprint(self, indent=2, max_length=80, current_depth=-1):
+    def pprint(self, indent=2, max_length=80, current_depth=-1) -> None:
         """
         Pretty print method. Method is called in Section.pprint()
         """

@@ -7,6 +7,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
+from __future__ import annotations
 try:
     from sys import maxint
 except ImportError:
@@ -14,6 +15,7 @@ except ImportError:
 import numpy as np
 from inspect import isclass
 from six import string_types
+from typing import List, Union
 try:
     from collections.abc import OrderedDict
 except ImportError:
@@ -38,7 +40,7 @@ from .section import Section
 
 class Block(Entity):
 
-    def __init__(self, nixparent, h5group, compression=Compression.Auto):
+    def __init__(self, nixparent, h5group, compression=Compression.Auto) -> None:
         super(Block, self).__init__(nixparent, h5group)
         self._groups = None
         self._data_arrays = None
@@ -49,7 +51,7 @@ class Block(Entity):
         self._data_frames = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, compression):
+    def _create_new(cls, nixparent, h5parent, name, type_, compression) -> Entity:
         newentity = super(Block, cls)._create_new(nixparent, h5parent,
                                                   name, type_)
         newentity._compr = compression
@@ -57,7 +59,7 @@ class Block(Entity):
 
     # MultiTag
     def create_multi_tag(self, name="", type_="", positions=0,
-                         copy_from=None, keep_copy_id=True):
+                         copy_from=None, keep_copy_id=True) -> MultiTag:
         """
         Create/copy a new multi tag for this block.
 
@@ -94,7 +96,7 @@ class Block(Entity):
 
     # Tag
     def create_tag(self, name="", type_="", position=0,
-                   copy_from=None, keep_copy_id=True):
+                   copy_from=None, keep_copy_id=True) -> Tag:
         """
         Create/copy a new tag for this block.
 
@@ -126,7 +128,7 @@ class Block(Entity):
         return tag
 
     # Source
-    def create_source(self, name, type_):
+    def create_source(self, name, type_) -> Source:
         """
         Create a new source on this block.
 
@@ -146,7 +148,7 @@ class Block(Entity):
         return src
 
     # Group
-    def create_group(self, name, type_):
+    def create_group(self, name, type_) -> Group:
         """
         Create a new group on this block.
 
@@ -167,7 +169,7 @@ class Block(Entity):
 
     def create_data_array(self, name="", array_type="", dtype=None, shape=None,
                           data=None, compression=Compression.Auto,
-                          copy_from=None, keep_copy_id=True):
+                          copy_from=None, keep_copy_id=True) -> DataArray:
         """
         Create/copy a new data array for this block. Either ``shape``
         or ``data`` must be given. If both are given their shape must agree.
@@ -222,7 +224,7 @@ class Block(Entity):
             raise exceptions.DuplicateName("create_data_array")
         if compression == Compression.Auto:
             compression = self._compr
-        da = DataArray._create_new(self, data_arrays, name, array_type,
+        da = DataArray._create_new_da(self, data_arrays, name, array_type,
                                    dtype, shape, compression)
         if data is not None:
             da.write_direct(data)
@@ -231,7 +233,7 @@ class Block(Entity):
     def create_data_frame(self, name="", type_="", col_dict=None,
                           col_names=None, col_dtypes=None, data=None,
                           compression=Compression.No,
-                          copy_from=None, keep_copy_id=True):
+                          copy_from=None, keep_copy_id=True) -> DataFrame:
         """
         Create/copy a new data frame for this block. Either ``col_dict``
         or ``col_name`` and ``col_dtypes`` must be given.
@@ -340,7 +342,7 @@ class Block(Entity):
                 df.write_direct(arr)
         return df
 
-    def find_sources(self, filtr=lambda _: True, limit=None):
+    def find_sources(self, filtr=lambda _: True, limit=None) -> List[Source]:
         """
         Get all sources in this block recursively.
 
@@ -362,7 +364,7 @@ class Block(Entity):
             limit = maxint
         return finders._find_sources(self, filtr, limit)
 
-    def pprint(self, indent=2, max_length=120, extra=True, start_depth=0):
+    def pprint(self, indent=2, max_length=120, extra=True, start_depth=0) -> None:
         """
         Pretty Printing the Data and MetaData Tree of the whole File
 
@@ -411,7 +413,7 @@ class Block(Entity):
                 self._pp(fe, max_length, indent*(start_depth + 2), False)
 
     @staticmethod
-    def _pp(obj, ml, indent, ex, grp=False):
+    def _pp(obj, ml, indent, ex, grp=False) -> None:
         spaces = " "*(indent)
         if grp:
             prefix = "*"
@@ -451,7 +453,7 @@ class Block(Entity):
             else:
                 print(n)
 
-    def _copy_objects(self, obj, clsname, keep_id=True, name=""):
+    def _copy_objects(self, obj, clsname, keep_id=True, name="") -> str:
         src = "{}/{}".format(clsname, obj.name)
         if not name:
             name = str(obj.name)
@@ -467,7 +469,7 @@ class Block(Entity):
         return o.attrs["entity_id"]
 
     @property
-    def sources(self):
+    def sources(self) -> SourceContainer:
         """
         A property containing all sources of a block. Sources can be obtained
         via their index or by their id. Sources can be deleted from the list.
@@ -479,7 +481,7 @@ class Block(Entity):
         return self._sources
 
     @property
-    def multi_tags(self):
+    def multi_tags(self) -> Container:
         """
         A property containing all multi tags of a block. MultiTag entities can
         be obtained via their index or by their id. Tags can be deleted from
@@ -491,7 +493,7 @@ class Block(Entity):
         return self._multi_tags
 
     @property
-    def tags(self):
+    def tags(self) -> Container:
         """
         A property containing all tags of a block. Tag entities can be obtained
         via their index or by their id. Tags can be deleted from the list.
@@ -503,7 +505,7 @@ class Block(Entity):
         return self._tags
 
     @property
-    def data_arrays(self):
+    def data_arrays(self) -> Container:
         """
         A property containing all data arrays of a block. DataArray entities
         can be obtained via their index or by their id. Data arrays can be
@@ -516,13 +518,13 @@ class Block(Entity):
         return self._data_arrays
 
     @property
-    def data_frames(self):
+    def data_frames(self) -> Container:
         if self._data_frames is None:
             self._data_frames = Container("data_frames", self, DataFrame)
         return self._data_frames
 
     @property
-    def groups(self):
+    def groups(self) -> Container:
         """
         A property containing all groups of a block. Group entities can be
         obtained via their index or by their id. Groups can be deleted from the
@@ -535,7 +537,7 @@ class Block(Entity):
 
     # metadata
     @property
-    def metadata(self):
+    def metadata(self) -> Union[Section, None]:
         """
         Associated metadata of the entity. Sections attached to the entity via
         this attribute can provide additional annotations. This is an optional
@@ -549,12 +551,12 @@ class Block(Entity):
             return None
 
     @metadata.setter
-    def metadata(self, sect):
+    def metadata(self, sect) -> None:
         if not isinstance(sect, Section):
             raise TypeError("{} is not of type Section".format(sect))
         self._h5group.create_link(sect, "metadata")
 
     @metadata.deleter
-    def metadata(self):
+    def metadata(self) -> None:
         if "metadata" in self._h5group:
             self._h5group.delete("metadata")

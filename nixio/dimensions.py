@@ -6,15 +6,16 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from __future__ import annotations
 from numbers import Number
 
 import numpy as np
+from typing import  List, Tuple
 
 from .datatype import DataType
 from .dimension_type import DimensionType
 from . import util
 from .container import Container
-from six import string_types
 
 
 class DimensionContainer(Container):
@@ -23,7 +24,7 @@ class DimensionContainer(Container):
     of Dimension classes on return.
     """
 
-    def _inst_item(self, item):
+    def _inst_item(self, item) -> Dimension:
         cls = {
             DimensionType.Range: RangeDimension,
             DimensionType.Sample: SampledDimension,
@@ -35,29 +36,29 @@ class DimensionContainer(Container):
 
 class Dimension(object):
 
-    def __init__(self, h5group, index):
+    def __init__(self, h5group, index) -> None:
         self._h5group = h5group
         self.dim_index = int(index)
 
     @classmethod
-    def _create_new(cls, parent, index):
+    def _create_new(cls, parent, index) -> Dimension:
         h5group = parent.open_group(str(index))
         newdim = cls(h5group, index)
         return newdim
 
     @property
-    def dimension_type(self):
+    def dimension_type(self) -> DimensionType:
         return DimensionType(self._h5group.get_attr("dimension_type"))
 
     @dimension_type.setter
-    def _dimension_type(self, dimtype):
+    def _dimension_type(self, dimtype): -> None:
         dimtype = DimensionType(dimtype)
         if dimtype not in DimensionType:
             raise TypeError("Invalid dimension type.")
         self._h5group.set_attr("dimension_type", dimtype.value)
 
     @property
-    def index(self):
+    def index(self) -> int:
         return self.dim_index
 
     def __str__(self):
@@ -71,17 +72,17 @@ class Dimension(object):
 
 class SampledDimension(Dimension):
 
-    def __init__(self, h5group, index):
+    def __init__(self, h5group, index) -> None:
         super(SampledDimension, self).__init__(h5group, index)
 
     @classmethod
-    def _create_new(cls, parent, index, sample):
+    def _create_new(cls, parent, index, sample) ->  SampledDimension:
         newdim = super(SampledDimension, cls)._create_new(parent, index)
         newdim._dimension_type = DimensionType.Sample
         newdim.sampling_interval = sample
         return newdim
 
-    def position_at(self, index):
+    def position_at(self, index) -> float:
         """
         Returns the position corresponding to a given index.
 
@@ -94,7 +95,7 @@ class SampledDimension(Dimension):
         sample = self.sampling_interval
         return index * sample + offset
 
-    def index_of(self, position):
+    def index_of(self, position) -> int:
         """
         Returns the index of a certain position in the dimension.
 
@@ -110,7 +111,7 @@ class SampledDimension(Dimension):
             raise IndexError("Position is out of bounds of this dimension!")
         return int(index)
 
-    def axis(self, count, start=0):
+    def axis(self, count, start=0) -> Tuple[float]:
         """
         Get an axis as defined by this sampled dimension.
 
@@ -119,7 +120,7 @@ class SampledDimension(Dimension):
         :param start: positive integer, indicates the starting sample.
 
         :returns: The created axis
-        :rtype: list
+        :rtype: tuple
         """
         offset = self.offset if self.offset else 0.0
         sample = self.sampling_interval
@@ -128,63 +129,63 @@ class SampledDimension(Dimension):
         return tuple(np.arange(start_val, end_val, sample))
 
     @property
-    def label(self):
+    def label(self) -> str:
         return self._h5group.get_attr("label")
 
     @label.setter
-    def label(self, l):
+    def label(self, l) -> None:
         util.check_attr_type(l, str)
         self._h5group.set_attr("label", l)
 
     @property
-    def sampling_interval(self):
+    def sampling_interval(self) -> float:
         return self._h5group.get_attr("sampling_interval")
 
     @sampling_interval.setter
-    def sampling_interval(self, interval):
+    def sampling_interval(self, interval) -> None:
         util.check_attr_type(interval, Number)
         self._h5group.set_attr("sampling_interval", interval)
 
     @property
-    def unit(self):
+    def unit(self) -> str:
         return self._h5group.get_attr("unit")
 
     @unit.setter
-    def unit(self, u):
+    def unit(self, u) -> None:
         util.check_attr_type(u, str)
         self._h5group.set_attr("unit", u)
 
     @property
-    def offset(self):
+    def offset(self) -> float:
         return self._h5group.get_attr("offset")
 
     @offset.setter
-    def offset(self, o):
+    def offset(self, o) -> None:
         util.check_attr_type(o, Number)
         self._h5group.set_attr("offset", o)
 
 
 class RangeDimension(Dimension):
 
-    def __init__(self, h5group, index):
+    def __init__(self, h5group, index) -> None:
         super(RangeDimension, self).__init__(h5group, index)
 
     @classmethod
-    def _create_new(cls, parent, index, ticks):
+    def _create_new(cls, parent, index, ticks) -> RangeDimension:
         newdim = super(RangeDimension, cls)._create_new(parent, index)
         newdim._dimension_type = DimensionType.Range
         newdim._h5group.write_data("ticks", ticks, dtype=DataType.Double)
         return newdim
 
     @classmethod
-    def _create_new_alias(cls, parent, index, da):
+    def _create_new_alias(cls, parent, index, da) -> RangeDimension:
         newdim = super(RangeDimension, cls)._create_new(parent, index)
         newdim._dimension_type = DimensionType.Range
         newdim._h5group.create_link(da, da.id)
         return newdim
 
     @property
-    def is_alias(self):
+    def is_alias(self) -> bool:
         """
         Return True if this dimension is an Alias Range dimension.
         Read-only property.
@@ -194,7 +195,7 @@ class RangeDimension(Dimension):
         return True
 
     @property
-    def ticks(self):
+    def ticks(self) -> Tuple[float]:
         g = self._redirgrp
         if g.has_data("ticks"):
             ticks = g.get_data("ticks")
@@ -205,13 +206,13 @@ class RangeDimension(Dimension):
         return tuple(ticks)
 
     @ticks.setter
-    def ticks(self, ticks):
+    def ticks(self, ticks) -> None:
         if np.any(np.diff(ticks) < 0):
             raise ValueError("Ticks are not given in an ascending order.")
         self._h5group.write_data("ticks", ticks)
 
     @property
-    def _redirgrp(self):
+    def _redirgrp(self) -> object:
         """
         If the dimension is an Alias Range dimension, this property returns
         the H5Group of the linked DataArray. Otherwise, it returns the H5Group
@@ -223,24 +224,24 @@ class RangeDimension(Dimension):
         return self._h5group
 
     @property
-    def label(self):
+    def label(self) -> str:
         return self._redirgrp.get_attr("label")
 
     @label.setter
-    def label(self, l):
+    def label(self, l) -> None:
         util.check_attr_type(l, str)
         self._redirgrp.set_attr("label", l)
 
     @property
-    def unit(self):
+    def unit(self) -> str:
         return self._redirgrp.get_attr("unit")
 
     @unit.setter
-    def unit(self, u):
+    def unit(self, u) -> None:
         util.check_attr_type(u, str)
         self._redirgrp.set_attr("unit", u)
 
-    def index_of(self, position):
+    def index_of(self, position) -> int:
         """
         Returns the index of a certain position in the dimension.
 
@@ -259,7 +260,7 @@ class RangeDimension(Dimension):
         pidxs = np.flatnonzero((ticks - position) <= 0)
         return int(pidxs[-1])
 
-    def tick_at(self, index):
+    def tick_at(self, index) -> float:
         """
         Returns the tick at the given index. Will throw an Exception if the
         index is out of bounds.
@@ -272,7 +273,7 @@ class RangeDimension(Dimension):
         ticks = list(self.ticks)
         return ticks[index]
 
-    def axis(self, count, start=0):
+    def axis(self, count, start=0) -> List[float]:
         """
         Get an axis as defined by this range dimension.
 
@@ -294,23 +295,23 @@ class RangeDimension(Dimension):
 
 class SetDimension(Dimension):
 
-    def __init__(self, h5group, index):
+    def __init__(self, h5group, index) -> None:
         super(SetDimension, self).__init__(h5group, index)
 
     @classmethod
-    def _create_new(cls, parent, index):
+    def _create_new(cls, parent, index) -> SetDimension:
         newdim = super(SetDimension, cls)._create_new(parent, index)
         newdim._dimension_type = DimensionType.Set
         return newdim
 
     @property
-    def labels(self):
+    def labels(self) -> Tuple[str]:
         labels = tuple(self._h5group.get_data("labels"))
         if len(labels) and isinstance(labels[0], bytes):
             labels = tuple(l.decode() for l in labels)
         return labels
 
     @labels.setter
-    def labels(self, labels):
+    def labels(self, labels) -> None:
         dt = util.vlen_str_dtype
         self._h5group.write_data("labels", labels, dtype=dt)

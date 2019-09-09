@@ -13,11 +13,12 @@ except ImportError:
     from collections import Iterable
 from .data_set import DataSet
 from .exceptions import OutOfBounds
+from typing import List, Tuple, Iterable
 
 
 class DataView(DataSet):
 
-    def __init__(self, da, sl):
+    def __init__(self, da, sl) -> None:
         self.array = da
         self._h5group = self.array._h5group
         self._slice = sl
@@ -28,24 +29,24 @@ class DataView(DataSet):
             )
 
     @property
-    def data_extent(self):
+    def data_extent(self) -> Tuple:  # Can be int or float
         return tuple(s.stop - s.start for s in self._slice)
 
     @data_extent.setter
-    def data_extent(self, v):
+    def data_extent(self, v) -> None:
         raise AttributeError("can't set attribute")
 
     @property
-    def data_type(self):
+    def data_type(self) -> np.dtype:
         return self.array.data_type
 
-    def _write_data(self, data, count, offset):
+    def _write_data(self, data, count, offset) -> None:
         if not count:
             count = self._count
         offset = self._transform_coordinates(count, offset)
         return super(DataView, self)._write_data(data, count, offset)
 
-    def _read_data(self, sl=None):
+    def _read_data(self, sl=None) -> np.ndarray:
         dvslices = self._slice
         # complete DataView slices (turn Nones into values)
         dvslices = tuple(slice(*dv.indices(l)) for dv, l in
@@ -77,7 +78,7 @@ class DataView(DataSet):
         # probably inefficient, but correct
         return sup._read_data(dvslices).read_data(sl)
 
-    def _transform_coordinates(self, count, offset):
+    def _transform_coordinates(self, count, offset) -> Tuple:
         if not offset:
             if np.any(np.greater(count, self._count)):
                 raise OutOfBounds("Trying to access data outside of range")

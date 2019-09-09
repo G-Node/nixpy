@@ -6,6 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from __future__ import annotations
 import os
 import gc
 import numpy as np
@@ -27,13 +28,14 @@ from .util import find as finders
 from .validate import Validate
 from .compression import Compression
 from .dimensions import RangeDimension, SetDimension, SampledDimension
+from typing import AnyStr, List, Optional, Union
 
 
 FILE_FORMAT = "nix"
 HDF_FF_VERSION = (1, 1, 1)
 
 
-def can_write(nixfile):
+def can_write(nixfile) -> bool:
     filever = nixfile.version
     if len(filever) != 3:
         raise RuntimeError("Invalid version specified in file.")
@@ -43,7 +45,7 @@ def can_write(nixfile):
         return False
 
 
-def can_read(nixfile):
+def can_read(nixfile) -> bool:
     filever = nixfile.version
     if len(filever) != 3:
         raise RuntimeError("Invalid version specified in file.")
@@ -61,7 +63,8 @@ class FileMode(object):
     Overwrite = 'w'
 
 
-def map_file_mode(mode):
+
+def map_file_mode(mode) -> int:
     if mode == FileMode.ReadOnly:
         return h5py.h5f.ACC_RDONLY
     elif mode == FileMode.ReadWrite:
@@ -86,7 +89,7 @@ def make_fcpl():
 class File(object):
 
     def __init__(self, path, mode=FileMode.ReadWrite,
-                 compression=Compression.Auto, auto_update_time=False):
+                 compression=Compression.Auto, auto_update_time=False) -> None:
         """
         Open a NIX file, or create it if it does not exist.
 
@@ -141,16 +144,16 @@ class File(object):
 
     @classmethod
     def open(cls, path, mode=FileMode.ReadWrite, compression=Compression.Auto,
-             backend=None,  auto_update_time=False):
+             backend=None,  auto_update_time=False) -> File:
         if backend is not None:
             warn("Backend selection is deprecated. Ignoring value.")
         return cls(path, mode, compression, auto_update_time)
 
-    def _create_header(self):
+    def _create_header(self) -> None:
         self.format = FILE_FORMAT
         self.version = HDF_FF_VERSION
 
-    def _check_header(self, mode):
+    def _check_header(self, mode) -> None:
         if self.format != FILE_FORMAT:
             raise InvalidFile
 
@@ -170,7 +173,7 @@ class File(object):
         self.close()
 
     @property
-    def version(self):
+    def version(self) -> tuple:
         """
         The file format version.
 
@@ -179,7 +182,7 @@ class File(object):
         return tuple(self._root.get_attr("version"))
 
     @version.setter
-    def version(self, v):
+    def version(self, v) -> None:
         util.check_attr_type(v, tuple)
         for part in v:
             util.check_attr_type(part, int)
@@ -190,7 +193,7 @@ class File(object):
             self.force_updated_at()
 
     @property
-    def format(self):
+    def format(self) -> AnyStr:
         """
         The format of the file. This read only property should always have the
         value 'nix'.
@@ -200,14 +203,14 @@ class File(object):
         return self._root.get_attr("format")
 
     @format.setter
-    def format(self, f):
+    def format(self, f) -> None:
         util.check_attr_type(f, str)
         self._root.set_attr("format", f.encode("ascii"))
         if self.time_auto_update:
             self.force_updated_at()
 
     @property
-    def time_auto_update(self):
+    def time_auto_update(self) -> bool:
         """
         A user defined flag which decided if time should always be updated
         when properties are changed.
@@ -217,11 +220,11 @@ class File(object):
         return self._time_auto_update
 
     @time_auto_update.setter
-    def time_auto_update(self, auto_update_flag):
+    def time_auto_update(self, auto_update_flag) -> None:
         self._time_auto_update = auto_update_flag
 
     @property
-    def created_at(self):
+    def created_at(self) -> int:
         """
         The creation time of the file. This is a read-only property.
         Use `force_created_at` in order to change the creation time.
@@ -230,7 +233,7 @@ class File(object):
         """
         return util.str_to_time(self._h5file.attrs["created_at"])
 
-    def force_created_at(self, t=None):
+    def force_created_at(self, t=None) -> None:
         """
         Sets the creation time `created_at` to the given time
         (default: current time).
@@ -245,7 +248,7 @@ class File(object):
         self._h5file.attrs["created_at"] = util.time_to_str(t)
 
     @property
-    def updated_at(self):
+    def updated_at(self) -> int:
         """
         The time of the last update of the file. This is a read-only
         property. Use `force_updated_at` in order to change the update
@@ -255,7 +258,7 @@ class File(object):
         """
         return util.str_to_time(self._h5file.attrs["updated_at"])
 
-    def force_updated_at(self, t=None):
+    def force_updated_at(self, t=None) -> None:
         """
         Sets the update time `updated_at` to the given time.
         (default: current time)
@@ -269,7 +272,7 @@ class File(object):
             util.check_attr_type(t, int)
         self._h5file.attrs["updated_at"] = util.time_to_str(t)
 
-    def is_open(self):
+    def is_open(self) -> bool:
         """
         Checks whether a file is open or closed.
 
@@ -282,7 +285,7 @@ class File(object):
         except ValueError:
             return False
 
-    def validate(self):
+    def validate(self) -> dict:
         """
         Checks if the file is a valid nix file.
 
@@ -329,7 +332,7 @@ class File(object):
             print("No errors found: The file is a valid NIX file")
             return errors
 
-    def pprint(self, indent=2, max_length=120, extra=True, max_depth=3):
+    def pprint(self, indent=2, max_length=120, extra=True, max_depth=3) -> None:
         """
         Pretty Printing the Data and MetaData Tree of the whole File
 
@@ -354,7 +357,7 @@ class File(object):
 
     # TODO: if same file, set_attr("entity_id", id_)
 
-    def copy_section(self, obj, children=True, keep_id=True, name=""):
+    def copy_section(self, obj, children=True, keep_id=True, name="") -> Section:
         """
         Copy a section to the file.
 
@@ -396,10 +399,10 @@ class File(object):
 
         return self.sections[obj.name]
 
-    def flush(self):
+    def flush(self) -> None:
         self._h5file.flush()
 
-    def close(self):
+    def close(self) -> None:
         """
         Closes an open file.
         """
@@ -410,7 +413,7 @@ class File(object):
 
     # Block
     def create_block(self, name="", type_="", compression=Compression.Auto,
-                     copy_from=None, keep_copy_id=True):
+                     copy_from=None, keep_copy_id=True) -> Block:
         """
         Create a new block inside the file.
 
@@ -453,7 +456,7 @@ class File(object):
         return block
 
     # Section
-    def create_section(self, name, type_="undefined", oid=None):
+    def create_section(self, name, type_="undefined", oid=None) -> Section:
         """
         Create a new metadata section inside the file.
 
@@ -474,7 +477,7 @@ class File(object):
         return sec
 
     @property
-    def blocks(self):
+    def blocks(self) -> Container:
         """
         A property containing all blocks of a file. Blocks can be obtained by
         their name, id or index. Blocks can be deleted from the list, when a
@@ -486,7 +489,7 @@ class File(object):
             self._blocks = Container("data", self, Block)
         return self._blocks
 
-    def find_sections(self, filtr=lambda _: True, limit=None):
+    def find_sections(self, filtr=lambda _: True, limit=None) -> List[Section]:
         """
         Get all sections and their child sections recursively.
 
@@ -509,7 +512,7 @@ class File(object):
         return finders._find_sections(self, filtr, limit)
 
     @property
-    def sections(self):
+    def sections(self) -> SectionContainer:
         """
         A property containing all root Sections of a file. Specific root
         Sections can be obtained by their name, id or index. Sections can be

@@ -6,7 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-from .entity import Entity
+from __future__ import annotations
 from .data_array import DataArray
 from .link_type import LinkType
 from six import string_types
@@ -15,13 +15,13 @@ from .util import util
 
 class Feature(object):
 
-    def __init__(self, nixparent, h5group):
+    def __init__(self, nixparent, h5group) -> None:
         util.check_entity_id(h5group.get_attr("entity_id"))
         self._h5group = h5group
         self._parent = nixparent
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, data, link_type):
+    def _create_new(cls, nixparent, h5parent, data, link_type) -> Feature:
         id_ = util.create_id()
         h5group = h5parent.open_group(id_)
         h5group.set_attr("entity_id", id_)
@@ -36,15 +36,15 @@ class Feature(object):
         return newfeature
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self._h5group.get_attr("entity_id")
 
     @property
-    def link_type(self):
+    def link_type(self) -> LinkType:
         return LinkType(self._h5group.get_attr("link_type"))
 
     @link_type.setter
-    def link_type(self, lt):
+    def link_type(self, lt) -> None:
         if isinstance(lt, string_types):
             lt = lt.lower()
         lt = LinkType(lt)
@@ -54,14 +54,14 @@ class Feature(object):
             self._h5group.set_attr("updated_at", util.time_to_str(t))
 
     @property
-    def data(self):
+    def data(self) -> DataArray:
         if "data" not in self._h5group:
             raise RuntimeError("Feature.data: DataArray not found!")
         return DataArray(self._parent._parent,
                          self._h5group.open_group("data"))
 
     @data.setter
-    def data(self, da):
+    def data(self, da) -> None:
         if da is None:
             raise TypeError("Feature.data cannot be None.")
         parblock = self._parent._parent
@@ -75,7 +75,7 @@ class Feature(object):
             self._h5group.set_attr("updated_at", util.time_to_str(t))
 
     @property
-    def created_at(self):
+    def created_at(self) -> int:
         """
         The creation time of the entity. This is a read-only property.
         Use `force_created_at` in order to change the creation time.
@@ -85,7 +85,7 @@ class Feature(object):
         return util.str_to_time(self._h5group.get_attr("created_at"))
 
     @property
-    def updated_at(self):
+    def updated_at(self) -> int:
         """
         The time of the last update of the entity. This is a read-only
         property. Use `force_updated_at` in order to change the update

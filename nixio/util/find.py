@@ -8,6 +8,7 @@
 # LICENSE file in the root of the Project.
 
 import nixio
+from typing import List
 
 
 class Cont(object):
@@ -49,7 +50,7 @@ def _find_sources(with_sources, filtr, limit):
     return result
 
 
-def _find_sections(with_sections, filtr, limit):
+def _find_sections(with_sections, filtr, limit) -> List:
     """
     Find a list of matching sections recursively.
     For internal use.
