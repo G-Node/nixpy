@@ -7,6 +7,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import numpy as np
+from numbers import Integral
 try:
     from collections.abc import Iterable
 except ImportError:
@@ -95,13 +96,52 @@ class DataView(DataSet):
         # probably inefficient, but correct
         return sup._read_data(dvslices).read_data(sl)
 
-    def _transform_coordinates(self, count, offset):
-        if not offset:
-            if np.any(np.greater(count, self._count)):
-                raise OutOfBounds("Trying to access data outside of range")
-            return self._offset
-        else:
-            co = tuple(c + o for c, o in zip(count, offset))
-            if any(c > sc for c, sc in zip(co, self._count)):
-                raise OutOfBounds("Trying to access data outside of range")
-            return tuple(so + o for so, o in zip(self._offset, offset))
+    def _transform_coordinates(self, user_slices):
+        """
+        Takes a series (tuple) of slices or indices passed to the DataView and
+        transforms them to the equivalent slices or indices for the underlying
+        DataArray. Bounds checking is performed on the results to make sure it
+        is not outside the DataView's range.
+        """
+        oob = OutOfBounds("Trying to access data outside of range of DataView")
+        dvslices = self._slices
+
+        def transform_slice(uslice, dvslice):
+            """
+            Single dimension transform function for slices.
+
+            uslice: User provided slice for dimension
+            dvslice: DataView slice for dimension
+            """
+            # Simplify uslice; DataView step is always 1
+            dimlen = dvslice.stop - dvslice.start
+            ustart, ustop, ustep = uslice.indices(dimlen)
+            if ustop < 0:  # special case for None stop
+                ustop = dimlen + ustop
+            tslice = slice(dvslice.start+ustart, dvslice.start+ustop, ustep)
+            if tslice.stop > dvslice.stop:
+                raise oob
+
+            return tslice
+
+        tslices = list()
+        for uslice, dvslice in zip(user_slices, dvslices):
+            if isinstance(uslice, Integral):
+                if uslice < 0:
+                    tslice = dvslice.stop + uslice
+                else:
+                    tslice = uslice + dvslice.start
+                if tslice < dvslice.start or tslice >= dvslice.stop:
+                    raise oob
+            elif isinstance(uslice, slice):
+                tslice = transform_slice(uslice, dvslice)
+                if tslice.start < dvslice.start:
+                    raise oob
+                if tslice.stop > dvslice.stop:
+                    raise oob
+            else:
+                raise TypeError("Data indices must be integers or slices, "
+                                "not {}".format(type(uslice)))
+            tslices.append(tslice)
+
+        return tuple(tslices)
