@@ -19,7 +19,7 @@ class TestDataView(unittest.TestCase):
         self.tmpdir = TempDir("dvtest")
         self.testfilename = os.path.join(self.tmpdir.path, "dvtest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
-        self.data = np.zeros((20, 30))
+        self.data = np.random.random((40, 80))
         block = self.file.create_block("testblock", "nix.test.block")
         block.create_data_array("data", "nix.test.data", data=self.data)
 
@@ -28,7 +28,12 @@ class TestDataView(unittest.TestCase):
         self.file.close()
         self.tmpdir.cleanup()
 
-    def test_data_view_write(self):
+    def test_data_view_read(self):
+        da = self.file.blocks[0].data_arrays[0]
+        dv = da.get_slice((10, 3), extents=(1, 3))
+        np.testing.assert_almost_equal(dv[:], da[10:11, 3:6])
+
+    def test_data_view_write_direct(self):
         da = self.file.blocks[0].data_arrays[0]
         np.testing.assert_almost_equal(da[:], self.data)
 
@@ -39,3 +44,39 @@ class TestDataView(unittest.TestCase):
         newdata[10:11, 3:6] = [1, 2, 3]
 
         np.testing.assert_almost_equal(da[:], newdata)
+
+    def test_data_view_write_index(self):
+        da = self.file.blocks[0].data_arrays[0]
+
+        dv = da.get_slice((10, 20), extents=(20, 15))
+        ow = np.random.random((3, 4))
+        dv[0:3, 1:5] = ow
+
+        newdata = self.data.copy()
+        newdata[10:13, 21:25] = ow
+
+        np.testing.assert_almost_equal(da[:], newdata)
+
+        ow = np.random.random((5, 3))
+        dv[0:20:4, 0:15:5] = ow
+        newdata[10:30:4, 20:35:5] = ow
+        np.testing.assert_almost_equal(da[:], newdata)
+
+        ow = np.random.random((5, 3))
+        dv[::4, ::5] = ow
+        newdata[10:30:4, 20:35:5] = ow
+        np.testing.assert_almost_equal(da[:], newdata)
+
+        dv[1, 1] = 20
+        newdata[11, 21] = 20
+        np.testing.assert_almost_equal(da[:], newdata)
+
+        dv[-1, -1] = 80
+        newdata[29, 34] = 80
+        np.testing.assert_almost_equal(da[:], newdata)
+
+    def test_data_view_oob_write(self):
+        pass
+
+    def test_data_view_oob_read(self):
+        pass
