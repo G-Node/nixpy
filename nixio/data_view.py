@@ -56,16 +56,12 @@ class DataView(DataSet):
     def _write_data(self, data, sl=None):
         tsl = self._slices
         if sl:
-            if not isinstance(sl, Iterable):  # single slice or index
-                sl = (sl,)
             tsl = self._transform_coordinates(sl)
         super(DataView, self)._write_data(data, tsl)
 
     def _read_data(self, sl=None):
         tsl = self._slices
         if sl:
-            if not isinstance(sl, Iterable):  # single slice or index
-                sl = (sl,)
             tsl = self._transform_coordinates(sl)
         return super(DataView, self)._read_data(tsl)
 
@@ -81,7 +77,6 @@ class DataView(DataSet):
         use the same message).
         """
         oob = OutOfBounds("Trying to access data outside of range of DataView")
-        dvslices = self._slices
 
         def transform_slice(uslice, dvslice):
             """
@@ -104,6 +99,8 @@ class DataView(DataSet):
 
             return tslice
 
+        dvslices = self._slices
+        user_slices = self._pad_user_slices(user_slices)
         tslices = list()
         for uslice, dvslice in zip(user_slices, dvslices):
             if isinstance(uslice, Integral):
@@ -125,3 +122,15 @@ class DataView(DataSet):
             tslices.append(tslice)
 
         return tuple(tslices)
+
+    def _pad_user_slices(self, user_slices):
+        """
+        Given the user-supplied slices or indices, returns the same objects in
+        a tuple padded with slice(None, None, None) to match the
+        dimensionality of the DataView.
+        """
+        if not isinstance(user_slices, Iterable):
+            user_slices = (user_slices,)
+
+        padding = (slice(None),) * (len(self.data_extent) - len(user_slices))
+        return user_slices + padding
