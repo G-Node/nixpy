@@ -6,7 +6,6 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-import numpy as np
 from numbers import Integral
 try:
     from collections.abc import Iterable
@@ -57,44 +56,18 @@ class DataView(DataSet):
     def _write_data(self, data, sl=None):
         tsl = self._slices
         if sl:
+            if not isinstance(sl, Iterable):  # single slice or index
+                sl = (sl,)
             tsl = self._transform_coordinates(sl)
         super(DataView, self)._write_data(data, tsl)
 
     def _read_data(self, sl=None):
-        # tsl = self._slices
-        # if sl:
-        #     tsl = self._transform_coordinates(sl)
-        # return super(DataView, self)._read_data(tsl)
-        dvslices = self._slices
-        # complete DataView slices (turn Nones into values)
-        dvslices = tuple(slice(*dv.indices(l)) for dv, l in
-                         zip(dvslices, self.array.shape))
-        sup = super(DataView, self)
-        if sl is None or sl == slice(None, None, None):
-            # full DataView: pass dvslices directly
-            return sup._read_data(dvslices)
-        if isinstance(sl, int):
-            # single value or dimension, offset by DataView start on first dim
-            readslice = dvslices[0].start + sl
-            return sup._read_data(readslice)
-        if isinstance(sl, Iterable):
-            # combine slices
-            readslice = list()
-            for readi, datai in zip(sl, dvslices):
-                if readi is None:
-                    readslice.append(datai)
-                elif isinstance(readi, int):
-                    readslice.append(datai.start + readi)
-                elif isinstance(readi, slice):
-                    start = datai.start + (readi.start or 0)
-                    stop = (datai.start + readi.stop
-                            if readi.stop else datai.stop)
-                    readslice.append(slice(start, stop, readi.step))
-            return sup._read_data(tuple(readslice))
-
-        # something else? Just read the underlying data then slice it
-        # probably inefficient, but correct
-        return sup._read_data(dvslices).read_data(sl)
+        tsl = self._slices
+        if sl:
+            if not isinstance(sl, Iterable):  # single slice or index
+                sl = (sl,)
+            tsl = self._transform_coordinates(sl)
+        return super(DataView, self)._read_data(tsl)
 
     def _transform_coordinates(self, user_slices):
         """

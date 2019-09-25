@@ -54,7 +54,6 @@ class TestDataView(unittest.TestCase):
         directly to DataArray for assertions.
         """
         da = self.file.blocks[0].data_arrays[0]
-
         dv = da.get_slice((10, 20), extents=(20, 15))
         newdata = self.data.copy()
 
