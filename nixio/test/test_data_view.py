@@ -155,3 +155,16 @@ class TestDataView(unittest.TestCase):
 
         with self.assertRaises(nix.exceptions.OutOfBounds):
             dv[0, -21]
+
+    def test_data_view_ellipsis(self):
+        block = self.file.blocks[0]
+        data = np.random.random((10, 11, 12, 13, 14))
+        da = block.create_data_array("data2", "nix.test.data", data=data)
+
+        npeq = np.testing.assert_almost_equal
+
+        dv = da.get_slice((5, 6, 7, 8, 9), (5, 5, 5, 5, 5))
+        npeq(dv[1, ..., 2], da[6, 6:11, 7:12, 8:13, 11])
+        npeq(dv[..., 0, 0], da[5:10, 6:11, 7:12, 8, 9])
+        npeq(dv[1:3, 0, ...], da[6:8, 6, 7:12, 8:13, 9:14])
+        npeq(dv[1:3, :, ...], da[6:8, 6:11, 7:12, 8:13, 9:14])
