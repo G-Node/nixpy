@@ -100,7 +100,7 @@ class DataView(DataSet):
             return tslice
 
         dvslices = self._slices
-        user_slices = self._pad_user_slices(user_slices)
+        user_slices = self._expand_user_slices(user_slices)
         tslices = list()
         for uslice, dvslice in zip(user_slices, dvslices):
             if isinstance(uslice, Integral):
@@ -123,14 +123,27 @@ class DataView(DataSet):
 
         return tuple(tslices)
 
-    def _pad_user_slices(self, user_slices):
+    def _expand_user_slices(self, user_slices):
         """
-        Given the user-supplied slices or indices, returns the same objects in
-        a tuple padded with slice(None, None, None) to match the
-        dimensionality of the DataView.
+        Given the user-supplied slices or indices, expands Ellipses if
+        necessary and returns the same objects in a tuple padded with
+        slice(None) to match the dimensionality of the DataView.
         """
         if not isinstance(user_slices, Iterable):
             user_slices = (user_slices,)
 
-        padding = (slice(None),) * (len(self.data_extent) - len(user_slices))
+        if user_slices.count(Ellipsis) > 1:
+            raise IndexError(
+                "an index can only have a single ellipsis ('...')"
+            )
+        elif user_slices.count(Ellipsis) == 1:
+            # expand slices at Ellipsis index
+            expidx = user_slices.index(Ellipsis)
+            npad = len(self.data_extent) - len(user_slices) + 1
+            padding = (slice(None),) * npad
+            return user_slices[:expidx] + padding + user_slices[expidx+1:]
+
+        # expand slices at the end
+        npad = len(self.data_extent) - len(user_slices)
+        padding = (slice(None),) * npad
         return user_slices + padding
