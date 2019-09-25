@@ -20,7 +20,7 @@ from .dimensions import (Dimension, SampledDimension, RangeDimension,
 from . import util
 from .compression import Compression
 
-from .exceptions import InvalidUnit
+from .exceptions import InvalidUnit, IncompatibleDimensions
 from .section import Section
 
 
@@ -296,15 +296,21 @@ class DataArray(Entity, DataSet):
     def get_slice(self, positions, extents=None, mode=DataSliceMode.Index):
         datadim = len(self.shape)
         if not len(positions) == datadim:
-            raise IndexError("Number of positions given ({}) does not match "
-                             "number of data dimensions ({})".format(
-                                 len(positions), datadim
-                             ))
+            raise IncompatibleDimensions(
+                "Number of positions given ({}) does not match "
+                "number of data dimensions ({})".format(
+                    len(positions), datadim
+                ),
+                "DataArray.get_slice"
+            )
         if extents and not len(extents) == datadim:
-            raise IndexError("Number of extents given ({}) does not match "
-                             "number of data dimensions ({})".format(
-                                 len(extents), datadim
-                             ))
+            raise IncompatibleDimensions(
+                "Number of extents given ({}) does not match "
+                "number of data dimensions ({})".format(
+                    len(extents), datadim
+                ),
+                "DataArray.get_slice"
+            )
         if mode == DataSliceMode.Index:
             sl = tuple(slice(p, p+e) for p, e in zip(positions, extents))
             return DataView(self, sl)
