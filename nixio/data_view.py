@@ -102,6 +102,10 @@ class DataView(DataSet):
         transforms them to the equivalent slices or indices for the underlying
         DataArray. Bounds checking is performed on the results to make sure it
         is not outside the DataView's range.
+
+        Note: HDF5 hyperslabs don't support negative steps, so we catch it
+        here to throw an error from NIX instead to shorten the stack trace (we
+        use the same message).
         """
         oob = OutOfBounds("Trying to access data outside of range of DataView")
         dvslices = self._slices
@@ -121,6 +125,9 @@ class DataView(DataSet):
             tslice = slice(dvslice.start+ustart, dvslice.start+ustop, ustep)
             if tslice.stop > dvslice.stop:
                 raise oob
+
+            if tslice.step < 0:
+                raise ValueError("Step must be >= 1")
 
             return tslice
 
