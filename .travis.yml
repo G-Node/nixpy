@@ -14,10 +14,10 @@ matrix:
       env: pymajor=2
     - python: "3.6"
       os: linux
-      env: pymajor=3 coveralls=1
+      env: pymajor=3
     - python: "3.7"
       os: linux
-      env: pymajor=3 coveralls=1
+      env: pymajor=3 coverage=1
       dist: xenial
       sudo: true
     - language: generic
@@ -60,7 +60,8 @@ before_install:
   - export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:${nixprefix}/lib/pkgconfig
   - alias pip2='pip'
   - if [[ "${TRAVIS_OS_NAME}" != "osx" ]]; then pip${pymajor} install --upgrade numpy; fi
-  - pip${pymajor} install --upgrade coveralls h5py pytest-xdist;
+  - pip${pymajor} install --upgrade h5py pytest pytest-xdist pytest-cov;
+  - if [[ "${pymajor}" == 2 ]]; then pip${pymajor} install enum34; fi
   - git clone --branch ${NIX_BRANCH} https://github.com/G-Node/nix /tmp/libnix
   - pushd /tmp/libnix
   - mkdir build
@@ -78,11 +79,10 @@ install:
   - python${pymajor} setup.py build
 
 script:
-  - if [[ "${coveralls}" == 1 ]]; then
-      coverage run --source=nixio setup.py test --addopts "--nix-compat -s" && coverage report -m;
-    else
-      python${pymajor} setup.py test --addopts "--nix-compat -s -nauto";
-    fi
+  - pytest --cov=nixio --nix-compat -nauto;
 
 after_success:
-  - if [[ "${coveralls}" == 1 ]]; then coveralls; fi
+  - if [[ "${coverage}" == 1 ]]; then
+      pip install codecov;
+      codecov;
+    fi
