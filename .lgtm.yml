@@ -1,0 +1,9 @@
+path_classifiers:
+  helper_scripts:
+    - scripts
+
+extraction:
+  javascript:
+    index:
+      filters:
+        - exclude: "*"
