@@ -4,7 +4,7 @@ import numpy as np
 import os
 import unittest
 from .tmp import TempDir
-from ..validate import Validate
+# from ..validate import Validate
 
 
 class TestValidate (unittest.TestCase):
@@ -31,21 +31,21 @@ class TestValidate (unittest.TestCase):
 
         self.file.create_section("sec1", "test")
 
-        self.validator = Validate(self.file)
-        self.validator.form_dict()
-
     def tearDown(self):
         self.file.close()
         self.tmpdir.cleanup()
 
     def test_check_file(self):
-        assert self.validator.check_file()['file_errors'] == []
+        res = self.file.validate()
+        assert self.file not in res["errors"]
+        assert self.file not in res["warnings"]
         self.file.force_created_at(0)
-        res = self.validator.check_file()
-        assert res['file_errors'] == ["date is not set!"]
+        res = self.file.validate()
+        assert res["errors"][self.file] == ["date is not set!"]
 
     def test_check_blocks(self):
-        block = self.block1
+        res = self.file.validate()
+        assert not res["errors"][self.block1]
         assert self.validator.errors['blocks'][0]['errors'] == []
         block._h5group.set_attr("name", None)
         res = self.validator.check_blocks(block, 0)

@@ -88,7 +88,6 @@ def check_file(nixfile):
     is indexed by the object with values describing the error or warning.
     :rtype: Dictionary
     """
-
     results = {"errors": dict(), "warnings": dict()}
     if not nixfile.created_at:
         results["errors"][nixfile] = ["date is not set!"]
@@ -97,7 +96,9 @@ def check_file(nixfile):
         block_results = check_blocks(block)
         results["errors"].update(block_results.get("errors", {}))
         results["warnings"].update(block_results.get("warnings", {}))
+    print(results)
     return results
+
 
 def check_blocks(block):
     """
@@ -108,37 +109,34 @@ def check_blocks(block):
     is indexed by the object with values describing the error or warning.
     :rtype: Dictionary
     """
-    blk_err_list = check_entity(block)
+    errors = check_entity(block)
 
-    return {"errors": {block: blk_err_list}}
+    return {"errors": {block: errors}}
 
-def check_groups(self, group, grp_idx, blk_idx):
+
+def check_groups(group):
     """
-    Check if the file meets the NIX requirements at the group level.
+    Validate a Group and return all errors and warnings.
+    Does not check contained objects.
 
-    :returns: The error dict with errors appended on group level or None
-    :rtype: Dictionary or None if no errors found
-    """
-    grp_err_list = self.check_for_basics(group)
-
-    if grp_err_list:
-        grp = self.errors['blocks'][blk_idx]['groups'][grp_idx]
-        grp['errors'] = grp_err_list
-        self.error_count += len(grp_err_list)
-        return self.errors
-    else:
-        return None
-
-def check_data_arrays(self, da, da_idx, blk_idx):
-    """
-    Check if the file meets the NIX requirements at the DataArray level.
-
-    :returns: The error dictionary with errors appended on DataArray level
+    :returns: A nested dictionary of errors and warnings. Each subdictionary
+    is indexed by the object with values describing the error or warning.
     :rtype: Dictionary
     """
-    da_error_list = []
-    if self.check_for_basics(da):
-        da_error_list.extend(self.check_for_basics(da))
+    errors = check_entity(group)
+
+    return {"errors": {group: errors}}
+
+
+def check_data_arrays(da):
+    """
+    Validate a DataArray and return all errors and warnings.
+
+    :returns: A nested dictionary of errors and warnings. Each subdictionary
+    is indexed by the object with values describing the error or warning.
+    :rtype: Dictionary
+    """
+    errors = check_entity(da)
 
     dim = da.shape
     len_dim = da.data_extent
@@ -422,6 +420,7 @@ def check_set_dim(self, set_dim, dim_idx, da_idx, blk_idx):
         dim['errors'].append("Dimension type is not correct!")
         self.error_count += 1
     return self.errors
+
 
 def check_sampled_dim(self, sam_dim, dim_idx, da_idx, blk_idx):
     """

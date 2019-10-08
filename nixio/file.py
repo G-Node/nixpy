@@ -24,7 +24,7 @@ from .container import Container, SectionContainer
 from . import util
 from .exceptions import InvalidFile, DuplicateName
 from .util import find as finders
-from .validate import Validate
+from . import validator
 from .compression import Compression
 from .dimensions import RangeDimension, SetDimension, SampledDimension
 
@@ -283,6 +283,9 @@ class File(object):
             return False
 
     def validate(self):
+        return validator.check_file(self)
+
+    def _validate_old(self):
         """
         Checks if the file is a valid nix file.
 
