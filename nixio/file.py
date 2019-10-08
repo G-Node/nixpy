@@ -286,7 +286,8 @@ class File(object):
         """
         Checks if the file is a valid nix file.
 
-        :returns: A dict which contains all objects in file and related errors
+        :returns: A dict indexed by invalid objects and an warning or error as
+        value.
         :rtype: Dictionary
         """
         validator = Validate(self)
