@@ -82,47 +82,53 @@ class TestValidate (unittest.TestCase):
         assert len(res["warnings"]) == 0
 
     def test_check_data_arrays(self):
+        expected_errors = list()
+        expected_warnings = list()
         somedata = np.random.randint(10, size=(5, 5))
-        da1 = self.block1.create_data_array("u", "something",
-                                            dtype=int, data=somedata)
+        da1 = self.block1.create_data_array("data", "type",
+                                            dtype=nix.DataType.Int32,
+                                            data=somedata)
         da1.append_range_dimension([1, 2, 3, 4, 5, 6, 7, 8, 9])
-        da1.append_set_dimension()
-        da1.dimensions[1].labels = ["A", "B", "C", "D"]
-        da1._h5group.set_attr("unit", "abcde")
+        expected_errors.append(
+            "number of ticks in RangeDimension (1) differs from the number "
+            "of data entries along the corresponding data dimension"
+        )
+        setdim = da1.append_set_dimension()
+        setdim.labels = ["A", "B", "C", "D"]
+        expected_errors.append(
+            "number of labels in SetDimension (2) differs from the number "
+            "of data entries along the corresponding data dimension"
+        )
         da1._h5group.set_attr("type", None)
+        expected_errors.append("no type set")
         da1._h5group.set_attr("expansion_origin", 0.11)  # poly not set
-        self.validator.form_dict()
-        self.validator.check_data_arrays(da1, 4, 0)
-        da_warn1 = 'Type of DataArray is missing'
-        da_warn2 = ('In some Range Dimensions, '
-                    'the number of ticks differ from the data entries')
-        da_warn3 = ('In some Set Dimensions, '
-                    'the number of labels differ from the data entries')
-        da_warn4 = 'Invalid units'
-        da_warn5 = ('Expansion origins exist '
-                    'but polynomial coefficients are missing')
-        da_err = self.validator.errors['blocks'][0]['data_arrays'][4]['errors']
-        assert da_warn1 in da_err
-        assert da_warn2 in da_err
-        assert da_warn3 in da_err
-        assert da_warn4 in da_err
-        assert da_warn5 in da_err
+        expected_warnings.append(
+            "expansion origin for calibration is set, "
+            "but polynomial coefficients are missing"
+        )
+
+        res = self.file.validate()
+
+        da_err = res["errors"][da1]
+        da_warn = res["warnings"][da1]
+
+        assert sorted(da_err) == sorted(expected_errors)
+        assert sorted(da_warn) == sorted(expected_warnings)
 
         da2 = self.block1.data_arrays[1]
-        da2.append_set_dimension()
-        da2.dimensions[0].labels = ["A", "B", "C", "D", "E"]
+        setdim = da2.append_set_dimension()
+        setdim.labels = ["A", "B", "C", "D", "E"]
         da2.polynom_coefficients = [0.1, 0.2]
-        self.validator.check_data_arrays(da2, 1, 0)
-        da_err = self.validator.errors['blocks'][0]['data_arrays'][1]['errors']
-        assert da_err == ["Polynomial coefficients exist but expansion "
-                          "origins are missing"]
-        # Dimension mismatch missed out as change data_extent attr
-        # will also change shape
+        res = self.file.validate()
+        da_warn = res["warnings"][da2]
+        assert da_warn == ["polynomial coefficients for calibration are set, "
+                           "but expansion origin is missing"]
 
         da3 = self.block1.data_arrays[0]
-        self.validator.check_data_arrays(da3, 0, 0)
-        da_err = self.validator.errors['blocks'][0]['data_arrays'][0]['errors']
-        assert da_err == ["Dimension mismatch"]
+        res = self.file.validate()
+        da_err = res["errors"][da3]
+        assert da_err == ["data dimensionality does not match number of "
+                          "defined dimensions"]
 
     def test_check_tags(self):
         tag1 = self.block1.tags[0]

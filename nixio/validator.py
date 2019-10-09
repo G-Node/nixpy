@@ -9,7 +9,7 @@
 from __future__ import (absolute_import, division, print_function)
 import numpy as np
 from .util import units
-from .dimension_type import DimensionType
+import nixio as nix
 try:
     from collections.abc import OrderedDict
 except ImportError:
@@ -90,25 +90,36 @@ def check_file(nixfile):
     """
     results = {"errors": dict(), "warnings": dict()}
     if not nixfile.created_at:
-        results["errors"][nixfile] = ["date is not set!"]
+        results["errors"][nixfile] = ["date is not set"]
+
+    file_warnings = list()
+    if not nixfile.version:
+        file_warnings.append("version is not set")
+    if not nixfile.format:
+        file_warnings.append("format is not set")
+    if file_warnings:
+        results["warnings"][nixfile] = file_warnings
+
+    def update_results(obj, errors, warnings):
+        if errors:
+            results["errors"][obj] = errors
+        if warnings:
+            results["warnings"][obj] = warnings
 
     # Blocks
     for block in nixfile.blocks:
         blk_errors, blk_warnings = check_block(block)
-        if blk_errors:
-            results["errors"][block] = blk_errors
-        if blk_warnings:
-            results["warnings"][block] = blk_warnings
+        update_results(block, blk_errors, blk_warnings)
+
         # Groups
         for group in block.groups:
             grp_errors, grp_warnings = check_group(group)
-            if grp_errors:
-                results["errors"][group] = grp_errors
-            if grp_warnings:
-                results["warnings"][group] = grp_warnings
-        # DataArrays
+            update_results(group, grp_errors, grp_warnings)
 
-            # Dimensions
+        # DataArrays
+        for da in block.data_arrays:
+            da_errors, da_warnings = check_data_array(da)
+            update_results(da, da_errors, da_warnings)
 
         # Tags
 
@@ -132,7 +143,6 @@ def check_block(block):
     individual contained object.
 
     :returns: A list of 'errors' and a list of 'warnings'
-    :rtype: Dictionary
     """
     errors = check_entity(block)
     return errors, list()
@@ -144,100 +154,101 @@ def check_group(group):
     Does not check contained objects.
 
     :returns: A list of 'errors' and a list of 'warnings'
-    :rtype: Dictionary
     """
     errors = check_entity(group)
     return errors, list()
 
 
-def check_data_arrays(da):
+def check_data_array(da):
     """
-    Validate a DataArray and return all errors and warnings.
+    Validate a DataArray and its Dimensions and return all errors and warnings.
+    Errors and warnings about Dimension objects are included in the DataArray
+    errors and warnings lists.
 
-    :returns: A nested dictionary of errors and warnings. Each subdictionary
-    is indexed by the object with values describing the error or warning.
-    :rtype: Dictionary
+    :returns: A list of 'errors' and a list of 'warnings'
     """
     errors = check_entity(da)
+    warnings = list()
 
-    dim = da.shape
-    len_dim = da.data_extent
-    if dim != len_dim:
-        da_error_list.append("Dimension mismatch")
+    if not da.data_type:
+        errors.append("data type is not set")
 
-    if len(dim) != len(da.dimensions):
-        da_error_list.append("Dimension mismatch")
+    if len(da.dimensions) != len(da.data_extent):
+        errors.append("data dimensionality does not match number of defined "
+                      "dimensions")
 
-    if da.dimensions:
-        for i, dim in enumerate(da.dimensions):
-            if dim.dimension_type == DimensionType.Range:
-                try:
-                    if len(dim.ticks) != da.data_extent[i]:
-                        # if data_extent is used instead of len()
-                        # tuple will be observed, eg (1200,)
-                        da_error_list.append(
-                            "In some Range Dimensions, the number"
-                            " of ticks differ from the data entries"
-                        )
-                except IndexError:
-                    raise IndexError("Dimension of Dataarray and "
-                                     "Number of Dimension object Mismatch")
+    if da.unit and not units.is_si(da.unit):
+        warnings.append("unit is not SI or composite of SI units")
 
-            if dim.dimension_type == DimensionType.Set:
-                # same as above
-                try:
-                    if len(dim.labels) != da.data_extent[i]:
-                        da_error_list.append(
-                            "In some Set Dimensions, the number "
-                            "of labels differ from the data entries"
-                        )
-                except IndexError:
-                    raise IndexError("Dimension of Dataarray and "
-                                     "Number of Dimension object Mismatch")
+    if da.polynom_coefficients and not da.expansion_origin:
+        warnings.append("polynomial coefficients for calibration are set, "
+                        "but expansion origin is missing")
+    elif da.expansion_origin and not da.polynom_coefficients:
+        warnings.append("expansion origin for calibration is set, "
+                        "but polynomial coefficients are missing")
+    dimtypemap = {
+        nix.DimensionType.Range: nix.RangeDimension,
+        nix.DimensionType.Sample: nix.SampledDimension,
+        nix.DimensionType.Set: nix.SetDimension,
+    }
 
-    unit = da.unit
-    if unit and not units.is_si(unit):
-        da_error_list.append("Invalid units")
+    for idx, (dim, datalen) in enumerate(zip(da.dimensions, da.shape), 1):
+        if not dim.index or dim.index <= 0:
+            errors.append("index for dimension {} is not set to a valid value "
+                          "(index > 0)".format(idx))
+        elif dim.index != idx:
+            errors.append("index for dimension {} is set to incorrect "
+                          "value {}".format(idx, da.index))
+        if not isinstance(dim, dimtypemap[dim.dimension_type]):
+            errors.append("dimension_type attribute for dimension "
+                          "{} does not match "
+                          "Dimension object type".format(idx))
+        if isinstance(dim, nix.RangeDimension):
+            if dim.ticks is not None and len(dim.ticks) != datalen:
+                # if ticks is None or empty, it will be reported by the
+                # dimension check function
+                errors.append("number of ticks in RangeDimension ({}) "
+                              "differs from the number of data entries "
+                              "along the corresponding "
+                              "data dimension".format(idx))
+            dim_errors, dim_warnings = check_range_dimension(dim, idx)
+        elif isinstance(dim, nix.SampledDimension):
+            dim_errors, dim_warnings = check_sampled_dimension(dim, idx)
+        elif isinstance(dim, nix.SetDimension):
+            if dim.labels and len(dim.labels) != datalen:
+                # empty labels is allowed
+                errors.append("number of labels in SetDimension ({}) "
+                              "differs from the number of data entries "
+                              "along the corresponding "
+                              "data dimension".format(idx))
+            dim_errors, dim_warnings = check_set_dimension(dim, idx)
+        errors.extend(dim_errors)
+        warnings.extend(dim_warnings)
+    return errors, warnings
 
-    poly = da.polynom_coefficients
-    ex_origin = da.expansion_origin
-    if np.any(ex_origin):
-        if not poly:
-            da_error_list.append("Expansion origins exist but "
-                                 "polynomial coefficients are missing")
-    if np.any(poly):
-        if not ex_origin:
-            da_error_list.append("Polynomial coefficients exist"
-                                 " but expansion origins are missing")
-
-    da = self.errors['blocks'][blk_idx]['data_arrays'][da_idx]
-    da['errors'] = da_error_list
-    self.error_count += len(da_error_list)
-    return self.errors
 
 def check_tag(self, tag, tag_idx, blk_idx):
     """
     Check if the file meets the NIX requirements at the tag level.
 
     :returns: The error dictionary with errors appended on Tag level
-    :rtype: Dictionary
     """
     tag_err_list = []
 
     if not tag.position:
-        tag_err_list.append("Position is not set!")
+        tag_err_list.append("position is not set")
     if tag.references:
         # referenced da dimension and units should match the tag
         ndim = len(tag.references[0].shape)
         if tag.position:
             if len(tag.position) != ndim:
                 tag_err_list.append(
-                    "Number of position and dimensionality of reference "
+                    "number of position and dimensionality of reference "
                     "do not match"
                 )
         if tag.extent:
             if ndim != len(tag.extent):
-                tag_err_list.append("Number of extent and dimensionality "
+                tag_err_list.append("number of extent and dimensionality "
                                     "of reference do not match")
 
         for ref in tag.references:
@@ -248,13 +259,13 @@ def check_tag(self, tag, tag_idx, blk_idx):
                         if dim.dimension_type != DimensionType.Set]
             if len(unit_list) != len(dim_list):
                 tag_err_list.append(
-                    "Some dimensions of references have no units"
+                    "some dimensions of references have no units"
                 )
             for u in unit_list:
                 for tu in tag.units:
                     if not units.scalable(u, tu):
                         tag_err_list.append(
-                            "References and tag units mismatched"
+                            "references and tag units mismatched"
                         )
                         break
                 break
@@ -272,7 +283,7 @@ def check_multi_tag(self, mt, mt_idx, blk_idx):
     mt_err_list = []
 
     if not mt.positions:
-        mt_err_list.append("Position is not set!")  # no test for this
+        mt_err_list.append("position is not set")  # no test for this
     else:
         if len(mt.positions.shape) > 2:
             mt_err_list.append(
@@ -330,7 +341,6 @@ def check_section(self, section, sec_idx):
     Check if the file meets the NIX requirements at the section level.
 
     :returns: The error dictionary with errors appended on section level
-    :rtype: Dictionary
     """
     sec = self.errors['sections'][sec_idx]
     sec['errors'] = self.check_for_basics(section)
@@ -342,11 +352,11 @@ def check_property(self, prop, prop_idx, sec_idx):
     prop_err_list = []
 
     if not prop.name:
-        prop_err_list.append("Name is not set!")
+        prop_err_list.append("Name is not set")
     if prop.values and not prop.unit:
         prop_err_list.append("Unit is not set")
     if prop.unit and not units.is_si(prop.unit):
-        prop_err_list.append("Unit is not valid!")
+        prop_err_list.append("Unit is not valid")
     prop = self.errors['sections'][sec_idx]['props'][prop_idx]
     prop['errors'] = prop_err_list
     self.error_count += len(prop_err_list)
@@ -357,12 +367,11 @@ def check_features(self, feat, parent, blk_idx, tag_idx, fea_idx):
     Check if the file meets the NIX requirements at the feature level.
 
     :returns: The error dictionary with errors appended on feature level
-    :rtype: Dictionary
     """
     fea_err_list = []
     # will raise RuntimeError for both, actually no need to check
     if not feat.link_type:
-        fea_err_list.append("Linked type is not set!")
+        fea_err_list.append("Linked type is not set")
     if not feat.data:
         fea_err_list.append("Data is not set")
 
@@ -376,7 +385,6 @@ def check_sources(self, src, blk_idx):
     Check if the file meets the NIX requirements at the source level.
 
     :returns: The error dictionary with errors appended on source level
-    :rtype: Dictionary or None if no errors
     """
     if self.check_for_basics(src):
         blk = self.errors['blocks'][blk_idx]
@@ -385,96 +393,63 @@ def check_sources(self, src, blk_idx):
         return self.errors
     return None
 
-def check_dim(self, dimen):
+
+def check_range_dimension(dim, idx):
     """
-    General checks for all dimensions
+    Validate a RangeDimension and return all errors and warnings.
+
+    :returns: A list of 'errors' and a list of 'warnings'
     """
-    # call it in file after the index problem is fixed
-    # call it in other check dim function / don't call alone
-    if dimen.index and dimen.index > 0:
-        return None
-    return 'index must > 0'
+    errors = list()
+    warnings = list()
 
-def check_range_dim(self, r_dim, dim_idx, da_idx, blk_idx):
+    if not dim.ticks:
+        errors.append("ticks for dimension {} are not set".format(idx))
+    elif not all(ti < tj for ti, tj in zip(dim.ticks[:-1], dim.ticks[1:])):
+        errors.append("ticks for dimension {} are not sorted".format(idx))
+
+    if dim.unit and not units.is_atomic(dim.unit):
+        errors.append("unit for dimension {} is set but it is not an "
+                      "atomic SI unit "
+                      "(Note: composite units are not supported)".format(idx))
+    return errors, warnings
+
+
+def check_set_dimension(dim, idx):
     """
-    Check if the file meets the NIX requirements for range dimensions.
+    Validate a SetDimension and return all errors and warnings.
 
-    :returns: The error dictionary with errors appended on range dimensions
-    :rtype: Dictionary
+    :returns: A list of 'errors' and a list of 'warnings'
     """
-    rdim_err_list = []
+    return list(), list()
 
-    if self.check_dim(r_dim):
-        rdim_err_list.append(self.check_dim(r_dim))
 
-    if not r_dim.ticks:
-        rdim_err_list.append("Ticks need to be set for range dimensions")
-    elif not all(r_dim.ticks[i] <= r_dim.ticks[i+1]
-                 for i in range(len(r_dim.ticks)-1)):
-        rdim_err_list.append("Ticks are not sorted!")
-    if r_dim.dimension_type != DimensionType.Range:
-        rdim_err_list.append("Dimension type is not correct!")
-
-    # sorting is already covered in the dimensions.py file
-    if r_dim.unit:
-        if not units.is_atomic(r_dim.unit):
-            rdim_err_list.append("Unit must be atomic, not composite!")
-
-    da = self.errors['blocks'][blk_idx]['data_arrays'][da_idx]
-    da['dimensions'][dim_idx]['errors'] = rdim_err_list
-    self.error_count += len(rdim_err_list)
-    return self.errors
-
-def check_set_dim(self, set_dim, dim_idx, da_idx, blk_idx):
+def check_sampled_dimension(dim, idx):
     """
-    Check if the file meets the NIX requirements for set dimensions.
+    Validate a SetDimension and return all errors and warnings.
 
-    :returns: The error dictionary with errors appended on set dimensions
-    :rtype: Dictionary
+    :returns: A list of 'errors' and a list of 'warnings'
     """
-    if self.check_dim(set_dim):
-        da = self.errors['blocks'][blk_idx]['data_arrays'][da_idx]
-        da['dimensions'][dim_idx]['errors'].append(self.check_dim(set_dim))
-        self.error_count += 1
-    if set_dim.dimension_type != DimensionType.Set:
-        da = self.errors['blocks'][blk_idx]['data_arrays'][da_idx]
-        dim = da['dimensions'][dim_idx]
-        dim['errors'].append("Dimension type is not correct!")
-        self.error_count += 1
-    return self.errors
+    errors = list()
+    warnings = list()
 
+    if dim.sampling_interval:
+        errors.append("sampling interval for dimension {} "
+                      "is not set".format(idx))
+    elif dim.sampling_interval < 0:
+        errors.append("sampling interval for dimension {} "
+                      "is not valid (interval > 0)".format(idx))
 
-def check_sampled_dim(self, sam_dim, dim_idx, da_idx, blk_idx):
-    """
-    Check if the file meets the NIX requirements for sampled dimensions.
-
-    :returns: The error dict with errors appended on sampled dimensions
-    :rtype: Dictionary
-    """
-    sdim_err_list = []
-
-    if self.check_dim(sam_dim):
-        sdim_err_list.append(self.check_dim(sam_dim))
-
-    if sam_dim.sampling_interval < 0:
-        sdim_err_list.append("SamplingInterval is not set to valid value "
-                             "(> 0)!")
-
-    if sam_dim.dimension_type != DimensionType.Sample:
-        sdim_err_list.append("Dimension type is not correct!")
-
-    if sam_dim.offset and not sam_dim.unit:
-        # validity check below
-        sdim_err_list.append("Offset is set, but no unit set!")
-
-    if sam_dim.unit:
-        if not units.is_atomic(sam_dim.unit):
-            sdim_err_list.append("Unit must be atomic, not composite!")
-
-    da = self.errors['blocks'][blk_idx]['data_arrays'][da_idx]
-    da['dimensions'][dim_idx]['errors'] = sdim_err_list
-    self.error_count += len(sdim_err_list)
-    return self.errors
+    if dim.unit:
+        if units.is_atomic(dim.unit):
+            errors.append("unit for dimension {} is set but it is not an "
+                          "atomic SI unit (Note: composite units are "
+                          "not supported)".format(idx))
+    else:
+        if dim.offset:
+            warnings.append("offset for dimension {} is set, "
+                            "but no valid unit is set".format(idx))
+    return errors, warnings
 
 
 def check_entity(entity):
@@ -483,11 +458,13 @@ def check_entity(entity):
     """
     errors = []
     if not entity.type:
-        errors.append("no type set!")
+        errors.append("no type set")
     if not entity.id:
-        errors.append("no ID set!")
+        errors.append("no ID set")
     if not entity.name:
-        errors.append("no name set!")
+        errors.append("no name set")
+    if not entity.created_at:
+        errors.append("date not set")
     return errors
 
 def get_dim_units(self, data_arrays):
