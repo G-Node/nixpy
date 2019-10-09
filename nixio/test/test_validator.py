@@ -41,20 +41,23 @@ class TestValidate (unittest.TestCase):
         assert self.file not in res["warnings"]
         self.file.force_created_at(0)
         res = self.file.validate()
-        assert res["errors"][self.file] == ["date is not set!"]
+        assert res["errors"][self.file] == ["date is not set"]
 
     def test_check_blocks(self):
         res = self.file.validate()
-        assert not res["errors"][self.block1]
-        assert self.validator.errors['blocks'][0]['errors'] == []
+        block = self.block1
+        assert block not in res["errors"]
+
         block._h5group.set_attr("name", None)
-        res = self.validator.check_blocks(block, 0)
-        assert res['blocks'][0]['errors'] == ['Name of Block is missing']
+        res = self.file.validate()
+        assert res["errors"][block] == ["no name set"]
+
         block._h5group.set_attr("type", None)
-        self.validator.check_blocks(block, 0)
-        blkerr = self.validator.errors['blocks'][0]['errors']
-        assert blkerr == ['Type of Block is missing',
-                          'Name of Block is missing']
+        res = self.file.validate()
+        actual = sorted(res["errors"][block])
+        expected = sorted(["no name set", "no type set"])
+        assert actual == expected
+        assert len(res["warnings"]) == 0
 
     def test_check_groups(self):
         group1 = self.block1.groups[0]
