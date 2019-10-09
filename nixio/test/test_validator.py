@@ -61,20 +61,25 @@ class TestValidate (unittest.TestCase):
 
     def test_check_groups(self):
         group1 = self.block1.groups[0]
-        group1._h5group.set_attr("name", None)
-        self.validator.check_groups(group1, 0, 0)
-        grperr = self.validator.errors['blocks'][0]['groups'][0]['errors']
-        assert grperr == ['Name of Group is missing']
         group2 = self.block2.groups[1]
+        group1._h5group.set_attr("name", None)
+        res = self.file.validate()
+        assert res["errors"][group1] == ["no name set"]
+        assert group2 not in res["errors"]
+
         group2._h5group.set_attr("name", None)
-        self.validator.check_groups(group2, 1, 1)
-        grperr = self.validator.errors['blocks'][1]['groups'][1]['errors']
-        assert grperr == ['Name of Group is missing']
+        res = self.file.validate()
+        assert res["errors"][group2] == ["no name set"]
+
+        assert group1 not in res["warnings"]
+        assert group2 not in res["warnings"]
+
         group2._h5group.set_attr("type", None)
-        self.validator.check_groups(group2, 1, 1)
-        grperr = self.validator.errors['blocks'][1]['groups'][1]['errors']
-        assert grperr == ['Type of Group is missing',
-                          'Name of Group is missing']
+        res = self.file.validate()
+        actual = sorted(res["errors"][group2])
+        expected = sorted(["no name set", "no type set"])
+        assert actual == expected
+        assert len(res["warnings"]) == 0
 
     def test_check_data_arrays(self):
         somedata = np.random.randint(10, size=(5, 5))

@@ -93,14 +93,13 @@ def check_file(nixfile):
         results["errors"][nixfile] = ["date is not set!"]
 
     for block in nixfile.blocks:
-        block_results = check_blocks(block)
+        block_results = check_block(block)
         results["errors"].update(block_results.get("errors", {}))
         results["warnings"].update(block_results.get("warnings", {}))
-    print(results)
     return results
 
 
-def check_blocks(block):
+def check_block(block):
     """
     Validate a Block and return all errors and warnings for the block and each
     individual contained object.
@@ -109,12 +108,24 @@ def check_blocks(block):
     is indexed by the object with values describing the error or warning.
     :rtype: Dictionary
     """
+    results = {
+        "errors": dict(),
+        "warnings": dict(),
+    }
+
     errors = check_entity(block)
+    if errors:
+        results["errors"][block] = errors
 
-    return {"errors": {block: errors}}
+    for group in block.groups:
+        group_results = check_group(group)
+        results["errors"].update(group_results["errors"])
+        results["warnings"].update(group_results["warnings"])
+
+    return results
 
 
-def check_groups(group):
+def check_group(group):
     """
     Validate a Group and return all errors and warnings.
     Does not check contained objects.
@@ -123,9 +134,15 @@ def check_groups(group):
     is indexed by the object with values describing the error or warning.
     :rtype: Dictionary
     """
-    errors = check_entity(group)
+    results = {
+        "errors": dict(),
+        "warnings": dict(),
+    }
 
-    return {"errors": {group: errors}}
+    errors = check_entity(group)
+    if errors:
+        results["errors"][group] = errors
+    return results
 
 
 def check_data_arrays(da):
