@@ -81,8 +81,8 @@ class Validator(object):
 
 def check_file(nixfile):
     """
-    Validate a NIX file and return all errors and warnings for each individual
-    contained object.
+    Validate a NIX file and all contained objects and return all errors and
+    warnings for each individual object.
 
     :returns: A nested dictionary of errors and warnings. Each subdictionary
     is indexed by the object with values describing the error or warning.
@@ -92,10 +92,37 @@ def check_file(nixfile):
     if not nixfile.created_at:
         results["errors"][nixfile] = ["date is not set!"]
 
+    # Blocks
     for block in nixfile.blocks:
-        block_results = check_block(block)
-        results["errors"].update(block_results.get("errors", {}))
-        results["warnings"].update(block_results.get("warnings", {}))
+        blk_errors, blk_warnings = check_block(block)
+        if blk_errors:
+            results["errors"][block] = blk_errors
+        if blk_warnings:
+            results["warnings"][block] = blk_warnings
+        # Groups
+        for group in block.groups:
+            grp_errors, grp_warnings = check_group(group)
+            if grp_errors:
+                results["errors"][group] = grp_errors
+            if grp_warnings:
+                results["warnings"][group] = grp_warnings
+        # DataArrays
+
+            # Dimensions
+
+        # Tags
+
+            # Features
+
+        # MultiTags
+
+            # Features
+
+        # Sources
+
+    # Sections
+
+        # Properties
     return results
 
 
@@ -104,25 +131,11 @@ def check_block(block):
     Validate a Block and return all errors and warnings for the block and each
     individual contained object.
 
-    :returns: A nested dictionary of errors and warnings. Each subdictionary
-    is indexed by the object with values describing the error or warning.
+    :returns: A list of 'errors' and a list of 'warnings'
     :rtype: Dictionary
     """
-    results = {
-        "errors": dict(),
-        "warnings": dict(),
-    }
-
     errors = check_entity(block)
-    if errors:
-        results["errors"][block] = errors
-
-    for group in block.groups:
-        group_results = check_group(group)
-        results["errors"].update(group_results["errors"])
-        results["warnings"].update(group_results["warnings"])
-
-    return results
+    return errors, list()
 
 
 def check_group(group):
@@ -130,19 +143,11 @@ def check_group(group):
     Validate a Group and return all errors and warnings.
     Does not check contained objects.
 
-    :returns: A nested dictionary of errors and warnings. Each subdictionary
-    is indexed by the object with values describing the error or warning.
+    :returns: A list of 'errors' and a list of 'warnings'
     :rtype: Dictionary
     """
-    results = {
-        "errors": dict(),
-        "warnings": dict(),
-    }
-
     errors = check_entity(group)
-    if errors:
-        results["errors"][group] = errors
-    return results
+    return errors, list()
 
 
 def check_data_arrays(da):
