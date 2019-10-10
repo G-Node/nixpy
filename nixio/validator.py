@@ -16,69 +16,6 @@ except ImportError:
     from collections import OrderedDict
 
 
-class Validator(object):
-
-    def __init__(self, file):
-        self.file = file
-        self.errors = OrderedDict()
-        self.errors['file_errors'] = []
-        self.errors['blocks'] = []
-        self.errors['sections'] = []
-        # only for file.py use, number will not be correct
-        # if a function addressing same object is called more than once
-        self.error_count = 0
-
-    def form_dict(self):
-        """
-        Form a empty dict that has same structure as the data tree in the file.
-        """
-        file = self.file
-        self.error_count = 0
-
-        for si, sec in enumerate(file.find_sections()):
-            prop_dict = {'errors': [], 'props': [], "obj_ref": sec}
-            self.errors['sections'].append(prop_dict)
-
-            for pi, prop in enumerate(sec.props):
-                pe_dict = {'errors': [], "obj_ref": prop}
-                self.errors['sections'][si]['props'].append(pe_dict)
-
-        for bi, blk in enumerate(file.blocks):
-            blk_dict = {'sources': [], 'groups': [], 'data_arrays': [],
-                        'tags': [], 'multi_tags': [], 'errors': [],
-                        "obj_ref": blk}
-            self.errors['blocks'].append(blk_dict)
-            OrderedDict(self.errors)
-
-            for gi, grp in enumerate(blk.groups):
-                grp_dict = {'errors': [], "obj_ref": grp}
-                self.errors['blocks'][bi]['groups'].append(grp_dict)
-
-            for di, da in enumerate(blk.data_arrays):
-                d = {'dimensions': [], 'errors': [], "obj_ref": da}
-                self.errors['blocks'][bi]['data_arrays'].append(d)
-                for dim_idx, dim in enumerate(da.dimensions):
-                    dim_dict = {'errors': [], "obj_ref": dim}
-                    da = self.errors['blocks'][bi]['data_arrays'][di]
-                    da['dimensions'].append(dim_dict)
-
-            for mi, mt in enumerate(blk.multi_tags):
-                mt_dict = {'features': [], 'errors': [], "obj_ref": mt}
-                self.errors['blocks'][bi]['multi_tags'].append(mt_dict)
-                for fi, fea in enumerate(mt.features):
-                    fea_dict = {'errors': [], "obj_ref": fea}
-                    mtag = self.errors['blocks'][bi]['multi_tags'][mi]
-                    mtag['features'].append(fea_dict)
-
-            for ti, tag in enumerate(blk.tags):
-                tag_dict = {'features': [], 'errors': [], "obj_ref": tag}
-                self.errors['blocks'][bi]['tags'].append(tag_dict)
-                for fi, fea in enumerate(tag.features):
-                    fea_dict = {'errors': [], "obj_ref": fea}
-                    tag = self.errors['blocks'][bi]['tags'][ti]
-                    tag['features'].append(fea_dict)
-
-
 def check_file(nixfile):
     """
     Validate a NIX file and all contained objects and return all errors and
