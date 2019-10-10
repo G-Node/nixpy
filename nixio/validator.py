@@ -7,9 +7,9 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
-import numpy as np
 from .util import units
-import nixio as nix
+from .dimensions import (RangeDimension, SampledDimension, SetDimension,
+                         DimensionType)
 try:
     from collections.abc import OrderedDict
 except ImportError:
@@ -187,9 +187,9 @@ def check_data_array(da):
         warnings.append("expansion origin for calibration is set, "
                         "but polynomial coefficients are missing")
     dimtypemap = {
-        nix.DimensionType.Range: nix.RangeDimension,
-        nix.DimensionType.Sample: nix.SampledDimension,
-        nix.DimensionType.Set: nix.SetDimension,
+        DimensionType.Range: RangeDimension,
+        DimensionType.Sample: SampledDimension,
+        DimensionType.Set: SetDimension,
     }
 
     for idx, (dim, datalen) in enumerate(zip(da.dimensions, da.shape), 1):
@@ -203,7 +203,7 @@ def check_data_array(da):
             errors.append("dimension_type attribute for dimension "
                           "{} does not match "
                           "Dimension object type".format(idx))
-        if isinstance(dim, nix.RangeDimension):
+        if isinstance(dim, RangeDimension):
             if dim.ticks is not None and len(dim.ticks) != datalen:
                 # if ticks is None or empty, it will be reported by the
                 # dimension check function
@@ -212,9 +212,9 @@ def check_data_array(da):
                               "along the corresponding "
                               "data dimension".format(idx))
             dim_errors, dim_warnings = check_range_dimension(dim, idx)
-        elif isinstance(dim, nix.SampledDimension):
+        elif isinstance(dim, SampledDimension):
             dim_errors, dim_warnings = check_sampled_dimension(dim, idx)
-        elif isinstance(dim, nix.SetDimension):
+        elif isinstance(dim, SetDimension):
             if dim.labels and len(dim.labels) != datalen:
                 # empty labels is allowed
                 errors.append("number of labels in SetDimension ({}) "
