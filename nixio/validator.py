@@ -64,6 +64,9 @@ def check_file(nixfile):
             update_results(tag, tag_errors, tag_warnings)
 
         # MultiTags
+        for mtag in block.multi_tags:
+            mtag_errors, mtag_warnings = check_multi_tag(mtag)
+            update_results(mtag, mtag_errors, mtag_warnings)
 
         # Sources
 
@@ -199,9 +202,9 @@ def check_tag(tag):
         refs_units = [get_dim_units(da) for da in tag.references]
         if any(len(ru) != len(tag.units) for ru in refs_units):
             errors.append("some of the referenced DataArrays' dimensions "
-                          "don't have units where the tag has; "
+                          "don't have units where the Tag has; "
                           "make sure that all references have the same number "
-                          "of dimensions as the tag has units "
+                          "of dimensions as the Tag has units "
                           "and that each dimension has a unit set")
 
         if not tag_units_match_refs_units(tag.units, refs_units):
@@ -218,62 +221,67 @@ def check_tag(tag):
 
     return errors, warnings
 
-def check_multi_tag(self, mt, mt_idx, blk_idx):
-    mt_err_list = []
 
-    if not mt.positions:
-        mt_err_list.append("position is not set")  # no test for this
-    else:
-        if len(mt.positions.shape) > 2:
-            mt_err_list.append(
-                "Positions should not have more than 2 dimensions"
-            )
-    if mt.extents:
-        if len(mt.extents.shape) > 2:
-            mt_err_list.append(
-                "Extents should not have more than 2 dimensions"
-            )
-        if mt.positions.shape != mt.extents.shape:
-            # not sure what index should be given to shape
-            mt_err_list.append(
-                "Number of entries in positions and extents do not match"
-            )
-    if mt.references:
-        # assume all references have same shape
-        ref_ndim = len(mt.references[0].shape)
-        if ref_ndim > 1 and len(mt.positions.shape) == 1:
-            mt_err_list.append("The number of reference and position"
-                               " entries do not match")
-        elif (len(mt.positions.shape) == 2 and
-              mt.positions.shape[1] != ref_ndim):
-            mt_err_list.append("The number of reference and position"
-                               " entries do not match")
-        if mt.extents:
-            if len(mt.extents.shape) == 1 and ref_ndim > 1:
-                mt_err_list.append("The number of reference and extent"
-                                   " entries do not match")
-            elif (len(mt.extents.shape) == 2 and
-                  mt.extents.shape[1] != ref_ndim):
-                # should we add a function for limiting extent dim to <= 2
-                mt_err_list.append("The number of reference and extent"
-                                   " entries do not match")
-    for unit in mt.units:
-        if not units.is_si(unit):
-            mt_err_list.append("Invalid unit")
-            continue
-        for ref in mt.references:
-            u_list = self.get_dim_units(ref)
-            for u in u_list:
-                if not units.scalable(u, unit):
-                    mt_err_list.append(
-                        "References and multi_tag units mismatched"
-                    )
-                    break
+def check_multi_tag(mtag):
+    """
+    Validate a MultiTag and its Features and return all errors and warnings.
+    Errors and warnings about Features are included in the MultiTag errors and
+    warnings lists.
 
-    mtag = self.errors['blocks'][blk_idx]['multi_tags'][mt_idx]
-    mtag['errors'] = mt_err_list
-    self.error_count += len(mt_err_list)
-    return self.errors
+    For Features, only the basic Entity requirements, LinkType, and the
+    existence of a referenced DataArray are checked.  The linked DataArray is
+    not checked for validity (see check_data_array() for those validation
+    checks).
+
+    :returns: A list of 'errors' and a list of 'warnings'
+    """
+    errors = check_entity(mtag)
+    warnings = list()
+
+    if not mtag.positions:
+        errors.append("positions are not set")
+    if mtag.references:
+        if len(mtag.positions.shape) == 1:
+            posdim = 1
+        else:
+            posdim = mtag.positions.shape[1]
+        # New error for len(mtag.positions.shape) > 2
+        if any(posdim != len(da.shape) for da in mtag.references):
+            errors.append("number of entries (in 2nd dim) in positions "
+                          "does not match number of dimensions in all "
+                          "referenced DataArrays")
+        if mtag.extents:
+            if mtag.positions.shape != mtag.extents.shape:
+                errors.append("number of entries in positions and extents "
+                              "do not match")
+            extlen = mtag.positions.shape[1]
+            if any(extlen != len(da.shape) for da in mtag.references):
+                errors.append("number of entries (in 2nd dim) in extents "
+                              "does not match number of dimensions in all "
+                              "referenced DataArrays")
+
+        refs_units = [get_dim_units(da) for da in mtag.references]
+        if any(len(ru) != len(mtag.units) for ru in refs_units):
+            errors.append("some of the referenced DataArrays' dimensions "
+                          "don't have units where the MultiTag has; "
+                          "make sure that all references have the same number "
+                          "of dimensions as the MultiTag has units "
+                          "and that each dimension has a unit set")
+
+        if not tag_units_match_refs_units(mtag.units, refs_units):
+            errors.append("some of the referenced DataArrays' dimensions "
+                          "have units that are not convertible to the units "
+                          "set in the MultiTag "
+                          "(Note: composite units are not supported)")
+
+    if any(not units.is_si(u) for u in mtag.units if u):
+        errors.append("unit is invalid: not an atomic SI "
+                      "(Note: composite units are not supported)")
+
+    # TODO: Do Features
+
+    return errors, warnings
+
 
 def check_section(self, section, sec_idx):
     """
