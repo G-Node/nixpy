@@ -467,13 +467,16 @@ def check_entity(entity):
         errors.append("date not set")
     return errors
 
-def get_dim_units(self, data_arrays):
+
+def get_dim_units(data_array):
     """
-    Help function to collect the units of the dimensions of a data array
+    Helper function to collect the units of the dimensions of a data array
     """
     unit_list = []
-    for dim in data_arrays.dimensions:
-        if dim.dimension_type == DimensionType.Range or\
-                dim.dimension_type == DimensionType.Sample:
-            unit_list.append(dim.unit)
+    for dim in data_array.dimensions:
+        if (dim.dimension_type == DimensionType.Range or
+                dim.dimension_type == DimensionType.Sample):
+            unit_list.append(dim.unit if dim.unit else "")
+        elif dim.dimension_type == DimensionType.Set:
+            unit_list.append("")
     return unit_list
