@@ -109,7 +109,7 @@ def check_data_array(da):
     if not da.data_type:
         errors.append("data type is not set")
 
-    if len(da.dimensions) != len(da.data_extent):
+    if len(da.dimensions) != len(da.shape):
         errors.append("data dimensionality does not match number of defined "
                       "dimensions")
 
@@ -204,13 +204,13 @@ def check_tag(tag):
                           "of dimensions as the tag has units "
                           "and that each dimension has a unit set")
 
-        if any(units.scalable(ru, tag.units) for ru in refs_units):
+        if any(not units.scalable(ru, tag.units) for ru in refs_units):
             errors.append("some of the referenced DataArrays' dimensions "
                           "have units that are not convertible to the units "
                           "set in the Tag "
                           "(Note: composite units are not supported)")
 
-    if any(not units.is_si(u) for u in tag.units):
+    if any(not units.is_si(u) for u in tag.units if u):
         errors.append("unit is invalid: not an atomic SI "
                       "(Note: composite units are not supported)")
 
@@ -372,7 +372,7 @@ def check_sampled_dimension(dim, idx):
     errors = list()
     warnings = list()
 
-    if dim.sampling_interval:
+    if not dim.sampling_interval:
         errors.append("sampling interval for dimension {} "
                       "is not set".format(idx))
     elif dim.sampling_interval < 0:
@@ -380,7 +380,7 @@ def check_sampled_dimension(dim, idx):
                       "is not valid (interval > 0)".format(idx))
 
     if dim.unit:
-        if units.is_atomic(dim.unit):
+        if not units.is_atomic(dim.unit):
             errors.append("unit for dimension {} is set but it is not an "
                           "atomic SI unit (Note: composite units are "
                           "not supported)".format(idx))
