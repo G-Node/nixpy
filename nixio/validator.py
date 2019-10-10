@@ -204,7 +204,7 @@ def check_tag(tag):
                           "of dimensions as the tag has units "
                           "and that each dimension has a unit set")
 
-        if any(not units.scalable(ru, tag.units) for ru in refs_units):
+        if not tag_units_match_refs_units(tag.units, refs_units):
             errors.append("some of the referenced DataArrays' dimensions "
                           "have units that are not convertible to the units "
                           "set in the Tag "
@@ -419,3 +419,13 @@ def get_dim_units(data_array):
         elif dim.dimension_type == DimensionType.Set:
             unit_list.append("")
     return unit_list
+
+
+def tag_units_match_refs_units(tag_units, refs_units):
+    for ref in refs_units:
+        for ru, tu in zip(tag_units, ref):
+            if ru == "" and tu == "":
+                continue
+            if not units.scalable(ru, tu):
+                return False
+    return True
