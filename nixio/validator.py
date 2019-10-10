@@ -59,12 +59,11 @@ def check_file(nixfile):
             update_results(da, da_errors, da_warnings)
 
         # Tags
-
-            # Features
+        for tag in block.tags:
+            tag_errors, tag_warnings = check_tag(tag)
+            update_results(tag, tag_errors, tag_warnings)
 
         # MultiTags
-
-            # Features
 
         # Sources
 
@@ -164,57 +163,60 @@ def check_data_array(da):
     return errors, warnings
 
 
-def check_tag(self, tag, tag_idx, blk_idx):
+def check_tag(tag):
     """
-    Check if the file meets the NIX requirements at the tag level.
+    Validate a Tag and its Features and return all errors and warnings.
+    Errors and warnings about Features are included in the Tag errors and
+    warnings lists.
 
-    :returns: The error dictionary with errors appended on Tag level
+    For Features, only the basic Entity requirements, LinkType, and the
+    existence of a referenced DataArray are checked.  The linked DataArray is
+    not checked for validity (see check_data_array() for those validation
+    checks).
+
+    :returns: A list of 'errors' and a list of 'warnings'
     """
-    tag_err_list = []
+    errors = check_entity(tag)
+    warnings = list()
 
     if not tag.position:
-        tag_err_list.append("position is not set")
+        errors.append("position is not set")
     if tag.references:
-        # referenced da dimension and units should match the tag
-        ndim = len(tag.references[0].shape)
-        if tag.position:
-            if len(tag.position) != ndim:
-                tag_err_list.append(
-                    "number of position and dimensionality of reference "
-                    "do not match"
-                )
+        posdim = len(tag.position)
+        if any(posdim != len(da.shape) for da in tag.references):
+            errors.append("number of entries in position does not match "
+                          "number of dimensions in all referenced DataArrays")
         if tag.extent:
-            if ndim != len(tag.extent):
-                tag_err_list.append("number of extent and dimensionality "
-                                    "of reference do not match")
+            extlen = len(tag.extent)
+            if extlen != posdim:
+                errors.append("number of entries in position and extent "
+                              "do not match")
+            if any(extlen != len(da.shape) for da in tag.references):
+                errors.append("number of entries in extent does not match "
+                              "number of dimensions in all referenced "
+                              "DataArrays")
 
-        for ref in tag.references:
-            unit_list = self.get_dim_units(ref)
-            unit_list = [un for un in unit_list if un]
-            dim_list = [dim for refer in tag.references
-                        for dim in refer.dimensions
-                        if dim.dimension_type != DimensionType.Set]
-            if len(unit_list) != len(dim_list):
-                tag_err_list.append(
-                    "some dimensions of references have no units"
-                )
-            for u in unit_list:
-                for tu in tag.units:
-                    if not units.scalable(u, tu):
-                        tag_err_list.append(
-                            "references and tag units mismatched"
-                        )
-                        break
-                break
+        refs_units = [get_dim_units(da) for da in tag.references]
+        if any(len(ru) != len(tag.units) for ru in refs_units):
+            errors.append("some of the referenced DataArrays' dimensions "
+                          "don't have units where the tag has; "
+                          "make sure that all references have the same number "
+                          "of dimensions as the tag has units "
+                          "and that each dimension has a unit set")
 
-    for unit in tag.units:
-        if not units.is_si(unit):
-            tag_err_list.append('Invalid unit')
+        if any(units.scalable(ru, tag.units) for ru in refs_units):
+            errors.append("some of the referenced DataArrays' dimensions "
+                          "have units that are not convertible to the units "
+                          "set in the Tag "
+                          "(Note: composite units are not supported)")
 
-    tag = self.errors['blocks'][blk_idx]['tags'][tag_idx]
-    tag['errors'] = tag_err_list
-    self.error_count += len(tag_err_list)
-    return self.errors
+    if any(not units.is_si(u) for u in tag.units):
+        errors.append("unit is invalid: not an atomic SI "
+                      "(Note: composite units are not supported)")
+
+    # TODO: Do Features
+
+    return errors, warnings
 
 def check_multi_tag(self, mt, mt_idx, blk_idx):
     mt_err_list = []
