@@ -16,6 +16,81 @@ except ImportError:
     from collections import OrderedDict
 
 
+class ValidationError(object):
+    """
+    Static class for defining validation error messages
+    """
+    NoName = "no name set"
+    NoType = "no type set"
+    NoDate = "date is not set"
+    NoDataType = "data type is not set"
+    NoID = "no ID set"
+    DimensionMismatch = ("data dimensionality does not match number of "
+                         "defined dimensions")
+    InvalidDimensionIndex = ("index for dimension {} is not set to a valid "
+                             "value (index > 0)")
+    IncorrectDimensionIndex = ("index for dimension {} is set to incorrect "
+                               "value {}")
+    DimensionTypeMismatch = ("dimension_type attribute for dimension "
+                             "{} does not match Dimension object type")
+    RangeDimTicksMismatch = ("number of ticks in RangeDimension ({}) "
+                             "differs from the number of data entries "
+                             "along the corresponding data dimension")
+    SetDimLabelsMismatch = ("number of labels in SetDimension ({}) "
+                            "differs from the number of data entries "
+                            "along the corresponding data dimension")
+    NoPosition = "position is not set"
+    PositionDimensionMismatch = ("number of entries in position does not "
+                                 "match number of dimensions in all "
+                                 "referenced DataArrays")
+    ExtentDimensionMismatch = ("number of entries in extent does not match "
+                               "number of dimensions in all referenced "
+                               "DataArrays")
+    PositionExtentMismatch = ("number of entries in position and extent "
+                              "do not match")
+    ReferenceUnitsMismatch = ("some of the referenced DataArrays' dimensions "
+                              "don't have units where the Tag has; "
+                              "make sure that all references have the same "
+                              "number of dimensions as the Tag has units "
+                              "and that each dimension has a unit set")
+    ReferenceUnitsIncompatible = ("some of the referenced DataArrays' "
+                                  "dimensions have units that are not "
+                                  "convertible to the units set in the Tag "
+                                  "(Note: composite units are not supported)")
+    InvalidUnit = ("unit is invalid: not an atomic SI "
+                   "(Note: composite units are not supported)")
+    NoPositions = "positions are not set"
+    PositionsDimensionMismatch = ("number of entries (in 2nd dim) in "
+                                  "positions does not match number of "
+                                  "dimensions in all referenced DataArrays")
+    ExtentsDimensionMismatch = ("number of entries (in 2nd dim) in extents "
+                                "does not match number of dimensions in all "
+                                "referenced DataArrays")
+    PositionsExtentsMismatch = ("number of entries in positions and extents "
+                                "do not match")
+    NoTicks = "ticks for dimension {} are not set"
+    UnsortedTicks = "ticks for dimension {} are not sorted"
+    InvalidDimensionUnit = ("unit for dimension {} is set but it is not an "
+                            "atomic SI unit "
+                            "(Note: composite units are not supported)")
+    NoSamplingInterval = ("sampling interval for dimension {} "
+                          "is not set")
+    InvalidSamplingInterval = ("sampling interval for dimension {} "
+                               "is not valid (interval > 0)")
+
+
+class ValidationWarning(object):
+    NoVersion = "version is not set"
+    NoFormat = "format is not set"
+    InvalidUnit = "unit is not SI or composite of SI units"
+    NoExpansionOrigin = ("polynomial coefficients for calibration are set, "
+                         "but expansion origin is missing")
+    NoPolynomialCoefficients = ("expansion origin for calibration is set, "
+                                "but polynomial coefficients are missing")
+    OffsetNoUnit = ("offset for dimension {} is set, "
+                    "but no valid unit is set")
+
+
 def check_file(nixfile):
     """
     Validate a NIX file and all contained objects and return all errors and
@@ -27,13 +102,13 @@ def check_file(nixfile):
     """
     results = {"errors": dict(), "warnings": dict()}
     if not nixfile.created_at:
-        results["errors"][nixfile] = ["date is not set"]
+        results["errors"][nixfile] = [ValidationError.NoDate]
 
     file_warnings = list()
     if not nixfile.version:
-        file_warnings.append("version is not set")
+        file_warnings.append(ValidationWarning.NoVersion)
     if not nixfile.format:
-        file_warnings.append("format is not set")
+        file_warnings.append(ValidationWarning.NoFormat)
     if file_warnings:
         results["warnings"][nixfile] = file_warnings
 
@@ -110,21 +185,18 @@ def check_data_array(da):
     warnings = list()
 
     if not da.data_type:
-        errors.append("data type is not set")
+        errors.append(ValidationError.NoDataType)
 
     if len(da.dimensions) != len(da.shape):
-        errors.append("data dimensionality does not match number of defined "
-                      "dimensions")
+        errors.append(ValidationError.DimensionMismatch)
 
     if da.unit and not units.is_si(da.unit):
-        warnings.append("unit is not SI or composite of SI units")
+        warnings.append(ValidationWarning.InvalidUnit)
 
     if da.polynom_coefficients and not da.expansion_origin:
-        warnings.append("polynomial coefficients for calibration are set, "
-                        "but expansion origin is missing")
+        warnings.append(ValidationWarning.NoExpansionOrigin)
     elif da.expansion_origin and not da.polynom_coefficients:
-        warnings.append("expansion origin for calibration is set, "
-                        "but polynomial coefficients are missing")
+        warnings.append(ValidationWarning.NoPolynomialCoefficients)
     dimtypemap = {
         DimensionType.Range: RangeDimension,
         DimensionType.Sample: SampledDimension,
@@ -133,33 +205,27 @@ def check_data_array(da):
 
     for idx, (dim, datalen) in enumerate(zip(da.dimensions, da.shape), 1):
         if not dim.index or dim.index <= 0:
-            errors.append("index for dimension {} is not set to a valid value "
-                          "(index > 0)".format(idx))
+            errors.append(ValidationError.InvalidDimensionIndex.format(idx))
         elif dim.index != idx:
-            errors.append("index for dimension {} is set to incorrect "
-                          "value {}".format(idx, da.index))
+            errors.append(
+                ValidationError.IncorrectDimensionIndex.format(idx, dim.index)
+            )
         if not isinstance(dim, dimtypemap[dim.dimension_type]):
-            errors.append("dimension_type attribute for dimension "
-                          "{} does not match "
-                          "Dimension object type".format(idx))
+            errors.append(ValidationError.DimensionTypeMismatch.format(idx))
         if isinstance(dim, RangeDimension):
             if dim.ticks is not None and len(dim.ticks) != datalen:
                 # if ticks is None or empty, it will be reported by the
                 # dimension check function
-                errors.append("number of ticks in RangeDimension ({}) "
-                              "differs from the number of data entries "
-                              "along the corresponding "
-                              "data dimension".format(idx))
+                errors.append(
+                    ValidationError.RangeDimTicksMismatch.format(idx)
+                )
             dim_errors, dim_warnings = check_range_dimension(dim, idx)
         elif isinstance(dim, SampledDimension):
             dim_errors, dim_warnings = check_sampled_dimension(dim, idx)
         elif isinstance(dim, SetDimension):
             if dim.labels and len(dim.labels) != datalen:
                 # empty labels is allowed
-                errors.append("number of labels in SetDimension ({}) "
-                              "differs from the number of data entries "
-                              "along the corresponding "
-                              "data dimension".format(idx))
+                errors.append(ValidationError.SetDimLabelsMismatch.format(idx))
             dim_errors, dim_warnings = check_set_dimension(dim, idx)
         errors.extend(dim_errors)
         warnings.extend(dim_warnings)
@@ -183,39 +249,27 @@ def check_tag(tag):
     warnings = list()
 
     if not tag.position:
-        errors.append("position is not set")
+        errors.append(ValidationError.NoPosition)
     if tag.references:
         posdim = len(tag.position)
         if any(posdim != len(da.shape) for da in tag.references):
-            errors.append("number of entries in position does not match "
-                          "number of dimensions in all referenced DataArrays")
+            errors.append(ValidationError.PositionDimensionMismatch)
         if tag.extent:
             extlen = len(tag.extent)
             if extlen != posdim:
-                errors.append("number of entries in position and extent "
-                              "do not match")
+                errors.append(ValidationError.PositionExtentMismatch)
             if any(extlen != len(da.shape) for da in tag.references):
-                errors.append("number of entries in extent does not match "
-                              "number of dimensions in all referenced "
-                              "DataArrays")
+                errors.append(ValidationError.ExtentDimensionMismatch)
 
         refs_units = [get_dim_units(da) for da in tag.references]
         if any(len(ru) != len(tag.units) for ru in refs_units):
-            errors.append("some of the referenced DataArrays' dimensions "
-                          "don't have units where the Tag has; "
-                          "make sure that all references have the same number "
-                          "of dimensions as the Tag has units "
-                          "and that each dimension has a unit set")
+            errors.append(ValidationError.ReferenceUnitsMismatch)
 
         if not tag_units_match_refs_units(tag.units, refs_units):
-            errors.append("some of the referenced DataArrays' dimensions "
-                          "have units that are not convertible to the units "
-                          "set in the Tag "
-                          "(Note: composite units are not supported)")
+            errors.append(ValidationError.ReferenceUnitsIncompatible)
 
     if any(not units.is_si(u) for u in tag.units if u):
-        errors.append("unit is invalid: not an atomic SI "
-                      "(Note: composite units are not supported)")
+        errors.append(ValidationError.InvalidUnit)
 
     # TODO: Do Features
 
@@ -239,7 +293,7 @@ def check_multi_tag(mtag):
     warnings = list()
 
     if not mtag.positions:
-        errors.append("positions are not set")
+        errors.append(ValidationError.NoPositions)
     if mtag.references:
         if len(mtag.positions.shape) == 1:
             posdim = 1
@@ -247,36 +301,23 @@ def check_multi_tag(mtag):
             posdim = mtag.positions.shape[1]
         # New error for len(mtag.positions.shape) > 2
         if any(posdim != len(da.shape) for da in mtag.references):
-            errors.append("number of entries (in 2nd dim) in positions "
-                          "does not match number of dimensions in all "
-                          "referenced DataArrays")
+            errors.append(ValidationError.PositionsDimensionMismatch)
         if mtag.extents:
             if mtag.positions.shape != mtag.extents.shape:
-                errors.append("number of entries in positions and extents "
-                              "do not match")
+                errors.append(ValidationError.PositionsExtentsMismatch)
             extlen = mtag.positions.shape[1]
             if any(extlen != len(da.shape) for da in mtag.references):
-                errors.append("number of entries (in 2nd dim) in extents "
-                              "does not match number of dimensions in all "
-                              "referenced DataArrays")
+                errors.append(ValidationError.ExtentsDimensionMismatch)
 
         refs_units = [get_dim_units(da) for da in mtag.references]
         if any(len(ru) != len(mtag.units) for ru in refs_units):
-            errors.append("some of the referenced DataArrays' dimensions "
-                          "don't have units where the MultiTag has; "
-                          "make sure that all references have the same number "
-                          "of dimensions as the MultiTag has units "
-                          "and that each dimension has a unit set")
+            errors.append(ValidationError.ReferenceUnitsMismatch)
 
         if not tag_units_match_refs_units(mtag.units, refs_units):
-            errors.append("some of the referenced DataArrays' dimensions "
-                          "have units that are not convertible to the units "
-                          "set in the MultiTag "
-                          "(Note: composite units are not supported)")
+            errors.append(ValidationError.ReferenceUnitsIncompatible)
 
     if any(not units.is_si(u) for u in mtag.units if u):
-        errors.append("unit is invalid: not an atomic SI "
-                      "(Note: composite units are not supported)")
+        errors.append(ValidationError.InvalidUnit)
 
     # TODO: Do Features
 
@@ -351,14 +392,12 @@ def check_range_dimension(dim, idx):
     warnings = list()
 
     if not dim.ticks:
-        errors.append("ticks for dimension {} are not set".format(idx))
+        errors.append(ValidationError.NoTicks.format(idx))
     elif not all(ti < tj for ti, tj in zip(dim.ticks[:-1], dim.ticks[1:])):
-        errors.append("ticks for dimension {} are not sorted".format(idx))
+        errors.append(ValidationError.UnsortedTicks.format(idx))
 
     if dim.unit and not units.is_atomic(dim.unit):
-        errors.append("unit for dimension {} is set but it is not an "
-                      "atomic SI unit "
-                      "(Note: composite units are not supported)".format(idx))
+        errors.append(ValidationError.InvalidDimensionUnit.format(idx))
     return errors, warnings
 
 
@@ -381,21 +420,16 @@ def check_sampled_dimension(dim, idx):
     warnings = list()
 
     if not dim.sampling_interval:
-        errors.append("sampling interval for dimension {} "
-                      "is not set".format(idx))
+        errors.append(ValidationError.NoSamplingInterval.format(idx))
     elif dim.sampling_interval < 0:
-        errors.append("sampling interval for dimension {} "
-                      "is not valid (interval > 0)".format(idx))
+        errors.append(ValidationError.InvalidSamplingInterval.format(idx))
 
     if dim.unit:
         if not units.is_atomic(dim.unit):
-            errors.append("unit for dimension {} is set but it is not an "
-                          "atomic SI unit (Note: composite units are "
-                          "not supported)".format(idx))
+            errors.append(ValidationError.InvalidDimensionUnit.format(idx))
     else:
         if dim.offset:
-            warnings.append("offset for dimension {} is set, "
-                            "but no valid unit is set".format(idx))
+            warnings.append(ValidationWarning.OffsetNoUnit.format(idx))
     return errors, warnings
 
 
@@ -405,13 +439,13 @@ def check_entity(entity):
     """
     errors = []
     if not entity.type:
-        errors.append("no type set")
+        errors.append(ValidationError.NoType)
     if not entity.id:
-        errors.append("no ID set")
+        errors.append(ValidationError.NoID)
     if not entity.name:
-        errors.append("no name set")
+        errors.append(ValidationError.NoName)
     if not entity.created_at:
-        errors.append("date not set")
+        errors.append(ValidationError.NoDate)
     return errors
 
 

@@ -4,7 +4,9 @@ import numpy as np
 import os
 import unittest
 from .tmp import TempDir
-# from ..validate import Validate
+
+VE = nix.validator.ValidationError
+VW = nix.validator.ValidationWarning
 
 
 class TestValidate (unittest.TestCase):
@@ -100,18 +102,18 @@ class TestValidate (unittest.TestCase):
     def test_check_file(self):
         self.file.force_created_at(0)
         res = self.file.validate()
-        assert res["errors"][self.file] == ["date is not set"]
+        assert res["errors"][self.file] == [VE.NoDate]
 
     def test_check_block(self):
         block = self.file.blocks[0]
         block._h5group.set_attr("name", None)
         res = self.file.validate()
-        assert res["errors"][block] == ["no name set"]
+        assert res["errors"][block] == [VE.NoName]
 
         block._h5group.set_attr("type", None)
         res = self.file.validate()
         actual = sorted(res["errors"][block])
-        expected = sorted(["no name set", "no type set"])
+        expected = sorted([VE.NoName, VE.NoType])
         assert actual == expected
         assert len(res["warnings"]) == 0
 
@@ -120,12 +122,12 @@ class TestValidate (unittest.TestCase):
         group2 = self.file.blocks[1].groups[0]
         group1._h5group.set_attr("name", None)
         res = self.file.validate()
-        assert res["errors"][group1] == ["no name set"]
+        assert res["errors"][group1] == [VE.NoName]
         assert group2 not in res["errors"]
 
         group2._h5group.set_attr("name", None)
         res = self.file.validate()
-        assert res["errors"][group2] == ["no name set"]
+        assert res["errors"][group2] == [VE.NoName]
 
         assert group1 not in res["warnings"]
         assert group2 not in res["warnings"]
@@ -133,14 +135,12 @@ class TestValidate (unittest.TestCase):
         group2._h5group.set_attr("type", None)
         res = self.file.validate()
         actual = sorted(res["errors"][group2])
-        expected = sorted(["no name set", "no type set"])
+        expected = sorted([VE.NoName, VE.NoType])
         assert actual == expected
         assert len(res["warnings"]) == 0
 
     def test_check_data_array_wrong_ticks(self):
-        expmsg = ("number of ticks in RangeDimension (1) differs from the "
-                  "number of data entries along the corresponding "
-                  "data dimension")
+        expmsg = VE.RangeDimTicksMismatch.format(1)
         da = self.file.blocks[0].data_arrays["data-1d"]
         rdim = da.dimensions[0]
         rdim.ticks = [10]
@@ -148,10 +148,7 @@ class TestValidate (unittest.TestCase):
         assert res["errors"][da] == [expmsg]
 
     def test_check_data_array_wrong_labels(self):
-        expmsg = (
-            "number of labels in SetDimension (1) differs from the number "
-            "of data entries along the corresponding data dimension"
-        )
+        expmsg = VE.SetDimLabelsMismatch.format(1)
         da = self.file.blocks[0].data_arrays["data-2d"]
         setdim = da.dimensions[0]
         setdim.labels = ["-"]
@@ -159,14 +156,6 @@ class TestValidate (unittest.TestCase):
         assert res["errors"][da] == [expmsg]
 
     def test_check_data_array_coefficients(self):
-        no_polynom_coeff_warning = (
-            "expansion origin for calibration is set, "
-            "but polynomial coefficients are missing"
-        )
-        no_expansion_origin_warning = (
-            "polynomial coefficients for calibration are set, "
-            "but expansion origin is missing"
-        )
         da1 = self.file.blocks[0].data_arrays["data-1d"]
         da1.expansion_origin = 0.7
 
@@ -175,17 +164,14 @@ class TestValidate (unittest.TestCase):
 
         res = self.file.validate()
         warnings = res["warnings"]
-        assert warnings[da1] == [no_polynom_coeff_warning]
-        assert warnings[da2] == [no_expansion_origin_warning]
+        assert warnings[da1] == [VW.NoPolynomialCoefficients]
+        assert warnings[da2] == [VW.NoExpansionOrigin]
 
     def test_check_data_array_bad_dims(self):
-        expmsg = (
-            "data dimensionality does not match number of defined dimensions"
-        )
         da = self.file.blocks[1].data_arrays["data-3d"]
         da.append_set_dimension()
         res = self.file.validate()
-        assert res["errors"][da] == [expmsg]
+        assert res["errors"][da] == [VE.DimensionMismatch]
 
     def test_check_tag_no_pos(self):
         tag = self.file.blocks[0].tags[0]
@@ -196,53 +182,38 @@ class TestValidate (unittest.TestCase):
         assert "position is not set" in tagerr
 
     def test_check_tag_mismatch_dim(self):
-        errmsg = ("number of entries in position does not match "
-                  "number of dimensions in all referenced DataArrays")
         tag = self.file.blocks[0].tags[0]
         tag.position = [4, 3, 2, 1]
         res = self.file.validate()
         tagerr = res["errors"][tag]
-        assert errmsg in tagerr
+        assert VE.PositionDimensionMismatch in tagerr
 
     def test_check_tag_invalid_unit(self):
-        errmsg = ("unit is invalid: not an atomic SI "
-                  "(Note: composite units are not supported)")
         tag = self.file.blocks[0].tags[0]
         tag.units = ['abc']
         res = self.file.validate()
         tagerr = res["errors"][tag]
-        assert errmsg in tagerr
+        assert VE.InvalidUnit in tagerr
 
     def test_check_tag_mismatch_units(self):
-        err_unit_len = ("some of the referenced DataArrays' dimensions "
-                        "don't have units where the Tag has; "
-                        "make sure that all references have the same number "
-                        "of dimensions as the Tag has units "
-                        "and that each dimension has a unit set")
         tag = self.file.blocks[0].tags[0]
         tag.units = ("V", "A")
         res = self.file.validate()
         tagerr = res["errors"][tag]
-        assert err_unit_len in tagerr
+        assert VE.ReferenceUnitsMismatch in tagerr
 
-        err_unit_match = ("some of the referenced DataArrays' dimensions "
-                          "have units that are not convertible to the units "
-                          "set in the Tag "
-                          "(Note: composite units are not supported)")
         tag.units = ("V", "A", "L")
         res = self.file.validate()
         tagerr = res["errors"][tag]
-        assert err_unit_match in tagerr
+        assert VE.ReferenceUnitsIncompatible in tagerr
 
     def test_check_tag_pos_ext_mismatch(self):
-        errmsg = ("number of entries in extent does not match "
-                  "number of dimensions in all referenced DataArrays")
         tag = self.file.blocks[0].tags[0]
         tag.extent = [100]
 
         res = self.file.validate()
         tagerr = res["errors"][tag]
-        assert errmsg in tagerr
+        assert VE.ExtentDimensionMismatch in tagerr
 
     def test_check_multi_tag_no_pos(self):
         blk = self.file.blocks[0]
@@ -251,59 +222,46 @@ class TestValidate (unittest.TestCase):
         res = self.file.validate()
         mtagerr = res["errors"][mtag]
         # will also report mismatch in dimensions with reference
-        assert "positions are not set" in mtagerr
+        assert VE.NoPositions in mtagerr
 
     def test_check_multi_tag_mismatch_dim(self):
-        errmsg = ("number of entries (in 2nd dim) in positions does not match "
-                  "number of dimensions in all referenced DataArrays")
         blk = self.file.blocks[0]
         mtag = blk.multi_tags["mtag2d"]
         mtag.positions = blk.create_data_array("wrong dim", "bork",
                                                data=[(1, 1), (2, 2)])
         res = self.file.validate()
         mtagerr = res["errors"][mtag]
-        assert errmsg in mtagerr
+        assert VE.PositionsDimensionMismatch in mtagerr
 
     def test_check_multi_tag_invalid_unit(self):
-        errmsg = ("unit is invalid: not an atomic SI "
-                  "(Note: composite units are not supported)")
         blk = self.file.blocks[0]
         mtag = blk.multi_tags["mtag2d"]
         mtag.units = ['abc']
         res = self.file.validate()
         tagerr = res["errors"][mtag]
-        assert errmsg in tagerr
+        assert VE.InvalidUnit in tagerr
 
     def test_check_multi_tag_mismatch_units(self):
-        err_unit_len = ("some of the referenced DataArrays' dimensions "
-                        "don't have units where the MultiTag has; "
-                        "make sure that all references have the same number "
-                        "of dimensions as the MultiTag has units "
-                        "and that each dimension has a unit set")
         mtag = self.file.blocks[0].multi_tags["mtag2d"]
         mtag.units = ("V", "A")
         res = self.file.validate()
         tagerr = res["errors"][mtag]
-        assert err_unit_len in tagerr
+        assert VE.ReferenceUnitsMismatch in tagerr
 
-        err_unit_match = ("some of the referenced DataArrays' dimensions "
-                          "have units that are not convertible to the units "
-                          "set in the MultiTag "
-                          "(Note: composite units are not supported)")
         mtag.units = ("V", "A", "L")
         res = self.file.validate()
         tagerr = res["errors"][mtag]
-        assert err_unit_match in tagerr
+        assert VE.ReferenceUnitsIncompatible in tagerr
 
     def test_check_multi_tag_pos_ext_mismatch(self):
-        errmsg = ("number of entries in extent does not match "
-                  "number of dimensions in all referenced DataArrays")
-        tag = self.file.blocks[0].tags[0]
-        tag.extent = [100]
+        blk = self.file.blocks[0]
+        mtag = blk.multi_tags["mtag2d"]
+        mtag.extents = blk.create_data_array("wrong dim", "bork",
+                                             data=[(1, 1), (2, 2)])
 
         res = self.file.validate()
-        tagerr = res["errors"][tag]
-        assert errmsg in tagerr
+        mtagerr = res["errors"][mtag]
+        assert VE.PositionsExtentsMismatch in mtagerr
 
     def _test_check_section(self):  # only have check for basics now
         sec1 = self.file.sections[0]
