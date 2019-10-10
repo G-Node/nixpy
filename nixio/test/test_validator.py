@@ -104,6 +104,14 @@ class TestValidate (unittest.TestCase):
         res = self.file.validate()
         assert res["errors"][self.file] == [VE.NoDate]
 
+        self.file.version = tuple()
+        res = self.file.validate()
+        assert VW.NoVersion in res["warnings"][self.file]
+
+        self.file.format = ""
+        res = self.file.validate()
+        assert VW.NoFormat in res["warnings"][self.file]
+
     def test_check_block(self):
         block = self.file.blocks[0]
         block._h5group.set_attr("name", None)
@@ -172,6 +180,30 @@ class TestValidate (unittest.TestCase):
         da.append_set_dimension()
         res = self.file.validate()
         assert res["errors"][da] == [VE.DimensionMismatch]
+
+    def test_check_data_array_invalid_unit(self):
+        da = self.file.blocks[1].data_arrays["data-1d"]
+        da.unit = "whatevz"
+        res = self.file.validate()
+        assert res["warnings"][da] == [VW.InvalidUnit]
+
+    def test_incorrect_dim_index(self):
+        da = self.file.blocks[1].data_arrays["data-1d"]
+        da.delete_dimensions()
+        dimgroup = da._h5group.open_group("dimensions")
+        # This wont work if we ever change the internals
+        nix.SetDimension._create_new(dimgroup, "10")
+        res = self.file.validate()
+        assert VE.IncorrectDimensionIndex.format(1, 10) in res["errors"][da]
+
+    def test_invalid_dim_index(self):
+        da = self.file.blocks[1].data_arrays["data-1d"]
+        da.delete_dimensions()
+        dimgroup = da._h5group.open_group("dimensions")
+        # This wont work if we ever change the internals
+        nix.SetDimension._create_new(dimgroup, "-1")
+        res = self.file.validate()
+        assert VE.InvalidDimensionIndex.format(1) in res["errors"][da]
 
     def test_check_tag_no_pos(self):
         tag = self.file.blocks[0].tags[0]
