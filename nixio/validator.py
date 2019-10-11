@@ -444,7 +444,7 @@ def check_entity(entity):
         errors.append(ValidationError.NoID)
     if not entity.name:
         errors.append(ValidationError.NoName)
-    if not entity.created_at:
+    if entity.created_at is None:
         errors.append(ValidationError.NoDate)
     return errors
 

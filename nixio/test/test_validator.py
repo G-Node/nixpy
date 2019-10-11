@@ -100,10 +100,6 @@ class TestValidate (unittest.TestCase):
         assert not res["warnings"], self.print_all_results(res)
 
     def test_check_file(self):
-        self.file.force_created_at(0)
-        res = self.file.validate()
-        assert res["errors"][self.file] == [VE.NoDate]
-
         self.file.version = tuple()
         res = self.file.validate()
         assert VW.NoVersion in res["warnings"][self.file]
