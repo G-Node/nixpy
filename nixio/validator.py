@@ -77,6 +77,8 @@ class ValidationError(object):
                           "is not set")
     InvalidSamplingInterval = ("sampling interval for dimension {} "
                                "is not valid (interval > 0)")
+    NoData = "data is not set"
+    NoLinkType = "link_type is not set"
 
 
 class ValidationWarning(object):
@@ -144,10 +146,19 @@ def check_file(nixfile):
             update_results(mtag, mtag_errors, mtag_warnings)
 
         # Sources
+        def traverse_sources(sources):
+            # for recursively checking a source tree
+            for source in sources:
+                src_errors, src_warnings = check_source(source)
+                update_results(source, src_errors, src_warnings)
+                traverse_sources(source.sources)
+
+        traverse_sources(block.sources)
 
     # Sections
 
         # Properties
+
     return results
 
 
@@ -271,7 +282,9 @@ def check_tag(tag):
     if any(not units.is_si(u) for u in tag.units if u):
         errors.append(ValidationError.InvalidUnit)
 
-    # TODO: Do Features
+    for idx, feat in enumerate(tag.features):
+        feat_errors = check_feature(feat, idx)
+        errors.extend(feat_errors)
 
     return errors, warnings
 
@@ -319,9 +332,29 @@ def check_multi_tag(mtag):
     if any(not units.is_si(u) for u in mtag.units if u):
         errors.append(ValidationError.InvalidUnit)
 
-    # TODO: Do Features
+    for idx, feat in enumerate(mtag.features):
+        feat_errors = check_feature(feat, idx)
+        errors.extend(feat_errors)
 
     return errors, warnings
+
+
+def check_feature(feat, idx):
+    """
+    Validate a Feature and return all errors.
+
+    :returns: A list of 'errors'
+    """
+    errors = list()
+    if not feat.id:
+        errors.append("feature {}: {}".format(idx, ValidationError.NoID))
+    if feat.created_at is None:
+        errors.append("feature {}: {}".format(idx, ValidationError.NoDate))
+    if not feat.data:
+        errors.append("feature {}: {}".format(idx, ValidationError.NoData))
+    if not feat.link_type:
+        errors.append("feature {}: {}".format(idx, ValidationError.NoLinkType))
+    return errors
 
 
 def check_section(self, section, sec_idx):
@@ -350,36 +383,15 @@ def check_property(self, prop, prop_idx, sec_idx):
     self.error_count += len(prop_err_list)
     return self.errors
 
-def check_features(self, feat, parent, blk_idx, tag_idx, fea_idx):
-    """
-    Check if the file meets the NIX requirements at the feature level.
 
-    :returns: The error dictionary with errors appended on feature level
+def check_source(source):
     """
-    fea_err_list = []
-    # will raise RuntimeError for both, actually no need to check
-    if not feat.link_type:
-        fea_err_list.append("Linked type is not set")
-    if not feat.data:
-        fea_err_list.append("Data is not set")
+    Validate a Source and return all errors and warnings.
 
-    tag = self.errors['blocks'][blk_idx][parent][tag_idx]
-    tag['features'][fea_idx]['errors'] = fea_err_list
-    self.error_count += len(fea_err_list)
-    return self.errors
-
-def check_sources(self, src, blk_idx):
+    :returns: A list of 'errors' and a list of 'warnings'
     """
-    Check if the file meets the NIX requirements at the source level.
-
-    :returns: The error dictionary with errors appended on source level
-    """
-    if self.check_for_basics(src):
-        blk = self.errors['blocks'][blk_idx]
-        blk['sources'] = self.check_for_basics(src)
-        self.error_count += len(self.check_for_basics(src))
-        return self.errors
-    return None
+    errors = check_entity(source)
+    return errors, list()
 
 
 def check_range_dimension(dim, idx):

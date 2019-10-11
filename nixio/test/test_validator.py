@@ -17,11 +17,15 @@ class TestValidate (unittest.TestCase):
         self.testfilename = os.path.join(self.tmpdir.path, "validatetest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         for bidx in range(2):
+            # Block
             blk = self.file.create_block("block-{}".format(bidx),
                                          "validation-test.block")
             for gidx in range(2):
+                # Groups
                 blk.create_group("group-{}".format(gidx),
                                  "validation-test.group")
+
+            # DataArrays + Dimensions
             da1d = blk.create_data_array("data-1d",
                                          "validation-test.data_array",
                                          dtype=nix.DataType.Float,
@@ -47,6 +51,7 @@ class TestValidate (unittest.TestCase):
             smpldim = da3d.append_sampled_dimension(0.05)
             smpldim.unit = "s"
 
+            # Tags + References + Features
             tag = blk.create_tag("tag", "validation-test.tag",
                                  position=(1, 1, 1))
             tag.extent = (2, 1, 5)
@@ -58,6 +63,16 @@ class TestValidate (unittest.TestCase):
                 data=[0, 1, 10, 20]
             )
             pos1d.append_set_dimension()
+
+            tagwf = blk.create_tag("tag-wf", "validation-test.tag",
+                                   position=(1, 3))
+            tag_feat_data = blk.create_data_array(
+                "feat-1", "validation-test.tag-feature", data=[1]
+            )
+            tag_feat_data.append_set_dimension()
+            tagwf.create_feature(tag_feat_data, nix.LinkType.Untagged)
+
+            # MultiTags + References + Features
             mtag1d = blk.create_multi_tag(
                 "mtag1d", "validation-test.multi_tag", positions=pos1d
             )
@@ -84,9 +99,31 @@ class TestValidate (unittest.TestCase):
             mtag2d.references.append(da3d)
             mtag2d.units = ("", "", "us")
 
-            # TODO: Add Features
+            poswf = blk.create_data_array(
+                "pos-wf", "validation-test.multi_tag.feature", data=[42]
+            )
+            poswf.append_set_dimension()
+            mtagwf = blk.create_multi_tag(
+                "mtag-wf", "validation-test.multi_tag.feature",
+                positions=poswf
+            )
+            mtag_feat_data = blk.create_data_array(
+                "feat-2", "validation-test.tag-feature", data=[4, 2]
+            )
+            mtag_feat_data.append_set_dimension()
+            mtagwf.create_feature(mtag_feat_data, nix.LinkType.Untagged)
 
-            # TODO: Add sources
+            # Sources
+            # Go 3 levels deep (with N = 3:2:1)
+            typestr = "validation-test.sources"
+            for idx in range(3):
+                isrc = blk.create_source("{}:{}".format(blk.name, idx),
+                                         typestr)
+                for jdx in range(2):
+                    jsrc = isrc.create_source("{}:{}".format(isrc.name, jdx),
+                                              typestr)
+                    jsrc.create_source("{}:0".format(jsrc.name),
+                                       typestr)
 
         # TODO: Add Sections and Properties
 
@@ -291,6 +328,23 @@ class TestValidate (unittest.TestCase):
         mtagerr = res["errors"][mtag]
         assert VE.PositionsExtentsMismatch in mtagerr
 
+    def test_check_source(self):
+        # just break one of the deepest sources
+        def get_deepest_source(sources):
+            for source in sources:
+                if not source.sources:
+                    return source
+                return get_deepest_source(source.sources)
+
+        source = get_deepest_source(self.file.blocks[0].sources)
+        source._h5group.set_attr("name", None)
+        source._h5group.set_attr("type", None)
+
+        res = self.file.validate()
+        assert len(res["errors"][source]) == 2
+        assert len(res["warnings"]) == 0
+        assert sorted(res["errors"][source]) == sorted([VE.NoName, VE.NoType])
+
     def _test_check_section(self):  # only have check for basics now
         sec1 = self.file.sections[0]
         sec1._h5group.set_attr("type", None)
@@ -321,9 +375,6 @@ class TestValidate (unittest.TestCase):
         self.validator.check_property(prop2, 2, 0)  # check3
         err = self.validator.errors['sections'][0]['props'][2]['errors']
         assert 'Unit is not valid!' in err
-
-    def _test_check_features(self):
-        pass  # RuntimeError will be raised, so no need for test
 
     def _test_range_dim(self):
         err_dict = self.validator.errors['blocks'][0]['data_arrays']
@@ -393,7 +444,9 @@ class TestValidate (unittest.TestCase):
     def print_all_results(res):
         print("Errors")
         for obj, msg in res["errors"].items():
-            print("  {}: {}".format(obj.name, msg))
+            name = obj.name if hasattr(obj, "name") else str(obj)
+            print("  {}: {}".format(name, msg))
         print("Warnings")
         for obj, msg in res["warnings"].items():
-            print("  {}: {}".format(obj.name, msg))
+            name = obj.name if hasattr(obj, "name") else str(obj)
+            print("  {}: {}".format(name, msg))
