@@ -10,10 +10,6 @@ from __future__ import (absolute_import, division, print_function)
 from .util import units
 from .dimensions import (RangeDimension, SampledDimension, SetDimension,
                          DimensionType)
-try:
-    from collections.abc import OrderedDict
-except ImportError:
-    from collections import OrderedDict
 
 
 class ValidationError(object):
