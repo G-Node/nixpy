@@ -442,14 +442,3 @@ class TestValidate (unittest.TestCase):
         dim.offset = 10
         res = self.file.validate()
         assert VW.OffsetNoUnit.format(2) in res["warnings"][da]
-
-    @staticmethod
-    def print_all_results(res):
-        print("Errors")
-        for obj, msg in res["errors"].items():
-            name = obj.name if hasattr(obj, "name") else str(obj)
-            print("  {}: {}".format(name, msg))
-        print("Warnings")
-        for obj, msg in res["warnings"].items():
-            name = obj.name if hasattr(obj, "name") else str(obj)
-            print("  {}: {}".format(name, msg))
