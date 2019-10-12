@@ -125,7 +125,24 @@ class TestValidate (unittest.TestCase):
                     jsrc.create_source("{}:0".format(jsrc.name),
                                        typestr)
 
-        # TODO: Add Sections and Properties
+        # Sections
+        # Go 3 levels deep (with N = 4:2:2)
+        # 3 props per Section
+
+        def attach_props(section):
+            section.create_property("intprop", "prop-type", 10).unit = "s"
+            section.create_property("strprop", "prop-type", 0.1).unit = "mA"
+        typestr = "validation-test.sections"
+        for idx in range(4):
+            isec = self.file.create_section("{}:{}".format(blk.name, idx),
+                                            typestr)
+            attach_props(isec)
+            for jdx in range(2):
+                jsec = isec.create_section("{}:{}".format(isec.name, jdx),
+                                           typestr)
+                for kdx in range(2):
+                    jsec.create_section("{}:{}".format(jsec.name, kdx),
+                                        typestr)
 
     def tearDown(self):
         self.file.close()
