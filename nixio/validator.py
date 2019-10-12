@@ -91,6 +91,7 @@ class ValidationWarning(object):
                                 "but polynomial coefficients are missing")
     OffsetNoUnit = ("offset for dimension {} is set, "
                     "but no valid unit is set")
+    NoUnit = "unit is not set"
 
 
 def check_file(nixfile):
@@ -156,8 +157,14 @@ def check_file(nixfile):
         traverse_sources(block.sources)
 
     # Sections
+    def traverse_sections(sections):
+        # for recursively checking a metadata tree
+        for section in sections:
+            sec_errors, sec_warnings = check_section(section)
+            update_results(section, sec_errors, sec_warnings)
+            traverse_sections(section.sections)
 
-        # Properties
+    traverse_sections(nixfile.sections)
 
     return results
 
@@ -357,31 +364,41 @@ def check_feature(feat, idx):
     return errors
 
 
-def check_section(self, section, sec_idx):
+def check_section(section):
     """
-    Check if the file meets the NIX requirements at the section level.
+    Validate a Section and its Properties return all errors and warnings.
 
-    :returns: The error dictionary with errors appended on section level
+    Errors and warnings about Properties are included in the Section errors and
+    warnings lists.
+
+    :returns: A list of 'errors' and a list of 'warnings'
     """
-    sec = self.errors['sections'][sec_idx]
-    sec['errors'] = self.check_for_basics(section)
-    self.error_count += len(self.check_for_basics(section))
+    errors = check_entity(section)
+    warnings = list()
+    for idx, prop in enumerate(section.props):
+        prop_errors, prop_warnings = check_property(prop, idx)
+        errors.extend(prop_errors)
+        warnings.extend(prop_warnings)
 
-    return self.errors
+    return errors, warnings
 
-def check_property(self, prop, prop_idx, sec_idx):
-    prop_err_list = []
 
+def check_property(prop, idx):
+    """
+    Validate a Property and return all errors.
+
+    :returns: A list of 'errors' and 'warnings'
+    """
+    errors = list()
+    warnings = list()
+    if not prop.id:
+        errors.append("property {}: {}".format(idx, ValidationError.NoID))
     if not prop.name:
-        prop_err_list.append("Name is not set")
-    if prop.values and not prop.unit:
-        prop_err_list.append("Unit is not set")
-    if prop.unit and not units.is_si(prop.unit):
-        prop_err_list.append("Unit is not valid")
-    prop = self.errors['sections'][sec_idx]['props'][prop_idx]
-    prop['errors'] = prop_err_list
-    self.error_count += len(prop_err_list)
-    return self.errors
+        errors.append("property {}: {}".format(idx, ValidationError.NoName))
+    if not prop.unit:
+        warnings.append("property {}: {}".format(idx,
+                                                 ValidationWarning.NoUnit))
+    return errors, warnings
 
 
 def check_source(source):
