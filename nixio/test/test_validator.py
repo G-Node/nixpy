@@ -393,6 +393,56 @@ class TestValidate (unittest.TestCase):
         warnmsg = "property 1: {}".format(VW.NoUnit)
         assert res["warnings"][section] == [warnmsg]
 
+    def test_check_range_dim_no_ticks(self):
+        da = self.file.blocks[1].data_arrays["data-1d"]
+        dim = da.dimensions[0]
+        dim.ticks = []
+        res = self.file.validate()
+        assert VE.NoTicks.format(1) in res["errors"][da]
+
+    def test_check_range_dim_invalid_unit(self):
+        da = self.file.blocks[1].data_arrays["data-1d"]
+        dim = da.dimensions[0]
+        dim.unit = "sillyvolts"
+        res = self.file.validate()
+        assert VE.InvalidDimensionUnit.format(1) in res["errors"][da]
+
+    def test_check_range_dim_unsorted_ticks(self):
+        da = self.file.blocks[1].data_arrays["data-1d"]
+        dim = da.dimensions[0]
+        dim._h5group.write_data("ticks", [10, 3, 1])
+        res = self.file.validate()
+        assert VE.UnsortedTicks.format(1) in res["errors"][da]
+
+    def test_check_sampled_dim_no_interval(self):
+        da = self.file.blocks[1].data_arrays["data-2d"]
+        dim = da.dimensions[1]
+        dim.sampling_interval = None
+        res = self.file.validate()
+        assert VE.NoSamplingInterval.format(2) in res["errors"][da]
+
+    def test_check_sampled_dim_bad_interval(self):
+        da = self.file.blocks[1].data_arrays["data-2d"]
+        dim = da.dimensions[1]
+        dim.sampling_interval = -1
+        res = self.file.validate()
+        assert VE.InvalidSamplingInterval.format(2) in res["errors"][da]
+
+    def test_check_sampled_dim_bad_unit(self):
+        da = self.file.blocks[1].data_arrays["data-2d"]
+        dim = da.dimensions[1]
+        dim.unit = "sillyamps"
+        res = self.file.validate()
+        assert VE.InvalidDimensionUnit.format(2) in res["errors"][da]
+
+    def test_check_sampled_dim_no_unit(self):
+        da = self.file.blocks[1].data_arrays["data-2d"]
+        dim = da.dimensions[1]
+        dim.unit = None
+        dim.offset = 10
+        res = self.file.validate()
+        assert VW.OffsetNoUnit.format(2) in res["warnings"][da]
+
     @staticmethod
     def print_all_results(res):
         print("Errors")
