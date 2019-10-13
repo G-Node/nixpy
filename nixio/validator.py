@@ -117,6 +117,22 @@ def check_file(nixfile):
         if warnings:
             results["warnings"][obj] = warnings
 
+    # Sources
+    def traverse_sources(sources):
+        # for recursively checking a source tree
+        for source in sources:
+            src_errors, src_warnings = check_source(source)
+            update_results(source, src_errors, src_warnings)
+            traverse_sources(source.sources)
+
+    # Sections
+    def traverse_sections(sections):
+        # for recursively checking a metadata tree
+        for section in sections:
+            sec_errors, sec_warnings = check_section(section)
+            update_results(section, sec_errors, sec_warnings)
+            traverse_sections(section.sections)
+
     # Blocks
     for block in nixfile.blocks:
         blk_errors, blk_warnings = check_block(block)
@@ -142,23 +158,7 @@ def check_file(nixfile):
             mtag_errors, mtag_warnings = check_multi_tag(mtag)
             update_results(mtag, mtag_errors, mtag_warnings)
 
-        # Sources
-        def traverse_sources(sources):
-            # for recursively checking a source tree
-            for source in sources:
-                src_errors, src_warnings = check_source(source)
-                update_results(source, src_errors, src_warnings)
-                traverse_sources(source.sources)
-
         traverse_sources(block.sources)
-
-    # Sections
-    def traverse_sections(sections):
-        # for recursively checking a metadata tree
-        for section in sections:
-            sec_errors, sec_warnings = check_section(section)
-            update_results(section, sec_errors, sec_warnings)
-            traverse_sections(section.sections)
 
     traverse_sections(nixfile.sections)
 
