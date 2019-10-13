@@ -8,8 +8,7 @@
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
 from .util import units
-from .dimensions import (RangeDimension, SampledDimension, SetDimension,
-                         DimensionType)
+from .dimension_type import DimensionType
 
 
 class ValidationError(object):
@@ -211,11 +210,6 @@ def check_data_array(da):
         warnings.append(ValidationWarning.NoExpansionOrigin)
     elif da.expansion_origin and not da.polynom_coefficients:
         warnings.append(ValidationWarning.NoPolynomialCoefficients)
-    dimtypemap = {
-        DimensionType.Range: RangeDimension,
-        DimensionType.Sample: SampledDimension,
-        DimensionType.Set: SetDimension,
-    }
 
     for idx, (dim, datalen) in enumerate(zip(da.dimensions, da.shape), 1):
         if not dim.index or dim.index <= 0:
@@ -224,9 +218,7 @@ def check_data_array(da):
             errors.append(
                 ValidationError.IncorrectDimensionIndex.format(idx, dim.index)
             )
-        if not isinstance(dim, dimtypemap[dim.dimension_type]):
-            errors.append(ValidationError.DimensionTypeMismatch.format(idx))
-        if isinstance(dim, RangeDimension):
+        if dim.dimension_type == DimensionType.Range:
             if dim.ticks is not None and len(dim.ticks) != datalen:
                 # if ticks is None or empty, it will be reported by the
                 # dimension check function
@@ -234,9 +226,9 @@ def check_data_array(da):
                     ValidationError.RangeDimTicksMismatch.format(idx)
                 )
             dim_errors, dim_warnings = check_range_dimension(dim, idx)
-        elif isinstance(dim, SampledDimension):
+        elif dim.dimension_type == DimensionType.Sample:
             dim_errors, dim_warnings = check_sampled_dimension(dim, idx)
-        elif isinstance(dim, SetDimension):
+        elif dim.dimension_type == DimensionType.Set:
             if dim.labels and len(dim.labels) != datalen:
                 # empty labels is allowed
                 errors.append(ValidationError.SetDimLabelsMismatch.format(idx))
