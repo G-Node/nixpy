@@ -46,10 +46,6 @@ def get_wheel_data():
     return data
 
 
-nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include')
-nix_lib_dir = os.getenv('NIX_LIBDIR', '/usr/local/lib')
-nix_lib = 'nix'
-
 classifiers = [
     'Development Status :: 5 - Production/Stable',
     'Programming Language :: Python',
