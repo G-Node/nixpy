@@ -55,6 +55,12 @@ classifiers = [
     'Topic :: Scientific/Engineering'
 ]
 
+packages = ['nixio',
+            'nixio.hdf5',
+            'nixio.util',
+            'nixio.exceptions',
+            'nixio.cmd']
+
 
 setup(
     name='nixio',
@@ -66,7 +72,7 @@ setup(
     long_description=description_text,
     classifiers=classifiers,
     license='BSD',
-    packages=['nixio', 'nixio.hdf5', 'nixio.util', 'nixio.exceptions'],
+    packages=packages,
     scripts=[],
     tests_require=['pytest'],
     test_suite='pytest',
@@ -75,5 +81,6 @@ setup(
     package_data={'nixio': [license_text, description_text]},
     include_package_data=True,
     zip_safe=False,
-    data_files=get_wheel_data()
+    data_files=get_wheel_data(),
+    entry_points={'console_scripts': ['nix-validate=nixio.cmd:validatemain']}
 )
