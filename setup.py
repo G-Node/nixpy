@@ -46,10 +46,6 @@ def get_wheel_data():
     return data
 
 
-nix_inc_dir = os.getenv('NIX_INCDIR', '/usr/local/include')
-nix_lib_dir = os.getenv('NIX_LIBDIR', '/usr/local/lib')
-nix_lib = 'nix'
-
 classifiers = [
     'Development Status :: 5 - Production/Stable',
     'Programming Language :: Python',
@@ -58,6 +54,12 @@ classifiers = [
     'Programming Language :: Python :: 3.7',
     'Topic :: Scientific/Engineering'
 ]
+
+packages = ['nixio',
+            'nixio.hdf5',
+            'nixio.util',
+            'nixio.exceptions',
+            'nixio.cmd']
 
 
 setup(
@@ -70,7 +72,7 @@ setup(
     long_description=description_text,
     classifiers=classifiers,
     license='BSD',
-    packages=['nixio', 'nixio.hdf5', 'nixio.util', 'nixio.exceptions'],
+    packages=packages,
     scripts=[],
     tests_require=['pytest'],
     test_suite='pytest',
@@ -79,5 +81,6 @@ setup(
     package_data={'nixio': [license_text, description_text]},
     include_package_data=True,
     zip_safe=False,
-    data_files=get_wheel_data()
+    data_files=get_wheel_data(),
+    entry_points={'console_scripts': ['nixio-validate=nixio.cmd:validatemain']}
 )
