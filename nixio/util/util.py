@@ -6,7 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-from six import string_types
+from six import string_types, text_type
 import numpy as np
 
 import h5py
@@ -15,16 +15,8 @@ from uuid import uuid4, UUID
 from ..exceptions import exceptions
 from . import names
 
-from nixio.link_type import LinkType
 
-
-try:
-    vstype = unicode
-except NameError:
-    vstype = str
-
-
-vlen_str_dtype = h5py.special_dtype(vlen=vstype)
+vlen_str_dtype = h5py.special_dtype(vlen=text_type)
 
 
 def create_id():

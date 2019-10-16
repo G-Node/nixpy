@@ -209,6 +209,7 @@ int main(int argc, char* argv[]) {
     othermd.createProperty("bools", {nix::Variant(true), nix::Variant(false), nix::Variant(true)});
     othermd.createProperty("string", nix::Variant("I am a string. Rawr."));
     othermd.createProperty("strings", {nix::Variant("one"), nix::Variant("two"), nix::Variant("twenty")});
+    othermd.createProperty("unicode", {nix::Variant("Μπύρα"), nix::Variant("Bräu"), nix::Variant("啤酒"), nix::Variant("🍺")});
 
     // All types of data
     block = nf.createBlock("datablock", "block of data");
@@ -216,6 +217,11 @@ int main(int argc, char* argv[]) {
     for (auto dt : dtypes) {
         block.createDataArray(nix::data_type_to_string(dt), "dtype-test-array", dt, nix::NDSize{0});
     }
+
+    // Unicode data
+    auto unicodeda = block.createDataArray("unicodedata", "dtype-test-array", nix::DataType::String, nix::NDSize{4});
+    std::vector<std::string> unicode_array = {"Καφές", "Café", "咖啡", "☕"};
+    unicodeda.setData(nix::DataType::String, unicode_array.data(), nix::NDSize{4}, nix::NDSize{0});
 
     return 0;
 }

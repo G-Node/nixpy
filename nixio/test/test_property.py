@@ -8,6 +8,7 @@
 # LICENSE file in the root of the Project.
 import os
 import unittest
+import six
 import nixio as nix
 from .tmp import TempDir
 
@@ -167,19 +168,40 @@ class TestProperties(unittest.TestCase):
         assert(self.prop_s.data_type == nix.DataType.String)
 
     def test_extend_values(self):
-        da = (1, 2, 3)
-        self.prop.extend_values(da)
-        da = 10
-        self.prop.extend_values(da)
-        sda = ["foo", "bar"]
-        self.prop_s.extend_values(sda)
-        sda = "bla"
-        self.prop_s.extend_values(sda)
+        values = (1, 2, 3)
+        self.prop.extend_values(values)
+        value_extend = 10
+        self.prop.extend_values(value_extend)
+        string_values = ["foo", "bar"]
+        self.prop_s.extend_values(string_values)
+        string_extend = "bla"
+        self.prop_s.extend_values(string_extend)
         self.assertRaises(TypeError, lambda: self.prop_s.extend_values(1))
-        sda = ["str", 1]
-        self.assertRaises(TypeError, lambda: self.prop_s.extend_values(sda))
+        mixed_list = ["str", 1]
+        self.assertRaises(TypeError,
+                          lambda: self.prop_s.extend_values(mixed_list))
         self.assertRaises(TypeError, lambda: self.prop.extend_values(1.0))
-        da = (1.1, 1.2, 1.3)
-        self.assertRaises(TypeError, lambda: self.prop.extend_values(da))
-        da = (1, 1.2)
-        self.assertRaises(TypeError, lambda: self.prop.extend_values(da))
+        float_data = (1.1, 1.2, 1.3)
+        self.assertRaises(TypeError,
+                          lambda: self.prop.extend_values(float_data))
+        number_extend = (1, 1.2)
+        self.assertRaises(TypeError,
+                          lambda: self.prop.extend_values(number_extend))
+
+    def test_unicode_values(self):
+        sec = self.section
+        unistrings = {
+            "umlaut": ["ü"],
+            "gr": ["ω"],
+            "deg": ["°"],
+            "chinese-simplified": ["汉字"]
+        }
+
+        # test writing
+        for name, value in unistrings.items():
+            sec.create_property(name, value)
+
+        # read them back
+        for name, value in unistrings.items():
+            value = [six.ensure_text(v) for v in value]  # py2compat
+            assert tuple(value) == sec.props[name].values

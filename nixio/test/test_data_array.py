@@ -14,6 +14,7 @@ import numpy as np
 import nixio as nix
 from nixio.exceptions import IncompatibleDimensions
 from .tmp import TempDir
+import six
 
 
 class TestDataArray(unittest.TestCase):
@@ -281,6 +282,14 @@ class TestDataArray(unittest.TestCase):
         da = self.block.create_data_array('dtype_opaque', 'b', data=void_data)
         assert(da.dtype == np.dtype('V1'))
         assert(np.array_equal(void_data, da[:]))
+
+    def test_array_unicode(self):
+        da = self.block.create_data_array("unicode", "lotsatext",
+                                          nix.DataType.String, shape=(4,))
+        data = ["Καφές", "Café", "咖啡", "☕"]
+        da.write_direct(data)
+
+        assert data == list(da[:])
 
     def test_data_array_dimensions(self):
         assert(len(self.array.dimensions) == 0)

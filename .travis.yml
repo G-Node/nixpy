@@ -60,7 +60,7 @@ before_install:
   - export PKG_CONFIG_PATH=${PKG_CONFIG_PATH}:${nixprefix}/lib/pkgconfig
   - alias pip2='pip'
   - if [[ "${TRAVIS_OS_NAME}" != "osx" ]]; then pip${pymajor} install --upgrade numpy; fi
-  - pip${pymajor} install --upgrade h5py pytest pytest-xdist pytest-cov;
+  - pip${pymajor} install --upgrade h5py pytest pytest-xdist pytest-cov six;
   - if [[ "${pymajor}" == 2 ]]; then pip${pymajor} install enum34; fi
   - git clone --branch ${NIX_BRANCH} https://github.com/G-Node/nix /tmp/libnix
   - pushd /tmp/libnix

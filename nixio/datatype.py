@@ -24,9 +24,9 @@ class DataType(object):
     Int16 = np.int16
     Int32 = np.int32
     Int64 = np.int64
-    Float = np.float_
+    Float = np.float32
     Double = np.double
-    String = np.string_
+    String = np.unicode_
     Bool = np.bool_
 
     @classmethod
@@ -36,7 +36,7 @@ class DataType(object):
         elif isinstance(value, Integral):
             return cls.Int64
         elif isinstance(value, Real):
-            return cls.Float
+            return cls.Double
         elif isinstance(value, string_types):
             return cls.String
         else:

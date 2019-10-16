@@ -459,7 +459,8 @@ def test_properties(tmpdir):
 
     sec.props[0].values = [101]
     sec.props[1].values = ["foo", "bar", "baz"]
-    sec.props["prop Float"].values = [10.0, 33.3, 1.345, 90.2]
+    sec.props["prop Float"].values = np.array([10.0, 33.3, 1.345, 90.2],
+                                              dtype=nix.DataType.Float)
 
     nix_file.close()
     # validate(nixfilepath)
@@ -515,7 +516,7 @@ def test_full_write(tmpdir):
 
 
 @pytest.mark.compatibility
-def test_full_file(tmpdir, bindir):
+def test_full_file_write(tmpdir, bindir):
     nixfilepath = os.path.join(str(tmpdir), "filetest-writepy.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
 
@@ -669,9 +670,9 @@ def test_full_file(tmpdir, bindir):
     numbermd = proptypesmd.create_section("numerical metadata",
                                           "test metadata section")
     numbermd["integer"] = 42
-    numbermd["float"] = 4.2
+    numbermd["double"] = 4.2
     numbermd["integers"] = [40, 41, 42, 43, 44, 45]
-    numbermd["floats"] = [1.1, 10.10]
+    numbermd["doubles"] = [1.1, 10.10]
 
     othermd = proptypesmd.create_section("other metadata",
                                          "test metadata section")
@@ -680,6 +681,7 @@ def test_full_file(tmpdir, bindir):
     othermd["bools"] = [True, False, True]
     othermd["string"] = "I am a string. Rawr."
     othermd["strings"] = ["one", "two", "twenty"]
+    othermd["unicode"] = ["Μπύρα", "Bräu", "啤酒", "🍺"]
 
     # All types of data
     dtypeblock = nix_file.create_block("datablock", "block of data")
@@ -687,6 +689,12 @@ def test_full_file(tmpdir, bindir):
     for n, dt in enumerate(dtypes):
         dtypeblock.create_data_array(str(n), "dtype-test-array",
                                      dtype=dt, data=dt(0))
+
+    # Unicode DataArray on last Block
+    data = ["Καφές", "Café", "咖啡", "☕"]
+    dtypeblock.create_data_array("unicodedata", "coffeestuff",
+                                 dtype=nix.DataType.String,
+                                 data=data)
 
     nix_file.close()
     cmd = os.path.join(bindir, "readfullfile")
@@ -737,7 +745,7 @@ def test_full_file_read(tmpdir, bindir):
     check_block_children_counts(nix_file.blocks[0], 2, 4, 1, 1)
     check_block_children_counts(nix_file.blocks[1], 2, 2, 0, 0)
     check_block_children_counts(nix_file.blocks[2], 2, 3, 1, 1)
-    check_block_children_counts(nix_file.blocks[3], 0, 12, 0, 0)
+    check_block_children_counts(nix_file.blocks[3], 0, 13, 0, 0)
 
     check_group_children_counts(nix_file.blocks[0].groups[0], 1, 1, 0)
     check_group_children_counts(nix_file.blocks[0].groups[1], 0, 0, 0)
@@ -1014,7 +1022,7 @@ def test_full_file_read(tmpdir, bindir):
     othermd = proptypesmd.sections[1]
     compare("other metadata", othermd.name)
     compare("test metadata section", othermd.type)
-    compare(5, len(othermd.props))
+    compare(6, len(othermd.props))
 
     prop = othermd.props["bool"]
     compare(1, len(prop.values))
@@ -1034,14 +1042,26 @@ def test_full_file_read(tmpdir, bindir):
 
     prop = othermd.props["strings"]
     compare(3, len(prop.values))
-    compare([v for v in ["one", "two", "twenty"]], prop.values)
+    compare(["one", "two", "twenty"], prop.values)
 
-    # TODO: Check type compatibilities
-    # for idx in range(len(dtypes)):
-    #     da = block.data_arrays[idx]
-    #     dt = dtypes[idx]
-    #     compare(dt, da.data_type)
-    #     compare([1], da.shape)
+    prop = othermd.props["unicode"]
+    compare(4, len(prop.values))
+    compare(["Μπύρα", "Bräu", "啤酒", "🍺"], prop.values)
+
+    block = nix_file.blocks["datablock"]
+    for idx in range(len(dtypes)):
+        print(da.name)
+        da = block.data_arrays[idx]
+        dt = dtypes[idx]
+        if dt == nix.DataType.String:
+            dt = nix.util.vlen_str_dtype
+        compare(dt, da.data_type)
+        compare([0], da.shape)
+
+    da = block.data_arrays["unicodedata"]
+    unicodedata = ["Καφές", "Café", "咖啡", "☕"]
+    dadata = da[:]
+    compare(unicodedata, dadata)
 
     nix_file.close()
     # validate(nixfilepath)

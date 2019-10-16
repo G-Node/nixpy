@@ -11,9 +11,7 @@ std::vector<nix::DataType> dtypes = {
     nix::DataType::Int16,
     nix::DataType::Int32,
     nix::DataType::Int64,
-    // NOTE: NIXPy doesn't do 'Float' (32)
-    // It will probably be easier to add when the bindings are removed
-    nix::DataType::Double,
+    nix::DataType::Float,
     nix::DataType::Double,
     nix::DataType::String,
     nix::DataType::Bool
@@ -47,7 +45,7 @@ int checkObjectCounts(const nix::File &nf) {
     errcount += checkChildrenCounts(nf.getBlock(0), 2, 4, 1, 1);
     errcount += checkChildrenCounts(nf.getBlock(1), 2, 2, 0, 0);
     errcount += checkChildrenCounts(nf.getBlock(2), 2, 3, 1, 1);
-    errcount += checkChildrenCounts(nf.getBlock(3), 0, 12, 0, 0);
+    errcount += checkChildrenCounts(nf.getBlock(3), 0, 13, 0, 0);
 
     errcount += checkChildrenCounts(nf.getBlock(0).getGroup(0), 1, 1, 0);
     errcount += checkChildrenCounts(nf.getBlock(0).getGroup(1), 0, 0, 0);
@@ -371,7 +369,7 @@ int main(int argc, char* argv[]) {
     errcount += compare(nix::ndsize_t{1}, prop.valueCount());
     errcount += compare({nix::Variant{int64_t(42)}}, prop.values());
 
-    prop = numbermd.getProperty("float");
+    prop = numbermd.getProperty("double");
     errcount += compare(nix::ndsize_t{1}, prop.valueCount());
     errcount += compare({nix::Variant{double(4.2)}}, prop.values());
 
@@ -382,14 +380,14 @@ int main(int argc, char* argv[]) {
         values[idx] = nix::Variant{int64_t(40 + idx)};
     errcount += compare(values, prop.values());
 
-    prop = numbermd.getProperty("floats");
+    prop = numbermd.getProperty("doubles");
     errcount += compare(nix::ndsize_t{2}, prop.valueCount());
     errcount += compare({nix::Variant{double(1.1)}, nix::Variant{double(10.10)}}, prop.values());
 
     auto othermd = proptypesmd.getSection(1);
     errcount += compare("other metadata", othermd.name());
     errcount += compare("test metadata section", othermd.type());
-    errcount += compare(nix::ndsize_t{5}, othermd.propertyCount());
+    errcount += compare(nix::ndsize_t{6}, othermd.propertyCount());
 
     prop = othermd.getProperty("bool");
     errcount += compare(nix::ndsize_t{1}, prop.valueCount());
@@ -411,6 +409,10 @@ int main(int argc, char* argv[]) {
     errcount += compare(nix::ndsize_t{3}, prop.valueCount());
     errcount += compare({nix::Variant{"one"}, nix::Variant{"two"}, nix::Variant{"twenty"}}, prop.values());
 
+    prop = othermd.getProperty("unicode");
+    errcount += compare(nix::ndsize_t{4}, prop.valueCount());
+    errcount += compare({nix::Variant("Μπύρα"), nix::Variant("Bräu"), nix::Variant("啤酒"), nix::Variant("🍺")}, prop.values());
+
     block = nf.getBlock("datablock");
     errcount += compare("block of data", block.type());
 
@@ -420,6 +422,12 @@ int main(int argc, char* argv[]) {
         errcount += compare(dt, da.dataType());
         errcount += compare({1}, da.dataExtent());
     }
+
+    // Unicode data
+    auto unicodeda = block.getDataArray("unicodedata");
+    std::vector<std::string> unicode_array(4);
+    unicodeda.getData(nix::DataType::String, unicode_array.data(), {4}, {});
+    errcount += compare({"Καφές", "Café", "咖啡", "☕"}, unicode_array);
 
     return errcount;
 }
