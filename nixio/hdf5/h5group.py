@@ -9,7 +9,6 @@
 
 import h5py
 import numpy as np
-from warnings import warn
 
 from .h5dataset import H5DataSet
 from ..datatype import DataType
@@ -172,8 +171,7 @@ class H5Group(object):
             for item in self:
                 if item.get_attr("entity_id") == id_or_name:
                     return True
-            else:
-                return False
+            return False
         else:
             return id_or_name in self.group
 

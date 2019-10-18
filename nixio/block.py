@@ -299,8 +299,9 @@ class Block(Entity):
                         for nam, dt in zip(col_names, col_dtypes)
                     )
                 else:  # col_dtypes is None and data is None
-                    raise (ValueError,
-                           "The data type of each column have to be specified")
+                    raise ValueError(
+                           "The data type of each column have to be specified"
+                    )
             else:  # if col_names is None
                 if data is not None and type(data[0]) == np.void:
                     col_dtype = data[0].dtype
@@ -315,8 +316,9 @@ class Block(Entity):
                 else:
                     # data is None or type(data[0]) != np.void
                     # data_type doesnt matter
-                    raise (ValueError,
-                           "No information about column names is provided!")
+                    raise ValueError(
+                           "No information about column names is provided!"
+                    )
 
         if col_dict is not None:
             for nam, dt in col_dict.items():

@@ -14,7 +14,6 @@ from .datatype import DataType
 from .dimension_type import DimensionType
 from . import util
 from .container import Container
-from six import string_types
 
 
 class DimensionContainer(Container):

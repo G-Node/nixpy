@@ -6,7 +6,6 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-from .entity import Entity
 from .data_array import DataArray
 from .link_type import LinkType
 from six import string_types
@@ -102,6 +101,9 @@ class Feature(object):
         if hasattr(other, "id"):
             return self.id == other.id
         return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def __hash__(self):
         """
