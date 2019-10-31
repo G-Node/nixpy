@@ -308,12 +308,30 @@ class TestValidate (unittest.TestCase):
 
     def test_check_multi_tag_mismatch_dim(self):
         blk = self.file.blocks[0]
+
+        # 2d tag positions on 2d data, with wrong positions length
         mtag = blk.multi_tags["mtag2d"]
-        mtag.positions = blk.create_data_array("wrong dim", "bork",
+        okpos = mtag.positions
+        mtag.positions = blk.create_data_array("wrong dim len", "bork",
                                                data=[(1, 1), (2, 2)])
         res = self.file.validate()
         mtagerr = res["errors"][mtag]
         assert VE.PositionsDimensionMismatch in mtagerr
+
+        # 1d tag positions on 2d data
+        mtag.positions = blk.create_data_array("1d v 2d", "bork",
+                                               data=[1, 2])
+        res = self.file.validate()
+        mtagerr = res["errors"][mtag]
+        assert VE.PositionsDimensionMismatch in mtagerr
+
+        # valid tag positions on 2d data, 1d extents
+        mtag.positions = okpos
+        mtag.extents = blk.create_data_array("1d extents", "bork",
+                                             data=[1, 2])
+        res = self.file.validate()
+        mtagerr = res["errors"][mtag]
+        assert VE.ExtentsDimensionMismatch in mtagerr
 
     def test_check_multi_tag_invalid_unit(self):
         blk = self.file.blocks[0]

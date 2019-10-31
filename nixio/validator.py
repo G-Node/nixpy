@@ -313,8 +313,11 @@ def check_multi_tag(mtag):
         if mtag.extents:
             if mtag.positions.shape != mtag.extents.shape:
                 errors.append(ValidationError.PositionsExtentsMismatch)
-            extlen = mtag.positions.shape[1]
-            if any(extlen != len(da.shape) for da in mtag.references):
+            if len(mtag.extents.shape) == 1:
+                extdim = 1
+            else:
+                extdim = mtag.extents.shape[1]
+            if any(extdim != len(da.shape) for da in mtag.references):
                 errors.append(ValidationError.ExtentsDimensionMismatch)
 
         refs_units = [get_dim_units(da) for da in mtag.references]
