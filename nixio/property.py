@@ -13,7 +13,7 @@ except ImportError:
     from collections import Sequence, Iterable
 from enum import Enum
 from numbers import Number
-from six import string_types
+from six import string_types, ensure_str, ensure_text
 import numpy as np
 
 from .datatype import DataType
@@ -145,6 +145,12 @@ class Property(Entity):
 
     @property
     def uncertainty(self):
+        dataset = self._h5dataset
+        x, y, z = dataset._parent.file.attrs["version"]
+        if x < 1 or (x == 1 and y < 1) or (x == 1 and y == 1 and z < 1):
+            val = self._h5dataset.dataset[:]
+            v = val[0]["uncertainty"]
+            return v
         return self._h5dataset.get_attr("uncertainty")
 
     @uncertainty.setter
@@ -155,6 +161,12 @@ class Property(Entity):
 
     @property
     def reference(self):
+        dataset = self._h5dataset
+        x, y, z = dataset._parent.file.attrs["version"]
+        if x < 1 or (x == 1 and y < 1) or (x == 1 and y == 1 and z < 1):
+            val = self._h5dataset.dataset[:]
+            v = val[0]["reference"]
+            return v
         return self._h5dataset.get_attr("reference")
 
     @reference.setter
@@ -215,9 +227,21 @@ class Property(Entity):
 
         self._h5dataset.set_attr("odml_type", str(new_type))
 
+    def _read_old_values(self):
+        val = self._h5dataset.dataset[:]
+        val_tu = tuple()
+        for v in val:
+            v = v["value"]
+            val_tu += (v,)
+        return val_tu
+
     @property
     def values(self):
         dataset = self._h5dataset
+        x, y, z = dataset._parent.file.attrs["version"]
+        if x < 1 or (x == 1 and y < 1) or (x == 1 and y == 1 and z < 1):
+            v = self._read_old_values()
+            return v
         if not sum(dataset.shape):
             return tuple()
 
@@ -225,7 +249,7 @@ class Property(Entity):
 
         def data_to_value(dat):
             if isinstance(dat, bytes):
-                dat = dat.decode()
+                dat = ensure_str(dat)  # py2compat
             return dat
 
         values = tuple(map(data_to_value, data))
@@ -250,12 +274,11 @@ class Property(Entity):
             vals = [vals]
 
         # Make sure all values are of the same data type
-        vtype = self._value_type_checking(vals)
-
+        vtype = self._check_new_value_types(vals)
+        if vtype == DataType.String:
+            vals = [ensure_text(v) for v in vals]  # py2compat
         self._h5dataset.shape = np.shape(vals)
-
         data = np.array(vals, dtype=vtype)
-
         self._h5dataset.write_data(data)
 
     def extend_values(self, data):
@@ -263,7 +286,7 @@ class Property(Entity):
         Extends values to existing data.
         Suitable when new data is nested or original data is long.
         """
-        vtype = self._value_type_checking(data)
+        vtype = self._check_new_value_types(data)
 
         arr = np.array(data, dtype=vtype).flatten('C')
         ds = self._h5dataset
@@ -272,7 +295,7 @@ class Property(Entity):
         ds.shape = (src_len+dlen,)
         ds.write_data(arr, sl=np.s_[src_len: src_len+dlen])
 
-    def _value_type_checking(self, data):
+    def _check_new_value_types(self, data):
         if (isinstance(data, (Sequence, Iterable)) and
                 not isinstance(data, string_types)):
             single_val = data[0]
@@ -280,22 +303,34 @@ class Property(Entity):
             single_val = data
             data = [data]
 
-        # Will raise an error, if the data type of the first value is not valid
-        vtype = DataType.get_dtype(single_val)
+        def check_prop_consistent(vtype):
+            # Check if the new data has the same type as the existing property
+            # data
+            if vtype != self.data_type:
+                raise TypeError("New data type '{}' is inconsistent with the "
+                                "Property's data type '{}'".format(
+                                    vtype, self.data_type))
 
-        # Check if the data type has changed and raise an exception otherwise.
-        if vtype != self.data_type:
-            raise TypeError("New data type '{}' is inconsistent with the "
-                            "Properties data type '{}'".format(vtype,
-                                                               self.data_type))
+        def check_new_data_consistent(vtype):
+            # Check if each value in the new data has the same type
+            for val in data:
+                if DataType.get_dtype(val) != vtype:
+                    raise TypeError("Array contains inconsistent values. "
+                                    "Only values of type '{}' can be "
+                                    "assigned".format(vtype))
 
-        # Check all values for data type consistency to ensure clean value add.
-        # Will raise an exception otherwise.
-        for val in data:
-            if DataType.get_dtype(val) != vtype:
-                raise TypeError("Array contains inconsistent values. "
-                                "Only values of type '{}' can be "
-                                "assigned".format(vtype))
+        if hasattr(data, "dtype"):
+            # numpy array: no need to scan values, arrays are consistent but
+            # check for 1D
+            vtype = data.dtype
+            check_prop_consistent(vtype)
+        else:
+            # Will raise an error, if the data type of the first value is not
+            # valid
+            vtype = DataType.get_dtype(single_val)
+            check_prop_consistent(vtype)
+            check_new_data_consistent(vtype)
+
         return vtype
 
     @property
@@ -326,20 +361,6 @@ class Property(Entity):
 
     def __repr__(self):
         return self.__str__()
-
-    def __eq__(self, other):
-        if hasattr(other, "id"):
-            return self.id == other.id
-
-        return False
-
-    def __hash__(self):
-        """
-        overwriting method __eq__ blocks inheritance of __hash__ in Python 3
-        hash has to be either explicitly inherited from parent class,
-        implemented or escaped
-        """
-        return hash(self.id)
 
     def pprint(self, indent=2, max_length=80, current_depth=-1):
         """

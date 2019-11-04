@@ -8,9 +8,9 @@
 # LICENSE file in the root of the Project.
 from __future__ import (absolute_import, division, print_function)
 try:
-    from collections.abc import Iterable, Sequence
+    from collections.abc import Iterable
 except ImportError:
-    from collections import Iterable, Sequence
+    from collections import Iterable
 from collections import OrderedDict
 from inspect import isclass
 import numpy as np
@@ -352,7 +352,7 @@ class DataFrame(Entity, DataSet):
 
         :type: list of tuples
         """
-        if self.units:
+        if np.any(self.units):
             cols = [(n, dt, u) for n, dt, u in
                     zip(self.column_names, self.dtype, self.units)]
         else:
@@ -429,4 +429,3 @@ class DataFrame(Entity, DataSet):
     def metadata(self):
         if "metadata" in self._h5group:
             self._h5group.delete("metadata")
-

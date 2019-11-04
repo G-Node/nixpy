@@ -12,7 +12,9 @@ import sys
 import unittest
 import numpy as np
 import nixio as nix
+from nixio.exceptions import IncompatibleDimensions
 from .tmp import TempDir
+import six
 
 
 class TestDataArray(unittest.TestCase):
@@ -281,6 +283,14 @@ class TestDataArray(unittest.TestCase):
         assert(da.dtype == np.dtype('V1'))
         assert(np.array_equal(void_data, da[:]))
 
+    def test_array_unicode(self):
+        da = self.block.create_data_array("unicode", "lotsatext",
+                                          nix.DataType.String, shape=(4,))
+        data = ["Καφές", "Café", "咖啡", "☕"]
+        da.write_direct(data)
+
+        assert data == list(da[:])
+
     def test_data_array_dimensions(self):
         assert(len(self.array.dimensions) == 0)
 
@@ -460,11 +470,11 @@ class TestDataArray(unittest.TestCase):
                                 mode=nix.DataSliceMode.Data)
         np.testing.assert_almost_equal(data, dslice)
 
-        with self.assertRaises(IndexError):
+        with self.assertRaises(IncompatibleDimensions):
             da2d.get_slice((0, 0, 0), (10, 10, 10))
 
-        with self.assertRaises(IndexError):
+        with self.assertRaises(IncompatibleDimensions):
             da2d.get_slice((0, 0), (10,))
 
-        with self.assertRaises(IndexError):
+        with self.assertRaises(IncompatibleDimensions):
             da3d.get_slice((0, 0, 0), (3, 9, 40, 1))

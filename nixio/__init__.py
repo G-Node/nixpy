@@ -20,6 +20,7 @@ from .property import Property, OdmlType
 from .feature import Feature
 from .data_frame import DataFrame
 from .dimensions import SampledDimension, RangeDimension, SetDimension
+from . import validator
 
 # enums
 from .file import FileMode
@@ -36,6 +37,6 @@ __all__ = ("File", "Block", "Group", "DataArray", "DataFrame", "Tag",
            "MultiTag", "Source", "Section", "S", "Feature", "Property",
            "OdmlType", "SampledDimension", "RangeDimension", "SetDimension",
            "FileMode", "DataSliceMode", "DataType", "DimensionType",
-           "LinkType", "Compression")
+           "LinkType", "Compression", "validator")
 __author__ = ('Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, '
               'Balint Morvai, Achilleas Koutsou')

@@ -473,7 +473,7 @@ class Section(Entity):
             data = [data]
 
         if key not in self.props:
-            prop = self.create_property(key, data)
+            self.create_property(key, data)
         else:
             prop = self.props[key]
             prop.values = data
@@ -509,7 +509,7 @@ class Section(Entity):
     def pprint(self, indent=2, max_depth=1, max_length=80, current_depth=0):
         """
         Pretty print method.
-        
+
         :param indent: The number of indentation spaces per recursion
         :type indent:  int
         :param max_depth: The maximum times of recursion

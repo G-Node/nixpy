@@ -299,8 +299,9 @@ class Block(Entity):
                         for nam, dt in zip(col_names, col_dtypes)
                     )
                 else:  # col_dtypes is None and data is None
-                    raise (ValueError,
-                           "The data type of each column have to be specified")
+                    raise ValueError(
+                           "The data type of each column have to be specified"
+                    )
             else:  # if col_names is None
                 if data is not None and type(data[0]) == np.void:
                     col_dtype = data[0].dtype
@@ -315,8 +316,9 @@ class Block(Entity):
                 else:
                     # data is None or type(data[0]) != np.void
                     # data_type doesnt matter
-                    raise (ValueError,
-                           "No information about column names is provided!")
+                    raise ValueError(
+                           "No information about column names is provided!"
+                    )
 
         if col_dict is not None:
             for nam, dt in col_dict.items():
@@ -379,8 +381,8 @@ class Block(Entity):
         for grp in self.groups:
             self._pp(grp, max_length, indent*(start_depth + 1), False)
             for da in grp.data_arrays:
-                self._pp(da, max_length, indent*(start_depth + 2)
-                         , extra, True)
+                self._pp(da, max_length, indent*(start_depth + 2),
+                         extra, True)
                 for dim in da.dimensions:
                     self._pp(dim, max_length, indent*(start_depth + 3), False)
             for df in grp.data_frames:
@@ -388,7 +390,7 @@ class Block(Entity):
                          indent*(start_depth + 2), extra, True)
             for tag in grp.tags:
                 self._pp(tag, max_length,
-                        indent*(start_depth + 2), extra, True)
+                         indent*(start_depth + 2), extra, True)
                 for fe in tag.features:
                     self._pp(fe, max_length, indent*(start_depth + 3), False)
             for mt in grp.multi_tags:

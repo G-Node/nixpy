@@ -14,7 +14,6 @@ from .datatype import DataType
 from .dimension_type import DimensionType
 from . import util
 from .container import Container
-from six import string_types
 
 
 class DimensionContainer(Container):
@@ -50,7 +49,7 @@ class Dimension(object):
         return DimensionType(self._h5group.get_attr("dimension_type"))
 
     @dimension_type.setter
-    def dimension_type(self, dimtype):
+    def _dimension_type(self, dimtype):
         dimtype = DimensionType(dimtype)
         if dimtype not in DimensionType:
             raise TypeError("Invalid dimension type.")
@@ -68,6 +67,7 @@ class Dimension(object):
     def __repr__(self):
         return self.__str__()
 
+
 class SampledDimension(Dimension):
 
     def __init__(self, h5group, index):
@@ -76,7 +76,7 @@ class SampledDimension(Dimension):
     @classmethod
     def _create_new(cls, parent, index, sample):
         newdim = super(SampledDimension, cls)._create_new(parent, index)
-        newdim.dimension_type = DimensionType.Sample
+        newdim._dimension_type = DimensionType.Sample
         newdim.sampling_interval = sample
         return newdim
 
@@ -171,14 +171,14 @@ class RangeDimension(Dimension):
     @classmethod
     def _create_new(cls, parent, index, ticks):
         newdim = super(RangeDimension, cls)._create_new(parent, index)
-        newdim.dimension_type = DimensionType.Range
+        newdim._dimension_type = DimensionType.Range
         newdim._h5group.write_data("ticks", ticks, dtype=DataType.Double)
         return newdim
 
     @classmethod
     def _create_new_alias(cls, parent, index, da):
         newdim = super(RangeDimension, cls)._create_new(parent, index)
-        newdim.dimension_type = DimensionType.Range
+        newdim._dimension_type = DimensionType.Range
         newdim._h5group.create_link(da, da.id)
         return newdim
 
@@ -299,7 +299,7 @@ class SetDimension(Dimension):
     @classmethod
     def _create_new(cls, parent, index):
         newdim = super(SetDimension, cls)._create_new(parent, index)
-        newdim.dimension_type = DimensionType.Set
+        newdim._dimension_type = DimensionType.Set
         return newdim
 
     @property
