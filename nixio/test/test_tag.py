@@ -41,6 +41,32 @@ class TestTags(unittest.TestCase):
         self.file.close()
         self.tmpdir.cleanup()
 
+    def test_flex(self):
+        tag1d = self.block.create_tag("1dim tag", "tag", [1])
+        tag2d = self.block.create_tag("2dim tag", "tag", [1, 1])
+        tag3d = self.block.create_tag("3dim tag", "tag", [1,1,1])
+        da1d = self.block.create_data_array("1d array", "da", data=np.arange(5))
+        da1d.append_sampled_dimension(1., label="time", unit="s")
+        da2d = self.block.create_data_array("2d array", "da", data=np.arange(25).reshape((5,5)))
+        da2d.append_sampled_dimension(1., label="time", unit="s")
+        da2d.append_set_dimension()
+        da3d = self.block.create_data_array("3d array", "da", data=np.arange(125).reshape((5,5,5)))
+        da3d.append_sampled_dimension(1., label="time", unit="s")
+        da3d.append_set_dimension()
+        da3d.append_set_dimension()
+        tag1d.extent = [1]
+        tag1d.references.extend([da1d,da2d, da3d])
+        assert list(tag1d.references) == [da1d,da2d, da3d]
+        ref1 = tag1d.tagged_data(1) # 1d tag to 2d data
+        for (y,z) in zip(ref1[:].flatten(), da2d[1:3,:].flatten()): assert y==z
+        tag2d.extent = [1,2]
+        tag2d.references.extend([da1d, da2d, da3d])
+        tag2d.tagged_data(0)  # 2d tag to 1d data
+        tag3d.extent = [1,2,3]
+        tag3d.references.extend([da1d, da2d, da3d])
+
+
+
     def test_tag_eq(self):
         assert(self.my_tag == self.my_tag)
         assert(not self.my_tag == self.your_tag)
