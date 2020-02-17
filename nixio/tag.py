@@ -224,6 +224,22 @@ class Tag(BaseTag):
         refslice = list()
         position = self.position
         extent = self.extent
+        dimcount = len(data.dimensions)
+
+        if dimcount >len(position):
+            ldiff = dimcount-len(position)
+            tmp_pos = list(position)
+            tmp_pos.extend([0] * ldiff)
+            position = tuple(tmp_pos)
+            tmp_ext = list(extent)
+            for i in range(len(position)-1, dimcount):
+                tmp_ext.append(len(data[i])-1)
+            extent = tuple(tmp_ext)
+        else:
+            ldiff = dimcount - len(position)  # a negative value
+            position = position[:ldiff]
+            extent = extent[:ldiff]
+
         for idx, (pos, dim) in enumerate(zip(position, data.dimensions)):
             if self.units:
                 unit = self.units[idx]
@@ -256,13 +272,9 @@ class Tag(BaseTag):
             raise OutOfBounds("Reference index out of bounds.")
 
         ref = references[refidx]
-        dimcount = len(ref.dimensions)
-        if (len(position) != dimcount) or (len(extent) > 0 and
-                                           len(extent) != dimcount):
+        if len(position) != len(extent):
             raise IncompatibleDimensions(
-                "Number of dimensions in position or extent do not match "
-                "dimensionality of data",
-                "Tag.tagged_data")
+                "Number of dimensions in position and extent do not match ")
 
         slices = self._calc_data_slices(ref)
         if not self._slices_in_data(ref, slices):
