@@ -64,8 +64,9 @@ class TestTags(unittest.TestCase):
         tag2d.tagged_data(0)  # 2d tag to 1d data
         tag3d.extent = [1,2,3]
         tag3d.references.extend([da1d, da2d, da3d])
-
-
+        np.testing.assert_array_equal(tag3d.tagged_data(0),  da1d[1:3])
+        np.testing.assert_array_equal(tag3d.tagged_data(1), da2d[1:3, 1:4])
+        np.testing.assert_array_equal(tag3d.tagged_data(2), da3d[1:3, 1:4, 1:5])
 
     def test_tag_eq(self):
         assert(self.my_tag == self.my_tag)

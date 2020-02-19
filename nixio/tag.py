@@ -225,7 +225,6 @@ class Tag(BaseTag):
         position = self.position
         extent = self.extent
         dimcount = len(data.dimensions)
-
         if dimcount >len(position):
             ldiff = dimcount-len(position)
             tmp_pos = list(position)
@@ -235,7 +234,7 @@ class Tag(BaseTag):
             for i in range(len(position)-1, dimcount):
                 tmp_ext.append(len(data[i])-1)
             extent = tuple(tmp_ext)
-        else:
+        elif dimcount<len(position):
             ldiff = dimcount - len(position)  # a negative value
             position = position[:ldiff]
             extent = extent[:ldiff]
@@ -272,7 +271,7 @@ class Tag(BaseTag):
             raise OutOfBounds("Reference index out of bounds.")
 
         ref = references[refidx]
-        if len(position) != len(extent):
+        if extent and len(position) != len(extent):
             raise IncompatibleDimensions(
                 "Number of dimensions in position and extent do not match ")
 
