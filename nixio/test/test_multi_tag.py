@@ -102,6 +102,42 @@ class TestMultiTags(unittest.TestCase):
         self.file.close()
         self.tmpdir.cleanup()
 
+    def test_multi_tag_flex(self):
+        pos1d = self.block.create_data_array("pos1", "pos", data=[[0], [1]])
+        pos2d = self.block.create_data_array("pos2", "pos", data=[[0,0], [1,1]])
+        pos3d = self.block.create_data_array("pos3", "pos", data=[[0,1,2], [1,2,3]])
+        ext1d = self.block.create_data_array('ext1', 'ext', data=[[1], [1]])
+        ext2d = self.block.create_data_array('ext2', 'ext', data=[[1,2], [0,2]])
+        ext3d = self.block.create_data_array('ext3', 'ext', data=[[1,1,1], [1,1,1]])
+        mt1d = self.block.create_multi_tag("mt1d", "mt", pos1d)
+        mt1d.extents = ext1d
+        mt2d = self.block.create_multi_tag("mt2d", "mt", pos2d)
+        mt2d.extents = ext2d
+        mt3d = self.block.create_multi_tag("mt3d", "mt", pos3d)
+        mt3d.extents = ext3d
+        # create some references
+        da1d = self.block.create_data_array('ref1d', 'ref', data=np.arange(10))
+        da1d.append_sampled_dimension(1., label="time", unit="s")
+        da2d = self.block.create_data_array('ref2d', 'ref', data=np.arange(100).reshape((10,10)))
+        da2d.append_sampled_dimension(1., label="time", unit="s")
+        da2d.append_set_dimension()
+        da3d = self.block.create_data_array('ref3d', 'ref', data=np.arange(1000).reshape((10,10,10)))
+        da3d.append_sampled_dimension(1., label="time", unit="s")
+        da3d.append_set_dimension()
+        da3d.append_set_dimension()
+        mt1d.references.extend([da1d,da2d,da3d])
+        mt2d.references.extend([da1d,da2d,da3d])
+        mt3d.references.extend([da1d,da2d,da3d])
+        np.testing.assert_almost_equal(mt1d.tagged_data(0,0)[:], da1d[0:2])
+        np.testing.assert_almost_equal(mt1d.tagged_data(0,1)[:], da2d[0:2, :])
+        np.testing.assert_almost_equal(mt1d.tagged_data(0,2)[:], da3d[0:2,:,:])
+        np.testing.assert_almost_equal(mt2d.tagged_data(0,0)[:], da1d[0:2])
+        np.testing.assert_almost_equal(mt2d.tagged_data(0,1)[:], da2d[0:2, 0:3])
+        np.testing.assert_almost_equal(mt2d.tagged_data(0,2)[:], da3d[0:2, 0:3,:])
+        np.testing.assert_almost_equal(mt3d.tagged_data(1,0)[:], da1d[1:3])
+        np.testing.assert_almost_equal(mt3d.tagged_data(1,1)[:], da2d[1:3, 2:4])
+        np.testing.assert_almost_equal(mt3d.tagged_data(1,2)[:], da3d[1:3,2:4,3:5])
+
     def test_multi_tag_eq(self):
         assert(self.my_tag == self.my_tag)
         assert(not self.my_tag == self.your_tag)

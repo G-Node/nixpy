@@ -230,14 +230,16 @@ class Tag(BaseTag):
             tmp_pos = list(position)
             tmp_pos.extend([0] * ldiff)
             position = tuple(tmp_pos)
-            tmp_ext = list(extent)
-            for i in range(len(position)-1, dimcount):
-                tmp_ext.append(len(data[i])-1)
-            extent = tuple(tmp_ext)
+            if extent is not None and len(extent) != 0:
+                tmp_ext = list(extent)
+                for i in range(len(position)-1, dimcount):
+                    tmp_ext.append(len(data[i])-1)
+                extent = tuple(tmp_ext)
         elif dimcount<len(position):
             ldiff = dimcount - len(position)  # a negative value
             position = position[:ldiff]
-            extent = extent[:ldiff]
+            if extent is not None and len(extent) != 0:
+                extent = extent[:ldiff]
 
         for idx, (pos, dim) in enumerate(zip(position, data.dimensions)):
             if self.units:
