@@ -313,3 +313,46 @@ class SetDimension(Dimension):
     def labels(self, labels):
         dt = util.vlen_str_dtype
         self._h5group.write_data("labels", labels, dtype=dt)
+
+
+class DataFrameDimension(Dimension):
+
+    def __init__(self, h5group, index):
+        super(DataFrameDimension, self).__init__(h5group, index)
+
+    @classmethod
+    def _create_new(cls, parent, index, data_frame):
+        """
+        Create new Dimension that point to a DataFrame
+        :param parent: the linked DataArray
+        :param parent: the linked DataArray
+        :param data_frame: the DataFrame that
+        :param column: optional, the column that it points to
+        :return:
+        """
+        newdim = super(DataFrameDimension, cls)._create_new(parent, index)
+        newdim.data_frame = data_frame
+        newdim._dimension_type = DimensionType.DataFrame
+        return newdim
+
+    @property
+    def data_frame(self):
+        return self._h5group.get_attr("data_frame")
+
+    @data_frame.setter
+    def data_frame(self, df):
+        self._h5group.set_attr("data_frame", df)
+
+    @property
+    def column(self):
+        colidx = self._h5group.get_attr("column")
+        return colidx
+
+    @column.setter
+    def column(self, col):
+        self._h5group.set_attr("column", col)
+
+
+
+
+

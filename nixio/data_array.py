@@ -16,7 +16,8 @@ from .entity import Entity
 from .source_link_container import SourceLinkContainer
 from .datatype import DataType
 from .dimensions import (Dimension, SampledDimension, RangeDimension,
-                         SetDimension, DimensionType, DimensionContainer)
+                         SetDimension, DataFrameDimension,
+                         DimensionType, DimensionContainer)
 from . import util
 from .compression import Compression
 
@@ -140,6 +141,23 @@ class DataArray(Entity, DataSet):
         if self._parent._parent.time_auto_update:
             self.force_updated_at()
         return rdim
+
+    def append_data_frame_dimension(self, data_frame, column=None):
+        """
+        Append a new DataFrameDimension to 
+        :param data_frame:
+        :param column:
+        :return:
+        """
+        dimgroup = self._h5group.open_group("dimensions")
+        index = len(dimgroup) + 1
+        dfdim = DataFrameDimension._create_new(dimgroup, index,
+                                               data_frame)
+        if column:
+            dfdim.column = column
+        if self._parent._parent.time_auto_update:
+            self.force_updated_at()
+        return dfdim
 
     def append_alias_range_dimension(self):
         """
