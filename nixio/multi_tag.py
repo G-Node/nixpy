@@ -111,7 +111,7 @@ class MultiTag(BaseTag):
 
     def _get_slice(self, data, index):
         offset, count = self._get_offset_and_count(data, index)
-        sl = tuple(slice(o, o+c) for o, c in zip(offset, count))
+        sl = tuple(slice(o, o + c) for o, c in zip(offset, count))
         return sl
 
     def _calc_data_slices(self, data, index):
@@ -128,25 +128,26 @@ class MultiTag(BaseTag):
 
         if extents and positions.data_extent != extents.data_extent:
             raise IncompatibleDimensions(
-                "Number of dimensions in position and extent dowa not match", self)
+                "Number of dimensions in position and extent dowa not match",
+                self)
 
         dimcount = len(data.dimensions)
         da_len = list(data.data_extent)
         tmp_eli = []
         tmp_pli = []
         if len(positions.data_extent) == 1:
-                if dimcount != 1:  # must be larger than 1
-                    for i, p in enumerate(positions):
-                        tmp_p = [p]
-                        tmp_p.extend([0]*(dimcount-1))
-                        tmp_pli.append(tmp_p)
-                    if extents:  # Checked previously extent.shape = pos.shape
-                        for i, e in enumerate(extents):
-                            tmp_e = [e]
-                            tmp_e.extend(da_len[1:])
-                            tmp_eli.append(tmp_e)
-                    positions = np.array(tmp_pli)
-                    extents = np.array(tmp_eli)
+            if dimcount != 1:  # must be larger than 1
+                for i, p in enumerate(positions):
+                    tmp_p = [p]
+                    tmp_p.extend([0] * (dimcount - 1))
+                    tmp_pli.append(tmp_p)
+                if extents:  # Checked previously extent.shape = pos.shape
+                    for i, e in enumerate(extents):
+                        tmp_e = [e]
+                        tmp_e.extend(da_len[1:])
+                        tmp_eli.append(tmp_e)
+                positions = np.array(tmp_pli)
+                extents = np.array(tmp_eli)
         else:  # if len(data_extent) =2
             ndim = positions.data_extent[1]
             if dimcount > ndim:
@@ -157,7 +158,7 @@ class MultiTag(BaseTag):
                 if extents:  # Checked previously extent.shape = pos.shape
                     for i, e in enumerate(extents):
                         tmp_e = list(e)
-                        tmp_len = [x-1 for x in da_len[ndim:]]
+                        tmp_len = [x - 1 for x in da_len[ndim:]]
                         tmp_e.extend(tmp_len)
                         tmp_eli.append(tmp_e)
             elif ndim > dimcount:
@@ -197,7 +198,7 @@ class MultiTag(BaseTag):
                 minstop = starts[idx] + 1
                 stops.append(max(stop, minstop))
         else:
-            stops = [start+1 for start in starts]
+            stops = [start + 1 for start in starts]
         return tuple(slice(start, stop) for start, stop in zip(starts, stops))
 
     def retrieve_data(self, posidx, refidx):
@@ -220,7 +221,7 @@ class MultiTag(BaseTag):
         ref = references[refidx]
 
         slices = self._calc_data_slices(ref, posidx)
-        print("slices",slices)
+        print("slices", slices)
         if not self._slices_in_data(ref, slices):
             raise OutOfBounds("References data slice out of the extent of the "
                               "DataArray!")
@@ -261,7 +262,7 @@ class MultiTag(BaseTag):
             if posidx > da.data_extent[0]:
                 raise OutOfBounds("Position is larger than the data stored "
                                   "in the Feature!")
-            slices = [slice(posidx, posidx+1)]
+            slices = [slice(posidx, posidx + 1)]
             slices.extend(slice(0, stop) for stop in da.data_extent[1:])
 
             if not self._slices_in_data(da, slices):
