@@ -128,7 +128,7 @@ class MultiTag(BaseTag):
 
         if extents and positions.data_extent != extents.data_extent:
             raise IncompatibleDimensions(
-                "Number of dimensions in position and extent dowa not match",
+                "Number of dimensions in position and extent do not match",
                 self)
 
 
