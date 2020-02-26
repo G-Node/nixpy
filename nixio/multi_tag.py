@@ -129,7 +129,7 @@ class MultiTag(BaseTag):
         if extents and positions.data_extent != extents.data_extent:
             raise IncompatibleDimensions(
                 "Number of dimensions in position and extent do not match",
-                self)
+                "MultiTag._calc_data_slices")
 
 
         if len(pos_size) == 1:
