@@ -131,51 +131,14 @@ class MultiTag(BaseTag):
                 "Number of dimensions in position and extent dowa not match",
                 self)
 
-        dimcount = len(data.dimensions)
-        da_len = list(data.data_extent)
-        tmp_eli = []
-        tmp_pli = []
-        if len(positions.data_extent) == 1:
-            if dimcount != 1:  # must be larger than 1
-                for i, p in enumerate(positions):
-                    tmp_p = [p]
-                    tmp_p.extend([0] * (dimcount - 1))
-                    tmp_pli.append(tmp_p)
-                if extents:  # Checked previously extent.shape = pos.shape
-                    for i, e in enumerate(extents):
-                        tmp_e = [e]
-                        tmp_e.extend(da_len[1:])
-                        tmp_eli.append(tmp_e)
-                positions = np.array(tmp_pli)
-                extents = np.array(tmp_eli)
-        else:  # if len(data_extent) =2
-            ndim = positions.data_extent[1]
-            if dimcount > ndim:
-                for i, p in enumerate(positions):
-                    tmp_p = list(p)
-                    tmp_p.extend([0] * (dimcount - ndim))
-                    tmp_pli.append(tmp_p)
-                if extents:  # Checked previously extent.shape = pos.shape
-                    for i, e in enumerate(extents):
-                        tmp_e = list(e)
-                        tmp_len = [x - 1 for x in da_len[ndim:]]
-                        tmp_e.extend(tmp_len)
-                        tmp_eli.append(tmp_e)
-            elif ndim > dimcount:
-                for i, p in enumerate(positions):
-                    ldiff = dimcount - ndim  # a negative value
-                    tmp_p = list(p[:ldiff])
-                    tmp_pli.append(tmp_p)
-                    if extents:
-                        tmp_e = list(extents[i, :ldiff])
-                        tmp_eli.append(tmp_e)
-            if ndim != dimcount:
-                positions = np.array(tmp_pli)
-                extents = np.array(tmp_eli)
+
         if len(pos_size) == 1:
             dimpos = positions[0:len(data.dimensions)]
         else:
             dimpos = positions[index, 0:len(data.dimensions)]
+        if len(data.dimensions)>len(dimpos):
+            extension = [0]*(len(data.dimensions)-len(dimpos))
+            dimpos = np.concatenate((dimpos, extension))
         units = self.units
         starts, stops = list(), list()
         for idx in range(dimpos.size):
@@ -187,6 +150,11 @@ class MultiTag(BaseTag):
 
         if extents is not None:
             extent = extents[index, 0:len(data.dimensions)]
+            if len(data.dimensions)>len(extent):
+                da_len = list(data.data_extent)
+                ndim = extents.data_extent[1]
+                extension = [x - 1 for x in da_len[ndim:]]
+                extent = np.concatenate((extent, extension))
             for idx in range(extent.size):
                 dim = data.dimensions[idx]
                 unit = None
