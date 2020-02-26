@@ -351,8 +351,3 @@ class DataFrameDimension(Dimension):
     @column.setter
     def column(self, col):
         self._h5group.set_attr("column", col)
-
-
-
-
-
