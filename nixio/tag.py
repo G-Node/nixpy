@@ -275,7 +275,8 @@ class Tag(BaseTag):
         ref = references[refidx]
         if extent and len(position) != len(extent):
             raise IncompatibleDimensions(
-                "Number of dimensions in position and extent do not match ")
+                "Number of dimensions in position and extent "
+                "do not match ", extent)
 
         slices = self._calc_data_slices(ref)
         if not self._slices_in_data(ref, slices):
