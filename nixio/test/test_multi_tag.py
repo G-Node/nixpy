@@ -401,6 +401,21 @@ class TestMultiTags(unittest.TestCase):
             for pidx, p in enumerate(mtag.positions):
                 mtag.tagged_data(pidx, ridx)
 
+        wrong_pos = self.block.create_data_array("incorpos", "test",
+                                           data=[[1, 1, 1],
+                                                 [100, 1, 1]])
+        wrong_pos.append_set_dimension()
+        wrong_pos.append_set_dimension()
+        postag.positions = wrong_pos
+        self.assertRaises(IndexError, lambda: postag.tagged_data(1, 1))
+        wrong_ext = self.block.create_data_array("incorext", "test",
+                                           data=[[1, 500, 2],
+                                                 [0, 4, 1]])
+        wrong_ext.append_set_dimension()
+        wrong_ext.append_set_dimension()
+        segtag.extents = wrong_ext
+        self.assertRaises(IndexError, lambda: segtag.tagged_data(0, 1))
+
     def test_multi_tag_tagged_data_1d(self):
         # MultiTags to vectors behave a bit differently
         # Testing separately
