@@ -104,17 +104,21 @@ class TestMultiTags(unittest.TestCase):
 
     def test_multi_tag_flex(self):
         pos1d = self.block.create_data_array("pos1", "pos", data=[[0], [1]])
+        pos1d1d = self.block.create_data_array("pos1d1d", "pos", data=[0, 1])
         pos2d = self.block.create_data_array("pos2", "pos",
                                              data=[[0, 0], [1, 1]])
         pos3d = self.block.create_data_array("pos3", "pos",
                                              data=[[0, 1, 2], [1, 2, 3]])
         ext1d = self.block.create_data_array('ext1', 'ext', data=[[1], [1]])
+        ext1d1d = self.block.create_data_array('ext1d1d', 'ext', data=[1,1])
         ext2d = self.block.create_data_array('ext2', 'ext',
                                              data=[[1, 2], [0, 2]])
         ext3d = self.block.create_data_array('ext3', 'ext',
                                              data=[[1, 1, 1], [1, 1, 1]])
         mt1d = self.block.create_multi_tag("mt1d", "mt", pos1d)
         mt1d.extents = ext1d
+        mt1d1d = self.block.create_multi_tag("mt1d1d", "mt", pos1d1d)
+        mt1d1d.extents = ext1d1d
         mt2d = self.block.create_multi_tag("mt2d", "mt", pos2d)
         mt2d.extents = ext2d
         mt3d = self.block.create_multi_tag("mt3d", "mt", pos3d)
@@ -134,11 +138,17 @@ class TestMultiTags(unittest.TestCase):
         da3d.append_set_dimension()
         da3d.append_set_dimension()
         mt1d.references.extend([da1d, da2d, da3d])
+        mt1d1d.references.extend([da1d, da2d, da3d])
         mt2d.references.extend([da1d, da2d, da3d])
         mt3d.references.extend([da1d, da2d, da3d])
         np.testing.assert_almost_equal(mt1d.tagged_data(0, 0)[:], da1d[0:2])
         np.testing.assert_almost_equal(mt1d.tagged_data(0, 1)[:], da2d[0:2, :])
         np.testing.assert_almost_equal(mt1d.tagged_data(0, 2)[:],
+                                       da3d[0:2, :, :])
+        np.testing.assert_almost_equal(mt1d1d.tagged_data(0, 0)[:], da1d[0:2])
+        np.testing.assert_almost_equal(mt1d1d.tagged_data(0, 1)[:],
+                                       da2d[0:2, :])
+        np.testing.assert_almost_equal(mt1d1d.tagged_data(0, 2)[:],
                                        da3d[0:2, :, :])
         np.testing.assert_almost_equal(mt2d.tagged_data(0, 0)[:], da1d[0:2])
         np.testing.assert_almost_equal(mt2d.tagged_data(0, 1)[:],
@@ -398,7 +408,7 @@ class TestMultiTags(unittest.TestCase):
                                                 data=list(range(100)))
         oneddata.append_sampled_dimension(0.1)
         onedpos = self.block.create_data_array("1dpos", "positions",
-                                               data=[1, 9, 34])
+                                               data=[1, 9, 9.5])
         onedmtag = self.block.create_multi_tag("2dmt", "mtag",
                                                positions=onedpos)
         onedmtag.references.append(oneddata)

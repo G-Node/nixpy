@@ -131,13 +131,12 @@ class MultiTag(BaseTag):
                 "Number of dimensions in position and extent do not match",
                 "MultiTag._calc_data_slices")
 
-
         if len(pos_size) == 1:
-            dimpos = positions[0:len(data.dimensions)]
+            dimpos = np.array([positions[index]])
         else:
             dimpos = positions[index, 0:len(data.dimensions)]
         if len(data.dimensions)>len(dimpos):
-            extension = [0]*(len(data.dimensions)-len(dimpos))
+            extension =np.array([0]*(len(data.dimensions)-len(dimpos)))
             dimpos = np.concatenate((dimpos, extension))
         units = self.units
         starts, stops = list(), list()
@@ -149,10 +148,13 @@ class MultiTag(BaseTag):
             starts.append(self._pos_to_idx(dimpos.item(idx), unit, dim))
 
         if extents is not None:
-            extent = extents[index, 0:len(data.dimensions)]
+            if len(ext_size) == 1:
+                extent = np.array([extents[index]])
+            else:
+                extent = extents[index, 0:len(data.dimensions)]
             if len(data.dimensions)>len(extent):
                 da_len = list(data.data_extent)
-                ndim = extents.data_extent[1]
+                ndim = len(extent)
                 extension = [x - 1 for x in da_len[ndim:]]
                 extent = np.concatenate((extent, extension))
             for idx in range(extent.size):
@@ -189,7 +191,6 @@ class MultiTag(BaseTag):
         ref = references[refidx]
 
         slices = self._calc_data_slices(ref, posidx)
-        print("slices", slices)
         if not self._slices_in_data(ref, slices):
             raise OutOfBounds("References data slice out of the extent of the "
                               "DataArray!")
