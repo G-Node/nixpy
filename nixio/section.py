@@ -167,8 +167,9 @@ class Section(Entity):
             for v in vals:
                 if DataType.get_dtype(v) != dtype:
                     raise TypeError("Array contains inconsistent values.")
+        shape = (len(vals),)
 
-        prop = Property._create_new(self, properties, name, dtype, oid)
+        prop = Property._create_new(self, properties, name, dtype, oid, shape)
         prop.values = vals
 
         return prop
