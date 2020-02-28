@@ -135,8 +135,8 @@ class MultiTag(BaseTag):
             dimpos = np.array([positions[index]])
         else:
             dimpos = positions[index, 0:len(data.dimensions)]
-        if len(data.dimensions)>len(dimpos):
-            extension =np.array([0]*(len(data.dimensions)-len(dimpos)))
+        if len(data.dimensions) > len(dimpos):
+            extension = np.array([0]*(len(data.dimensions)-len(dimpos)))
             dimpos = np.concatenate((dimpos, extension))
         units = self.units
         starts, stops = list(), list()
@@ -152,7 +152,7 @@ class MultiTag(BaseTag):
                 extent = np.array([extents[index]])
             else:
                 extent = extents[index, 0:len(data.dimensions)]
-            if len(data.dimensions)>len(extent):
+            if len(data.dimensions) > len(extent):
                 da_len = list(data.data_extent)
                 ndim = len(extent)
                 extension = [x - 1 for x in da_len[ndim:]]

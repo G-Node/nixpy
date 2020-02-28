@@ -110,7 +110,7 @@ class TestMultiTags(unittest.TestCase):
         pos3d = self.block.create_data_array("pos3", "pos",
                                              data=[[0, 1, 2], [1, 2, 3]])
         ext1d = self.block.create_data_array('ext1', 'ext', data=[[1], [1]])
-        ext1d1d = self.block.create_data_array('ext1d1d', 'ext', data=[1,1])
+        ext1d1d = self.block.create_data_array('ext1d1d', 'ext', data=[1, 1])
         ext2d = self.block.create_data_array('ext2', 'ext',
                                              data=[[1, 2], [0, 2]])
         ext3d = self.block.create_data_array('ext3', 'ext',
@@ -402,15 +402,15 @@ class TestMultiTags(unittest.TestCase):
                 mtag.tagged_data(pidx, ridx)
 
         wrong_pos = self.block.create_data_array("incorpos", "test",
-                                           data=[[1, 1, 1],
-                                                 [100, 1, 1]])
+                                                 data=[[1, 1, 1],
+                                                       [100, 1, 1]])
         wrong_pos.append_set_dimension()
         wrong_pos.append_set_dimension()
         postag.positions = wrong_pos
         self.assertRaises(IndexError, lambda: postag.tagged_data(1, 1))
         wrong_ext = self.block.create_data_array("incorext", "test",
-                                           data=[[1, 500, 2],
-                                                 [0, 4, 1]])
+                                                 data=[[1, 500, 2],
+                                                       [0, 4, 1]])
         wrong_ext.append_set_dimension()
         wrong_ext.append_set_dimension()
         segtag.extents = wrong_ext
