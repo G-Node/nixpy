@@ -144,7 +144,8 @@ class DataArray(Entity, DataSet):
 
     def append_data_frame_dimension(self, data_frame, column=None):
         """
-        Append a new DataFrameDimension to 
+        Append a new DataFrameDimension to the list of existing dimension
+        descriptors.
         :param data_frame:
         :param column:
         :return:
@@ -152,9 +153,7 @@ class DataArray(Entity, DataSet):
         dimgroup = self._h5group.open_group("dimensions")
         index = len(dimgroup) + 1
         dfdim = DataFrameDimension._create_new(dimgroup, index,
-                                               data_frame)
-        if column:
-            dfdim.column = column
+                                               data_frame, column)
         if self._parent._parent.time_auto_update:
             self.force_updated_at()
         return dfdim

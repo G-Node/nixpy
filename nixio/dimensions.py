@@ -321,7 +321,7 @@ class DataFrameDimension(Dimension):
         super(DataFrameDimension, self).__init__(h5group, index)
 
     @classmethod
-    def _create_new(cls, parent, index, data_frame):
+    def _create_new(cls, parent, index, data_frame, column):
         """
         Create new Dimension that point to a DataFrame
         :param parent: the linked DataArray
@@ -332,16 +332,50 @@ class DataFrameDimension(Dimension):
         """
         newdim = super(DataFrameDimension, cls)._create_new(parent, index)
         newdim.data_frame = data_frame
+        newdim.column = column
         newdim._dimension_type = DimensionType.DataFrame
         return newdim
 
+    def unit(self, index):
+        if index is None:
+            if self.column is None:
+                raise ValueError("No default column index is set for this Dimension. Please supply one")
+            else:
+                idx = self.column
+        else:
+            idx = index
+        unit = self.data_frame[idx]
+        return unit
+
+    def ticks(self, index=None):
+        if index is None:
+            if self.column is None:
+                raise ValueError("No default column index is set for this Dimension. Please supply one")
+            else:
+                idx = self.column
+        else:
+            idx = index
+        ticks = self.data_frame[idx]
+        return ticks
+
+    def label(self, index):
+        if index is None:
+            if self.column is None:
+                label = self.data_frame.name
+            else:
+                label = self.data_frame[self.column].column_names[self.column]
+        else:
+            label = self.data_frame[index].column_names[index]
+        return label
+
     @property
     def data_frame(self):
-        return self._h5group.get_attr("data_frame")
+        dfname = self._h5group.get_by_pos(0).name
+        return self._h5group.open_group(dfname)
 
     @data_frame.setter
     def data_frame(self, df):
-        self._h5group.set_attr("data_frame", df)
+        self._h5group.create_link(df, df.id)
 
     @property
     def column(self):
