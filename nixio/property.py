@@ -98,7 +98,7 @@ class Property(Entity):
 
     @classmethod
     def _create_new(cls, nixparent, h5parent, name,
-                    dtype, oid=None, shape=None):
+                    dtype,shape=None, oid=None):
         if shape is None or shape[0] == 0:
             shape = (8, )
         util.check_entity_name(name)

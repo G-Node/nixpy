@@ -169,7 +169,7 @@ class Section(Entity):
                     raise TypeError("Array contains inconsistent values.")
         shape = (len(vals),)
 
-        prop = Property._create_new(self, properties, name, dtype, oid, shape)
+        prop = Property._create_new(self, properties, name, dtype, shape, oid)
         prop.values = vals
 
         return prop
