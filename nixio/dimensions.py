@@ -12,6 +12,7 @@ import numpy as np
 
 from .datatype import DataType
 from .dimension_type import DimensionType
+from .data_frame import DataFrame
 from . import util
 from .container import Container
 
@@ -336,7 +337,7 @@ class DataFrameDimension(Dimension):
         newdim._dimension_type = DimensionType.DataFrame
         return newdim
 
-    def unit(self, index):
+    def unit(self, index=None):
         if index is None:
             if self.column is None:
                 raise ValueError("No default column index is set for this Dimension. Please supply one")
@@ -355,10 +356,11 @@ class DataFrameDimension(Dimension):
                 idx = self.column
         else:
             idx = index
-        ticks = self.data_frame[idx]
+        df = self.data_frame
+        ticks = df[df.column_names[idx]]
         return ticks
 
-    def label(self, index):
+    def label(self, index=None):
         if index is None:
             if self.column is None:
                 label = self.data_frame.name
@@ -371,7 +373,9 @@ class DataFrameDimension(Dimension):
     @property
     def data_frame(self):
         dfname = self._h5group.get_by_pos(0).name
-        return self._h5group.open_group(dfname)
+        grp = self._h5group.open_group(dfname)
+        df = DataFrame(grp.h5root.group["data_frames"], grp)
+        return df
 
     @data_frame.setter
     def data_frame(self, df):

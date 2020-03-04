@@ -188,3 +188,23 @@ class TestDimension(unittest.TestCase):
         assert slabel == smpldim.label
         assert sunit == smpldim.unit
         assert soffset == smpldim.offset
+
+    def test_df_dim(self):
+        di = dict([('name', np.int64), ('id', str), ('time', float),
+                          ('sig1', np.float64), ('sig2', np.int32)])
+        arr = [(1, "a", 20.18, 5.0, 100), (2, 'b', 20.09, 5.5, 101),
+               (2, 'c', 20.05, 5.1, 100), (1, "d", 20.15, 5.3, 150),
+               (2, 'e', 20.23, 5.7, 200), (2, 'f', 20.07, 5.2, 300),
+               (1, "g", 20.12, 5.1, 39), (1, "h", 20.27, 5.1, 600),
+               (2, 'i', 20.15, 5.6, 400), (2, 'j', 20.08, 5.1, 200)]
+        df = self.block.create_data_frame("ref frame", "test", col_dict=di, data=arr)
+        dfdim1 = self.array.append_data_frame_dimension(df)
+        dfdim2 = self.array.append_data_frame_dimension(df, column=1)
+        self.assertRaises(ValueError,lambda: dfdim1.ticks())
+        for ti, tu in enumerate(arr):
+            for idx, item in enumerate(tu):
+                assert item == dfdim1.ticks(idx)[ti]
+                assert item == dfdim2.ticks(idx)[ti]
+        for ti, tu in enumerate(arr):
+            assert arr[ti][1] == dfdim2.ticks()[ti]
+
