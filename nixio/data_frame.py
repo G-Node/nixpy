@@ -330,7 +330,13 @@ class DataFrame(Entity, DataSet):
 
         :type: array of str
         """
-        return self._h5group.get_attr("units")
+        u = self._h5group.get_attr("units")
+        if u is None:
+            return u
+        for idx, _  in enumerate(u):
+            if u[idx] == "":
+                u[idx] = None
+        return u
 
     @units.setter
     def units(self, u):
@@ -338,8 +344,8 @@ class DataFrame(Entity, DataSet):
             if i is not None:
                 i = util.units.sanitizer(i)
                 util.check_attr_type(i, str)
-        u = np.array(u, dtype=util.vlen_str_dtype)
-        self._h5group.set_attr("units", u)
+        unit = np.array(u, util.vlen_str_dtype)
+        self._h5group.set_attr("units", unit)
         if self._parent._parent.time_auto_update:
             self.force_updated_at()
 
