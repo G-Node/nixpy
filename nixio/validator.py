@@ -72,7 +72,7 @@ class ValidationError(object):
                           "is not set")
     InvalidSamplingInterval = ("sampling interval for dimension {} "
                                "is not valid (interval > 0)")
-    DataFrameNotMatch = ("referenced data frame for dimension {} does "
+    DataFrameMismatch = ("referenced data frame for dimension {} does "
                          "not have the same row count as the data array")
     NoData = "data is not set"
     NoLinkType = "link_type is not set"
