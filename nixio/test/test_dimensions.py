@@ -197,14 +197,26 @@ class TestDimension(unittest.TestCase):
                (2, 'e', 20.23, 5.7, 200), (2, 'f', 20.07, 5.2, 300),
                (1, "g", 20.12, 5.1, 39), (1, "h", 20.27, 5.1, 600),
                (2, 'i', 20.15, 5.6, 400), (2, 'j', 20.08, 5.1, 200)]
+        unit =  [None, None, "s", "mV", None]
         df = self.block.create_data_frame("ref frame", "test", col_dict=di, data=arr)
+        df.units = unit
         dfdim1 = self.array.append_data_frame_dimension(df)
         dfdim2 = self.array.append_data_frame_dimension(df, column=1)
         self.assertRaises(ValueError,lambda: dfdim1.ticks())
         for ti, tu in enumerate(arr):
             for idx, item in enumerate(tu):
+                # ticks
                 assert item == dfdim1.ticks(idx)[ti]
                 assert item == dfdim2.ticks(idx)[ti]
+                # units
+                assert unit[idx] == dfdim1.unit(idx)
+                assert unit[idx] == dfdim2.unit(idx)
+                # labels
+                assert list(di)[idx] ==  dfdim1.label(idx)
+                assert list(di)[idx] ==  dfdim2.label(idx)
         for ti, tu in enumerate(arr):
             assert arr[ti][1] == dfdim2.ticks()[ti]
+        assert unit[1] ==  dfdim2.unit()
+        assert list(di)[1] ==  dfdim2.label()
+        assert dfdim1.label() == df.name
 

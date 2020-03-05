@@ -345,7 +345,7 @@ class DataFrameDimension(Dimension):
                 idx = self.column
         else:
             idx = index
-        unit = self.data_frame[idx]
+        unit = self.data_frame.units[idx]
         return unit
 
     def ticks(self, index=None):
@@ -365,9 +365,9 @@ class DataFrameDimension(Dimension):
             if self.column is None:
                 label = self.data_frame.name
             else:
-                label = self.data_frame[self.column].column_names[self.column]
+                label = self.data_frame.column_names[self.column]
         else:
-            label = self.data_frame[index].column_names[index]
+            label = self.data_frame.column_names[index]
         return label
 
     @property
