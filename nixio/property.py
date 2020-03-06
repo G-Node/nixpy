@@ -97,11 +97,14 @@ class Property(Entity):
         self._h5dataset = self._h5group
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, dtype, oid=None):
+    def _create_new(cls, nixparent, h5parent, name,
+                    dtype, shape=None, oid=None):
+        if shape is None or shape[0] == 0:
+            shape = (8, )
         util.check_entity_name(name)
         dtype = cls._make_h5_dtype(dtype)
 
-        h5dataset = h5parent.create_dataset(name, shape=(0,), dtype=dtype)
+        h5dataset = h5parent.create_dataset(name, shape=shape, dtype=dtype)
         h5dataset.set_attr("name", name)
 
         if not util.is_uuid(oid):
