@@ -324,12 +324,11 @@ class DataFrameDimension(Dimension):
     @classmethod
     def _create_new(cls, parent, index, data_frame, column):
         """
-        Create new Dimension that point to a DataFrame
-        :param parent: the linked DataArray
-        :param parent: the linked DataArray
-        :param data_frame: the DataFrame that
-        :param column: optional, the column that it points to
-        :return:
+        Create a new Dimension that points to a DataFrame
+        :param parent: DataArray the dimension will be attached to
+        :param data_frame: the referenced DataFrame for this Dimension
+        :param column: the index of a column in the DataFrame that the Dimension will reference (optional)
+        :return: The new DataFrameDimension
         """
         newdim = super(DataFrameDimension, cls)._create_new(parent, index)
         newdim.data_frame = data_frame
