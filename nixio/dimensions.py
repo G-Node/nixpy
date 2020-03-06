@@ -28,6 +28,7 @@ class DimensionContainer(Container):
             DimensionType.Range: RangeDimension,
             DimensionType.Sample: SampledDimension,
             DimensionType.Set: SetDimension,
+            DimensionType.DataFrame: DataFrameDimension,
         }[DimensionType(item.get_attr("dimension_type"))]
         idx = item.name
         return cls(item, idx)
@@ -336,10 +337,11 @@ class DataFrameDimension(Dimension):
         newdim._dimension_type = DimensionType.DataFrame
         return newdim
 
-    def unit(self, index=None):
+    def get_unit(self, index=None):
         if index is None:
             if self.column is None:
-                raise ValueError("No default column index is set for this Dimension. Please supply one")
+                raise ValueError("No default column index is set "
+                                 "for this Dimension. Please supply one")
             else:
                 idx = self.column
         else:
@@ -347,10 +349,11 @@ class DataFrameDimension(Dimension):
         unit = self.data_frame.units[idx]
         return unit
 
-    def ticks(self, index=None):
+    def get_ticks(self, index=None):
         if index is None:
             if self.column is None:
-                raise ValueError("No default column index is set for this Dimension. Please supply one")
+                raise ValueError("No default column index is set "
+                                 "for this Dimension. Please supply one")
             else:
                 idx = self.column
         else:
@@ -359,7 +362,7 @@ class DataFrameDimension(Dimension):
         ticks = df[df.column_names[idx]]
         return ticks
 
-    def label(self, index=None):
+    def get_label(self, index=None):
         if index is None:
             if self.column is None:
                 label = self.data_frame.name
@@ -378,7 +381,7 @@ class DataFrameDimension(Dimension):
 
     @data_frame.setter
     def data_frame(self, df):
-        self._h5group.create_link(df, df.id)
+        self._h5group.create_link(df, "data_frame")
 
     @property
     def column(self):

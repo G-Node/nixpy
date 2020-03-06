@@ -202,21 +202,24 @@ class TestDimension(unittest.TestCase):
         df.units = unit
         dfdim1 = self.array.append_data_frame_dimension(df)
         dfdim2 = self.array.append_data_frame_dimension(df, column=1)
-        self.assertRaises(ValueError,lambda: dfdim1.ticks())
+        self.assertRaises(ValueError,lambda: dfdim1.get_ticks())
         for ti, tu in enumerate(arr):
             for idx, item in enumerate(tu):
                 # ticks
-                assert item == dfdim1.ticks(idx)[ti]
-                assert item == dfdim2.ticks(idx)[ti]
+                assert item == dfdim1.get_ticks(idx)[ti]
+                assert item == dfdim2.get_ticks(idx)[ti]
+                assert self.array.dimensions[3].get_ticks(idx)[ti] \
+                       == dfdim1.get_ticks(idx)[ti]
+                assert self.array.dimensions[4].get_ticks(idx)[ti] \
+                       == dfdim2.get_ticks(idx)[ti]
                 # units
-                assert unit[idx] == dfdim1.unit(idx)
-                assert unit[idx] == dfdim2.unit(idx)
+                assert unit[idx] == dfdim1.get_unit(idx)
+                assert unit[idx] == dfdim2.get_unit(idx)
                 # labels
-                assert list(di)[idx] ==  dfdim1.label(idx)
-                assert list(di)[idx] ==  dfdim2.label(idx)
+                assert list(di)[idx] == dfdim1.get_label(idx)
+                assert list(di)[idx] == dfdim2.get_label(idx)
         for ti, tu in enumerate(arr):
-            assert arr[ti][1] == dfdim2.ticks()[ti]
-        assert unit[1] ==  dfdim2.unit()
-        assert list(di)[1] ==  dfdim2.label()
-        assert dfdim1.label() == df.name
-
+            assert arr[ti][1] == dfdim2.get_ticks()[ti]
+        assert unit[1] == dfdim2.get_unit()
+        assert list(di)[1] == dfdim2.get_label()
+        assert dfdim1.get_label() == df.name
