@@ -84,8 +84,6 @@ class Block(Entity):
 
         util.check_entity_name_and_type(name, type_)
         util.check_entity_input(positions)
-        if not isinstance(positions, DataArray):
-            raise TypeError("DataArray expected for 'positions'")
         multi_tags = self._h5group.open_group("multi_tags")
         if name in multi_tags:
             raise exceptions.DuplicateName("create_multi_tag")

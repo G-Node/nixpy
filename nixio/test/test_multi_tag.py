@@ -102,6 +102,19 @@ class TestMultiTags(unittest.TestCase):
         self.file.close()
         self.tmpdir.cleanup()
 
+    def test_multi_tag_new_constructor(self):
+        pos = np.random.random((2, 3))
+        ext = np.random.random((2, 3))
+        mt = self.block.create_multi_tag("conv_test", "test", pos)
+        mt.extents = ext
+        np.testing.assert_almost_equal(pos, mt.positions[:])
+        np.testing.assert_almost_equal(ext, mt.extents[:])
+        # try reset positions and ext
+        pos_new = np.random.random((2, 3))
+        ext_new = np.random.random((2, 3))
+        mt.positions = pos_new
+        mt.extents = ext_new
+
     def test_multi_tag_flex(self):
         pos1d = self.block.create_data_array("pos1", "pos", data=[[0], [1]])
         pos1d1d = self.block.create_data_array("pos1d1d", "pos", data=[0, 1])

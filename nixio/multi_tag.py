@@ -16,7 +16,7 @@ from .data_array import DataArray
 from .data_view import DataView
 from .link_type import LinkType
 from .exceptions import (OutOfBounds, IncompatibleDimensions,
-                         UninitializedEntity)
+                         UninitializedEntity, DuplicateName)
 from .section import Section
 
 
@@ -52,7 +52,14 @@ class MultiTag(BaseTag):
             raise TypeError("MultiTag.positions cannot be None.")
         if "positions" in self._h5group:
             del self._h5group["positions"]
-        self._h5group.create_link(da, "positions")
+        pos = da
+        if not isinstance(da, DataArray):
+            blk = self._parent
+            name = "f{self.name}-positions"
+            if name in blk.data_arrays:
+                del blk.data_arrays[name]
+            pos = blk.create_data_array(name, "multi_tag_positions", data=da)
+        self._h5group.create_link(pos, "positions")
         if self._parent._parent.time_auto_update:
             self.force_updated_at()
 
@@ -74,7 +81,15 @@ class MultiTag(BaseTag):
         if da is None:
             del self._h5group["extents"]
         else:
-            self._h5group.create_link(da, "extents")
+            ext = da
+            if not isinstance(da, DataArray):
+                blk = self._parent
+                name = "f{self.name}-extents"
+                if name in blk.data_arrays:
+                    del blk.data_arrays[name]
+                ext = blk.create_data_array(name,
+                                            "multi_tag_positions", data=da)
+            self._h5group.create_link(ext, "extents")
         if self._parent._parent.time_auto_update:
             self.force_updated_at()
 
