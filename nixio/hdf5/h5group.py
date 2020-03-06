@@ -340,12 +340,12 @@ class H5Group(object):
         topgroup = self.group.name.split("/")[1]
         if topgroup == "data":
             cls = Block
+            return cls(h5root.parent, h5root)
         elif topgroup == "metadata":
             cls = Section
+            return cls(h5root.parent, h5root)
         else:
             raise InvalidEntity
-        # TODO: Fix this
-        return cls(h5root)
 
     @property
     def parent(self):
