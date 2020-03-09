@@ -40,9 +40,9 @@ class DimensionContainer(Container):
         if isinstance(item, int) and self.one_based:
             item -= 1
         print(item, self)
-        it = super().__getitem__(item)
+        it = super(DimensionContainer, self).__getitem__(item)
+        return it
 
-        return  it
 
 class Dimension(object):
 

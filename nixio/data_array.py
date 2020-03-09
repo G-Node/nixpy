@@ -218,10 +218,9 @@ class DataArray(Entity, DataSet):
             raise TypeError("Invalid Dimension object in file.")
 
     def iter_dimensions(self):
-        '''
         # 1-based index dimension iterator
-        '''
-        dim_iter = DimensionContainer("dimensions", self, Dimension, one_based=True)
+        dim_iter = DimensionContainer("dimensions", self,
+                                      Dimension, one_based=True)
         return dim_iter
 
     @property
