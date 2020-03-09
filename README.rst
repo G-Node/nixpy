@@ -51,7 +51,7 @@ Check out the API documentation for further tutorials.
 NIXPY API Documentation
 -----------------------
 
-The API documentation can be found `here <http://g-node.github.io/nixpy/>`_.
+The API documentation can be found `here <https://nixpy.readthedocs.io/>`_.
 
 
 .. _nixio: https://pypi.python.org/pypi/nixio
