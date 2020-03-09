@@ -346,7 +346,9 @@ class DataFrameDimension(Dimension):
                 idx = self.column
         else:
             idx = index
-        unit = self.data_frame.units[idx]
+        unit = None
+        if self.data_frame.units is not None:
+            unit = self.data_frame.units[idx]
         return unit
 
     def get_ticks(self, index=None):
