@@ -217,6 +217,13 @@ class DataArray(Entity, DataSet):
         else:
             raise TypeError("Invalid Dimension object in file.")
 
+    def iter_dimensions(self):
+        '''
+        # 1-based index dimension iterator
+        '''
+        dim_iter = DimensionContainer("dimensions", self, Dimension, one_based=True)
+        return dim_iter
+
     @property
     def dtype(self):
         """
