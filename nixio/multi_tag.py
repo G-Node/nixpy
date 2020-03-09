@@ -16,7 +16,7 @@ from .data_array import DataArray
 from .data_view import DataView
 from .link_type import LinkType
 from .exceptions import (OutOfBounds, IncompatibleDimensions,
-                         UninitializedEntity, DuplicateName)
+                         UninitializedEntity)
 from .section import Section
 
 
@@ -55,10 +55,11 @@ class MultiTag(BaseTag):
         pos = da
         if not isinstance(da, DataArray):
             blk = self._parent
-            name = "f{self.name}-positions"
+            name = "{}-positions".format(self.name)
             if name in blk.data_arrays:
                 del blk.data_arrays[name]
-            pos = blk.create_data_array(name, "multi_tag_positions", data=da)
+            pos = blk.create_data_array(name, "{}-positions".format(self.type),
+                                        data=da)
         self._h5group.create_link(pos, "positions")
         if self._parent._parent.time_auto_update:
             self.force_updated_at()
@@ -84,11 +85,12 @@ class MultiTag(BaseTag):
             ext = da
             if not isinstance(da, DataArray):
                 blk = self._parent
-                name = "f{self.name}-extents"
+                name = "{}-extents".format(self.name)
                 if name in blk.data_arrays:
                     del blk.data_arrays[name]
                 ext = blk.create_data_array(name,
-                                            "multi_tag_positions", data=da)
+                                            "{}-extents".format(self.type)
+                                            , data=da)
             self._h5group.create_link(ext, "extents")
         if self._parent._parent.time_auto_update:
             self.force_updated_at()

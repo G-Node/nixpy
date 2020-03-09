@@ -114,6 +114,10 @@ class TestMultiTags(unittest.TestCase):
         ext_new = np.random.random((2, 3))
         mt.positions = pos_new
         mt.extents = ext_new
+        assert mt.positions.name == "conv_test-positions"
+        assert mt.positions.type == "test-positions"
+        assert mt.extents.name == "conv_test-extents"
+        assert mt.extents.type == "test-extents"
 
     def test_multi_tag_flex(self):
         pos1d = self.block.create_data_array("pos1", "pos", data=[[0], [1]])
