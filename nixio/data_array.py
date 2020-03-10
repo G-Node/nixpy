@@ -171,6 +171,7 @@ class DataArray(Entity, DataSet):
 
         :returns: The created dimension descriptor.
         :rtype: RangeDimension
+
         """
         if (len(self.data_extent) > 1 or
                 not DataType.is_numeric_dtype(self.dtype)):
@@ -218,10 +219,12 @@ class DataArray(Entity, DataSet):
             raise TypeError("Invalid Dimension object in file.")
 
     def iter_dimensions(self):
-        # 1-based index dimension iterator
-        dim_iter = DimensionContainer("dimensions", self,
-                                      Dimension, one_based=True)
-        return dim_iter
+        """
+        1-based index dimension iterator. The method returns a generator
+        which returns the index starting from one and the dimensions.
+        """
+        for idx, dim in enumerate(self.dimensions):
+            yield idx+1, dim
 
     @property
     def dtype(self):

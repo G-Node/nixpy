@@ -484,10 +484,5 @@ class TestDataArray(unittest.TestCase):
         self.array.append_range_dimension(range(10))
         self.array.append_sampled_dimension(0.1)
         dim_container_one_based = self.array.iter_dimensions()
-        assert dim_container_one_based[1].dimension_type \
-            == nix.DimensionType.Set
-        assert dim_container_one_based[2].dimension_type \
-            == nix.DimensionType.Range
-        assert dim_container_one_based[3].dimension_type \
-            == nix.DimensionType.Sample
-        assert dim_container_one_based[3].sampling_interval == 0.1
+        for idx, dim in dim_container_one_based:
+            assert self.array.dimensions[idx-1].dimension_type == dim.dimension_type

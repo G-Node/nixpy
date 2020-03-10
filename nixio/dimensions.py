@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 # Copyright © 2016, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
@@ -22,9 +23,6 @@ class DimensionContainer(Container):
     DimensionContainer extends Container to support returning different types
     of Dimension classes on return.
     """
-    def __init__(self, name, parent, itemclass, one_based=False):
-        super(DimensionContainer, self).__init__(name, parent, itemclass)
-        self.one_based = one_based
 
     def _inst_item(self, item):
         cls = {
@@ -35,13 +33,6 @@ class DimensionContainer(Container):
         }[DimensionType(item.get_attr("dimension_type"))]
         idx = item.name
         return cls(item, idx)
-
-    def __getitem__(self, item):
-        if isinstance(item, int) and self.one_based:
-            item -= 1
-        print(item, self)
-        it = super(DimensionContainer, self).__getitem__(item)
-        return it
 
 
 class Dimension(object):
