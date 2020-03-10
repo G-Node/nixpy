@@ -338,6 +338,14 @@ class DataFrameDimension(Dimension):
         return newdim
 
     def get_unit(self, index=None):
+        """
+        Get the unit of a specific column in the referenced DataFrame
+        :param index: Index of the needed column
+        :type index: int
+
+        :return: Unit of the specified column
+        :rtype: str or None
+        """
         if index is None:
             if self.column is None:
                 raise ValueError("No default column index is set "
@@ -348,10 +356,19 @@ class DataFrameDimension(Dimension):
             idx = index
         unit = None
         if self.data_frame.units is not None:
+
             unit = self.data_frame.units[idx]
         return unit
 
     def get_ticks(self, index=None):
+        """
+        Get the values in a specific column in the referenced DataFrame
+        :param index: Index of the needed column
+        :type index: int
+
+        :return: values in the specified column
+        :rtype: ndarray
+        """
         if index is None:
             if self.column is None:
                 raise ValueError("No default column index is set "
@@ -365,6 +382,14 @@ class DataFrameDimension(Dimension):
         return ticks
 
     def get_label(self, index=None):
+        """
+        Generate a label for this dimension by referring to a specific column in the referenced DataFrame
+        :param index: Index of the referred column
+        :type index: int or None
+
+        :return: the header of the specified column or the name of DataFrame if index is None
+        :rtype: str
+        """
         if index is None:
             if self.column is None:
                 label = self.data_frame.name

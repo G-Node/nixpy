@@ -142,13 +142,17 @@ class DataArray(Entity, DataSet):
             self.force_updated_at()
         return rdim
 
-    def append_data_frame_dimension(self, data_frame, column=None):
+    def append_data_frame_dimension(self, data_frame, column_idx=None):
         """
         Append a new DataFrameDimension to the list of existing dimension
         descriptors.
-        :param data_frame:
-        :param column:
-        :return:
+        :param data_frame: The referenced DataFrame
+        :type data_frame: nix.DataFrame
+        :param column_idx: Index of the referenced column of the DataFrame. The column will be used as the default for the get methods
+        :type column_idx: int or None
+
+        :returns: Thew newly created DataFrameDimension.
+        :rtype: DataFrameDimension
         """
         dimgroup = self._h5group.open_group("dimensions")
         index = len(dimgroup) + 1
