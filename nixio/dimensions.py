@@ -12,6 +12,7 @@ import numpy as np
 
 from .datatype import DataType
 from .dimension_type import DimensionType
+from .data_frame import DataFrame
 from . import util
 from .container import Container
 
@@ -27,6 +28,7 @@ class DimensionContainer(Container):
             DimensionType.Range: RangeDimension,
             DimensionType.Sample: SampledDimension,
             DimensionType.Set: SetDimension,
+            DimensionType.DataFrame: DataFrameDimension,
         }[DimensionType(item.get_attr("dimension_type"))]
         idx = item.name
         return cls(item, idx)
@@ -313,3 +315,81 @@ class SetDimension(Dimension):
     def labels(self, labels):
         dt = util.vlen_str_dtype
         self._h5group.write_data("labels", labels, dtype=dt)
+
+
+class DataFrameDimension(Dimension):
+
+    def __init__(self, h5group, index):
+        super(DataFrameDimension, self).__init__(h5group, index)
+
+    @classmethod
+    def _create_new(cls, parent, index, data_frame, column):
+        """
+        Create a new Dimension that points to a DataFrame
+        :param parent: DataArray the dimension will be attached to
+        :param data_frame: the referenced DataFrame for this Dimension
+        :param column: the index of a column in the DataFrame that the Dimension will reference (optional)
+        :return: The new DataFrameDimension
+        """
+        newdim = super(DataFrameDimension, cls)._create_new(parent, index)
+        newdim.data_frame = data_frame
+        newdim.column = column
+        newdim._dimension_type = DimensionType.DataFrame
+        return newdim
+
+    def get_unit(self, index=None):
+        if index is None:
+            if self.column is None:
+                raise ValueError("No default column index is set "
+                                 "for this Dimension. Please supply one")
+            else:
+                idx = self.column
+        else:
+            idx = index
+        unit = None
+        if self.data_frame.units is not None:
+            unit = self.data_frame.units[idx]
+        return unit
+
+    def get_ticks(self, index=None):
+        if index is None:
+            if self.column is None:
+                raise ValueError("No default column index is set "
+                                 "for this Dimension. Please supply one")
+            else:
+                idx = self.column
+        else:
+            idx = index
+        df = self.data_frame
+        ticks = df[df.column_names[idx]]
+        return ticks
+
+    def get_label(self, index=None):
+        if index is None:
+            if self.column is None:
+                label = self.data_frame.name
+            else:
+                label = self.data_frame.column_names[self.column]
+        else:
+            label = self.data_frame.column_names[index]
+        return label
+
+    @property
+    def data_frame(self):
+        dfname = self._h5group.get_by_pos(0).name
+        grp = self._h5group.open_group(dfname)
+        df = DataFrame(grp.h5root.group["data_frames"], grp)
+        return df
+
+    @data_frame.setter
+    def data_frame(self, df):
+        self._h5group.create_link(df, "data_frame")
+
+    @property
+    def column(self):
+        colidx = self._h5group.get_attr("column")
+        return colidx
+
+    @column.setter
+    def column(self, col):
+        self._h5group.set_attr("column", col)

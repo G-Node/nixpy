@@ -72,6 +72,8 @@ class ValidationError(object):
                           "is not set")
     InvalidSamplingInterval = ("sampling interval for dimension {} "
                                "is not valid (interval > 0)")
+    DataFrameMismatch = ("referenced data frame for dimension {} does "
+                         "not have the same row count as the data array")
     NoData = "data is not set"
     NoLinkType = "link_type is not set"
 
@@ -233,6 +235,10 @@ def check_data_array(da):
                 # empty labels is allowed
                 errors.append(ValidationError.SetDimLabelsMismatch.format(idx))
             dim_errors, dim_warnings = check_set_dimension(dim, idx)
+        elif dim.dimension_type == DimensionType.DataFrame:
+            df_len = dim.data_frame.row_count()
+            if df_len != da.shape[0]:
+                dim_errors, dim_warnings = check_df_dimension(dim, idx)
         errors.extend(dim_errors)
         warnings.extend(dim_warnings)
     return errors, warnings
@@ -432,7 +438,7 @@ def check_set_dimension(dim, idx):
 
 def check_sampled_dimension(dim, idx):
     """
-    Validate a SetDimension and return all errors and warnings.
+    Validate a SampledDimension and return all errors and warnings.
 
     :returns: A list of 'errors' and a list of 'warnings'
     """
@@ -450,6 +456,17 @@ def check_sampled_dimension(dim, idx):
     else:
         if dim.offset:
             warnings.append(ValidationWarning.OffsetNoUnit.format(idx))
+    return errors, warnings
+
+
+def check_df_dimension(dim, idx):
+    """
+    Validate a DataFrameDimension and return all errors and warnings.
+
+    :returns: A list of 'errors' and a list of 'warnings'
+    """
+    errors = [ValidationError.DataFrameNotMatch.format(idx)]
+    warnings = list()
     return errors, warnings
 
 
