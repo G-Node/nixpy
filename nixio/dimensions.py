@@ -339,7 +339,8 @@ class DataFrameDimension(Dimension):
 
     def get_unit(self, index=None):
         """
-        Get the unit of a specific column in the referenced DataFrame
+        Get the unit of the Dimension.  If an index is specified,
+        it will return the unit of the column in the referenced DataFrame at that index.
         :param index: Index of the needed column
         :type index: int
 
@@ -362,7 +363,9 @@ class DataFrameDimension(Dimension):
 
     def get_ticks(self, index=None):
         """
-        Get the values in a specific column in the referenced DataFrame
+        Get the ticks of the Dimension from the referenced DataFrame.
+        If an index is specified, it will return the values of the column
+        in the referenced DataFrame at that index.
         :param index: Index of the needed column
         :type index: int
 
@@ -383,7 +386,10 @@ class DataFrameDimension(Dimension):
 
     def get_label(self, index=None):
         """
-        Generate a label for this dimension by referring to a specific column in the referenced DataFrame
+        ```suggestion
+        Get the label of the Dimension. If an index is specified,
+         it will return the name of the column in the referenced
+         DataFrame at that index.
         :param index: Index of the referred column
         :type index: int or None
 

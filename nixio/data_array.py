@@ -148,7 +148,8 @@ class DataArray(Entity, DataSet):
         descriptors.
         :param data_frame: The referenced DataFrame
         :type data_frame: nix.DataFrame
-        :param column_idx: Index of the referenced column of the DataFrame. The column will be used as the default for the get methods
+        :param column_idx: Index of the referenced column of the DataFrame.
+                           The default column determines the default label, ticks, and unit of this Dimension.
         :type column_idx: int or None
 
         :returns: Thew newly created DataFrameDimension.
