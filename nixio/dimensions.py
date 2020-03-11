@@ -386,7 +386,6 @@ class DataFrameDimension(Dimension):
 
     def get_label(self, index=None):
         """
-        ```suggestion
         Get the label of the Dimension. If an index is specified,
          it will return the name of the column in the referenced
          DataFrame at that index.
