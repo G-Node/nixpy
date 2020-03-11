@@ -333,7 +333,7 @@ class DataFrameDimension(Dimension):
         """
         newdim = super(DataFrameDimension, cls)._create_new(parent, index)
         newdim.data_frame = data_frame
-        newdim.column = column
+        newdim.column_idx = column
         newdim._dimension_type = DimensionType.DataFrame
         return newdim
 
@@ -347,11 +347,11 @@ class DataFrameDimension(Dimension):
         :rtype: str or None
         """
         if index is None:
-            if self.column is None:
+            if self.column_idx is None:
                 raise ValueError("No default column index is set "
                                  "for this Dimension. Please supply one")
             else:
-                idx = self.column
+                idx = self.column_idx
         else:
             idx = index
         unit = None
@@ -370,11 +370,11 @@ class DataFrameDimension(Dimension):
         :rtype: ndarray
         """
         if index is None:
-            if self.column is None:
+            if self.column_idx is None:
                 raise ValueError("No default column index is set "
                                  "for this Dimension. Please supply one")
             else:
-                idx = self.column
+                idx = self.column_idx
         else:
             idx = index
         df = self.data_frame
@@ -391,10 +391,10 @@ class DataFrameDimension(Dimension):
         :rtype: str
         """
         if index is None:
-            if self.column is None:
+            if self.column_idx is None:
                 label = self.data_frame.name
             else:
-                label = self.data_frame.column_names[self.column]
+                label = self.data_frame.column_names[self.column_idx]
         else:
             label = self.data_frame.column_names[index]
         return label
@@ -411,10 +411,10 @@ class DataFrameDimension(Dimension):
         self._h5group.create_link(df, "data_frame")
 
     @property
-    def column(self):
-        colidx = self._h5group.get_attr("column")
+    def column_idx(self):
+        colidx = self._h5group.get_attr("column_idx")
         return colidx
 
-    @column.setter
-    def column(self, col):
-        self._h5group.set_attr("column", col)
+    @column_idx.setter
+    def column_idx(self, col):
+        self._h5group.set_attr("column_idx", col)

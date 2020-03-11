@@ -203,7 +203,7 @@ class TestDimension(unittest.TestCase):
                                           col_dict=di, data=arr)
         df.units = unit
         dfdim1 = self.array.append_data_frame_dimension(df)
-        dfdim2 = self.array.append_data_frame_dimension(df, column=1)
+        dfdim2 = self.array.append_data_frame_dimension(df, column_idx=1)
         self.assertRaises(ValueError,lambda: dfdim1.get_ticks())
         for ti, tu in enumerate(arr):
             for idx, item in enumerate(tu):
