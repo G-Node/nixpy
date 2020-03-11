@@ -251,14 +251,14 @@ class RangeDimension(Dimension):
         :rtype: int
         """
         ticks = self.ticks
-        if position < ticks[0]:
+        if position <= ticks[0]:
             return 0
-        elif position > ticks[-1]:
+        elif position >= ticks[-1]:
             return len(ticks) - 1
 
         ticks = np.array(ticks)
-        pidxs = np.flatnonzero((ticks - position) <= 0)
-        return int(pidxs[-1])
+        pidxs = np.searchsorted(ticks, position, side="right") - 1
+        return int(pidxs)
 
     def tick_at(self, index):
         """

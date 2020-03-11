@@ -118,6 +118,8 @@ class TestDimension(unittest.TestCase):
 
         assert(self.range_dim.index_of(0.) == 0)
         assert(self.range_dim.index_of(10.) == (np.floor(10./3.14)))
+        assert(self.range_dim.index_of(18.84) == 6)
+        assert(self.range_dim.index_of(28.26) == 9)
         assert(self.range_dim.index_of(100.) == 9)
         assert(self.range_dim.index_of(-100.) == 0)
 
