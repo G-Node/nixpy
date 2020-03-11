@@ -41,13 +41,6 @@ class TestDataFrame(unittest.TestCase):
         self.file.close()
         self.tmpdir.cleanup()
 
-    def create_with_list(self):
-        arr = np.arange(999).reshape((333, 3))
-        namelist = np.array(['name', 'id', 'time'])
-        dtlist = np.array([int, str, float])
-        self.blk.create_data_frame('test1', 'for_test', col_names=namelist,
-                                   col_dtypes=dtlist, data=arr)
-
     def test_data_frame_eq(self):
         assert self.df1 == self.df1
         assert not self.df1 == self.df2
@@ -68,6 +61,11 @@ class TestDataFrame(unittest.TestCase):
         for i in df_li[:]:
             self.assertIsInstance(i['id'], string_types)
             self.assertIsInstance(i['sig2'], np.int32)
+        namelist = np.array(['name', 'name', 'name', 'name', 'name'])
+        self.assertRaises(nix.exceptions.DuplicateColumnName,
+                          lambda: self.block.create_data_frame('testerror',
+                                  'for_test', col_names=namelist,
+                                   col_dtypes=dtlist, data=arr))
 
     def test_data_frame_type(self):
         assert self.df1.type == "signal1"
