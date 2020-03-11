@@ -29,10 +29,12 @@ class MultiTag(BaseTag):
         self._features = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, positions):
+    def _create_new(cls, nixparent, h5parent, name, type_, positions, extents):
         newentity = super(MultiTag, cls)._create_new(nixparent, h5parent,
                                                      name, type_)
         newentity.positions = positions
+        if extents is not None:
+            newentity.extents = extents
         return newentity
 
     @property
@@ -52,15 +54,7 @@ class MultiTag(BaseTag):
             raise TypeError("MultiTag.positions cannot be None.")
         if "positions" in self._h5group:
             del self._h5group["positions"]
-        pos = da
-        if not isinstance(da, DataArray):
-            blk = self._parent
-            name = "{}-positions".format(self.name)
-            if name in blk.data_arrays:
-                del blk.data_arrays[name]
-            pos = blk.create_data_array(name, "{}-positions".format(self.type),
-                                        data=da)
-        self._h5group.create_link(pos, "positions")
+        self._h5group.create_link(da, "positions")
         if self._parent._parent.time_auto_update:
             self.force_updated_at()
 
@@ -82,16 +76,7 @@ class MultiTag(BaseTag):
         if da is None:
             del self._h5group["extents"]
         else:
-            ext = da
-            if not isinstance(da, DataArray):
-                blk = self._parent
-                name = "{}-extents".format(self.name)
-                if name in blk.data_arrays:
-                    del blk.data_arrays[name]
-                ext = blk.create_data_array(name,
-                                            "{}-extents".format(self.type)
-                                            , data=da)
-            self._h5group.create_link(ext, "extents")
+            self._h5group.create_link(da, "extents")
         if self._parent._parent.time_auto_update:
             self.force_updated_at()
 

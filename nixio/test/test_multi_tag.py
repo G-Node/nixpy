@@ -105,15 +105,10 @@ class TestMultiTags(unittest.TestCase):
     def test_multi_tag_new_constructor(self):
         pos = np.random.random((2, 3))
         ext = np.random.random((2, 3))
-        mt = self.block.create_multi_tag("conv_test", "test", pos)
-        mt.extents = ext
+        mt = self.block.create_multi_tag("conv_test", "test", pos, ext)
         np.testing.assert_almost_equal(pos, mt.positions[:])
         np.testing.assert_almost_equal(ext, mt.extents[:])
         # try reset positions and ext
-        pos_new = np.random.random((2, 3))
-        ext_new = np.random.random((2, 3))
-        mt.positions = pos_new
-        mt.extents = ext_new
         assert mt.positions.name == "conv_test-positions"
         assert mt.positions.type == "test-positions"
         assert mt.extents.name == "conv_test-extents"
