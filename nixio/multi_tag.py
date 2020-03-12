@@ -29,12 +29,10 @@ class MultiTag(BaseTag):
         self._features = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, positions, extents):
+    def _create_new(cls, nixparent, h5parent, name, type_, positions):
         newentity = super(MultiTag, cls)._create_new(nixparent, h5parent,
                                                      name, type_)
         newentity.positions = positions
-        if extents is not None:
-            newentity.extents = extents
         return newentity
 
     @property
@@ -237,7 +235,7 @@ class MultiTag(BaseTag):
             slices.extend(slice(0, stop) for stop in da.data_extent[1:])
 
             if not self._slices_in_data(da, slices):
-                OutOfBounds("Requested data slice out of the extent of the "
+                raise OutOfBounds("Requested data slice out of the extent of the "
                             "Feature!")
             return DataView(da, slices)
         # For untagged return the full data

@@ -77,4 +77,3 @@ class DuplicateColumnName(Exception):
     def __init__(self):
         self.message = "Column names for a DataFrame have to be unique."
         super(DuplicateColumnName, self).__init__(self.message)
-

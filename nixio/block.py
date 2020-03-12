@@ -86,16 +86,34 @@ class Block(Entity):
         multi_tags = self._h5group.open_group("multi_tags")
         if name in multi_tags:
             raise exceptions.DuplicateName("create_multi_tag")
-        if not isinstance(positions, DataArray):
-            da_name = "{}-positions".format(name)
-            positions = self.create_data_array(da_name, "{}-positions".format(type_),
-                                        data=positions)
-        if not isinstance(extents, DataArray) and extents is not None:
-            da_name = "{}-extents".format(name)
-            extents = self.create_data_array(da_name,
-                                        "{}-extents".format(type_)
-                                            , data=extents)
-        mtag = MultiTag._create_new(self, multi_tags, name, type_, positions, extents)
+        try:
+            if not isinstance(positions, DataArray):
+                da_name = "{}-positions".format(name)
+                positions = self.create_data_array(da_name,
+                                                   "{}-positions".format(type_),
+                                                   data=positions)
+            if not isinstance(extents, DataArray) and extents is not None:
+                da_name = "{}-extents".format(name)
+                extents = self.create_data_array(da_name,
+                                                 "{}-extents".format(type_)
+                                                 , data=extents)
+            da_name = name
+            mtag = MultiTag._create_new(self, multi_tags,
+                                        name, type_, positions)
+        except (exceptions.DuplicateName, ValueError) as e:
+            msg = "Creation failed for {} due to {}.".format(da_name, e)
+            add_msg = None
+            if "{}-positions".format(name) in self.data_arrays:
+                del self.data_arrays["{}-positions".format(name)]
+                add_msg = " Created DataArray positions deleted."
+            if "{}-extents".format(name) in self.data_arrays:
+                del self.data_arrays["{}-extents".format(name)]
+                add_msg = " Created DataArray positions and extents deleted."
+            msg += add_msg
+            raise exceptions.CreationFail(msg)
+
+        if extents is not None:
+            mtag.extents = extents
         return mtag
 
     # Tag
