@@ -11,7 +11,7 @@ import unittest
 import numpy as np
 import nixio as nix
 from .tmp import TempDir
-from nixio.exceptions import CreationFail
+from nixio.exceptions import DuplicateName
 
 
 class TestMultiTags(unittest.TestCase):
@@ -117,7 +117,7 @@ class TestMultiTags(unittest.TestCase):
         # test positions extents deleted if multitag creation failed
         pos = None
         ext = np.random.random((2, 3))
-        self.assertRaises(CreationFail ,
+        self.assertRaises(ValueError ,
                           lambda: self.block.create_multi_tag("err_test",
                                                             "test", pos, ext))
 
