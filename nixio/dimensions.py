@@ -333,31 +333,51 @@ class DataFrameDimension(Dimension):
         """
         newdim = super(DataFrameDimension, cls)._create_new(parent, index)
         newdim.data_frame = data_frame
-        newdim.column = column
+        newdim.column_idx = column
         newdim._dimension_type = DimensionType.DataFrame
         return newdim
 
     def get_unit(self, index=None):
+        """
+        Get the unit of the Dimension.  If an index is specified,
+        it will return the unit of the column in the referenced DataFrame at that index.
+        :param index: Index of the needed column
+        :type index: int
+
+        :return: Unit of the specified column
+        :rtype: str or None
+        """
         if index is None:
-            if self.column is None:
+            if self.column_idx is None:
                 raise ValueError("No default column index is set "
                                  "for this Dimension. Please supply one")
             else:
-                idx = self.column
+                idx = self.column_idx
         else:
             idx = index
         unit = None
         if self.data_frame.units is not None:
+
             unit = self.data_frame.units[idx]
         return unit
 
     def get_ticks(self, index=None):
+        """
+        Get the ticks of the Dimension from the referenced DataFrame.
+        If an index is specified, it will return the values of the column
+        in the referenced DataFrame at that index.
+        :param index: Index of the needed column
+        :type index: int
+
+        :return: values in the specified column
+        :rtype: ndarray
+        """
         if index is None:
-            if self.column is None:
+            if self.column_idx is None:
                 raise ValueError("No default column index is set "
                                  "for this Dimension. Please supply one")
             else:
-                idx = self.column
+                idx = self.column_idx
         else:
             idx = index
         df = self.data_frame
@@ -365,11 +385,21 @@ class DataFrameDimension(Dimension):
         return ticks
 
     def get_label(self, index=None):
+        """
+        Get the label of the Dimension. If an index is specified,
+         it will return the name of the column in the referenced
+         DataFrame at that index.
+        :param index: Index of the referred column
+        :type index: int or None
+
+        :return: the header of the specified column or the name of DataFrame if index is None
+        :rtype: str
+        """
         if index is None:
-            if self.column is None:
+            if self.column_idx is None:
                 label = self.data_frame.name
             else:
-                label = self.data_frame.column_names[self.column]
+                label = self.data_frame.column_names[self.column_idx]
         else:
             label = self.data_frame.column_names[index]
         return label
@@ -386,10 +416,10 @@ class DataFrameDimension(Dimension):
         self._h5group.create_link(df, "data_frame")
 
     @property
-    def column(self):
-        colidx = self._h5group.get_attr("column")
+    def column_idx(self):
+        colidx = self._h5group.get_attr("column_idx")
         return colidx
 
-    @column.setter
-    def column(self, col):
-        self._h5group.set_attr("column", col)
+    @column_idx.setter
+    def column_idx(self, col):
+        self._h5group.set_attr("column_idx", col)
