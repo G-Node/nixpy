@@ -11,6 +11,7 @@ import unittest
 import numpy as np
 import nixio as nix
 from .tmp import TempDir
+from nixio.exceptions import CreationFail
 
 
 class TestMultiTags(unittest.TestCase):
@@ -113,6 +114,12 @@ class TestMultiTags(unittest.TestCase):
         assert mt.positions.type == "test-positions"
         assert mt.extents.name == "conv_test-extents"
         assert mt.extents.type == "test-extents"
+        # test positions extents deleted if multitag creation failed
+        pos = None
+        ext = np.random.random((2, 3))
+        self.assertRaises(CreationFail ,
+                          lambda: self.block.create_multi_tag("err_test",
+                                                            "test", pos, ext))
 
     def test_multi_tag_flex(self):
         pos1d = self.block.create_data_array("pos1", "pos", data=[[0], [1]])

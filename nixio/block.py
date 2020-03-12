@@ -102,7 +102,7 @@ class Block(Entity):
                                         name, type_, positions)
         except (exceptions.DuplicateName, ValueError) as e:
             msg = "Creation failed for {} due to {}.".format(da_name, e)
-            add_msg = None
+            add_msg = ""
             if "{}-positions".format(name) in self.data_arrays:
                 del self.data_arrays["{}-positions".format(name)]
                 add_msg = " Created DataArray positions deleted."
