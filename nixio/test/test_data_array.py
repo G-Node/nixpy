@@ -478,3 +478,11 @@ class TestDataArray(unittest.TestCase):
 
         with self.assertRaises(IncompatibleDimensions):
             da3d.get_slice((0, 0, 0), (3, 9, 40, 1))
+
+    def test_dim_one_based(self):
+        self.array.append_set_dimension()
+        self.array.append_range_dimension(range(10))
+        self.array.append_sampled_dimension(0.1)
+        dim_container_one_based = self.array.iter_dimensions()
+        for idx, dim in dim_container_one_based:
+            assert self.array.dimensions[idx-1].dimension_type == dim.dimension_type
