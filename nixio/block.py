@@ -103,7 +103,7 @@ class Block(Entity):
                 extcreated = True
             mtag = MultiTag._create_new(self, multi_tags,
                                         name, type_, positions)
-        except (exceptions.DuplicateName, ValueError) as e:
+        except Exception as e:
             msg = "MultiTag Creation Failed"
             if poscreated:
                 del self.data_arrays["{}-positions".format(name)]
@@ -111,7 +111,7 @@ class Block(Entity):
                 msg += " due to invalid positions"
             if extcreated:
                 del self.data_arrays["{}-extents".format(name)]
-            else:
+            elif poscreated and not extcreated:
                 msg += " due to invalid extents"
             print(msg)
             raise e

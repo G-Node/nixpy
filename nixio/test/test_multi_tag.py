@@ -120,6 +120,31 @@ class TestMultiTags(unittest.TestCase):
         self.assertRaises(ValueError ,
                           lambda: self.block.create_multi_tag("err_test",
                                                             "test", pos, ext))
+        self.block.create_data_array("dup_test-"
+                                     "positions", "test", data=[0])
+        pos = np.random.random((2, 3))
+        ext = np.random.random((2, 3))
+        self.assertRaises(DuplicateName,
+                          lambda: self.block.create_multi_tag("dup_test",
+                                                              "test", pos,
+                                                              ext))
+        del self.block.data_arrays["dup_test-positions"]
+        self.block.create_data_array("dup_test2-"
+                                     "extents", "test", data=[0])
+        pos = np.random.random((2, 3))
+        ext = np.random.random((2, 3))
+        self.assertRaises(DuplicateName,
+                          lambda: self.block.create_multi_tag("dup_test2",
+                                                              "test", pos,
+                                                              ext))
+        pos = np.random.random((2, 3))
+        ext = [None, None]
+        self.assertRaises(TypeError,
+                          lambda: self.block.create_multi_tag("dup_test3",
+                                                              "test", pos,
+                                                              ext))
+
+
 
     def test_multi_tag_flex(self):
         pos1d = self.block.create_data_array("pos1", "pos", data=[[0], [1]])
