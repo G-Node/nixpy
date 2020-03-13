@@ -1,4 +1,5 @@
 import unittest
+
 import nixio as nix
 from .tmp import TempDir
 import os
@@ -41,13 +42,6 @@ class TestDataFrame(unittest.TestCase):
         self.file.close()
         self.tmpdir.cleanup()
 
-    def create_with_list(self):
-        arr = np.arange(999).reshape((333, 3))
-        namelist = np.array(['name', 'id', 'time'])
-        dtlist = np.array([int, str, float])
-        self.blk.create_data_frame('test1', 'for_test', col_names=namelist,
-                                   col_dtypes=dtlist, data=arr)
-
     def test_data_frame_eq(self):
         assert self.df1 == self.df1
         assert not self.df1 == self.df2
@@ -68,6 +62,16 @@ class TestDataFrame(unittest.TestCase):
         for i in df_li[:]:
             self.assertIsInstance(i['id'], string_types)
             self.assertIsInstance(i['sig2'], np.int32)
+
+    def test_column_name_collision(self):
+        arr = [(1, 'a', 20.18, 5.1, 100), (2, 'b', 20.09, 5.5, 101),
+               (2, 'c', 20.05, 5.1, 100)]
+        dtlist = np.array([np.int64, str, float, np.float64, np.int32])
+        namelist = np.array(['name', 'name', 'name', 'name', 'name'])
+        self.assertRaises(nix.exceptions.DuplicateColumnName,
+                          lambda: self.block.create_data_frame('testerror',
+                                  'for_test', col_names=namelist,
+                                   col_dtypes=dtlist, data=arr))
 
     def test_data_frame_type(self):
         assert self.df1.type == "signal1"

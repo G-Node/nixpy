@@ -302,6 +302,8 @@ class Block(Entity):
                     raise ValueError(
                            "The data type of each column have to be specified"
                     )
+                if len(col_names) != len(col_dict):
+                    raise exceptions.DuplicateColumnName
             else:  # if col_names is None
                 if data is not None and type(data[0]) == np.void:
                     col_dtype = data[0].dtype
@@ -312,6 +314,8 @@ class Block(Entity):
                             raw_dt = list(raw_dt)
                             raw_dt_list = [ele[0] for ele in raw_dt]
                             col_dict = OrderedDict(zip(cn, raw_dt_list))
+                    if len(col_dtype.fields.values()) != len(col_dict):
+                        raise exceptions.DuplicateColumnName
 
                 else:
                     # data is None or type(data[0]) != np.void
