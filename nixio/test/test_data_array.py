@@ -485,4 +485,5 @@ class TestDataArray(unittest.TestCase):
         self.array.append_sampled_dimension(0.1)
         dim_container_one_based = self.array.iter_dimensions()
         for idx, dim in dim_container_one_based:
-            assert self.array.dimensions[idx-1].dimension_type == dim.dimension_type
+            assert self.array.dimensions[idx-1].dimension_type ==\
+                dim.dimension_type

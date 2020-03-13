@@ -335,7 +335,7 @@ class DataFrame(Entity, DataSet):
         u = self._h5group.get_attr("units")
         if u is None:
             return u
-        for idx, _  in enumerate(u):
+        for idx, _ in enumerate(u):
             if u[idx] == "":
                 u[idx] = None
         return u

@@ -206,16 +206,16 @@ class TestDimension(unittest.TestCase):
         df.units = unit
         dfdim1 = self.array.append_data_frame_dimension(df)
         dfdim2 = self.array.append_data_frame_dimension(df, column_idx=1)
-        self.assertRaises(ValueError,lambda: dfdim1.get_ticks())
+        self.assertRaises(ValueError, lambda: dfdim1.get_ticks())
         for ti, tu in enumerate(arr):
             for idx, item in enumerate(tu):
                 # ticks
                 assert item == dfdim1.get_ticks(idx)[ti]
                 assert item == dfdim2.get_ticks(idx)[ti]
                 assert self.array.dimensions[3].get_ticks(idx)[ti] \
-                       == dfdim1.get_ticks(idx)[ti]
+                    == dfdim1.get_ticks(idx)[ti]
                 assert self.array.dimensions[4].get_ticks(idx)[ti] \
-                       == dfdim2.get_ticks(idx)[ti]
+                    == dfdim2.get_ticks(idx)[ti]
                 # units
                 assert unit[idx] == dfdim1.get_unit(idx)
                 assert unit[idx] == dfdim2.get_unit(idx)
