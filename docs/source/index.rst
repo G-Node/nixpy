@@ -28,3 +28,11 @@ The API documentation for Data and Metadata
    api_data
    api_metadata
 
+Internal API Developer Documentation
+====================================
+The API documentation of internal modules, for developers
+
+.. toctree::
+   :maxdepth: 2
+
+   api/nixio
