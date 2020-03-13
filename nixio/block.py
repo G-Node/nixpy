@@ -336,12 +336,11 @@ class Block(Entity):
                 if data is not None and type(data[0]) == np.void:
                     col_dtype = data[0].dtype
                     for i, dt in enumerate(col_dtype.fields.values()):
-                        if dt[0] == np.dtype(str):
-                            cn = list(col_dtype.fields.keys())
-                            raw_dt = col_dtype.fields.values()
-                            raw_dt = list(raw_dt)
-                            raw_dt_list = [ele[0] for ele in raw_dt]
-                            col_dict = OrderedDict(zip(cn, raw_dt_list))
+                        cn = list(col_dtype.fields.keys())
+                        raw_dt = col_dtype.fields.values()
+                        raw_dt = list(raw_dt)
+                        raw_dt_list = [ele[0] for ele in raw_dt]
+                    col_dict = OrderedDict(zip(cn, raw_dt_list))
                     if len(col_dtype.fields.values()) != len(col_dict):
                         raise exceptions.DuplicateColumnName
 
@@ -358,6 +357,8 @@ class Block(Entity):
                     if any(issubclass(dt, st) for st in string_types) \
                             or issubclass(dt, np.string_):
                         col_dict[nam] = util.vlen_str_dtype
+                if 'U' in str(dt) or dt == np.string_:
+                    col_dict[nam] = util.vlen_str_dtype
             dt_arr = list(col_dict.items())
             col_dtype = np.dtype(dt_arr)
 

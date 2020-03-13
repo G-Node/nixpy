@@ -200,3 +200,10 @@ class TestDataFrame(unittest.TestCase):
         assert self.df1.dtype[4] == np.int32
         assert self.df1.dtype[0] != self.df1.dtype[4]
         assert self.df1.dtype[2] == self.df1.dtype[3]
+
+    def test_creation_without_name(self):
+        b = np.array([("a",1,2.2), ("b",2,3.3), ("c",3,4.4)], dtype=[('name', 'U10'), ("id", 'i4'), ('val', 'f4')])
+        df = self.block.create_data_frame("without_name", "test", data=b)
+        assert sorted(list(df.column_names)) == sorted(["name", "id", "val"])
+        assert sorted(list(df["name"])) == ["a", "b", "c"]
+
