@@ -1,4 +1,5 @@
 import unittest
+
 import nixio as nix
 from .tmp import TempDir
 import os
@@ -61,6 +62,11 @@ class TestDataFrame(unittest.TestCase):
         for i in df_li[:]:
             self.assertIsInstance(i['id'], string_types)
             self.assertIsInstance(i['sig2'], np.int32)
+
+    def test_column_name_collision(self):
+        arr = [(1, 'a', 20.18, 5.1, 100), (2, 'b', 20.09, 5.5, 101),
+               (2, 'c', 20.05, 5.1, 100)]
+        dtlist = np.array([np.int64, str, float, np.float64, np.int32])
         namelist = np.array(['name', 'name', 'name', 'name', 'name'])
         self.assertRaises(nix.exceptions.DuplicateColumnName,
                           lambda: self.block.create_data_frame('testerror',
