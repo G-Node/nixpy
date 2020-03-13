@@ -14,7 +14,6 @@ import numpy as np
 import nixio as nix
 from nixio.exceptions import IncompatibleDimensions
 from .tmp import TempDir
-import six
 
 
 class TestDataArray(unittest.TestCase):

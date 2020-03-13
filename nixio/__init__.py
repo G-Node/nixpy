@@ -31,7 +31,7 @@ from .link_type import LinkType
 from .compression import Compression
 
 # version
-from .info import VERSION as __version__
+from .info import VERSION
 
 __all__ = ("File", "Block", "Group", "DataArray", "DataFrame", "Tag",
            "MultiTag", "Source", "Section", "S", "Feature", "Property",
@@ -40,3 +40,4 @@ __all__ = ("File", "Block", "Group", "DataArray", "DataFrame", "Tag",
            "LinkType", "Compression", "validator")
 __author__ = ('Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, '
               'Balint Morvai, Achilleas Koutsou')
+__version__ = VERSION
