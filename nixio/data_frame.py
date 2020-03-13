@@ -257,8 +257,10 @@ class DataFrame(Entity, DataSet):
     def print_table(self, row_sl=None, col_sl=None):
         """
         Print the whole DataFrame as a table
+
         :param row_sl: Rows to be printed; None for printing all rows
         :type row_sl: slice or iterable of int
+
         :param col_sl: Columns to be printed; None for printing all columns
         :type col_sl: slice or iterable of int
         """
