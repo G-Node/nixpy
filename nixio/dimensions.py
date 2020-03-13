@@ -51,8 +51,7 @@ class Dimension(object):
     def dimension_type(self):
         return DimensionType(self._h5group.get_attr("dimension_type"))
 
-    @dimension_type.setter
-    def _dimension_type(self, dimtype):
+    def _set_dimension_type(self, dimtype):
         dimtype = DimensionType(dimtype)
         if dimtype not in DimensionType:
             raise TypeError("Invalid dimension type.")
@@ -79,7 +78,7 @@ class SampledDimension(Dimension):
     @classmethod
     def _create_new(cls, parent, index, sample):
         newdim = super(SampledDimension, cls)._create_new(parent, index)
-        newdim._dimension_type = DimensionType.Sample
+        newdim._set_dimension_type(DimensionType.Sample)
         newdim.sampling_interval = sample
         return newdim
 
@@ -175,14 +174,14 @@ class RangeDimension(Dimension):
     @classmethod
     def _create_new(cls, parent, index, ticks):
         newdim = super(RangeDimension, cls)._create_new(parent, index)
-        newdim._dimension_type = DimensionType.Range
+        newdim._set_dimension_type(DimensionType.Range)
         newdim._h5group.write_data("ticks", ticks, dtype=DataType.Double)
         return newdim
 
     @classmethod
     def _create_new_alias(cls, parent, index, da):
         newdim = super(RangeDimension, cls)._create_new(parent, index)
-        newdim._dimension_type = DimensionType.Range
+        newdim._set_dimension_type(DimensionType.Range)
         newdim._h5group.create_link(da, da.id)
         return newdim
 
@@ -304,7 +303,7 @@ class SetDimension(Dimension):
     @classmethod
     def _create_new(cls, parent, index):
         newdim = super(SetDimension, cls)._create_new(parent, index)
-        newdim._dimension_type = DimensionType.Set
+        newdim._set_dimension_type(DimensionType.Set)
         return newdim
 
     @property
@@ -342,7 +341,7 @@ class DataFrameDimension(Dimension):
         newdim = super(DataFrameDimension, cls)._create_new(parent, index)
         newdim.data_frame = data_frame
         newdim.column_idx = column
-        newdim._dimension_type = DimensionType.DataFrame
+        newdim._set_dimension_type(DimensionType.DataFrame)
         return newdim
 
     def get_unit(self, index=None):
