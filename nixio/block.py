@@ -56,8 +56,8 @@ class Block(Entity):
         return newentity
 
     # MultiTag
-    def create_multi_tag(self, name="", type_="", positions=0,
-                         copy_from=None, keep_copy_id=True):
+    def create_multi_tag(self, name="", type_="", positions=None,
+                         extents=None, copy_from=None, keep_copy_id=True):
         """
         Create/copy a new multi tag for this block.
 
@@ -83,13 +83,41 @@ class Block(Entity):
             return self.multi_tags[id]
 
         util.check_entity_name_and_type(name, type_)
-        util.check_entity_input(positions)
-        if not isinstance(positions, DataArray):
-            raise TypeError("DataArray expected for 'positions'")
         multi_tags = self._h5group.open_group("multi_tags")
         if name in multi_tags:
             raise exceptions.DuplicateName("create_multi_tag")
-        mtag = MultiTag._create_new(self, multi_tags, name, type_, positions)
+        poscreated = False
+        extcreated = False
+        try:
+            if not isinstance(positions, DataArray):
+                da_name = "{}-positions".format(name)
+                positions = self.create_data_array(da_name,
+                                                   "{}-positions".format(type_),
+                                                   data=positions)
+                poscreated = True
+            if not isinstance(extents, DataArray) and extents is not None:
+                da_name = "{}-extents".format(name)
+                extents = self.create_data_array(da_name,
+                                                 "{}-extents".format(type_)
+                                                 , data=extents)
+                extcreated = True
+            mtag = MultiTag._create_new(self, multi_tags,
+                                        name, type_, positions)
+        except Exception as e:
+            msg = "MultiTag Creation Failed"
+            if poscreated:
+                del self.data_arrays["{}-positions".format(name)]
+            else:
+                msg += " due to invalid positions"
+            if extcreated:
+                del self.data_arrays["{}-extents".format(name)]
+            elif poscreated and not extcreated:
+                msg += " due to invalid extents"
+            print(msg)
+            raise e
+
+        if extents is not None:
+            mtag.extents = extents
         return mtag
 
     # Tag

@@ -11,6 +11,7 @@ import unittest
 import numpy as np
 import nixio as nix
 from .tmp import TempDir
+from nixio.exceptions import DuplicateName
 
 
 class TestMultiTags(unittest.TestCase):
@@ -101,6 +102,49 @@ class TestMultiTags(unittest.TestCase):
         del self.file.blocks[self.block.id]
         self.file.close()
         self.tmpdir.cleanup()
+
+    def test_multi_tag_new_constructor(self):
+        pos = np.random.random((2, 3))
+        ext = np.random.random((2, 3))
+        mt = self.block.create_multi_tag("conv_test", "test", pos, ext)
+        np.testing.assert_almost_equal(pos, mt.positions[:])
+        np.testing.assert_almost_equal(ext, mt.extents[:])
+        # try reset positions and ext
+        assert mt.positions.name == "conv_test-positions"
+        assert mt.positions.type == "test-positions"
+        assert mt.extents.name == "conv_test-extents"
+        assert mt.extents.type == "test-extents"
+        # test positions extents deleted if multitag creation failed
+        pos = None
+        ext = np.random.random((2, 3))
+        self.assertRaises(ValueError ,
+                          lambda: self.block.create_multi_tag("err_test",
+                                                            "test", pos, ext))
+        self.block.create_data_array("dup_test-"
+                                     "positions", "test", data=[0])
+        pos = np.random.random((2, 3))
+        ext = np.random.random((2, 3))
+        self.assertRaises(DuplicateName,
+                          lambda: self.block.create_multi_tag("dup_test",
+                                                              "test", pos,
+                                                              ext))
+        del self.block.data_arrays["dup_test-positions"]
+        self.block.create_data_array("dup_test2-"
+                                     "extents", "test", data=[0])
+        pos = np.random.random((2, 3))
+        ext = np.random.random((2, 3))
+        self.assertRaises(DuplicateName,
+                          lambda: self.block.create_multi_tag("dup_test2",
+                                                              "test", pos,
+                                                              ext))
+        pos = np.random.random((2, 3))
+        ext = [None, None]
+        self.assertRaises(TypeError,
+                          lambda: self.block.create_multi_tag("dup_test3",
+                                                              "test", pos,
+                                                              ext))
+
+
 
     def test_multi_tag_flex(self):
         pos1d = self.block.create_data_array("pos1", "pos", data=[[0], [1]])

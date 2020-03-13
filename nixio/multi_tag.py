@@ -235,7 +235,7 @@ class MultiTag(BaseTag):
             slices.extend(slice(0, stop) for stop in da.data_extent[1:])
 
             if not self._slices_in_data(da, slices):
-                OutOfBounds("Requested data slice out of the extent of the "
+                raise OutOfBounds("Requested data slice out of the extent of the "
                             "Feature!")
             return DataView(da, slices)
         # For untagged return the full data
