@@ -161,8 +161,7 @@ class TestFile(unittest.TestCase):
         assert not copied_sec.sections  # children is False
         tar_file.close()
         # test copying on the same file
-        self.assertRaises(NameError, lambda: self.file.create_block(
-            copy_from=blk1))
+        self.assertRaises(NameError, self.file.create_block, copy_from=blk1)
         self.file.create_block(name="111", copy_from=blk1)
         assert self.file.blocks[0] == self.file.blocks[1]  # ID stays the same
         assert self.file.blocks[0].name != self.file.blocks[1].name

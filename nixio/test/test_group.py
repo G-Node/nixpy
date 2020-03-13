@@ -85,8 +85,7 @@ class TestGroups(unittest.TestCase):
     def test_group_data_arrays(self):
         assert(len(self.my_group.data_arrays) == 1)
 
-        self.assertRaises(TypeError,
-                          lambda _: self.my_group.data_arrays.append(100))
+        self.assertRaises(TypeError, self.my_group.data_arrays.append, 100)
 
         a1 = self.block.create_data_array("reference1", "stimuli",
                                           nix.DataType.Int16, (1, ))
@@ -110,7 +109,7 @@ class TestGroups(unittest.TestCase):
     def test_group_tags(self):
         assert(len(self.my_group.tags) == 1)
 
-        self.assertRaises(TypeError, lambda _: self.my_group.tags.append(100))
+        self.assertRaises(TypeError, self.my_group.tags.append, 100)
 
         t1 = self.block.create_tag("tag1", "stimuli", [1.0])
         t2 = self.block.create_tag("tag2", "stimuli", [2.])
@@ -135,8 +134,7 @@ class TestGroups(unittest.TestCase):
     def test_group_multi_tags(self):
         assert(len(self.my_group.multi_tags) == 1)
 
-        self.assertRaises(TypeError,
-                          lambda _: self.my_group.multi_tags.append(100))
+        self.assertRaises(TypeError, self.my_group.multi_tags.append, 100)
 
         mt1 = self.block.create_multi_tag("mtag1", "stimuli", self.my_array)
         mt2 = self.block.create_multi_tag("mtag2", "stimuli", self.my_array)
