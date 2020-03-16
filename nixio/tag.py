@@ -329,7 +329,7 @@ class Tag(BaseTag):
         of the list.
         This is a read only attribute.
 
-        Link:type: Container of DataArray
+        :type: Container of DataArray
         """
         if self._references is None:
             self._references = LinkContainer("references", self, DataArray,

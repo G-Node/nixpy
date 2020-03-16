@@ -51,8 +51,7 @@ class Dimension(object):
     def dimension_type(self):
         return DimensionType(self._h5group.get_attr("dimension_type"))
 
-    @dimension_type.setter
-    def _dimension_type(self, dimtype):
+    def _set_dimension_type(self, dimtype):
         dimtype = DimensionType(dimtype)
         if dimtype not in DimensionType:
             raise TypeError("Invalid dimension type.")
@@ -79,7 +78,7 @@ class SampledDimension(Dimension):
     @classmethod
     def _create_new(cls, parent, index, sample):
         newdim = super(SampledDimension, cls)._create_new(parent, index)
-        newdim._dimension_type = DimensionType.Sample
+        newdim._set_dimension_type(DimensionType.Sample)
         newdim.sampling_interval = sample
         return newdim
 
@@ -117,7 +116,8 @@ class SampledDimension(Dimension):
         Get an axis as defined by this sampled dimension.
 
         :param count: A positive integer specifying the length of the axis
-        (no of samples).
+                      (no of samples).
+
         :param start: positive integer, indicates the starting sample.
 
         :returns: The created axis
@@ -174,14 +174,14 @@ class RangeDimension(Dimension):
     @classmethod
     def _create_new(cls, parent, index, ticks):
         newdim = super(RangeDimension, cls)._create_new(parent, index)
-        newdim._dimension_type = DimensionType.Range
+        newdim._set_dimension_type(DimensionType.Range)
         newdim._h5group.write_data("ticks", ticks, dtype=DataType.Double)
         return newdim
 
     @classmethod
     def _create_new_alias(cls, parent, index, da):
         newdim = super(RangeDimension, cls)._create_new(parent, index)
-        newdim._dimension_type = DimensionType.Range
+        newdim._set_dimension_type(DimensionType.Range)
         newdim._h5group.create_link(da, da.id)
         return newdim
 
@@ -279,7 +279,8 @@ class RangeDimension(Dimension):
         Get an axis as defined by this range dimension.
 
         :param count: A positive integer specifying the length of the axis
-        (no of points).
+                      (no of points).
+
         :param start: positive integer, indicates the starting tick.
 
         :returns: The created axis
@@ -302,7 +303,7 @@ class SetDimension(Dimension):
     @classmethod
     def _create_new(cls, parent, index):
         newdim = super(SetDimension, cls)._create_new(parent, index)
-        newdim._dimension_type = DimensionType.Set
+        newdim._set_dimension_type(DimensionType.Set)
         return newdim
 
     @property
@@ -327,21 +328,28 @@ class DataFrameDimension(Dimension):
     def _create_new(cls, parent, index, data_frame, column):
         """
         Create a new Dimension that points to a DataFrame
+
         :param parent: DataArray the dimension will be attached to
+
         :param data_frame: the referenced DataFrame for this Dimension
-        :param column: the index of a column in the DataFrame that the Dimension will reference (optional)
+
+        :param column: the index of a column in the DataFrame that the
+        Dimension will reference (optional)
+
         :return: The new DataFrameDimension
         """
         newdim = super(DataFrameDimension, cls)._create_new(parent, index)
         newdim.data_frame = data_frame
         newdim.column_idx = column
-        newdim._dimension_type = DimensionType.DataFrame
+        newdim._set_dimension_type(DimensionType.DataFrame)
         return newdim
 
     def get_unit(self, index=None):
         """
         Get the unit of the Dimension.  If an index is specified,
-        it will return the unit of the column in the referenced DataFrame at that index.
+        it will return the unit of the column in the referenced DataFrame at
+        that index.
+
         :param index: Index of the needed column
         :type index: int
 
@@ -367,11 +375,12 @@ class DataFrameDimension(Dimension):
         Get the ticks of the Dimension from the referenced DataFrame.
         If an index is specified, it will return the values of the column
         in the referenced DataFrame at that index.
+
         :param index: Index of the needed column
         :type index: int
 
         :return: values in the specified column
-        :rtype: ndarray
+        :rtype: numpy.ndarray
         """
         if index is None:
             if self.column_idx is None:
@@ -393,7 +402,8 @@ class DataFrameDimension(Dimension):
         :param index: Index of the referred column
         :type index: int or None
 
-        :return: the header of the specified column or the name of DataFrame if index is None
+        :return: the header of the specified column or the name of DataFrame
+        if index is None
         :rtype: str
         """
         if index is None:

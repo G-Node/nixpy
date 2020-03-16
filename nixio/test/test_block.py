@@ -213,8 +213,8 @@ class TestBlock(unittest.TestCase):
         self.block.create_data_array("da2", 'grp da2', data=[(1, 2, 3)])
         da2 = self.block.data_arrays[1]
         mt2 = self.block.multi_tags[0]
-        self.assertRaises(NameError, lambda: self.block.create_data_array(
-            copy_from=da2))
+        self.assertRaises(NameError, self.block.create_data_array,
+                          copy_from=da2)
         self.block.create_data_array(name="new da name", copy_from=da2)
         self.block.create_multi_tag(name="new mt name", copy_from=mt2)
         assert self.block.multi_tags[0] == mt2

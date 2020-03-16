@@ -176,17 +176,14 @@ class TestProperties(unittest.TestCase):
         self.prop_s.extend_values(string_values)
         string_extend = "bla"
         self.prop_s.extend_values(string_extend)
-        self.assertRaises(TypeError, lambda: self.prop_s.extend_values(1))
+        self.assertRaises(TypeError, self.prop_s.extend_values, 1)
         mixed_list = ["str", 1]
-        self.assertRaises(TypeError,
-                          lambda: self.prop_s.extend_values(mixed_list))
-        self.assertRaises(TypeError, lambda: self.prop.extend_values(1.0))
+        self.assertRaises(TypeError, self.prop_s.extend_values, mixed_list)
+        self.assertRaises(TypeError, self.prop.extend_values, 1.0)
         float_data = (1.1, 1.2, 1.3)
-        self.assertRaises(TypeError,
-                          lambda: self.prop.extend_values(float_data))
+        self.assertRaises(TypeError, self.prop.extend_values, float_data)
         number_extend = (1, 1.2)
-        self.assertRaises(TypeError,
-                          lambda: self.prop.extend_values(number_extend))
+        self.assertRaises(TypeError, self.prop.extend_values, number_extend)
 
     def test_unicode_values(self):
         sec = self.section

@@ -49,6 +49,6 @@ except ImportError:
 
 # intersphinx configuration
 intersphinx_mapping     = {
-    'http://docs.python.org/2.7' : None,
+    'http://docs.python.org/' : None,
     'http://docs.scipy.org/doc/numpy': None
 }

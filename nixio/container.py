@@ -169,11 +169,14 @@ class LinkContainer(Container):
         Group.multi_tags
 
     :param name: Name of the container
+
     :param parent: Parent H5Group where this container will be created
+
     :param itemclass: The class of the objects this container holds (for
-    checking and instantiations)
+                      checking and instantiations)
+
     :param itemstore: The location (Container) where the original objects
-    are stored and linked to.
+                      are stored and linked to.
     """
 
     def __init__(self, name, parent, itemclass, itemstore):

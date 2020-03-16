@@ -146,10 +146,13 @@ class DataArray(Entity, DataSet):
         """
         Append a new DataFrameDimension to the list of existing dimension
         descriptors.
+
         :param data_frame: The referenced DataFrame
         :type data_frame: nix.DataFrame
+
         :param column_idx: Index of the referenced column of the DataFrame.
-                           The default column determines the default label, ticks, and unit of this Dimension.
+                           The default column determines the default label,
+                           ticks, and unit of this Dimension.
         :type column_idx: int or None
 
         :returns: Thew newly created DataFrameDimension.
