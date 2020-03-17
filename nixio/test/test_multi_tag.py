@@ -117,34 +117,25 @@ class TestMultiTags(unittest.TestCase):
         # test positions extents deleted if multitag creation failed
         pos = None
         ext = np.random.random((2, 3))
-        self.assertRaises(ValueError ,
-                          lambda: self.block.create_multi_tag("err_test",
-                                                            "test", pos, ext))
+        self.assertRaises(ValueError, self.block.create_multi_tag,
+                          "err_test", "test", pos, ext)
         self.block.create_data_array("dup_test-"
                                      "positions", "test", data=[0])
         pos = np.random.random((2, 3))
         ext = np.random.random((2, 3))
-        self.assertRaises(DuplicateName,
-                          lambda: self.block.create_multi_tag("dup_test",
-                                                              "test", pos,
-                                                              ext))
+        self.assertRaises(DuplicateName, self.block.create_multi_tag,
+                          "dup_test", "test", pos, ext)
         del self.block.data_arrays["dup_test-positions"]
         self.block.create_data_array("dup_test2-"
                                      "extents", "test", data=[0])
         pos = np.random.random((2, 3))
         ext = np.random.random((2, 3))
-        self.assertRaises(DuplicateName,
-                          lambda: self.block.create_multi_tag("dup_test2",
-                                                              "test", pos,
-                                                              ext))
+        self.assertRaises(DuplicateName, self.block.create_multi_tag,
+                          "dup_test2", "test", pos, ext)
         pos = np.random.random((2, 3))
         ext = [None, None]
-        self.assertRaises(TypeError,
-                          lambda: self.block.create_multi_tag("dup_test3",
-                                                              "test", pos,
-                                                              ext))
-
-
+        self.assertRaises(TypeError, self.block.create_multi_tag,
+                          "dup_test3", "test", pos, ext)
 
     def test_multi_tag_flex(self):
         pos1d = self.block.create_data_array("pos1", "pos", data=[[0], [1]])
@@ -286,8 +277,7 @@ class TestMultiTags(unittest.TestCase):
     def test_multi_tag_references(self):
         assert (len(self.my_tag.references) == 0)
 
-        self.assertRaises(TypeError,
-                          lambda _: self.my_tag.references.append(100))
+        self.assertRaises(TypeError, self.my_tag.references.append, 100)
 
         reference1 = self.block.create_data_array("reference1", "stimuli",
                                                   nix.DataType.Int16, (0,))
@@ -451,14 +441,14 @@ class TestMultiTags(unittest.TestCase):
         wrong_pos.append_set_dimension()
         wrong_pos.append_set_dimension()
         postag.positions = wrong_pos
-        self.assertRaises(IndexError, lambda: postag.tagged_data(1, 1))
+        self.assertRaises(IndexError, postag.tagged_data, 1, 1)
         wrong_ext = self.block.create_data_array("incorext", "test",
                                                  data=[[1, 500, 2],
                                                        [0, 4, 1]])
         wrong_ext.append_set_dimension()
         wrong_ext.append_set_dimension()
         segtag.extents = wrong_ext
-        self.assertRaises(IndexError, lambda: segtag.tagged_data(0, 1))
+        self.assertRaises(IndexError, segtag.tagged_data, 0, 1)
 
     def test_multi_tag_tagged_data_1d(self):
         # MultiTags to vectors behave a bit differently

@@ -141,8 +141,7 @@ class TestTags(unittest.TestCase):
     def test_tag_references(self):
         assert (len(self.my_tag.references) == 1)
 
-        self.assertRaises(TypeError,
-                          lambda _: self.my_tag.references.append(100))
+        self.assertRaises(TypeError, self.my_tag.references.append, 100)
 
         reference1 = self.block.create_data_array("reference1", "stimuli",
                                                   nix.DataType.Int16, (1,))
