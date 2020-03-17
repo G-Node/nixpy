@@ -91,15 +91,15 @@ class Block(Entity):
         try:
             if not isinstance(positions, DataArray):
                 da_name = "{}-positions".format(name)
-                positions = self.create_data_array(da_name,
-                                                   "{}-positions".format(type_),
-                                                   data=positions)
+                positions = self.create_data_array(
+                    da_name, "{}-positions".format(type_), data=positions
+                )
                 poscreated = True
             if not isinstance(extents, DataArray) and extents is not None:
                 da_name = "{}-extents".format(name)
                 extents = self.create_data_array(da_name,
-                                                 "{}-extents".format(type_)
-                                                 , data=extents)
+                                                 "{}-extents".format(type_),
+                                                 data=extents)
                 extcreated = True
             mtag = MultiTag._create_new(self, multi_tags,
                                         name, type_, positions)

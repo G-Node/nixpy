@@ -204,9 +204,8 @@ class MultiTag(BaseTag):
 
     def feature_data(self, posidx, featidx):
         if len(self.features) == 0:
-            raise OutOfBounds(
-                "There are no features associated with this tag!"
-            )
+            msg = "There are no features associated with this tag!"
+            raise OutOfBounds(msg)
 
         try:
             feat = self.features[featidx]
@@ -235,8 +234,8 @@ class MultiTag(BaseTag):
             slices.extend(slice(0, stop) for stop in da.data_extent[1:])
 
             if not self._slices_in_data(da, slices):
-                raise OutOfBounds("Requested data slice out of the extent of the "
-                            "Feature!")
+                msg = "Requested data slice out of the extent of the Feature!"
+                raise OutOfBounds(msg)
             return DataView(da, slices)
         # For untagged return the full data
         slices = tuple(slice(0, stop) for stop in da.data_extent)
