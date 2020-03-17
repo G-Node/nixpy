@@ -1,6 +1,6 @@
-======== 
+========
 Overview
-======== 
+========
 
 Design Principles
 =================
@@ -9,7 +9,7 @@ The design of the data model tries to draw on similarities of
 different data types and structures and and come up with *entities*
 that are as generic and versatile as meaningful. At the same time we
 aim for clearly established links between different entities to keep the
-model as expressive as possible. 
+model as expressive as possible.
 
 Most entities of the NIX-model have a *name* and a *type* field which
 are meant to provide information about the entity. While the name can
@@ -64,7 +64,7 @@ unique id (UUID).
 
 
 Storing data
-"""""""""""" 
+""""""""""""
 
 The heart of our data model is an entity called **DataArray**. This is
 the entity that actually stores all data. It can take n-dimensional
@@ -85,7 +85,7 @@ Using this call will create a **DataArray**, set name and type, set
 the *dataType* according to the dtype of the passed data, and store
 the data in the file. You can also create empty **DataArrays** to take
 up data-to-be-recorded. In this case you have to provide the space
-that will be needed in advance. 
+that will be needed in advance.
 
 .. code-block:: python
 
@@ -142,7 +142,7 @@ irregular intervals, and (iii) data that belongs to categories.
         dim.unit = "s"
 
 The **SampledDimension** can also be used to desribe space dimensions,
-e.g. in case of images. 
+e.g. in case of images.
 
 If the data was sampled at irregular intervals the sample points of
 the x-axis are defined using the *ticks* property of a
@@ -364,3 +364,17 @@ the tag's position is given in *ms*.
 
         #for compound units we can do
         tag.units=["mV/cm"]
+
+
+Metadata
+========
+
+The model for storing metadata is largely equivalent to the `odML`_ (open metadata Markup Language) model. In brief: the
+model consists of so called Properties that contain Values much like a key-value pair (plus some additional fields).
+These Properties can be grouped into Sections which themselves can be nested to built a tree-structure. Sections are
+defined by a name and a type (e.g. a stimulus-type section will contain information that is related to a stimulus).
+The basic feature of the odML approach is that it defines the model but not the items that are described or the terms
+that are used in this. On the other hand where standardization is required each Section can be based on an
+odML-terminology that standardizes without restricting to the terms defined within the terminology.
+
+.. _odML: http://www.frontiersin.org/Neuroinformatics/10.3389/fninf.2011.00016
