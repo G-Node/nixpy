@@ -232,11 +232,7 @@ class Property(Entity):
 
     def _read_old_values(self):
         val = self._h5dataset.dataset[:]
-        val_tu = tuple()
-        for v in val:
-            v = v["value"]
-            val_tu += (v,)
-        return val_tu
+        return tuple(v["value"] for v in val)
 
     @property
     def values(self):
