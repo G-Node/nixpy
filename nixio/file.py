@@ -124,7 +124,7 @@ class File(object):
         self._check_header(mode)
         self.mode = mode
         self._data = self._root.open_group("data", create=True)
-        self.metadata = self._root.open_group("metadata", create=True)
+        self._metadata = self._root.open_group("metadata", create=True)
         if "created_at" not in self._h5file.attrs:
             self.force_created_at()
         if "updated_at" not in self._h5file.attrs:
@@ -435,9 +435,9 @@ class File(object):
         :returns: The newly created section.
         :rtype: Section
         """
-        if name in self.metadata:
+        if name in self.sections:
             raise DuplicateName("create_section")
-        sec = Section._create_new(self, self.metadata, name, type_, oid)
+        sec = Section._create_new(self, self._metadata, name, type_, oid)
         return sec
 
     @property
