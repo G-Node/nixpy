@@ -105,23 +105,22 @@ class File(object):
                 "Cannot open non-existent file in ReadOnly mode!"
             )
 
-        new = False
         if not os.path.exists(path) or mode == FileMode.Overwrite:
             mode = FileMode.Overwrite
             h5mode = map_file_mode(mode)
             fid = h5py.h5f.create(path, flags=h5mode, fapl=make_fapl(),
                                   fcpl=make_fcpl())
-            new = True
+            self._h5file = h5py.File(fid)
+            self._root = H5Group(self._h5file, "/", create=True)
+            self._create_header()
         else:
             h5mode = map_file_mode(mode)
             fid = h5py.h5f.open(path, flags=h5mode, fapl=make_fapl())
+            self._h5file = h5py.File(fid)
+            self._root = H5Group(self._h5file, "/")
 
-        self._h5file = h5py.File(fid)
-        self._root = H5Group(self._h5file, "/", create=True)
         self._h5group = self._root  # to match behaviour of other objects
         self._time_auto_update = True
-        if new:
-            self._create_header()
         self._check_header(mode)
         self.mode = mode
         self._data = self._root.open_group("data", create=True)
