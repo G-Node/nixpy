@@ -154,11 +154,11 @@ class TestValidate (unittest.TestCase):
         assert not res["warnings"], self.print_all_results(res)
 
     def test_check_file(self):
-        self.file.version = tuple()
+        self.file._root.set_attr("version", tuple())
         res = self.file.validate()
         assert VW.NoVersion in res["warnings"][self.file]
 
-        self.file.format = ""
+        self.file._root.set_attr("format", "")
         res = self.file.validate()
         assert VW.NoFormat in res["warnings"][self.file]
 
