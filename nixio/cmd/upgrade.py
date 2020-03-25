@@ -28,6 +28,85 @@ def add_file_id(fname):
     return add_id
 
 
+def update_property_values(fname):
+    """
+    Returns a closure that binds the filename. When the return value is
+    called, it modifies rewrites all the metadata Property objects to the new
+    format.
+    """
+    props = list()
+
+    with h5py.File(fname, mode="r") as hfile:
+        sections = hfile["metadata"]
+
+        def find_props(name, group):
+            if isinstance(group, h5py.Dataset) and len(group.dtype):
+                # structured/compound dtypes have non-zero length
+                props.append(group.name)
+
+        sections.visititems(find_props)
+
+    def update_props():
+        for propname in props:
+            with h5py.File(fname, mode="a") as hfile:
+                prop = hfile[propname]
+
+                # pull out the old extra attributes
+                uncertainty = prop["uncertainty"]
+                reference = prop["reference"]
+                filename = prop["filename"]
+                encoder = prop["encoder"]
+                checksum = prop["checksum"]
+
+                # replace base prop
+                values = prop["value"]
+                dt = values.dtype
+                del hfile[propname]
+                newprop = create_property(hfile, propname,
+                                          dtype=dt, data=values)
+
+                # Create properties for any extra attrs that are set
+                if len(set(uncertainty)) > 1:
+                    # multiple values, make new prop
+                    create_property(hfile, propname + ".uncertainty",
+                                    dtype=float, data=uncertainty)
+                elif any(uncertainty):
+                    # single, unique, non-zero value; add to main prop attr
+                    newprop.attrs["uncertainty"] = uncertainty[0]
+
+                if any(reference):
+                    create_property(hfile, propname + ".reference",
+                                    dtype=nix.util.vlen_str_dtype,
+                                    data=reference)
+
+                if any(filename):
+                    create_property(hfile, propname + ".filename",
+                                    dtype=nix.util.vlen_str_dtype,
+                                    data=filename)
+
+                if any(encoder):
+                    create_property(hfile, propname + ".encoder",
+                                    dtype=nix.util.vlen_str_dtype,
+                                    data=encoder)
+
+                if any(checksum):
+                    create_property(hfile, propname + ".checksum",
+                                    dtype=nix.util.vlen_str_dtype,
+                                    data=checksum)
+
+    update_props.__doc__ = "Update {} properties".format(len(props))
+    return update_props
+
+
+def create_property(hfile, name, dtype, data):
+    prop = hfile.create_dataset(name, dtype=dtype, data=data)
+    prop.attrs["name"] = name.split("/")[-1]
+    prop.attrs["entity_id"] = nix.util.create_id()
+    prop.attrs["created_at"] = nix.util.time_to_str(nix.util.now_int())
+    prop.attrs["updated_at"] = nix.util.time_to_str(nix.util.now_int())
+    return prop
+
+
 def update_format_version(fname):
     """
     Returns a closure that binds the filename. When the return value is
@@ -54,8 +133,9 @@ def collect_tasks(fname):
     tasks = list()
     if not has_valid_file_id(fname):
         tasks.append(add_file_id(fname))
+        tasks.append(update_property_values(fname))
 
-    # always update the format in the end
+    # always update the format last
     tasks.append(update_format_version(fname))
     print(f"{fname}: {file_verstr} -> {lib_verstr}")
     print("  - " + "\n  - ".join(t.__doc__ for t in tasks) + "\n")
