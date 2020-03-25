@@ -162,6 +162,11 @@ class File(object):
                 raise RuntimeError("Cannot open file. "
                                    "Incompatible version.")
 
+        if self.version >= (1, 2, 0):  # ID only required for 1.2.0+
+            if not util.is_uuid(self.id):
+                raise RuntimeError("Cannot open file. "
+                                   "The file does not have an ID.")
+
     def __enter__(self):
         return self
 
