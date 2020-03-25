@@ -81,6 +81,7 @@ class ValidationError(object):
 class ValidationWarning(object):
     NoVersion = "version is not set"
     NoFormat = "format is not set"
+    NoFileID = "file ID is not set"
     InvalidUnit = "unit is not SI or composite of SI units"
     NoExpansionOrigin = ("polynomial coefficients for calibration are set, "
                          "but expansion origin is missing")
@@ -109,6 +110,8 @@ def check_file(nixfile):
         file_warnings.append(ValidationWarning.NoVersion)
     if not nixfile.format:
         file_warnings.append(ValidationWarning.NoFormat)
+    if not nixfile.id and nixfile.version and nixfile.version >= (1, 2, 0):
+        file_warnings.append(ValidationWarning.NoFileID)
     if file_warnings:
         results["warnings"][nixfile] = file_warnings
 
