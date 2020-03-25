@@ -184,6 +184,7 @@ class TestFileVer(unittest.TestCase):
             version = self.filever
         self.h5root.attrs["format"] = fformat
         self.h5root.attrs["version"] = version
+        self.h5root.attrs["id"] = nix.util.create_id()
         self.h5root.attrs["created_at"] = 0
         self.h5root.attrs["updated_at"] = 0
         if "data" not in self.h5root:
