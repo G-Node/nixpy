@@ -147,6 +147,7 @@ class File(object):
     def _create_header(self):
         self._set_format()
         self._set_version()
+        self._set_id()
 
     def _check_header(self, mode):
         if self.format != FILE_FORMAT:
@@ -166,6 +167,18 @@ class File(object):
 
     def __exit__(self, *args):
         self.close()
+
+    @property
+    def id(self):
+        return self._root.get_attr("id")
+
+    def _set_id(self):
+        # file id attribute should only be set on creation (or format
+        # upgrade), so do nothing if it's already set
+        if self._root.get_attr("id"):
+            return
+
+        self._root.set_attr("id", util.create_id())
 
     @property
     def version(self):
