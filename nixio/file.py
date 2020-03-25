@@ -146,8 +146,8 @@ class File(object):
         return cls(path, mode, compression, auto_update_time)
 
     def _create_header(self):
-        self.format = FILE_FORMAT
-        self.version = HDF_FF_VERSION
+        self._set_format()
+        self._set_version()
 
     def _check_header(self, mode):
         if self.format != FILE_FORMAT:
@@ -177,16 +177,15 @@ class File(object):
         """
         return tuple(self._root.get_attr("version"))
 
-    @version.setter
-    def version(self, v):
-        util.check_attr_type(v, tuple)
-        for part in v:
-            util.check_attr_type(part, int)
+    def _set_version(self):
+        # file format version should only be set on creation, so do nothing
+        # if it's already set
+        if self._root.get_attr("version"):
+            return
+
         # convert to np.int32 since py3 defaults to 64
-        v = np.array(v, dtype=np.int32)
+        v = np.array(HDF_FF_VERSION, dtype=np.int32)
         self._root.set_attr("version", v)
-        if self.time_auto_update:
-            self.force_updated_at()
 
     @property
     def format(self):
@@ -198,12 +197,8 @@ class File(object):
         """
         return self._root.get_attr("format")
 
-    @format.setter
-    def format(self, f):
-        util.check_attr_type(f, str)
-        self._root.set_attr("format", f.encode("ascii"))
-        if self.time_auto_update:
-            self.force_updated_at()
+    def _set_format(self):
+        self._root.set_attr("format", FILE_FORMAT.encode("ascii"))
 
     @property
     def time_auto_update(self):
