@@ -18,20 +18,27 @@ def has_valid_file_id(fname):
 
 def add_file_id(fname):
     """
-    Returns a closure that binds the filename. When the return value is
-    called, it adds a UUID to the file header.
+    Returns a closure that binds the filename if a file ID is required. When
+    the return value is called, it adds a UUID to the file header.
     """
+    if has_valid_file_id(fname):
+        return None
+
     def add_id():
         "Add a UUID to the file header"
         with h5py.File(fname, mode="a") as hfile:
+            if has_valid_file_id(fname):
+                return
+            print("Adding file id")
             hfile.attrs["id"] = nix.util.create_id()
     return add_id
 
 
 def update_property_values(fname):
     """
-    Returns a closure that binds the filename. When the return value is
-    called, it rewrites all the metadata Property objects to the new format.
+    Returns a closure that binds the filename if at least one Property update
+    is required. When the return value is called, it rewrites all the metadata
+    Property objects to the new format.
     """
     props = list()
 
@@ -45,6 +52,9 @@ def update_property_values(fname):
 
         sections.visititems(find_props)
 
+    if not props:
+        return None
+
     def update_props():
         for propname in props:
             with h5py.File(fname, mode="a") as hfile:
@@ -56,6 +66,7 @@ def update_property_values(fname):
                     # skip this prop
                     continue
 
+                print(f"Fixing {propname}")
                 # pull out the old extra attributes
                 uncertainty = prop["uncertainty"]
                 reference = prop["reference"]
@@ -136,12 +147,18 @@ def collect_tasks(fname):
     # even if the version string indicates the file is old, check format
     # details before scheduling tasks
     tasks = list()
-    if not has_valid_file_id(fname):
-        tasks.append(add_file_id(fname))
-        tasks.append(update_property_values(fname))
+    id_task = add_file_id(fname)
+    if id_task:
+        tasks.append(id_task)
+
+    props_task = update_property_values(fname)
+    if props_task:
+        tasks.append(props_task)
 
     # always update the format last
     tasks.append(update_format_version(fname))
+
+    # print task list
     print(f"{fname}: {file_verstr} -> {lib_verstr}")
     print("  - " + "\n  - ".join(t.__doc__ for t in tasks) + "\n")
 
