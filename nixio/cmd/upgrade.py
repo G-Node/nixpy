@@ -49,6 +49,12 @@ def update_property_values(fname):
         for propname in props:
             with h5py.File(fname, mode="a") as hfile:
                 prop = hfile[propname]
+                if not (isinstance(prop, h5py.Dataset) and len(prop.dtype)):
+                    # File was possibly changed since the tasks were
+                    # collected.  File may have been submitted twice or
+                    # multiple instances of the script could be running.
+                    # skip this prop
+                    continue
 
                 # pull out the old extra attributes
                 uncertainty = prop["uncertainty"]
