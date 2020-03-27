@@ -31,8 +31,7 @@ def add_file_id(fname):
 def update_property_values(fname):
     """
     Returns a closure that binds the filename. When the return value is
-    called, it modifies rewrites all the metadata Property objects to the new
-    format.
+    called, it rewrites all the metadata Property objects to the new format.
     """
     props = list()
 
