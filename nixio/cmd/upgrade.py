@@ -29,7 +29,6 @@ def add_file_id(fname):
         with h5py.File(fname, mode="a") as hfile:
             if has_valid_file_id(fname):
                 return
-            print("Adding file id")
             hfile.attrs["id"] = nix.util.create_id()
     return add_id
 
@@ -66,7 +65,6 @@ def update_property_values(fname):
                     # skip this prop
                     continue
 
-                print(f"Fixing {propname}")
                 # pull out the old extra attributes
                 uncertainty = prop["uncertainty"]
                 reference = prop["reference"]
@@ -76,10 +74,14 @@ def update_property_values(fname):
 
                 # replace base prop
                 values = prop["value"]
+                definition = prop.attrs.get("definition")
+                unit = prop.attrs.get("unit")
                 dt = values.dtype
                 del hfile[propname]
                 newprop = create_property(hfile, propname,
-                                          dtype=dt, data=values)
+                                          dtype=dt, data=values,
+                                          definition=definition,
+                                          unit=unit)
 
                 # Create properties for any extra attrs that are set
                 if len(set(uncertainty)) > 1:
@@ -114,12 +116,16 @@ def update_property_values(fname):
     return update_props
 
 
-def create_property(hfile, name, dtype, data):
+def create_property(hfile, name, dtype, data, definition=None, unit=None):
     prop = hfile.create_dataset(name, dtype=dtype, data=data)
     prop.attrs["name"] = name.split("/")[-1]
     prop.attrs["entity_id"] = nix.util.create_id()
     prop.attrs["created_at"] = nix.util.time_to_str(nix.util.now_int())
     prop.attrs["updated_at"] = nix.util.time_to_str(nix.util.now_int())
+    if definition:
+        prop.attrs["definition"] = definition
+    if unit:
+        prop.attrs["unit"] = unit
     return prop
 
 
