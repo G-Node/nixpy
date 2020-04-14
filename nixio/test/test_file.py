@@ -177,13 +177,16 @@ class TestFileVer(unittest.TestCase):
         f = nix.File.open(self.testfilename, mode)
         f.close()
 
-    def set_header(self, fformat=None, version=None):
+    def set_header(self, fformat=None, version=None, fileid=None):
         if fformat is None:
             fformat = self.fformat
         if version is None:
             version = self.filever
+        if fileid is None:
+            fileid = nix.util.create_id()
         self.h5root.attrs["format"] = fformat
         self.h5root.attrs["version"] = version
+        self.h5root.attrs["id"] = fileid
         self.h5root.attrs["created_at"] = 0
         self.h5root.attrs["updated_at"] = 0
         if "data" not in self.h5root:
@@ -245,3 +248,18 @@ class TestFileVer(unittest.TestCase):
         self.set_header(fformat="NOT_A_NIX_FILE")
         with self.assertRaises(InvalidFile):
             self.try_open(nix.FileMode.ReadOnly)
+
+    def test_bad_id(self):
+        self.set_header(fileid="")
+        with self.assertRaises(RuntimeError):
+            self.try_open(nix.FileMode.ReadOnly)
+
+        # empty file ID OK for versions older than 1.2.0
+        self.set_header(version=(1, 1, 1), fileid="")
+        self.try_open(nix.FileMode.ReadOnly)
+
+        self.set_header(version=(1, 1, 0), fileid="")
+        self.try_open(nix.FileMode.ReadOnly)
+
+        self.set_header(version=(1, 0, 0), fileid="")
+        self.try_open(nix.FileMode.ReadOnly)

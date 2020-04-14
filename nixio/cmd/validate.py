@@ -1,14 +1,6 @@
-import sys
 import os
+import argparse
 import nixio as nix
-
-
-def usage():
-    print("Usage")
-    print("  nix-validate <nixfile>...")
-    print()
-    print("Args")
-    print("  <nixfile>...    One or more NIX files")
 
 
 def format_obj(obj):
@@ -46,13 +38,15 @@ def validate(filename):
 
 
 def main():
-    args = sys.argv
-    if len(args) < 2:
-        usage()
-        sys.exit(1)
+    parser = argparse.ArgumentParser(
+        description="Validate NIX files"
+    )
+    parser.add_argument("file", type=str, nargs="+",
+                        help="path to file to validate (at least one)")
+    args = parser.parse_args()
+    filenames = args.file
 
-    nixfnames = args[1:]
-    for nixfn in nixfnames:
+    for nixfn in filenames:
         if os.path.exists(nixfn):
             validate(nixfn)
         else:
