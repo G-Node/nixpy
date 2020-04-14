@@ -154,18 +154,13 @@ class TestValidate (unittest.TestCase):
         assert not res["warnings"], self.print_all_results(res)
 
     def test_check_file(self):
-        self.file._root.set_attr("version", tuple())
+        self.file.version = tuple()
         res = self.file.validate()
         assert VW.NoVersion in res["warnings"][self.file]
 
-        self.file._root.set_attr("format", "")
+        self.file.format = ""
         res = self.file.validate()
         assert VW.NoFormat in res["warnings"][self.file]
-
-        self.file._root.set_attr("version", (1, 2, 0))  # needed for ID check
-        self.file._root.set_attr("id", "")
-        res = self.file.validate()
-        assert VW.NoFileID in res["warnings"][self.file]
 
     def test_check_block(self):
         block = self.file.blocks[0]
@@ -465,14 +460,3 @@ class TestValidate (unittest.TestCase):
         dim.offset = 10
         res = self.file.validate()
         assert VW.OffsetNoUnit.format(2) in res["warnings"][da]
-
-    @staticmethod
-    def print_all_results(res):
-        print("Errors")
-        for obj, msg in res["errors"].items():
-            name = obj.name if hasattr(obj, "name") else str(obj)
-            print("  {}: {}".format(name, msg))
-        print("Warnings")
-        for obj, msg in res["warnings"].items():
-            name = obj.name if hasattr(obj, "name") else str(obj)
-            print("  {}: {}".format(name, msg))

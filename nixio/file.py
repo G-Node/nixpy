@@ -29,7 +29,7 @@ from .compression import Compression
 
 
 FILE_FORMAT = "nix"
-HDF_FF_VERSION = (1, 2, 0)
+HDF_FF_VERSION = (1, 1, 1)
 
 
 def can_write(nixfile):
@@ -105,26 +105,27 @@ class File(object):
                 "Cannot open non-existent file in ReadOnly mode!"
             )
 
+        new = False
         if not os.path.exists(path) or mode == FileMode.Overwrite:
             mode = FileMode.Overwrite
             h5mode = map_file_mode(mode)
             fid = h5py.h5f.create(path, flags=h5mode, fapl=make_fapl(),
                                   fcpl=make_fcpl())
-            self._h5file = h5py.File(fid)
-            self._root = H5Group(self._h5file, "/", create=True)
-            self._create_header()
+            new = True
         else:
             h5mode = map_file_mode(mode)
             fid = h5py.h5f.open(path, flags=h5mode, fapl=make_fapl())
-            self._h5file = h5py.File(fid)
-            self._root = H5Group(self._h5file, "/")
 
+        self._h5file = h5py.File(fid)
+        self._root = H5Group(self._h5file, "/", create=True)
         self._h5group = self._root  # to match behaviour of other objects
         self._time_auto_update = True
+        if new:
+            self._create_header()
         self._check_header(mode)
         self.mode = mode
         self._data = self._root.open_group("data", create=True)
-        self._metadata = self._root.open_group("metadata", create=True)
+        self.metadata = self._root.open_group("metadata", create=True)
         if "created_at" not in self._h5file.attrs:
             self.force_created_at()
         if "updated_at" not in self._h5file.attrs:
@@ -145,9 +146,8 @@ class File(object):
         return cls(path, mode, compression, auto_update_time)
 
     def _create_header(self):
-        self._set_format()
-        self._set_version()
-        self._set_id()
+        self.format = FILE_FORMAT
+        self.version = HDF_FF_VERSION
 
     def _check_header(self, mode):
         if self.format != FILE_FORMAT:
@@ -162,28 +162,11 @@ class File(object):
                 raise RuntimeError("Cannot open file. "
                                    "Incompatible version.")
 
-        if self.version >= (1, 2, 0):
-            if not util.is_uuid(self.id):
-                raise RuntimeError("Cannot open file. "
-                                   "The file does not have an ID.")
-
     def __enter__(self):
         return self
 
     def __exit__(self, *args):
         self.close()
-
-    @property
-    def id(self):
-        return self._root.get_attr("id")
-
-    def _set_id(self):
-        # file id attribute should only be set on creation (or format
-        # upgrade), so do nothing if it's already set
-        if self._root.get_attr("id"):
-            return
-
-        self._root.set_attr("id", util.create_id())
 
     @property
     def version(self):
@@ -194,15 +177,16 @@ class File(object):
         """
         return tuple(self._root.get_attr("version"))
 
-    def _set_version(self):
-        # file format version should only be set on creation, so do nothing
-        # if it's already set
-        if self._root.get_attr("version"):
-            return
-
+    @version.setter
+    def version(self, v):
+        util.check_attr_type(v, tuple)
+        for part in v:
+            util.check_attr_type(part, int)
         # convert to np.int32 since py3 defaults to 64
-        v = np.array(HDF_FF_VERSION, dtype=np.int32)
+        v = np.array(v, dtype=np.int32)
         self._root.set_attr("version", v)
+        if self.time_auto_update:
+            self.force_updated_at()
 
     @property
     def format(self):
@@ -214,8 +198,12 @@ class File(object):
         """
         return self._root.get_attr("format")
 
-    def _set_format(self):
-        self._root.set_attr("format", FILE_FORMAT.encode("ascii"))
+    @format.setter
+    def format(self, f):
+        util.check_attr_type(f, str)
+        self._root.set_attr("format", f.encode("ascii"))
+        if self.time_auto_update:
+            self.force_updated_at()
 
     @property
     def time_auto_update(self):
@@ -435,9 +423,9 @@ class File(object):
         :returns: The newly created section.
         :rtype: Section
         """
-        if name in self.sections:
+        if name in self.metadata:
             raise DuplicateName("create_section")
-        sec = Section._create_new(self, self._metadata, name, type_, oid)
+        sec = Section._create_new(self, self.metadata, name, type_, oid)
         return sec
 
     @property
