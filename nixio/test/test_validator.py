@@ -245,18 +245,16 @@ class TestValidate (unittest.TestCase):
     def test_incorrect_dim_index(self):
         da = self.file.blocks[1].data_arrays["data-1d"]
         da.delete_dimensions()
-        dimgroup = da._h5group.open_group("dimensions")
         # This wont work if we ever change the internals
-        nix.SetDimension.create_new(dimgroup, "10")
+        nix.SetDimension.create_new(da, "10")
         res = self.file.validate()
         assert VE.IncorrectDimensionIndex.format(1, 10) in res["errors"][da]
 
     def test_invalid_dim_index(self):
         da = self.file.blocks[1].data_arrays["data-1d"]
         da.delete_dimensions()
-        dimgroup = da._h5group.open_group("dimensions")
         # This wont work if we ever change the internals
-        nix.SetDimension.create_new(dimgroup, "-1")
+        nix.SetDimension.create_new(da, "-1")
         res = self.file.validate()
         assert VE.InvalidDimensionIndex.format(1) in res["errors"][da]
 

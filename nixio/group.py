@@ -19,8 +19,8 @@ from .section import Section
 
 class Group(Entity):
 
-    def __init__(self, nixparent, h5group):
-        super(Group, self).__init__(nixparent, h5group)
+    def __init__(self, nixfile, nixparent, h5group):
+        super(Group, self).__init__(nixfile, nixparent, h5group)
         self._data_arrays = None
         self._data_frames = None
         self._tags = None
@@ -28,8 +28,8 @@ class Group(Entity):
         self._sources = None
 
     @classmethod
-    def create_new(cls, nixparent, h5parent, name, type_):
-        newentity = super(Group, cls).create_new(nixparent, h5parent,
+    def create_new(cls, nixfile, nixparent, h5parent, name, type_):
+        newentity = super(Group, cls).create_new(nixfile, nixparent, h5parent,
                                                  name, type_)
         return newentity
 
@@ -115,7 +115,8 @@ class Group(Entity):
         :type: Section
         """
         if "metadata" in self._h5group:
-            return Section(None, self._h5group.open_group("metadata"))
+            return Section(self.file, None,
+                           self._h5group.open_group("metadata"))
         else:
             return None
 

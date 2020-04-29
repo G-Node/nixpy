@@ -18,13 +18,13 @@ from .section import Section
 
 class Source(Entity):
 
-    def __init__(self, nixparent, h5group):
-        super(Source, self).__init__(nixparent, h5group)
+    def __init__(self, nixfile, nixparent, h5group):
+        super(Source, self).__init__(nixfile, nixparent, h5group)
         self._sources = None
 
     @classmethod
-    def create_new(cls, nixparent, h5parent, name, type_):
-        newentity = super(Source, cls).create_new(nixparent, h5parent,
+    def create_new(cls, nixfile, nixparent, h5parent, name, type_):
+        newentity = super(Source, cls).create_new(nixfile, nixparent, h5parent,
                                                   name, type_)
         return newentity
 
@@ -45,7 +45,7 @@ class Source(Entity):
         sources = self._h5group.open_group("sources", True)
         if name in sources:
             raise exceptions.DuplicateName("create_source")
-        src = Source.create_new(self, sources, name, type_)
+        src = Source.create_new(self.file, self, sources, name, type_)
         return src
 
     @property
@@ -99,7 +99,7 @@ class Source(Entity):
         This is a read only attribute.
         """
         if self._sources is None:
-            self._sources = SourceContainer("sources", self, Source)
+            self._sources = SourceContainer("sources", self.file, self, Source)
         return self._sources
 
     # metadata
@@ -114,7 +114,7 @@ class Source(Entity):
         :type: Section
         """
         if "metadata" in self._h5group:
-            return Section(None, self._h5group.open_group("metadata"))
+            return Section(self.file, None, self._h5group.open_group("metadata"))
         else:
             return None
 

@@ -14,17 +14,18 @@ from .util import util
 
 class Feature(object):
 
-    def __init__(self, nixparent, h5group):
+    def __init__(self, nixfile, nixparent, h5group):
         util.check_entity_id(h5group.get_attr("entity_id"))
         self._h5group = h5group
         self._parent = nixparent
+        self._file = nixfile
 
     @classmethod
-    def create_new(cls, nixparent, h5parent, data, link_type):
+    def create_new(cls, nixfile, nixparent, h5parent, data, link_type):
         id_ = util.create_id()
         h5group = h5parent.open_group(id_)
         h5group.set_attr("entity_id", id_)
-        newfeature = cls(nixparent, h5group)
+        newfeature = cls(nixfile, nixparent, h5group)
         newfeature.link_type = link_type
         newfeature.data = data
         newfeature._h5group.set_attr("created_at",
@@ -56,7 +57,7 @@ class Feature(object):
     def data(self):
         if "data" not in self._h5group:
             raise RuntimeError("Feature.data: DataArray not found!")
-        return DataArray(self._parent._parent,
+        return DataArray(self._file, self._parent._parent,
                          self._h5group.open_group("data"))
 
     @data.setter

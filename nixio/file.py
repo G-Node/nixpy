@@ -437,7 +437,7 @@ class File(object):
         """
         if name in self.sections:
             raise DuplicateName("create_section")
-        sec = Section.create_new(self, self._metadata, name, type_, oid)
+        sec = Section.create_new(self, self, self._metadata, name, type_, oid)
         return sec
 
     @property
@@ -450,7 +450,7 @@ class File(object):
         create_block method of File. This is a read-only attribute.
         """
         if self._blocks is None:
-            self._blocks = Container("data", self, Block)
+            self._blocks = Container("data", self, self, Block)
         return self._blocks
 
     def find_sections(self, filtr=lambda _: True, limit=None):
@@ -486,7 +486,7 @@ class File(object):
         This is a read-only property.
         """
         if self._sections is None:
-            self._sections = SectionContainer("metadata", self, Section)
+            self._sections = SectionContainer("metadata", self, self, Section)
         return self._sections
 
 

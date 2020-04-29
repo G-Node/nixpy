@@ -22,16 +22,16 @@ from .section import Section
 
 class MultiTag(BaseTag):
 
-    def __init__(self, nixparent, h5group):
-        super(MultiTag, self).__init__(nixparent, h5group)
+    def __init__(self, nixfile, nixparent, h5group):
+        super(MultiTag, self).__init__(nixfile, nixparent, h5group)
         self._sources = None
         self._references = None
         self._features = None
 
     @classmethod
-    def create_new(cls, nixparent, h5parent, name, type_, positions):
-        newentity = super(MultiTag, cls).create_new(nixparent, h5parent,
-                                                    name, type_)
+    def create_new(cls, nixfile, nixparent, h5parent, name, type_, positions):
+        newentity = super(MultiTag, cls).create_new(nixfile, nixparent,
+                                                    h5parent, name, type_)
         newentity.positions = positions
         return newentity
 
@@ -44,7 +44,8 @@ class MultiTag(BaseTag):
         """
         if "positions" not in self._h5group:
             raise RuntimeError("MultiTag.positions: DataArray not found!")
-        return DataArray(self._parent, self._h5group.open_group("positions"))
+        return DataArray(self.file, self._parent,
+                         self._h5group.open_group("positions"))
 
     @positions.setter
     def positions(self, da):
@@ -65,9 +66,9 @@ class MultiTag(BaseTag):
         :type: DataArray or None
         """
         if "extents" in self._h5group:
-            return DataArray(self._parent, self._h5group.open_group("extents"))
-        else:
-            return None
+            return DataArray(self.file, self._parent,
+                             self._h5group.open_group("extents"))
+        return None
 
     @extents.setter
     def extents(self, da):
@@ -106,7 +107,8 @@ class MultiTag(BaseTag):
         :type: Container of Feature.
         """
         if self._features is None:
-            self._features = FeatureContainer("features", self, Feature)
+            self._features = FeatureContainer("features", self.file,
+                                              self, Feature)
         return self._features
 
     def _calc_data_slices(self, data, index):
@@ -261,7 +263,7 @@ class MultiTag(BaseTag):
         :type: Section
         """
         if "metadata" in self._h5group:
-            return Section(None, self._h5group.open_group("metadata"))
+            return Section(self.file, None, self._h5group.open_group("metadata"))
         else:
             return None
 

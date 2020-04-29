@@ -23,14 +23,15 @@ class Container(object):
     checking and instantiations)
     """
 
-    def __init__(self, name, parent, itemclass):
+    def __init__(self, name, nixfile, parent, itemclass):
         self._backend = parent._h5group.open_group(name)
         self._itemclass = itemclass
+        self._file = nixfile
         self._parent = parent
         self._name = name
 
     def _inst_item(self, item):
-        return self._itemclass(self._parent, item)
+        return self._itemclass(self._file, self._parent, item)
 
     def __len__(self):
         return len(self._backend)
@@ -180,7 +181,8 @@ class LinkContainer(Container):
     """
 
     def __init__(self, name, parent, itemclass, itemstore):
-        super(LinkContainer, self).__init__(name, parent, itemclass)
+        super(LinkContainer, self).__init__(name, parent.file,
+                                            parent, itemclass)
         self._itemstore = itemstore
 
     def __delitem__(self, item):
@@ -249,7 +251,7 @@ class LinkContainer(Container):
         return False
 
     def _inst_item(self, item):
-        return self._itemclass(self._itemstore._parent, item)
+        return self._itemclass(self._file, self._itemstore._parent, item)
 
     @staticmethod
     def _item_key(item):

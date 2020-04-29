@@ -92,12 +92,12 @@ class OdmlType(Enum):
 
 class Property(Entity):
     """An odML Property"""
-    def __init__(self, nixparent, h5dataset):
-        super(Property, self).__init__(nixparent, h5dataset)
+    def __init__(self, nixfile, nixparent, h5dataset):
+        super(Property, self).__init__(nixfile, nixparent, h5dataset)
         self._h5dataset = self._h5group
 
     @classmethod
-    def create_new(cls, nixparent, h5parent, name,
+    def create_new(cls, nixfile, nixparent, h5parent, name,
                    dtype, shape=None, oid=None):
         if shape is None or shape[0] == 0:
             shape = (8, )
@@ -112,7 +112,7 @@ class Property(Entity):
 
         h5dataset.set_attr("entity_id", oid)
 
-        newentity = cls(nixparent, h5dataset)
+        newentity = cls(nixfile, nixparent, h5dataset)
         newentity.force_created_at()
         newentity.force_updated_at()
 

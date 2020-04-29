@@ -38,8 +38,9 @@ from .section import Section
 
 class Block(Entity):
 
-    def __init__(self, nixparent, h5group, compression=Compression.Auto):
-        super(Block, self).__init__(nixparent, h5group)
+    def __init__(self, nixfile, nixparent, h5group,
+                 compression=Compression.Auto):
+        super(Block, self).__init__(nixfile, nixparent, h5group)
         self._groups = None
         self._data_arrays = None
         self._tags = None
@@ -50,7 +51,8 @@ class Block(Entity):
 
     @classmethod
     def create_new(cls, nixparent, h5parent, name, type_, compression):
-        newentity = super(Block, cls).create_new(nixparent, h5parent,
+        nixfile = nixparent  # file is parent
+        newentity = super(Block, cls).create_new(nixfile, nixparent, h5parent,
                                                  name, type_)
         newentity._compr = compression
         return newentity
@@ -101,7 +103,7 @@ class Block(Entity):
                                                  "{}-extents".format(type_),
                                                  data=extents)
                 extcreated = True
-            mtag = MultiTag.create_new(self, multi_tags,
+            mtag = MultiTag.create_new(self.file, self, multi_tags,
                                        name, type_, positions)
         except Exception as e:
             msg = "MultiTag Creation Failed"
@@ -150,7 +152,7 @@ class Block(Entity):
         tags = self._h5group.open_group("tags")
         if name in tags:
             raise exceptions.DuplicateName("create_tag")
-        tag = Tag.create_new(self, tags, name, type_, position)
+        tag = Tag.create_new(self.file, self, tags, name, type_, position)
         return tag
 
     # Source
@@ -170,7 +172,7 @@ class Block(Entity):
         sources = self._h5group.open_group("sources")
         if name in sources:
             raise exceptions.DuplicateName("create_source")
-        src = Source.create_new(self, sources, name, type_)
+        src = Source.create_new(self.file, self, sources, name, type_)
         return src
 
     # Group
@@ -190,7 +192,7 @@ class Block(Entity):
         groups = self._h5group.open_group("groups")
         if name in groups:
             raise exceptions.DuplicateName("open_group")
-        grp = Group.create_new(self, groups, name, type_)
+        grp = Group.create_new(self.file, self, groups, name, type_)
         return grp
 
     def create_data_array(self, name="", array_type="", dtype=None, shape=None,
@@ -250,7 +252,7 @@ class Block(Entity):
             raise exceptions.DuplicateName("create_data_array")
         if compression == Compression.Auto:
             compression = self._compr
-        da = DataArray.create_new(self, data_arrays, name, array_type,
+        da = DataArray.create_new(self.file, self, data_arrays, name, array_type,
                                   dtype, shape, compression)
         if data is not None:
             da.write_direct(data)
@@ -362,7 +364,7 @@ class Block(Entity):
             dt_arr = list(col_dict.items())
             col_dtype = np.dtype(dt_arr)
 
-        df = DataFrame.create_new(self, data_frames, name,
+        df = DataFrame.create_new(self.file, self, data_frames, name,
                                   type_, shape, col_dtype, compression)
 
         if data is not None:
@@ -510,7 +512,7 @@ class Block(Entity):
         This is a read only attribute.
         """
         if self._sources is None:
-            self._sources = SourceContainer("sources", self, Source)
+            self._sources = SourceContainer("sources", self.file, self, Source)
         return self._sources
 
     @property
@@ -522,7 +524,8 @@ class Block(Entity):
         This is a read only attribute.
         """
         if self._multi_tags is None:
-            self._multi_tags = Container("multi_tags", self, MultiTag)
+            self._multi_tags = Container("multi_tags", self.file,
+                                         self, MultiTag)
         return self._multi_tags
 
     @property
@@ -534,7 +537,7 @@ class Block(Entity):
         This is a read only attribute.
         """
         if self._tags is None:
-            self._tags = Container("tags", self, Tag)
+            self._tags = Container("tags", self.file, self, Tag)
         return self._tags
 
     @property
@@ -547,13 +550,15 @@ class Block(Entity):
         This is a read only attribute.
         """
         if self._data_arrays is None:
-            self._data_arrays = Container("data_arrays", self, DataArray)
+            self._data_arrays = Container("data_arrays", self.file,
+                                          self, DataArray)
         return self._data_arrays
 
     @property
     def data_frames(self):
         if self._data_frames is None:
-            self._data_frames = Container("data_frames", self, DataFrame)
+            self._data_frames = Container("data_frames", self.file,
+                                          self, DataFrame)
         return self._data_frames
 
     @property
@@ -565,7 +570,7 @@ class Block(Entity):
         This is a read only attribute.
         """
         if self._groups is None:
-            self._groups = Container("groups", self, Group)
+            self._groups = Container("groups", self.file, self, Group)
         return self._groups
 
     # metadata
@@ -579,7 +584,8 @@ class Block(Entity):
         :type: Section
         """
         if "metadata" in self._h5group:
-            return Section(None, self._h5group.open_group("metadata"))
+            return Section(self.file, None,
+                           self._h5group.open_group("metadata"))
         else:
             return None
 

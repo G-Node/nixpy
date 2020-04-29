@@ -48,16 +48,16 @@ class S(object):
 
 class Section(Entity):
 
-    def __init__(self, nixparent, h5group):
-        super(Section, self).__init__(nixparent, h5group)
+    def __init__(self, nixfile, nixparent, h5group):
+        super(Section, self).__init__(nixfile, nixparent, h5group)
         self._sec_parent = None
         self._sections = None
         self._properties = None
 
     @classmethod
-    def create_new(cls, nixparent, h5parent, name, type_, oid=None):
-        newentity = super(Section, cls).create_new(nixparent, h5parent,
-                                                   name, type_)
+    def create_new(cls, nixfile, nixparent, h5parent, name, type_, oid=None):
+        newentity = super(Section, cls).create_new(nixfile, nixparent,
+                                                   h5parent, name, type_)
         if util.is_uuid(oid):
             newentity._h5group.set_attr("entity_id", oid)
 
@@ -83,7 +83,7 @@ class Section(Entity):
         sections = self._h5group.open_group("sections", True)
         if name in sections:
             raise exceptions.DuplicateName("create_section")
-        sec = Section.create_new(self, sections, name, type_, oid)
+        sec = Section.create_new(self.file, self, sections, name, type_, oid)
         sec._sec_parent = self
         return sec
 
@@ -169,7 +169,8 @@ class Section(Entity):
                     raise TypeError("Array contains inconsistent values.")
         shape = (len(vals),)
 
-        prop = Property.create_new(self, properties, name, dtype, shape, oid)
+        prop = Property.create_new(self.file, self, properties,
+                                   name, dtype, shape, oid)
         prop.values = vals
 
         return prop
@@ -240,7 +241,7 @@ class Section(Entity):
         if "link" not in self._h5group:
             return None
 
-        return Section(self, self._h5group.open_group("link"))
+        return Section(self.file, self, self._h5group.open_group("link"))
 
     @link.setter
     def link(self, id_or_sec):
@@ -249,7 +250,7 @@ class Section(Entity):
         if isinstance(id_or_sec, Section):
             sec = id_or_sec
         else:
-            rootsec = Section(self, self._h5group.h5root)
+            rootsec = Section(self.file, self, self._h5group.h5root)
             sec = rootsec.find_sections(filtr=lambda x: x.id == id_or_sec)
 
         self._h5group.create_link(sec, "link")
@@ -258,7 +259,7 @@ class Section(Entity):
 
     def inherited_properties(self):
         properties = self._h5group.open_group("properties")
-        inhprops = [Property(self, h5prop) for h5prop in properties]
+        inhprops = [Property(self.file, self, h5prop) for h5prop in properties]
         if self.link:
             inhprops.extend(self.link.inherited_properties())
         return inhprops
@@ -294,7 +295,7 @@ class Section(Entity):
             return self._sec_parent
         rootmd = self._h5group.file.open_group("metadata")
         # BFS
-        sections = [Section(None, sg) for sg in rootmd]
+        sections = [Section(self.file, None, sg) for sg in rootmd]
         if self in sections:
             # Top-level section
             return None
@@ -444,7 +445,8 @@ class Section(Entity):
         :type: Container of Section
         """
         if self._sections is None:
-            self._sections = SectionContainer("sections", self, Section)
+            self._sections = SectionContainer("sections", self.file,
+                                              self, Section)
         return self._sections
 
     def __len__(self):
@@ -504,7 +506,8 @@ class Section(Entity):
         :type: Container of Property
         """
         if self._properties is None:
-            self._properties = Container("properties", self, Property)
+            self._properties = Container("properties", self.file,
+                                         self, Property)
         return self._properties
 
     def pprint(self, indent=2, max_depth=1, max_length=80, current_depth=0):

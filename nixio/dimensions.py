@@ -32,20 +32,18 @@ class DimensionContainer(Container):
             DimensionType.DataFrame: DataFrameDimension,
         }[DimensionType(item.get_attr("dimension_type"))]
         idx = item.name
-        return cls(item, idx)
+        return cls(self._parent, idx)
 
 
 class Dimension(object):
 
-    def __init__(self, h5group, index):
+    def __init__(self, nixfile, data_array, index):
+        dimgroup = data_array._h5group.open_group("dimensions")
+        h5group = dimgroup.open_group(str(index))
         self._h5group = h5group
         self.dim_index = int(index)
-
-    @classmethod
-    def create_new(cls, parent, index):
-        h5group = parent.open_group(str(index))
-        newdim = cls(h5group, index)
-        return newdim
+        self._parent = data_array
+        self._file = nixfile
 
     @property
     def dimension_type(self):
@@ -72,12 +70,13 @@ class Dimension(object):
 
 class SampledDimension(Dimension):
 
-    def __init__(self, h5group, index):
-        super(SampledDimension, self).__init__(h5group, index)
+    def __init__(self, data_array, index):
+        nixfile = data_array.file
+        super(SampledDimension, self).__init__(nixfile, data_array, index)
 
     @classmethod
-    def create_new(cls, parent, index, sample):
-        newdim = super(SampledDimension, cls).create_new(parent, index)
+    def create_new(cls, data_array, index, sample):
+        newdim = cls(data_array, index)
         newdim._set_dimension_type(DimensionType.Sample)
         newdim.sampling_interval = sample
         return newdim
@@ -168,21 +167,22 @@ class SampledDimension(Dimension):
 
 class RangeDimension(Dimension):
 
-    def __init__(self, h5group, index):
-        super(RangeDimension, self).__init__(h5group, index)
+    def __init__(self, data_array, index):
+        nixfile = data_array.file
+        super(RangeDimension, self).__init__(nixfile, data_array, index)
 
     @classmethod
-    def create_new(cls, parent, index, ticks):
-        newdim = super(RangeDimension, cls).create_new(parent, index)
+    def create_new(cls, data_array, index, ticks):
+        newdim = cls(data_array, index)
         newdim._set_dimension_type(DimensionType.Range)
         newdim._h5group.write_data("ticks", ticks, dtype=DataType.Double)
         return newdim
 
     @classmethod
-    def create_new_alias(cls, parent, index, da):
-        newdim = super(RangeDimension, cls).create_new(parent, index)
+    def create_new_alias(cls, data_array, index):
+        newdim = cls(data_array, index)
         newdim._set_dimension_type(DimensionType.Range)
-        newdim._h5group.create_link(da, da.id)
+        newdim._h5group.create_link(data_array, data_array.id)
         return newdim
 
     @property
@@ -297,12 +297,13 @@ class RangeDimension(Dimension):
 
 class SetDimension(Dimension):
 
-    def __init__(self, h5group, index):
-        super(SetDimension, self).__init__(h5group, index)
+    def __init__(self, data_array, index):
+        nixfile = data_array.file
+        super(SetDimension, self).__init__(nixfile, data_array, index)
 
     @classmethod
-    def create_new(cls, parent, index):
-        newdim = super(SetDimension, cls).create_new(parent, index)
+    def create_new(cls, data_array, index):
+        newdim = cls(data_array, index)
         newdim._set_dimension_type(DimensionType.Set)
         return newdim
 
@@ -321,15 +322,18 @@ class SetDimension(Dimension):
 
 class DataFrameDimension(Dimension):
 
-    def __init__(self, h5group, index):
-        super(DataFrameDimension, self).__init__(h5group, index)
+    def __init__(self, data_array, index):
+        nixfile = data_array.file
+        super(DataFrameDimension, self).__init__(nixfile, data_array, index)
 
     @classmethod
-    def create_new(cls, parent, index, data_frame, column):
+    def create_new(cls, data_array, index, data_frame, column):
         """
         Create a new Dimension that points to a DataFrame
 
-        :param parent: DataArray the dimension will be attached to
+        :param data_array: The DataArray this Dimension belongs to
+
+        :param parent: The H5Group for the dimensions
 
         :param data_frame: the referenced DataFrame for this Dimension
 
@@ -338,7 +342,7 @@ class DataFrameDimension(Dimension):
 
         :return: The new DataFrameDimension
         """
-        newdim = super(DataFrameDimension, cls).create_new(parent, index)
+        newdim = cls(data_array, index)
         newdim.data_frame = data_frame
         newdim.column_idx = column
         newdim._set_dimension_type(DimensionType.DataFrame)
@@ -419,7 +423,9 @@ class DataFrameDimension(Dimension):
     def data_frame(self):
         dfname = self._h5group.get_by_pos(0).name
         grp = self._h5group.open_group(dfname)
-        df = DataFrame(grp.h5root.group["data_frames"], grp)
+        nixblock = self._parent._parent
+        nixfile = self._file
+        df = DataFrame(nixfile, nixblock, grp)
         return df
 
     @data_frame.setter
