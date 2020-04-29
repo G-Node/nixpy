@@ -18,7 +18,7 @@ class Entity(object):
         self._parent = nixparent
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name=None, type_=None):
+    def create_new(cls, nixparent, h5parent, name=None, type_=None):
         if name and type_:
             util.check_entity_name_and_type(name, type_)
             id_ = util.create_id()

@@ -49,9 +49,9 @@ class Block(Entity):
         self._data_frames = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, compression):
-        newentity = super(Block, cls)._create_new(nixparent, h5parent,
-                                                  name, type_)
+    def create_new(cls, nixparent, h5parent, name, type_, compression):
+        newentity = super(Block, cls).create_new(nixparent, h5parent,
+                                                 name, type_)
         newentity._compr = compression
         return newentity
 
@@ -101,8 +101,8 @@ class Block(Entity):
                                                  "{}-extents".format(type_),
                                                  data=extents)
                 extcreated = True
-            mtag = MultiTag._create_new(self, multi_tags,
-                                        name, type_, positions)
+            mtag = MultiTag.create_new(self, multi_tags,
+                                       name, type_, positions)
         except Exception as e:
             msg = "MultiTag Creation Failed"
             if poscreated:
@@ -150,7 +150,7 @@ class Block(Entity):
         tags = self._h5group.open_group("tags")
         if name in tags:
             raise exceptions.DuplicateName("create_tag")
-        tag = Tag._create_new(self, tags, name, type_, position)
+        tag = Tag.create_new(self, tags, name, type_, position)
         return tag
 
     # Source
@@ -170,7 +170,7 @@ class Block(Entity):
         sources = self._h5group.open_group("sources")
         if name in sources:
             raise exceptions.DuplicateName("create_source")
-        src = Source._create_new(self, sources, name, type_)
+        src = Source.create_new(self, sources, name, type_)
         return src
 
     # Group
@@ -190,7 +190,7 @@ class Block(Entity):
         groups = self._h5group.open_group("groups")
         if name in groups:
             raise exceptions.DuplicateName("open_group")
-        grp = Group._create_new(self, groups, name, type_)
+        grp = Group.create_new(self, groups, name, type_)
         return grp
 
     def create_data_array(self, name="", array_type="", dtype=None, shape=None,
@@ -250,8 +250,8 @@ class Block(Entity):
             raise exceptions.DuplicateName("create_data_array")
         if compression == Compression.Auto:
             compression = self._compr
-        da = DataArray._create_new(self, data_arrays, name, array_type,
-                                   dtype, shape, compression)
+        da = DataArray.create_new(self, data_arrays, name, array_type,
+                                  dtype, shape, compression)
         if data is not None:
             da.write_direct(data)
         return da
@@ -328,7 +328,7 @@ class Block(Entity):
                     )
                 else:  # col_dtypes is None and data is None
                     raise ValueError(
-                           "The data type of each column have to be specified"
+                        "The data type of each column have to be specified"
                     )
                 if len(col_names) != len(col_dict):
                     raise exceptions.DuplicateColumnName
@@ -348,7 +348,7 @@ class Block(Entity):
                     # data is None or type(data[0]) != np.void
                     # data_type doesnt matter
                     raise ValueError(
-                           "No information about column names is provided!"
+                        "No information about column names is provided!"
                     )
 
         if col_dict is not None:
@@ -362,8 +362,8 @@ class Block(Entity):
             dt_arr = list(col_dict.items())
             col_dtype = np.dtype(dt_arr)
 
-        df = DataFrame._create_new(self, data_frames, name,
-                                   type_, shape, col_dtype, compression)
+        df = DataFrame.create_new(self, data_frames, name,
+                                  type_, shape, col_dtype, compression)
 
         if data is not None:
             if type(data[0]) == np.void:

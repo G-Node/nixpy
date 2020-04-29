@@ -247,7 +247,7 @@ class TestValidate (unittest.TestCase):
         da.delete_dimensions()
         dimgroup = da._h5group.open_group("dimensions")
         # This wont work if we ever change the internals
-        nix.SetDimension._create_new(dimgroup, "10")
+        nix.SetDimension.create_new(dimgroup, "10")
         res = self.file.validate()
         assert VE.IncorrectDimensionIndex.format(1, 10) in res["errors"][da]
 
@@ -256,7 +256,7 @@ class TestValidate (unittest.TestCase):
         da.delete_dimensions()
         dimgroup = da._h5group.open_group("dimensions")
         # This wont work if we ever change the internals
-        nix.SetDimension._create_new(dimgroup, "-1")
+        nix.SetDimension.create_new(dimgroup, "-1")
         res = self.file.validate()
         assert VE.InvalidDimensionIndex.format(1) in res["errors"][da]
 

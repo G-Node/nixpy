@@ -29,9 +29,9 @@ class MultiTag(BaseTag):
         self._features = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, positions):
-        newentity = super(MultiTag, cls)._create_new(nixparent, h5parent,
-                                                     name, type_)
+    def create_new(cls, nixparent, h5parent, name, type_, positions):
+        newentity = super(MultiTag, cls).create_new(nixparent, h5parent,
+                                                    name, type_)
         newentity.positions = positions
         return newentity
 

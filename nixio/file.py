@@ -416,7 +416,7 @@ class File(object):
             raise ValueError("Block with the given name already exists!")
         if compression == Compression.Auto:
             compression = self._compr
-        block = Block._create_new(self, self._data, name, type_, compression)
+        block = Block.create_new(self, self._data, name, type_, compression)
         return block
 
     # Section
@@ -437,7 +437,7 @@ class File(object):
         """
         if name in self.sections:
             raise DuplicateName("create_section")
-        sec = Section._create_new(self, self._metadata, name, type_, oid)
+        sec = Section.create_new(self, self._metadata, name, type_, oid)
         return sec
 
     @property

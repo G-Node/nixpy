@@ -105,7 +105,7 @@ class BaseTag(Entity):
             link_type = link_type.lower()
         link_type = LinkType(link_type)
         features = self._h5group.open_group("features")
-        feat = Feature._create_new(self, features, data, link_type)
+        feat = Feature.create_new(self, features, data, link_type)
         return feat
 
     @staticmethod
@@ -173,9 +173,9 @@ class Tag(BaseTag):
         self._features = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, position):
-        newentity = super(Tag, cls)._create_new(nixparent, h5parent,
-                                                name, type_)
+    def create_new(cls, nixparent, h5parent, name, type_, position):
+        newentity = super(Tag, cls).create_new(nixparent, h5parent,
+                                               name, type_)
         newentity.position = position
         return newentity
 

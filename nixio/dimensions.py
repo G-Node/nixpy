@@ -42,7 +42,7 @@ class Dimension(object):
         self.dim_index = int(index)
 
     @classmethod
-    def _create_new(cls, parent, index):
+    def create_new(cls, parent, index):
         h5group = parent.open_group(str(index))
         newdim = cls(h5group, index)
         return newdim
@@ -76,8 +76,8 @@ class SampledDimension(Dimension):
         super(SampledDimension, self).__init__(h5group, index)
 
     @classmethod
-    def _create_new(cls, parent, index, sample):
-        newdim = super(SampledDimension, cls)._create_new(parent, index)
+    def create_new(cls, parent, index, sample):
+        newdim = super(SampledDimension, cls).create_new(parent, index)
         newdim._set_dimension_type(DimensionType.Sample)
         newdim.sampling_interval = sample
         return newdim
@@ -172,15 +172,15 @@ class RangeDimension(Dimension):
         super(RangeDimension, self).__init__(h5group, index)
 
     @classmethod
-    def _create_new(cls, parent, index, ticks):
-        newdim = super(RangeDimension, cls)._create_new(parent, index)
+    def create_new(cls, parent, index, ticks):
+        newdim = super(RangeDimension, cls).create_new(parent, index)
         newdim._set_dimension_type(DimensionType.Range)
         newdim._h5group.write_data("ticks", ticks, dtype=DataType.Double)
         return newdim
 
     @classmethod
-    def _create_new_alias(cls, parent, index, da):
-        newdim = super(RangeDimension, cls)._create_new(parent, index)
+    def create_new_alias(cls, parent, index, da):
+        newdim = super(RangeDimension, cls).create_new(parent, index)
         newdim._set_dimension_type(DimensionType.Range)
         newdim._h5group.create_link(da, da.id)
         return newdim
@@ -301,8 +301,8 @@ class SetDimension(Dimension):
         super(SetDimension, self).__init__(h5group, index)
 
     @classmethod
-    def _create_new(cls, parent, index):
-        newdim = super(SetDimension, cls)._create_new(parent, index)
+    def create_new(cls, parent, index):
+        newdim = super(SetDimension, cls).create_new(parent, index)
         newdim._set_dimension_type(DimensionType.Set)
         return newdim
 
@@ -325,7 +325,7 @@ class DataFrameDimension(Dimension):
         super(DataFrameDimension, self).__init__(h5group, index)
 
     @classmethod
-    def _create_new(cls, parent, index, data_frame, column):
+    def create_new(cls, parent, index, data_frame, column):
         """
         Create a new Dimension that points to a DataFrame
 
@@ -338,7 +338,7 @@ class DataFrameDimension(Dimension):
 
         :return: The new DataFrameDimension
         """
-        newdim = super(DataFrameDimension, cls)._create_new(parent, index)
+        newdim = super(DataFrameDimension, cls).create_new(parent, index)
         newdim.data_frame = data_frame
         newdim.column_idx = column
         newdim._set_dimension_type(DimensionType.DataFrame)

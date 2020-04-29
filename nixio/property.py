@@ -97,8 +97,8 @@ class Property(Entity):
         self._h5dataset = self._h5group
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name,
-                    dtype, shape=None, oid=None):
+    def create_new(cls, nixparent, h5parent, name,
+                   dtype, shape=None, oid=None):
         if shape is None or shape[0] == 0:
             shape = (8, )
         util.check_entity_name(name)

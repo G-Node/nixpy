@@ -23,9 +23,9 @@ class Source(Entity):
         self._sources = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_):
-        newentity = super(Source, cls)._create_new(nixparent, h5parent,
-                                                   name, type_)
+    def create_new(cls, nixparent, h5parent, name, type_):
+        newentity = super(Source, cls).create_new(nixparent, h5parent,
+                                                  name, type_)
         return newentity
 
     # Source
@@ -45,7 +45,7 @@ class Source(Entity):
         sources = self._h5group.open_group("sources", True)
         if name in sources:
             raise exceptions.DuplicateName("create_source")
-        src = Source._create_new(self, sources, name, type_)
+        src = Source.create_new(self, sources, name, type_)
         return src
 
     @property

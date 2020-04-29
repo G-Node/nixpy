@@ -20,7 +20,7 @@ class Feature(object):
         self._parent = nixparent
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, data, link_type):
+    def create_new(cls, nixparent, h5parent, data, link_type):
         id_ = util.create_id()
         h5group = h5parent.open_group(id_)
         h5group.set_attr("entity_id", id_)

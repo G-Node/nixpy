@@ -28,9 +28,9 @@ class Group(Entity):
         self._sources = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_):
-        newentity = super(Group, cls)._create_new(nixparent, h5parent,
-                                                  name, type_)
+    def create_new(cls, nixparent, h5parent, name, type_):
+        newentity = super(Group, cls).create_new(nixparent, h5parent,
+                                                 name, type_)
         return newentity
 
     @property

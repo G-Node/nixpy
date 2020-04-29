@@ -55,9 +55,9 @@ class Section(Entity):
         self._properties = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, oid=None):
-        newentity = super(Section, cls)._create_new(nixparent, h5parent,
-                                                    name, type_)
+    def create_new(cls, nixparent, h5parent, name, type_, oid=None):
+        newentity = super(Section, cls).create_new(nixparent, h5parent,
+                                                   name, type_)
         if util.is_uuid(oid):
             newentity._h5group.set_attr("entity_id", oid)
 
@@ -83,7 +83,7 @@ class Section(Entity):
         sections = self._h5group.open_group("sections", True)
         if name in sections:
             raise exceptions.DuplicateName("create_section")
-        sec = Section._create_new(self, sections, name, type_, oid)
+        sec = Section.create_new(self, sections, name, type_, oid)
         sec._sec_parent = self
         return sec
 
@@ -169,7 +169,7 @@ class Section(Entity):
                     raise TypeError("Array contains inconsistent values.")
         shape = (len(vals),)
 
-        prop = Property._create_new(self, properties, name, dtype, shape, oid)
+        prop = Property.create_new(self, properties, name, dtype, shape, oid)
         prop.values = vals
 
         return prop
@@ -293,7 +293,7 @@ class Section(Entity):
         if self._sec_parent is not None:
             return self._sec_parent
         rootmd = self._h5group.file.open_group("metadata")
-        # Assuming most metadata trees are shallow---doing BFS
+        # BFS
         sections = [Section(None, sg) for sg in rootmd]
         if self in sections:
             # Top-level section

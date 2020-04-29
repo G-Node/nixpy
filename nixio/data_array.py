@@ -38,10 +38,10 @@ class DataArray(Entity, DataSet):
         self._dimensions = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, data_type, shape,
-                    compression):
-        newentity = super(DataArray, cls)._create_new(nixparent, h5parent,
-                                                      name, type_)
+    def create_new(cls, nixparent, h5parent, name, type_, data_type, shape,
+                   compression):
+        newentity = super(DataArray, cls).create_new(nixparent, h5parent,
+                                                     name, type_)
         datacompr = False
         if compression == Compression.DeflateNormal:
             datacompr = True
@@ -87,7 +87,7 @@ class DataArray(Entity, DataSet):
         """
         dimgroup = self._h5group.open_group("dimensions")
         index = len(dimgroup) + 1
-        setdim = SetDimension._create_new(dimgroup, index)
+        setdim = SetDimension.create_new(dimgroup, index)
         if labels:
             setdim.labels = labels
         if self._parent._parent.time_auto_update:
@@ -109,8 +109,8 @@ class DataArray(Entity, DataSet):
         """
         dimgroup = self._h5group.open_group("dimensions")
         index = len(dimgroup) + 1
-        smpldim = SampledDimension._create_new(dimgroup, index,
-                                               sampling_interval)
+        smpldim = SampledDimension.create_new(dimgroup, index,
+                                              sampling_interval)
         if label:
             smpldim.label = label
         if unit:
@@ -134,7 +134,7 @@ class DataArray(Entity, DataSet):
         """
         dimgroup = self._h5group.open_group("dimensions")
         index = len(dimgroup) + 1
-        rdim = RangeDimension._create_new(dimgroup, index, ticks)
+        rdim = RangeDimension.create_new(dimgroup, index, ticks)
         if label:
             rdim.label = label
             rdim.unit = unit
@@ -160,8 +160,8 @@ class DataArray(Entity, DataSet):
         """
         dimgroup = self._h5group.open_group("dimensions")
         index = len(dimgroup) + 1
-        dfdim = DataFrameDimension._create_new(dimgroup, index,
-                                               data_frame, column_idx)
+        dfdim = DataFrameDimension.create_new(dimgroup, index,
+                                              data_frame, column_idx)
         if self._parent._parent.time_auto_update:
             self.force_updated_at()
         return dfdim
@@ -194,7 +194,7 @@ class DataArray(Entity, DataSet):
                     "Current SI unit is {}".format(u),
                     "DataArray.append_alias_range_dimension"
                 )
-        return RangeDimension._create_new_alias(dimgroup, 1, self)
+        return RangeDimension.create_new_alias(dimgroup, 1, self)
 
     def delete_dimensions(self):
         """
@@ -315,7 +315,7 @@ class DataArray(Entity, DataSet):
             u = None
         util.check_attr_type(u, str)
         if (self._dimension_count() == 1 and
-            self.dimensions[0].dimension_type == DimensionType.Range and
+                self.dimensions[0].dimension_type == DimensionType.Range and
                 self.dimensions[0].is_alias and u is not None):
             if not (util.units.is_si(u) or util.units.is_compound(u)):
                 raise InvalidUnit(
