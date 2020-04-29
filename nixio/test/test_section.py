@@ -231,6 +231,9 @@ class TestSections(unittest.TestCase):
         grp.metadata = child
         self.assertEqual(grp.metadata.parent, self.section)
 
+        # indirect access parent check
+        self.assertEqual(block.groups["group"].metadata.parent, self.section)
+
     def test_inverse_search(self):
         block = self.file.create_block("a block", "block with metadata")
         block.metadata = self.section
