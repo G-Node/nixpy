@@ -16,6 +16,7 @@ class Entity(object):
         util.check_entity_id(h5group.get_attr("entity_id"))
         self._h5group = h5group
         self._parent = nixparent
+        self._file = None
 
     @classmethod
     def create_new(cls, nixparent, h5parent, name=None, type_=None):
@@ -53,6 +54,16 @@ class Entity(object):
         :rtype: int
         """
         return util.str_to_time(self._h5group.get_attr("created_at"))
+
+    @property
+    def file(self):
+        """
+        Reference to the NIX File object.
+        This is a read-only property.
+
+        :rtype: nixio.File
+        """
+        return self._file
 
     def force_created_at(self, t=None):
         """
