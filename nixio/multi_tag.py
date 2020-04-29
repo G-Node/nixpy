@@ -109,11 +109,6 @@ class MultiTag(BaseTag):
             self._features = FeatureContainer("features", self, Feature)
         return self._features
 
-    def _get_slice(self, data, index):
-        offset, count = self._get_offset_and_count(data, index)
-        sl = tuple(slice(o, o + c) for o, c in zip(offset, count))
-        return sl
-
     def _calc_data_slices(self, data, index):
         positions = self.positions
         extents = self.extents
