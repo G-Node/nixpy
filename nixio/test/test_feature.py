@@ -7,6 +7,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import os
+import time
 import unittest
 import nixio as nix
 from .tmp import TempDir
@@ -84,3 +85,36 @@ class TestFeatures(unittest.TestCase):
 
     def test_create_diff_link_type_style(self):
         self.stimuli_tag.create_feature(self.movie1, nix.LinkType.Tagged)
+
+    def test_timestamp_autoupdate(self):
+        array = self.block.create_data_array("array.time", "signal",
+                                             nix.DataType.Double, (100, ))
+        feature = self.stimuli_tag.create_feature(array, nix.LinkType.Tagged)
+
+        ftime = feature.updated_at
+        time.sleep(1)
+        feature.data = self.block.create_data_array("alt.array", "signal",
+                                                    nix.DataType.Int8, (1,))
+        self.assertNotEqual(ftime, feature.updated_at)
+
+        ftime = feature.updated_at
+        time.sleep(1)
+        feature.link_type = nix.LinkType.Untagged
+        self.assertNotEqual(ftime, feature.updated_at)
+
+    def test_timestamp_noautoupdate(self):
+        self.file.auto_update_timestamps = False
+        array = self.block.create_data_array("array.time", "signal",
+                                             nix.DataType.Double, (100, ))
+        feature = self.stimuli_tag.create_feature(array, nix.LinkType.Tagged)
+
+        ftime = feature.updated_at
+        time.sleep(1)
+        feature.data = self.block.create_data_array("alt.array", "signal",
+                                                    nix.DataType.Int8, (1,))
+        self.assertEqual(ftime, feature.updated_at)
+
+        ftime = feature.updated_at
+        time.sleep(1)
+        feature.link_type = nix.LinkType.Untagged
+        self.assertEqual(ftime, feature.updated_at)
