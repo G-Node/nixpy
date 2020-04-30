@@ -10,6 +10,7 @@ import os
 import unittest
 import h5py
 import numpy as np
+import time
 
 import nixio as nix
 import nixio.file as filepy
@@ -165,6 +166,60 @@ class TestFile(unittest.TestCase):
         self.file.create_block(name="111", copy_from=blk1)
         assert self.file.blocks[0] == self.file.blocks[1]  # ID stays the same
         assert self.file.blocks[0].name != self.file.blocks[1].name
+
+    def test_timestamp_autoupdate_definition(self):
+        blk = self.file.create_block("block", "timetest")
+        blktime = blk.updated_at
+        blk.definition = "updated"
+        # no update
+        self.assertEqual(blk.updated_at, blktime)
+
+        rblk = self.file.blocks["block"]  # read through container
+        rblk.definition = "updated again"
+        self.assertEqual(rblk.updated_at, blktime)
+
+        # close and recreate file with auto_update_time enabled
+        self.file.close()
+        self.file = nix.File(self.testfilename, nix.FileMode.Overwrite,
+                             auto_update_time=True)
+        blk = self.file.create_block("block", "timetest")
+        blktime = blk.updated_at
+        time.sleep(1)  # wait for time to change
+        blk.definition = "update"
+        self.assertNotEqual(blk.updated_at, blktime)
+
+        rblk = self.file.blocks["block"]  # read through container
+        rblktime = rblk.updated_at
+        time.sleep(1)  # wait for time to change
+        rblk.definition = "time should change"
+        self.assertNotEqual(rblk.updated_at, rblktime)
+
+    def test_timestamp_autoupdate_type(self):
+        blk = self.file.create_block("block", "timetest")
+        blktime = blk.updated_at
+        blk.type = "updated"
+        # no update
+        self.assertEqual(blk.updated_at, blktime)
+
+        rblk = self.file.blocks["block"]  # read through container
+        rblk.type = "updated again"
+        self.assertEqual(rblk.updated_at, blktime)
+
+        # close and recreate file with auto_update_time enabled
+        self.file.close()
+        self.file = nix.File(self.testfilename, nix.FileMode.Overwrite,
+                             auto_update_time=True)
+        blk = self.file.create_block("block", "timetest")
+        blktime = blk.updated_at
+        time.sleep(1)  # wait for time to change
+        blk.type = "update"
+        self.assertNotEqual(blk.updated_at, blktime)
+
+        rblk = self.file.blocks["block"]  # read through container
+        rblktime = rblk.updated_at
+        time.sleep(1)  # wait for time to change
+        rblk.type = "time should change"
+        self.assertNotEqual(rblk.updated_at, rblktime)
 
 
 class TestFileVer(unittest.TestCase):
