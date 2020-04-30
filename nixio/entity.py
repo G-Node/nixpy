@@ -120,10 +120,7 @@ class Entity(object):
     def definition(self, d):
         util.check_attr_type(d, str)
         self._h5group.set_attr("definition", d)
-        par = self._parent
-        while isinstance(par, Entity):
-            par = par._parent
-        if par.time_auto_update:
+        if self.file.time_auto_update:
             self.force_updated_at()
 
     @property
@@ -154,10 +151,7 @@ class Entity(object):
             raise AttributeError("type can't be None")
         util.check_attr_type(t, str)
         self._h5group.set_attr("type", t)
-        par = self._parent
-        while isinstance(par, Entity):
-            par = par._parent
-        if par.time_auto_update:
+        if self.file.time_auto_update:
             self.force_updated_at()
 
     def __eq__(self, other):
