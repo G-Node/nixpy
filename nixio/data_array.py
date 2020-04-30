@@ -188,7 +188,10 @@ class DataArray(Entity, DataSet):
                     "Current SI unit is {}".format(u),
                     "DataArray.append_alias_range_dimension"
                 )
-        return RangeDimension.create_new_alias(self, 1)
+        aliasdim = RangeDimension.create_new_alias(self, 1)
+        if self.file.auto_update_timestamps:
+            self.force_updated_at()
+        return aliasdim
 
     def delete_dimensions(self):
         """
