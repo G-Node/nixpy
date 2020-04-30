@@ -40,6 +40,10 @@ class Feature(object):
         return self._h5group.get_attr("entity_id")
 
     @property
+    def file(self):
+        return self._file
+
+    @property
     def link_type(self):
         return LinkType(self._h5group.get_attr("link_type"))
 
@@ -49,7 +53,7 @@ class Feature(object):
             lt = lt.lower()
         lt = LinkType(lt)
         self._h5group.set_attr("link_type", lt.value)
-        if self._file.time_auto_update:
+        if self.file.time_auto_update:
             t = util.now_int()
             self._h5group.set_attr("updated_at", util.time_to_str(t))
 
@@ -57,7 +61,7 @@ class Feature(object):
     def data(self):
         if "data" not in self._h5group:
             raise RuntimeError("Feature.data: DataArray not found!")
-        return DataArray(self._file, self._parent._parent,
+        return DataArray(self.file, self._parent._parent,
                          self._h5group.open_group("data"))
 
     @data.setter
@@ -70,7 +74,7 @@ class Feature(object):
         if "data" in self._h5group:
             del self._h5group["data"]
         self._h5group.create_link(da, "data")
-        if self._file.time_auto_update:
+        if self.file.time_auto_update:
             t = util.now_int()
             self._h5group.set_attr("updated_at", util.time_to_str(t))
 
