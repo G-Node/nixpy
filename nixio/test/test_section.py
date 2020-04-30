@@ -7,6 +7,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import os
+import time
 import unittest
 import nixio as nix
 from .tmp import TempDir
@@ -317,3 +318,42 @@ class TestSections(unittest.TestCase):
         assert sec2 == tarsec.sections[1]
         assert sec1.sections[0] == tarsec.sections[1]
         tarfile.close()
+
+    def test_timestamp_autoupdate(self):
+        section = self.file.create_section("section.time", "test.time")
+
+        sectime = section.updated_at
+        time.sleep(1)  # wait for time to change
+        section.reference = "whatever"
+        self.assertNotEqual(sectime, section.updated_at)
+
+        sectime = section.updated_at
+        linksec = self.file.create_section("link.section.time", "test.time")
+        time.sleep(1)  # wait for time to change
+        section.link = linksec
+        self.assertNotEqual(sectime, section.updated_at)
+
+        sectime = section.updated_at
+        time.sleep(1)  # wait for time to change
+        section.repository = "repo"
+        self.assertNotEqual(sectime, section.updated_at)
+
+    def test_timestamp_noautoupdate(self):
+        self.file.auto_update_timestamps = False
+        section = self.file.create_section("section.time", "test.time")
+
+        sectime = section.updated_at
+        time.sleep(1)  # wait for time to change
+        section.reference = "whatever"
+        self.assertEqual(sectime, section.updated_at)
+
+        sectime = section.updated_at
+        time.sleep(1)  # wait for time to change
+        linksec = self.file.create_section("link.section.time", "test.time")
+        section.link = linksec
+        self.assertEqual(sectime, section.updated_at)
+
+        sectime = section.updated_at
+        time.sleep(1)  # wait for time to change
+        section.repository = "repo"
+        self.assertEqual(sectime, section.updated_at)
