@@ -7,6 +7,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import os
+import time
 import unittest
 import numpy as np
 import nixio as nix
@@ -297,3 +298,40 @@ class TestTags(unittest.TestCase):
 
         assert (data1.size == 1)
         assert (data2.size == 3)
+
+    def test_timestamp_autoupdate(self):
+        tag = self.block.create_tag("tag.time", "test.time", [-1])
+
+        tagtime = tag.updated_at
+        time.sleep(1)  # wait for time to change
+        tag.position = [-100]
+        self.assertNotEqual(tag.updated_at, tagtime)
+
+        tagtime = tag.updated_at
+        time.sleep(1)  # wait for time to change
+        tag.extent = [30]
+        self.assertNotEqual(tag.updated_at, tagtime)
+
+        tagtime = tag.updated_at
+        time.sleep(1)  # wait for time to change
+        tag.units = "Mm"
+        self.assertNotEqual(tag.updated_at, tagtime)
+
+    def test_timestamp_noautoupdate(self):
+        self.file.auto_update_timestamps = False
+        tag = self.block.create_tag("tag.time", "test.time", [-1])
+
+        tagtime = tag.updated_at
+        time.sleep(1)  # wait for time to change
+        tag.position = [-100]
+        self.assertEqual(tag.updated_at, tagtime)
+
+        tagtime = tag.updated_at
+        time.sleep(1)  # wait for time to change
+        tag.extent = [30]
+        self.assertEqual(tag.updated_at, tagtime)
+
+        tagtime = tag.updated_at
+        time.sleep(1)  # wait for time to change
+        tag.units = "Mm"
+        self.assertEqual(tag.updated_at, tagtime)
