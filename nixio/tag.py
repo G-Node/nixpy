@@ -86,7 +86,7 @@ class BaseTag(Entity):
 
             dtype = DataType.String
             self._h5group.write_data("units", sanitized, dtype)
-        if self.file.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
 
     def create_feature(self, data, link_type):
@@ -196,7 +196,7 @@ class Tag(BaseTag):
         else:
             dtype = DataType.Double
             self._h5group.write_data("position", pos, dtype)
-        if self.file.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
 
     @property
@@ -217,7 +217,7 @@ class Tag(BaseTag):
         else:
             dtype = DataType.Double
             self._h5group.write_data("extent", ext, dtype)
-        if self.file.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
 
     def _calc_data_slices(self, data):

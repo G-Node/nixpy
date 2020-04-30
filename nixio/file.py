@@ -85,7 +85,8 @@ def make_fcpl():
 class File(object):
 
     def __init__(self, path, mode=FileMode.ReadWrite,
-                 compression=Compression.Auto, auto_update_time=False):
+                 compression=Compression.Auto,
+                 auto_update_timestamps=True):
         """
         Open a NIX file, or create it if it does not exist.
 
@@ -93,6 +94,9 @@ class File(object):
         :param mode: FileMode ReadOnly, ReadWrite, or Overwrite.
                     (default: ReadWrite)
         :param compression: No, DeflateNormal, Auto (default: Auto)
+        :param auto_update_timestamps: Enable/disable automatic updating of
+                    'updated_at' timestamp. (default: True)
+
         :return: nixio.File object
         """
         try:
@@ -120,7 +124,7 @@ class File(object):
             self._root = H5Group(self._h5file, "/")
 
         self._h5group = self._root  # to match behaviour of other objects
-        self._time_auto_update = True
+        self._auto_update_timestamps = auto_update_timestamps
         self._check_header(mode)
         self.mode = mode
         self._data = self._root.open_group("data", create=True)
@@ -129,7 +133,6 @@ class File(object):
             self.force_created_at()
         if "updated_at" not in self._h5file.attrs:
             self.force_updated_at()
-        self.time_auto_update = auto_update_time
         if compression == Compression.Auto:
             compression = Compression.No
         self._compr = compression
@@ -139,10 +142,10 @@ class File(object):
 
     @classmethod
     def open(cls, path, mode=FileMode.ReadWrite, compression=Compression.Auto,
-             backend=None,  auto_update_time=False):
+             backend=None, auto_update_timestamps=True):
         if backend is not None:
             warn("Backend selection is deprecated. Ignoring value.")
-        return cls(path, mode, compression, auto_update_time)
+        return cls(path, mode, compression, auto_update_timestamps)
 
     def _create_header(self):
         self._set_format()
@@ -218,18 +221,24 @@ class File(object):
         self._root.set_attr("format", FILE_FORMAT.encode("ascii"))
 
     @property
-    def time_auto_update(self):
+    def auto_update_timestamps(self):
         """
-        A user defined flag which decided if time should always be updated
-        when properties are changed.
+        If enabled, automatically updates the 'updated_at' attribute when an
+        object's data or attributes are changed.
 
         :type: bool
         """
-        return self._time_auto_update
+        return self._auto_update_timestamps
 
-    @time_auto_update.setter
-    def time_auto_update(self, auto_update_flag):
-        self._time_auto_update = auto_update_flag
+    @auto_update_timestamps.setter
+    def auto_update_timestamps(self, enable):
+        """
+        If enabled, automatically updates the 'updated_at' attribute when an
+        object's data or attributes are changed.
+
+        :type: bool
+        """
+        self._auto_update_timestamps = enable
 
     @property
     def created_at(self):

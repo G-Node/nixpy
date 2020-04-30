@@ -348,7 +348,7 @@ class DataFrame(Entity, DataSet):
                 util.check_attr_type(i, str)
         unit = np.array(u, util.vlen_str_dtype)
         self._h5group.set_attr("units", unit)
-        if self.file.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
 
     @property
