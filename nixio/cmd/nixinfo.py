@@ -2,7 +2,7 @@ import os
 import argparse
 import nixio as nix
 import glob
-
+from IPython import embed
 
 def open_nix_file(filename):
     f = None
@@ -13,6 +13,16 @@ def open_nix_file(filename):
     return f
 
 
+def assemble_files(arguments):
+    filenames = sorted(arguments.file)
+    all_files = []
+    for nix_file in filenames:
+        if os.path.isdir(nix_file):
+            nix_file += "*." + arguments.suffix
+        all_files.extend(sorted(glob.glob(nix_file)))
+    return all_files
+
+
 def disp_file_info(filename, arguments):
     f = open_nix_file(filename)
     if f is None:
@@ -20,7 +30,7 @@ def disp_file_info(filename, arguments):
 
     print(" File: %s" % (filename.split(os.sep)[-1]))
     print("\t format: %s \t version: %s " % (f.format, f.version))
-    print("\t created at: %i \t last updated %i" %
+    print("\t created at: %i \t last updated %i\n\n" %
           (f.created_at, f.updated_at))
     f.close()
 
@@ -31,41 +41,72 @@ def disp_metadata(filename, arguments):
         pass
     print(" File: %s" % (filename.split(os.sep)[-1]))
     for sec in f.sections:
-        sec.pprint(max_depth=-1)
-
+        sec.pprint(max_depth=arguments.depth)
+    print("\n\n")
     f.close()
 
 
-def worker(filename, arguments):
-    if os.path.isdir(filename):
-        filename += "*." + arguments.suffix
-    files = glob.glob(filename)
-    for file in files:
-        if os.path.exists(file) and os.path.isfile(file):
-            if arguments.metadata is None:
-                 # and arguments.data is None:
-                disp_file_info(file, arguments)
-            if arguments.metadata:
-                disp_metadata(file, arguments)
+def mdata_worker(arguments):
+    files = assemble_files(arguments)
+    for nf in files:
+        disp_metadata(nf, arguments)
+
+
+def disp_data(filename, arguments):
+    pass
+
+
+def data_worker(arguments):
+    files = assemble_files(arguments)
+    for nf in files:
+        disp_data(nf, arguments)
+
+
+def file_worker(arguments):
+
     pass
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Search for information within NIX file(s)"
-    )
-    parser.add_argument("file", type=str, nargs="+",
-                        help="Path to file (at least one)")
-    parser.add_argument("suffix", type=str, default="nix", nargs="?", 
-                        help="The suffix used for nix data files (default: nix).")
-    parser.add_argument("-m", "--metadata", type=str, default="",
-                        help="display file metadata, accepts a pattern")
+    parser = argparse.ArgumentParser(prog="nixo-info",
+                                     description="Search for information within NIX file(s)")
+
+    subparsers = parser.add_subparsers(title="commands",
+                                       help="subcommands for working on data and metdata",
+                                       description="Allowed subcommands")
+
+    meta_parser = subparsers.add_parser("metadata", help="filter and display metadata",
+                                        aliases=["m"])
+    meta_parser.add_argument("-p", "--pattern", type=str, default="",
+                             help="pattern(s) of sections and properties")
+    meta_parser.add_argument("-d", "--depth", type=int, default=-1,
+                             help="maximum depth, of metadata tree output")
+    meta_parser.add_argument("file", type=str, nargs="+",
+                             help="Path to file (at least one)")
+    meta_parser.add_argument("suffix", type=str, default="nix", nargs="?",
+                             help="The file suffix used for nix data files (default: nix).")
+    meta_parser.set_defaults(func=mdata_worker)
+
+    data_parser = subparsers.add_parser("data", help="search and display data entities",
+                                        aliases=["d"])
+    data_parser.add_argument("-t", "--type", help="entity type")
+    data_parser.add_argument("file", type=str, nargs="+",
+                             help="Path to file (at least one)")
+    data_parser.add_argument("suffix", type=str, default="nix", nargs="?",
+                             help="The file suffix used for nix data files (default: nix).")
+    data_parser.set_defaults(func=data_worker)
+
+    file_parser = subparsers.add_parser("data", help="search and display data entities",
+                                        aliases=["d"])
+    file_parser.add_argument("file", type=str, nargs="+",
+                             help="Path to file (at least one)")
+    file_parser.add_argument("suffix", type=str, default="nix", nargs="?",
+                             help="The file suffix used for nix data files (default: nix).")
+    file_parser.set_defaults(func=file_worker)
+
     args = parser.parse_args()
+    args.func(args)
 
-    filenames = args.file
-
-    for nix_file in filenames:
-        worker(nix_file, args)
 
 if __name__ == "__main__":
     main()
