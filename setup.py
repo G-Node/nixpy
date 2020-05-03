@@ -85,5 +85,6 @@ setup(
     entry_points={'console_scripts': [
         'nixio-validate=nixio.cmd.validate:main',
         'nixio-upgrade=nixio.cmd.upgrade:main',
+        'nixio-info=nixio.cmd.nixinfo:main',
     ]}
 )
