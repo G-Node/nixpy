@@ -4,6 +4,17 @@ import nixio as nix
 import glob
 from IPython import embed
 
+mdata_pattern_help = """
+Pattern(s) with which to look for sections and properties. The
+pattern can be either\n
+1) type_or_name: First looks for a section
+matching in type or name or a property with matching name.
+2) type_or_name/prop_name: first looks for a matching section and within
+those for matching properties.
+Patterns are applied case-insensitive
+and can be partial matches. Default: %(default)s
+""".strip()
+
 
 def __open_nix_file(filename):
     f = None
@@ -86,7 +97,7 @@ def disp_metadata(filename, arguments):
                         p.pprint()
                 else:
                     for s in secs:
-                        s.pprint(max_depth=-1)
+                        s.pprint(max_depth=arguments.depth)
 
     f.close()
     print("\n\n")
@@ -128,13 +139,13 @@ def __create_parser():
     meta_parser = subparsers.add_parser("metadata", help="filter and display metadata",
                                         aliases=["m"])
     meta_parser.add_argument("-p", "--pattern", type=str, default=[], nargs="+",
-                             help="pattern(s) of sections and properties")
+                             help=mdata_pattern_help)
     meta_parser.add_argument("-d", "--depth", type=int, default=-1,
-                             help="maximum depth, of metadata tree output")
+                             help="maximum depth of metadata tree output, default is %(default)s, full depth")
     meta_parser.add_argument("file", type=str, nargs="+",
                              help="Path to file (at least one)")
     meta_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
-                             help="The file suffix used for nix data files (default: nix).")
+                             help="The file suffix used for nix data files (default: %(default)s).")
     meta_parser.set_defaults(func=mdata_worker)
 
     # parser for data subcommand options
@@ -144,7 +155,7 @@ def __create_parser():
     data_parser.add_argument("file", type=str, nargs="+",
                              help="Path to file (at least one)")
     data_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
-                             help="The file suffix used for nix data files (default: nix).")
+                             help="The file suffix used for nix data files (default: %(default)s).")
     data_parser.set_defaults(func=data_worker)
 
     # parser for file subcommand options
