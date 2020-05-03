@@ -63,11 +63,14 @@ def data_worker(arguments):
 
 
 def file_worker(arguments):
-
+    files = assemble_files(arguments)
+    for nf in files:
+        disp_file_info(nf, arguments)
     pass
 
 
-def main():
+def __create_parser():
+    # create main parser
     parser = argparse.ArgumentParser(prog="nixo-info",
                                      description="Search for information within NIX file(s)")
 
@@ -75,6 +78,7 @@ def main():
                                        help="subcommands for working on data and metdata",
                                        description="Allowed subcommands")
 
+    # parser for metadata subcommand options
     meta_parser = subparsers.add_parser("metadata", help="filter and display metadata",
                                         aliases=["m"])
     meta_parser.add_argument("-p", "--pattern", type=str, default="",
@@ -83,27 +87,34 @@ def main():
                              help="maximum depth, of metadata tree output")
     meta_parser.add_argument("file", type=str, nargs="+",
                              help="Path to file (at least one)")
-    meta_parser.add_argument("suffix", type=str, default="nix", nargs="?",
+    meta_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
                              help="The file suffix used for nix data files (default: nix).")
     meta_parser.set_defaults(func=mdata_worker)
 
+    # parser for data subcommand options
     data_parser = subparsers.add_parser("data", help="search and display data entities",
                                         aliases=["d"])
     data_parser.add_argument("-t", "--type", help="entity type")
     data_parser.add_argument("file", type=str, nargs="+",
                              help="Path to file (at least one)")
-    data_parser.add_argument("suffix", type=str, default="nix", nargs="?",
+    data_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
                              help="The file suffix used for nix data files (default: nix).")
     data_parser.set_defaults(func=data_worker)
 
-    file_parser = subparsers.add_parser("data", help="search and display data entities",
-                                        aliases=["d"])
+    # parser for file subcommand options
+    file_parser = subparsers.add_parser("file", help="display basic file info",
+                                        aliases=["f"])
     file_parser.add_argument("file", type=str, nargs="+",
                              help="Path to file (at least one)")
-    file_parser.add_argument("suffix", type=str, default="nix", nargs="?",
+    file_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
                              help="The file suffix used for nix data files (default: nix).")
     file_parser.set_defaults(func=file_worker)
 
+    return parser
+
+
+def main():
+    parser = __create_parser()
     args = parser.parse_args()
     args.func(args)
 
