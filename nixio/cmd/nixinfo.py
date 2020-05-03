@@ -4,7 +4,8 @@ import nixio as nix
 import glob
 from IPython import embed
 
-def open_nix_file(filename):
+
+def __open_nix_file(filename):
     f = None
     try:
         f = nix.File.open(filename, nix.FileMode.ReadOnly)
@@ -13,7 +14,7 @@ def open_nix_file(filename):
     return f
 
 
-def assemble_files(arguments):
+def __assemble_files(arguments):
     filenames = sorted(arguments.file)
     all_files = []
     for nix_file in filenames:
@@ -24,7 +25,7 @@ def assemble_files(arguments):
 
 
 def disp_file_info(filename, arguments):
-    f = open_nix_file(filename)
+    f = __open_nix_file(filename)
     if f is None:
         pass
 
@@ -35,19 +36,64 @@ def disp_file_info(filename, arguments):
     f.close()
 
 
+def __find_section(nix_file, pattern):
+    # FIXME support limitations to name or type, and strictness in case
+    # and full vs. partial matches 
+    def type_lambda(t):
+        return lambda s: t.lower() in s.type.lower()
+
+    def name_lambda(n):
+        return lambda s: n.lower() in s.type.lower()
+
+    secs = nix_file.find_sections(type_lambda(pattern))
+    if len(secs) == 0:
+        secs = nix_file.find_sections(name_lambda(pattern))
+    return secs
+
+
+def __find_props(nix_file, pattern):
+    n = pattern.lower()
+    props = []
+    for s in nix_file.find_sections(lambda s: True):
+        for p in s.props:
+            if n in p.name.lower():
+                props.append(p)
+    return props
+
+
 def disp_metadata(filename, arguments):
-    f = open_nix_file(filename)
+    f = __open_nix_file(filename)
     if f is None:
         pass
-    print(" File: %s" % (filename.split(os.sep)[-1]))
-    for sec in f.sections:
-        sec.pprint(max_depth=arguments.depth)
-    print("\n\n")
+    print("%s: " % (filename.split(os.sep)[-1]), end="\n")
+    if arguments.pattern is None or len(arguments.pattern) == 0:
+        for sec in f.sections:
+            sec.pprint(max_depth=arguments.depth)
+    else:
+        for p in arguments.pattern:
+            if "/" in p:
+                parts = p.split("/")
+                secs = __find_section(f, parts[0])
+                for s in secs:
+                    for prop in s.props:
+                        if parts[1].lower() in prop.name.lower():
+                            prop.pprint()
+            else:
+                secs = __find_section(f, p)
+                if len(secs) == 0:
+                    props = __find_props(f, p)
+                    for p in props:
+                        p.pprint()
+                else:
+                    for s in secs:
+                        s.pprint(max_depth=-1)
+
     f.close()
+    print("\n\n")
 
 
 def mdata_worker(arguments):
-    files = assemble_files(arguments)
+    files = __assemble_files(arguments)
     for nf in files:
         disp_metadata(nf, arguments)
 
@@ -57,13 +103,13 @@ def disp_data(filename, arguments):
 
 
 def data_worker(arguments):
-    files = assemble_files(arguments)
+    files = __assemble_files(arguments)
     for nf in files:
         disp_data(nf, arguments)
 
 
 def file_worker(arguments):
-    files = assemble_files(arguments)
+    files = __assemble_files(arguments)
     for nf in files:
         disp_file_info(nf, arguments)
     pass
@@ -81,7 +127,7 @@ def __create_parser():
     # parser for metadata subcommand options
     meta_parser = subparsers.add_parser("metadata", help="filter and display metadata",
                                         aliases=["m"])
-    meta_parser.add_argument("-p", "--pattern", type=str, default="",
+    meta_parser.add_argument("-p", "--pattern", type=str, default=[], nargs="+",
                              help="pattern(s) of sections and properties")
     meta_parser.add_argument("-d", "--depth", type=int, default=-1,
                              help="maximum depth, of metadata tree output")
