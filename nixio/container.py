@@ -57,10 +57,7 @@ class Container(object):
                     self._itemclass.__name__)
             )
 
-        root = self._backend.h5root
-        if not root:
-            root = self._parent._h5group
-        root.delete_all([item.id])
+        self._file._h5group.delete_all([item.id])
 
     def __iter__(self):
         for group in self._backend:
@@ -122,8 +119,7 @@ class SectionContainer(Container):
         # the root block
         secids = [s.id for s in item.find_sections()]
 
-        root = self._backend.file
-        root.delete_all(secids)
+        self._file._h5group.delete_all(secids)
 
 
 class SourceContainer(Container):
@@ -146,9 +142,7 @@ class SourceContainer(Container):
         # the root block
         srcids = [s.id for s in item.find_sources()]
         srcids.append(item.id)
-
-        root = self._backend.h5root
-        root.delete_all(srcids)
+        self._file._h5group.delete_all(srcids)
 
 
 class LinkContainer(Container):

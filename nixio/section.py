@@ -293,9 +293,8 @@ class Section(Entity):
         """
         if self._sec_parent is not None:
             return self._sec_parent
-        rootmd = self._h5group.file.open_group("metadata")
         # BFS
-        sections = [Section(self.file, None, sg) for sg in rootmd]
+        sections = list(self.file.sections)
         if self in sections:
             # Top-level section
             return None
@@ -308,18 +307,6 @@ class Section(Entity):
             sections.extend(sect.sections)
 
         return None
-
-    @property
-    def file(self):
-        """
-        Root file object.
-
-        :type: File
-        """
-        par = self._parent
-        while isinstance(par, Entity):
-            par = par._parent
-        return par
 
     @property
     def referring_objects(self):
