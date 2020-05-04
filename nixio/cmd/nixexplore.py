@@ -60,8 +60,6 @@ def disp_file_info(filename, arguments):
 
 
 def find_section(nix_file, pattern):
-    # FIXME support limitations to name or type, and strictness in case
-    # and full vs. partial matches 
     def type_lambda(t):
         return lambda s: t.lower() in s.type.lower()
 
@@ -163,7 +161,11 @@ def create_parser():
     meta_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
                              help="The file suffix used for nix data files (default: %(default)s).")
     meta_parser.set_defaults(func=mdata_worker)
+    # add support for limitations on name or type such as case sensitivity and full vs. partial matches
+    # add value search?
+    # add option to specify directly if one looks for a property which would increase performance
 
+    
     # parser for data subcommand options
     data_parser = subparsers.add_parser("data", help="search and display data entities",
                                         aliases=["d"])
@@ -174,6 +176,8 @@ def create_parser():
                              help="The file suffix used for nix data files (default: %(default)s).")
     data_parser.set_defaults(func=data_worker)
 
+    # one could even add a subcommand for plotting, if nixworks is available?
+    
     # parser for file subcommand options
     file_parser = subparsers.add_parser("file", help="display basic file info",
                                         aliases=["f"])
@@ -182,7 +186,9 @@ def create_parser():
     file_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
                              help="The file suffix used for nix data files (default: nix).")
     file_parser.set_defaults(func=file_worker)
-
+    # add display of file structure, file size etc...
+    # add verbosity support
+    
     return parser
 
 
