@@ -27,10 +27,23 @@ def open_nix_file(filename):
 def assemble_files(arguments):
     filenames = sorted(arguments.file)
     all_files = []
-    for nix_file in filenames:
-        if os.path.isdir(nix_file):
-            nix_file += "*." + arguments.suffix
-        all_files.extend(sorted(glob.glob(nix_file)))
+    for filename in filenames:
+        if os.path.isfile(filename):
+            all_files.append(filename)
+        elif os.path.isdir(filename):
+            filename = os.sep.join((filename, "*." + arguments.suffix))
+            all_files.extend(sorted(glob.glob(filename)))
+        else:
+            candidates = sorted(glob.glob(filename))
+            if len(candidates) == 0:
+                print("Error: invalid file or directory! No matches found. '{}'").format(filename)
+            for c in candidates:
+                if os.path.isdir(c):
+                    c = os.sep.join((c, "*." + arguments.suffix))
+                    all_files.extend(sorted(glob.glob(c)))
+                elif os.path.isfile(c):
+                    all_files.append(c)            
+            
     return all_files
 
 
@@ -53,7 +66,7 @@ def find_section(nix_file, pattern):
         return lambda s: t.lower() in s.type.lower()
 
     def name_lambda(n):
-        return lambda s: n.lower() in s.type.lower()
+        return lambda s: n.lower() in s.name.lower()
 
     secs = nix_file.find_sections(type_lambda(pattern))
     if len(secs) == 0:
