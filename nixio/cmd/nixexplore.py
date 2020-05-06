@@ -63,11 +63,13 @@ def find_section(nix_file, pattern):
 
 def find_props(nix_file, pattern):
     n = pattern.lower()
-    props = []
+    props = {}
     for s in nix_file.find_sections(lambda s: True):
         for p in s.props:
             if n in p.name.lower():
-                props.append(p)
+                if s not in props.keys():
+                    props[s] = []
+                props[s].append(p)
     return props
 
 
@@ -87,13 +89,16 @@ def disp_metadata(filename, arguments):
                 for s in secs:
                     for prop in s.props:
                         if parts[1].lower() in prop.name.lower():
+                            print("[section: %s, type: %s, id: %s] >> " % (s.name, s.type, s.id), end="")
                             prop.pprint()
             else:
                 secs = find_section(f, p)
                 if len(secs) == 0:
                     props = find_props(f, p)
-                    for prop in props:
-                        prop.pprint()
+                    for sec in props.keys():
+                        for prop in props[sec]:
+                            print("[section: %s, type: %s, id: %s] >> " % (sec.name, sec.type, sec.id), end="")
+                            prop.pprint()
                 else:
                     for s in secs:
                         s.pprint(max_depth=arguments.depth)
@@ -122,7 +127,6 @@ def file_worker(arguments):
     files = assemble_files(arguments)
     for nf in files:
         disp_file_info(nf, arguments)
-    pass
 
 
 def create_parser():
