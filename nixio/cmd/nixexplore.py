@@ -2,7 +2,6 @@ import os
 import argparse
 import nixio as nix
 import glob
-from IPython import embed
 
 mdata_pattern_help = """
 Pattern(s) with which to look for sections and properties. The
@@ -16,7 +15,7 @@ and can be partial matches. Default: %(default)s
 """.strip()
 
 
-def __open_nix_file(filename):
+def open_nix_file(filename):
     f = None
     try:
         f = nix.File.open(filename, nix.FileMode.ReadOnly)
@@ -25,7 +24,7 @@ def __open_nix_file(filename):
     return f
 
 
-def __assemble_files(arguments):
+def assemble_files(arguments):
     filenames = sorted(arguments.file)
     all_files = []
     for nix_file in filenames:
@@ -36,7 +35,7 @@ def __assemble_files(arguments):
 
 
 def disp_file_info(filename, arguments):
-    f = __open_nix_file(filename)
+    f = open_nix_file(filename)
     if f is None:
         pass
 
@@ -47,7 +46,7 @@ def disp_file_info(filename, arguments):
     f.close()
 
 
-def __find_section(nix_file, pattern):
+def find_section(nix_file, pattern):
     # FIXME support limitations to name or type, and strictness in case
     # and full vs. partial matches 
     def type_lambda(t):
@@ -62,7 +61,7 @@ def __find_section(nix_file, pattern):
     return secs
 
 
-def __find_props(nix_file, pattern):
+def find_props(nix_file, pattern):
     n = pattern.lower()
     props = []
     for s in nix_file.find_sections(lambda s: True):
@@ -73,7 +72,7 @@ def __find_props(nix_file, pattern):
 
 
 def disp_metadata(filename, arguments):
-    f = __open_nix_file(filename)
+    f = open_nix_file(filename)
     if f is None:
         pass
     print("%s: " % (filename.split(os.sep)[-1]), end="\n")
@@ -84,17 +83,17 @@ def disp_metadata(filename, arguments):
         for p in arguments.pattern:
             if "/" in p:
                 parts = p.split("/")
-                secs = __find_section(f, parts[0])
+                secs = find_section(f, parts[0])
                 for s in secs:
                     for prop in s.props:
                         if parts[1].lower() in prop.name.lower():
                             prop.pprint()
             else:
-                secs = __find_section(f, p)
+                secs = find_section(f, p)
                 if len(secs) == 0:
-                    props = __find_props(f, p)
-                    for p in props:
-                        p.pprint()
+                    props = find_props(f, p)
+                    for prop in props:
+                        prop.pprint()
                 else:
                     for s in secs:
                         s.pprint(max_depth=arguments.depth)
@@ -104,7 +103,7 @@ def disp_metadata(filename, arguments):
 
 
 def mdata_worker(arguments):
-    files = __assemble_files(arguments)
+    files = assemble_files(arguments)
     for nf in files:
         disp_metadata(nf, arguments)
 
@@ -114,21 +113,21 @@ def disp_data(filename, arguments):
 
 
 def data_worker(arguments):
-    files = __assemble_files(arguments)
+    files = assemble_files(arguments)
     for nf in files:
         disp_data(nf, arguments)
 
 
 def file_worker(arguments):
-    files = __assemble_files(arguments)
+    files = assemble_files(arguments)
     for nf in files:
         disp_file_info(nf, arguments)
     pass
 
 
-def __create_parser():
+def create_parser():
     # create main parser
-    parser = argparse.ArgumentParser(prog="nixo-info",
+    parser = argparse.ArgumentParser(prog="nixio-explore",
                                      description="Search for information within NIX file(s)")
 
     subparsers = parser.add_subparsers(title="commands",
@@ -171,7 +170,7 @@ def __create_parser():
 
 
 def main():
-    parser = __create_parser()
+    parser = create_parser()
     args = parser.parse_args()
     args.func(args)
 
