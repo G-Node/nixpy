@@ -77,10 +77,9 @@ class OdmlType(Enum):
         :param dtype: nix DataType
         :return: OdmlType
         """
-
-        if dtype == DataType.Float:
+        if dtype in DataType.FloatTypes:
             return cls.Float
-        elif dtype == DataType.Int64:
+        elif dtype in DataType.IntTypes:
             return cls.Int
         elif dtype == DataType.String:
             return cls.String
