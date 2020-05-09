@@ -140,18 +140,9 @@ def file_worker(arguments):
         disp_file_info(nf, arguments)
 
 
-def create_parser():
-    # create main parser
-    parser = argparse.ArgumentParser(prog="nixio-explore",
-                                     description="Search for information within NIX file(s)")
-
-    subparsers = parser.add_subparsers(title="commands",
-                                       help="subcommands for working on data and metdata",
-                                       description="Allowed subcommands")
-
-    # parser for metadata subcommand options
-    meta_parser = subparsers.add_parser("metadata", help="filter and display metadata",
-                                        aliases=["m"])
+def create_metadata_parser(parent_parser):
+    meta_parser = parent_parser.add_parser("metadata", help="filter and display metadata",
+                                           aliases=["m"])
     meta_parser.add_argument("-p", "--pattern", type=str, default=[], nargs="+",
                              help=mdata_pattern_help)
     meta_parser.add_argument("-d", "--depth", type=int, default=-1,
@@ -165,22 +156,23 @@ def create_parser():
     # add value search?
     # add option to specify directly if one looks for a property which would increase performance
 
-    
-    # parser for data subcommand options
-    data_parser = subparsers.add_parser("data", help="search and display data entities",
-                                        aliases=["d"])
+
+def create_data_parser(parent_parser):
+    data_parser = parent_parser.add_parser("data", help="search and display data entities",
+                                           aliases=["d"])
     data_parser.add_argument("-t", "--type", help="entity type")
     data_parser.add_argument("file", type=str, nargs="+",
                              help="Path to file (at least one)")
     data_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
                              help="The file suffix used for nix data files (default: %(default)s).")
     data_parser.set_defaults(func=data_worker)
-
     # one could even add a subcommand for plotting, if nixworks is available?
-    
-    # parser for file subcommand options
-    file_parser = subparsers.add_parser("file", help="display basic file info",
-                                        aliases=["f"])
+
+
+def create_file_parser(parent_parser):
+    file_parser = parent_parser.add_parser("file", help="display basic file info", aliases=["f"],
+                                           description="Quick display of file information such as " +
+                                           "creation date, file size and structure etc.")
     file_parser.add_argument("file", type=str, nargs="+",
                              help="Path to file (at least one)")
     file_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
@@ -188,7 +180,19 @@ def create_parser():
     file_parser.set_defaults(func=file_worker)
     # add display of file structure, file size etc...
     # add verbosity support
-    
+
+
+def create_parser():
+    parser = argparse.ArgumentParser(prog="nixio-explore",
+                                     description="Search for information within NIX file(s)")
+    subparsers = parser.add_subparsers(title="commands",
+                                       help="subcommands for working on data and metdata",
+                                       description="Allowed subcommands")
+
+    create_metadata_parser(subparsers)
+    create_data_parser(subparsers)
+    create_file_parser(subparsers)
+
     return parser
 
 
