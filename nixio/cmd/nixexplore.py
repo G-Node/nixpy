@@ -146,8 +146,8 @@ def file_worker(arguments):
 
 
 def create_metadata_parser(parent_parser):
-    meta_parser = parent_parser.add_parser("metadata", help="filter and display metadata",
-                                           aliases=["m"])
+    meta_parser = parent_parser.add_parser("metadata", help="filter and display metadata", aliases=["m"],
+                                           description="Search for metadata items or display metadata (sub)trees.")
     meta_parser.add_argument("-p", "--pattern", type=str, default=[], nargs="+",
                              help=mdata_pattern_help)
     meta_parser.add_argument("-d", "--depth", type=int, default=-1,
@@ -163,8 +163,8 @@ def create_metadata_parser(parent_parser):
 
 
 def create_data_parser(parent_parser):
-    data_parser = parent_parser.add_parser("data", help="search and display data entities",
-                                           aliases=["d"])
+    data_parser = parent_parser.add_parser("data", help="search and display data entities", aliases=["d"],
+                                           description="display information about data or dump them to system.out.")
     data_parser.add_argument("-t", "--type", help="entity type")
     data_parser.add_argument("file", type=str, nargs="+",
                              help="Path to file (at least one)")
