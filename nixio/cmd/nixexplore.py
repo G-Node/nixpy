@@ -151,29 +151,38 @@ def disp_file_info(filename, arguments):
     f.close()
 
 
-def find_section(nix_file, pattern, case_sensitive=False):
-    def type_lambda(t):
-        return lambda s: t.lower() in s.type.lower()
+def find_section(nix_file, pattern, case_sensitive=False, full_match=False):
+    def type_lambda(t, full_match):
+        if full_match:
+            return lambda s: t.lower() == s.type.lower()
+        else:
+            return lambda s: t.lower() in s.type.lower()
 
-    def name_lambda(n):
-        return lambda s: n.lower() in s.name.lower()
+    def name_lambda(n, full_match):
+        if full_match:
+            return lambda s: n.lower() == s.name.lower()
+        else:
+            return lambda s: n.lower() in s.name.lower()
 
-    def name_lambda_cs(n):
-        return lambda s: n in s.name
+    def name_lambda_cs(n, full_match):
+        if full_match:
+            return lambda s: n == s.name
+        else:
+            return lambda s: n in s.name
 
-    secs = nix_file.find_sections(type_lambda(pattern))
+    secs = nix_file.find_sections(type_lambda(pattern, full_match))
     if len(secs) == 0:
-        secs = nix_file.find_sections(name_lambda_cs(pattern) if case_sensitive else name_lambda(pattern))
+        secs = nix_file.find_sections(name_lambda_cs(pattern, full_match) if case_sensitive else name_lambda(pattern, full_match))
     return secs
 
 
-def find_props(nix_file, pattern, case_sensitive=False):
+def find_props(nix_file, pattern, case_sensitive=False, full_match=False):
     n = pattern if case_sensitive else pattern.lower()
     props = {}
     for s in nix_file.find_sections(lambda s: True):
         for p in s.props:
             pname = p.name if case_sensitive else p.name.lower()
-            if n in pname:
+            if n == pname if full_match else n in pname:
                 if s not in props.keys():
                     props[s] = []
                 props[s].append(p)
@@ -182,6 +191,7 @@ def find_props(nix_file, pattern, case_sensitive=False):
 
 def disp_metadata(filename, arguments):
     case_sensitive = arguments.case_sensitive
+    full_match = arguments.full_match
     f = open_nix_file(filename)
     if f is None:
         pass
@@ -198,7 +208,7 @@ def disp_metadata(filename, arguments):
                     for prop in s.props:
                         part = parts[1] if case_sensitive else parts[1].lower()
                         pname = prop.name if case_sensitive else prop.name.lower()
-                        if part in pname:
+                        if part == pname if full_match else part in pname:
                             print("[section: %s, type: %s, id: %s] >> " % (s.name, s.type, s.id), end="")
                             prop.pprint()
             else:
@@ -248,12 +258,13 @@ def create_metadata_parser(parent_parser):
                              help="maximum depth of metadata tree output, default is %(default)s, full depth")
     meta_parser.add_argument("-c", "--case_sensitive", action="store_true", help="name matching of" +
                              " sections and properties is case sensitive, by default the case is ignored")
+    meta_parser.add_argument("-fm", "--full_match", action="store_true", help="names and types must" +
+                             " be full matches, bey default a partial match is sufficient")
     meta_parser.add_argument("file", type=str, nargs="+",
                              help="Path to file (at least one)")
     meta_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
                              help="The file suffix used for nix data files (default: %(default)s).")
     meta_parser.set_defaults(func=mdata_worker)
-    # add support for limitations on name or type such as case sensitivity and full vs. partial matches
     # add value search?
     # add option to specify directly if one looks for a property which would increase performance
 
