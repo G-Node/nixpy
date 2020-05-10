@@ -72,27 +72,65 @@ def disp_file_structure(nix_file, verbosity):
                 content = "\n       shape: %s, dtype: %s %s" % (data_array.shape, data_array.dtype, dims)
                 return content
 
-            content = ""
+            content = "      Data Arrays:\n" if len(block.data_arrays) > 0 else ""
             for a in b.data_arrays:
                 array_struct = array_structure(a, verbosity) if verbosity > 2 else ""
                 content += "      %s [%s] --- id: %s    %s\n" % (a.name, a.type, a.id, array_struct)
             return content
 
         def group_content(block, verbosity):
-            content = "      groups\n"
+            content = "      Groups:\n" if len(block.groups) > 0 else ""
+            for g in block.groups:
+                content += "      %s [%s] -- id: %s\n" % (g.name, g.type, g.id)
             return content
 
         def tag_content(block, verbosity):
-            return "      tags\n"
+            def tag_details(tag, verbosity):
+                if verbosity < 3:
+                    return ""
+
+                content = "      start: %s, extent: %s" % (tag.position, tag.extent)
+                for r in tag.references:
+                    content += "\n       refers to -> %s" % r.name
+                for ft in tag.features:
+                    content += "\n       feature in -> %s" % ft.data.name
+                content += "\n"
+                return content
+
+            content = "      Tags:\n"
+            for t in block.tags:
+                content += "      %s [%s] --- id: %s\n %s" % (t.name, t.type, t.id, tag_details(t, verbosity))
+            return content
 
         def mtag_content(block, verbosity):
-            return "      mtags\n"
+            def tag_details(tag, verbosity):
+                if verbosity < 3:
+                    return ""
+
+                content = "      start: %s, extent: %s" % (tag.position[:], tag.extent[:])
+                for r in tag.references:
+                    content += "\n       segment refers to -> %s" % r.name
+                for ft in tag.features:
+                    content += "\n       segment feature(s) in -> %s" % ft.data.name
+                content += "\n"
+                return content
+
+            content = "      Multi-Tags:\n"
+            for t in block.tags:
+                content += "      %s [%s] --- id: %s\n %s" % (t.name, t.type, t.id, tag_details(t, verbosity))
+            return content
 
         def frame_content(block, verbosity):
-            return "      frames\n"
+            content = "      Data frames:\n" if len(block.data_frames) > 0 else ""
+            for df in block.data_frames:
+                content += "      %s [%s] -- id: %s\n" % (df.name, df.type, df.id)
+            return content
 
         def source_content(block, verbosity):
-            return "      sources\n"
+            content = "      Sources:\n" if len(block.groups) > 0 else ""
+            for s in block.sources:
+                content += "      %s [%s] -- id: %s\n" % (s.name, s.type, s.id)
+            return content
 
         content = ""
         if verbosity < 1:
@@ -107,7 +145,7 @@ def disp_file_structure(nix_file, verbosity):
                 groups = group_content(b, verbosity) if verbosity > 1 else "      %i groups\n" % len(b.groups)
                 tags = tag_content(b, verbosity) if verbosity > 1 else "      %i tags\n" % len(b.tags)
                 mtags = mtag_content(b, verbosity) if verbosity > 1 else "      %i multi-tags\n" % len(b.multi_tags)
-                srcs = source_content(b, verbosity) if verbosity >1 else "      %i sources\n" % len(b.sources)
+                srcs = source_content(b, verbosity) if verbosity > 1 else "      %i sources\n" % len(b.sources)
                 content += "    %s [%s] --- id: %s\n%s%s%s%s%s%s\n" % (b.name, b.type, b.id, arrays,
                                                                        frames,  groups, tags, mtags,
                                                                        srcs)
@@ -141,7 +179,7 @@ def disp_file_structure(nix_file, verbosity):
             content += "  metadata:\n%s\n" % section_content(nix_file, verbosity)
         return content
 
-    print("\n%s" % file_content(nix_file, verbosity))
+    print("\n%s\n\n" % file_content(nix_file, verbosity))
 
 
 def disp_file_info(filename, arguments):
