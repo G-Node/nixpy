@@ -4,10 +4,16 @@ import nixio as nix
 import glob
 import datetime as dt
 
+general_help = """ Search for information within NIX file(s). Use the file sub
+command for general information about the file(s) verbosity flag can be used to 
+get more detailed information about the file structure. (e.g.
+ \'nixio-explore file nix_file -vvv\' for most detailed output).
+
+The metadata (m) and data (d) commands provide further options for finding and viewing.""".strip()
 
 mdata_pattern_help = """
 Pattern(s) with which to look for sections and properties. The
-pattern can be either\n
+pattern can be either
 1) type_or_name: First looks for a section
 matching in type or name or a property with matching name.
 2) type_or_name/prop_name: first looks for a matching section and within
@@ -102,7 +108,9 @@ def disp_file_structure(nix_file, verbosity):
                 tags = tag_content(b, verbosity) if verbosity > 1 else "      %i tags\n" % len(b.tags)
                 mtags = mtag_content(b, verbosity) if verbosity > 1 else "      %i multi-tags\n" % len(b.multi_tags)
                 srcs = source_content(b, verbosity) if verbosity >1 else "      %i sources\n" % len(b.sources)
-                content += "    %s [%s] --- id: %s\n%s%s%s%s%s%s\n" % (b.name, b.type, b.id, arrays, frames,  groups, tags, mtags, srcs)
+                content += "    %s [%s] --- id: %s\n%s%s%s%s%s%s\n" % (b.name, b.type, b.id, arrays,
+                                                                       frames,  groups, tags, mtags,
+                                                                       srcs)
         return content
 
     def section_content(nix_file, verbosity):
@@ -143,10 +151,11 @@ def disp_file_info(filename, arguments):
 
     print(" File: %s" % (filename.split(os.sep)[-1]))
     print("  format: %s \n  version: %s " % (f.format, f.version))
-    print("  created at: %s \n  last updated %s" %
+    print("  created at: %s \n  last updated: %s" %
           (str(dt.datetime.fromtimestamp(f.created_at)),
            str(dt.datetime.fromtimestamp(f.updated_at))))
-    print("  size on disk: %2.f MB" % (os.path.getsize(filename) / 10**6))
+    print("  size on disk: %.2f MB" % (os.path.getsize(filename) / 10**6))
+    print("  location: %s" % os.path.split(filename)[0])
     disp_file_structure(f, arguments.verbosity)
     f.close()
 
@@ -250,7 +259,7 @@ def file_worker(arguments):
 
 
 def create_metadata_parser(parent_parser):
-    meta_parser = parent_parser.add_parser("metadata", help="filter and display metadata", aliases=["m"],
+    meta_parser = parent_parser.add_parser("metadata", help="Filter and display metadata", aliases=["m"],
                                            description="Search for metadata items or display metadata (sub)trees.")
     meta_parser.add_argument("-p", "--pattern", type=str, default=[], nargs="+",
                              help=mdata_pattern_help)
@@ -270,8 +279,8 @@ def create_metadata_parser(parent_parser):
 
 
 def create_data_parser(parent_parser):
-    data_parser = parent_parser.add_parser("data", help="search and display data entities", aliases=["d"],
-                                           description="display information about data or dump them to system.out.")
+    data_parser = parent_parser.add_parser("data", help="Search and display data entities", aliases=["d"],
+                                           description="Display information about data or dump them to system.out. (not fully implemented yet)")
     data_parser.add_argument("-t", "--type", help="entity type")
     data_parser.add_argument("file", type=str, nargs="+",
                              help="Path to file (at least one)")
@@ -282,7 +291,7 @@ def create_data_parser(parent_parser):
 
 
 def create_file_parser(parent_parser):
-    file_parser = parent_parser.add_parser("file", help="display basic file info", aliases=["f"],
+    file_parser = parent_parser.add_parser("file", help="Display basic file info", aliases=["f"],
                                            description="Quick display of file information such as " +
                                            "creation date, file size and structure etc.")
     file_parser.add_argument("-v", "--verbosity", action="count",
@@ -298,10 +307,11 @@ def create_file_parser(parent_parser):
 
 def create_parser():
     parser = argparse.ArgumentParser(prog="nixio-explore",
-                                     description="Search for information within NIX file(s)")
+                                     description=general_help)
     subparsers = parser.add_subparsers(title="commands",
-                                       help="subcommands for working on data and metdata",
-                                       description="Allowed subcommands")
+                                       help="Sub commands for working on data and metadata",
+                                       description="nixio-explore offers the following sub commands" +
+                                       " for file metadata and data exploration:")
 
     create_metadata_parser(subparsers)
     create_data_parser(subparsers)
