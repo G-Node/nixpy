@@ -49,6 +49,93 @@ def assemble_files(arguments):
     return all_files
 
 
+def disp_file_structure(nix_file, verbosity):
+    def block_content(nix_file, verbosity):
+        def array_content(block, verbosity):
+            def dimension_description(data_array, verbosity):
+                content = ", dimensions: ["
+                dd = [d.label if d.dimension_type == nix.DimensionType.Sample or
+                      d.dimension_type == nix.DimensionType.Range else d.dimension_type
+                      for d in data_array.dimensions]
+                content += ",".join(dd)
+                content += "]"
+                return content
+
+            def array_structure(data_array, verbosity):
+                dims = dimension_description(data_array, verbosity)
+                content = "\n       shape: %s, dtype: %s %s" % (data_array.shape, data_array.dtype, dims)
+                return content
+
+            content = ""
+            for a in b.data_arrays:
+                array_struct = array_structure(a, verbosity) if verbosity > 2 else ""
+                content += "      %s [%s] --- id: %s    %s\n" % (a.name, a.type, a.id, array_struct)
+            return content
+
+        def group_content(block, verbosity):
+            content = "      groups\n"
+            return content
+
+        def tag_content(block, verbosity):
+            return "      tags\n"
+
+        def mtag_content(block, verbosity):
+            return "      mtags\n"
+
+        def frame_content(block, verbosity):
+            return "      frames\n"
+
+        def source_content(block, verbosity):
+            return "      sources\n"
+
+        content = ""
+        if verbosity < 1:
+            content += "  %i block(s)" % len(nix_file.blocks)
+        else:
+            for b in nix_file.blocks:
+                arrays = array_content(b, verbosity) if verbosity > 1 else "      %i data arrays\n" % len(b.data_arrays)
+                if getattr(b, "data_frames", None) is not None:
+                    frames = frame_content(b, verbosity) if verbosity > 1 else "      %i data frames\n" % len(b.data_frames)
+                else:
+                    frames = ""
+                groups = group_content(b, verbosity) if verbosity > 1 else "      %i groups\n" % len(b.groups)
+                tags = tag_content(b, verbosity) if verbosity > 1 else "      %i tags\n" % len(b.tags)
+                mtags = mtag_content(b, verbosity) if verbosity > 1 else "      %i multi-tags\n" % len(b.multi_tags)
+                srcs = source_content(b, verbosity) if verbosity >1 else "      %i sources\n" % len(b.sources)
+                content += "    %s [%s] --- id: %s\n%s%s%s%s%s%s\n" % (b.name, b.type, b.id, arrays, frames,  groups, tags, mtags, srcs)
+        return content
+
+    def section_content(nix_file, verbosity):
+        def subsections(section, verbosity):
+            content = ""
+            sections = s.find_sections()
+            prop_count = sum([len(sec) for sec in sections])
+            content += "\n     %i sub-section(s), %i properties\n" % (len(sections), prop_count)
+            return content
+
+        content = ""
+        if verbosity < 1:
+            content += "  %i section(s)" % len(nix_file.find_sections())
+        else:
+            for s in nix_file.sections:
+                subs_props = "\n" if verbosity < 1 else subsections(s, verbosity)
+                content += "    %s [%s] --- id: %s%s" % (s.name, s.type, s.id, subs_props)
+        return content
+
+    def file_content(nix_file, verbosity):
+        if verbosity is None:
+            verbosity = 0
+        content = ""
+        if verbosity < 1:
+            content += "%s\n%s" % (block_content(nix_file, verbosity), section_content(nix_file, verbosity))
+        else:
+            content += "  data:\n%s" % block_content(nix_file, verbosity)
+            content += "  metadata:\n%s\n" % section_content(nix_file, verbosity)
+        return content
+
+    print("\n%s" % file_content(nix_file, verbosity))
+
+
 def disp_file_info(filename, arguments):
     f = open_nix_file(filename)
     if f is None:
@@ -178,6 +265,8 @@ def create_file_parser(parent_parser):
     file_parser = parent_parser.add_parser("file", help="display basic file info", aliases=["f"],
                                            description="Quick display of file information such as " +
                                            "creation date, file size and structure etc.")
+    file_parser.add_argument("-v", "--verbosity", action="count",
+                             help="increase output verbosity, use -v, -vv, -vvv for more verbose output")
     file_parser.add_argument("file", type=str, nargs="+",
                              help="Path to file (at least one)")
     file_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
