@@ -164,7 +164,7 @@ def disp_file_structure(nix_file, verbosity):
             content += "  %i section(s)" % len(nix_file.find_sections())
         else:
             for s in nix_file.sections:
-                subs_props = "\n" if verbosity < 1 else subsections(s, verbosity)
+                subs_props = subsections(s, verbosity)
                 content += "    %s [%s] --- id: %s%s" % (s.name, s.type, s.id, subs_props)
         return content
 
