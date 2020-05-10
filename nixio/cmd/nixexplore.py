@@ -2,6 +2,8 @@ import os
 import argparse
 import nixio as nix
 import glob
+import datetime as dt
+
 
 mdata_pattern_help = """
 Pattern(s) with which to look for sections and properties. The
@@ -53,9 +55,12 @@ def disp_file_info(filename, arguments):
         pass
 
     print(" File: %s" % (filename.split(os.sep)[-1]))
-    print("\t format: %s \t version: %s " % (f.format, f.version))
-    print("\t created at: %i \t last updated %i\n\n" %
-          (f.created_at, f.updated_at))
+    print("  format: %s \n  version: %s " % (f.format, f.version))
+    print("  created at: %s \n  last updated %s" %
+          (str(dt.datetime.fromtimestamp(f.created_at)),
+           str(dt.datetime.fromtimestamp(f.updated_at))))
+    print("  size on disk: %2.f MB" % (os.path.getsize(filename) / 10**6))
+    disp_file_structure(f, arguments.verbosity)
     f.close()
 
 
