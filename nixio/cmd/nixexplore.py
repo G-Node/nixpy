@@ -151,25 +151,29 @@ def disp_file_info(filename, arguments):
     f.close()
 
 
-def find_section(nix_file, pattern):
+def find_section(nix_file, pattern, case_sensitive=False):
     def type_lambda(t):
         return lambda s: t.lower() in s.type.lower()
 
     def name_lambda(n):
         return lambda s: n.lower() in s.name.lower()
 
+    def name_lambda_cs(n):
+        return lambda s: n in s.name
+
     secs = nix_file.find_sections(type_lambda(pattern))
     if len(secs) == 0:
-        secs = nix_file.find_sections(name_lambda(pattern))
+        secs = nix_file.find_sections(name_lambda_cs(pattern) if case_sensitive else name_lambda(pattern))
     return secs
 
 
-def find_props(nix_file, pattern):
-    n = pattern.lower()
+def find_props(nix_file, pattern, case_sensitive=False):
+    n = pattern if case_sensitive else pattern.lower()
     props = {}
     for s in nix_file.find_sections(lambda s: True):
         for p in s.props:
-            if n in p.name.lower():
+            pname = p.name if case_sensitive else p.name.lower()
+            if n in pname:
                 if s not in props.keys():
                     props[s] = []
                 props[s].append(p)
@@ -177,6 +181,7 @@ def find_props(nix_file, pattern):
 
 
 def disp_metadata(filename, arguments):
+    case_sensitive = arguments.case_sensitive
     f = open_nix_file(filename)
     if f is None:
         pass
@@ -188,16 +193,18 @@ def disp_metadata(filename, arguments):
         for p in arguments.pattern:
             if "/" in p:
                 parts = p.split("/")
-                secs = find_section(f, parts[0])
+                secs = find_section(f, parts[0], case_sensitive)
                 for s in secs:
                     for prop in s.props:
-                        if parts[1].lower() in prop.name.lower():
+                        part = parts[1] if case_sensitive else parts[1].lower()
+                        pname = prop.name if case_sensitive else prop.name.lower()
+                        if part in pname:
                             print("[section: %s, type: %s, id: %s] >> " % (s.name, s.type, s.id), end="")
                             prop.pprint()
             else:
-                secs = find_section(f, p)
+                secs = find_section(f, p, case_sensitive)
                 if len(secs) == 0:
-                    props = find_props(f, p)
+                    props = find_props(f, p, case_sensitive)
                     for sec in props.keys():
                         for prop in props[sec]:
                             print("[section: %s, type: %s, id: %s] >> " % (sec.name, sec.type, sec.id), end="")
@@ -239,6 +246,8 @@ def create_metadata_parser(parent_parser):
                              help=mdata_pattern_help)
     meta_parser.add_argument("-d", "--depth", type=int, default=-1,
                              help="maximum depth of metadata tree output, default is %(default)s, full depth")
+    meta_parser.add_argument("-c", "--case_sensitive", action="store_true", help="name matching of" +
+                             " sections and properties is case sensitive, by default the case is ignored")
     meta_parser.add_argument("file", type=str, nargs="+",
                              help="Path to file (at least one)")
     meta_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
