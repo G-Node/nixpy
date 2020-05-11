@@ -7,6 +7,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import os
+import time
 import unittest
 import numpy as np
 import nixio as nix
@@ -562,3 +563,42 @@ class TestMultiTags(unittest.TestCase):
             self.feature_tag.feature_data(2, 1)
 
         self.assertRaises(IndexError, out_of_bounds)
+
+    def test_timestamp_autoupdate(self):
+        pos = self.block.create_data_array("positions.time", "test.time",
+                                           nix.DataType.Int16, (0, 0))
+        mtag = self.block.create_multi_tag("mtag.time", "test.time", pos)
+
+        mtagtime = mtag.updated_at
+        time.sleep(1)  # wait for time to change
+        mtag.positions = self.block.create_data_array("pos2.time",
+                                                      "test.time",
+                                                      nix.DataType.Int8, (0,))
+        self.assertNotEqual(mtag.updated_at, mtagtime)
+
+        mtagtime = mtag.updated_at
+        time.sleep(1)  # wait for time to change
+        mtag.extents = self.block.create_data_array("extents.time",
+                                                    "test.time",
+                                                    nix.DataType.Int8, (0,))
+        self.assertNotEqual(mtag.updated_at, mtagtime)
+
+    def test_timestamp_noautoupdate(self):
+        self.file.auto_update_timestamps = False
+        pos = self.block.create_data_array("positions.time", "test.time",
+                                           nix.DataType.Int16, (0, 0))
+        mtag = self.block.create_multi_tag("mtag.time", "test.time", pos)
+
+        mtagtime = mtag.updated_at
+        time.sleep(1)  # wait for time to change
+        mtag.positions = self.block.create_data_array("pos2.time",
+                                                      "test.time",
+                                                      nix.DataType.Int8, (0,))
+        self.assertEqual(mtag.updated_at, mtagtime)
+
+        mtagtime = mtag.updated_at
+        time.sleep(1)  # wait for time to change
+        mtag.extents = self.block.create_data_array("extents.time",
+                                                    "test.time",
+                                                    nix.DataType.Int8, (0,))
+        self.assertEqual(mtag.updated_at, mtagtime)

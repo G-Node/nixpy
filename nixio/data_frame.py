@@ -26,17 +26,17 @@ import csv
 
 class DataFrame(Entity, DataSet):
 
-    def __init__(self, nixparent, h5group):
-        super(DataFrame, self).__init__(nixparent, h5group)
+    def __init__(self, nixfile, nixparent, h5group):
+        super(DataFrame, self).__init__(nixfile, nixparent, h5group)
         self._sources = None
         self._columns = None
         self._rows = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent,
-                    name, type_, shape, col_dtype, compression):
-        newentity = super(DataFrame, cls)._create_new(nixparent, h5parent,
-                                                      name, type_)
+    def create_new(cls, nixfile, nixparent, h5parent, name, type_,
+                   shape, col_dtype, compression):
+        newentity = super(DataFrame, cls).create_new(nixfile, nixparent,
+                                                     h5parent, name, type_)
         newentity._h5group.create_dataset("data", (shape, ), col_dtype)
         return newentity
 
@@ -348,7 +348,7 @@ class DataFrame(Entity, DataSet):
                 util.check_attr_type(i, str)
         unit = np.array(u, util.vlen_str_dtype)
         self._h5group.set_attr("units", unit)
-        if self._parent._parent.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
 
     @property
@@ -423,7 +423,8 @@ class DataFrame(Entity, DataSet):
         :type: Section
         """
         if "metadata" in self._h5group:
-            return Section(None, self._h5group.open_group("metadata"))
+            return Section(self.file, None,
+                           self._h5group.open_group("metadata"))
         else:
             return None
 

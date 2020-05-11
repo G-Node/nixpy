@@ -73,13 +73,53 @@ class TestContainer(unittest.TestCase):
         self.assertEqual(self.multi_tag,
                          self.group.multi_tags[0])
 
+    def test_file_references(self):
+        # add some sources
+        self.source = self.block.create_source("test source", "containertest")
+        self.child_source = self.source.create_source("test source 2",
+                                                      "containertest")
+        # using assertIs since the reference should be the same instance as
+        # the original
+
+        # created objects
+        self.assertIs(self.block.file, self.file)
+        self.assertIs(self.group.file, self.file)
+        self.assertIs(self.dataarray.file, self.file)
+        self.assertIs(self.tag.file, self.file)
+        self.assertIs(self.multi_tag.file, self.file)
+        self.assertIs(self.positions.file, self.file)
+        self.assertIs(self.source.file, self.file)
+        self.assertIs(self.child_source.file, self.file)
+
+        # instantiated through container getters
+        blk = self.file.blocks[0]
+        self.assertIs(blk.file, self.file)
+        self.assertIs(blk.groups[0].file, self.file)
+        self.assertIs(blk.data_arrays[0].file, self.file)
+        self.assertIs(blk.tags[0].file, self.file)
+        self.assertIs(blk.multi_tags[0].file, self.file)
+        self.assertIs(blk.sources[0].file, self.file)
+        self.assertIs(blk.sources[0].sources[0].file, self.file)
+
+        # linked through group
+        self.assertIs(self.group.data_arrays[0].file, self.file)
+        self.assertIs(self.group.tags[0].file, self.file)
+        self.assertIs(self.group.multi_tags[0].file, self.file)
+
     def test_parent_references(self):
+        # add some sources
+        self.source = self.block.create_source("test source", "containertest")
+        self.child_source = self.source.create_source("test source 2",
+                                                      "containertest")
+
         self.assertEqual(self.block._parent, self.file)
         self.assertEqual(self.group._parent, self.block)
         self.assertEqual(self.dataarray._parent, self.block)
         self.assertEqual(self.tag._parent, self.block)
         self.assertEqual(self.multi_tag._parent, self.block)
         self.assertEqual(self.positions._parent, self.block)
+        self.assertEqual(self.source._parent, self.block)
+        self.assertEqual(self.child_source._parent, self.source)
 
     def test_link_parent_references(self):
         self.assertEqual(self.group.data_arrays[0]._parent, self.block)

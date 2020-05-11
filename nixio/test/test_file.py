@@ -10,6 +10,7 @@ import os
 import unittest
 import h5py
 import numpy as np
+import time
 
 import nixio as nix
 import nixio.file as filepy
@@ -165,6 +166,60 @@ class TestFile(unittest.TestCase):
         self.file.create_block(name="111", copy_from=blk1)
         assert self.file.blocks[0] == self.file.blocks[1]  # ID stays the same
         assert self.file.blocks[0].name != self.file.blocks[1].name
+
+    def test_timestamp_autoupdate(self):
+        # Using Block to test Entity.definition
+        blk = self.file.create_block("block", "timetest")
+        blktime = blk.updated_at
+        time.sleep(1)  # wait for time to change
+        blk.definition = "updated"
+        # no update
+        self.assertNotEqual(blk.updated_at, blktime)
+
+        rblk = self.file.blocks["block"]  # read through container
+        time.sleep(1)  # wait for time to change
+        rblk.definition = "updated again"
+        self.assertNotEqual(rblk.updated_at, blktime)
+
+        # Using Block to test Entity.type
+        blktime = blk.updated_at
+        time.sleep(1)  # wait for time to change
+        blk.type = "updated"
+        # no update
+        self.assertNotEqual(blk.updated_at, blktime)
+
+        rblk = self.file.blocks["block"]  # read through container
+        time.sleep(1)  # wait for time to change
+        rblk.type = "updated again"
+        self.assertNotEqual(rblk.updated_at, blktime)
+
+    def test_timestamp_noautoupdate(self):
+        # Using Block to test Entity.definition
+        blk = self.file.create_block("block", "timetest")
+
+        # disable timestamp autoupdating
+        self.file.auto_update_timestamps = False
+        blktime = blk.updated_at
+        time.sleep(1)  # wait for time to change
+        blk.definition = "update"
+        self.assertEqual(blk.updated_at, blktime)
+
+        rblk = self.file.blocks["block"]  # read through container
+        rblktime = rblk.updated_at
+        time.sleep(1)  # wait for time to change
+        rblk.definition = "time should change"
+        self.assertEqual(rblk.updated_at, rblktime)
+
+        blktime = blk.updated_at
+        time.sleep(1)  # wait for time to change
+        blk.type = "update"
+        self.assertEqual(blk.updated_at, blktime)
+
+        rblk = self.file.blocks["block"]  # read through container
+        rblktime = rblk.updated_at
+        time.sleep(1)  # wait for time to change
+        rblk.type = "time should change"
+        self.assertEqual(rblk.updated_at, rblktime)
 
 
 class TestFileVer(unittest.TestCase):

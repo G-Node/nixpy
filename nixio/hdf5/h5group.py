@@ -12,11 +12,8 @@ import numpy as np
 
 from .h5dataset import H5DataSet
 from ..datatype import DataType
-from ..block import Block
-from ..section import Section
 
 from .. import util
-from ..exceptions import InvalidEntity
 
 
 class H5Group(object):
@@ -296,56 +293,6 @@ class H5Group(object):
             g.attrs.modify("entity_id", np.string_(id_))
             g.visititems(change_id)
         return g
-
-    @property
-    def file(self):
-        """
-        An H5Group object which represents the file root.
-
-        :return: H5Group at '/'
-        """
-        return H5Group(self.group.file, "/", create=False)
-
-    @property
-    def h5root(self):
-        """
-        Returns the H5Group of the Block or top-level Section which contains
-        this object. Returns None if requested on the file root '/' or the
-        /data or /metadata groups.
-
-        :return: Top level object containing this group (H5Group)
-        """
-        pathparts = self.group.name.split("/")
-        if len(pathparts) == 3:
-            return self
-        if self.group.name == "/":
-            return None
-        if len(pathparts) == 2:
-            return None
-
-        return self.parent.h5root
-
-    @property
-    def root(self):
-        """
-        Returns the Block or top-level Section which contains this object.
-        Returns None if requested on the file root '/' or the /data or
-        /metadata groups.
-
-        :return: Top level object containing this group (Block or Section)
-        """
-        h5root = self.h5root
-        if h5root is None:
-            return None
-        topgroup = self.group.name.split("/")[1]
-        if topgroup == "data":
-            cls = Block
-            return cls(h5root.parent, h5root)
-        elif topgroup == "metadata":
-            cls = Section
-            return cls(h5root.parent, h5root)
-        else:
-            raise InvalidEntity
 
     @property
     def parent(self):

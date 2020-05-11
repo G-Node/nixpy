@@ -7,6 +7,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import os
+import time
 from six import string_types
 import sys
 import unittest
@@ -476,3 +477,114 @@ class TestDataArray(unittest.TestCase):
         for idx, dim in dim_container_one_based:
             assert self.array.dimensions[idx-1].dimension_type ==\
                 dim.dimension_type
+
+    def test_timestamp_autoupdate(self):
+        array = self.block.create_data_array("array.time", "signal",
+                                             nix.DataType.Double, (100, ))
+        # Append dimensions and check time
+        datime = array.updated_at
+        time.sleep(1)
+        array.append_set_dimension()
+        self.assertNotEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.append_sampled_dimension(sampling_interval=0.1)
+        self.assertNotEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.append_range_dimension(ticks=[0.1])
+        self.assertNotEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        df = self.block.create_data_frame(
+            "df", "test.data_array.timestamp.data_frame",
+            col_dict={"idx": int}
+        )
+        array.append_data_frame_dimension(data_frame=df)
+        self.assertNotEqual(datime, array.updated_at)
+
+        array.delete_dimensions()
+        datime = array.updated_at
+        time.sleep(1)
+        array.append_alias_range_dimension()
+        self.assertNotEqual(datime, array.updated_at)
+
+        # other properties
+        datime = array.updated_at
+        time.sleep(1)
+        array.polynom_coefficients = [1.1, 2.2]
+        self.assertNotEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.expansion_origin = -1
+        self.assertNotEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.label = "lbl"
+        self.assertNotEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.unit = "Ms"
+        self.assertNotEqual(datime, array.updated_at)
+
+    def test_timestamp_noautoupdate(self):
+        self.file.auto_update_timestamps = False
+        array = self.block.create_data_array("array.time", "signal",
+                                             nix.DataType.Double, (100, ))
+        # Append dimensions and check time
+        datime = array.updated_at
+        time.sleep(1)
+        array.append_set_dimension()
+        self.assertEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.append_sampled_dimension(sampling_interval=0.1)
+        self.assertEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.append_range_dimension(ticks=[0.1])
+        self.assertEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        df = self.block.create_data_frame(
+            "df", "test.data_array.timestamp.data_frame",
+            col_dict={"idx": int}
+        )
+        array.append_data_frame_dimension(data_frame=df)
+        self.assertEqual(datime, array.updated_at)
+
+        array.delete_dimensions()
+        datime = array.updated_at
+        time.sleep(1)
+        array.append_alias_range_dimension()
+        self.assertEqual(datime, array.updated_at)
+
+        # other properties
+        datime = array.updated_at
+        time.sleep(1)
+        array.polynom_coefficients = [1.1, 2.2]
+        self.assertEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.expansion_origin = -1
+        self.assertEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.label = "lbl"
+        self.assertEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.unit = "Ms"
+        self.assertEqual(datime, array.updated_at)

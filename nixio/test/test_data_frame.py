@@ -3,6 +3,7 @@ import unittest
 import nixio as nix
 from .tmp import TempDir
 import os
+import time
 import numpy as np
 from six import string_types
 try:
@@ -206,3 +207,21 @@ class TestDataFrame(unittest.TestCase):
         df = self.block.create_data_frame("without_name", "test", data=data)
         assert sorted(list(df.column_names)) == sorted(["name", "id", "val"])
         assert sorted(list(df["name"])) == ["a", "b", "c"]
+
+    def test_timestamp_autoupdate(self):
+        self.file.auto_update_timestamps = True
+        df = self.block.create_data_frame("df.time", "test.time",
+                                          col_dict={"idx": int})
+        dftime = df.updated_at
+        time.sleep(1)
+        df.units = "ly"
+        self.assertNotEqual(dftime, df.updated_at)
+
+    def test_timestamp_noautoupdate(self):
+        self.file.auto_update_timestamps = False
+        df = self.block.create_data_frame("df.time", "test.time",
+                                          col_dict={"idx": int})
+        dftime = df.updated_at
+        time.sleep(1)
+        df.units = "ly"
+        self.assertEqual(dftime, df.updated_at)
