@@ -56,7 +56,7 @@ class OdmlType(Enum):
               DataType.get_dtype(value) == DataType.Bool):
             return True
         elif (self == self.Float and
-              DataType.get_dtype(value) == DataType.Float):
+              DataType.get_dtype(value) == DataType.Double):
             return True
         elif self == self.Int and DataType.get_dtype(value) == DataType.Int64:
             return True
@@ -77,10 +77,9 @@ class OdmlType(Enum):
         :param dtype: nix DataType
         :return: OdmlType
         """
-
-        if dtype == DataType.Float:
+        if dtype in DataType.FloatTypes:
             return cls.Float
-        elif dtype == DataType.Int64:
+        elif dtype in DataType.IntTypes:
             return cls.Int
         elif dtype == DataType.String:
             return cls.String

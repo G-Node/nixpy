@@ -29,6 +29,10 @@ class DataType(object):
     String = np.unicode_
     Bool = np.bool_
 
+    # type groups
+    IntTypes = (Int8, Int16, Int32, Int64, UInt8, UInt16, UInt32, UInt64)
+    FloatTypes = (Float, Double)
+
     @classmethod
     def get_dtype(cls, value):
         if isinstance(value, BOOLS):
@@ -44,13 +48,4 @@ class DataType(object):
 
     @classmethod
     def is_numeric_dtype(cls, dtype):
-        return (dtype == cls.Int8 or
-                dtype == cls.Int16 or
-                dtype == cls.Int32 or
-                dtype == cls.Int64 or
-                dtype == cls.UInt8 or
-                dtype == cls.UInt16 or
-                dtype == cls.UInt32 or
-                dtype == cls.UInt64 or
-                dtype == cls.Float or
-                dtype == cls.Double)
+        return dtype in cls.IntTypes + cls.FloatTypes
