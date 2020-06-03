@@ -3,6 +3,11 @@ import argparse
 import nixio as nix
 import glob
 import datetime as dt
+try:
+    import nixworks as nw
+    nw_present = True
+except ImportError as e:
+    nw_present = False
 
 general_help = """ Search for information within NIX file(s). Use the file sub
 command for general information about the file(s) verbosity flag can be used to 
@@ -22,6 +27,14 @@ Patterns are applied case-insensitive
 and can be partial matches. Default: %(default)s
 """.strip()
 
+data_parser_help = """
+Display information about data entities such as DataArrays, Tags, or MultiTags, or dump them to stdout. 
+If the nixworks package is installed, it is also possible to plot the data. (not fully implemented yet)
+""".strip()
+
+data_pattern_help = """
+A string pattern that is parsed to find the data 
+""".strip()
 
 def open_nix_file(filename):
     f = None
@@ -299,14 +312,13 @@ def file_worker(arguments):
 def create_metadata_parser(parent_parser):
     meta_parser = parent_parser.add_parser("metadata", help="Filter and display metadata", aliases=["m"],
                                            description="Search for metadata items or display metadata (sub)trees.")
-    meta_parser.add_argument("-p", "--pattern", type=str, default=[], nargs="+",
-                             help=mdata_pattern_help)
+    meta_parser.add_argument("-p", "--pattern", type=str, default=[], nargs="+", help=mdata_pattern_help)
     meta_parser.add_argument("-d", "--depth", type=int, default=-1,
                              help="maximum depth of metadata tree output, default is %(default)s, full depth")
-    meta_parser.add_argument("-c", "--case_sensitive", action="store_true", help="name matching of" +
-                             " sections and properties is case sensitive, by default the case is ignored")
-    meta_parser.add_argument("-fm", "--full_match", action="store_true", help="names and types must" +
-                             " be full matches, bey default a partial match is sufficient")
+    meta_parser.add_argument("-c", "--case_sensitive", action="store_true", help="name matching of"
+                             + " sections and properties is case sensitive, by default the case is ignored")
+    meta_parser.add_argument("-fm", "--full_match", action="store_true", help="names and types must"
+                             + " be full matches, bey default a partial match is sufficient")
     meta_parser.add_argument("file", type=str, nargs="+",
                              help="Path to file (at least one)")
     meta_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
@@ -318,8 +330,17 @@ def create_metadata_parser(parent_parser):
 
 def create_data_parser(parent_parser):
     data_parser = parent_parser.add_parser("data", help="Search and display data entities", aliases=["d"],
-                                           description="Display information about data or dump them to system.out. (not fully implemented yet)")
-    data_parser.add_argument("-t", "--type", help="entity type")
+                                           description=data_parser_help)
+    data_parser.add_argument("-p", "--pattern", type=str, help=data_pattern_help)
+    data_parser.add_argument("-d", "--dump", help="Dump data to stdout. This functionality is limited to 3d data.",
+                             action="store_true")
+    data_parser.add_argument("-c", "--case_sensitive", action="store_true", help="matching of"
+                             + " entitiy names and types is case sensitive, by default the case is ignored")
+    data_parser.add_argument("-fm", "--full_match", action="store_true", help="names and types must"
+                             + " be full matches, bey default a partial match is sufficient")
+    if nw_present:
+        data_parser.add_argument("-pl", "--plot", help="Plot the selected data using the generic plotting routines implemented in the nixworks package.")
+        data_parser.add_argument("-i", "--interactive", action="store_true", help="Will open an interactive shell when plotting the data.")
     data_parser.add_argument("file", type=str, nargs="+",
                              help="Path to file (at least one)")
     data_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
