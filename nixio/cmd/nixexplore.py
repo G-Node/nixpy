@@ -293,14 +293,52 @@ def mdata_worker(arguments):
         disp_metadata(nf, arguments)
 
 
+def find_data_entity(nix_file, arguments):
+    name_or_type = arguments.pattern if arguments.case_sensitive else arguments.pattern.lower()
+    classes = ["data_arrays"]  # , "multi_tags", "tags", "data_frames"]
+    entities = []
+    for b in nix_file.blocks:
+        for c in classes:
+            for e in getattr(b, c):
+                ename = e.name() if arguments.case_sensitive else e.name.lower()
+                etype = e.type() if arguments.case_sensitive else e.type.lower()
+                if arguments.full_match:
+                    if ename == name_or_type or etype == name_or_type:
+                        entities.append(e)
+                else:
+                    if name_or_type in ename or name_or_type in etype:
+                        entities.append(e)
+    return entities
+
+
 def disp_data(filename, arguments):
+    nix_file = open_nix_file(filename)
+    entities = find_data_entity(nix_file, arguments)
+
+    nix_file.close()
     pass
+
+
+def dump_data_array(array):
+    print(array)
+    pass
+
+
+def data_dump(filename, arguments):
+    nix_file = open_nix_file(filename)
+    entities = find_data_entity(nix_file, arguments)
+    for e in entities:
+        if isinstance(e, nix.pycore.data_array.DataArray):
+            dump_data_array(e)
+    
+    nix_file.close()
 
 
 def data_worker(arguments):
     files = assemble_files(arguments)
+    func = data_dump if arguments.dump else disp_data
     for nf in files:
-        disp_data(nf, arguments)
+        func(nf, arguments)
 
 
 def file_worker(arguments):
