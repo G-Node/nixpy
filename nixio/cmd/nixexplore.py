@@ -339,6 +339,39 @@ def disp_data(filename, arguments):
 
 def dump_data_array(array):
     print(array)
+def get_ticks(dimension, extent):
+    ticks = None
+    dim_type = dimension.dimension_type
+    if dim_type == nix.DimensionType.Sample:
+        ticks = np.array(dimension.axis(extent))
+    elif dim_type == nix.DimensionType.Range:
+        ticks = np.array(dimension.ticks)
+    elif dim_type == nix.DimensionType.Set:
+        ticks = np.array(dimension.labels)
+        if len(ticks) == 0:
+            ticks = np.arange(0., extent, 1.0)
+    elif dim_type == nix.DimensionType.DataFrame:
+        ticks = np.array(dimension.ticks)
+    else:
+        print("Unsupported dimension type!")
+    return ticks
+
+
+def dump_oned(data, dimension, label, unit, format="%.6f"):
+    ticks = get_ticks(dimension, data.shape[0])
+    dim_label = getattr(dimension, "label") if hasattr(dimension, "label") else ""
+    dim_unit = getattr(dimension, "unit") if hasattr(dimension, "unit") else ""
+    max_tick_len = max([len(format % ticks[-1]), len(dim_label)])
+    padding = " " * (max_tick_len - len(dim_label))
+    print("# %s%s%s" % (dim_label, padding, label))
+    padding = " " * (max_tick_len - len(dim_unit))
+    print("# %s%s%s" % (dim_unit, padding, unit))
+
+    for i in range(data.shape[0]):
+        if i % 1000 == 0:
+            progress(i, data.shape[0], status='Dumping ...')
+
+        print(format % ticks[i] + "   " + format % data[i])
     pass
 
 
