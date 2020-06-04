@@ -42,7 +42,7 @@ A string pattern that is parsed to find the data entity.
 
 def progress(count, total, status='', bar_len=60):
     """
-    modified after https://gist.github.com/vladignatyev/06860ec2040cb497f0f3 
+    modified after https://gist.github.com/vladignatyev/06860ec2040cb497f0f3
     by Vladimir Ignatev published under MIT License
     """
     percents = count / total
@@ -346,12 +346,18 @@ def get_ticks(dimension, extent):
     return ticks
 
 
-def dump_oned(data, dimension, label, unit, format="%.6f"):
-    ticks = get_ticks(dimension, data.shape[0])
+def get_dim_label_and_unit(dimension):
     dim_label = getattr(dimension, "label") if hasattr(dimension, "label") else ""
     dim_unit = getattr(dimension, "unit") if hasattr(dimension, "unit") else ""
+    return dim_label, dim_unit
+
+
+def dump_oned(data, dimension, label, unit, format="%.6f", end="\n\n"):
+    assert(len(data.shape) ==  2)
+    ticks = get_ticks(dimension, data.shape[0])
+    dim_label, dim_unit = get_dim_label_and_unit(dimension)
     max_tick_len = max([len(format % ticks[-1]), len(dim_label)])
-    
+
     if dimension.dimension_type == nix.DimensionType.Range and dimension.is_alias:
         print("# %s" % dim_label)
         print("# %s" % dim_unit)
@@ -360,9 +366,9 @@ def dump_oned(data, dimension, label, unit, format="%.6f"):
             if i % 1000 == 0:
                 progress(i, data.shape[0], status='Dumping ...')
     else:
-        padding = " " * (max_tick_len - len(dim_label))
+        padding = " " * (max_tick_len - len(dim_label) if dim_label else 0)
         print("# %s%s%s" % (dim_label, padding, label))
-        padding = " " * (max_tick_len - len(dim_unit))
+        padding = " " * (max_tick_len - len(dim_unit) if dim_unit else 0)
         print("# %s%s%s" % (dim_unit, padding, unit))
 
         for i in range(data.shape[0]):
@@ -370,8 +376,46 @@ def dump_oned(data, dimension, label, unit, format="%.6f"):
                 progress(i, data.shape[0], status='Dumping ...')
 
             print(format % ticks[i] + "   " + format % data[i])
-    print("\n\n")
+    print(end)
 
+
+def dump_twod(data, dimensions, label, unit, format="%.6f", end="\n\n"):
+    assert(len(data.shape) == 2 and len(dimensions) == 2)
+    first_dim_ticks = get_ticks(dimensions[0], data.shape[0])
+    second_dim_ticks = get_ticks(dimensions[1], data.shape[1])
+    assert(len(first_dim_ticks) == data.shape[0] and len(second_dim_ticks) == data.shape[1])
+
+    first_dim_label, first_dim_unit = get_dim_label_and_unit(dimensions[0])
+    second_dim_label, second_dim_unit = get_dim_label_and_unit(dimensions[1])
+
+    max_tick_len = max([len(format % first_dim_ticks[-1]), len(first_dim_label)])
+    print("# data label: %s" % label)
+    print("# data unit: %s\n" % unit)
+    padding = " " * (max_tick_len - (len(first_dim_label) if first_dim_unit else 0))
+    print("# %s%s%s" % (first_dim_label, padding, second_dim_label))
+    padding = " " * (max_tick_len - (len(first_dim_unit) if first_dim_unit else 0))
+    print("# %s%s%s" % (first_dim_unit, padding, second_dim_unit))
+    # first line contains 2nd dim ticks
+    print(" " * max_tick_len + "   " + (" " * max_tick_len + "  ").join(map(str, second_dim_ticks)))
+    # now dump the rest
+    for i in range(len(first_dim_ticks)):
+        print(format % first_dim_ticks[i] + "    " + "   ".join(map(lambda x: "%.6f" % x, data[i, :])))
+        if i % 500 == 0:
+            progress(i, data.shape[0], status='Dumping ...')
+    print(end)
+
+
+def dump_threed(data, dimensions, label, unit, format="%.6f", end="\n\n"):
+    assert(len(data.shape) == 3 and len(dimensions) == 3)
+    ticks = get_ticks(dimensions[2], data.shape[2])
+    dim_label, dim_unit = get_dim_label_and_unit(dimensions[2])
+
+    for i in range(data.shape[2]):
+        print("# data[:, :, %i]: %s" % (i, dim_label + "%s%s" % (ticks[i], dim_unit) if dim_unit else ""))
+        dump_twod(data[:, :, i], [dimensions[0], dimensions[1]], label, unit, format, end="\n")
+
+    print(end)
+    pass
 
 
 def dump_data_array(array, filename):
@@ -380,13 +424,13 @@ def dump_data_array(array, filename):
           (str(dt.datetime.fromtimestamp(array.created_at)),
            str(dt.datetime.fromtimestamp(array.updated_at))))
     dims = len(array.shape)
-    data_view = array[:]
+    data = array[:]
     if dims == 1:
-        dump_oned(data_view, array.dimensions[0], array.label, array.unit)
+        dump_oned(data, array.dimensions[0], array.label, array.unit)
     elif dims == 2:
-        pass
+        dump_twod(data, array.dimensions, array.label, array.unit)
     elif dims == 3:
-        pass
+        dump_threed(data, array.dimensions, array.label, array.unit)
     else:
         print("Sorry, cannot dump data with more than 3 dimensions!")
     pass
