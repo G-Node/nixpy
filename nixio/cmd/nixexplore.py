@@ -1,8 +1,11 @@
 import os
 import argparse
 import nixio as nix
+import numpy as np
 import glob
 import datetime as dt
+import sys
+
 try:
     import nixworks as nw
     nw_present = True
@@ -33,8 +36,23 @@ If the nixworks package is installed, it is also possible to plot the data. (not
 """.strip()
 
 data_pattern_help = """
-A string pattern that is parsed to find the data 
+A string pattern that is parsed to find the data entity.  
 """.strip()
+
+
+def progress(count, total, status=''):
+    """
+    modified after https://gist.github.com/vladignatyev/06860ec2040cb497f0f3 
+    by Vladimir Ignatev published under MIT License
+    """
+    bar_len = 60
+    percents = count / total
+    filled_len = int(percents * bar_len)
+    bar = '=' * filled_len + '-' * (bar_len - filled_len)
+
+    sys.stderr.write('[%s] %.2f%s ...%s\r' % (bar, percents * 100, '%', status))
+    sys.stderr.flush()
+
 
 def open_nix_file(filename):
     f = None
