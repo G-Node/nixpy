@@ -362,6 +362,23 @@ def dump_oned(data, dimension, label, unit, format="%.6f"):
             progress(i, data.shape[0], status='Dumping ...')
 
         print(format % ticks[i] + "   " + format % data[i])
+
+
+def dump_data_array(array, filename):
+    print("# File: %s\n# entity: %s\n# type: %s\n# id: %s" % (filename, array.name, array.type, array.id))
+    print("# created at: %s\n# last edited at: %s\n" %
+          (str(dt.datetime.fromtimestamp(array.created_at)),
+           str(dt.datetime.fromtimestamp(array.updated_at))))
+    dims = len(array.shape)
+    data_view = array[:]
+    if dims == 1:
+        dump_oned(data_view, array.dimensions[0], array.label, array.unit)
+    elif dims == 2:
+        pass
+    elif dims == 3:
+        pass
+    else:
+        print("Sorry, cannot dump data with more than 3 dimensions!")
     pass
 
 
