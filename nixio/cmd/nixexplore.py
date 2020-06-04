@@ -40,12 +40,11 @@ A string pattern that is parsed to find the data entity.
 """.strip()
 
 
-def progress(count, total, status=''):
+def progress(count, total, status='', bar_len=60):
     """
     modified after https://gist.github.com/vladignatyev/06860ec2040cb497f0f3 
     by Vladimir Ignatev published under MIT License
     """
-    bar_len = 60
     percents = count / total
     filled_len = int(percents * bar_len)
     bar = '=' * filled_len + '-' * (bar_len - filled_len)
@@ -352,16 +351,27 @@ def dump_oned(data, dimension, label, unit, format="%.6f"):
     dim_label = getattr(dimension, "label") if hasattr(dimension, "label") else ""
     dim_unit = getattr(dimension, "unit") if hasattr(dimension, "unit") else ""
     max_tick_len = max([len(format % ticks[-1]), len(dim_label)])
-    padding = " " * (max_tick_len - len(dim_label))
-    print("# %s%s%s" % (dim_label, padding, label))
-    padding = " " * (max_tick_len - len(dim_unit))
-    print("# %s%s%s" % (dim_unit, padding, unit))
+    
+    if dimension.dimension_type == nix.DimensionType.Range and dimension.is_alias:
+        print("# %s" % dim_label)
+        print("# %s" % dim_unit)
+        for i, t in enumerate(ticks):
+            print(format % t)
+            if i % 1000 == 0:
+                progress(i, data.shape[0], status='Dumping ...')
+    else:
+        padding = " " * (max_tick_len - len(dim_label))
+        print("# %s%s%s" % (dim_label, padding, label))
+        padding = " " * (max_tick_len - len(dim_unit))
+        print("# %s%s%s" % (dim_unit, padding, unit))
 
-    for i in range(data.shape[0]):
-        if i % 1000 == 0:
-            progress(i, data.shape[0], status='Dumping ...')
+        for i in range(data.shape[0]):
+            if i % 1000 == 0:
+                progress(i, data.shape[0], status='Dumping ...')
 
-        print(format % ticks[i] + "   " + format % data[i])
+            print(format % ticks[i] + "   " + format % data[i])
+    print("\n\n")
+
 
 
 def dump_data_array(array, filename):
