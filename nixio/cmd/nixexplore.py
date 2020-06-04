@@ -329,16 +329,6 @@ def find_data_entity(nix_file, arguments):
     return entities
 
 
-def disp_data(filename, arguments):
-    nix_file = open_nix_file(filename)
-    entities = find_data_entity(nix_file, arguments)
-
-    nix_file.close()
-    pass
-
-
-def dump_data_array(array):
-    print(array)
 def get_ticks(dimension, extent):
     ticks = None
     dim_type = dimension.dimension_type
@@ -380,9 +370,17 @@ def data_dump(filename, arguments):
     entities = find_data_entity(nix_file, arguments)
     for e in entities:
         if isinstance(e, nix.pycore.data_array.DataArray):
-            dump_data_array(e)
-    
+            dump_data_array(e, filename)
+
     nix_file.close()
+
+
+def disp_data(filename, arguments):
+    nix_file = open_nix_file(filename)
+    entities = find_data_entity(nix_file, arguments)
+
+    nix_file.close()
+    pass
 
 
 def data_worker(arguments):
