@@ -12,12 +12,21 @@ try:
 except ImportError as e:
     nw_present = False
 
-general_help = """ Search for information within NIX file(s). Use the file sub
-command for general information about the file(s) verbosity flag can be used to 
+general_help = """ Search for information within NIX file(s). Use the \"file\" 
+command for general information about the file(s). The verbosity flag can be used to 
 get more detailed information about the file structure. (e.g.
  \'nixio-explore file nix_file -vvv\' for most detailed output).
 
-The metadata (m) and data (d) commands provide further options for finding and viewing.""".strip()
+The \"metadata\" (mdata) and \"data\" commands provide further options for finding and viewing data
+and metadata information. With the \"dump\" subcommand data can be dumped to file (up to 3D data).
+The plot command is only available if the nixworks package is installed (https://github.com/G-node/nixworks).
+\n\n Note that this tool is not yet fully implemented. Please use the github issue tracker 
+(https://github.com/G-node/nixpy/issues) for bug reports and feature requests.""".strip()
+
+tool_description = """
+nixio-explore functionality is split into sub-commands for file, metadata, and data exploration. For 
+help on the commands type e.g.: 'nixio-explore file --help'.
+"""
 
 mdata_pattern_help = """
 Pattern(s) with which to look for sections and properties. The
@@ -31,14 +40,22 @@ and can be partial matches. Default: %(default)s
 """.strip()
 
 data_parser_help = """
-Display information about data entities such as DataArrays, Tags, or MultiTags, or dump them to stdout. 
-If the nixworks package is installed, it is also possible to plot the data. (not fully implemented yet)
+Display information about data entities such as DataArrays, Tags, or MultiTags. 
 """.strip()
 
 data_pattern_help = """
 A string pattern that is parsed to find the data entity.
 """.strip()
 
+dump_parser_help = """
+Dump data to stdout. This command can process up to 3D data. The data dump contains 
+dimension information as well as the stored data. To write the data to  text file use e.g. 
+\'nixio-explore dump path_to_nix_file -p \"name or type of data entity\" > data.dump\'. 
+""".strip()
+
+plot_parser_help = """
+Create basic plots of the stored data. This command is only available if nixworks is installed.
+""".strip()
 
 def progress(count, total, status='', bar_len=60):
     """
@@ -474,7 +491,7 @@ def disp_data(filename, arguments):
 
 def data_worker(arguments):
     files = assemble_files(arguments)
-    func = data_dump if arguments.dump else disp_data
+    func = disp_data
     for nf in files:
         func(nf, arguments)
 
@@ -485,8 +502,20 @@ def file_worker(arguments):
         disp_file_info(nf, arguments)
 
 
+def dump_worker(arguments):
+    files = assemble_files(arguments)
+    func = data_dump
+    for nf in files:
+        func(nf, arguments)
+
+
+def plot_worker(arguments):
+    print("Not implemented, yet!")
+    pass
+
+
 def create_metadata_parser(parent_parser):
-    meta_parser = parent_parser.add_parser("metadata", help="Filter and display metadata", aliases=["m"],
+    meta_parser = parent_parser.add_parser("metadata", help="Filter and display metadata", aliases=["mdata"],
                                            description="Search for metadata items or display metadata (sub)trees.")
     meta_parser.add_argument("-p", "--pattern", type=str, default=[], nargs="+", help=mdata_pattern_help)
     meta_parser.add_argument("-d", "--depth", type=int, default=-1,
@@ -505,18 +534,13 @@ def create_metadata_parser(parent_parser):
 
 
 def create_data_parser(parent_parser):
-    data_parser = parent_parser.add_parser("data", help="Search and display data entities", aliases=["d"],
+    data_parser = parent_parser.add_parser("data", help="Search and display information about data entities",
                                            description=data_parser_help)
     data_parser.add_argument("-p", "--pattern", type=str, help=data_pattern_help)
-    data_parser.add_argument("-d", "--dump", help="Dump data to stdout. This functionality is limited to 3d data.",
-                             action="store_true")
     data_parser.add_argument("-c", "--case_sensitive", action="store_true", help="matching of"
                              + " entitiy names and types is case sensitive, by default the case is ignored")
     data_parser.add_argument("-fm", "--full_match", action="store_true", help="names and types must"
                              + " be full matches, bey default a partial match is sufficient")
-    if nw_present:
-        data_parser.add_argument("-pl", "--plot", help="Plot the selected data using the generic plotting routines implemented in the nixworks package.")
-        data_parser.add_argument("-i", "--interactive", action="store_true", help="Will open an interactive shell when plotting the data.")
     data_parser.add_argument("file", type=str, nargs="+",
                              help="Path to file (at least one)")
     data_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
@@ -525,8 +549,40 @@ def create_data_parser(parent_parser):
     # one could even add a subcommand for plotting, if nixworks is available?
 
 
+def create_dump_parser(parent_parser):
+    dump_parser = parent_parser.add_parser("dump", help="Dump stored data to stdout",
+                                           description=dump_parser_help)
+    dump_parser.add_argument("-p", "--pattern", type=str, help=data_pattern_help)
+    dump_parser.add_argument("-c", "--case_sensitive", action="store_true", help="matching of"
+                             + " entitiy names and types is case sensitive, by default the case is ignored")
+    dump_parser.add_argument("-fm", "--full_match", action="store_true", help="names and types must"
+                             + " be full matches, bey default a partial match is sufficient")
+    dump_parser.add_argument("file", type=str, nargs="+",
+                             help="Path to file (at least one)")
+    dump_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
+                             help="The file suffix used for nix data files (default: %(default)s).")
+    dump_parser.set_defaults(func=dump_worker)
+
+
+def create_plot_parser(parent_parser):
+    if not nw_present:
+        return
+    plot_parser = parent_parser.add_parser("plot", help="Create basic plots of stored data.",
+                                           description=plot_parser_help)
+    plot_parser.add_argument("-p", "--pattern", type=str, help=data_pattern_help)
+    plot_parser.add_argument("-c", "--case_sensitive", action="store_true", help="matching of"
+                             + " entitiy names and types is case sensitive, by default the case is ignored")
+    plot_parser.add_argument("-fm", "--full_match", action="store_true", help="names and types must"
+                             + " be full matches, bey default a partial match is sufficient")
+    plot_parser.add_argument("file", type=str, nargs="+",
+                             help="Path to file (at least one)")
+    plot_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
+                             help="The file suffix used for nix data files (default: %(default)s).")
+    plot_parser.set_defaults(func=plot_worker)
+
+
 def create_file_parser(parent_parser):
-    file_parser = parent_parser.add_parser("file", help="Display basic file info", aliases=["f"],
+    file_parser = parent_parser.add_parser("file", help="Display basic file info",
                                            description="Quick display of file information such as " +
                                            "creation date, file size and structure etc.")
     file_parser.add_argument("-v", "--verbosity", action="count",
@@ -545,12 +601,13 @@ def create_parser():
                                      description=general_help)
     subparsers = parser.add_subparsers(title="commands",
                                        help="Sub commands for working on data and metadata",
-                                       description="nixio-explore offers the following sub commands" +
-                                       " for file metadata and data exploration:")
+                                       description=tool_description)
 
-    create_metadata_parser(subparsers)
-    create_data_parser(subparsers)
     create_file_parser(subparsers)
+    create_data_parser(subparsers)
+    create_dump_parser(subparsers)
+    create_metadata_parser(subparsers)
+    create_plot_parser(subparsers)
 
     return parser
 
