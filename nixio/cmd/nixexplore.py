@@ -443,7 +443,6 @@ def dump_threed(data, dimensions, label, unit, format="%.6f", end="\n\n"):
         dump_twod(data[:, :, i], [dimensions[0], dimensions[1]], label, unit, format, end="\n")
 
     print(end)
-    pass
 
 
 def dump_data_array(array, filename):
@@ -461,7 +460,6 @@ def dump_data_array(array, filename):
         dump_threed(data, array.dimensions, array.label, array.unit)
     else:
         print("Sorry, cannot dump data with more than 3 dimensions!")
-    pass
 
 
 def data_dump(filename, arguments):
@@ -486,7 +484,6 @@ def disp_data(filename, arguments):
         print(e)
         print("\n")
     nix_file.close()
-    pass
 
 
 def data_worker(arguments):
@@ -511,7 +508,17 @@ def dump_worker(arguments):
 
 def plot_worker(arguments):
     print("Not implemented, yet!")
-    pass
+
+
+def add_default_args(parent_parser):
+    parent_parser.add_argument("-c", "--case_sensitive", action="store_true", help="matching of"
+                               + " entitiy names and types is case sensitive, by default the case is ignored")
+    parent_parser.add_argument("-fm", "--full_match", action="store_true", help="names and types must"
+                               + " be full matches, bey default a partial match is sufficient")
+    parent_parser.add_argument("file", type=str, nargs="+",
+                               help="Path to file (at least one)")
+    parent_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
+                               help="The file suffix used for nix data files (default: %(default)s).")
 
 
 def create_metadata_parser(parent_parser):
@@ -520,14 +527,7 @@ def create_metadata_parser(parent_parser):
     meta_parser.add_argument("-p", "--pattern", type=str, default=[], nargs="+", help=mdata_pattern_help)
     meta_parser.add_argument("-d", "--depth", type=int, default=-1,
                              help="maximum depth of metadata tree output, default is %(default)s, full depth")
-    meta_parser.add_argument("-c", "--case_sensitive", action="store_true", help="name matching of"
-                             + " sections and properties is case sensitive, by default the case is ignored")
-    meta_parser.add_argument("-fm", "--full_match", action="store_true", help="names and types must"
-                             + " be full matches, bey default a partial match is sufficient")
-    meta_parser.add_argument("file", type=str, nargs="+",
-                             help="Path to file (at least one)")
-    meta_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
-                             help="The file suffix used for nix data files (default: %(default)s).")
+    add_default_args(meta_parser)
     meta_parser.set_defaults(func=mdata_worker)
     # add value search?
     # add option to specify directly if one looks for a property which would increase performance
@@ -537,30 +537,15 @@ def create_data_parser(parent_parser):
     data_parser = parent_parser.add_parser("data", help="Search and display information about data entities",
                                            description=data_parser_help)
     data_parser.add_argument("-p", "--pattern", type=str, help=data_pattern_help)
-    data_parser.add_argument("-c", "--case_sensitive", action="store_true", help="matching of"
-                             + " entitiy names and types is case sensitive, by default the case is ignored")
-    data_parser.add_argument("-fm", "--full_match", action="store_true", help="names and types must"
-                             + " be full matches, bey default a partial match is sufficient")
-    data_parser.add_argument("file", type=str, nargs="+",
-                             help="Path to file (at least one)")
-    data_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
-                             help="The file suffix used for nix data files (default: %(default)s).")
+    add_default_args(data_parser)
     data_parser.set_defaults(func=data_worker)
-    # one could even add a subcommand for plotting, if nixworks is available?
 
 
 def create_dump_parser(parent_parser):
     dump_parser = parent_parser.add_parser("dump", help="Dump stored data to stdout",
                                            description=dump_parser_help)
     dump_parser.add_argument("-p", "--pattern", type=str, help=data_pattern_help)
-    dump_parser.add_argument("-c", "--case_sensitive", action="store_true", help="matching of"
-                             + " entitiy names and types is case sensitive, by default the case is ignored")
-    dump_parser.add_argument("-fm", "--full_match", action="store_true", help="names and types must"
-                             + " be full matches, bey default a partial match is sufficient")
-    dump_parser.add_argument("file", type=str, nargs="+",
-                             help="Path to file (at least one)")
-    dump_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
-                             help="The file suffix used for nix data files (default: %(default)s).")
+    add_default_args(dump_parser)
     dump_parser.set_defaults(func=dump_worker)
 
 
@@ -570,14 +555,7 @@ def create_plot_parser(parent_parser):
     plot_parser = parent_parser.add_parser("plot", help="Create basic plots of stored data.",
                                            description=plot_parser_help)
     plot_parser.add_argument("-p", "--pattern", type=str, help=data_pattern_help)
-    plot_parser.add_argument("-c", "--case_sensitive", action="store_true", help="matching of"
-                             + " entitiy names and types is case sensitive, by default the case is ignored")
-    plot_parser.add_argument("-fm", "--full_match", action="store_true", help="names and types must"
-                             + " be full matches, bey default a partial match is sufficient")
-    plot_parser.add_argument("file", type=str, nargs="+",
-                             help="Path to file (at least one)")
-    plot_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
-                             help="The file suffix used for nix data files (default: %(default)s).")
+    add_default_args(plot_parser)
     plot_parser.set_defaults(func=plot_worker)
 
 
@@ -592,8 +570,6 @@ def create_file_parser(parent_parser):
     file_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
                              help="The file suffix used for nix data files (default: nix).")
     file_parser.set_defaults(func=file_worker)
-    # add display of file structure, file size etc...
-    # add verbosity support
 
 
 def create_parser():
