@@ -36,7 +36,7 @@ If the nixworks package is installed, it is also possible to plot the data. (not
 """.strip()
 
 data_pattern_help = """
-A string pattern that is parsed to find the data entity.  
+A string pattern that is parsed to find the data entity.
 """.strip()
 
 
@@ -177,7 +177,7 @@ def disp_file_structure(nix_file, verbosity):
                 mtags = mtag_content(b, verbosity) if verbosity > 1 else "      %i multi-tags\n" % len(b.multi_tags)
                 srcs = source_content(b, verbosity) if verbosity > 1 else "      %i sources\n" % len(b.sources)
                 content += "    %s [%s] --- id: %s\n%s%s%s%s%s%s\n" % (b.name, b.type, b.id, arrays,
-                                                                       frames,  groups, tags, mtags,
+                                                                       frames, groups, tags, mtags,
                                                                        srcs)
         return content
 
@@ -353,16 +353,21 @@ def get_dim_label_and_unit(dimension):
 
 
 def dump_oned(data, dimension, label, unit, format="%.6f", end="\n\n"):
-    assert(len(data.shape) ==  2)
+    assert(len(data.shape) == 2)
     ticks = get_ticks(dimension, data.shape[0])
     dim_label, dim_unit = get_dim_label_and_unit(dimension)
     max_tick_len = max([len(format % ticks[-1]), len(dim_label)])
+
+    numeric_dim_ticks = isinstance(ticks[0], (int, float))
+    numeric_data = isinstance(data[0, 0], (int, float))
+    data_conv_func = (lambda x: format % x) if numeric_data else str
+    dim_ticks_conv_func = (lambda x: format % x) if numeric_dim_ticks else str
 
     if dimension.dimension_type == nix.DimensionType.Range and dimension.is_alias:
         print("# %s" % dim_label)
         print("# %s" % dim_unit)
         for i, t in enumerate(ticks):
-            print(format % t)
+            print(data_conv_func(t))
             if i % 1000 == 0:
                 progress(i, data.shape[0], status='Dumping ...')
     else:
@@ -374,8 +379,7 @@ def dump_oned(data, dimension, label, unit, format="%.6f", end="\n\n"):
         for i in range(data.shape[0]):
             if i % 1000 == 0:
                 progress(i, data.shape[0], status='Dumping ...')
-
-            print(format % ticks[i] + "   " + format % data[i])
+            print(dim_ticks_conv_func(ticks[i]) + "   " + data_conv_func(data[i]))
     print(end)
 
 
@@ -388,7 +392,14 @@ def dump_twod(data, dimensions, label, unit, format="%.6f", end="\n\n"):
     first_dim_label, first_dim_unit = get_dim_label_and_unit(dimensions[0])
     second_dim_label, second_dim_unit = get_dim_label_and_unit(dimensions[1])
 
-    max_tick_len = max([len(format % first_dim_ticks[-1]), len(first_dim_label)])
+    numeric_1st_dim_ticks = isinstance(first_dim_ticks[0], (int, float))
+    numeric_2nd_dim_ticks = isinstance(second_dim_ticks[0], (int, float))
+    numeric_data = isinstance(data[0, 0], (int, float))
+    data_conv_func = (lambda x: format % x) if numeric_data else str
+    dim_ticks_conv_func1 = (lambda x: format % x) if numeric_1st_dim_ticks else str
+    dim_ticks_conv_func2 = (lambda x: format % x) if numeric_2nd_dim_ticks else str
+
+    max_tick_len = max([len(dim_ticks_conv_func1(first_dim_ticks[-1])), len(first_dim_label)])
     print("# data label: %s" % label)
     print("# data unit: %s\n" % unit)
     padding = " " * (max_tick_len - (len(first_dim_label) if first_dim_unit else 0))
@@ -396,10 +407,10 @@ def dump_twod(data, dimensions, label, unit, format="%.6f", end="\n\n"):
     padding = " " * (max_tick_len - (len(first_dim_unit) if first_dim_unit else 0))
     print("# %s%s%s" % (first_dim_unit, padding, second_dim_unit))
     # first line contains 2nd dim ticks
-    print(" " * max_tick_len + "   " + (" " * max_tick_len + "  ").join(map(str, second_dim_ticks)))
+    print(" " * max_tick_len + "   " + (" " * max_tick_len + "  ").join(map(dim_ticks_conv_func2, second_dim_ticks)))
     # now dump the rest
     for i in range(len(first_dim_ticks)):
-        print(format % first_dim_ticks[i] + "    " + "   ".join(map(lambda x: "%.6f" % x, data[i, :])))
+        print(dim_ticks_conv_func1(first_dim_ticks[i]) + "    " + "   ".join(map(data_conv_func, data[i, :])))
         if i % 500 == 0:
             progress(i, data.shape[0], status='Dumping ...')
     print(end)
@@ -449,7 +460,14 @@ def data_dump(filename, arguments):
 def disp_data(filename, arguments):
     nix_file = open_nix_file(filename)
     entities = find_data_entity(nix_file, arguments)
-
+    print("# File: %s" % filename)
+    for e in entities:
+        print("# entity: %s\n# type: %s\n# id: %s" % (e.name, e.type, e.id))
+        print("# created at: %s\n# last edited at: %s\n" %
+              (str(dt.datetime.fromtimestamp(e.created_at)),
+               str(dt.datetime.fromtimestamp(e.updated_at))))
+        print(e)
+        print("\n")
     nix_file.close()
     pass
 
