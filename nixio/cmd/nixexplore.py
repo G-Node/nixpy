@@ -510,15 +510,18 @@ def plot_worker(arguments):
     print("Not implemented, yet!")
 
 
+def add_default_file_args(parent_parser):
+    parent_parser.add_argument("file", type=str, nargs="+",
+                               help="Path to file (at least one)")
+    parent_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
+                               help="The file suffix used for nix data files (default: %(default)s).")
+
+
 def add_default_args(parent_parser):
     parent_parser.add_argument("-c", "--case_sensitive", action="store_true", help="matching of"
                                + " entitiy names and types is case sensitive, by default the case is ignored")
     parent_parser.add_argument("-fm", "--full_match", action="store_true", help="names and types must"
                                + " be full matches, bey default a partial match is sufficient")
-    parent_parser.add_argument("file", type=str, nargs="+",
-                               help="Path to file (at least one)")
-    parent_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
-                               help="The file suffix used for nix data files (default: %(default)s).")
 
 
 def create_metadata_parser(parent_parser):
@@ -528,6 +531,7 @@ def create_metadata_parser(parent_parser):
     meta_parser.add_argument("-d", "--depth", type=int, default=-1,
                              help="maximum depth of metadata tree output, default is %(default)s, full depth")
     add_default_args(meta_parser)
+    add_default_file_args(meta_parser)
     meta_parser.set_defaults(func=mdata_worker)
     # add value search?
     # add option to specify directly if one looks for a property which would increase performance
@@ -538,6 +542,7 @@ def create_data_parser(parent_parser):
                                            description=data_parser_help)
     data_parser.add_argument("-p", "--pattern", type=str, help=data_pattern_help)
     add_default_args(data_parser)
+    add_default_file_args(data_parser)
     data_parser.set_defaults(func=data_worker)
 
 
@@ -546,6 +551,7 @@ def create_dump_parser(parent_parser):
                                            description=dump_parser_help)
     dump_parser.add_argument("-p", "--pattern", type=str, help=data_pattern_help)
     add_default_args(dump_parser)
+    add_default_file_args(dump_parser)
     dump_parser.set_defaults(func=dump_worker)
 
 
@@ -556,6 +562,7 @@ def create_plot_parser(parent_parser):
                                            description=plot_parser_help)
     plot_parser.add_argument("-p", "--pattern", type=str, help=data_pattern_help)
     add_default_args(plot_parser)
+    add_default_file_args(plot_parser)
     plot_parser.set_defaults(func=plot_worker)
 
 
@@ -565,10 +572,7 @@ def create_file_parser(parent_parser):
                                            "creation date, file size and structure etc.")
     file_parser.add_argument("-v", "--verbosity", action="count",
                              help="increase output verbosity, use -v, -vv, -vvv for more verbose output")
-    file_parser.add_argument("file", type=str, nargs="+",
-                             help="Path to file (at least one)")
-    file_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
-                             help="The file suffix used for nix data files (default: nix).")
+    add_default_file_args(file_parser)
     file_parser.set_defaults(func=file_worker)
 
 
