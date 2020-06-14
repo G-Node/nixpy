@@ -5,6 +5,7 @@ import numpy as np
 import glob
 import datetime as dt
 import sys
+import matplotlib.pyplot as plt
 
 try:
     import nixworks as nw
@@ -472,6 +473,23 @@ def data_dump(filename, arguments):
     nix_file.close()
 
 
+def data_plotter(filename, arguments):
+    nix_file = open_nix_file(filename)
+    entities = find_data_entity(nix_file, arguments)
+    for e in entities:
+        if isinstance(e, nix.pycore.data_array.DataArray):
+            plotter = nw.plotter.suggested_plotter(e)
+            if plotter:
+                plotter.plot()
+                plt.show()
+            else:
+                print("Could not find a suitable plotter for the DataArray: %s" % str(e))
+        else:
+            print("Sorry, so far I can only try to plot DataArrays.")
+
+    nix_file.close()
+
+
 def disp_data(filename, arguments):
     nix_file = open_nix_file(filename)
     entities = find_data_entity(nix_file, arguments)
@@ -507,7 +525,10 @@ def dump_worker(arguments):
 
 
 def plot_worker(arguments):
-    print("Not implemented, yet!")
+    files = assemble_files(arguments)
+    func = data_plotter
+    for nf in files:
+        func(nf, arguments)
 
 
 def add_default_file_args(parent_parser):
