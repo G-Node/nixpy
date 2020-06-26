@@ -8,6 +8,10 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 from numbers import Number
+try:
+    from collections.abc import Sequence
+except ImportError:
+    from collections import Sequence
 
 import numpy as np
 
@@ -16,6 +20,7 @@ from .dimension_type import DimensionType
 from .data_frame import DataFrame
 from . import util
 from .container import Container
+from .exceptions import IncompatibleDimensions, OutOfBounds
 
 
 class DimensionContainer(Container):
@@ -33,6 +38,80 @@ class DimensionContainer(Container):
         }[DimensionType(item.get_attr("dimension_type"))]
         idx = item.name
         return cls(self._parent, idx)
+
+
+class DimensionLink(object):
+    """
+    Links a Dimension to a data object (DataArray or DataFrame).
+
+    A single vector of values from the underlying data object must be
+    specified to serve as the ticks or labels for the associated Dimension.
+
+    - A single vector of a DataArray.
+    - A single column of a DataFrame.
+    """
+
+    def __init__(self, nixfile, nixparent, h5group):
+        util.check_entity_id(h5group.get_attr("entity_id"))
+        self._h5group = h5group
+        self._parent = nixparent
+        self._file = nixfile
+
+    @classmethod
+    def create_new(cls, nixfile, nixparent, h5parent, dataobj, dotype, index):
+        id_ = util.create_id()
+        h5group = h5parent.open_group("link", True)
+        h5group.set_attr("entity_id", id_)
+        newdimlink = cls(nixfile, nixparent, h5group)
+        newdimlink._h5group.set_attr("data_object_type", dotype)
+        newdimlink._h5group.create_link(dataobj, dataobj.id)
+        newdimlink.index = index
+        now = util.time_to_str(util.now_int())
+        newdimlink._h5group.set_attr("created_at", now)
+        newdimlink._h5group.set_attr("updated_at", now)
+        return newdimlink
+
+    @property
+    def id(self):
+        self._h5group.get_attr("entity_id")
+
+    @property
+    def file(self):
+        return self._file
+
+    @property
+    def linked_data(self):
+        grp = self._h5group.get_by_pos(0)
+        return grp.get_data("data")
+
+    @property
+    def index(self):
+        if self._data_object_type == "DataArray":
+            return tuple(self._h5group.get_attr("index"))
+        if self._data_object_type == "DataFrame":
+            return self._h5group.get_attr("index")
+        raise RuntimeError("Invalid DataObjectType attribute found in "
+                           "DimensionLink")
+
+    @index.setter
+    def index(self, index):
+        if self._data_object_type == "DataArray":
+            util.check_attr_type(index, Sequence)
+            if index.count(-1) != 1:
+                raise ValueError("Index for DimensionLink with DataArray must "
+                                 "have exactly one value equal to -1. "
+                                 "See class docstring for more information.")
+            self._h5group.set_attr("index", list(index))
+        elif self._data_object_type == "DataFrame":
+            util.check_attr_type(index, int)
+            self._h5group.set_attr("index", index)
+        else:
+            raise RuntimeError("Invalid DataObjectType attribute found in "
+                               "DimensionLink")
+
+    @property
+    def _data_object_type(self):
+        return self._h5group.get_attr("data_object_type")
 
 
 class Dimension(object):
@@ -58,6 +137,32 @@ class Dimension(object):
     @property
     def index(self):
         return self.dim_index
+
+    def link_data_array(self, data_array, index):
+        if len(data_array.data_extent) != len(index):
+            raise IncompatibleDimensions(
+                "Length of linked DataArray indices ({}) does not match"
+                "number of DataArray dimensions ({})".format(
+                    len(data_array.data_extent), len(index)
+                ),
+                "Dimension.link_data_array"
+            )
+
+        if index.count(-1) != 1:
+            # TODO: Add link to relevant docs
+            raise ValueError(
+                "Invalid linked DataArray index: "
+                "One of the values must be -1, indicating the relevant vector."
+            )
+
+        DimensionLink.create_new(self._file, self, self._h5group,
+                                 data_array, "DataArray", index)
+
+    def link_data_frame(self, data_frame, index):
+        if index >= len(data_frame.columns):
+            raise OutOfBounds("DataFrame index is out of bounds", index)
+        DimensionLink.create_new(self._file, self, self._h5group,
+                                 data_frame, "DataFrame", index)
 
     def __str__(self):
         return "{}: {{index = {}}}".format(
