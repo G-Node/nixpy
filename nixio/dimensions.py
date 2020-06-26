@@ -133,9 +133,9 @@ class SampledDimension(Dimension):
         return self._h5group.get_attr("label")
 
     @label.setter
-    def label(self, l):
-        util.check_attr_type(l, str)
-        self._h5group.set_attr("label", l)
+    def label(self, label):
+        util.check_attr_type(label, str)
+        self._h5group.set_attr("label", label)
 
     @property
     def sampling_interval(self):
@@ -229,9 +229,9 @@ class RangeDimension(Dimension):
         return self._redirgrp.get_attr("label")
 
     @label.setter
-    def label(self, l):
-        util.check_attr_type(l, str)
-        self._redirgrp.set_attr("label", l)
+    def label(self, label):
+        util.check_attr_type(label, str)
+        self._redirgrp.set_attr("label", label)
 
     @property
     def unit(self):
@@ -311,7 +311,7 @@ class SetDimension(Dimension):
     def labels(self):
         labels = tuple(self._h5group.get_data("labels"))
         if len(labels) and isinstance(labels[0], bytes):
-            labels = tuple(l.decode() for l in labels)
+            labels = tuple(label.decode() for label in labels)
         return labels
 
     @labels.setter
