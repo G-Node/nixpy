@@ -280,7 +280,8 @@ class RangeDimension(Dimension):
     def create_new(cls, data_array, index, ticks):
         newdim = cls(data_array, index)
         newdim._set_dimension_type(DimensionType.Range)
-        newdim._h5group.write_data("ticks", ticks, dtype=DataType.Double)
+        if ticks is not None:
+            newdim._h5group.write_data("ticks", ticks, dtype=DataType.Double)
         return newdim
 
     @classmethod

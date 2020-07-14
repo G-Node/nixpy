@@ -118,7 +118,7 @@ class DataArray(Entity, DataSet):
             self.force_updated_at()
         return smpldim
 
-    def append_range_dimension(self, ticks, label=None, unit=None):
+    def append_range_dimension(self, ticks=None, label=None, unit=None):
         """
         Append a new RangeDimension to the list of existing dimension
         descriptors.
