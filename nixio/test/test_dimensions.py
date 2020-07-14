@@ -135,7 +135,7 @@ class TestDimension(unittest.TestCase):
             self.range_dim.axis(10, 2)
             self.range_dim.axis(100)
 
-    def test_alias_dimension(self):
+    def _test_alias_dimension(self):
         da = self.block.create_data_array("alias da", "dimticks",
                                           data=np.random.random(10))
         da.label = "alias dimension label"
@@ -192,7 +192,73 @@ class TestDimension(unittest.TestCase):
         assert sunit == smpldim.unit
         assert soffset == smpldim.offset
 
-    def test_df_dim(self):
+
+class TestLinkDimension(unittest.TestCase):
+
+    def setUp(self):
+        self.tmpdir = TempDir("linkdimtest")
+        self.testfilename = os.path.join(self.tmpdir.path, "linkdimtest.nix")
+        self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
+        self.block = self.file.create_block("test block", "test.session")
+        self.array = self.block.create_data_array(
+            "test array", "signal", nix.DataType.Float,
+            data=np.random.random((3, 15))
+        )
+
+        self.set_dim = self.array.append_set_dimension()
+        self.range_dim = self.array.append_range_dimension()
+
+    def tearDown(self):
+        del self.file.blocks[self.block.id]
+        self.file.close()
+        self.tmpdir.cleanup()
+
+    def test_data_array_range_link_dimension(self):
+        tickarray = self.block.create_data_array(
+            "ticks", "array.dimension.ticks",
+            data=np.linspace(0, 100, 15)
+        )
+        tickarray.label = "DIMENSION LABEL"
+        tickarray.unit = "mV"
+        self.range_dim.link_data_array(tickarray, [-1])
+        assert np.all(tickarray[:] == self.range_dim.ticks)
+        assert np.all(tickarray.unit == self.range_dim.unit)
+        assert np.all(tickarray.label == self.range_dim.label)
+
+        tickarray3d = self.block.create_data_array(
+            "ticks3d", "array.dimension.ticks",
+            data=np.random.random((20, 15, 4))
+        )
+        tickarray3d.unit = "mA"
+        ticks = np.cumsum(np.random.random(15))
+        tickarray3d[3, :, 1] = ticks
+        tickarray3d.label = "DIMENSION LABEL 2"
+        self.range_dim.link_data_array(tickarray3d, [3, -1, 1])
+        assert np.shape(ticks) == np.shape(self.range_dim.ticks)
+        assert np.all(ticks == self.range_dim.ticks)
+        assert np.all(tickarray3d.unit == self.range_dim.unit)
+        assert np.all(tickarray3d.label == self.range_dim.label)
+
+    def test_data_array_set_link_dimension(self):
+        pass
+
+    def test_data_array_self_link_dimension(self):
+        # The new way of making alias range dimension
+        da = self.block.create_data_array("alias da", "dimticks",
+                                          data=np.random.random(10))
+        da.label = "alias dimension label"
+        da.unit = "F"
+        rdim = da.append_range_dimension()
+        rdim.link_data_array(da, [-1])
+        assert(len(da.dimensions) == 1)
+        assert(da.dimensions[0].label == da.label)
+        assert(da.dimensions[0].unit == da.unit)
+        assert(np.all(da.dimensions[0].ticks == da[:]))
+
+    def test_data_frame_range_link_dimension(self):
+        pass
+
+    def _test_data_frame_set_link_dimension(self):
         di = OrderedDict([('name', np.int64), ('id', str), ('time', float),
                           ('sig1', np.float64), ('sig2', np.int32)])
         arr = [(1, "a", 20.18, 5.0, 100), (2, 'b', 20.09, 5.5, 101),
