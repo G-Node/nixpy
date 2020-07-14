@@ -380,13 +380,10 @@ class RangeDimension(Dimension):
 
     @property
     def ticks(self):
-        g = self._redirgrp
-        if g.has_data("ticks"):
-            ticks = g.get_data("ticks")
-        elif g.has_data("data"):
-            ticks = g.get_data("data")
+        if self.has_link:
+            ticks = self.dimension_link.values
         else:
-            raise AttributeError("Attribute 'ticks' is not set.")
+            ticks = self._h5group.get_data("ticks")
         return tuple(ticks)
 
     @ticks.setter
