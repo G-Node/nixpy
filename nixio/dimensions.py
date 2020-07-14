@@ -197,6 +197,40 @@ class Dimension(object):
         DimensionLink.create_new(self._file, self, self._h5group,
                                  data_frame, "DataFrame", index)
 
+    @property
+    def has_link(self):
+        """
+        Return True if this Dimension links to a data object
+        (DataArray or DataFrame).
+        Read-only property.
+        """
+        if "link" in self._h5group:
+            return True
+        return False
+
+    @property
+    def _redirgrp(self):
+        """
+        If the dimension links to a data object, this property returns
+        the H5Group of the linked DataArray or DataFrame. Otherwise, it returns
+        the H5Group representing the dimension.
+        """
+        if self.has_link:
+            link = self._h5group.open_group("link")
+            return link.get_by_pos(0)
+        return self._h5group
+
+    @property
+    def dimension_link(self):
+        """
+        If the dimension has a DimensionLink to a data object, returns the
+        DimensionLink object, otherwise returns None.
+        """
+        if self.has_link:
+            link = self._h5group.open_group("link")
+            return DimensionLink(self._file, self, link)
+        return None
+
     def __str__(self):
         return "{}: {{index = {}}}".format(
             type(self).__name__, self.index
@@ -268,12 +302,12 @@ class SampledDimension(Dimension):
 
     @property
     def label(self):
-        return self._h5group.get_attr("label")
+        return self._redirgrp.get_attr("label")
 
     @label.setter
     def label(self, label):
         util.check_attr_type(label, str)
-        self._h5group.set_attr("label", label)
+        self._redirgrp.set_attr("label", label)
 
     @property
     def sampling_interval(self):
@@ -286,12 +320,12 @@ class SampledDimension(Dimension):
 
     @property
     def unit(self):
-        return self._h5group.get_attr("unit")
+        return self._redirgrp.get_attr("unit")
 
     @unit.setter
     def unit(self, u):
         util.check_attr_type(u, str)
-        self._h5group.set_attr("unit", u)
+        self._redirgrp.set_attr("unit", u)
 
     @property
     def offset(self):
@@ -352,7 +386,7 @@ class RangeDimension(Dimension):
         self._h5group.write_data("ticks", ticks)
 
     @property
-    def _redirgrp(self):
+    def _redirgrp_old(self):
         """
         If the dimension is an Alias Range dimension, this property returns
         the H5Group of the linked DataArray. Otherwise, it returns the H5Group
