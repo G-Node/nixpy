@@ -188,12 +188,16 @@ class Dimension(object):
                 "One of the values must be -1, indicating the relevant vector."
             )
 
+        if self.has_link:
+            self._h5group.delete("link")
         DimensionLink.create_new(self._file, self, self._h5group,
                                  data_array, "DataArray", index)
 
     def link_data_frame(self, data_frame, index):
         if index >= len(data_frame.columns):
             raise OutOfBounds("DataFrame index is out of bounds", index)
+        if self.has_link:
+            self._h5group.delete("link")
         DimensionLink.create_new(self._file, self, self._h5group,
                                  data_frame, "DataFrame", index)
 
