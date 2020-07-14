@@ -220,7 +220,7 @@ class Dimension(object):
         the H5Group representing the dimension.
         """
         if self.has_link:
-            link = self._h5group.open_group("link")
+            link = self._h5group.get_by_name("link")
             return link.get_by_pos(0)
         return self._h5group
 
@@ -231,7 +231,7 @@ class Dimension(object):
         DimensionLink object, otherwise returns None.
         """
         if self.has_link:
-            link = self._h5group.open_group("link")
+            link = self._h5group.get_by_name("link")
             return DimensionLink(self._file, self, link)
         return None
 
