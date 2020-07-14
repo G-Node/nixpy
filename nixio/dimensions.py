@@ -336,6 +336,12 @@ class SampledDimension(Dimension):
         util.check_attr_type(o, Number)
         self._h5group.set_attr("offset", o)
 
+    def link_data_array(self, data_array, index):
+        raise RuntimeError("SampledDimension does not support linking")
+
+    def link_data_frame(self, data_array, index):
+        raise RuntimeError("SampledDimension does not support linking")
+
 
 class RangeDimension(Dimension):
 
