@@ -110,6 +110,39 @@ class DimensionLink(object):
                                "DimensionLink")
 
     @property
+    def values(self):
+        """
+        Returns the values (vector or column) from the linked data object
+        (DataArray or DataFrame) specified by the LinkDimension's index.
+        """
+        data = self.linked_data
+        if self._data_object_type == "DataArray":
+            dimindex = list(self.index)
+            # replace -1 with slice(None)
+            dimindex[dimindex.index(-1)] = slice(None)
+            return data[dimindex]
+        elif self._data_object_type == "DataFrame":
+            return data[self.index]
+        else:
+            raise RuntimeError("Invalid DataObjectType attribute found in "
+                               "DimensionLink")
+
+    @property
+    def unit(self):
+        """
+        Returns the unit from the linked data object (DataArray or DataFrame)
+        specified by the LinkDimension's index.
+        """
+        data = self.linked_data
+        if self._data_object_type == "DataArray":
+            return data.get_attr("unit")
+        elif self._data_object_type == "DataFrame":
+            return data.get_attr("units")[self.index]
+        else:
+            raise RuntimeError("Invalid DataObjectType attribute found in "
+                               "DimensionLink")
+
+    @property
     def _data_object_type(self):
         return self._h5group.get_attr("data_object_type")
 
