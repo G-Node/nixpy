@@ -120,7 +120,7 @@ class DimensionLink(object):
             dimindex = list(self.index)
             # replace -1 with slice(None)
             dimindex[dimindex.index(-1)] = slice(None)
-            return data[dimindex]
+            return data[tuple(dimindex)]
         elif self._data_object_type == "DataFrame":
             return data[self.index]
         else:
