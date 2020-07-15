@@ -489,10 +489,15 @@ class SetDimension(Dimension):
 
     @property
     def labels(self):
-        labels = tuple(self._h5group.get_data("labels"))
+        if self.has_link:
+            labels = self.dimension_link.values
+        else:
+            labels = self._h5group.get_data("labels")
+
         if len(labels) and isinstance(labels[0], bytes):
             labels = tuple(label.decode() for label in labels)
-        return labels
+
+        return tuple(labels)
 
     @labels.setter
     def labels(self, labels):
