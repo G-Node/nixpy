@@ -330,5 +330,83 @@ class TestLinkDimension(unittest.TestCase):
         self.set_dim.link_data_frame(df, 1)
         assert self.set_dim.labels == tuple(v[1] for v in values)
 
-    def test_linking_errors(self):
-        pass
+    def test_data_array_linking_errors(self):
+        da = self.block.create_data_array("baddim", "dimension.error.test",
+                                          data=np.random.random((3, 4, 2)))
+
+        # index dimensionality mismatch
+        with self.assertRaises(nix.exceptions.IncompatibleDimensions):
+            self.set_dim.link_data_array(da, [0, -1])
+        with self.assertRaises(nix.exceptions.IncompatibleDimensions):
+            self.range_dim.link_data_array(da, [0, -1, 3, 3])
+
+        # no -1 in index
+        with self.assertRaises(ValueError):
+            self.set_dim.link_data_array(da, [0, 0, 0])
+        with self.assertRaises(ValueError):
+            self.range_dim.link_data_array(da, [1, 1, 1])
+
+        # multiple -1  (or negative)in index
+        with self.assertRaises(ValueError):
+            self.set_dim.link_data_array(da, [-1, -1, 0])
+        with self.assertRaises(ValueError):
+            self.range_dim.link_data_array(da, [-1, -1, 1])
+        with self.assertRaises(ValueError):
+            self.set_dim.link_data_array(da, [-2, 0, 0])
+        with self.assertRaises(ValueError):
+            self.range_dim.link_data_array(da, [-2, 0, 1])
+        with self.assertRaises(ValueError):
+            self.set_dim.link_data_array(da, [-10, -10, 0])
+        with self.assertRaises(ValueError):
+            self.range_dim.link_data_array(da, [-10, -10, 1])
+
+    def test_data_frame_linking_errors(self):
+        column_descriptions = OrderedDict([("name", nix.DataType.String),
+                                           ("id", nix.DataType.String),
+                                           ("score", nix.DataType.Float)])
+        values = [("Alpha", "a", 0),
+                  ("Beta", 'b',  100),
+                  ("Gamma", 'c', 50),
+                  ("Alpha", "a", 10),
+                  ("Gamma", 'c', 42),
+                  ("Alpha", "a", 93),
+                  ("Gamma", 'c', 23),
+                  ("Alpha", "a", 37),
+                  ("Beta", 'b',  87)]
+        df = self.block.create_data_frame("df-dimension",
+                                          "array.dimension.labels",
+                                          col_dict=column_descriptions,
+                                          data=values)
+        for badidx in [-110, -5, -1, 3, 4, 34]:
+            with self.assertRaises(nix.exceptions.OutOfBounds):
+                self.set_dim.link_data_frame(df, badidx)
+            with self.assertRaises(nix.exceptions.OutOfBounds):
+                self.range_dim.link_data_frame(df, badidx)
+
+    def test_sampled_dimension_unsupported(self):
+        sdim = self.array.append_sampled_dimension(0.1)
+
+        da = self.block.create_data_array("baddim", "dimension.error.test",
+                                          data=np.random.random((3, 4, 2)))
+        with self.assertRaises(RuntimeError):
+            sdim.link_data_array(da, [0])
+
+        column_descriptions = OrderedDict([("name", nix.DataType.String),
+                                           ("id", nix.DataType.String),
+                                           ("duration", nix.DataType.Float)])
+        values = [("Alpha", "a", 0),
+                  ("Beta", 'b',  0),
+                  ("Gamma", 'c', 0),
+                  ("Alpha", "a", 0),
+                  ("Gamma", 'c', 0),
+                  ("Alpha", "a", 0),
+                  ("Gamma", 'c', 0),
+                  ("Alpha", "a", 0),
+                  ("Beta", 'b',  0)]
+        df = self.block.create_data_frame("df-dimension",
+                                          "array.dimension.labels",
+                                          col_dict=column_descriptions,
+                                          data=values)
+
+        with self.assertRaises(RuntimeError):
+            sdim.link_data_array(df, 10)
