@@ -135,17 +135,6 @@ class TestDimension(unittest.TestCase):
             self.range_dim.axis(10, 2)
             self.range_dim.axis(100)
 
-    def _test_alias_dimension(self):
-        da = self.block.create_data_array("alias da", "dimticks",
-                                          data=np.random.random(10))
-        da.label = "alias dimension label"
-        da.unit = "F"
-        da.append_alias_range_dimension()
-        assert(len(da.dimensions) == 1)
-        assert(da.dimensions[0].label == da.label)
-        assert(da.dimensions[0].unit == da.unit)
-        assert(np.all(da.dimensions[0].ticks == da[:]))
-
     def test_set_dim_label_resize(self):
         setdim = self.array.append_set_dimension()
         labels = ["A", "B"]

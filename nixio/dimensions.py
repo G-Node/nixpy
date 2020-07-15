@@ -17,7 +17,6 @@ import numpy as np
 
 from .datatype import DataType
 from .dimension_type import DimensionType
-from .data_frame import DataFrame
 from . import util
 from .container import Container
 from .exceptions import IncompatibleDimensions, OutOfBounds
@@ -34,7 +33,6 @@ class DimensionContainer(Container):
             DimensionType.Range: RangeDimension,
             DimensionType.Sample: SampledDimension,
             DimensionType.Set: SetDimension,
-            DimensionType.DataFrame: DataFrameDimension,
         }[DimensionType(item.get_attr("dimension_type"))]
         idx = item.name
         return cls(self._parent, idx)
@@ -382,23 +380,6 @@ class RangeDimension(Dimension):
             newdim._h5group.write_data("ticks", ticks, dtype=DataType.Double)
         return newdim
 
-    @classmethod
-    def create_new_alias(cls, data_array, index):
-        newdim = cls(data_array, index)
-        newdim._set_dimension_type(DimensionType.Range)
-        newdim._h5group.create_link(data_array, data_array.id)
-        return newdim
-
-    @property
-    def is_alias(self):
-        """
-        Return True if this dimension is an Alias Range dimension.
-        Read-only property.
-        """
-        if self._h5group.has_data("ticks"):
-            return False
-        return True
-
     @property
     def ticks(self):
         if self.has_link:
@@ -409,21 +390,10 @@ class RangeDimension(Dimension):
 
     @ticks.setter
     def ticks(self, ticks):
+        # TODO: Write through to linked object
         if np.any(np.diff(ticks) < 0):
             raise ValueError("Ticks are not given in an ascending order.")
         self._h5group.write_data("ticks", ticks)
-
-    @property
-    def _redirgrp_old(self):
-        """
-        If the dimension is an Alias Range dimension, this property returns
-        the H5Group of the linked DataArray. Otherwise, it returns the H5Group
-        representing the dimension.
-        """
-        if self.is_alias:
-            gname = self._h5group.get_by_pos(0).name
-            return self._h5group.open_group(gname)
-        return self._h5group
 
     @property
     def label(self):
@@ -433,6 +403,7 @@ class RangeDimension(Dimension):
 
     @label.setter
     def label(self, label):
+        # TODO: Write through to linked object
         util.check_attr_type(label, str)
         self._redirgrp.set_attr("label", label)
 
@@ -526,127 +497,6 @@ class SetDimension(Dimension):
 
     @labels.setter
     def labels(self, labels):
+        # TODO: Write through to linked object
         dt = util.vlen_str_dtype
         self._h5group.write_data("labels", labels, dtype=dt)
-
-
-class DataFrameDimension(Dimension):
-
-    def __init__(self, data_array, index):
-        nixfile = data_array.file
-        super(DataFrameDimension, self).__init__(nixfile, data_array, index)
-
-    @classmethod
-    def create_new(cls, data_array, index, data_frame, column):
-        """
-        Create a new Dimension that points to a DataFrame
-
-        :param data_array: The DataArray this Dimension belongs to
-
-        :param parent: The H5Group for the dimensions
-
-        :param data_frame: the referenced DataFrame for this Dimension
-
-        :param column: the index of a column in the DataFrame that the
-        Dimension will reference (optional)
-
-        :return: The new DataFrameDimension
-        """
-        newdim = cls(data_array, index)
-        newdim.data_frame = data_frame
-        newdim.column_idx = column
-        newdim._set_dimension_type(DimensionType.DataFrame)
-        return newdim
-
-    def get_unit(self, index=None):
-        """
-        Get the unit of the Dimension.  If an index is specified,
-        it will return the unit of the column in the referenced DataFrame at
-        that index.
-
-        :param index: Index of the needed column
-        :type index: int
-
-        :return: Unit of the specified column
-        :rtype: str or None
-        """
-        if index is None:
-            if self.column_idx is None:
-                raise ValueError("No default column index is set "
-                                 "for this Dimension. Please supply one")
-            else:
-                idx = self.column_idx
-        else:
-            idx = index
-        unit = None
-        if self.data_frame.units is not None:
-
-            unit = self.data_frame.units[idx]
-        return unit
-
-    def get_ticks(self, index=None):
-        """
-        Get the ticks of the Dimension from the referenced DataFrame.
-        If an index is specified, it will return the values of the column
-        in the referenced DataFrame at that index.
-
-        :param index: Index of the needed column
-        :type index: int
-
-        :return: values in the specified column
-        :rtype: numpy.ndarray
-        """
-        if index is None:
-            if self.column_idx is None:
-                raise ValueError("No default column index is set "
-                                 "for this Dimension. Please supply one")
-            else:
-                idx = self.column_idx
-        else:
-            idx = index
-        df = self.data_frame
-        ticks = df[df.column_names[idx]]
-        return ticks
-
-    def get_label(self, index=None):
-        """
-        Get the label of the Dimension. If an index is specified,
-         it will return the name of the column in the referenced
-         DataFrame at that index.
-        :param index: Index of the referred column
-        :type index: int or None
-
-        :return: the header of the specified column or the name of DataFrame
-        if index is None
-        :rtype: str
-        """
-        if index is None:
-            if self.column_idx is None:
-                label = self.data_frame.name
-            else:
-                label = self.data_frame.column_names[self.column_idx]
-        else:
-            label = self.data_frame.column_names[index]
-        return label
-
-    @property
-    def data_frame(self):
-        dfname = self._h5group.get_by_pos(0).name
-        grp = self._h5group.open_group(dfname)
-        nixblock = self._parent._parent
-        nixfile = self._file
-        df = DataFrame(nixfile, nixblock, grp)
-        return df
-
-    @data_frame.setter
-    def data_frame(self, df):
-        self._h5group.create_link(df, "data_frame")
-
-    @property
-    def column_idx(self):
-        colidx = self._h5group.get_attr("column_idx")
-        return colidx
-
-    @column_idx.setter
-    def column_idx(self, col):
-        self._h5group.set_attr("column_idx", col)

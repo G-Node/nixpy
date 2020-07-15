@@ -16,8 +16,7 @@ from .entity import Entity
 from .source_link_container import SourceLinkContainer
 from .datatype import DataType
 from .dimensions import (Dimension, SampledDimension, RangeDimension,
-                         SetDimension, DataFrameDimension,
-                         DimensionType, DimensionContainer)
+                         SetDimension, DimensionType, DimensionContainer)
 from . import util
 from .compression import Compression
 
@@ -138,61 +137,6 @@ class DataArray(Entity, DataSet):
             self.force_updated_at()
         return rdim
 
-    def append_data_frame_dimension(self, data_frame, column_idx=None):
-        """
-        Append a new DataFrameDimension to the list of existing dimension
-        descriptors.
-
-        :param data_frame: The referenced DataFrame
-        :type data_frame: nix.DataFrame
-
-        :param column_idx: Index of the referenced column of the DataFrame.
-                           The default column determines the default label,
-                           ticks, and unit of this Dimension.
-        :type column_idx: int or None
-
-        :returns: Thew newly created DataFrameDimension.
-        :rtype: DataFrameDimension
-        """
-        index = len(self.dimensions) + 1
-        dfdim = DataFrameDimension.create_new(self, index,
-                                              data_frame, column_idx)
-        if self.file.auto_update_timestamps:
-            self.force_updated_at()
-        return dfdim
-
-    def append_alias_range_dimension(self):
-        """
-        Append a new RangeDimension that uses the data stored in this
-        DataArray as ticks. This works only(!) if the DataArray is 1-D and
-        the stored data is numeric. A ValueError will be raised otherwise.
-
-        :returns: The created dimension descriptor.
-        :rtype: RangeDimension
-
-        """
-        if (len(self.data_extent) > 1 or
-                not DataType.is_numeric_dtype(self.dtype)):
-            raise ValueError("AliasRangeDimensions only allowed for 1D "
-                             "numeric DataArrays.")
-        if self._dimension_count() > 0:
-            raise ValueError("Cannot append additional alias dimension. "
-                             "There must only be one!")
-        # check if existing unit is SI
-        if self.unit:
-            u = self.unit
-            if not (util.units.is_si(u) or util.units.is_compound(u)):
-                raise InvalidUnit(
-                    "AliasRangeDimensions are only allowed when SI or "
-                    "composites of SI units are used. "
-                    "Current SI unit is {}".format(u),
-                    "DataArray.append_alias_range_dimension"
-                )
-        aliasdim = RangeDimension.create_new_alias(self, 1)
-        if self.file.auto_update_timestamps:
-            self.force_updated_at()
-        return aliasdim
-
     def delete_dimensions(self):
         """
         Delete all the dimension descriptors for this DataArray.
@@ -311,15 +255,6 @@ class DataArray(Entity, DataSet):
         if u == "":
             u = None
         util.check_attr_type(u, str)
-        if (self._dimension_count() == 1 and
-                self.dimensions[0].dimension_type == DimensionType.Range and
-                self.dimensions[0].is_alias and u is not None):
-            if not (util.units.is_si(u) or util.units.is_compound(u)):
-                raise InvalidUnit(
-                    "[{}]: Non-SI units are not allowed if the DataArray "
-                    "has an AliasRangeDimension.".format(u),
-                    "DataArray.unit"
-                )
         self._h5group.set_attr("unit", u)
         if self.file.auto_update_timestamps:
             self.force_updated_at()

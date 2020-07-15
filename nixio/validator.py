@@ -462,17 +462,6 @@ def check_sampled_dimension(dim, idx):
     return errors, warnings
 
 
-def check_df_dimension(dim, idx):
-    """
-    Validate a DataFrameDimension and return all errors and warnings.
-
-    :returns: A list of 'errors' and a list of 'warnings'
-    """
-    errors = [ValidationError.DataFrameNotMatch.format(idx)]
-    warnings = list()
-    return errors, warnings
-
-
 def check_entity(entity):
     """
     General NIX entity validator
