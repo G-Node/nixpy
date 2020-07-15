@@ -257,7 +257,7 @@ class TestLinkDimension(unittest.TestCase):
         assert np.all(("Alpha2", "Beta2", "Gamma2") == self.set_dim.labels)
         assert np.all(labelarray2d[1, :] == self.set_dim.labels)
 
-    def test_data_array_self_link_dimension(self):
+    def test_data_array_self_link_range_dimension(self):
         # The new way of making alias range dimension
         da = self.block.create_data_array("alias da", "dimticks",
                                           data=np.random.random(10))
@@ -265,10 +265,19 @@ class TestLinkDimension(unittest.TestCase):
         da.unit = "F"
         rdim = da.append_range_dimension()
         rdim.link_data_array(da, [-1])
-        assert(len(da.dimensions) == 1)
-        assert(da.dimensions[0].label == da.label)
-        assert(da.dimensions[0].unit == da.unit)
-        assert(np.all(da.dimensions[0].ticks == da[:]))
+        assert len(da.dimensions) == 1
+        assert da.dimensions[0].label == da.label
+        assert da.dimensions[0].unit == da.unit
+        assert np.all(da.dimensions[0].ticks == da[:])
+
+    def test_data_array_self_link_set_dimension(self):
+        # The new way of making alias range dimension
+        labelda = self.block.create_data_array("alias da", "dimlabels",
+                                               data=np.random.random(10))
+        rdim = labelda.append_set_dimension()
+        rdim.link_data_array(labelda, [-1])
+        assert len(labelda.dimensions) == 1
+        assert np.all(labelda.dimensions[0].labels == labelda[:])
 
     def test_data_frame_range_link_dimension(self):
         pass
