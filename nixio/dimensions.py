@@ -79,9 +79,12 @@ class DimensionLink(object):
     def file(self):
         return self._file
 
+    def _linked_group(self):
+        return self._h5group.get_by_pos(0)
+
     @property
     def linked_data(self):
-        grp = self._h5group.get_by_pos(0)
+        grp = self._linked_group()
         return grp.get_data("data")
 
     @property
@@ -133,11 +136,11 @@ class DimensionLink(object):
         Returns the unit from the linked data object (DataArray or DataFrame)
         specified by the LinkDimension's index.
         """
-        data = self.linked_data
+        lobj = self._linked_group()
         if self._data_object_type == "DataArray":
-            return data.get_attr("unit")
+            return lobj.get_attr("unit")
         elif self._data_object_type == "DataFrame":
-            return data.get_attr("units")[self.index]
+            return lobj.get_attr("units")[self.index]
         else:
             raise RuntimeError("Invalid DataObjectType attribute found in "
                                "DimensionLink")
@@ -415,7 +418,9 @@ class RangeDimension(Dimension):
 
     @property
     def unit(self):
-        return self._redirgrp.get_attr("unit")
+        if self.has_link:
+            return self.dimension_link.unit
+        return self._h5group.get_attr("unit")
 
     @unit.setter
     def unit(self, u):
