@@ -200,12 +200,14 @@ class Dimension(object):
                 "Dimension.link_data_array"
             )
 
-        if index.count(-1) != 1:
+        invalid_idx_msg = (
+            "Invalid linked DataArray index: "
+            "One of the values must be -1, indicating the relevant vector. "
+            "Negative indexing is not supported."
+        )
+        if index.count(-1) != 1 or sum(idx < 0 for idx in index) != 1:
             # TODO: Add link to relevant docs
-            raise ValueError(
-                "Invalid linked DataArray index: "
-                "One of the values must be -1, indicating the relevant vector."
-            )
+            raise ValueError(invalid_idx_msg)
 
         if self.has_link:
             self._h5group.delete("link")
