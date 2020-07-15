@@ -122,7 +122,7 @@ class DimensionLink(object):
             dimindex[dimindex.index(-1)] = slice(None)
             return data[tuple(dimindex)]
         elif self._data_object_type == "DataFrame":
-            return data[self.index]
+            return tuple(row[self.index] for row in data)
         else:
             raise RuntimeError("Invalid DataObjectType attribute found in "
                                "DimensionLink")
