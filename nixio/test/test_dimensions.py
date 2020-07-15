@@ -240,7 +240,22 @@ class TestLinkDimension(unittest.TestCase):
         assert np.all(tickarray3d.label == self.range_dim.label)
 
     def test_data_array_set_link_dimension(self):
-        pass
+        labelarray = self.block.create_data_array(
+            "labels", "array.dimension.labels",
+            data=["Alpha", "Beta", "Gamma"], dtype=nix.DataType.String
+        )
+        self.set_dim.link_data_array(labelarray, [-1])
+        assert np.all(labelarray[:] == self.set_dim.labels)
+
+        labelarray2d = self.block.create_data_array(
+            "labels2d", "array.dimension.labels",
+            dtype=nix.DataType.String,
+            data=[["Alpha1", "Beta1", "Gamma1"],
+                  ["Alpha2", "Beta2", "Gamma2"]],
+        )
+        self.set_dim.link_data_array(labelarray2d, [1, -1])
+        assert np.all(("Alpha2", "Beta2", "Gamma2") == self.set_dim.labels)
+        assert np.all(labelarray2d[1, :] == self.set_dim.labels)
 
     def test_data_array_self_link_dimension(self):
         # The new way of making alias range dimension
