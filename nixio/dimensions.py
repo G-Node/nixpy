@@ -306,12 +306,12 @@ class SampledDimension(Dimension):
 
     @property
     def label(self):
-        return self._redirgrp.get_attr("label")
+        return self._h5group.get_attr("label")
 
     @label.setter
     def label(self, label):
         util.check_attr_type(label, str)
-        self._redirgrp.set_attr("label", label)
+        self._h5group.set_attr("label", label)
 
     @property
     def sampling_interval(self):
@@ -324,12 +324,12 @@ class SampledDimension(Dimension):
 
     @property
     def unit(self):
-        return self._redirgrp.get_attr("unit")
+        return self._h5group.get_attr("unit")
 
     @unit.setter
     def unit(self, u):
         util.check_attr_type(u, str)
-        self._redirgrp.set_attr("unit", u)
+        self._h5group.set_attr("unit", u)
 
     @property
     def offset(self):
