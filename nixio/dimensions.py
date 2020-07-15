@@ -146,6 +146,24 @@ class DimensionLink(object):
                                "DimensionLink")
 
     @property
+    def label(self):
+        """
+        Returns the label of the linked data object:
+        For DataArray links, returns the label.
+        For DataFrame links, returns the name of the column specified by the
+        LinkDimension's index.
+        """
+        lobj = self._linked_group()
+        if self._data_object_type == "DataArray":
+            return lobj.get_attr("label")
+        elif self._data_object_type == "DataFrame":
+            col_dts = lobj.group["data"].dtype
+            return col_dts.names[self.index]
+        else:
+            raise RuntimeError("Invalid DataObjectType attribute found in "
+                               "DimensionLink")
+
+    @property
     def _data_object_type(self):
         return self._h5group.get_attr("data_object_type")
 
@@ -409,7 +427,9 @@ class RangeDimension(Dimension):
 
     @property
     def label(self):
-        return self._redirgrp.get_attr("label")
+        if self.has_link:
+            return self.dimension_link.label
+        return self._h5group.get_attr("label")
 
     @label.setter
     def label(self, label):
