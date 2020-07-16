@@ -143,6 +143,22 @@ class DimensionLink(object):
             raise RuntimeError("Invalid DataObjectType attribute found in "
                                "DimensionLink")
 
+    @unit.setter
+    def unit(self, unit):
+        """
+        Sets the unit of the linked data object.
+        """
+        lobj = self._linked_group()
+        if self._data_object_type == "DataArray":
+            lobj.set_attr("unit", unit)
+        elif self._data_object_type == "DataFrame":
+            units = list(lobj.get_attr("units"))
+            units[self.index] = unit
+            lobj.set_attr("units", units)
+        else:
+            raise RuntimeError("Invalid DataObjectType attribute found in "
+                               "DimensionLink")
+
     @property
     def label(self):
         """
@@ -157,6 +173,21 @@ class DimensionLink(object):
         elif self._data_object_type == "DataFrame":
             col_dts = lobj.group["data"].dtype
             return col_dts.names[self.index]
+        else:
+            raise RuntimeError("Invalid DataObjectType attribute found in "
+                               "DimensionLink")
+
+    @label.setter
+    def label(self, label):
+        """
+        Sets the label of the linked data objet.
+        """
+        lobj = self._linked_group()
+        if self._data_object_type == "DataArray":
+            lobj.set_attr("label", label)
+        elif self._data_object_type == "DataFrame":
+            raise RuntimeError("The label of a Dimension linked to a "
+                               "DataFrame column cannot be modified")
         else:
             raise RuntimeError("Invalid DataObjectType attribute found in "
                                "DimensionLink")
@@ -232,18 +263,6 @@ class Dimension(object):
         if "link" in self._h5group:
             return True
         return False
-
-    @property
-    def _redirgrp(self):
-        """
-        If the dimension links to a data object, this property returns
-        the H5Group of the linked DataArray or DataFrame. Otherwise, it returns
-        the H5Group representing the dimension.
-        """
-        if self.has_link:
-            link = self._h5group.get_by_name("link")
-            return link.get_by_pos(0)
-        return self._h5group
 
     @property
     def dimension_link(self):
@@ -392,9 +411,11 @@ class RangeDimension(Dimension):
 
     @ticks.setter
     def ticks(self, ticks):
-        # TODO: Write through to linked object
         if np.any(np.diff(ticks) < 0):
             raise ValueError("Ticks are not given in an ascending order.")
+        if self.has_link:
+            raise RuntimeError("The ticks of a RangeDimension linked to a "
+                               "data object cannot be modified")
         self._h5group.write_data("ticks", ticks)
 
     @property
@@ -405,9 +426,11 @@ class RangeDimension(Dimension):
 
     @label.setter
     def label(self, label):
-        # TODO: Write through to linked object
         util.check_attr_type(label, str)
-        self._redirgrp.set_attr("label", label)
+        if self.has_link:
+            self.dimension_link.label = label
+        else:
+            self._h5group.set_attr("label", label)
 
     @property
     def unit(self):
@@ -418,7 +441,10 @@ class RangeDimension(Dimension):
     @unit.setter
     def unit(self, u):
         util.check_attr_type(u, str)
-        self._redirgrp.set_attr("unit", u)
+        if self.has_link:
+            self.dimension_link.unit = u
+        else:
+            self._h5group.set_attr("unit", u)
 
     def index_of(self, position):
         """
@@ -499,6 +525,8 @@ class SetDimension(Dimension):
 
     @labels.setter
     def labels(self, labels):
-        # TODO: Write through to linked object
+        if self.has_link:
+            raise RuntimeError("The labels of a SetDimension linked to a "
+                               "data object cannot be modified")
         dt = util.vlen_str_dtype
         self._h5group.write_data("labels", labels, dtype=dt)
