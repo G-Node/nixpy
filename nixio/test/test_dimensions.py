@@ -211,8 +211,8 @@ class TestLinkDimension(unittest.TestCase):
         tickarray.unit = "mV"
         self.range_dim.link_data_array(tickarray, [-1])
         assert np.all(tickarray[:] == self.range_dim.ticks)
-        assert np.all(tickarray.unit == self.range_dim.unit)
-        assert np.all(tickarray.label == self.range_dim.label)
+        assert tickarray.unit == self.range_dim.unit
+        assert tickarray.label == self.range_dim.label
 
         tickarray3d = self.block.create_data_array(
             "ticks3d", "array.dimension.ticks",
@@ -225,8 +225,8 @@ class TestLinkDimension(unittest.TestCase):
         self.range_dim.link_data_array(tickarray3d, [3, -1, 1])
         assert np.shape(ticks) == np.shape(self.range_dim.ticks)
         assert np.all(ticks == self.range_dim.ticks)
-        assert np.all(tickarray3d.unit == self.range_dim.unit)
-        assert np.all(tickarray3d.label == self.range_dim.label)
+        assert tickarray3d.unit == self.range_dim.unit
+        assert tickarray3d.label == self.range_dim.label
 
     def test_data_array_set_link_dimension(self):
         labelarray = self.block.create_data_array(
