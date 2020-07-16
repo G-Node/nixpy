@@ -410,3 +410,57 @@ class TestLinkDimension(unittest.TestCase):
 
         with self.assertRaises(RuntimeError):
             sdim.link_data_array(df, 10)
+
+    def test_write_linked_array_props(self):
+        tickarray = self.block.create_data_array(
+            "ticks3d", "array.dimension.ticks",
+            data=np.random.random((10, 5, 4))
+        )
+        tickarray.unit = "whatever"
+        ticks = np.cumsum(np.random.random(5))
+        tickarray[3, :, 1] = ticks
+        tickarray.label = "DIMENSION LABEL"
+        self.range_dim.link_data_array(tickarray, [3, -1, 1])
+        assert tickarray.unit == self.range_dim.unit
+        assert tickarray.label == self.range_dim.label
+
+        self.range_dim.unit = "something else"
+        assert tickarray.unit == "something else"
+        assert tickarray.unit == self.range_dim.unit
+
+        self.range_dim.label = "MODIFIED DIMENSION LABEL"
+        assert tickarray.label == "MODIFIED DIMENSION LABEL"
+        assert tickarray.unit == self.range_dim.unit
+
+    def test_write_linked_dataframe_props(self):
+        column_descriptions = OrderedDict([("name", nix.DataType.String),
+                                           ("id", nix.DataType.String),
+                                           ("duration", nix.DataType.Double)])
+
+        values = [("Alpha", "a", 0),
+                  ("Beta", 'b',  0),
+                  ("Gamma", 'c', 0),
+                  ("Alpha", "a", 0),
+                  ("Gamma", 'c', 0),
+                  ("Alpha", "a", 0),
+                  ("Gamma", 'c', 0),
+                  ("Alpha", "a", 0),
+                  ("Beta", 'b',  0)]
+        units = (None, None, "s")
+        df = self.block.create_data_frame("df-dimension",
+                                          "array.dimension.labels",
+                                          col_dict=column_descriptions,
+                                          data=values)
+        df.units = units
+
+        self.range_dim.link_data_frame(df, 2)
+        assert self.range_dim.unit == df.units[2]
+        assert self.range_dim.label == df.column_names[2]
+
+        self.range_dim.unit = "m"
+        assert df.units[2] == "m"
+        assert self.range_dim.unit == df.units[2]
+
+        with self.assertRaises(RuntimeError):
+            # Can't change label: column name
+            self.range_dim.label = "a whole new label"
