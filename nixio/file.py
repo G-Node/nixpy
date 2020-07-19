@@ -46,8 +46,8 @@ def can_read(nixfile):
     filever = nixfile.version
     if len(filever) != 3:
         raise RuntimeError("Invalid version specified in file.")
-    vx, vy, vz = HDF_FF_VERSION
-    fx, fy, fz = filever
+    vx, vy, _ = HDF_FF_VERSION
+    fx, fy, _ = filever
     if vx == fx and vy >= fy:
         return True
     else:

@@ -337,7 +337,7 @@ class Block(Entity):
             else:  # if col_names is None
                 if data is not None and type(data[0]) == np.void:
                     col_dtype = data[0].dtype
-                    for i, dt in enumerate(col_dtype.fields.values()):
+                    for dt in col_dtype.fields.values():
                         cn = list(col_dtype.fields.keys())
                         raw_dt = col_dtype.fields.values()
                         raw_dt = list(raw_dt)

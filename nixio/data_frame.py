@@ -185,7 +185,7 @@ class DataFrame(Entity, DataSet):
             self._write_data(rows, sl=index)
         else:
             cr_list = []
-            for i, cr in enumerate(rows):
+            for cr in rows:
                 cr_list.append(tuple(cr))
             self._write_data(cr_list, sl=index)
 

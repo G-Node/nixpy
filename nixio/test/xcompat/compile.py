@@ -41,7 +41,7 @@ def cc(filenames, dest,
         objnames = compiler.compile(filenames, output_dir=dest,
                                     extra_postargs=compile_args)
         for obj in objnames:
-            execname, ext = os.path.splitext(obj)
+            execname, _ = os.path.splitext(obj)
             compiler.link_executable(
                 [obj], execname, output_dir=dest,
                 target_lang="c++",

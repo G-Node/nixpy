@@ -20,7 +20,7 @@ from .dimensions import (Dimension, SampledDimension, RangeDimension,
 from . import util
 from .compression import Compression
 
-from .exceptions import InvalidUnit, IncompatibleDimensions
+from .exceptions import IncompatibleDimensions
 from .section import Section
 
 
