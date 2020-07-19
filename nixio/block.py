@@ -337,11 +337,10 @@ class Block(Entity):
             else:  # if col_names is None
                 if data is not None and type(data[0]) == np.void:
                     col_dtype = data[0].dtype
-                    for dt in col_dtype.fields.values():
-                        cn = list(col_dtype.fields.keys())
-                        raw_dt = col_dtype.fields.values()
-                        raw_dt = list(raw_dt)
-                        raw_dt_list = [ele[0] for ele in raw_dt]
+                    cn = list(col_dtype.fields.keys())
+                    raw_dt = col_dtype.fields.values()
+                    raw_dt = list(raw_dt)
+                    raw_dt_list = [ele[0] for ele in raw_dt]
                     col_dict = OrderedDict(zip(cn, raw_dt_list))
                     if len(col_dtype.fields.values()) != len(col_dict):
                         raise exceptions.DuplicateColumnName
