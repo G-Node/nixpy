@@ -92,7 +92,7 @@ def assemble_files(arguments):
         else:
             candidates = sorted(glob.glob(filename))
             if len(candidates) == 0:
-                print("Error: invalid file or directory! No matches found. '{}'").format(filename)
+                print("Error: invalid file or directory! No matches found. '{}'".format(filename))
             for c in candidates:
                 if os.path.isdir(c):
                     c = os.sep.join((c, "*." + arguments.suffix))
