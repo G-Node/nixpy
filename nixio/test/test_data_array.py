@@ -311,43 +311,6 @@ class TestDataArray(unittest.TestCase):
 
         self.array.delete_dimensions()
 
-        assert(len(self.array.dimensions) == 0)
-        self.array.append_alias_range_dimension()
-        assert(len(self.array.dimensions) == 1)
-        self.array.delete_dimensions()
-        self.array.append_alias_range_dimension()
-        assert(len(self.array.dimensions) == 1)
-
-        self.assertRaises(ValueError, self.array.append_alias_range_dimension)
-        self.assertRaises(ValueError, self.array.append_alias_range_dimension)
-        string_array = self.block.create_data_array('string_array',
-                                                    'nix.texts',
-                                                    dtype=nix.DataType.String,
-                                                    shape=(10,))
-        self.assertRaises(ValueError,
-                          string_array.append_alias_range_dimension)
-        assert(len(string_array.dimensions) == 0)
-        del self.block.data_arrays['string_array']
-
-        array_2D = self.block.create_data_array(
-            'array_2d', 'nix.2d', dtype=nix.DataType.Double, shape=(10, 10)
-        )
-        self.assertRaises(ValueError, array_2D.append_alias_range_dimension)
-        assert(len(array_2D.dimensions) == 0)
-        del self.block.data_arrays['array_2d']
-
-        # alias range dimension with non-SI unit
-        self.array.delete_dimensions()
-        self.array.unit = "10 * ms"
-        with self.assertRaises(ValueError):
-            self.array.append_alias_range_dimension()
-
-        self.array.delete_dimensions()
-        self.array.unit = None
-        self.array.append_alias_range_dimension()
-        with self.assertRaises(ValueError):
-            self.array.unit = "10 * ms"
-
     def test_data_array_sources(self):
         source1 = self.block.create_source("source1", "channel")
         source2 = self.block.create_source("source2", "electrode")
@@ -497,21 +460,6 @@ class TestDataArray(unittest.TestCase):
         array.append_range_dimension(ticks=[0.1])
         self.assertNotEqual(datime, array.updated_at)
 
-        datime = array.updated_at
-        time.sleep(1)
-        df = self.block.create_data_frame(
-            "df", "test.data_array.timestamp.data_frame",
-            col_dict={"idx": int}
-        )
-        array.append_data_frame_dimension(data_frame=df)
-        self.assertNotEqual(datime, array.updated_at)
-
-        array.delete_dimensions()
-        datime = array.updated_at
-        time.sleep(1)
-        array.append_alias_range_dimension()
-        self.assertNotEqual(datime, array.updated_at)
-
         # other properties
         datime = array.updated_at
         time.sleep(1)
@@ -551,21 +499,6 @@ class TestDataArray(unittest.TestCase):
         datime = array.updated_at
         time.sleep(1)
         array.append_range_dimension(ticks=[0.1])
-        self.assertEqual(datime, array.updated_at)
-
-        datime = array.updated_at
-        time.sleep(1)
-        df = self.block.create_data_frame(
-            "df", "test.data_array.timestamp.data_frame",
-            col_dict={"idx": int}
-        )
-        array.append_data_frame_dimension(data_frame=df)
-        self.assertEqual(datime, array.updated_at)
-
-        array.delete_dimensions()
-        datime = array.updated_at
-        time.sleep(1)
-        array.append_alias_range_dimension()
         self.assertEqual(datime, array.updated_at)
 
         # other properties

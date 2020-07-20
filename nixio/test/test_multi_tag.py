@@ -432,8 +432,8 @@ class TestMultiTags(unittest.TestCase):
         assert (segdata.shape == (1, 5, 1))
 
         # retrieve all positions for all references
-        for ridx, ref in enumerate(mtag.references):
-            for pidx, p in enumerate(mtag.positions):
+        for ridx, _ in enumerate(mtag.references):
+            for pidx, _ in enumerate(mtag.positions):
                 mtag.tagged_data(pidx, ridx)
 
         wrong_pos = self.block.create_data_array("incorpos", "test",
@@ -462,7 +462,7 @@ class TestMultiTags(unittest.TestCase):
         onedmtag = self.block.create_multi_tag("2dmt", "mtag",
                                                positions=onedpos)
         onedmtag.references.append(oneddata)
-        for pidx, p in enumerate(onedmtag.positions):
+        for pidx, _ in enumerate(onedmtag.positions):
             onedmtag.tagged_data(pidx, 0)
 
     def test_multi_tag_feature_data(self):

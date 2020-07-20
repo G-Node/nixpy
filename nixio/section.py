@@ -469,7 +469,7 @@ class Section(Entity):
             prop.values = data
 
     def __iter__(self):
-        for name, item in self.items():
+        for _, item in self.items():
             yield item
 
     def items(self):

@@ -137,8 +137,8 @@ def scalable(unit_a, unit_b):
     if not (is_si(unit_a) and is_si(unit_b)):
         return False
 
-    a_prefix, a_unit, a_power = split(unit_a)
-    b_prefix, b_unit, b_power = split(unit_b)
+    _, a_unit, a_power = split(unit_a)
+    _, b_unit, b_power = split(unit_b)
     if a_unit != b_unit or a_power != b_power:
         return False
 
@@ -163,8 +163,8 @@ def scaling(origin, destination):
             "nixio.util.scaling"
         )
 
-    org_prefix, org_unit, org_power = split(origin)
-    dest_prefix, dest_unit, dest_power = split(destination)
+    org_prefix, _, org_power = split(origin)
+    dest_prefix, _, dest_power = split(destination)
 
     if org_prefix == dest_prefix and org_power == dest_power:
         return scale
