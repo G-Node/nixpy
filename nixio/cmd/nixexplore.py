@@ -506,9 +506,8 @@ def disp_data(filename, arguments):
 
 def data_worker(arguments):
     files = assemble_files(arguments)
-    func = disp_data
     for nf in files:
-        func(nf, arguments)
+        disp_data(nf, arguments)
 
 
 def file_worker(arguments):
