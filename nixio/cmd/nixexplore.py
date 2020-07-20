@@ -477,7 +477,7 @@ def data_plotter(filename, arguments):
     nix_file = open_nix_file(filename)
     entities = find_data_entity(nix_file, arguments)
     for e in entities:
-        if isinstance(e, nix.pycore.data_array.DataArray):
+        if isinstance(e, nix.DataArray):
             plotter = nw.plotter.suggested_plotter(e)
             if plotter:
                 plotter.plot()
