@@ -1,6 +1,7 @@
 import argparse
-import nixio as nix
 import h5py
+
+import nixio as nix
 
 
 def get_file_version(fname):
@@ -112,7 +113,8 @@ def update_property_values(fname):
                                     dtype=nix.util.vlen_str_dtype,
                                     data=checksum)
 
-    update_props.__doc__ = "Update {} properties".format(len(props))
+    psuffix = "ies" if len(props) > 1 else "y"
+    update_props.__doc__ = "Update {} propert{}".format(len(props), psuffix)
     return update_props
 
 
