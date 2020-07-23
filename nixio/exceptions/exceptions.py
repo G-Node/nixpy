@@ -70,3 +70,10 @@ class InvalidFile(Exception):
     def __init__(self):
         self.message = "Invalid file - file is not a nix file."
         super(InvalidFile, self).__init__(self.message)
+
+
+class DuplicateColumnName(Exception):
+
+    def __init__(self):
+        self.message = "Column names for a DataFrame have to be unique."
+        super(DuplicateColumnName, self).__init__(self.message)

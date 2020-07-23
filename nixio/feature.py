@@ -14,17 +14,18 @@ from .util import util
 
 class Feature(object):
 
-    def __init__(self, nixparent, h5group):
+    def __init__(self, nixfile, nixparent, h5group):
         util.check_entity_id(h5group.get_attr("entity_id"))
         self._h5group = h5group
         self._parent = nixparent
+        self._file = nixfile
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, data, link_type):
+    def create_new(cls, nixfile, nixparent, h5parent, data, link_type):
         id_ = util.create_id()
         h5group = h5parent.open_group(id_)
         h5group.set_attr("entity_id", id_)
-        newfeature = cls(nixparent, h5group)
+        newfeature = cls(nixfile, nixparent, h5group)
         newfeature.link_type = link_type
         newfeature.data = data
         newfeature._h5group.set_attr("created_at",
@@ -39,6 +40,10 @@ class Feature(object):
         return self._h5group.get_attr("entity_id")
 
     @property
+    def file(self):
+        return self._file
+
+    @property
     def link_type(self):
         return LinkType(self._h5group.get_attr("link_type"))
 
@@ -48,7 +53,7 @@ class Feature(object):
             lt = lt.lower()
         lt = LinkType(lt)
         self._h5group.set_attr("link_type", lt.value)
-        if self._parent._parent._parent.time_auto_update:
+        if self.file.auto_update_timestamps:
             t = util.now_int()
             self._h5group.set_attr("updated_at", util.time_to_str(t))
 
@@ -56,7 +61,7 @@ class Feature(object):
     def data(self):
         if "data" not in self._h5group:
             raise RuntimeError("Feature.data: DataArray not found!")
-        return DataArray(self._parent._parent,
+        return DataArray(self.file, self._parent._parent,
                          self._h5group.open_group("data"))
 
     @data.setter
@@ -69,7 +74,7 @@ class Feature(object):
         if "data" in self._h5group:
             del self._h5group["data"]
         self._h5group.create_link(da, "data")
-        if self._parent._parent._parent.time_auto_update:
+        if self.file.auto_update_timestamps:
             t = util.now_int()
             self._h5group.set_attr("updated_at", util.time_to_str(t))
 

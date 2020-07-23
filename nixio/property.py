@@ -56,7 +56,7 @@ class OdmlType(Enum):
               DataType.get_dtype(value) == DataType.Bool):
             return True
         elif (self == self.Float and
-              DataType.get_dtype(value) == DataType.Float):
+              DataType.get_dtype(value) == DataType.Double):
             return True
         elif self == self.Int and DataType.get_dtype(value) == DataType.Int64:
             return True
@@ -77,10 +77,9 @@ class OdmlType(Enum):
         :param dtype: nix DataType
         :return: OdmlType
         """
-
-        if dtype == DataType.Float:
+        if dtype in DataType.FloatTypes:
             return cls.Float
-        elif dtype == DataType.Int64:
+        elif dtype in DataType.IntTypes:
             return cls.Int
         elif dtype == DataType.String:
             return cls.String
@@ -92,16 +91,19 @@ class OdmlType(Enum):
 
 class Property(Entity):
     """An odML Property"""
-    def __init__(self, nixparent, h5dataset):
-        super(Property, self).__init__(nixparent, h5dataset)
+    def __init__(self, nixfile, nixparent, h5dataset):
+        super(Property, self).__init__(nixfile, nixparent, h5dataset)
         self._h5dataset = self._h5group
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, dtype, oid=None):
+    def create_new(cls, nixfile, nixparent, h5parent, name,
+                   dtype, shape=None, oid=None):
+        if shape is None or shape[0] == 0:
+            shape = (8, )
         util.check_entity_name(name)
         dtype = cls._make_h5_dtype(dtype)
 
-        h5dataset = h5parent.create_dataset(name, shape=(0,), dtype=dtype)
+        h5dataset = h5parent.create_dataset(name, shape=shape, dtype=dtype)
         h5dataset.set_attr("name", name)
 
         if not util.is_uuid(oid):
@@ -109,7 +111,7 @@ class Property(Entity):
 
         h5dataset.set_attr("entity_id", oid)
 
-        newentity = cls(nixparent, h5dataset)
+        newentity = cls(nixfile, nixparent, h5dataset)
         newentity.force_created_at()
         newentity.force_updated_at()
 
@@ -146,8 +148,8 @@ class Property(Entity):
     @property
     def uncertainty(self):
         dataset = self._h5dataset
-        x, y, z = dataset._parent.file.attrs["version"]
-        if x < 1 or (x == 1 and y < 1) or (x == 1 and y == 1 and z < 1):
+        filever = tuple(dataset._parent.file.attrs["version"])
+        if filever < (1, 1, 1):
             val = self._h5dataset.dataset[:]
             v = val[0]["uncertainty"]
             return v
@@ -162,8 +164,8 @@ class Property(Entity):
     @property
     def reference(self):
         dataset = self._h5dataset
-        x, y, z = dataset._parent.file.attrs["version"]
-        if x < 1 or (x == 1 and y < 1) or (x == 1 and y == 1 and z < 1):
+        filever = tuple(dataset._parent.file.attrs["version"])
+        if filever < (1, 1, 1):
             val = self._h5dataset.dataset[:]
             v = val[0]["reference"]
             return v
@@ -229,17 +231,13 @@ class Property(Entity):
 
     def _read_old_values(self):
         val = self._h5dataset.dataset[:]
-        val_tu = tuple()
-        for v in val:
-            v = v["value"]
-            val_tu += (v,)
-        return val_tu
+        return tuple(v["value"] for v in val)
 
     @property
     def values(self):
         dataset = self._h5dataset
-        x, y, z = dataset._parent.file.attrs["version"]
-        if x < 1 or (x == 1 and y < 1) or (x == 1 and y == 1 and z < 1):
+        filever = tuple(dataset._parent.file.attrs["version"])
+        if filever < (1, 1, 1):
             v = self._read_old_values()
             return v
         if not sum(dataset.shape):

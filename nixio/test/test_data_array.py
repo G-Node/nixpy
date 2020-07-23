@@ -7,6 +7,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import os
+import time
 from six import string_types
 import sys
 import unittest
@@ -14,7 +15,6 @@ import numpy as np
 import nixio as nix
 from nixio.exceptions import IncompatibleDimensions
 from .tmp import TempDir
-import six
 
 
 class TestDataArray(unittest.TestCase):
@@ -137,10 +137,6 @@ class TestDataArray(unittest.TestCase):
 
         assert(len(self.array) == len(data))
 
-        # indexing support in 1-d arrays
-        # self.assertRaises(IndexError, lambda: self.array[1:4:5])
-        # self.assertRaises(IndexError, lambda: self.array[[1, 3, ]])
-
         dout = np.array([self.array[i] for i in range(100)])
         assert(np.array_equal(data, dout))
 
@@ -228,12 +224,9 @@ class TestDataArray(unittest.TestCase):
         assert(test_ten == [x for x in da])
 
         # test for exceptions
-        self.assertRaises(ValueError,
-                          lambda: self.block.create_data_array('x', 'y'))
-        self.assertRaises(ValueError,
-                          lambda: self.block.create_data_array(
-                              'x', 'y', data=test_data, shape=(1, 1, 1)
-                          ))
+        self.assertRaises(ValueError, self.block.create_data_array, 'x', 'y')
+        self.assertRaises(ValueError, self.block.create_data_array,
+                          'x', 'y', data=test_data, shape=(1, 1, 1))
 
         # test appending
         data = np.zeros((10, 5))
@@ -247,8 +240,8 @@ class TestDataArray(unittest.TestCase):
         da.append(to_append, axis=1)
         assert(da.shape == (12, 7))
 
-        self.assertRaises(ValueError, lambda: da.append(np.zeros((3, 3, 3))))
-        self.assertRaises(ValueError, lambda: da.append(np.zeros((5, 5))))
+        self.assertRaises(ValueError, da.append, np.zeros((3, 3, 3)))
+        self.assertRaises(ValueError, da.append, np.zeros((5, 5)))
 
     def test_data_array_dtype(self):
         da = self.block.create_data_array('dtype_f8', 'b', 'f8', (10, 10))
@@ -318,46 +311,6 @@ class TestDataArray(unittest.TestCase):
 
         self.array.delete_dimensions()
 
-        assert(len(self.array.dimensions) == 0)
-        self.array.append_alias_range_dimension()
-        assert(len(self.array.dimensions) == 1)
-        self.array.delete_dimensions()
-        self.array.append_alias_range_dimension()
-        assert(len(self.array.dimensions) == 1)
-
-        self.assertRaises(ValueError,
-                          lambda: self.array.append_alias_range_dimension())
-        self.assertRaises(ValueError,
-                          lambda: self.array.append_alias_range_dimension())
-        string_array = self.block.create_data_array('string_array',
-                                                    'nix.texts',
-                                                    dtype=nix.DataType.String,
-                                                    shape=(10,))
-        self.assertRaises(ValueError,
-                          lambda: string_array.append_alias_range_dimension())
-        assert(len(string_array.dimensions) == 0)
-        del self.block.data_arrays['string_array']
-
-        array_2D = self.block.create_data_array(
-            'array_2d', 'nix.2d', dtype=nix.DataType.Double, shape=(10, 10)
-        )
-        self.assertRaises(ValueError,
-                          lambda: array_2D.append_alias_range_dimension())
-        assert(len(array_2D.dimensions) == 0)
-        del self.block.data_arrays['array_2d']
-
-        # alias range dimension with non-SI unit
-        self.array.delete_dimensions()
-        self.array.unit = "10 * ms"
-        with self.assertRaises(ValueError):
-            self.array.append_alias_range_dimension()
-
-        self.array.delete_dimensions()
-        self.array.unit = None
-        self.array.append_alias_range_dimension()
-        with self.assertRaises(ValueError):
-            self.array.unit = "10 * ms"
-
     def test_data_array_sources(self):
         source1 = self.block.create_source("source1", "channel")
         source2 = self.block.create_source("source2", "electrode")
@@ -367,7 +320,7 @@ class TestDataArray(unittest.TestCase):
         self.array.sources.append(source1)
         self.array.sources.append(source2)
 
-        self.assertRaises(TypeError, lambda: self.array.sources.append(100))
+        self.assertRaises(TypeError, self.array.sources.append, 100)
 
         assert(len(self.array.sources) == 2)
         assert(source1 in self.array.sources)
@@ -478,3 +431,93 @@ class TestDataArray(unittest.TestCase):
 
         with self.assertRaises(IncompatibleDimensions):
             da3d.get_slice((0, 0, 0), (3, 9, 40, 1))
+
+    def test_dim_one_based(self):
+        self.array.append_set_dimension()
+        self.array.append_range_dimension(range(10))
+        self.array.append_sampled_dimension(0.1)
+        dim_container_one_based = self.array.iter_dimensions()
+        for idx, dim in dim_container_one_based:
+            assert self.array.dimensions[idx-1].dimension_type ==\
+                dim.dimension_type
+
+    def test_timestamp_autoupdate(self):
+        array = self.block.create_data_array("array.time", "signal",
+                                             nix.DataType.Double, (100, ))
+        # Append dimensions and check time
+        datime = array.updated_at
+        time.sleep(1)
+        array.append_set_dimension()
+        self.assertNotEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.append_sampled_dimension(sampling_interval=0.1)
+        self.assertNotEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.append_range_dimension(ticks=[0.1])
+        self.assertNotEqual(datime, array.updated_at)
+
+        # other properties
+        datime = array.updated_at
+        time.sleep(1)
+        array.polynom_coefficients = [1.1, 2.2]
+        self.assertNotEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.expansion_origin = -1
+        self.assertNotEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.label = "lbl"
+        self.assertNotEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.unit = "Ms"
+        self.assertNotEqual(datime, array.updated_at)
+
+    def test_timestamp_noautoupdate(self):
+        self.file.auto_update_timestamps = False
+        array = self.block.create_data_array("array.time", "signal",
+                                             nix.DataType.Double, (100, ))
+        # Append dimensions and check time
+        datime = array.updated_at
+        time.sleep(1)
+        array.append_set_dimension()
+        self.assertEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.append_sampled_dimension(sampling_interval=0.1)
+        self.assertEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.append_range_dimension(ticks=[0.1])
+        self.assertEqual(datime, array.updated_at)
+
+        # other properties
+        datime = array.updated_at
+        time.sleep(1)
+        array.polynom_coefficients = [1.1, 2.2]
+        self.assertEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.expansion_origin = -1
+        self.assertEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.label = "lbl"
+        self.assertEqual(datime, array.updated_at)
+
+        datime = array.updated_at
+        time.sleep(1)
+        array.unit = "Ms"
+        self.assertEqual(datime, array.updated_at)

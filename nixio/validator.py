@@ -72,6 +72,8 @@ class ValidationError(object):
                           "is not set")
     InvalidSamplingInterval = ("sampling interval for dimension {} "
                                "is not valid (interval > 0)")
+    DataFrameMismatch = ("referenced data frame for dimension {} does "
+                         "not have the same row count as the data array")
     NoData = "data is not set"
     NoLinkType = "link_type is not set"
 
@@ -79,6 +81,7 @@ class ValidationError(object):
 class ValidationWarning(object):
     NoVersion = "version is not set"
     NoFormat = "format is not set"
+    NoFileID = "file ID is not set"
     InvalidUnit = "unit is not SI or composite of SI units"
     NoExpansionOrigin = ("polynomial coefficients for calibration are set, "
                          "but expansion origin is missing")
@@ -107,6 +110,8 @@ def check_file(nixfile):
         file_warnings.append(ValidationWarning.NoVersion)
     if not nixfile.format:
         file_warnings.append(ValidationWarning.NoFormat)
+    if not nixfile.id and nixfile.version and nixfile.version >= (1, 2, 0):
+        file_warnings.append(ValidationWarning.NoFileID)
     if file_warnings:
         results["warnings"][nixfile] = file_warnings
 
@@ -233,6 +238,10 @@ def check_data_array(da):
                 # empty labels is allowed
                 errors.append(ValidationError.SetDimLabelsMismatch.format(idx))
             dim_errors, dim_warnings = check_set_dimension(dim, idx)
+        elif dim.dimension_type == DimensionType.DataFrame:
+            df_len = dim.data_frame.row_count()
+            if df_len != da.shape[0]:
+                dim_errors, dim_warnings = check_df_dimension(dim, idx)
         errors.extend(dim_errors)
         warnings.extend(dim_warnings)
     return errors, warnings
@@ -432,7 +441,7 @@ def check_set_dimension(dim, idx):
 
 def check_sampled_dimension(dim, idx):
     """
-    Validate a SetDimension and return all errors and warnings.
+    Validate a SampledDimension and return all errors and warnings.
 
     :returns: A list of 'errors' and a list of 'warnings'
     """

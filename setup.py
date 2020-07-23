@@ -82,5 +82,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     data_files=get_wheel_data(),
-    entry_points={'console_scripts': ['nixio-validate=nixio.cmd:validatemain']}
+    entry_points={'console_scripts': [
+        'nixio-validate=nixio.cmd.validate:main',
+        'nixio-upgrade=nixio.cmd.upgrade:main',
+    ]}
 )

@@ -38,8 +38,9 @@ from .section import Section
 
 class Block(Entity):
 
-    def __init__(self, nixparent, h5group, compression=Compression.Auto):
-        super(Block, self).__init__(nixparent, h5group)
+    def __init__(self, nixfile, nixparent, h5group,
+                 compression=Compression.Auto):
+        super(Block, self).__init__(nixfile, nixparent, h5group)
         self._groups = None
         self._data_arrays = None
         self._tags = None
@@ -49,15 +50,16 @@ class Block(Entity):
         self._data_frames = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, compression):
-        newentity = super(Block, cls)._create_new(nixparent, h5parent,
-                                                  name, type_)
+    def create_new(cls, nixparent, h5parent, name, type_, compression):
+        nixfile = nixparent  # file is parent
+        newentity = super(Block, cls).create_new(nixfile, nixparent, h5parent,
+                                                 name, type_)
         newentity._compr = compression
         return newentity
 
     # MultiTag
-    def create_multi_tag(self, name="", type_="", positions=0,
-                         copy_from=None, keep_copy_id=True):
+    def create_multi_tag(self, name="", type_="", positions=None,
+                         extents=None, copy_from=None, keep_copy_id=True):
         """
         Create/copy a new multi tag for this block.
 
@@ -83,13 +85,41 @@ class Block(Entity):
             return self.multi_tags[id]
 
         util.check_entity_name_and_type(name, type_)
-        util.check_entity_input(positions)
-        if not isinstance(positions, DataArray):
-            raise TypeError("DataArray expected for 'positions'")
         multi_tags = self._h5group.open_group("multi_tags")
         if name in multi_tags:
             raise exceptions.DuplicateName("create_multi_tag")
-        mtag = MultiTag._create_new(self, multi_tags, name, type_, positions)
+        poscreated = False
+        extcreated = False
+        try:
+            if not isinstance(positions, DataArray):
+                da_name = "{}-positions".format(name)
+                positions = self.create_data_array(
+                    da_name, "{}-positions".format(type_), data=positions
+                )
+                poscreated = True
+            if not isinstance(extents, DataArray) and extents is not None:
+                da_name = "{}-extents".format(name)
+                extents = self.create_data_array(da_name,
+                                                 "{}-extents".format(type_),
+                                                 data=extents)
+                extcreated = True
+            mtag = MultiTag.create_new(self.file, self, multi_tags,
+                                       name, type_, positions)
+        except Exception as e:
+            msg = "MultiTag Creation Failed"
+            if poscreated:
+                del self.data_arrays["{}-positions".format(name)]
+            else:
+                msg += " due to invalid positions"
+            if extcreated:
+                del self.data_arrays["{}-extents".format(name)]
+            elif poscreated and not extcreated:
+                msg += " due to invalid extents"
+            print(msg)
+            raise e
+
+        if extents is not None:
+            mtag.extents = extents
         return mtag
 
     # Tag
@@ -122,7 +152,7 @@ class Block(Entity):
         tags = self._h5group.open_group("tags")
         if name in tags:
             raise exceptions.DuplicateName("create_tag")
-        tag = Tag._create_new(self, tags, name, type_, position)
+        tag = Tag.create_new(self.file, self, tags, name, type_, position)
         return tag
 
     # Source
@@ -142,7 +172,7 @@ class Block(Entity):
         sources = self._h5group.open_group("sources")
         if name in sources:
             raise exceptions.DuplicateName("create_source")
-        src = Source._create_new(self, sources, name, type_)
+        src = Source.create_new(self.file, self, sources, name, type_)
         return src
 
     # Group
@@ -162,7 +192,7 @@ class Block(Entity):
         groups = self._h5group.open_group("groups")
         if name in groups:
             raise exceptions.DuplicateName("open_group")
-        grp = Group._create_new(self, groups, name, type_)
+        grp = Group.create_new(self.file, self, groups, name, type_)
         return grp
 
     def create_data_array(self, name="", array_type="", dtype=None, shape=None,
@@ -222,8 +252,8 @@ class Block(Entity):
             raise exceptions.DuplicateName("create_data_array")
         if compression == Compression.Auto:
             compression = self._compr
-        da = DataArray._create_new(self, data_arrays, name, array_type,
-                                   dtype, shape, compression)
+        da = DataArray.create_new(self.file, self, data_arrays, name, array_type,
+                                  dtype, shape, compression)
         if data is not None:
             da.write_direct(data)
         return da
@@ -300,24 +330,26 @@ class Block(Entity):
                     )
                 else:  # col_dtypes is None and data is None
                     raise ValueError(
-                           "The data type of each column have to be specified"
+                        "The data type of each column have to be specified"
                     )
+                if len(col_names) != len(col_dict):
+                    raise exceptions.DuplicateColumnName
             else:  # if col_names is None
                 if data is not None and type(data[0]) == np.void:
                     col_dtype = data[0].dtype
-                    for i, dt in enumerate(col_dtype.fields.values()):
-                        if dt[0] == np.dtype(str):
-                            cn = list(col_dtype.fields.keys())
-                            raw_dt = col_dtype.fields.values()
-                            raw_dt = list(raw_dt)
-                            raw_dt_list = [ele[0] for ele in raw_dt]
-                            col_dict = OrderedDict(zip(cn, raw_dt_list))
+                    cn = list(col_dtype.fields.keys())
+                    raw_dt = col_dtype.fields.values()
+                    raw_dt = list(raw_dt)
+                    raw_dt_list = [ele[0] for ele in raw_dt]
+                    col_dict = OrderedDict(zip(cn, raw_dt_list))
+                    if len(col_dtype.fields.values()) != len(col_dict):
+                        raise exceptions.DuplicateColumnName
 
                 else:
                     # data is None or type(data[0]) != np.void
                     # data_type doesnt matter
                     raise ValueError(
-                           "No information about column names is provided!"
+                        "No information about column names is provided!"
                     )
 
         if col_dict is not None:
@@ -326,11 +358,13 @@ class Block(Entity):
                     if any(issubclass(dt, st) for st in string_types) \
                             or issubclass(dt, np.string_):
                         col_dict[nam] = util.vlen_str_dtype
+                if 'U' in str(dt) or dt == np.string_:
+                    col_dict[nam] = util.vlen_str_dtype
             dt_arr = list(col_dict.items())
             col_dtype = np.dtype(dt_arr)
 
-        df = DataFrame._create_new(self, data_frames, name,
-                                   type_, shape, col_dtype, compression)
+        df = DataFrame.create_new(self.file, self, data_frames, name,
+                                  type_, shape, col_dtype, compression)
 
         if data is not None:
             if type(data[0]) == np.void:
@@ -477,7 +511,7 @@ class Block(Entity):
         This is a read only attribute.
         """
         if self._sources is None:
-            self._sources = SourceContainer("sources", self, Source)
+            self._sources = SourceContainer("sources", self.file, self, Source)
         return self._sources
 
     @property
@@ -489,7 +523,8 @@ class Block(Entity):
         This is a read only attribute.
         """
         if self._multi_tags is None:
-            self._multi_tags = Container("multi_tags", self, MultiTag)
+            self._multi_tags = Container("multi_tags", self.file,
+                                         self, MultiTag)
         return self._multi_tags
 
     @property
@@ -501,7 +536,7 @@ class Block(Entity):
         This is a read only attribute.
         """
         if self._tags is None:
-            self._tags = Container("tags", self, Tag)
+            self._tags = Container("tags", self.file, self, Tag)
         return self._tags
 
     @property
@@ -514,13 +549,15 @@ class Block(Entity):
         This is a read only attribute.
         """
         if self._data_arrays is None:
-            self._data_arrays = Container("data_arrays", self, DataArray)
+            self._data_arrays = Container("data_arrays", self.file,
+                                          self, DataArray)
         return self._data_arrays
 
     @property
     def data_frames(self):
         if self._data_frames is None:
-            self._data_frames = Container("data_frames", self, DataFrame)
+            self._data_frames = Container("data_frames", self.file,
+                                          self, DataFrame)
         return self._data_frames
 
     @property
@@ -532,7 +569,7 @@ class Block(Entity):
         This is a read only attribute.
         """
         if self._groups is None:
-            self._groups = Container("groups", self, Group)
+            self._groups = Container("groups", self.file, self, Group)
         return self._groups
 
     # metadata
@@ -546,7 +583,8 @@ class Block(Entity):
         :type: Section
         """
         if "metadata" in self._h5group:
-            return Section(None, self._h5group.open_group("metadata"))
+            return Section(self.file, None,
+                           self._h5group.open_group("metadata"))
         else:
             return None
 

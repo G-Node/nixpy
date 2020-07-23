@@ -21,13 +21,7 @@ pygments_style          = 'sphinx'
 # html options
 htmlhelp_basename       = 'nixio'
 try:
-    import alabaster
-
-    html_theme_path     = [alabaster.get_path()]
-    html_static_path    = ['_static']
-    extensions          += ['alabaster']
-    html_theme          = 'alabaster'
-
+    html_theme          = 'sphinx_rtd_theme'
     html_sidebars       = {
         '**': [
                 'about.html', 'navigation.html', 'searchbox.html',
@@ -49,6 +43,6 @@ except ImportError:
 
 # intersphinx configuration
 intersphinx_mapping     = {
-    'http://docs.python.org/2.7' : None,
+    'http://docs.python.org/' : None,
     'http://docs.scipy.org/doc/numpy': None
 }

@@ -23,14 +23,15 @@ class Container(object):
     checking and instantiations)
     """
 
-    def __init__(self, name, parent, itemclass):
+    def __init__(self, name, nixfile, parent, itemclass):
         self._backend = parent._h5group.open_group(name)
         self._itemclass = itemclass
+        self._file = nixfile
         self._parent = parent
         self._name = name
 
     def _inst_item(self, item):
-        return self._itemclass(self._parent, item)
+        return self._itemclass(self._file, self._parent, item)
 
     def __len__(self):
         return len(self._backend)
@@ -56,10 +57,7 @@ class Container(object):
                     self._itemclass.__name__)
             )
 
-        root = self._backend.h5root
-        if not root:
-            root = self._parent._h5group
-        root.delete_all([item.id])
+        self._file._h5group.delete_all([item.id])
 
     def __iter__(self):
         for group in self._backend:
@@ -121,8 +119,7 @@ class SectionContainer(Container):
         # the root block
         secids = [s.id for s in item.find_sections()]
 
-        root = self._backend.file
-        root.delete_all(secids)
+        self._file._h5group.delete_all(secids)
 
 
 class SourceContainer(Container):
@@ -145,9 +142,7 @@ class SourceContainer(Container):
         # the root block
         srcids = [s.id for s in item.find_sources()]
         srcids.append(item.id)
-
-        root = self._backend.h5root
-        root.delete_all(srcids)
+        self._file._h5group.delete_all(srcids)
 
 
 class LinkContainer(Container):
@@ -169,15 +164,19 @@ class LinkContainer(Container):
         Group.multi_tags
 
     :param name: Name of the container
+
     :param parent: Parent H5Group where this container will be created
+
     :param itemclass: The class of the objects this container holds (for
-    checking and instantiations)
+                      checking and instantiations)
+
     :param itemstore: The location (Container) where the original objects
-    are stored and linked to.
+                      are stored and linked to.
     """
 
     def __init__(self, name, parent, itemclass, itemstore):
-        super(LinkContainer, self).__init__(name, parent, itemclass)
+        super(LinkContainer, self).__init__(name, parent.file,
+                                            parent, itemclass)
         self._itemstore = itemstore
 
     def __delitem__(self, item):
@@ -246,7 +245,7 @@ class LinkContainer(Container):
         return False
 
     def _inst_item(self, item):
-        return self._itemclass(self._itemstore._parent, item)
+        return self._itemclass(self._file, self._itemstore._parent, item)
 
     @staticmethod
     def _item_key(item):

@@ -1,4 +1,3 @@
 include LICENSE README.rst
 recursive-include docs *
-recursive-include scripts *
 include nixio/info.json

@@ -154,13 +154,18 @@ class TestValidate (unittest.TestCase):
         assert not res["warnings"], self.print_all_results(res)
 
     def test_check_file(self):
-        self.file.version = tuple()
+        self.file._root.set_attr("version", tuple())
         res = self.file.validate()
         assert VW.NoVersion in res["warnings"][self.file]
 
-        self.file.format = ""
+        self.file._root.set_attr("format", "")
         res = self.file.validate()
         assert VW.NoFormat in res["warnings"][self.file]
+
+        self.file._root.set_attr("version", (1, 2, 0))  # needed for ID check
+        self.file._root.set_attr("id", "")
+        res = self.file.validate()
+        assert VW.NoFileID in res["warnings"][self.file]
 
     def test_check_block(self):
         block = self.file.blocks[0]
@@ -240,18 +245,16 @@ class TestValidate (unittest.TestCase):
     def test_incorrect_dim_index(self):
         da = self.file.blocks[1].data_arrays["data-1d"]
         da.delete_dimensions()
-        dimgroup = da._h5group.open_group("dimensions")
         # This wont work if we ever change the internals
-        nix.SetDimension._create_new(dimgroup, "10")
+        nix.SetDimension.create_new(da, "10")
         res = self.file.validate()
         assert VE.IncorrectDimensionIndex.format(1, 10) in res["errors"][da]
 
     def test_invalid_dim_index(self):
         da = self.file.blocks[1].data_arrays["data-1d"]
         da.delete_dimensions()
-        dimgroup = da._h5group.open_group("dimensions")
         # This wont work if we ever change the internals
-        nix.SetDimension._create_new(dimgroup, "-1")
+        nix.SetDimension.create_new(da, "-1")
         res = self.file.validate()
         assert VE.InvalidDimensionIndex.format(1) in res["errors"][da]
 
@@ -460,3 +463,14 @@ class TestValidate (unittest.TestCase):
         dim.offset = 10
         res = self.file.validate()
         assert VW.OffsetNoUnit.format(2) in res["warnings"][da]
+
+    @staticmethod
+    def print_all_results(res):
+        print("Errors")
+        for obj, msg in res["errors"].items():
+            name = obj.name if hasattr(obj, "name") else str(obj)
+            print("  {}: {}".format(name, msg))
+        print("Warnings")
+        for obj, msg in res["warnings"].items():
+            name = obj.name if hasattr(obj, "name") else str(obj)
+            print("  {}: {}".format(name, msg))

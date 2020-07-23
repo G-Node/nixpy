@@ -7,6 +7,7 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import warnings
+import numpy as np
 from .tag import BaseTag, FeatureContainer
 from .container import LinkContainer
 from .feature import Feature
@@ -21,16 +22,16 @@ from .section import Section
 
 class MultiTag(BaseTag):
 
-    def __init__(self, nixparent, h5group):
-        super(MultiTag, self).__init__(nixparent, h5group)
+    def __init__(self, nixfile, nixparent, h5group):
+        super(MultiTag, self).__init__(nixfile, nixparent, h5group)
         self._sources = None
         self._references = None
         self._features = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, positions):
-        newentity = super(MultiTag, cls)._create_new(nixparent, h5parent,
-                                                     name, type_)
+    def create_new(cls, nixfile, nixparent, h5parent, name, type_, positions):
+        newentity = super(MultiTag, cls).create_new(nixfile, nixparent,
+                                                    h5parent, name, type_)
         newentity.positions = positions
         return newentity
 
@@ -43,7 +44,8 @@ class MultiTag(BaseTag):
         """
         if "positions" not in self._h5group:
             raise RuntimeError("MultiTag.positions: DataArray not found!")
-        return DataArray(self._parent, self._h5group.open_group("positions"))
+        return DataArray(self.file, self._parent,
+                         self._h5group.open_group("positions"))
 
     @positions.setter
     def positions(self, da):
@@ -52,7 +54,7 @@ class MultiTag(BaseTag):
         if "positions" in self._h5group:
             del self._h5group["positions"]
         self._h5group.create_link(da, "positions")
-        if self._parent._parent.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
 
     @property
@@ -64,9 +66,9 @@ class MultiTag(BaseTag):
         :type: DataArray or None
         """
         if "extents" in self._h5group:
-            return DataArray(self._parent, self._h5group.open_group("extents"))
-        else:
-            return None
+            return DataArray(self.file, self._parent,
+                             self._h5group.open_group("extents"))
+        return None
 
     @extents.setter
     def extents(self, da):
@@ -74,7 +76,7 @@ class MultiTag(BaseTag):
             del self._h5group["extents"]
         else:
             self._h5group.create_link(da, "extents")
-        if self._parent._parent.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
 
     @property
@@ -105,18 +107,13 @@ class MultiTag(BaseTag):
         :type: Container of Feature.
         """
         if self._features is None:
-            self._features = FeatureContainer("features", self, Feature)
+            self._features = FeatureContainer("features", self.file,
+                                              self, Feature)
         return self._features
-
-    def _get_slice(self, data, index):
-        offset, count = self._get_offset_and_count(data, index)
-        sl = tuple(slice(o, o+c) for o, c in zip(offset, count))
-        return sl
 
     def _calc_data_slices(self, data, index):
         positions = self.positions
         extents = self.extents
-
         pos_size = positions.data_extent if positions else tuple()
         ext_size = extents.data_extent if extents else tuple()
 
@@ -126,26 +123,18 @@ class MultiTag(BaseTag):
         if extents and index >= ext_size[0]:
             raise OutOfBounds("Index out of bounds of extents!")
 
-        incdim_exception = IncompatibleDimensions(
-                "Number of dimensions in positions does not match "
-                "dimensionality of data",
-                "MultiTag._calc_data_slices"
-            )
-
-        if len(pos_size) == 1 and len(data.dimensions) != 1:
-            raise incdim_exception
-
-        if len(pos_size) > 1 and pos_size[1] > len(data.dimensions):
-            raise incdim_exception
-
-        if (extents and len(ext_size) > 1 and
-                ext_size[1] > len(data.dimensions)):
-            raise incdim_exception
+        if extents and positions.data_extent != extents.data_extent:
+            raise IncompatibleDimensions(
+                "Number of dimensions in position and extent do not match",
+                "MultiTag._calc_data_slices")
 
         if len(pos_size) == 1:
-            dimpos = positions[0:len(data.dimensions)]
+            dimpos = np.array([positions[index]])
         else:
             dimpos = positions[index, 0:len(data.dimensions)]
+        if len(data.dimensions) > len(dimpos):
+            extension = np.array([0]*(len(data.dimensions)-len(dimpos)))
+            dimpos = np.concatenate((dimpos, extension))
         units = self.units
         starts, stops = list(), list()
         for idx in range(dimpos.size):
@@ -155,8 +144,16 @@ class MultiTag(BaseTag):
                 unit = units[idx]
             starts.append(self._pos_to_idx(dimpos.item(idx), unit, dim))
 
-        if extents:
-            extent = extents[index, 0:len(data.dimensions)]
+        if extents is not None:
+            if len(ext_size) == 1:
+                extent = np.array([extents[index]])
+            else:
+                extent = extents[index, 0:len(data.dimensions)]
+            if len(data.dimensions) > len(extent):
+                da_len = list(data.data_extent)
+                ndim = len(extent)
+                extension = [x - 1 for x in da_len[ndim:]]
+                extent = np.concatenate((extent, extension))
             for idx in range(extent.size):
                 dim = data.dimensions[idx]
                 unit = None
@@ -168,8 +165,7 @@ class MultiTag(BaseTag):
                 minstop = starts[idx] + 1
                 stops.append(max(stop, minstop))
         else:
-            stops = [start+1 for start in starts]
-
+            stops = [start + 1 for start in starts]
         return tuple(slice(start, stop) for start, stop in zip(starts, stops))
 
     def retrieve_data(self, posidx, refidx):
@@ -190,21 +186,8 @@ class MultiTag(BaseTag):
             raise OutOfBounds("Index out of bounds of positions or extents!")
 
         ref = references[refidx]
-        dimcount = len(ref.dimensions)
-        if len(positions.data_extent) == 1 and dimcount != 1:
-            raise IncompatibleDimensions(
-                "Number of dimensions in position or extent do not match "
-                "dimensionality of data",
-                "MultiTag.tagged_data")
-        if len(positions.data_extent) > 1:
-            if (positions.data_extent[1] > dimcount or
-                    extents and extents.data_extent[1] > dimcount):
-                raise IncompatibleDimensions(
-                    "Number of dimensions in position or extent do not match "
-                    "dimensionality of data",
-                    "MultiTag.tagged_data")
-        slices = self._calc_data_slices(ref, posidx)
 
+        slices = self._calc_data_slices(ref, posidx)
         if not self._slices_in_data(ref, slices):
             raise OutOfBounds("References data slice out of the extent of the "
                               "DataArray!")
@@ -218,9 +201,8 @@ class MultiTag(BaseTag):
 
     def feature_data(self, posidx, featidx):
         if len(self.features) == 0:
-            raise OutOfBounds(
-                "There are no features associated with this tag!"
-            )
+            msg = "There are no features associated with this tag!"
+            raise OutOfBounds(msg)
 
         try:
             feat = self.features[featidx]
@@ -245,12 +227,12 @@ class MultiTag(BaseTag):
             if posidx > da.data_extent[0]:
                 raise OutOfBounds("Position is larger than the data stored "
                                   "in the Feature!")
-            slices = [slice(posidx, posidx+1)]
+            slices = [slice(posidx, posidx + 1)]
             slices.extend(slice(0, stop) for stop in da.data_extent[1:])
 
             if not self._slices_in_data(da, slices):
-                OutOfBounds("Requested data slice out of the extent of the "
-                            "Feature!")
+                msg = "Requested data slice out of the extent of the Feature!"
+                raise OutOfBounds(msg)
             return DataView(da, slices)
         # For untagged return the full data
         slices = tuple(slice(0, stop) for stop in da.data_extent)
@@ -281,7 +263,7 @@ class MultiTag(BaseTag):
         :type: Section
         """
         if "metadata" in self._h5group:
-            return Section(None, self._h5group.open_group("metadata"))
+            return Section(self.file, None, self._h5group.open_group("metadata"))
         else:
             return None
 

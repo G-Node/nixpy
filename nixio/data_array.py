@@ -20,7 +20,7 @@ from .dimensions import (Dimension, SampledDimension, RangeDimension,
 from . import util
 from .compression import Compression
 
-from .exceptions import InvalidUnit, IncompatibleDimensions
+from .exceptions import IncompatibleDimensions
 from .section import Section
 
 
@@ -31,16 +31,16 @@ class DataSliceMode(Enum):
 
 class DataArray(Entity, DataSet):
 
-    def __init__(self, nixparent, h5group):
-        super(DataArray, self).__init__(nixparent, h5group)
+    def __init__(self, nixfile, nixparent, h5group):
+        super(DataArray, self).__init__(nixfile, nixparent, h5group)
         self._sources = None
         self._dimensions = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, data_type, shape,
-                    compression):
-        newentity = super(DataArray, cls)._create_new(nixparent, h5parent,
-                                                      name, type_)
+    def create_new(cls, nixfile, nixparent, h5parent, name, type_,
+                   data_type, shape, compression):
+        newentity = super(DataArray, cls).create_new(nixfile, nixparent,
+                                                     h5parent, name, type_)
         datacompr = False
         if compression == Compression.DeflateNormal:
             datacompr = True
@@ -84,12 +84,11 @@ class DataArray(Entity, DataSet):
         :returns: The newly created SetDimension.
         :rtype: SetDimension
         """
-        dimgroup = self._h5group.open_group("dimensions")
-        index = len(dimgroup) + 1
-        setdim = SetDimension._create_new(dimgroup, index)
+        index = len(self.dimensions) + 1
+        setdim = SetDimension.create_new(self, index)
         if labels:
             setdim.labels = labels
-        if self._parent._parent.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
         return setdim
 
@@ -106,21 +105,19 @@ class DataArray(Entity, DataSet):
         :returns: The newly created SampledDimension.
         :rtype: SampledDimension
         """
-        dimgroup = self._h5group.open_group("dimensions")
-        index = len(dimgroup) + 1
-        smpldim = SampledDimension._create_new(dimgroup, index,
-                                               sampling_interval)
+        index = len(self.dimensions) + 1
+        smpldim = SampledDimension.create_new(self, index, sampling_interval)
         if label:
             smpldim.label = label
         if unit:
             smpldim.unit = unit
         if offset:
             smpldim.offset = offset
-        if self._parent._parent.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
         return smpldim
 
-    def append_range_dimension(self, ticks, label=None, unit=None):
+    def append_range_dimension(self, ticks=None, label=None, unit=None):
         """
         Append a new RangeDimension to the list of existing dimension
         descriptors.
@@ -131,44 +128,14 @@ class DataArray(Entity, DataSet):
         :returns: The newly created RangeDimension.
         :rtype: RangeDimension
         """
-        dimgroup = self._h5group.open_group("dimensions")
-        index = len(dimgroup) + 1
-        rdim = RangeDimension._create_new(dimgroup, index, ticks)
+        index = len(self.dimensions) + 1
+        rdim = RangeDimension.create_new(self, index, ticks)
         if label:
             rdim.label = label
             rdim.unit = unit
-        if self._parent._parent.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
         return rdim
-
-    def append_alias_range_dimension(self):
-        """
-        Append a new RangeDimension that uses the data stored in this
-        DataArray as ticks. This works only(!) if the DataArray is 1-D and
-        the stored data is numeric. A ValueError will be raised otherwise.
-
-        :returns: The created dimension descriptor.
-        :rtype: RangeDimension
-        """
-        if (len(self.data_extent) > 1 or
-                not DataType.is_numeric_dtype(self.dtype)):
-            raise ValueError("AliasRangeDimensions only allowed for 1D "
-                             "numeric DataArrays.")
-        if self._dimension_count() > 0:
-            raise ValueError("Cannot append additional alias dimension. "
-                             "There must only be one!")
-        dimgroup = self._h5group.open_group("dimensions")
-        # check if existing unit is SI
-        if self.unit:
-            u = self.unit
-            if not (util.units.is_si(u) or util.units.is_compound(u)):
-                raise InvalidUnit(
-                    "AliasRangeDimensions are only allowed when SI or "
-                    "composites of SI units are used. "
-                    "Current SI unit is {}".format(u),
-                    "DataArray.append_alias_range_dimension"
-                )
-        return RangeDimension._create_new_alias(dimgroup, 1, self)
 
     def delete_dimensions(self):
         """
@@ -194,6 +161,14 @@ class DataArray(Entity, DataSet):
             return SetDimension(h5dim, index)
         else:
             raise TypeError("Invalid Dimension object in file.")
+
+    def iter_dimensions(self):
+        """
+        1-based index dimension iterator. The method returns a generator
+        which returns the index starting from one and the dimensions.
+        """
+        for idx, dim in enumerate(self.dimensions):
+            yield idx+1, dim
 
     @property
     def dtype(self):
@@ -224,7 +199,7 @@ class DataArray(Entity, DataSet):
         else:
             dtype = DataType.Double
             self._h5group.write_data("polynom_coefficients", coeff, dtype)
-        if self._parent._parent.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
 
     @property
@@ -242,7 +217,7 @@ class DataArray(Entity, DataSet):
     def expansion_origin(self, eo):
         util.check_attr_type(eo, Number)
         self._h5group.set_attr("expansion_origin", eo)
-        if self._parent._parent.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
 
     @property
@@ -260,7 +235,7 @@ class DataArray(Entity, DataSet):
     def label(self, l):
         util.check_attr_type(l, str)
         self._h5group.set_attr("label", l)
-        if self._parent._parent.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
 
     @property
@@ -280,17 +255,8 @@ class DataArray(Entity, DataSet):
         if u == "":
             u = None
         util.check_attr_type(u, str)
-        if (self._dimension_count() == 1 and
-            self.dimensions[0].dimension_type == DimensionType.Range and
-                self.dimensions[0].is_alias and u is not None):
-            if not (util.units.is_si(u) or util.units.is_compound(u)):
-                raise InvalidUnit(
-                    "[{}]: Non-SI units are not allowed if the DataArray "
-                    "has an AliasRangeDimension.".format(u),
-                    "DataArray.unit"
-                )
         self._h5group.set_attr("unit", u)
-        if self._parent._parent.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
 
     def get_slice(self, positions, extents=None, mode=DataSliceMode.Index):
@@ -356,8 +322,8 @@ class DataArray(Entity, DataSet):
         :type: Container of dimension descriptors.
         """
         if self._dimensions is None:
-            self._dimensions = DimensionContainer("dimensions", self,
-                                                  Dimension)
+            self._dimensions = DimensionContainer("dimensions", self.file,
+                                                  self, Dimension)
         return self._dimensions
 
     # metadata
@@ -372,7 +338,8 @@ class DataArray(Entity, DataSet):
         :type: Section
         """
         if "metadata" in self._h5group:
-            return Section(None, self._h5group.open_group("metadata"))
+            return Section(self.file, None,
+                           self._h5group.open_group("metadata"))
         else:
             return None
 

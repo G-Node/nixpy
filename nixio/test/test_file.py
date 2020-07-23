@@ -10,6 +10,7 @@ import os
 import unittest
 import h5py
 import numpy as np
+import time
 
 import nixio as nix
 import nixio.file as filepy
@@ -161,11 +162,64 @@ class TestFile(unittest.TestCase):
         assert not copied_sec.sections  # children is False
         tar_file.close()
         # test copying on the same file
-        self.assertRaises(NameError, lambda: self.file.create_block(
-            copy_from=blk1))
+        self.assertRaises(NameError, self.file.create_block, copy_from=blk1)
         self.file.create_block(name="111", copy_from=blk1)
         assert self.file.blocks[0] == self.file.blocks[1]  # ID stays the same
         assert self.file.blocks[0].name != self.file.blocks[1].name
+
+    def test_timestamp_autoupdate(self):
+        # Using Block to test Entity.definition
+        blk = self.file.create_block("block", "timetest")
+        blktime = blk.updated_at
+        time.sleep(1)  # wait for time to change
+        blk.definition = "updated"
+        # no update
+        self.assertNotEqual(blk.updated_at, blktime)
+
+        rblk = self.file.blocks["block"]  # read through container
+        time.sleep(1)  # wait for time to change
+        rblk.definition = "updated again"
+        self.assertNotEqual(rblk.updated_at, blktime)
+
+        # Using Block to test Entity.type
+        blktime = blk.updated_at
+        time.sleep(1)  # wait for time to change
+        blk.type = "updated"
+        # no update
+        self.assertNotEqual(blk.updated_at, blktime)
+
+        rblk = self.file.blocks["block"]  # read through container
+        time.sleep(1)  # wait for time to change
+        rblk.type = "updated again"
+        self.assertNotEqual(rblk.updated_at, blktime)
+
+    def test_timestamp_noautoupdate(self):
+        # Using Block to test Entity.definition
+        blk = self.file.create_block("block", "timetest")
+
+        # disable timestamp autoupdating
+        self.file.auto_update_timestamps = False
+        blktime = blk.updated_at
+        time.sleep(1)  # wait for time to change
+        blk.definition = "update"
+        self.assertEqual(blk.updated_at, blktime)
+
+        rblk = self.file.blocks["block"]  # read through container
+        rblktime = rblk.updated_at
+        time.sleep(1)  # wait for time to change
+        rblk.definition = "time should change"
+        self.assertEqual(rblk.updated_at, rblktime)
+
+        blktime = blk.updated_at
+        time.sleep(1)  # wait for time to change
+        blk.type = "update"
+        self.assertEqual(blk.updated_at, blktime)
+
+        rblk = self.file.blocks["block"]  # read through container
+        rblktime = rblk.updated_at
+        time.sleep(1)  # wait for time to change
+        rblk.type = "time should change"
+        self.assertEqual(rblk.updated_at, rblktime)
 
 
 class TestFileVer(unittest.TestCase):
@@ -178,13 +232,16 @@ class TestFileVer(unittest.TestCase):
         f = nix.File.open(self.testfilename, mode)
         f.close()
 
-    def set_header(self, fformat=None, version=None):
+    def set_header(self, fformat=None, version=None, fileid=None):
         if fformat is None:
             fformat = self.fformat
         if version is None:
             version = self.filever
+        if fileid is None:
+            fileid = nix.util.create_id()
         self.h5root.attrs["format"] = fformat
         self.h5root.attrs["version"] = version
+        self.h5root.attrs["id"] = fileid
         self.h5root.attrs["created_at"] = 0
         self.h5root.attrs["updated_at"] = 0
         if "data" not in self.h5root:
@@ -246,3 +303,18 @@ class TestFileVer(unittest.TestCase):
         self.set_header(fformat="NOT_A_NIX_FILE")
         with self.assertRaises(InvalidFile):
             self.try_open(nix.FileMode.ReadOnly)
+
+    def test_bad_id(self):
+        self.set_header(fileid="")
+        with self.assertRaises(RuntimeError):
+            self.try_open(nix.FileMode.ReadOnly)
+
+        # empty file ID OK for versions older than 1.2.0
+        self.set_header(version=(1, 1, 1), fileid="")
+        self.try_open(nix.FileMode.ReadOnly)
+
+        self.set_header(version=(1, 1, 0), fileid="")
+        self.try_open(nix.FileMode.ReadOnly)
+
+        self.set_header(version=(1, 0, 0), fileid="")
+        self.try_open(nix.FileMode.ReadOnly)

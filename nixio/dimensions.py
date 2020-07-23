@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 # Copyright © 2016, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
@@ -7,6 +8,10 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 from numbers import Number
+try:
+    from collections.abc import Sequence
+except ImportError:
+    from collections import Sequence
 
 import numpy as np
 
@@ -14,6 +19,7 @@ from .datatype import DataType
 from .dimension_type import DimensionType
 from . import util
 from .container import Container
+from .exceptions import IncompatibleDimensions, OutOfBounds
 
 
 class DimensionContainer(Container):
@@ -29,27 +35,183 @@ class DimensionContainer(Container):
             DimensionType.Set: SetDimension,
         }[DimensionType(item.get_attr("dimension_type"))]
         idx = item.name
-        return cls(item, idx)
+        return cls(self._parent, idx)
+
+
+class DimensionLink(object):
+    """
+    Links a Dimension to a data object (DataArray or DataFrame).
+
+    A single vector of values from the underlying data object must be
+    specified to serve as the ticks or labels for the associated Dimension.
+
+    - A single vector of a DataArray.
+    - A single column of a DataFrame.
+    """
+
+    def __init__(self, nixfile, nixparent, h5group):
+        util.check_entity_id(h5group.get_attr("entity_id"))
+        self._h5group = h5group
+        self._parent = nixparent
+        self._file = nixfile
+
+    @classmethod
+    def create_new(cls, nixfile, nixparent, h5parent, dataobj, dotype, index):
+        id_ = util.create_id()
+        h5group = h5parent.open_group("link", True)
+        h5group.set_attr("entity_id", id_)
+        newdimlink = cls(nixfile, nixparent, h5group)
+        newdimlink._h5group.set_attr("data_object_type", dotype)
+        newdimlink._h5group.create_link(dataobj, dataobj.id)
+        newdimlink.index = index
+        now = util.time_to_str(util.now_int())
+        newdimlink._h5group.set_attr("created_at", now)
+        newdimlink._h5group.set_attr("updated_at", now)
+        return newdimlink
+
+    @property
+    def id(self):
+        self._h5group.get_attr("entity_id")
+
+    @property
+    def file(self):
+        return self._file
+
+    def _linked_group(self):
+        return self._h5group.get_by_pos(0)
+
+    @property
+    def linked_data(self):
+        grp = self._linked_group()
+        return grp.get_data("data")
+
+    @property
+    def index(self):
+        if self._data_object_type == "DataArray":
+            return tuple(self._h5group.get_attr("index"))
+        if self._data_object_type == "DataFrame":
+            return self._h5group.get_attr("index")
+        raise RuntimeError("Invalid DataObjectType attribute found in "
+                           "DimensionLink")
+
+    @index.setter
+    def index(self, index):
+        if self._data_object_type == "DataArray":
+            util.check_attr_type(index, Sequence)
+            if index.count(-1) != 1:
+                raise ValueError("Index for DimensionLink with DataArray must "
+                                 "have exactly one value equal to -1. "
+                                 "See class docstring for more information.")
+            self._h5group.set_attr("index", list(index))
+        elif self._data_object_type == "DataFrame":
+            util.check_attr_type(index, int)
+            self._h5group.set_attr("index", index)
+        else:
+            raise RuntimeError("Invalid DataObjectType attribute found in "
+                               "DimensionLink")
+
+    @property
+    def values(self):
+        """
+        Returns the values (vector or column) from the linked data object
+        (DataArray or DataFrame) specified by the LinkDimension's index.
+        """
+        data = self.linked_data
+        if self._data_object_type == "DataArray":
+            dimindex = list(self.index)
+            # replace -1 with slice(None)
+            dimindex[dimindex.index(-1)] = slice(None)
+            return data[tuple(dimindex)]
+        elif self._data_object_type == "DataFrame":
+            return tuple(row[self.index] for row in data)
+        else:
+            raise RuntimeError("Invalid DataObjectType attribute found in "
+                               "DimensionLink")
+
+    @property
+    def unit(self):
+        """
+        Returns the unit from the linked data object (DataArray or DataFrame)
+        specified by the LinkDimension's index.
+        """
+        lobj = self._linked_group()
+        if self._data_object_type == "DataArray":
+            return lobj.get_attr("unit")
+        elif self._data_object_type == "DataFrame":
+            return lobj.get_attr("units")[self.index]
+        else:
+            raise RuntimeError("Invalid DataObjectType attribute found in "
+                               "DimensionLink")
+
+    @unit.setter
+    def unit(self, unit):
+        """
+        Sets the unit of the linked data object.
+        """
+        lobj = self._linked_group()
+        if self._data_object_type == "DataArray":
+            lobj.set_attr("unit", unit)
+        elif self._data_object_type == "DataFrame":
+            units = list(lobj.get_attr("units"))
+            units[self.index] = unit
+            lobj.set_attr("units", units)
+        else:
+            raise RuntimeError("Invalid DataObjectType attribute found in "
+                               "DimensionLink")
+
+    @property
+    def label(self):
+        """
+        Returns the label of the linked data object:
+        For DataArray links, returns the label.
+        For DataFrame links, returns the name of the column specified by the
+        LinkDimension's index.
+        """
+        lobj = self._linked_group()
+        if self._data_object_type == "DataArray":
+            return lobj.get_attr("label")
+        elif self._data_object_type == "DataFrame":
+            col_dts = lobj.group["data"].dtype
+            return col_dts.names[self.index]
+        else:
+            raise RuntimeError("Invalid DataObjectType attribute found in "
+                               "DimensionLink")
+
+    @label.setter
+    def label(self, label):
+        """
+        Sets the label of the linked data objet.
+        """
+        lobj = self._linked_group()
+        if self._data_object_type == "DataArray":
+            lobj.set_attr("label", label)
+        elif self._data_object_type == "DataFrame":
+            raise RuntimeError("The label of a Dimension linked to a "
+                               "DataFrame column cannot be modified")
+        else:
+            raise RuntimeError("Invalid DataObjectType attribute found in "
+                               "DimensionLink")
+
+    @property
+    def _data_object_type(self):
+        return self._h5group.get_attr("data_object_type")
 
 
 class Dimension(object):
 
-    def __init__(self, h5group, index):
+    def __init__(self, nixfile, data_array, index):
+        dimgroup = data_array._h5group.open_group("dimensions")
+        h5group = dimgroup.open_group(str(index))
         self._h5group = h5group
         self.dim_index = int(index)
-
-    @classmethod
-    def _create_new(cls, parent, index):
-        h5group = parent.open_group(str(index))
-        newdim = cls(h5group, index)
-        return newdim
+        self._parent = data_array
+        self._file = nixfile
 
     @property
     def dimension_type(self):
         return DimensionType(self._h5group.get_attr("dimension_type"))
 
-    @dimension_type.setter
-    def _dimension_type(self, dimtype):
+    def _set_dimension_type(self, dimtype):
         dimtype = DimensionType(dimtype)
         if dimtype not in DimensionType:
             raise TypeError("Invalid dimension type.")
@@ -58,6 +220,60 @@ class Dimension(object):
     @property
     def index(self):
         return self.dim_index
+
+    def link_data_array(self, data_array, index):
+        if len(data_array.data_extent) != len(index):
+            raise IncompatibleDimensions(
+                "Length of linked DataArray indices ({}) does not match"
+                "number of DataArray dimensions ({})".format(
+                    len(data_array.data_extent), len(index)
+                ),
+                "Dimension.link_data_array"
+            )
+
+        invalid_idx_msg = (
+            "Invalid linked DataArray index: "
+            "One of the values must be -1, indicating the relevant vector. "
+            "Negative indexing is not supported."
+        )
+        if index.count(-1) != 1 or sum(idx < 0 for idx in index) != 1:
+            # TODO: Add link to relevant docs
+            raise ValueError(invalid_idx_msg)
+
+        if self.has_link:
+            self._h5group.delete("link")
+        DimensionLink.create_new(self._file, self, self._h5group,
+                                 data_array, "DataArray", index)
+
+    def link_data_frame(self, data_frame, index):
+        if not 0 <= index < len(data_frame.columns):
+            raise OutOfBounds("DataFrame index is out of bounds", index)
+        if self.has_link:
+            self._h5group.delete("link")
+        DimensionLink.create_new(self._file, self, self._h5group,
+                                 data_frame, "DataFrame", index)
+
+    @property
+    def has_link(self):
+        """
+        Return True if this Dimension links to a data object
+        (DataArray or DataFrame).
+        Read-only property.
+        """
+        if "link" in self._h5group:
+            return True
+        return False
+
+    @property
+    def dimension_link(self):
+        """
+        If the dimension has a DimensionLink to a data object, returns the
+        DimensionLink object, otherwise returns None.
+        """
+        if self.has_link:
+            link = self._h5group.get_by_name("link")
+            return DimensionLink(self._file, self, link)
+        return None
 
     def __str__(self):
         return "{}: {{index = {}}}".format(
@@ -70,13 +286,14 @@ class Dimension(object):
 
 class SampledDimension(Dimension):
 
-    def __init__(self, h5group, index):
-        super(SampledDimension, self).__init__(h5group, index)
+    def __init__(self, data_array, index):
+        nixfile = data_array.file
+        super(SampledDimension, self).__init__(nixfile, data_array, index)
 
     @classmethod
-    def _create_new(cls, parent, index, sample):
-        newdim = super(SampledDimension, cls)._create_new(parent, index)
-        newdim._dimension_type = DimensionType.Sample
+    def create_new(cls, data_array, index, sample):
+        newdim = cls(data_array, index)
+        newdim._set_dimension_type(DimensionType.Sample)
         newdim.sampling_interval = sample
         return newdim
 
@@ -114,7 +331,8 @@ class SampledDimension(Dimension):
         Get an axis as defined by this sampled dimension.
 
         :param count: A positive integer specifying the length of the axis
-        (no of samples).
+                      (no of samples).
+
         :param start: positive integer, indicates the starting sample.
 
         :returns: The created axis
@@ -131,9 +349,9 @@ class SampledDimension(Dimension):
         return self._h5group.get_attr("label")
 
     @label.setter
-    def label(self, l):
-        util.check_attr_type(l, str)
-        self._h5group.set_attr("label", l)
+    def label(self, label):
+        util.check_attr_type(label, str)
+        self._h5group.set_attr("label", label)
 
     @property
     def sampling_interval(self):
@@ -162,82 +380,71 @@ class SampledDimension(Dimension):
         util.check_attr_type(o, Number)
         self._h5group.set_attr("offset", o)
 
+    def link_data_array(self, data_array, index):
+        raise RuntimeError("SampledDimension does not support linking")
+
+    def link_data_frame(self, data_array, index):
+        raise RuntimeError("SampledDimension does not support linking")
+
 
 class RangeDimension(Dimension):
 
-    def __init__(self, h5group, index):
-        super(RangeDimension, self).__init__(h5group, index)
+    def __init__(self, data_array, index):
+        nixfile = data_array.file
+        super(RangeDimension, self).__init__(nixfile, data_array, index)
 
     @classmethod
-    def _create_new(cls, parent, index, ticks):
-        newdim = super(RangeDimension, cls)._create_new(parent, index)
-        newdim._dimension_type = DimensionType.Range
-        newdim._h5group.write_data("ticks", ticks, dtype=DataType.Double)
+    def create_new(cls, data_array, index, ticks):
+        newdim = cls(data_array, index)
+        newdim._set_dimension_type(DimensionType.Range)
+        if ticks is not None:
+            newdim._h5group.write_data("ticks", ticks, dtype=DataType.Double)
         return newdim
-
-    @classmethod
-    def _create_new_alias(cls, parent, index, da):
-        newdim = super(RangeDimension, cls)._create_new(parent, index)
-        newdim._dimension_type = DimensionType.Range
-        newdim._h5group.create_link(da, da.id)
-        return newdim
-
-    @property
-    def is_alias(self):
-        """
-        Return True if this dimension is an Alias Range dimension.
-        Read-only property.
-        """
-        if self._h5group.has_data("ticks"):
-            return False
-        return True
 
     @property
     def ticks(self):
-        g = self._redirgrp
-        if g.has_data("ticks"):
-            ticks = g.get_data("ticks")
-        elif g.has_data("data"):
-            ticks = g.get_data("data")
+        if self.has_link:
+            ticks = self.dimension_link.values
         else:
-            raise AttributeError("Attribute 'ticks' is not set.")
+            ticks = self._h5group.get_data("ticks")
         return tuple(ticks)
 
     @ticks.setter
     def ticks(self, ticks):
         if np.any(np.diff(ticks) < 0):
             raise ValueError("Ticks are not given in an ascending order.")
+        if self.has_link:
+            raise RuntimeError("The ticks of a RangeDimension linked to a "
+                               "data object cannot be modified")
         self._h5group.write_data("ticks", ticks)
 
     @property
-    def _redirgrp(self):
-        """
-        If the dimension is an Alias Range dimension, this property returns
-        the H5Group of the linked DataArray. Otherwise, it returns the H5Group
-        representing the dimension.
-        """
-        if self.is_alias:
-            gname = self._h5group.get_by_pos(0).name
-            return self._h5group.open_group(gname)
-        return self._h5group
-
-    @property
     def label(self):
-        return self._redirgrp.get_attr("label")
+        if self.has_link:
+            return self.dimension_link.label
+        return self._h5group.get_attr("label")
 
     @label.setter
-    def label(self, l):
-        util.check_attr_type(l, str)
-        self._redirgrp.set_attr("label", l)
+    def label(self, label):
+        util.check_attr_type(label, str)
+        if self.has_link:
+            self.dimension_link.label = label
+        else:
+            self._h5group.set_attr("label", label)
 
     @property
     def unit(self):
-        return self._redirgrp.get_attr("unit")
+        if self.has_link:
+            return self.dimension_link.unit
+        return self._h5group.get_attr("unit")
 
     @unit.setter
     def unit(self, u):
         util.check_attr_type(u, str)
-        self._redirgrp.set_attr("unit", u)
+        if self.has_link:
+            self.dimension_link.unit = u
+        else:
+            self._h5group.set_attr("unit", u)
 
     def index_of(self, position):
         """
@@ -249,14 +456,14 @@ class RangeDimension(Dimension):
         :rtype: int
         """
         ticks = self.ticks
-        if position < ticks[0]:
+        if position <= ticks[0]:
             return 0
-        elif position > ticks[-1]:
+        elif position >= ticks[-1]:
             return len(ticks) - 1
 
         ticks = np.array(ticks)
-        pidxs = np.flatnonzero((ticks - position) <= 0)
-        return int(pidxs[-1])
+        pidxs = np.searchsorted(ticks, position, side="right") - 1
+        return int(pidxs)
 
     def tick_at(self, index):
         """
@@ -276,7 +483,8 @@ class RangeDimension(Dimension):
         Get an axis as defined by this range dimension.
 
         :param count: A positive integer specifying the length of the axis
-        (no of points).
+                      (no of points).
+
         :param start: positive integer, indicates the starting tick.
 
         :returns: The created axis
@@ -293,23 +501,32 @@ class RangeDimension(Dimension):
 
 class SetDimension(Dimension):
 
-    def __init__(self, h5group, index):
-        super(SetDimension, self).__init__(h5group, index)
+    def __init__(self, data_array, index):
+        nixfile = data_array.file
+        super(SetDimension, self).__init__(nixfile, data_array, index)
 
     @classmethod
-    def _create_new(cls, parent, index):
-        newdim = super(SetDimension, cls)._create_new(parent, index)
-        newdim._dimension_type = DimensionType.Set
+    def create_new(cls, data_array, index):
+        newdim = cls(data_array, index)
+        newdim._set_dimension_type(DimensionType.Set)
         return newdim
 
     @property
     def labels(self):
-        labels = tuple(self._h5group.get_data("labels"))
+        if self.has_link:
+            labels = self.dimension_link.values
+        else:
+            labels = self._h5group.get_data("labels")
+
         if len(labels) and isinstance(labels[0], bytes):
-            labels = tuple(l.decode() for l in labels)
-        return labels
+            labels = tuple(label.decode() for label in labels)
+
+        return tuple(labels)
 
     @labels.setter
     def labels(self, labels):
+        if self.has_link:
+            raise RuntimeError("The labels of a SetDimension linked to a "
+                               "data object cannot be modified")
         dt = util.vlen_str_dtype
         self._h5group.write_data("labels", labels, dtype=dt)

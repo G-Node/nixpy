@@ -15,3 +15,4 @@ class DimensionType(Enum):
     Sample = "sample"
     Range = "range"
     Set = "set"
+    DataFrame = "data_frame"

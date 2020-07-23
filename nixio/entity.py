@@ -12,13 +12,14 @@ from . import util
 
 class Entity(object):
 
-    def __init__(self, nixparent, h5group):
+    def __init__(self, nixfile, nixparent, h5group):
         util.check_entity_id(h5group.get_attr("entity_id"))
         self._h5group = h5group
         self._parent = nixparent
+        self._file = nixfile
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name=None, type_=None):
+    def create_new(cls, nixfile, nixparent, h5parent, name=None, type_=None):
         if name and type_:
             util.check_entity_name_and_type(name, type_)
             id_ = util.create_id()
@@ -29,7 +30,8 @@ class Entity(object):
         h5group.set_attr("name", name)
         h5group.set_attr("type", type_)
         h5group.set_attr("entity_id", id_)
-        newentity = cls(nixparent, h5group)
+
+        newentity = cls(nixfile, nixparent, h5group)
         newentity.force_created_at()
         newentity.force_updated_at()
         return newentity
@@ -53,6 +55,16 @@ class Entity(object):
         :rtype: int
         """
         return util.str_to_time(self._h5group.get_attr("created_at"))
+
+    @property
+    def file(self):
+        """
+        Reference to the NIX File object.
+        This is a read-only property.
+
+        :rtype: nixio.File
+        """
+        return self._file
 
     def force_created_at(self, t=None):
         """
@@ -108,10 +120,7 @@ class Entity(object):
     def definition(self, d):
         util.check_attr_type(d, str)
         self._h5group.set_attr("definition", d)
-        par = self._parent
-        while isinstance(par, Entity):
-            par = par._parent
-        if par.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
 
     @property
@@ -142,10 +151,7 @@ class Entity(object):
             raise AttributeError("type can't be None")
         util.check_attr_type(t, str)
         self._h5group.set_attr("type", t)
-        par = self._parent
-        while isinstance(par, Entity):
-            par = par._parent
-        if par.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
 
     def __eq__(self, other):

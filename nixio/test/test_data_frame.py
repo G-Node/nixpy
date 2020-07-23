@@ -1,7 +1,9 @@
 import unittest
+
 import nixio as nix
 from .tmp import TempDir
 import os
+import time
 import numpy as np
 from six import string_types
 try:
@@ -41,13 +43,6 @@ class TestDataFrame(unittest.TestCase):
         self.file.close()
         self.tmpdir.cleanup()
 
-    def create_with_list(self):
-        arr = np.arange(999).reshape((333, 3))
-        namelist = np.array(['name', 'id', 'time'])
-        dtlist = np.array([int, str, float])
-        self.blk.create_data_frame('test1', 'for_test', col_names=namelist,
-                                   col_dtypes=dtlist, data=arr)
-
     def test_data_frame_eq(self):
         assert self.df1 == self.df1
         assert not self.df1 == self.df2
@@ -68,6 +63,17 @@ class TestDataFrame(unittest.TestCase):
         for i in df_li[:]:
             self.assertIsInstance(i['id'], string_types)
             self.assertIsInstance(i['sig2'], np.int32)
+
+    def test_column_name_collision(self):
+        arr = [(1, 'a', 20.18, 5.1, 100), (2, 'b', 20.09, 5.5, 101),
+               (2, 'c', 20.05, 5.1, 100)]
+        dtlist = np.array([np.int64, str, float, np.float64, np.int32])
+        namelist = np.array(['name', 'name', 'name', 'name', 'name'])
+        self.assertRaises(nix.exceptions.DuplicateColumnName,
+                          self.block.create_data_frame,
+                          'testerror', 'for_test',
+                          col_names=namelist,
+                          col_dtypes=dtlist, data=arr)
 
     def test_data_frame_type(self):
         assert self.df1.type == "signal1"
@@ -129,9 +135,8 @@ class TestDataFrame(unittest.TestCase):
         crcell = self.df1.read_cell(col_name=['id'], row_idx=9)
         assert crcell == 'j'
         # test error raise if only one param given
-        self.assertRaises(ValueError, lambda: self.df1.read_cell(row_idx=10))
-        self.assertRaises(ValueError,
-                          lambda: self.df1.read_cell(col_name='sig1'))
+        self.assertRaises(ValueError, self.df1.read_cell, row_idx=10)
+        self.assertRaises(ValueError, self.df1.read_cell, col_name='sig1')
 
     def test_write_cell(self):
         # write cell by position
@@ -141,8 +146,7 @@ class TestDataFrame(unittest.TestCase):
         self.df1.write_cell('test', col_name='id', row_idx=3)
         assert self.df1[3]['id'] == 'test'
         # test error raise
-        self.assertRaises(ValueError,
-                          lambda: self.df1.write_cell(11, col_name='sig1'))
+        self.assertRaises(ValueError, self.df1.write_cell, 11, col_name='sig1')
 
     def test_append_column(self):
         y = np.arange(start=16000, stop=16010, step=1)
@@ -173,7 +177,7 @@ class TestDataFrame(unittest.TestCase):
                [[1, '2', 3., 4., 5], [6, 'testing', 8., 9., 10]]
         # append row with incorrect length
         errrow = [5, 6, 7, 8]
-        self.assertRaises(ValueError, lambda: self.df1.append_rows([errrow]))
+        self.assertRaises(ValueError, self.df1.append_rows, [errrow])
 
     def test_unit(self):
         assert self.df1.units is None
@@ -196,3 +200,28 @@ class TestDataFrame(unittest.TestCase):
         assert self.df1.dtype[4] == np.int32
         assert self.df1.dtype[0] != self.df1.dtype[4]
         assert self.df1.dtype[2] == self.df1.dtype[3]
+
+    def test_creation_without_name(self):
+        data = np.array([("a", 1, 2.2), ("b", 2, 3.3), ("c", 3, 4.4)],
+                        dtype=[('name', 'U10'), ("id", 'i4'), ('val', 'f4')])
+        df = self.block.create_data_frame("without_name", "test", data=data)
+        assert sorted(list(df.column_names)) == sorted(["name", "id", "val"])
+        assert sorted(list(df["name"])) == ["a", "b", "c"]
+
+    def test_timestamp_autoupdate(self):
+        self.file.auto_update_timestamps = True
+        df = self.block.create_data_frame("df.time", "test.time",
+                                          col_dict={"idx": int})
+        dftime = df.updated_at
+        time.sleep(1)
+        df.units = "ly"
+        self.assertNotEqual(dftime, df.updated_at)
+
+    def test_timestamp_noautoupdate(self):
+        self.file.auto_update_timestamps = False
+        df = self.block.create_data_frame("df.time", "test.time",
+                                          col_dict={"idx": int})
+        dftime = df.updated_at
+        time.sleep(1)
+        df.units = "ly"
+        self.assertEqual(dftime, df.updated_at)

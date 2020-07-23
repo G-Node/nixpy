@@ -86,7 +86,7 @@ class BaseTag(Entity):
 
             dtype = DataType.String
             self._h5group.write_data("units", sanitized, dtype)
-        if self._parent._parent.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
 
     def create_feature(self, data, link_type):
@@ -105,7 +105,7 @@ class BaseTag(Entity):
             link_type = link_type.lower()
         link_type = LinkType(link_type)
         features = self._h5group.open_group("features")
-        feat = Feature._create_new(self, features, data, link_type)
+        feat = Feature.create_new(self.file, self, features, data, link_type)
         return feat
 
     @staticmethod
@@ -166,16 +166,16 @@ class BaseTag(Entity):
 
 class Tag(BaseTag):
 
-    def __init__(self, nixparent, h5group):
-        super(Tag, self).__init__(nixparent, h5group)
+    def __init__(self, nixfile, nixparent, h5group):
+        super(Tag, self).__init__(nixfile, nixparent, h5group)
         self._sources = None
         self._references = None
         self._features = None
 
     @classmethod
-    def _create_new(cls, nixparent, h5parent, name, type_, position):
-        newentity = super(Tag, cls)._create_new(nixparent, h5parent,
-                                                name, type_)
+    def create_new(cls, nixfile, nixparent, h5parent, name, type_, position):
+        newentity = super(Tag, cls).create_new(nixfile, nixparent, h5parent,
+                                               name, type_)
         newentity.position = position
         return newentity
 
@@ -196,7 +196,7 @@ class Tag(BaseTag):
         else:
             dtype = DataType.Double
             self._h5group.write_data("position", pos, dtype)
-        if self._parent._parent.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
 
     @property
@@ -217,13 +217,30 @@ class Tag(BaseTag):
         else:
             dtype = DataType.Double
             self._h5group.write_data("extent", ext, dtype)
-        if self._parent._parent.time_auto_update:
+        if self.file.auto_update_timestamps:
             self.force_updated_at()
 
     def _calc_data_slices(self, data):
         refslice = list()
         position = self.position
         extent = self.extent
+        dimcount = len(data.dimensions)
+        if dimcount > len(position):
+            ldiff = dimcount-len(position)
+            tmp_pos = list(position)
+            tmp_pos.extend([0] * ldiff)
+            position = tuple(tmp_pos)
+            if extent is not None and len(extent) != 0:
+                tmp_ext = list(extent)
+                for i in range(len(position)-1, dimcount):
+                    tmp_ext.append(len(data[i])-1)
+                extent = tuple(tmp_ext)
+        elif dimcount < len(position):
+            ldiff = dimcount - len(position)  # a negative value
+            position = position[:ldiff]
+            if extent is not None and len(extent) != 0:
+                extent = extent[:ldiff]
+
         for idx, (pos, dim) in enumerate(zip(position, data.dimensions)):
             if self.units:
                 unit = self.units[idx]
@@ -256,13 +273,10 @@ class Tag(BaseTag):
             raise OutOfBounds("Reference index out of bounds.")
 
         ref = references[refidx]
-        dimcount = len(ref.dimensions)
-        if (len(position) != dimcount) or (len(extent) > 0 and
-                                           len(extent) != dimcount):
+        if extent and len(position) != len(extent):
             raise IncompatibleDimensions(
-                "Number of dimensions in position or extent do not match "
-                "dimensionality of data",
-                "Tag.tagged_data")
+                "Number of dimensions in position and extent "
+                "do not match ", extent)
 
         slices = self._calc_data_slices(ref)
         if not self._slices_in_data(ref, slices):
@@ -315,7 +329,7 @@ class Tag(BaseTag):
         of the list.
         This is a read only attribute.
 
-        Link:type: Container of DataArray
+        :type: Container of DataArray
         """
         if self._references is None:
             self._references = LinkContainer("references", self, DataArray,
@@ -333,7 +347,8 @@ class Tag(BaseTag):
         :type: Container of Feature.
         """
         if self._features is None:
-            self._features = FeatureContainer("features", self, Feature)
+            self._features = FeatureContainer("features", self.file,
+                                              self, Feature)
         return self._features
 
     @property
@@ -361,9 +376,8 @@ class Tag(BaseTag):
         :type: Section
         """
         if "metadata" in self._h5group:
-            return Section(None, self._h5group.open_group("metadata"))
-        else:
-            return None
+            return Section(self.file, None, self._h5group.open_group("metadata"))
+        return None
 
     @metadata.setter
     def metadata(self, sect):

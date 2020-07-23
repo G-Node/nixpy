@@ -2,14 +2,13 @@
 NIXIO Python Package for NIX Datafiles
 ======================================
 
-The nixpy module contains the python binding to the nix c++ library. In order
-to use it you also have to have the nix library installed. 
+The NIXPy module is a reimplementation of the `NIX C++ library <https://nixio.readthedocs.io>`_.
 
 
 Getting started
 ===============
 
-The following sections should help you getting started with nixpy. 
+The following sections should help you getting started with NIXPy.
 
 .. toctree::
    :maxdepth: 2
@@ -18,13 +17,26 @@ The following sections should help you getting started with nixpy.
    overview
    tutorial
 
-API Documentation
-=================
-The API documentation for Data and Metadata
+High Level API Reference
+========================
+
+User API documentation for Data and Metadata
 
 .. toctree::
    :maxdepth: 2
 
-   api_data
-   api_metadata
+   user_api
 
+
+Advanced
+========
+
+Internal NIXIO API Developer Documentation
+------------------------------------------
+
+The API documentation of internal modules, for NIXPy developers.
+
+.. toctree::
+   :maxdepth: 2
+
+   api/nixio
