@@ -1,6 +1,7 @@
 import argparse
-import nixio as nix
 import h5py
+
+import nixio as nix
 
 
 def get_file_version(fname):
@@ -112,8 +113,78 @@ def update_property_values(fname):
                                     dtype=nix.util.vlen_str_dtype,
                                     data=checksum)
 
-    update_props.__doc__ = "Update {} properties".format(len(props))
+    psuffix = "ies" if len(props) > 1 else "y"
+    update_props.__doc__ = "Update {} propert{}".format(len(props), psuffix)
     return update_props
+
+
+def create_h5group(parent, name):
+    """
+    Creates an h5group with the given name under the given parent using the
+    same flags and properties used in NIX (creation order tracking and
+    indexing).
+    """
+    gcpl = h5py.h5p.create(h5py.h5p.GROUP_CREATE)
+    flags = h5py.h5p.CRT_ORDER_TRACKED | h5py.h5p.CRT_ORDER_INDEXED
+    gcpl.set_link_creation_order(flags)
+    name = name.encode("utf-8")
+    gid = h5py.h5g.create(parent.id, name, gcpl=gcpl)
+    return h5py.Group(gid)
+
+
+def update_alias_range_dimension(fname):
+    """
+    Returns a closure that binds the filename if at least one
+    AliasRangeDimension is found. When the return value is called, it converts
+    all AliasRangeDimensions to a RangeDimension with a DimensionLink to the
+    DataArray.
+    """
+    dims = list()
+    with h5py.File(fname, mode="r") as hfile:
+        for block in hfile["data"].values():
+            for data_array in block["data_arrays"].values():
+                if "dimensions" not in data_array:
+                    continue
+                for dimension in data_array["dimensions"].values():
+                    daid = data_array.attrs["entity_id"]
+                    if ("ticks" not in dimension and "link" not in dimension
+                            and daid in dimension):
+                        # found alias range dimension
+                        dims.append(dimension.name)
+
+    if not dims:
+        return None
+
+    def update_alias_dims():
+        for dimname in dims:
+            with h5py.File(fname, mode="a") as hfile:
+                dim = hfile[dimname]
+                parentda = dim.parent.parent
+                daid = parentda.attrs["entity_id"]
+                if ("ticks" in dim or "link" in dim and daid not in dim):
+                    # File was possibly changed since the tasks were
+                    # collected.  File may have been submitted twice or
+                    # multiple instances of the script could be running.
+                    # skip this prop
+                    continue
+
+                # create link object
+                link = create_h5group(dim, "link")
+                link.attrs["entity_id"] = nix.util.create_id()
+                link.attrs["data_object_type"] = "DataArray"
+                link[daid] = parentda  # creates link
+                link.attrs["index"] = [-1]
+                now = nix.util.time_to_str(nix.util.now_int())
+                link.attrs["created_at"] = now
+                link.attrs["updated_at"] = now
+
+                # delete old alias link
+                del dim[daid]
+
+    plural = "s" if len(dims) > 1 else ""
+    update_alias_dims.__doc__ = ("Convert {} alias range dimension{s} "
+                                 "to link{s}").format(len(dims), s=plural)
+    return update_alias_dims
 
 
 def create_property(hfile, name, dtype, data, definition=None, unit=None):
@@ -160,6 +231,10 @@ def collect_tasks(fname):
     props_task = update_property_values(fname)
     if props_task:
         tasks.append(props_task)
+
+    alias_task = update_alias_range_dimension(fname)
+    if alias_task:
+        tasks.append(alias_task)
 
     # always update the format last
     tasks.append(update_format_version(fname))

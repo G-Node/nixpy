@@ -273,9 +273,9 @@ def main():
 
     tag_head(newverstr)
 
-    print("Creating archive...")
+    print("Creating archives...")
     os.chdir(gitroot)
-    ret = call(["python", "setup.py", "sdist"])
+    ret = call(["python", "setup.py", "sdist", "bdist_wheel"])
 
     if ret > 0:
         die("Error creating package")
@@ -283,8 +283,6 @@ def main():
     print("{}Package ready. See 'dist' directory under project root.{}".format(
         bold_begin, bold_end
     ))
-
-    print_appveyor_urls()
 
 
 if __name__ == "__main__":
