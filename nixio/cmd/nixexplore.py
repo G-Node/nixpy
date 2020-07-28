@@ -98,8 +98,8 @@ def assemble_files(arguments):
                     c = os.sep.join((c, "*." + arguments.suffix))
                     all_files.extend(sorted(glob.glob(c)))
                 elif os.path.isfile(c):
-                    all_files.append(c)            
-            
+                    all_files.append(c)
+
     return all_files
 
 
@@ -412,10 +412,12 @@ def dump_oned(data, dimension, label, unit, format="%.6f", end="\n\n", forgiving
 
 
 def dump_twod(data, dimensions, label, unit, format="%.6f", end="\n\n"):
-    assert(len(data.shape) == 2 and len(dimensions) == 2)
+    if len(data.shape) != 2 or len(dimensions) !=2:
+        raise ValueError("data must be 2 dimensional and exactly two dimensions must be passed inorder to dump the content properly.")
     first_dim_ticks = get_ticks(dimensions[0], data.shape[0])
     second_dim_ticks = get_ticks(dimensions[1], data.shape[1])
-    assert(len(first_dim_ticks) == data.shape[0] and len(second_dim_ticks) == data.shape[1])
+    if len(first_dim_ticks) != data.shape[0] or len(second_dim_ticks) != data.shape[1]:
+        raise ValueError("dimension ticks for first or second dimension do not match the data shape.")
 
     first_dim_label, first_dim_unit = get_dim_label_and_unit(dimensions[0])
     second_dim_label, second_dim_unit = get_dim_label_and_unit(dimensions[1])
@@ -445,7 +447,8 @@ def dump_twod(data, dimensions, label, unit, format="%.6f", end="\n\n"):
 
 
 def dump_threed(data, dimensions, label, unit, format="%.6f", end="\n\n"):
-    assert(len(data.shape) == 3 and len(dimensions) == 3)
+    if len(data.shape) != 3 or len(dimensions) != 3:
+        raise ValueError("data must be 3 dimensional and exactly three dimensions must be passed inorder to dump the content properly.")
     ticks = get_ticks(dimensions[2], data.shape[2])
     dim_label, dim_unit = get_dim_label_and_unit(dimensions[2])
 
