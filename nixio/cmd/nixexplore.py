@@ -570,7 +570,7 @@ def create_metadata_parser(parent_parser):
 def create_data_parser(parent_parser):
     data_parser = parent_parser.add_parser("data", help="Search and display information about data entities",
                                            description=data_parser_help)
-    data_parser.add_argument("-p", "--pattern", type=str, help=data_pattern_help)
+    data_parser.add_argument("-p", "--pattern", default="", type=str, help=data_pattern_help)
     add_default_args(data_parser)
     add_default_file_args(data_parser)
     data_parser.set_defaults(func=data_worker)
@@ -579,7 +579,7 @@ def create_data_parser(parent_parser):
 def create_dump_parser(parent_parser):
     dump_parser = parent_parser.add_parser("dump", help="Dump stored data to stdout",
                                            description=dump_parser_help)
-    dump_parser.add_argument("-p", "--pattern", type=str, help=data_pattern_help)
+    dump_parser.add_argument("-p", "--pattern", default="", type=str, help=data_pattern_help)
     add_default_args(dump_parser)
     add_default_file_args(dump_parser)
     dump_parser.set_defaults(func=dump_worker)
@@ -611,7 +611,7 @@ def create_parser():
                                      description=general_help)
     subparsers = parser.add_subparsers(title="commands",
                                        help="Sub commands for working on data and metadata",
-                                       description=tool_description)
+                                       description=tool_description, dest="func")
 
     create_file_parser(subparsers)
     create_data_parser(subparsers)
@@ -625,6 +625,9 @@ def create_parser():
 def main():
     parser = create_parser()
     args = parser.parse_args()
+    if not args.func:
+        parser.print_help()
+        sys.exit(1)
     args.func(args)
 
 
