@@ -332,17 +332,17 @@ def find_data_entity(nix_file, arguments):
     name_or_type = arguments.pattern if arguments.case_sensitive else arguments.pattern.lower()
     classes = ["data_arrays"]  # , "multi_tags", "tags", "data_frames"]
     entities = []
-    for b in nix_file.blocks:
-        for c in classes:
-            for e in getattr(b, c):
-                ename = e.name() if arguments.case_sensitive else e.name.lower()
-                etype = e.type() if arguments.case_sensitive else e.type.lower()
+    for block in nix_file.blocks:
+        for cls in classes:
+            for entity in getattr(block, cls):
+                ename = entity.name() if arguments.case_sensitive else entity.name.lower()
+                etype = entity.type() if arguments.case_sensitive else entity.type.lower()
                 if arguments.full_match:
                     if ename == name_or_type or etype == name_or_type:
-                        entities.append(e)
+                        entities.append(entity)
                 else:
                     if name_or_type in ename or name_or_type in etype:
-                        entities.append(e)
+                        entities.append(entity)
     return entities
 
 
@@ -365,8 +365,8 @@ def get_ticks(dimension, extent):
 
 
 def get_dim_label_and_unit(dimension):
-    dim_label = getattr(dimension, "label") if hasattr(dimension, "label") else ""
-    dim_unit = getattr(dimension, "unit") if hasattr(dimension, "unit") else ""
+    dim_label = getattr(dimension, "label") if hasattr(dimension, "label") and getattr(dimension, "label") else ""
+    dim_unit = getattr(dimension, "unit") if hasattr(dimension, "unit") and getattr(dimension, "unit") else ""
     return dim_label, dim_unit
 
 
