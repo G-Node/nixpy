@@ -370,18 +370,28 @@ def get_dim_label_and_unit(dimension):
     return dim_label, dim_unit
 
 
-def dump_oned(data, dimension, label, unit, format="%.6f", end="\n\n"):
-    assert(len(data.shape) == 2)
+def dump_oned(data, dimension, label, unit, format="%.6f", end="\n\n", forgiving=True):
+    if len(data.shape) > 1:
+        raise ValueError("data dimensionality is too deep, expected 1D data, got %iD" % len(data.shape))
     ticks = get_ticks(dimension, data.shape[0])
+    if len(ticks) != len(data):
+        if not forgiving:
+            print("Cannot dump data, could not read the dimension values on dimension %i (type: %s)!" % (dimension.index, dimension.dimension_type))
+            return
+        else:
+            ticks = np.arange(len(data))
     dim_label, dim_unit = get_dim_label_and_unit(dimension)
-    max_tick_len = max([len(format % ticks[-1]), len(dim_label)])
+    if isinstance(ticks[-1], str):
+        max_tick_len = max([len(ticks[-1]), len(dim_label)])
+    else:
+        max_tick_len = max([len(format % ticks[-1]), len(dim_label)])
 
     numeric_dim_ticks = isinstance(ticks[0], (int, float))
-    numeric_data = isinstance(data[0, 0], (int, float))
+    numeric_data = isinstance(data[0], (int, float))
     data_conv_func = (lambda x: format % x) if numeric_data else str
     dim_ticks_conv_func = (lambda x: format % x) if numeric_dim_ticks else str
 
-    if dimension.dimension_type == nix.DimensionType.Range and dimension.is_alias:
+    if dimension.dimension_type == nix.DimensionType.Range and dimension.has_link:
         print("# %s" % dim_label)
         print("# %s" % dim_unit)
         for i, t in enumerate(ticks):
