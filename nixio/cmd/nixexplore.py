@@ -557,7 +557,7 @@ def add_default_args(parent_parser):
 def create_metadata_parser(parent_parser):
     meta_parser = parent_parser.add_parser("metadata", help="Filter and display metadata", aliases=["mdata"],
                                            description="Search for metadata items or display metadata (sub)trees.")
-    meta_parser.add_argument("-p", "--pattern", type=str, action="append", help=mdata_pattern_help)
+    meta_parser.add_argument("-p", "--pattern", type=str, default="", action="append", help=mdata_pattern_help)
     meta_parser.add_argument("-d", "--depth", type=int, default=-1,
                              help="maximum depth of metadata tree output, default is %(default)s, full depth")
     add_default_args(meta_parser)
