@@ -37,7 +37,7 @@ matching in type or name or a property with matching name.
 2) type_or_name/prop_name: first looks for a matching section and within
 those for matching properties.
 Patterns are applied case-insensitive
-and can be partial matches. Default: %(default)s
+and can be partial matches. You can provide multiple patterns by calling the command like: `nixio-explore metadata -p "subject" -p "species" file1.nix file2.nix`
 """.strip()
 
 data_parser_help = """
@@ -557,7 +557,7 @@ def add_default_args(parent_parser):
 def create_metadata_parser(parent_parser):
     meta_parser = parent_parser.add_parser("metadata", help="Filter and display metadata", aliases=["mdata"],
                                            description="Search for metadata items or display metadata (sub)trees.")
-    meta_parser.add_argument("-p", "--pattern", type=str, default=[], nargs="+", help=mdata_pattern_help)
+    meta_parser.add_argument("-p", "--pattern", type=str, action="append", help=mdata_pattern_help)
     meta_parser.add_argument("-d", "--depth", type=int, default=-1,
                              help="maximum depth of metadata tree output, default is %(default)s, full depth")
     add_default_args(meta_parser)
