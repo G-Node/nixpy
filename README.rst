@@ -1,4 +1,4 @@
-.. image:: https://travis-ci.org/G-Node/nixpy.svg?branch=master
+.. image:: https://travis-ci.org/G-Node/nixpy.svg?branch=v1.4
     :target: https://travis-ci.org/G-Node/nixpy
 .. image:: https://ci.appveyor.com/api/projects/status/72l10ooxbvf0vfgd/branch/master?svg=true
     :target: https://ci.appveyor.com/project/G-Node/nixpy
