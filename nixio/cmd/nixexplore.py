@@ -54,6 +54,12 @@ dimension information as well as the stored data. To write the data to  text fil
 \'nixio-explore dump path_to_nix_file -p \"name or type of data entity\" > data.dump\'. 
 """.strip()
 
+dump_pattern_help = data_pattern_help
+
+dump_outfile_help = """
+Name of a file into which the data should be dumped. If not given data will be dumped to stdout.
+""".strip()
+
 plot_parser_help = """
 Create basic plots of the stored data. This command is only available if nixworks is installed.
 """.strip()
@@ -370,7 +376,7 @@ def get_dim_label_and_unit(dimension):
     return dim_label, dim_unit
 
 
-def dump_oned(data, dimension, label, unit, format="%.6f", end="\n\n", forgiving=True):
+def dump_oned(data, dimension, label, unit, outfile, format="%.6f", end="\n\n", forgiving=True, show_progress=False):
     if len(data.shape) > 1:
         raise ValueError("data dimensionality is too deep, expected 1D data, got %iD" % len(data.shape))
     ticks = get_ticks(dimension, data.shape[0])
@@ -392,27 +398,27 @@ def dump_oned(data, dimension, label, unit, format="%.6f", end="\n\n", forgiving
     dim_ticks_conv_func = (lambda x: format % x) if numeric_dim_ticks else str
 
     if dimension.dimension_type == nix.DimensionType.Range and dimension.has_link:
-        print("# %s" % dim_label)
-        print("# %s" % dim_unit)
+        print("# %s" % dim_label, file=outfile)
+        print("# %s" % dim_unit, file=outfile)
         for i, t in enumerate(ticks):
-            print(data_conv_func(t))
-            if i % 1000 == 0:
+            print(data_conv_func(t), file=outfile)
+            if show_progress and i % 1000 == 0:
                 progress(i, data.shape[0], status='Dumping ...')
     else:
         padding = " " * (max_tick_len - len(dim_label) if dim_label else 0)
-        print("# %s%s%s" % (dim_label, padding, label))
+        print("# %s%s%s" % (dim_label, padding, label), file=outfile)
         padding = " " * (max_tick_len - len(dim_unit) if dim_unit else 0)
-        print("# %s%s%s" % (dim_unit, padding, unit))
+        print("# %s%s%s" % (dim_unit, padding, unit), file=outfile)
 
         for i in range(data.shape[0]):
-            if i % 1000 == 0:
+            if show_progress and i % 1000 == 0:
                 progress(i, data.shape[0], status='Dumping ...')
-            print(dim_ticks_conv_func(ticks[i]) + "   " + data_conv_func(data[i]))
-    print(end)
+            print(dim_ticks_conv_func(ticks[i]) + "   " + data_conv_func(data[i]), file=outfile)
+    print(end, file=outfile)
 
 
-def dump_twod(data, dimensions, label, unit, format="%.6f", end="\n\n"):
-    if len(data.shape) != 2 or len(dimensions) !=2:
+def dump_twod(data, dimensions, label, unit, outfile, format="%.6f", end="\n\n", show_progress=False):
+    if len(data.shape) != 2 or len(dimensions) != 2:
         raise ValueError("data must be 2 dimensional and exactly two dimensions must be passed inorder to dump the content properly.")
     first_dim_ticks = get_ticks(dimensions[0], data.shape[0])
     second_dim_ticks = get_ticks(dimensions[1], data.shape[1])
@@ -430,58 +436,58 @@ def dump_twod(data, dimensions, label, unit, format="%.6f", end="\n\n"):
     dim_ticks_conv_func2 = (lambda x: format % x) if numeric_2nd_dim_ticks else str
 
     max_tick_len = max([len(dim_ticks_conv_func1(first_dim_ticks[-1])), len(first_dim_label)])
-    print("# data label: %s" % label)
-    print("# data unit: %s\n" % unit)
+    print("# data label: %s" % label, file=outfile)
+    print("# data unit: %s\n" % unit, file=outfile)
     padding = " " * (max_tick_len - (len(first_dim_label) if first_dim_unit else 0))
-    print("# %s%s%s" % (first_dim_label, padding, second_dim_label))
+    print("# %s%s%s" % (first_dim_label, padding, second_dim_label), file=outfile)
     padding = " " * (max_tick_len - (len(first_dim_unit) if first_dim_unit else 0))
-    print("# %s%s%s" % (first_dim_unit, padding, second_dim_unit))
+    print("# %s%s%s" % (first_dim_unit, padding, second_dim_unit), file=outfile)
     # first line contains 2nd dim ticks
-    print(" " * max_tick_len + "   " + (" " * max_tick_len + "  ").join(map(dim_ticks_conv_func2, second_dim_ticks)))
+    print(" " * max_tick_len + "   " + (" " * max_tick_len + "  ").join(map(dim_ticks_conv_func2, second_dim_ticks)), file=outfile)
     # now dump the rest
     for i in range(len(first_dim_ticks)):
-        print(dim_ticks_conv_func1(first_dim_ticks[i]) + "    " + "   ".join(map(data_conv_func, data[i, :])))
-        if i % 500 == 0:
+        print(dim_ticks_conv_func1(first_dim_ticks[i]) + "    " + "   ".join(map(data_conv_func, data[i, :])), file=outfile)
+        if show_progress and i % 500 == 0:
             progress(i, data.shape[0], status='Dumping ...')
-    print(end)
+    print(end, file=outfile)
 
 
-def dump_threed(data, dimensions, label, unit, format="%.6f", end="\n\n"):
+def dump_threed(data, dimensions, label, unit, outfile, format="%.6f", end="\n\n", show_progress=False):
     if len(data.shape) != 3 or len(dimensions) != 3:
         raise ValueError("data must be 3 dimensional and exactly three dimensions must be passed inorder to dump the content properly.")
     ticks = get_ticks(dimensions[2], data.shape[2])
     dim_label, dim_unit = get_dim_label_and_unit(dimensions[2])
 
     for i in range(data.shape[2]):
-        print("# data[:, :, %i]: %s" % (i, dim_label + "%s%s" % (ticks[i], dim_unit) if dim_unit else ""))
-        dump_twod(data[:, :, i], [dimensions[0], dimensions[1]], label, unit, format, end="\n")
+        print("# data[:, :, %i]: %s" % (i, dim_label + "%s%s" % (ticks[i], dim_unit) if dim_unit else ""), file=outfile)
+        dump_twod(data[:, :, i], [dimensions[0], dimensions[1]], label, unit, outfile, format, end="\n", show_progress=show_progress)
 
-    print(end)
+    print(end, file=outfile)
 
 
-def dump_data_array(array, filename):
-    print("# File: %s\n# entity: %s\n# type: %s\n# id: %s" % (filename, array.name, array.type, array.id))
+def dump_data_array(array, filename, outfile, show_progress=False):
+    print("# File: %s\n# entity: %s\n# type: %s\n# id: %s" % (filename, array.name, array.type, array.id), file=outfile)
     print("# created at: %s\n# last edited at: %s\n" %
           (str(dt.datetime.fromtimestamp(array.created_at)),
-           str(dt.datetime.fromtimestamp(array.updated_at))))
+           str(dt.datetime.fromtimestamp(array.updated_at))), file=outfile)
     dims = len(array.shape)
     data = array[:]
     if dims == 1:
-        dump_oned(data, array.dimensions[0], array.label, array.unit)
+        dump_oned(data, array.dimensions[0], array.label, array.unit, outfile)
     elif dims == 2:
-        dump_twod(data, array.dimensions, array.label, array.unit)
+        dump_twod(data, array.dimensions, array.label, array.unit, outfile, show_progress=show_progress)
     elif dims == 3:
-        dump_threed(data, array.dimensions, array.label, array.unit)
+        dump_threed(data, array.dimensions, array.label, array.unit, outfile, show_progress=show_progress)
     else:
         print("Sorry, cannot dump data with more than 3 dimensions!")
 
 
-def data_dump(filename, arguments):
+def data_dump(filename, arguments, outfile, show_progress=False):
     nix_file = open_nix_file(filename)
     entities = find_data_entity(nix_file, arguments)
     for e in entities:
         if isinstance(e, nix.DataArray):
-            dump_data_array(e, filename)
+            dump_data_array(e, filename, outfile, show_progress)
 
     nix_file.close()
 
@@ -532,8 +538,22 @@ def file_worker(arguments):
 def dump_worker(arguments):
     files = assemble_files(arguments)
     func = data_dump
+    if len(arguments.outfile) > 0:
+        if os.path.exists(arguments.outfile):
+            response = input("File %s already exists, are you sure to overwrite it? y/N:")
+            if response.lower() != "y":
+                print("... data dump aborted.")
+                return
+        f = open(arguments.outfile, 'w')
+        to_file = True
+    else:
+        f = sys.stdout
+        to_file = False
+    show_progress = to_file
     for nf in files:
-        func(nf, arguments)
+        func(nf, arguments, f, show_progress)
+    if to_file:
+        f.close()
 
 
 def plot_worker(arguments):
@@ -582,7 +602,8 @@ def create_data_parser(parent_parser):
 def create_dump_parser(parent_parser):
     dump_parser = parent_parser.add_parser("dump", help="Dump stored data to stdout",
                                            description=dump_parser_help)
-    dump_parser.add_argument("-p", "--pattern", default="", type=str, help=data_pattern_help)
+    dump_parser.add_argument("-p", "--pattern", default="", type=str, help=dump_pattern_help)
+    dump_parser.add_argument("-o", "--outfile", default="", type=str, help=dump_outfile_help)
     add_default_args(dump_parser)
     add_default_file_args(dump_parser)
     dump_parser.set_defaults(func=dump_worker)
