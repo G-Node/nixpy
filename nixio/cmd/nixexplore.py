@@ -5,7 +5,6 @@ import numpy as np
 import glob
 import datetime as dt
 import sys
-import matplotlib.pyplot as plt
 
 try:
     import nixworks as nw
@@ -51,7 +50,7 @@ A string pattern that is parsed to find the data entity.
 dump_parser_help = """
 Dump data to stdout. This command can process up to 3D data. The data dump contains 
 dimension information as well as the stored data. To write the data to  text file use e.g. 
-\'nixio-explore dump path_to_nix_file -p \"name or type of data entity\" > data.dump\'. 
+\'nixio-explore dump path_to_nix_file -p \"name or type of data entity\" > data.dump\' or provide the \"--outfile\" argument. 
 """.strip()
 
 dump_pattern_help = data_pattern_help
@@ -403,7 +402,7 @@ def dump_oned(data, dimension, label, unit, outfile, format="%.6f", end="\n\n", 
         for i, t in enumerate(ticks):
             print(data_conv_func(t), file=outfile)
             if show_progress and i % 1000 == 0:
-                progress(i, data.shape[0], status='Dumping ...')
+                progress(i, data.shape[0], status='')
     else:
         padding = " " * (max_tick_len - len(dim_label) if dim_label else 0)
         print("# %s%s%s" % (dim_label, padding, label), file=outfile)
@@ -412,8 +411,10 @@ def dump_oned(data, dimension, label, unit, outfile, format="%.6f", end="\n\n", 
 
         for i in range(data.shape[0]):
             if show_progress and i % 1000 == 0:
-                progress(i, data.shape[0], status='Dumping ...')
+                progress(i, data.shape[0], status='')
             print(dim_ticks_conv_func(ticks[i]) + "   " + data_conv_func(data[i]), file=outfile)
+    if show_progress:
+        progress(data.shape[0], data.shape[0], "Done")
     print(end, file=outfile)
 
 
@@ -448,7 +449,9 @@ def dump_twod(data, dimensions, label, unit, outfile, format="%.6f", end="\n\n",
     for i in range(len(first_dim_ticks)):
         print(dim_ticks_conv_func1(first_dim_ticks[i]) + "    " + "   ".join(map(data_conv_func, data[i, :])), file=outfile)
         if show_progress and i % 500 == 0:
-            progress(i, data.shape[0], status='Dumping ...')
+            progress(i, data.shape[0], status='')
+    if show_progress:
+        progress(data.shape[0], data.shape[0], "Done")
     print(end, file=outfile)
 
 
@@ -473,7 +476,7 @@ def dump_data_array(array, filename, outfile, show_progress=False):
     dims = len(array.shape)
     data = array[:]
     if dims == 1:
-        dump_oned(data, array.dimensions[0], array.label, array.unit, outfile)
+        dump_oned(data, array.dimensions[0], array.label, array.unit, outfile, show_progress=show_progress)
     elif dims == 2:
         dump_twod(data, array.dimensions, array.label, array.unit, outfile, show_progress=show_progress)
     elif dims == 3:
@@ -487,8 +490,9 @@ def data_dump(filename, arguments, outfile, show_progress=False):
     entities = find_data_entity(nix_file, arguments)
     for e in entities:
         if isinstance(e, nix.DataArray):
+            sys.stderr.write("Dumping %s to %s...\n" % (e.name, arguments.outfile))
             dump_data_array(e, filename, outfile, show_progress)
-
+            sys.stderr.write("\n")
     nix_file.close()
 
 
@@ -500,7 +504,7 @@ def data_plotter(filename, arguments):
             plotter = nw.plotter.suggested_plotter(e)
             if plotter:
                 plotter.plot()
-                plt.show()
+                plotter.show()
             else:
                 print("Could not find a suitable plotter for the DataArray: %s" % str(e))
         else:
@@ -540,7 +544,7 @@ def dump_worker(arguments):
     func = data_dump
     if len(arguments.outfile) > 0:
         if os.path.exists(arguments.outfile):
-            response = input("File %s already exists, are you sure to overwrite it? y/N:")
+            response = input("File %s already exists, are you sure to overwrite it? y/N:" % arguments.outfile)
             if response.lower() != "y":
                 print("... data dump aborted.")
                 return
