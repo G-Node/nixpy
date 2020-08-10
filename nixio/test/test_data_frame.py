@@ -211,7 +211,7 @@ class TestDataFrame(unittest.TestCase):
     def test_timestamp_autoupdate(self):
         self.file.auto_update_timestamps = True
         df = self.block.create_data_frame("df.time", "test.time",
-                                          col_dict={"idx": int})
+                                          col_dict=OrderedDict({"idx": int}))
         dftime = df.updated_at
         time.sleep(1)
         df.units = "ly"
@@ -220,7 +220,7 @@ class TestDataFrame(unittest.TestCase):
     def test_timestamp_noautoupdate(self):
         self.file.auto_update_timestamps = False
         df = self.block.create_data_frame("df.time", "test.time",
-                                          col_dict={"idx": int})
+                                          col_dict=OrderedDict({"idx": int}))
         dftime = df.updated_at
         time.sleep(1)
         df.units = "ly"
