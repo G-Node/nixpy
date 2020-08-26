@@ -41,8 +41,9 @@ def validate(filename):
 
 
 def create_subcmd_parser(parser):
-    return parser.add_argument("file", type=str, nargs="+",
-                               help="path to file to validate (at least one)")
+    parser.add_argument("file", type=str, nargs="+",
+                        help="path to file to validate (at least one)")
+    return parser
 
 
 def main(args):
