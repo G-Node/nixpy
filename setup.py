@@ -61,7 +61,6 @@ packages = ['nixio',
             'nixio.exceptions',
             'nixio.cmd']
 
-
 setup(
     name='nixio',
     version=VERSION,
@@ -83,8 +82,6 @@ setup(
     zip_safe=False,
     data_files=get_wheel_data(),
     entry_points={'console_scripts': [
-        'nixio-validate=nixio.cmd.validate:main',
-        'nixio-upgrade=nixio.cmd.upgrade:main',
-        'nixio-explore=nixio.cmd.nixexplore:main',
+        'nixio=nixio.cmd.main:main'
     ]}
 )

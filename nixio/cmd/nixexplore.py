@@ -1,3 +1,21 @@
+"""
+Search for information within NIX file(s). Use the "file" command for
+general information about the file(s). The verbose flag can be used to get
+more detailed information about the file structure. Multiple -v options
+increase the verbosity.
+(e.g.  'nixio explore file nix_file -vvv' for most detailed output).
+
+The "metadata" (mdata) and "data" commands provide further options for finding
+and viewing data and metadata information. With the "dump" subcommand data can
+be dumped to file (up to 3D data).
+
+The "plot" command is only available if the nixworks package is installed
+(https://github.com/G-node/nixworks).
+
+NOTE: This tool is under active development. Please use the github issue
+tracker (https://github.com/G-node/nixpy/issues) for bug reports and feature
+requests.
+"""
 import os
 import argparse
 import nixio as nix
