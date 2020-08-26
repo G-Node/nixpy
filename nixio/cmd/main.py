@@ -8,7 +8,7 @@ Command line interface for nixio tools.
   nixio upgrade:  Update older files to the newest file format.
 """
 import argparse
-from . import nixexplore as explore, validate, upgrade
+from . import explore, validate, upgrade
 
 
 def main():
