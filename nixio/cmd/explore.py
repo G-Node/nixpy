@@ -17,7 +17,6 @@ tracker (https://github.com/G-node/nixpy/issues) for bug reports and feature
 requests.
 """
 import os
-import argparse
 import nixio as nix
 import numpy as np
 import glob
@@ -27,7 +26,7 @@ import sys
 try:
     import nixworks as nw
     nw_present = True
-except ImportError as e:
+except ImportError:
     nw_present = False
 
 tool_description = """

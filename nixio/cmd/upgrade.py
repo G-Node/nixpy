@@ -1,9 +1,7 @@
 """
 Upgrade NIX files to newest file format version.
 """
-import argparse
 import h5py
-
 import nixio as nix
 
 

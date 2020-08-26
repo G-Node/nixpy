@@ -2,7 +2,6 @@
 Validate NIX files for missing or inconsistent objects and annotations.
 """
 import os
-import argparse
 import nixio as nix
 
 
