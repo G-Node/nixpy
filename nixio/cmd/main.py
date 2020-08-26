@@ -20,13 +20,16 @@ def main():
                                     dest="cmd")
 
     # nixio explore
-    subcmds.add_parser("explore", help=explore.__doc__)
+    explore_cmd = subcmds.add_parser("explore", help=explore.__doc__)
+    explore.create_subcmd_parsers(explore_cmd)
 
     # nixio validate
-    subcmds.add_parser("validate", help=validate.__doc__)
+    validate_cmd = subcmds.add_parser("validate", help=validate.__doc__)
+    validate.create_subcmd_parser(validate_cmd)
 
     # nixio upgrade
-    subcmds.add_parser("upgrade", help=upgrade.__doc__)
+    upgrade_cmd = subcmds.add_parser("upgrade", help=upgrade.__doc__)
+    upgrade.create_subcmd_parser(upgrade_cmd)
 
     cmdmap = {
         "explore": explore.main,

@@ -40,13 +40,12 @@ def validate(filename):
     print()
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Validate NIX files"
-    )
-    parser.add_argument("file", type=str, nargs="+",
-                        help="path to file to validate (at least one)")
-    args = parser.parse_args()
+def create_subcmd_parser(parser):
+    return parser.add_argument("file", type=str, nargs="+",
+                               help="path to file to validate (at least one)")
+
+
+def main(args):
     filenames = args.file
 
     for nixfn in filenames:
@@ -54,7 +53,3 @@ def main():
             validate(nixfn)
         else:
             print("error: No such file '{}'".format(nixfn))
-
-
-if __name__ == "__main__":
-    main()

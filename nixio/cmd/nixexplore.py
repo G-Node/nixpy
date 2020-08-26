@@ -652,13 +652,10 @@ def create_file_parser(parent_parser):
     file_parser.set_defaults(func=file_worker)
 
 
-def create_parser():
-    parser = argparse.ArgumentParser(prog="nixio-explore",
-                                     description=general_help)
+def create_subcmd_parsers(parser):
     subparsers = parser.add_subparsers(title="commands",
                                        help="Sub commands for working on data and metadata",
-                                       description=tool_description, dest="func")
-
+                                       description=tool_description, dest="explore_cmd")
     create_file_parser(subparsers)
     create_data_parser(subparsers)
     create_dump_parser(subparsers)
@@ -668,14 +665,5 @@ def create_parser():
     return parser
 
 
-def main():
-    parser = create_parser()
-    args = parser.parse_args()
-    if not args.func:
-        parser.print_help()
-        sys.exit(1)
+def main(args):
     args.func(args)
-
-
-if __name__ == "__main__":
-    main()
