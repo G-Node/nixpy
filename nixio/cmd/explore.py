@@ -3,7 +3,7 @@ Search for information within NIX file(s). Use the "file" command for
 general information about the file(s). The verbose flag can be used to get
 more detailed information about the file structure. Multiple -v options
 increase the verbosity.
-(e.g.  'nixio explore file nix_file -vvv' for most detailed output).
+(e.g. 'nixio explore file nix_file -vvv' for most detailed output).
 
 The "metadata" (mdata) and "data" commands provide further options for finding
 and viewing data and metadata information. With the "dump" subcommand data can
@@ -38,10 +38,10 @@ data exploration. For help on the commands type e.g.: 'nixio explore file
 mdata_pattern_help = """
 Pattern(s) with which to look for sections and properties. The pattern can be
 either 1) type_or_name: First looks for a section matching in type or name or
-a property with matching name.  2) type_or_name/prop_name: first looks for a
-matching section and within those for matching properties.  Patterns are
+a property with matching name. 2) type_or_name/prop_name: first looks for a
+matching section and within those for matching properties. Patterns are
 applied case-insensitive and can be partial matches. You can provide multiple
-patterns by calling the command like: `nixio-explore metadata -p "subject" -p
+patterns by calling the command like: `nixio explore metadata -p "subject" -p
 "species" file1.nix file2.nix`
 """
 
@@ -54,10 +54,10 @@ A string pattern that is parsed to find the data entity.
 """
 
 dump_parser_help = """
-Dump data to stdout. This command can process up to 3D data. The data dump
-contains dimension information as well as the stored data. To write the data
-to  text file use e.g.  'nixio-explore dump path_to_nix_file -p "name or type
-of data entity" > data.dump' or provide the "--outfile" argument.
+Dump data to file or stdout. This command can process up to 3D data. The data
+dump contains dimension information as well as the stored data. To write the
+data to text file use e.g. 'nixio explore dump path_to_nix_file -p "name or
+type of data entity" > data.dump' or provide the "--outfile" argument.
 """
 
 dump_pattern_help = data_pattern_help
@@ -588,7 +588,7 @@ def add_default_args(parent_parser):
     parent_parser.add_argument("-c", "--case_sensitive", action="store_true", help="matching of"
                                + " entitiy names and types is case sensitive, by default the case is ignored")
     parent_parser.add_argument("-fm", "--full_match", action="store_true", help="names and types must"
-                               + " be full matches, bey default a partial match is sufficient")
+                               + " be full matches, by default a partial match is sufficient")
 
 
 def create_metadata_parser(parent_parser):
