@@ -1,6 +1,7 @@
-import argparse
+"""
+Upgrade NIX files to newest file format version.
+"""
 import h5py
-
 import nixio as nix
 
 
@@ -246,15 +247,15 @@ def collect_tasks(fname):
     return tasks
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Upgrade NIX files to newest version"
-    )
+def create_subcmd_parser(parser):
     parser.add_argument("-f", "--force", action="store_true",
                         help="overwrite existing files without prompting")
     parser.add_argument("file", type=str, nargs="+",
                         help="path to file to upgrade (at least one)")
-    args = parser.parse_args()
+    return parser
+
+
+def main(args):
     filenames = args.file
 
     tasks = dict()
@@ -294,7 +295,3 @@ MAKE SURE YOUR FILES AND DATA ARE BACKED UP BEFORE CONTINUING.
             for task in tasklist:
                 task()
             print("done")
-
-
-if __name__ == "__main__":
-    main()

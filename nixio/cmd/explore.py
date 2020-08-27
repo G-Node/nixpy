@@ -1,5 +1,22 @@
+"""
+Search for information within NIX file(s). Use the "file" command for
+general information about the file(s). The verbose flag can be used to get
+more detailed information about the file structure. Multiple -v options
+increase the verbosity.
+(e.g. 'nixio explore file nix_file -vvv' for most detailed output).
+
+The "metadata" (mdata) and "data" commands provide further options for finding
+and viewing data and metadata information. With the "dump" subcommand data can
+be dumped to file (up to 3D data).
+
+The "plot" command is only available if the nixworks package is installed
+(https://github.com/G-node/nixworks).
+
+NOTE: This tool is under active development. Please use the github issue
+tracker (https://github.com/G-node/nixpy/issues) for bug reports and feature
+requests.
+"""
 import os
-import argparse
 import nixio as nix
 import numpy as np
 import glob
@@ -9,63 +26,56 @@ import sys
 try:
     import nixworks as nw
     nw_present = True
-except ImportError as e:
+except ImportError:
     nw_present = False
 
-general_help = """ Search for information within NIX file(s). Use the \"file\" 
-command for general information about the file(s). The verbosity flag can be used to 
-get more detailed information about the file structure. (e.g.
- \'nixio-explore file nix_file -vvv\' for most detailed output).
-
-The \"metadata\" (mdata) and \"data\" commands provide further options for finding and viewing data
-and metadata information. With the \"dump\" subcommand data can be dumped to file (up to 3D data).
-The plot command is only available if the nixworks package is installed (https://github.com/G-node/nixworks).
-\n\n Note that this tool is not yet fully implemented. Please use the github issue tracker 
-(https://github.com/G-node/nixpy/issues) for bug reports and feature requests.""".strip()
-
 tool_description = """
-nixio-explore functionality is split into sub-commands for file, metadata, and data exploration. For 
-help on the commands type e.g.: 'nixio-explore file --help'.
+nixio explore functionality is split into sub-commands for file, metadata, and
+data exploration. For help on the commands type e.g.: 'nixio explore file
+--help'.
 """
 
 mdata_pattern_help = """
-Pattern(s) with which to look for sections and properties. The
-pattern can be either
-1) type_or_name: First looks for a section
-matching in type or name or a property with matching name.
-2) type_or_name/prop_name: first looks for a matching section and within
-those for matching properties.
-Patterns are applied case-insensitive
-and can be partial matches. You can provide multiple patterns by calling the command like: `nixio-explore metadata -p "subject" -p "species" file1.nix file2.nix`
-""".strip()
+Pattern(s) with which to look for sections and properties. The pattern can be
+either 1) type_or_name: First looks for a section matching in type or name or
+a property with matching name. 2) type_or_name/prop_name: first looks for a
+matching section and within those for matching properties. Patterns are
+applied case-insensitive and can be partial matches. You can provide multiple
+patterns by calling the command like: `nixio explore metadata -p "subject" -p
+"species" file1.nix file2.nix`
+"""
 
 data_parser_help = """
-Display information about data entities such as DataArrays, Tags, or MultiTags. 
-""".strip()
+Display information about data entities such as DataArrays, Tags, or MultiTags.
+"""
 
 data_pattern_help = """
 A string pattern that is parsed to find the data entity.
-""".strip()
+"""
 
 dump_parser_help = """
-Dump data to stdout. This command can process up to 3D data. The data dump contains 
-dimension information as well as the stored data. To write the data to  text file use e.g. 
-\'nixio-explore dump path_to_nix_file -p \"name or type of data entity\" > data.dump\' or provide the \"--outfile\" argument. 
-""".strip()
+Dump data to file or stdout. This command can process up to 3D data. The data
+dump contains dimension information as well as the stored data. To write the
+data to text file use e.g. 'nixio explore dump path_to_nix_file -p "name or
+type of data entity" > data.dump' or provide the "--outfile" argument.
+"""
 
 dump_pattern_help = data_pattern_help
 
 dump_outfile_help = """
-Name of a file into which the data should be dumped. If not given data will be dumped to stdout.
-""".strip()
+Name of a file into which the data should be dumped. If not given data will be
+dumped to stdout.
+"""
 
 plot_parser_help = """
-Create basic plots of the stored data. This command is only available if nixworks is installed.
-""".strip()
+Create basic plots of the stored data. This command is only available if
+nixworks is installed.
+"""
+
 
 def progress(count, total, status='', bar_len=60):
     """
-    modified after https://gist.github.com/vladignatyev/06860ec2040cb497f0f3
+    Modified after https://gist.github.com/vladignatyev/06860ec2040cb497f0f3
     by Vladimir Ignatev published under MIT License
     """
     percents = count / total
@@ -578,7 +588,7 @@ def add_default_args(parent_parser):
     parent_parser.add_argument("-c", "--case_sensitive", action="store_true", help="matching of"
                                + " entitiy names and types is case sensitive, by default the case is ignored")
     parent_parser.add_argument("-fm", "--full_match", action="store_true", help="names and types must"
-                               + " be full matches, bey default a partial match is sufficient")
+                               + " be full matches, by default a partial match is sufficient")
 
 
 def create_metadata_parser(parent_parser):
@@ -634,13 +644,10 @@ def create_file_parser(parent_parser):
     file_parser.set_defaults(func=file_worker)
 
 
-def create_parser():
-    parser = argparse.ArgumentParser(prog="nixio-explore",
-                                     description=general_help)
+def create_subcmd_parsers(parser):
     subparsers = parser.add_subparsers(title="commands",
                                        help="Sub commands for working on data and metadata",
-                                       description=tool_description, dest="func")
-
+                                       description=tool_description, dest="explore_cmd")
     create_file_parser(subparsers)
     create_data_parser(subparsers)
     create_dump_parser(subparsers)
@@ -650,14 +657,5 @@ def create_parser():
     return parser
 
 
-def main():
-    parser = create_parser()
-    args = parser.parse_args()
-    if not args.func:
-        parser.print_help()
-        sys.exit(1)
+def main(args):
     args.func(args)
-
-
-if __name__ == "__main__":
-    main()
