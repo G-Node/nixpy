@@ -129,12 +129,14 @@ class DataArray(Entity, DataSet):
         :rtype: RangeDimension
         """
         index = len(self.dimensions) + 1
+
         rdim = RangeDimension.create_new(self, index, ticks)
-        if label:
-            rdim.label = label
-            rdim.unit = unit
+        rdim.label = label
+        rdim.unit = unit
         if self.file.auto_update_timestamps:
             self.force_updated_at()
+        if ticks is not None:
+            rdim.ticks = ticks
         return rdim
 
     def delete_dimensions(self):
