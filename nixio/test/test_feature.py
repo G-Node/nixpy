@@ -9,6 +9,7 @@
 import os
 import time
 import unittest
+from collections import OrderedDict
 import nixio as nix
 from .tmp import TempDir
 
@@ -75,6 +76,17 @@ class TestFeatures(unittest.TestCase):
                                                     nix.DataType.Float, (0, ))
         self.feature_1.data = new_data_ref
         assert(self.feature_1.data == new_data_ref)
+
+    def test_feature_dataframe(self):
+        coltypes = OrderedDict(
+            idx=int,
+            name=str,
+            value=float,
+        )
+        new_data_frame = self.block.create_data_frame("table", "test.feature",
+                                                      col_dict=coltypes)
+        df_feature = self.stimuli_tag.create_feature(new_data_frame, nix.LinkType.Indexed)
+        assert df_feature.data == new_data_frame
 
     def test_feature_on_group(self):
         grouptag = self.block.create_tag("I am tag", "grouptest", [0])
