@@ -464,3 +464,26 @@ class TestLinkDimension(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             # Can't change label: column name
             self.range_dim.label = "a whole new label"
+
+    def test_range_link_tick_replacement(self):
+        tickarray = self.block.create_data_array(
+            "ticks", "array.dimension.ticks",
+            data=np.linspace(0, 100, 15)
+        )
+        assert "link" not in self.range_dim._h5group
+        assert "ticks" not in self.range_dim._h5group
+
+        # add link
+        self.range_dim.link_data_array(tickarray, [-1])
+        assert "link" in self.range_dim._h5group
+        assert "ticks" not in self.range_dim._h5group
+
+        # replace with ticks
+        self.range_dim.ticks = np.cumsum(np.random.random(10))
+        assert "link" not in self.range_dim._h5group
+        assert "ticks" in self.range_dim._h5group
+
+        # replace with link again
+        self.range_dim.link_data_array(tickarray, [-1])
+        assert "link" in self.range_dim._h5group
+        assert "ticks" not in self.range_dim._h5group
