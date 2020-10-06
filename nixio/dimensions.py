@@ -241,7 +241,7 @@ class Dimension(object):
             raise ValueError(invalid_idx_msg)
 
         if self.has_link:
-            self._h5group.delete("link")
+            self.remove_link()
         DimensionLink.create_new(self._file, self, self._h5group,
                                  data_array, "DataArray", index)
 
@@ -249,9 +249,14 @@ class Dimension(object):
         if not 0 <= index < len(data_frame.columns):
             raise OutOfBounds("DataFrame index is out of bounds", index)
         if self.has_link:
-            self._h5group.delete("link")
+            self.remove_link()
         DimensionLink.create_new(self._file, self, self._h5group,
                                  data_frame, "DataFrame", index)
+
+    def remove_link(self):
+        if not self.has_link:
+            raise RuntimeError("Dimension has no link")
+        self._h5group.delete("link")
 
     @property
     def has_link(self):
