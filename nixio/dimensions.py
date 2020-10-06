@@ -419,8 +419,8 @@ class RangeDimension(Dimension):
         if np.any(np.diff(ticks) < 0):
             raise ValueError("Ticks are not given in an ascending order.")
         if self.has_link:
-            raise RuntimeError("The ticks of a RangeDimension linked to a "
-                               "data object cannot be modified")
+            # unlick object and set ticks
+            self.remove_link()
         self._h5group.write_data("ticks", ticks)
 
     @property
