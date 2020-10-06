@@ -385,10 +385,10 @@ class SampledDimension(Dimension):
         util.check_attr_type(o, Number)
         self._h5group.set_attr("offset", o)
 
-    def link_data_array(self, data_array, index):
+    def link_data_array(self, *_):
         raise RuntimeError("SampledDimension does not support linking")
 
-    def link_data_frame(self, data_array, index):
+    def link_data_frame(self, *_):
         raise RuntimeError("SampledDimension does not support linking")
 
 
@@ -397,6 +397,18 @@ class RangeDimension(Dimension):
     def __init__(self, data_array, index):
         nixfile = data_array.file
         super(RangeDimension, self).__init__(nixfile, data_array, index)
+
+    def link_data_array(self, data_array, index):
+        if "ticks" in self._h5group:
+            # delete ticks to replace with link
+            self._h5group.delete("ticks")
+        super(RangeDimension, self).link_data_array(data_array, index)
+
+    def link_data_frame(self, data_frame, index):
+        if "ticks" in self._h5group:
+            # delete ticks to replace with link
+            self._h5group.delete("ticks")
+        super(RangeDimension, self).link_data_frame(data_frame, index)
 
     @classmethod
     def create_new(cls, data_array, index, ticks):
