@@ -202,7 +202,7 @@ class H5Group(object):
                                               idx=pos)
         return self.get_by_name(name)
 
-    def delete(self, id_or_name):
+    def delete(self, id_or_name, delete_if_empty=True):
         """
         Deletes the child HDF5 group that matches the given name or id.
         """
@@ -214,6 +214,12 @@ class H5Group(object):
             del self.group[name]
         except Exception:
             raise ValueError("Error deleting {} ".format(name))
+        # Delete if empty and non-root container
+        groupdepth = len(self.group.name.split("/")) - 1
+        if delete_if_empty and not len(self.group) and groupdepth > 1:
+            del self.parent.group[self.name]
+            # del self.group
+            self.group = None
 
     def delete_all(self, eid):
         """

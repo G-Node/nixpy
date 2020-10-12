@@ -256,7 +256,7 @@ class Dimension(object):
     def remove_link(self):
         if not self.has_link:
             raise RuntimeError("Dimension has no link")
-        self._h5group.delete("link")
+        self._h5group.delete("link", False)
 
     @property
     def has_link(self):
@@ -401,13 +401,13 @@ class RangeDimension(Dimension):
     def link_data_array(self, data_array, index):
         if "ticks" in self._h5group:
             # delete ticks to replace with link
-            self._h5group.delete("ticks")
+            self._h5group.delete("ticks", False)
         super(RangeDimension, self).link_data_array(data_array, index)
 
     def link_data_frame(self, data_frame, index):
         if "ticks" in self._h5group:
             # delete ticks to replace with link
-            self._h5group.delete("ticks")
+            self._h5group.delete("ticks", False)
         super(RangeDimension, self).link_data_frame(data_frame, index)
 
     @classmethod
