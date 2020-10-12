@@ -241,7 +241,7 @@ class Dimension(object):
             raise ValueError(invalid_idx_msg)
 
         if self.has_link:
-            self._h5group.delete("link")
+            self.remove_link()
         DimensionLink.create_new(self._file, self, self._h5group,
                                  data_array, "DataArray", index)
 
@@ -249,9 +249,14 @@ class Dimension(object):
         if not 0 <= index < len(data_frame.columns):
             raise OutOfBounds("DataFrame index is out of bounds", index)
         if self.has_link:
-            self._h5group.delete("link")
+            self.remove_link()
         DimensionLink.create_new(self._file, self, self._h5group,
                                  data_frame, "DataFrame", index)
+
+    def remove_link(self):
+        if not self.has_link:
+            raise RuntimeError("Dimension has no link")
+        self._h5group.delete("link", False)
 
     @property
     def has_link(self):
@@ -380,10 +385,10 @@ class SampledDimension(Dimension):
         util.check_attr_type(o, Number)
         self._h5group.set_attr("offset", o)
 
-    def link_data_array(self, data_array, index):
+    def link_data_array(self, *_):
         raise RuntimeError("SampledDimension does not support linking")
 
-    def link_data_frame(self, data_array, index):
+    def link_data_frame(self, *_):
         raise RuntimeError("SampledDimension does not support linking")
 
 
@@ -392,6 +397,18 @@ class RangeDimension(Dimension):
     def __init__(self, data_array, index):
         nixfile = data_array.file
         super(RangeDimension, self).__init__(nixfile, data_array, index)
+
+    def link_data_array(self, data_array, index):
+        if "ticks" in self._h5group:
+            # delete ticks to replace with link
+            self._h5group.delete("ticks", False)
+        super(RangeDimension, self).link_data_array(data_array, index)
+
+    def link_data_frame(self, data_frame, index):
+        if "ticks" in self._h5group:
+            # delete ticks to replace with link
+            self._h5group.delete("ticks", False)
+        super(RangeDimension, self).link_data_frame(data_frame, index)
 
     @classmethod
     def create_new(cls, data_array, index, ticks):
@@ -414,8 +431,8 @@ class RangeDimension(Dimension):
         if np.any(np.diff(ticks) < 0):
             raise ValueError("Ticks are not given in an ascending order.")
         if self.has_link:
-            raise RuntimeError("The ticks of a RangeDimension linked to a "
-                               "data object cannot be modified")
+            # unlick object and set ticks
+            self.remove_link()
         self._h5group.write_data("ticks", ticks)
 
     @property
