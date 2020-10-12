@@ -11,6 +11,8 @@ import time
 import unittest
 import numpy as np
 import nixio as nix
+from nixio.exceptions import UnsupportedLinkType
+from collections import OrderedDict
 from .tmp import TempDir
 
 
@@ -181,30 +183,59 @@ class TestTags(unittest.TestCase):
 
         data_array = self.block.create_data_array("feature", "stimuli",
                                                   nix.DataType.Int16, (1,))
-        feature = self.my_tag.create_feature(data_array, nix.LinkType.Untagged)
+        da_feature = self.my_tag.create_feature(data_array, nix.LinkType.Untagged)
 
         assert (len(self.my_tag.features) == 1)
 
-        assert (feature in self.my_tag.features)
-        assert (feature.id in self.my_tag.features)
+        assert (da_feature in self.my_tag.features)
+        assert (da_feature.id in self.my_tag.features)
         assert ("notexist" not in self.my_tag.features)
 
-        assert (feature.id == self.my_tag.features[0].id)
-        assert (feature.id == self.my_tag.features[-1].id)
+        assert (da_feature.id == self.my_tag.features[0].id)
+        assert (da_feature.id == self.my_tag.features[-1].id)
 
         # id and name access
-        assert (feature.id == self.my_tag.features[feature.id].id)
-        assert (feature.id == self.my_tag.features[data_array.id].id)
-        assert (feature.id == self.my_tag.features[data_array.name].id)
+        assert (da_feature.id == self.my_tag.features[da_feature.id].id)
+        assert (da_feature.id == self.my_tag.features[data_array.id].id)
+        assert (da_feature.id == self.my_tag.features[data_array.name].id)
         assert (data_array == self.my_tag.features[data_array.id].data)
         assert (data_array == self.my_tag.features[data_array.name].data)
 
         assert (data_array.id in self.my_tag.features)
         assert (data_array.name in self.my_tag.features)
 
-        del self.my_tag.features[0]
+        data_frame = self.block.create_data_frame(
+            "dataframe feature", "test",
+            col_dict=OrderedDict([("number", nix.DataType.Float)]),
+            data=[(10.,)]
+        )
+        df_feature = self.my_tag.create_feature(data_frame, nix.LinkType.Untagged)
 
-        assert (len(self.my_tag.features) == 0)
+        assert len(self.my_tag.features) == 2
+
+        assert df_feature in self.my_tag.features
+        assert df_feature.id in self.my_tag.features
+
+        assert df_feature.id == self.my_tag.features[1].id
+        assert df_feature.id == self.my_tag.features[-1].id
+
+        # id and name access
+        assert df_feature.id == self.my_tag.features[df_feature.id].id
+        assert df_feature.id == self.my_tag.features[data_frame.id].id
+        assert df_feature.id == self.my_tag.features[data_frame.name].id
+        assert data_frame == self.my_tag.features[data_frame.id].data
+        assert data_frame == self.my_tag.features[data_frame.name].data
+
+        assert data_frame.id in self.my_tag.features
+        assert data_frame.name in self.my_tag.features
+
+        assert isinstance(self.my_tag.features[0].data, nix.DataArray)
+        assert isinstance(self.my_tag.features[1].data, nix.DataFrame)
+
+        del self.my_tag.features[0]
+        assert len(self.my_tag.features) == 1
+        del self.my_tag.features[0]
+        assert len(self.my_tag.features) == 0
 
     def test_tag_tagged_data(self):
         sample_iv = 1.0
@@ -256,8 +287,13 @@ class TestTags(unittest.TestCase):
         assert (segdata.shape == (1, 7, 2))
 
     def test_tag_feature_data(self):
+        number_data = np.random.random(20)
         number_feat = self.block.create_data_array("number feature", "test",
-                                                   data=10.)
+                                                   data=number_data)
+        dim = number_feat.append_sampled_dimension(1.0)
+        dim.unit = "ms"
+        dim.offset = 1.0
+
         ramp_data = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
         ramp_feat = self.block.create_data_array("ramp feature", "test",
                                                  data=np.asarray(ramp_data))
@@ -265,39 +301,111 @@ class TestTags(unittest.TestCase):
         ramp_feat.unit = "mV"
         dim = ramp_feat.append_sampled_dimension(1.0)
         dim.unit = "ms"
+        dim.offset = 2.0
 
         pos_tag = self.block.create_tag("feature test", "test", [5.0])
         pos_tag.units = ["ms"]
 
+        pos_tag.create_feature(number_feat, nix.LinkType.Tagged)
         pos_tag.create_feature(number_feat, nix.LinkType.Untagged)
+        pos_tag.create_feature(number_feat, nix.LinkType.Indexed)
         pos_tag.create_feature(ramp_feat, nix.LinkType.Tagged)
         pos_tag.create_feature(ramp_feat, nix.LinkType.Untagged)
-        assert (len(pos_tag.features) == 3)
+        pos_tag.create_feature(ramp_feat, nix.LinkType.Indexed)
+        assert len(pos_tag.features) == 6
 
         data1 = pos_tag.feature_data(0)
         data2 = pos_tag.feature_data(1)
         data3 = pos_tag.feature_data(2)
+        data4 = pos_tag.feature_data(3)
+        data5 = pos_tag.feature_data(4)
+        data6 = pos_tag.feature_data(5)
 
-        assert (data1.size == 1)
-        assert (data2.size == 1)
-        assert (data3.size == len(ramp_data))
+        assert data1.size == 1
+        assert data2.size == len(number_data)
+        assert data3.size == len(number_data)
+        assert data4.size == 1
+        assert data5.size == len(ramp_data)
+        assert data6.size == len(ramp_data)
+
+        # check expected data
+        # For Tag, both Indexed and Untagged just return the full data
+        assert np.all(data1[:] == number_data[4:5])
+        assert np.all(data2[:] == number_data[:])
+        assert np.all(data3[:] == number_data[:])
+        assert np.all(data4[:] == ramp_data[3:4])
+        assert np.all(data5[:] == ramp_data[:])
+        assert np.all(data6[:] == ramp_data[:])
 
         # make the tag pointing to a slice
         pos_tag.extent = [2.0]
         data1 = pos_tag.feature_data(0)
         data2 = pos_tag.feature_data(1)
         data3 = pos_tag.feature_data(2)
+        data4 = pos_tag.feature_data(3)
+        data5 = pos_tag.feature_data(4)
+        data6 = pos_tag.feature_data(5)
 
-        assert (data1.size == 1)
-        assert (data2.size == 3)
-        assert (data3.size == len(ramp_data))
+        assert np.all(data1[:] == number_data[4:7])  # end is inclusive
+        assert np.all(data2[:] == number_data[:])
+        assert np.all(data3[:] == number_data[:])
+        assert np.all(data4[:] == ramp_data[3:6])  # end is inclusive
+        assert np.all(data5[:] == ramp_data[:])
+        assert np.all(data6[:] == ramp_data[:])
 
-        # get by name
-        data1 = pos_tag.feature_data(number_feat.name)
-        data2 = pos_tag.feature_data(ramp_feat.name)
+    def test_tag_feature_dataframe(self):
+        numberdata = np.random.random(20)
+        number_feat = self.block.create_data_frame(
+            "number feature", "test",
+            col_dict=OrderedDict([("number", nix.DataType.Float)]),
+            data=[(n,) for n in numberdata]
+        )
+        column_descriptions = OrderedDict([("name", nix.DataType.String),
+                                           ("duration", nix.DataType.Double)])
+        values = [("One", 0.1), ("Two", 0.2), ("Three", 0.3), ("Four", 0.4),
+                  ("Five", 0.5), ("Six", 0.6), ("Seven", 0.7), ("Eight", 0.8),
+                  ("Nine", 0.9), ("Ten", 1.0)]
+        ramp_feat = self.block.create_data_frame("ramp feature", "test",
+                                                 col_dict=column_descriptions,
+                                                 data=values)
+        ramp_feat.label = "voltage"
+        ramp_feat.units = (None, "s")
 
-        assert (data1.size == 1)
-        assert (data2.size == 3)
+        pos_tag = self.block.create_tag("feature test", "test", [5.0])
+
+        with self.assertRaises(UnsupportedLinkType):
+            pos_tag.create_feature(number_feat, nix.LinkType.Tagged)
+        pos_tag.create_feature(number_feat, nix.LinkType.Untagged)
+        pos_tag.create_feature(number_feat, nix.LinkType.Indexed)
+        with self.assertRaises(UnsupportedLinkType):
+            pos_tag.create_feature(ramp_feat, nix.LinkType.Tagged)
+        pos_tag.create_feature(ramp_feat, nix.LinkType.Untagged)
+        pos_tag.create_feature(ramp_feat, nix.LinkType.Indexed)
+        assert len(pos_tag.features) == 4
+
+        data1 = pos_tag.feature_data(0)
+        data2 = pos_tag.feature_data(1)
+        data3 = pos_tag.feature_data(2)
+        data4 = pos_tag.feature_data(3)
+
+        # check expected data
+        # For Tag, both Indexed and Untagged just return the full data
+        assert np.all(data1[:] == number_feat[:])
+        assert np.all(data2[:] == number_feat[:])
+        assert np.all(data3[:] == ramp_feat[:])
+        assert np.all(data4[:] == ramp_feat[:])
+
+        # Extent should have no effect
+        pos_tag.extent = [2.0]
+        data1 = pos_tag.feature_data(0)
+        data2 = pos_tag.feature_data(1)
+        data3 = pos_tag.feature_data(2)
+        data4 = pos_tag.feature_data(3)
+
+        assert np.all(data1[:] == number_feat[:])
+        assert np.all(data2[:] == number_feat[:])
+        assert np.all(data3[:] == ramp_feat[:])
+        assert np.all(data4[:] == ramp_feat[:])
 
     def test_timestamp_autoupdate(self):
         tag = self.block.create_tag("tag.time", "test.time", [-1])
