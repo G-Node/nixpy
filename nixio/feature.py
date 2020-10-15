@@ -24,21 +24,12 @@ class Feature(object):
 
     @classmethod
     def create_new(cls, nixfile, nixparent, h5parent, data, link_type):
-        if isinstance(data, DataArray):
-            objtype = "DataArray"
-        elif isinstance(data, DataFrame):
-            objtype = "DataFrame"
-            if link_type == LinkType.Tagged:
-                raise UnsupportedLinkType(str(type(data)), link_type)
-        else:
-            raise UnsupportedLinkType(str(type(data)), link_type)
         id_ = util.create_id()
         h5group = h5parent.open_group(id_)
         h5group.set_attr("entity_id", id_)
         newfeature = cls(nixfile, nixparent, h5group)
         newfeature.link_type = link_type
         newfeature.data = data
-        newfeature._h5group.set_attr("target_type", objtype)
         newfeature._h5group.set_attr("created_at",
                                      util.time_to_str(util.now_int()))
         newfeature._h5group.set_attr("updated_at",
@@ -83,11 +74,16 @@ class Feature(object):
         if isinstance(dataobj, DataArray):
             if dataobj not in parblock.data_arrays:
                 raise RuntimeError("Feature.data: DataArray not found in Block!")
+            objtype = "DataArray"
         elif isinstance(dataobj, DataFrame):
             if dataobj not in parblock.data_frames:
                 raise RuntimeError("Feature.data: DataFrame not found in Block!")
+            if self.link_type == LinkType.Tagged:
+                raise UnsupportedLinkType(str(type(dataobj)), LinkType.Tagged)
+            objtype = "DataFrame"
         else:
             raise TypeError("Unknown data object type: {}".format(type(dataobj)))
+        self._h5group.set_attr("target_type", objtype)
 
         if "data" in self._h5group:
             del self._h5group["data"]
