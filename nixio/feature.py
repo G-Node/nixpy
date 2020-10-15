@@ -24,6 +24,8 @@ class Feature(object):
 
     @classmethod
     def create_new(cls, nixfile, nixparent, h5parent, data, link_type):
+        if isinstance(data, DataFrame) and link_type == LinkType.Tagged:
+            raise UnsupportedLinkType(str(type(data)), LinkType.Tagged)
         id_ = util.create_id()
         h5group = h5parent.open_group(id_)
         h5group.set_attr("entity_id", id_)
