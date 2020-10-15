@@ -9,6 +9,7 @@
 from .data_array import DataArray
 from .data_frame import DataFrame
 from .link_type import LinkType
+from .exceptions import UnsupportedLinkType
 from six import string_types
 from .util import util
 
@@ -23,6 +24,14 @@ class Feature(object):
 
     @classmethod
     def create_new(cls, nixfile, nixparent, h5parent, data, link_type):
+        if isinstance(data, DataArray):
+            objtype = "DataArray"
+        elif isinstance(data, DataFrame):
+            objtype = "DataFrame"
+            if link_type == LinkType.Tagged:
+                raise UnsupportedLinkType(str(type(data)), link_type)
+        else:
+            raise UnsupportedLinkType(str(type(data)), link_type)
         id_ = util.create_id()
         h5group = h5parent.open_group(id_)
         h5group.set_attr("entity_id", id_)
