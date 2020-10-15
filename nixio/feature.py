@@ -38,6 +38,7 @@ class Feature(object):
         newfeature = cls(nixfile, nixparent, h5group)
         newfeature.link_type = link_type
         newfeature.data = data
+        newfeature._h5group.set_attr("target_type", objtype)
         newfeature._h5group.set_attr("created_at",
                                      util.time_to_str(util.now_int()))
         newfeature._h5group.set_attr("updated_at",
