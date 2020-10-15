@@ -96,21 +96,6 @@ class MultiTag(BaseTag):
                                              self._parent.data_arrays)
         return self._references
 
-    @property
-    def features(self):
-        """
-        A property containing all features of the tag. Features can be obtained
-        via their index or their id. Features can be deleted from the list.
-        Adding new features to the multitag is done using the create_feature
-        method. This is a read only attribute.
-
-        :type: Container of Feature.
-        """
-        if self._features is None:
-            self._features = FeatureContainer("features", self.file,
-                                              self, Feature)
-        return self._features
-
     def _calc_data_slices(self, data, index):
         positions = self.positions
         extents = self.extents

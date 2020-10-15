@@ -164,6 +164,22 @@ class BaseTag(Entity):
         return int(index)
 
 
+    @property
+    def features(self):
+        """
+        A property containing all features. Features can be obtained
+        via their index or their ID. Features can be deleted from the list.
+        Adding new features is done using the create_feature method.
+        This is a read only attribute.
+
+        :type: Container of Feature.
+        """
+        if self._features is None:
+            self._features = FeatureContainer("features", self.file,
+                                              self, Feature)
+        return self._features
+
+
 class Tag(BaseTag):
 
     def __init__(self, nixfile, nixparent, h5group):
@@ -335,21 +351,6 @@ class Tag(BaseTag):
             self._references = LinkContainer("references", self, DataArray,
                                              self._parent.data_arrays)
         return self._references
-
-    @property
-    def features(self):
-        """
-        A property containing all features of the tag. Features can be obtained
-        via their index or their id. Features can be deleted from the list.
-        Adding new features to the tag is done using the create_feature method.
-        This is a read only attribute.
-
-        :type: Container of Feature.
-        """
-        if self._features is None:
-            self._features = FeatureContainer("features", self.file,
-                                              self, Feature)
-        return self._features
 
     @property
     def sources(self):
