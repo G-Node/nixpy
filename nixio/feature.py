@@ -64,9 +64,19 @@ class Feature(object):
     @property
     def data(self):
         if "data" not in self._h5group:
-            raise RuntimeError("Feature.data: DataArray not found!")
-        return DataArray(self.file, self._parent._parent,
-                         self._h5group.open_group("data"))
+            raise RuntimeError("Feature.data: Data object not found!")
+        if "target_type" in self._h5group:
+            # Missing target_type property: Default to DataArray (older files)
+            objtype = self._h5group.get_attr("target_type")
+        else:
+            objtype = "DataArray"
+        if objtype == "DataArray":
+            return DataArray(self.file, self._parent._parent,
+                             self._h5group.open_group("data"))
+        if objtype == "DataFrame":
+            return DataFrame(self.file, self._parent._parent,
+                             self._h5group.open_group("data"))
+        raise RuntimeError("Feature.data: Unknown target type defind: {}".format(objtype))
 
     @data.setter
     def data(self, dataobj):
