@@ -22,12 +22,6 @@ from .section import Section
 
 class MultiTag(BaseTag):
 
-    def __init__(self, nixfile, nixparent, h5group):
-        super(MultiTag, self).__init__(nixfile, nixparent, h5group)
-        self._sources = None
-        self._references = None
-        self._features = None
-
     @classmethod
     def create_new(cls, nixfile, nixparent, h5parent, name, type_, positions):
         newentity = super(MultiTag, cls).create_new(nixfile, nixparent,
