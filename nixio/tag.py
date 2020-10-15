@@ -321,18 +321,18 @@ class Tag(BaseTag):
                     break
             if feat is None:
                 raise
-        da = feat.data
-        if da is None:
+        data = feat.data
+        if data is None:
             raise UninitializedEntity()
         if feat.link_type == LinkType.Tagged:
-            slices = self._calc_data_slices(da)
-            if not self._slices_in_data(da, slices):
+            slices = self._calc_data_slices(data)
+            if not self._slices_in_data(data, slices):
                 raise OutOfBounds("Requested data slice out of the extent "
                                   "of the Feature!")
-            return DataView(da, slices)
+            return DataView(data, slices)
         # For untagged and indexed return the full data
-        fullslices = tuple(slice(0, stop) for stop in da.shape)
-        return DataView(da, fullslices)
+        fullslices = tuple(slice(0, stop) for stop in data.shape)
+        return DataView(data, fullslices)
 
     @property
     def references(self):
