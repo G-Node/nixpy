@@ -9,11 +9,11 @@
 import os
 import time
 import unittest
+from collections import OrderedDict
 import numpy as np
 import nixio as nix
-from .tmp import TempDir
 from nixio.exceptions import DuplicateName, UnsupportedLinkType
-from collections import OrderedDict
+from .tmp import TempDir
 
 
 class TestMultiTags(unittest.TestCase):
