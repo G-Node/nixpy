@@ -9,10 +9,10 @@
 import os
 import time
 import unittest
+from collections import OrderedDict
 import numpy as np
 import nixio as nix
 from nixio.exceptions import UnsupportedLinkType
-from collections import OrderedDict
 from .tmp import TempDir
 
 
@@ -78,71 +78,71 @@ class TestTags(unittest.TestCase):
                                       da3d[1:3, 1:4, 1:5])
 
     def test_tag_eq(self):
-        assert (self.my_tag == self.my_tag)
-        assert (not self.my_tag == self.your_tag)
-        assert (self.my_tag is not None)
+        assert self.my_tag == self.my_tag
+        assert not self.my_tag == self.your_tag
+        assert self.my_tag is not None
 
     def test_tag_id(self):
-        assert (self.my_tag.id is not None)
+        assert self.my_tag.id is not None
 
     def test_tag_name(self):
-        assert (self.my_tag.name is not None)
+        assert self.my_tag.name is not None
 
     def test_tag_type(self):
         def set_none():
             self.my_tag.type = None
 
-        assert (self.my_tag.type is not None)
+        assert self.my_tag.type is not None
         self.assertRaises(Exception, set_none)
 
         self.my_tag.type = "foo type"
-        assert (self.my_tag.type == "foo type")
+        assert self.my_tag.type == "foo type"
 
     def test_tag_definition(self):
-        assert (self.my_tag.definition is None)
+        assert self.my_tag.definition is None
 
         self.my_tag.definition = "definition"
-        assert (self.my_tag.definition == "definition")
+        assert self.my_tag.definition == "definition"
 
         self.my_tag.definition = None
-        assert (self.my_tag.definition is None)
+        assert self.my_tag.definition is None
 
     def test_tag_timestamps(self):
         created_at = self.my_tag.created_at
-        assert (created_at > 0)
+        assert created_at > 0
 
         updated_at = self.my_tag.updated_at
-        assert (updated_at > 0)
+        assert updated_at > 0
 
         self.my_tag.force_created_at(1403530068)
-        assert (self.my_tag.created_at == 1403530068)
+        assert self.my_tag.created_at == 1403530068
 
     def test_tag_units(self):
-        assert (self.my_tag.units == ())
+        assert self.my_tag.units == ()
 
         self.my_tag.units = ["mV", "ms"]
-        assert (self.my_tag.units == ("mV", "ms"))
+        assert self.my_tag.units == ("mV", "ms")
 
         self.my_tag.units = []
-        assert (self.my_tag.units == ())
+        assert self.my_tag.units == ()
 
     def test_tag_position(self):
-        assert (self.my_tag.position == (0,))
+        assert self.my_tag.position == (0,)
 
         self.my_tag.position = (1.0, 2.0, 3.0)
-        assert (self.my_tag.position == (1.0, 2.0, 3.0))
+        assert self.my_tag.position == (1.0, 2.0, 3.0)
 
     def test_tag_extent(self):
-        assert (self.my_tag.extent == ())
+        assert self.my_tag.extent == ()
 
         self.my_tag.extent = (1.0, 2.0, 3.0)
-        assert (self.my_tag.extent == (1.0, 2.0, 3.0))
+        assert self.my_tag.extent == (1.0, 2.0, 3.0)
 
         self.my_tag.extent = []
-        assert (self.my_tag.extent == ())
+        assert self.my_tag.extent == ()
 
     def test_tag_references(self):
-        assert (len(self.my_tag.references) == 1)
+        assert len(self.my_tag.references) == 1
 
         self.assertRaises(TypeError, self.my_tag.references.append, 100)
 
@@ -154,55 +154,55 @@ class TestTags(unittest.TestCase):
         self.my_tag.references.append(reference1)
         self.my_tag.references.append(reference2)
 
-        assert (reference1.name in self.my_tag.references)
+        assert reference1.name in self.my_tag.references
 
-        assert (len(self.my_tag.references) == 3)
-        assert (reference1 in self.my_tag.references)
-        assert (reference2 in self.my_tag.references)
+        assert len(self.my_tag.references) == 3
+        assert reference1 in self.my_tag.references
+        assert reference2 in self.my_tag.references
 
         # id and name access
-        assert (reference1 == self.my_tag.references[reference1.name])
-        assert (reference1 == self.my_tag.references[reference1.id])
-        assert (reference2 == self.my_tag.references[reference2.name])
-        assert (reference2 == self.my_tag.references[reference2.id])
+        assert reference1 == self.my_tag.references[reference1.name]
+        assert reference1 == self.my_tag.references[reference1.id]
+        assert reference2 == self.my_tag.references[reference2.name]
+        assert reference2 == self.my_tag.references[reference2.id]
 
-        assert (reference1.name in self.my_tag.references)
-        assert (reference2.name in self.my_tag.references)
-        assert (reference1.id in self.my_tag.references)
-        assert (reference2.id in self.my_tag.references)
+        assert reference1.name in self.my_tag.references
+        assert reference2.name in self.my_tag.references
+        assert reference1.id in self.my_tag.references
+        assert reference2.id in self.my_tag.references
 
         del self.my_tag.references[reference2]
-        assert (self.my_array in self.my_tag.references)
-        assert (reference1 in self.my_tag.references)
+        assert self.my_array in self.my_tag.references
+        assert reference1 in self.my_tag.references
 
         del self.my_tag.references[reference1]
-        assert (len(self.my_tag.references) == 1)
+        assert len(self.my_tag.references) == 1
 
     def test_tag_features(self):
-        assert (len(self.my_tag.features) == 0)
+        assert len(self.my_tag.features) == 0
 
         data_array = self.block.create_data_array("feature", "stimuli",
                                                   nix.DataType.Int16, (1,))
         da_feature = self.my_tag.create_feature(data_array, nix.LinkType.Untagged)
 
-        assert (len(self.my_tag.features) == 1)
+        assert len(self.my_tag.features) == 1
 
-        assert (da_feature in self.my_tag.features)
-        assert (da_feature.id in self.my_tag.features)
-        assert ("notexist" not in self.my_tag.features)
+        assert da_feature in self.my_tag.features
+        assert da_feature.id in self.my_tag.features
+        assert "notexist" not in self.my_tag.features
 
-        assert (da_feature.id == self.my_tag.features[0].id)
-        assert (da_feature.id == self.my_tag.features[-1].id)
+        assert da_feature.id == self.my_tag.features[0].id
+        assert da_feature.id == self.my_tag.features[-1].id
 
         # id and name access
-        assert (da_feature.id == self.my_tag.features[da_feature.id].id)
-        assert (da_feature.id == self.my_tag.features[data_array.id].id)
-        assert (da_feature.id == self.my_tag.features[data_array.name].id)
-        assert (data_array == self.my_tag.features[data_array.id].data)
-        assert (data_array == self.my_tag.features[data_array.name].data)
+        assert da_feature.id == self.my_tag.features[da_feature.id].id
+        assert da_feature.id == self.my_tag.features[data_array.id].id
+        assert da_feature.id == self.my_tag.features[data_array.name].id
+        assert data_array == self.my_tag.features[data_array.id].data
+        assert data_array == self.my_tag.features[data_array.name].data
 
-        assert (data_array.id in self.my_tag.features)
-        assert (data_array.name in self.my_tag.features)
+        assert data_array.id in self.my_tag.features
+        assert data_array.name in self.my_tag.features
 
         data_frame = self.block.create_data_frame(
             "dataframe feature", "test",
@@ -264,27 +264,27 @@ class TestTags(unittest.TestCase):
         segtag.units = units
 
         posdata = postag.tagged_data(0)
-        assert (len(posdata.shape) == 3)
-        assert (posdata.shape == (1, 1, 1))
+        assert len(posdata.shape) == 3
+        assert posdata.shape == (1, 1, 1)
 
         segdata = segtag.tagged_data(0)
-        assert (len(segdata.shape) == 3)
-        assert (segdata.shape == (1, 7, 2))
+        assert len(segdata.shape) == 3
+        assert segdata.shape == (1, 7, 2)
 
         # retrieve data by id and name
         posdata = postag.tagged_data(da.name)
-        assert (len(posdata.shape) == 3)
-        assert (posdata.shape == (1, 1, 1))
+        assert len(posdata.shape) == 3
+        assert posdata.shape == (1, 1, 1)
         segdata = segtag.tagged_data(da.name)
-        assert (len(segdata.shape) == 3)
-        assert (segdata.shape == (1, 7, 2))
+        assert len(segdata.shape) == 3
+        assert segdata.shape == (1, 7, 2)
 
         posdata = postag.tagged_data(da.id)
-        assert (len(posdata.shape) == 3)
-        assert (posdata.shape == (1, 1, 1))
+        assert len(posdata.shape) == 3
+        assert posdata.shape == (1, 1, 1)
         segdata = segtag.tagged_data(da.id)
-        assert (len(segdata.shape) == 3)
-        assert (segdata.shape == (1, 7, 2))
+        assert len(segdata.shape) == 3
+        assert segdata.shape == (1, 7, 2)
 
     def test_tag_feature_data(self):
         number_data = np.random.random(20)
