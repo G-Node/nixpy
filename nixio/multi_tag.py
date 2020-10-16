@@ -8,9 +8,9 @@
 # LICENSE file in the root of the Project.
 import warnings
 import numpy as np
-from .tag import BaseTag, FeatureContainer
+
+from .tag import BaseTag
 from .container import LinkContainer
-from .feature import Feature
 from .source_link_container import SourceLinkContainer
 from .data_array import DataArray
 from .data_view import DataView
@@ -193,29 +193,29 @@ class MultiTag(BaseTag):
                     break
             if feat is None:
                 raise
-        da = feat.data
-        if da is None:
+        data = feat.data
+        if data is None:
             raise UninitializedEntity()
         if feat.link_type == LinkType.Tagged:
-            slices = self._calc_data_slices(da, posidx)
-            if not self._slices_in_data(da, slices):
+            slices = self._calc_data_slices(data, posidx)
+            if not self._slices_in_data(data, slices):
                 raise OutOfBounds("Requested data slice out of the extent "
                                   "of the Feature!")
-            return DataView(da, slices)
-        elif feat.link_type == LinkType.Indexed:
-            if posidx > da.data_extent[0]:
+            return DataView(data, slices)
+        if feat.link_type == LinkType.Indexed:
+            if posidx > data.data_extent[0]:
                 raise OutOfBounds("Position is larger than the data stored "
                                   "in the Feature!")
             slices = [slice(posidx, posidx + 1)]
-            slices.extend(slice(0, stop) for stop in da.data_extent[1:])
+            slices.extend(slice(0, stop) for stop in data.data_extent[1:])
 
-            if not self._slices_in_data(da, slices):
+            if not self._slices_in_data(data, slices):
                 msg = "Requested data slice out of the extent of the Feature!"
                 raise OutOfBounds(msg)
-            return DataView(da, slices)
+            return DataView(data, slices)
         # For untagged return the full data
-        slices = tuple(slice(0, stop) for stop in da.data_extent)
-        return DataView(da, slices)
+        slices = tuple(slice(0, stop) for stop in data.data_extent)
+        return DataView(data, slices)
 
     @property
     def sources(self):
