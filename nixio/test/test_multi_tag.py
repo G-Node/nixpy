@@ -632,3 +632,61 @@ class TestMultiTags(unittest.TestCase):
                                                     "test.time",
                                                     nix.DataType.Int8, (0,))
         self.assertEqual(mtag.updated_at, mtagtime)
+
+    def test_multi_tag_feature_dataframe(self):
+        numberdata = np.random.random(20)
+        number_feat = self.block.create_data_frame(
+            "number feature", "test",
+            col_dict=OrderedDict([("number", nix.DataType.Float)]),
+            data=[(n,) for n in numberdata]
+        )
+        column_descriptions = OrderedDict([("name", nix.DataType.String),
+                                           ("duration", nix.DataType.Double)])
+        values = [("One", 0.1), ("Two", 0.2), ("Three", 0.3), ("Four", 0.4),
+                  ("Five", 0.5), ("Six", 0.6), ("Seven", 0.7), ("Eight", 0.8),
+                  ("Nine", 0.9), ("Ten", 1.0)]
+        ramp_feat = self.block.create_data_frame("ramp feature", "test",
+                                                 col_dict=column_descriptions,
+                                                 data=values)
+        ramp_feat.label = "voltage"
+        ramp_feat.units = (None, "s")
+
+        pos_tag = self.block.create_multi_tag("feature test", "test", [4, 7, 8])
+
+        with self.assertRaises(UnsupportedLinkType):
+            pos_tag.create_feature(number_feat, nix.LinkType.Tagged)
+        pos_tag.create_feature(number_feat, nix.LinkType.Untagged)
+        pos_tag.create_feature(number_feat, nix.LinkType.Indexed)
+        with self.assertRaises(UnsupportedLinkType):
+            pos_tag.create_feature(ramp_feat, nix.LinkType.Tagged)
+        pos_tag.create_feature(ramp_feat, nix.LinkType.Untagged)
+        pos_tag.create_feature(ramp_feat, nix.LinkType.Indexed)
+        assert len(pos_tag.features) == 4
+
+        for idx, _ in enumerate(pos_tag.positions):
+            data1 = pos_tag.feature_data(idx, 0)
+            data2 = pos_tag.feature_data(idx, 1)
+            data3 = pos_tag.feature_data(idx, 2)
+            data4 = pos_tag.feature_data(idx, 3)
+
+            # check expected data
+            assert np.all(data1[:] == number_feat[:])
+            assert np.all(data2[:] == number_feat[idx])
+            assert np.all(data3[:] == ramp_feat[:])
+            assert np.all(data4[:] == ramp_feat[idx])
+
+        # add extents (should have no effect)
+        extents = self.block.create_data_array("feature test.extents", "test",
+                                               data=[2, 2, 5])
+        pos_tag.extents = extents
+        for idx, _ in enumerate(pos_tag.positions):
+            data1 = pos_tag.feature_data(idx, 0)
+            data2 = pos_tag.feature_data(idx, 1)
+            data3 = pos_tag.feature_data(idx, 2)
+            data4 = pos_tag.feature_data(idx, 3)
+
+            # check expected data
+            assert np.all(data1[:] == number_feat[:])
+            assert np.all(data2[:] == number_feat[idx])
+            assert np.all(data3[:] == ramp_feat[:])
+            assert np.all(data4[:] == ramp_feat[idx])
