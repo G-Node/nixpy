@@ -12,7 +12,8 @@ import unittest
 import numpy as np
 import nixio as nix
 from .tmp import TempDir
-from nixio.exceptions import DuplicateName
+from nixio.exceptions import DuplicateName, UnsupportedLinkType
+from collections import OrderedDict
 
 
 class TestMultiTags(unittest.TestCase):
@@ -310,34 +311,63 @@ class TestMultiTags(unittest.TestCase):
         assert (len(self.my_tag.references) == 0)
 
     def test_multi_tag_features(self):
-        assert (len(self.my_tag.features) == 0)
+        assert len(self.my_tag.features) == 0
 
         data_array = self.block.create_data_array("feature", "stimuli",
                                                   nix.DataType.Int16, (0,))
         feature = self.my_tag.create_feature(data_array,
                                              nix.LinkType.Untagged)
-        assert (len(self.my_tag.features) == 1)
+        assert len(self.my_tag.features) == 1
 
-        assert (feature in self.my_tag.features)
-        assert (feature.id in self.my_tag.features)
-        assert ("notexist" not in self.my_tag.features)
+        assert feature in self.my_tag.features
+        assert feature.id in self.my_tag.features
+        assert "notexist" not in self.my_tag.features
 
-        assert (feature.id == self.my_tag.features[0].id)
-        assert (feature.id == self.my_tag.features[-1].id)
+        assert feature.id == self.my_tag.features[0].id
+        assert feature.id == self.my_tag.features[-1].id
 
         # id and name access
-        assert (feature.id == self.my_tag.features[feature.id].id)
-        assert (feature.id == self.my_tag.features[data_array.id].id)
-        assert (feature.id == self.my_tag.features[data_array.name].id)
-        assert (data_array == self.my_tag.features[data_array.id].data)
-        assert (data_array == self.my_tag.features[data_array.name].data)
+        assert feature.id == self.my_tag.features[feature.id].id
+        assert feature.id == self.my_tag.features[data_array.id].id
+        assert feature.id == self.my_tag.features[data_array.name].id
+        assert data_array == self.my_tag.features[data_array.id].data
+        assert data_array == self.my_tag.features[data_array.name].data
 
-        assert (data_array.id in self.my_tag.features)
-        assert (data_array.name in self.my_tag.features)
+        assert data_array.id in self.my_tag.features
+        assert data_array.name in self.my_tag.features
+
+        data_frame = self.block.create_data_frame(
+            "dataframe feature", "test",
+            col_dict=OrderedDict([("number", nix.DataType.Float)]),
+            data=[(10.,)]
+        )
+        df_feature = self.my_tag.create_feature(data_frame, nix.LinkType.Untagged)
+
+        assert len(self.my_tag.features) == 2
+
+        assert df_feature in self.my_tag.features
+        assert df_feature.id in self.my_tag.features
+
+        assert df_feature.id == self.my_tag.features[1].id
+        assert df_feature.id == self.my_tag.features[-1].id
+
+        # id and name access
+        assert df_feature.id == self.my_tag.features[df_feature.id].id
+        assert df_feature.id == self.my_tag.features[data_frame.id].id
+        assert df_feature.id == self.my_tag.features[data_frame.name].id
+        assert data_frame == self.my_tag.features[data_frame.id].data
+        assert data_frame == self.my_tag.features[data_frame.name].data
+
+        assert data_frame.id in self.my_tag.features
+        assert data_frame.name in self.my_tag.features
+
+        assert isinstance(self.my_tag.features[0].data, nix.DataArray)
+        assert isinstance(self.my_tag.features[1].data, nix.DataFrame)
 
         del self.my_tag.features[0]
-
-        assert (len(self.my_tag.features) == 0)
+        assert len(self.my_tag.features) == 1
+        del self.my_tag.features[0]
+        assert len(self.my_tag.features) == 0
 
     def test_multi_tag_tagged_data(self):
         sample_iv = 0.001
