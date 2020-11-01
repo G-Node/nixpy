@@ -55,7 +55,7 @@ matrix:
             - numpy
           update: true
   allow_failures:
-    - env:
+    - env: pymajor=3 compat=1
 
 addons:
   apt:
