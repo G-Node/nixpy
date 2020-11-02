@@ -65,10 +65,9 @@ class Feature(object):
     def data(self):
         if "data" not in self._h5group:
             raise RuntimeError("Feature.data: Data object not found!")
-        if "target_type" in self._h5group:
+        objtype = self._h5group.get_attr("target_type")
+        if not objtype:
             # Missing target_type property: Default to DataArray (older files)
-            objtype = self._h5group.get_attr("target_type")
-        else:
             objtype = "DataArray"
         if objtype == "DataArray":
             return DataArray(self.file, self._parent._parent,
