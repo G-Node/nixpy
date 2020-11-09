@@ -171,7 +171,8 @@ class TestDataArray(unittest.TestCase):
         assert(np.array_equal(data, dout))
 
         # indexing support in 2-d arrays
-        self.assertRaises(TypeError, lambda: self.array[[], [1, 2]])
+        with self.assertRaises(IndexError):
+            self.array[[], [1, 2]]
 
         dout = dset[12]
         assert(dout.shape == data[12].shape)
