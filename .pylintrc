@@ -280,7 +280,11 @@ good-names=i,
            k,
            ex,
            Run,
-           _
+           _,
+           da,  # common for DataArray
+           mt,  # common for MultiTag
+           df,  # common for DataFrame
+           dt,  # common for time difference/step
 
 # Good variable names regexes, separated by a comma. If names match any regex,
 # they will always be accepted
