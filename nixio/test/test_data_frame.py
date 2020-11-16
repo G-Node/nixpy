@@ -214,7 +214,7 @@ class TestDataFrame(unittest.TestCase):
                                           col_dict=OrderedDict({"idx": int}))
         dftime = df.updated_at
         time.sleep(1)
-        df.units = "ly"
+        df.units = ("ly",)
         self.assertNotEqual(dftime, df.updated_at)
 
     def test_timestamp_noautoupdate(self):
@@ -223,5 +223,5 @@ class TestDataFrame(unittest.TestCase):
                                           col_dict=OrderedDict({"idx": int}))
         dftime = df.updated_at
         time.sleep(1)
-        df.units = "ly"
+        df.units = ("ly",)
         self.assertEqual(dftime, df.updated_at)
