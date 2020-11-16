@@ -156,7 +156,7 @@ def test_tags(tmpdir, bindir):
     blk = nix_file.create_block("test_block", "blocktype")
     grp = blk.create_group("test_group", "grouptype")
     da1 = blk.create_data_array("feature_tag", "afea",
-                                data=np.random.random(20))
+                                data=np.random.random_sample(20))
 
     for idx in range(8):
         if idx == 2:
@@ -164,12 +164,12 @@ def test_tags(tmpdir, bindir):
                                  [0, 10, 10**2, 10**3, 10**4])
         else:
             tag = blk.create_tag("tag_" + str(idx), "atag",
-                                 np.random.random(idx*2))
+                                 np.random.random_sample(idx*2))
         tag.definition = "tag def " + str(idx)
         if idx == 2:
-            tag.extent = np.random.random(5)
+            tag.extent = np.random.random_sample(5)
         else:
-            tag.extent = np.random.random(idx*2)
+            tag.extent = np.random.random_sample(idx*2)
         if idx == 0:
             tag.units = ["V", "ms"]
         else:
@@ -197,26 +197,26 @@ def test_multi_tags(tmpdir, bindir):
     for idx in range(11):
         if idx == 5:
             posda = blk.create_data_array("pos_" + str(idx), "positions",
-                                          data=np.random.random((idx, idx)))
+                                          data=np.random.random_sample((idx, idx)))
             extda = blk.create_data_array("ext_" + str(idx), "extents",
-                                          data=np.random.random((idx, idx)))
+                                          data=np.random.random_sample((idx, idx)))
 
         else:
             posda = blk.create_data_array("pos_" + str(idx), "positions",
-                                          data=np.random.random(idx*10))
+                                          data=np.random.random_sample(idx*10))
             extda = blk.create_data_array("ext_" + str(idx), "extents",
-                                          data=np.random.random(idx*10))
+                                          data=np.random.random_sample(idx*10))
         mt = blk.create_multi_tag("mt_" + str(idx), "some multi tag", posda)
         if idx == 3:
             feada = blk.create_data_array("feature", "afea",
-                                          data=np.random.random(200))
+                                          data=np.random.random_sample(200))
             mt.create_feature(feada, nix.LinkType.Tagged)
 
         if idx != 1:
             mt.extents = extda
         if idx == 2:
             refda = blk.create_data_array("ref", "reference",
-                                          data=np.random.random(13))
+                                          data=np.random.random_sample(13))
             refda.append_range_dimension([0.1, 0.2, 0.3], "A", "s")
             mt.references.append(refda)
             mt.units = ["ms"]
@@ -240,9 +240,9 @@ def _test_sources(tmpdir):
     blk = nix_file.create_block("testblock", "sourcetest")
     grp = blk.create_group("testgroup", "sourcetest")
     da = blk.create_data_array("da", "sourcetest",
-                               data=np.random.random(10))
+                               data=np.random.random_sample(10))
     pos = blk.create_data_array("pos", "sourcetest",
-                                data=np.random.random(10))
+                                data=np.random.random_sample(10))
     mtag = blk.create_multi_tag("mtag", "sourcetest", pos)
     grp.data_arrays.append(da)
 
@@ -272,18 +272,18 @@ def _test_dimensions(tmpdir):
     blk = nix_file.create_block("testblock", "dimtest")
 
     da_set = blk.create_data_array("da with set", "datype",
-                                   data=np.random.random(20))
+                                   data=np.random.random_sample(20))
     da_set.append_set_dimension()
     da_set.dimensions[0].labels = ["label one", "label two"]
 
     da_range = blk.create_data_array("da with range", "datype",
-                                     data=np.random.random(12))
-    rngdim = da_range.append_range_dimension(np.random.random(12))
+                                     data=np.random.random_sample(12))
+    rngdim = da_range.append_range_dimension(np.random.random_sample(12))
     rngdim.label = "range dim label"
     rngdim.unit = "ms"
 
     da_sample = blk.create_data_array("da with sample", "datype",
-                                      data=np.random.random(10))
+                                      data=np.random.random_sample(10))
     smpldim = da_sample.append_sampled_dimension(0.3)
     smpldim.offset = 0.1
     smpldim.unit = "mV"
@@ -291,16 +291,16 @@ def _test_dimensions(tmpdir):
     da_sample.dimensions[0].label = "sample dim label"
 
     da_alias = blk.create_data_array("da with alias", "datype",
-                                     data=np.random.random(19))
+                                     data=np.random.random_sample(19))
     da_alias.unit = "F"
     da_alias.label = "fee fi fo fum"
     da_alias.append_alias_range_dimension()
 
     da_multi_dim = blk.create_data_array("da with multiple", "datype",
-                                         data=np.random.random(30))
+                                         data=np.random.random_sample(30))
     da_multi_dim.append_sampled_dimension(0.1)
     da_multi_dim.append_set_dimension()
-    da_multi_dim.append_range_dimension(np.random.random(10))
+    da_multi_dim.append_range_dimension(np.random.random_sample(10))
 
     nix_file.close()
     # validate(nixfilepath)
@@ -313,7 +313,7 @@ def _test_tag_features(tmpdir):
     blk = nix_file.create_block("testblock", "feattest")
     da_ref = blk.create_data_array("da for ref", "datype",
                                    nix.DataType.Double,
-                                   data=np.random.random(15))
+                                   data=np.random.random_sample(15))
     da_ref.append_sampled_dimension(0.2)
     tag_feat = blk.create_tag("tag for feat", "tagtype", [2])
     tag_feat.references.append(da_ref)
@@ -323,7 +323,7 @@ def _test_tag_features(tmpdir):
     for idx in range(6):
         da_feat = blk.create_data_array("da for feat " + str(idx),
                                         "datype", nix.DataType.Float,
-                                        data=np.random.random(12))
+                                        data=np.random.random_sample(12))
         da_feat.append_sampled_dimension(1.0)
         tag_feat.create_feature(da_feat, linktypes[idx % 3])
 
@@ -380,9 +380,9 @@ def test_multi_tag_features(tmpdir):
     event_labels = ["event 1", "event 2"]
     dim_labels = ["dim 0", "dim 1", "dim 2"]
     event_array = blk.create_data_array("positions", "test",
-                                        data=np.random.random((2, 3)))
+                                        data=np.random.random_sample((2, 3)))
     extent_array = blk.create_data_array("extents", "test",
-                                         data=np.random.random((2, 3)))
+                                         data=np.random.random_sample((2, 3)))
     extent_set_dim = extent_array.append_set_dimension()
     extent_set_dim.labels = event_labels
     extent_set_dim = extent_array.append_set_dimension()
@@ -392,7 +392,7 @@ def test_multi_tag_features(tmpdir):
                                        event_array)
     data_array = blk.create_data_array("featureTest", "test",
                                        nix.DataType.Double, (2, 10, 5))
-    data = np.random.random((2, 10, 5))
+    data = np.random.random_sample((2, 10, 5))
     data_array[:, :, :] = data
 
     feature_tag.extents = extent_array

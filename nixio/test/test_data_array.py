@@ -395,7 +395,7 @@ class TestDataArray(unittest.TestCase):
         check_idx(np.int64(9))
 
     def test_get_slice(self):
-        data2d = np.random.random((100, 2))
+        data2d = np.random.random_sample((100, 2))
         da2d = self.block.create_data_array("get_slice 2d", "Data",
                                             data=data2d)
         da2d.append_range_dimension(np.linspace(10, 19.8, 50))
@@ -408,7 +408,7 @@ class TestDataArray(unittest.TestCase):
                                 mode=nix.DataSliceMode.Data)
         np.testing.assert_almost_equal(data, dslice)
 
-        data3d = np.random.random((30, 30, 5))
+        data3d = np.random.random_sample((30, 30, 5))
         da3d = self.block.create_data_array("get_slice 3d", "Data",
                                             data=data3d)
         sd = da3d.append_sampled_dimension(0.1)

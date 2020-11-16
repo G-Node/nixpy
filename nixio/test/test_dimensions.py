@@ -191,7 +191,7 @@ class TestLinkDimension(unittest.TestCase):
         self.block = self.file.create_block("test block", "test.session")
         self.array = self.block.create_data_array(
             "test array", "signal", nix.DataType.Float,
-            data=np.random.random((3, 15))
+            data=np.random.random_sample((3, 15))
         )
 
         self.set_dim = self.array.append_set_dimension()
@@ -216,10 +216,10 @@ class TestLinkDimension(unittest.TestCase):
 
         tickarray3d = self.block.create_data_array(
             "ticks3d", "array.dimension.ticks",
-            data=np.random.random((20, 15, 4))
+            data=np.random.random_sample((20, 15, 4))
         )
         tickarray3d.unit = "mA"
-        ticks = np.cumsum(np.random.random(15))
+        ticks = np.cumsum(np.random.random_sample(15))
         tickarray3d[3, :, 1] = ticks
         tickarray3d.label = "DIMENSION LABEL 2"
         self.range_dim.link_data_array(tickarray3d, [3, -1, 1])
@@ -249,7 +249,7 @@ class TestLinkDimension(unittest.TestCase):
     def test_data_array_self_link_range_dimension(self):
         # The new way of making alias range dimension
         da = self.block.create_data_array("alias da", "dimticks",
-                                          data=np.random.random(10))
+                                          data=np.random.random_sample(10))
         da.label = "alias dimension label"
         da.unit = "F"
         rdim = da.append_range_dimension()
@@ -262,7 +262,7 @@ class TestLinkDimension(unittest.TestCase):
     def test_data_array_self_link_set_dimension(self):
         # The new way of making alias range dimension
         labelda = self.block.create_data_array("alias da", "dimlabels",
-                                               data=np.random.random(10))
+                                               data=np.random.random_sample(10))
         rdim = labelda.append_set_dimension()
         rdim.link_data_array(labelda, [-1])
         assert len(labelda.dimensions) == 1
@@ -276,7 +276,7 @@ class TestLinkDimension(unittest.TestCase):
         def randtick():
             ts = 0
             while True:
-                ts += np.random.random()
+                ts += np.random.random_sample()
                 yield ts
 
         tickgen = randtick()
@@ -309,7 +309,7 @@ class TestLinkDimension(unittest.TestCase):
                                            ("duration", nix.DataType.Float)])
 
         def rdura():
-            return np.random.random() * 30
+            return np.random.random_sample() * 30
 
         values = [("Alpha", "a", rdura()),
                   ("Beta", 'b',  rdura()),
@@ -332,7 +332,7 @@ class TestLinkDimension(unittest.TestCase):
 
     def test_data_array_linking_errors(self):
         da = self.block.create_data_array("baddim", "dimension.error.test",
-                                          data=np.random.random((3, 4, 2)))
+                                          data=np.random.random_sample((3, 4, 2)))
 
         # index dimensionality mismatch
         with self.assertRaises(nix.exceptions.IncompatibleDimensions):
@@ -387,7 +387,7 @@ class TestLinkDimension(unittest.TestCase):
         sdim = self.array.append_sampled_dimension(0.1)
 
         da = self.block.create_data_array("baddim", "dimension.error.test",
-                                          data=np.random.random((3, 4, 2)))
+                                          data=np.random.random_sample((3, 4, 2)))
         with self.assertRaises(RuntimeError):
             sdim.link_data_array(da, [0])
 
@@ -414,10 +414,10 @@ class TestLinkDimension(unittest.TestCase):
     def test_write_linked_array_props(self):
         tickarray = self.block.create_data_array(
             "ticks3d", "array.dimension.ticks",
-            data=np.random.random((10, 5, 4))
+            data=np.random.random_sample((10, 5, 4))
         )
         tickarray.unit = "whatever"
-        ticks = np.cumsum(np.random.random(5))
+        ticks = np.cumsum(np.random.random_sample(5))
         tickarray[3, :, 1] = ticks
         tickarray.label = "DIMENSION LABEL"
         self.range_dim.link_data_array(tickarray, [3, -1, 1])
@@ -479,7 +479,7 @@ class TestLinkDimension(unittest.TestCase):
         assert "ticks" not in self.range_dim._h5group
 
         # replace with ticks
-        self.range_dim.ticks = np.cumsum(np.random.random(10))
+        self.range_dim.ticks = np.cumsum(np.random.random_sample(10))
         assert "link" not in self.range_dim._h5group
         assert "ticks" in self.range_dim._h5group
 

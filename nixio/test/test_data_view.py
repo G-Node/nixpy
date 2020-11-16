@@ -19,7 +19,7 @@ class TestDataView(unittest.TestCase):
         self.tmpdir = TempDir("dvtest")
         self.testfilename = os.path.join(self.tmpdir.path, "dvtest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
-        self.data = np.random.random((40, 80))
+        self.data = np.random.random_sample((40, 80))
         block = self.file.create_block("testblock", "nix.test.block")
         block.create_data_array("data", "nix.test.data", data=self.data)
 
@@ -76,19 +76,19 @@ class TestDataView(unittest.TestCase):
         npeq = np.testing.assert_almost_equal
 
         # straightforward slicing
-        ow = np.random.random((3, 4))
+        ow = np.random.random_sample((3, 4))
         dv[0:3, 1:5] = ow
         newdata[10:13, 21:25] = ow
         npeq(da[:], newdata)
 
         # slicing with steps
-        ow = np.random.random((5, 3))
+        ow = np.random.random_sample((5, 3))
         dv[0:20:4, 0:15:5] = ow
         newdata[10:30:4, 20:35:5] = ow
         npeq(da[:], newdata)
 
         # steps only
-        ow = np.random.random((5, 3))
+        ow = np.random.random_sample((5, 3))
         dv[::4, ::5] = ow
         newdata[10:30:4, 20:35:5] = ow
         npeq(da[:], newdata)
@@ -104,19 +104,19 @@ class TestDataView(unittest.TestCase):
         npeq(da[:], newdata)
 
         # negative slice start
-        ow = np.random.random(3)
+        ow = np.random.random_sample(3)
         dv[-3::, 10] = ow
         newdata[27:30, 30] = ow
         npeq(da[:], newdata)
 
         # negative slice stop
-        ow = np.random.random(15)
+        ow = np.random.random_sample(15)
         dv[:-5, 2] = ow
         newdata[10:25, 22] = ow
         npeq(da[:], newdata)
 
         # negative slice start and stop
-        ow = np.random.random(10)
+        ow = np.random.random_sample(10)
         dv[10, -15:-5] = ow
         newdata[20, 20:30] = ow
         npeq(da[:], newdata)
@@ -158,7 +158,7 @@ class TestDataView(unittest.TestCase):
 
     def test_data_view_ellipsis(self):
         block = self.file.blocks[0]
-        data = np.random.random((10, 11, 12, 13, 14))
+        data = np.random.random_sample((10, 11, 12, 13, 14))
         da = block.create_data_array("data2", "nix.test.data", data=data)
 
         npeq = np.testing.assert_almost_equal

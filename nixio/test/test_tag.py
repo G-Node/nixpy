@@ -244,7 +244,7 @@ class TestTags(unittest.TestCase):
         pos = [0.0, 2.0, 3.4]
         ext = [0.0, 6.0, 2.3]
         units = ["none", "ms", "ms"]
-        data = np.random.random((2, 10, 5))
+        data = np.random.random_sample((2, 10, 5))
         da = self.block.create_data_array("dimtest", "test",
                                           data=data)
         setdim = da.append_set_dimension()
