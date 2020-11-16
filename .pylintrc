@@ -141,8 +141,8 @@ enable=C0102,  # Black listed name "%s"**
        W0150,  # %s statement in finally block may swallow exception**
        W0201,  # Attribute %r defined outside __init__**
        W0211,  # Static method with %r as first argument**
-       W0221,  # Arguments number differs from %s method**
-       W0222,  # Signature differs from %s method**
+       # W0221,  # Arguments number differs from %s method**  ## RE-ENABLE AFTER CODE RESTRUCTURING
+       # W0222,  # Signature differs from %s method**  ## RE-ENABLE AFTER CODE RESTRUCTURING
        W0223,  # Method %r is abstract in class %r but is not overridden**
        W0234,  # iter returns non-iterator**
        W0301,  # Unnecessary semicolon**
