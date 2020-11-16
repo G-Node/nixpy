@@ -115,16 +115,16 @@ class DataSet(object):
         enlarge = tuple(self.shape[i] + (0 if i != axis else x)
                         for i, x in enumerate(data.shape))
         self.data_extent = enlarge
-        sl = tuple(slice(o, c+o) for o, c in zip(offset, count))
-        self._write_data(data, sl)
+        slc = tuple(slice(o, c+o) for o, c in zip(offset, count))
+        self._write_data(data, slc)
 
-    def _write_data(self, data, sl=None):
+    def _write_data(self, data, slc=None):
         dataset = self._h5group.get_dataset("data")
-        dataset.write_data(data,  sl)
+        dataset.write_data(data,  slc)
 
-    def _read_data(self, sl=None):
+    def _read_data(self, slc=None):
         dataset = self._h5group.get_dataset("data")
-        data = dataset.read_data(sl)
+        data = dataset.read_data(slc)
         if data.dtype == util.vlen_str_dtype:
             data = np.array([ensure_str(d) for d in data],
                             dtype=util.vlen_str_dtype)

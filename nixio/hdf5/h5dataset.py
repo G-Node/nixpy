@@ -37,25 +37,25 @@ class H5DataSet(object):
         name = h5obj.name.split("/")[-1]
         return cls(parent, name)
 
-    def write_data(self, data, sl=None):
-        if sl is None:
+    def write_data(self, data, slc=None):
+        if slc is None:
             self.dataset[:] = data
         else:
-            self.dataset[sl] = data
+            self.dataset[slc] = data
 
-    def read_data(self, sl=None):
-        if sl is None:
+    def read_data(self, slc=None):
+        if slc is None:
             return self.dataset[:]
         try:
-            return self.dataset[sl]
-        except ValueError as ve:
+            return self.dataset[slc]
+        except ValueError as ve_exc:
             # h5py throws ValueError for out-of-bounds index
             # Let's change it to IndexError
-            raise IndexError(ve)
-        except TypeError as te:
+            raise IndexError(ve_exc)
+        except TypeError as te_exc:
             # h5py 2.10 in Python2 throws TypeError for out-of-bounds index
             # Let's change it to IndexError
-            raise IndexError(te)
+            raise IndexError(te_exc)
 
     def set_attr(self, name, value):
         if value is None:

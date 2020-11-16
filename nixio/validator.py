@@ -237,11 +237,7 @@ def check_data_array(da):
             if dim.labels and len(dim.labels) != datalen:
                 # empty labels is allowed
                 errors.append(ValidationError.SetDimLabelsMismatch.format(idx))
-            dim_errors, dim_warnings = check_set_dimension(dim, idx)
-        elif dim.dimension_type == DimensionType.DataFrame:
-            df_len = dim.data_frame.row_count()
-            if df_len != da.shape[0]:
-                dim_errors, dim_warnings = check_df_dimension(dim, idx)
+            dim_errors, dim_warnings = check_set_dimension()
         errors.extend(dim_errors)
         warnings.extend(dim_warnings)
     return errors, warnings
@@ -430,7 +426,7 @@ def check_range_dimension(dim, idx):
     return errors, warnings
 
 
-def check_set_dimension(dim, idx):
+def check_set_dimension():
     """
     Validate a SetDimension and return all errors and warnings.
 
@@ -493,10 +489,10 @@ def get_dim_units(data_array):
 
 
 def tag_units_match_refs_units(tag_units, refs_units):
-    for ref in refs_units:
-        for ru, tu in zip(tag_units, ref):
-            if ru == "" and tu == "":
+    for ref_units in refs_units:
+        for tag_unit, ref_unit in zip(tag_units, ref_units):
+            if tag_unit == "" and ref_unit == "":
                 continue
-            if not units.scalable(ru, tu):
+            if not units.scalable(tag_unit, ref_unit):
                 return False
     return True

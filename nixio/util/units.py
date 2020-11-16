@@ -112,7 +112,7 @@ def is_compound(unit):
     return unit and compound_unit.search(unit)
 
 
-def scalable(unit_a, unit_b):
+def scalable(units_a, units_b):
     """
     Checks whether units are scalable versions of the same SI unit.
     Method works on two lists and compares the corresponding units in both
@@ -124,21 +124,21 @@ def scalable(unit_a, unit_b):
     :returns: True if all corresponding units are scalable.
     :rtype: bool
     """
-    if (isinstance(unit_a, Sequence) and isinstance(unit_b, Sequence) and
-            not isinstance(unit_a, string_types) and
-            not isinstance(unit_b, string_types)):
-        if len(unit_a) != len(unit_b):
+    if (isinstance(units_a, Sequence) and isinstance(units_b, Sequence) and
+            not isinstance(units_a, string_types) and
+            not isinstance(units_b, string_types)):
+        if len(units_a) != len(units_b):
             return False
-        for a, b in zip(unit_a, unit_b):
-            if not scalable(a, b):
+        for unit_a, unit_b in zip(units_a, units_b):
+            if not scalable(unit_a, unit_b):
                 return False
         return True
 
-    if not (is_si(unit_a) and is_si(unit_b)):
+    if not (is_si(units_a) and is_si(units_b)):
         return False
 
-    _, a_unit, a_power = split(unit_a)
-    _, b_unit, b_power = split(unit_b)
+    _, a_unit, a_power = split(units_a)
+    _, b_unit, b_power = split(units_b)
     if a_unit != b_unit or a_power != b_power:
         return False
 
@@ -195,8 +195,8 @@ def split(combined_unit):
     unit_re = "(?P<unit>{})".format(UNITS)
     power_re = "(?P<power>{})".format(POWER)
     pup = re.compile(prefix_re + unit_re + power_re)
-    pu = re.compile(prefix_re + unit_re)
-    up = re.compile(unit_re + power_re)
+    prefix_matcher = re.compile(prefix_re + unit_re)
+    unit_matcher = re.compile(unit_re + power_re)
     # u = re.compile(unit_re)
     # p = re.compile(prefix_re)
 
@@ -207,14 +207,14 @@ def split(combined_unit):
         power = match.group("power")[1:]
         return prefix, unit, power
 
-    match = up.match(combined_unit)
+    match = unit_matcher.match(combined_unit)
     if match:
         prefix = ""
         unit = match.group("unit")
         power = match.group("power")[1:]
         return prefix, unit, power
 
-    match = pu.match(combined_unit)
+    match = prefix_matcher.match(combined_unit)
     if match:
         prefix = match.group("prefix")
         unit = match.group("unit")

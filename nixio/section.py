@@ -25,7 +25,7 @@ from . import util
 from . import exceptions
 
 
-class S(object):
+class S(object):  # pylint: disable=invalid-name
     def __init__(self, section_type, section=None):
         self.section_type = section_type
         self.section = section
@@ -120,12 +120,10 @@ class Section(Entity):
                 raise NameError("Name already exist. Possible solution is to "
                                 "provide a new name when copying destination "
                                 "is the same as the source parent")
-            p = copy_from._parent._h5group.copy(source=src, dest=self._h5group,
-                                                name=name,
-                                                cls=clsname,
-                                                keep_id=keep_copy_id)
+            objcopy = copy_from._parent._h5group.copy(source=src, dest=self._h5group, name=name,
+                                                      cls=clsname, keep_id=keep_copy_id)
 
-            id_ = p.attrs["entity_id"]
+            id_ = objcopy.attrs["entity_id"]
             return self.props[id_]
 
         vals = values_or_dtype
@@ -142,11 +140,8 @@ class Section(Entity):
         # In case of values, make sure boolean value 'False' gets through as
         # well, but ensure that empty values are not allowed, we need a
         # DataType.
-        elif vals is None or (isinstance(vals, (Sequence, Iterable)) and
-                              not len(vals)):
-            raise TypeError(
-                "Please provide either a non empty value or a DataType."
-            )
+        elif vals is None or (isinstance(vals, (Sequence, Iterable)) and not len(vals)):
+            raise TypeError("Please provide either a non empty value or a DataType.")
 
         else:
             # Make sure all values are of the same data type
@@ -164,8 +159,8 @@ class Section(Entity):
 
             # Check all values for data type consistency to ensure clean value
             # add. Will raise an exception otherwise.
-            for v in vals:
-                if DataType.get_dtype(v) != dtype:
+            for val in vals:
+                if DataType.get_dtype(val) != dtype:
                     raise TypeError("Array contains inconsistent values.")
         shape = (len(vals),)
 
@@ -212,9 +207,8 @@ class Section(Entity):
                                         keep_id=keep_id)
 
         if not children:
-            for p in obj.props:
-                self.sections[obj.name].create_property(copy_from=p,
-                                                        keep_copy_id=keep_id)
+            for prop in obj.props:
+                self.sections[obj.name].create_property(copy_from=prop, keep_copy_id=keep_id)
 
         return self.sections[sec.attrs["entity_id"]]
 
@@ -275,9 +269,9 @@ class Section(Entity):
         return self._h5group.get_attr("repository")
 
     @repository.setter
-    def repository(self, r):
-        util.check_attr_type(r, str)
-        self._h5group.set_attr("repository", r)
+    def repository(self, repo):
+        util.check_attr_type(repo, str)
+        self._h5group.set_attr("repository", repo)
         if self.file.auto_update_timestamps:
             self.force_updated_at()
 
@@ -321,15 +315,15 @@ class Section(Entity):
 
     @property
     def referring_blocks(self):
-        f = self.file
-        return list(blk for blk in f.blocks
+        nf = self.file
+        return list(blk for blk in nf.blocks
                     if blk.metadata is not None and blk.metadata.id == self.id)
 
     @property
     def referring_groups(self):
-        f = self.file
+        nf = self.file
         groups = []
-        for blk in f.blocks:
+        for blk in nf.blocks:
             groups.extend(grp for grp in blk.groups
                           if (grp.metadata is not None and
                               grp.metadata.id == self.id))
@@ -337,9 +331,9 @@ class Section(Entity):
 
     @property
     def referring_data_arrays(self):
-        f = self.file
+        nf = self.file
         data_arrays = []
-        for blk in f.blocks:
+        for blk in nf.blocks:
             data_arrays.extend(da for da in blk.data_arrays
                                if (da.metadata is not None and
                                    da.metadata.id == self.id))
@@ -347,9 +341,9 @@ class Section(Entity):
 
     @property
     def referring_tags(self):
-        f = self.file
+        nf = self.file
         tags = []
-        for blk in f.blocks:
+        for blk in nf.blocks:
             tags.extend(tg for tg in blk.tags
                         if (tg.metadata is not None and
                             tg.metadata.id == self.id))
@@ -357,9 +351,9 @@ class Section(Entity):
 
     @property
     def referring_multi_tags(self):
-        f = self.file
+        nf = self.file
         multi_tags = []
-        for blk in f.blocks:
+        for blk in nf.blocks:
             multi_tags.extend(mt for mt in blk.multi_tags
                               if (mt.metadata is not None and
                                   mt.metadata.id == self.id))
@@ -367,9 +361,9 @@ class Section(Entity):
 
     @property
     def referring_sources(self):
-        f = self.file
+        nf = self.file
         sources = []
-        for blk in f.blocks:
+        for blk in nf.blocks:
             sources.extend(src for src in blk.sources
                            if (src.metadata is not None and
                                src.metadata.id == self.id))
@@ -473,10 +467,10 @@ class Section(Entity):
             yield item
 
     def items(self):
-        for p in self.props:
-            yield (p.name, p)
-        for s in self.sections:
-            yield (s.name, s)
+        for prop in self.props:
+            yield (prop.name, prop)
+        for sec in self.sections:
+            yield (sec.name, sec)
 
     def __contains__(self, key):
         return key in self.props or key in self.sections
@@ -514,20 +508,16 @@ class Section(Entity):
         spaces = " " * (current_depth * indent)
         sec_str = "{}{} [{}]".format(spaces, self.name, self.type)
         print(sec_str)
-        for p in self.props:
-            p.pprint(current_depth=current_depth, indent=indent,
-                     max_length=max_length)
+        for prop in self.props:
+            prop.pprint(current_depth=current_depth, indent=indent, max_length=max_length)
         if max_depth == -1 or current_depth < max_depth:
-            for s in self.sections:
-                s.pprint(current_depth=current_depth+1, max_depth=max_depth,
-                         indent=indent, max_length=max_length)
+            for sec in self.sections:
+                sec.pprint(current_depth=current_depth+1, max_depth=max_depth, indent=indent, max_length=max_length)
         elif max_depth == current_depth:
             child_sec_indent = spaces + " " * indent
             more_indent = spaces + " " * (current_depth + 2 * indent)
-            for s in self.sections:
-                print("{} {} [{}]\n{}[...]".format(child_sec_indent,
-                                                   s.name, s.type,
-                                                   more_indent))
+            for sec in self.sections:
+                print("{} {} [{}]\n{}[...]".format(child_sec_indent, sec.name, sec.type, more_indent))
 
     @staticmethod
     def _change_id(_, grp):

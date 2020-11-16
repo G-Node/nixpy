@@ -123,7 +123,7 @@ class TestDataFrame(unittest.TestCase):
         multi_col = self.df1.read_columns(name=['sig1', 'sig2'])
         assert len(multi_col) == 10
         # read columns with slices
-        sl_col = self.df1.read_columns(name=['sig1', 'sig2'], sl=slice(0, 10))
+        sl_col = self.df1.read_columns(name=['sig1', 'sig2'], slc=slice(0, 10))
         assert len(sl_col) == 10
 
     def test_read_cell(self):

@@ -46,7 +46,7 @@ def update_property_values(fname):
     with h5py.File(fname, mode="r") as hfile:
         sections = hfile["metadata"]
 
-        def find_props(name, group):
+        def find_props(_, group):
             if isinstance(group, h5py.Dataset) and len(group.dtype):
                 # structured/compound dtypes have non-zero length
                 props.append(group.name)

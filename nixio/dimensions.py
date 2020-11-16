@@ -372,18 +372,18 @@ class SampledDimension(Dimension):
         return self._h5group.get_attr("unit")
 
     @unit.setter
-    def unit(self, u):
-        util.check_attr_type(u, str)
-        self._h5group.set_attr("unit", u)
+    def unit(self, unit):
+        util.check_attr_type(unit, str)
+        self._h5group.set_attr("unit", unit)
 
     @property
     def offset(self):
         return self._h5group.get_attr("offset")
 
     @offset.setter
-    def offset(self, o):
-        util.check_attr_type(o, Number)
-        self._h5group.set_attr("offset", o)
+    def offset(self, offset):
+        util.check_attr_type(offset, Number)
+        self._h5group.set_attr("offset", offset)
 
     def link_data_array(self, *_):
         raise RuntimeError("SampledDimension does not support linking")
@@ -456,12 +456,12 @@ class RangeDimension(Dimension):
         return self._h5group.get_attr("unit")
 
     @unit.setter
-    def unit(self, u):
-        util.check_attr_type(u, str)
+    def unit(self, unit):
+        util.check_attr_type(unit, str)
         if self.has_link:
-            self.dimension_link.unit = u
+            self.dimension_link.unit = unit
         else:
-            self._h5group.set_attr("unit", u)
+            self._h5group.set_attr("unit", unit)
 
     def index_of(self, position):
         """

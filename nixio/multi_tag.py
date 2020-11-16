@@ -187,9 +187,9 @@ class MultiTag(BaseTag):
             feat = self.features[featidx]
         except KeyError:
             feat = None
-            for f in self.features:
-                if f.data.name == featidx or f.data.id == featidx:
-                    feat = f
+            for feature in self.features:
+                if feature.data.name == featidx or feature.data.id == featidx:
+                    feat = feature
                     break
             if feat is None:
                 raise

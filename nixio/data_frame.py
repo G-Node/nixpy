@@ -33,11 +33,9 @@ class DataFrame(Entity, DataSet):
         self._rows = None
 
     @classmethod
-    def create_new(cls, nixfile, nixparent, h5parent, name, type_,
-                   shape, col_dtype, compression):
-        newentity = super(DataFrame, cls).create_new(nixfile, nixparent,
-                                                     h5parent, name, type_)
-        newentity._h5group.create_dataset("data", (shape, ), col_dtype)
+    def create_new(cls, nixfile, nixparent, h5parent, name, type_, shape, col_dtype, compression):
+        newentity = super(DataFrame, cls).create_new(nixfile, nixparent, h5parent, name, type_)
+        newentity._h5group.create_dataset("data", (shape,), col_dtype, compression)
         return newentity
 
     def append_column(self, column, name, datatype=None):
@@ -67,10 +65,10 @@ class DataFrame(Entity, DataSet):
         column = np.array(column, dtype=datatype)
         new_da = []
         for i, rows in enumerate(self._h5group.group['data'][:]):
-            li = list(rows)
-            li.append(column[i])
-            tu = tuple(li)
-            new_da.append(tu)
+            row_list = list(rows)
+            row_list.append(column[i])
+            row_tuple = tuple(row_list)
+            new_da.append(row_tuple)
         farr = np.ascontiguousarray(new_da, dtype=dt)
         del self._h5group.group['data']
         self._h5group.group['data'] = farr
@@ -85,9 +83,9 @@ class DataFrame(Entity, DataSet):
         :type data: array-like data
         """
         li_data = []
-        for d in data:
-            d = tuple(d)
-            li_data.append(d)
+        for values in data:
+            values = tuple(values)
+            li_data.append(values)
         pro_data = np.array(li_data, dtype=self.data_type)
         self.append(pro_data, axis=0)
 
@@ -115,8 +113,7 @@ class DataFrame(Entity, DataSet):
             rows[name] = cell
             self.write_rows(rows=[rows], index=[i])
 
-    def read_columns(self, index=None, name=None, sl=None,
-                     group_by_cols=False):
+    def read_columns(self, index=None, name=None, slc=None, group_by_cols=False):
         """
         Read one or multiple (part of) column(s) in the DataFrame
 
@@ -124,8 +121,8 @@ class DataFrame(Entity, DataSet):
         :type index: list of int
         :param name: Name of column(s) to be returned
         :type name: list of str
-        :param sl: The part of each column to be returned
-        :type sl: slice
+        :param slc: The part of each column to be returned
+        :type slc: slice
         :param group_by_cols: True for group return values by columns,
                               False for group by rows.
                               Only applicable for reading multiple columns
@@ -135,25 +132,25 @@ class DataFrame(Entity, DataSet):
             raise ValueError("Either index or name must not be None")
         if name is None:
             name = []
-            for ci in index:
-                name.append(self.column_names[ci])
-        if sl is None:
-            slic = np.s_[:]
+            for col_idx in index:
+                name.append(self.column_names[col_idx])
+        if slc is None:
+            slc = np.s_[:]
         else:
-            slic = np.s_[sl]
+            slc = np.s_[slc]
         if len(name) == 1:
-            get_col = self._read_data(sl=slic)[name]
+            get_col = self._read_data(slc=slc)[name]
             get_col = [i[0] for i in get_col]
             return np.array(get_col)
         if group_by_cols:
             gcol = []
-            for n in name:
-                get_col = self._read_data(sl=slic)[n]
+            for col_name in name:
+                get_col = self._read_data(slc=slc)[col_name]
                 get_col = [i for i in get_col]
                 gcol.append(get_col)
             return np.array(gcol)
         else:
-            get_col = self._read_data(sl=slic)[name]
+            get_col = self._read_data(slc=slc)[name]
             return get_col
 
     def write_rows(self, rows, index):
@@ -175,19 +172,17 @@ class DataFrame(Entity, DataSet):
                 "Number of rows ({}) does not match "
                 "length of indexes ({})".format(len(rows), len(index))
             )
-        x, = self.shape
-        if max(index) > (x - 1):
-            raise OutOfBounds(
-                "Row index exceeds the existing number of rows"
-            )
+        n_rows, = self.shape
+        if max(index) > (n_rows - 1):
+            raise OutOfBounds("Row index exceeds the existing number of rows")
         if len(index) == 1:
             rows = tuple(rows[0])
-            self._write_data(rows, sl=index)
+            self._write_data(rows, slc=index)
         else:
             cr_list = []
-            for cr in rows:
-                cr_list.append(tuple(cr))
-            self._write_data(cr_list, sl=index)
+            for row in rows:
+                cr_list.append(tuple(row))
+            self._write_data(cr_list, slc=index)
 
     def read_rows(self, index):
         """
@@ -198,7 +193,7 @@ class DataFrame(Entity, DataSet):
         """
         if isinstance(index, Iterable):
             index = list(index)
-        get_row = self._read_data(sl=(index,))
+        get_row = self._read_data(slc=(index,))
         return get_row
 
     def write_cell(self, cell, position=None, col_name=None, row_idx=None):
@@ -219,16 +214,16 @@ class DataFrame(Entity, DataSet):
             if len(position) != 2:
                 raise ValueError("position is invalid: "
                                  "need row and column index")
-            x, y = position
-            targeted_row = self.read_rows(x)
-            targeted_row[y] = cell
-            self._write_data(targeted_row, sl=x)
+            row_idx, col_idx = position
+            targeted_row = self.read_rows(row_idx)
+            targeted_row[col_idx] = cell
+            self._write_data(targeted_row, slc=row_idx)
         else:
             if col_name is None or row_idx is None:
                 raise ValueError("Column and rows identifier must be given")
             targeted_row = self.read_rows(row_idx)
             targeted_row[col_name] = cell
-            self._write_data(targeted_row, sl=row_idx)
+            self._write_data(targeted_row, slc=row_idx)
 
     def read_cell(self, position=None, col_name=None, row_idx=None):
         """
@@ -245,8 +240,8 @@ class DataFrame(Entity, DataSet):
         if position is not None:
             if len(position) != 2:
                 raise ValueError('Not a position')
-            x, y = position
-            return self[x][y]
+            col_idx, row_idx = position
+            return self[col_idx][row_idx]
         else:
             if col_name is None or row_idx is None:
                 raise ValueError("Column and rows identifier must be given")
@@ -268,21 +263,21 @@ class DataFrame(Entity, DataSet):
             row_sl = np.s_[:]
         if col_sl is None:
             col_sl = np.s_[:]
-        cl = np.array(self.column_names)[col_sl]
-        row_form = "{:^10}" * (len(cl) + 1)
-        print(row_form.format("column:", *cl))
+        column = np.array(self.column_names)[col_sl]
+        row_form = "{:^10}" * (len(column) + 1)
+        print(row_form.format("column:", *column))
         if self.units is not None:
             print(row_form.format(" unit:", *self.units[col_sl]))
         if not isinstance(row_sl, Iterable):
             ridx = list(range(len(self)))[row_sl]
         else:
             ridx = row_sl
-        for i, row in enumerate(self._read_data(sl=row_sl)[list(cl)]):
+        for i, row in enumerate(self._read_data(slc=row_sl)[list(column)]):
             print(row_form.format("  [{}]:".format(ridx[i]), *row))
 
     def _find_idx_by_name(self, name):
-        for i, n in enumerate(self.column_names):
-            if n == name:
+        for i, col_name in enumerate(self.column_names):
+            if col_name == name:
                 return i
         return None
 
@@ -308,20 +303,24 @@ class DataFrame(Entity, DataSet):
         :type mode: str
         """
         with open(filename, mode, newline='') as csvfile:
-            dw = csv.DictWriter(csvfile, fieldnames=self.column_names)
-            dw.writeheader()
-            di = dict()
-            for n in self.column_names:
-                n = str(n)
-                di[n] = list(self[n])
+            if len(self.column_names) == 0:
+                # no columns? return
+                return
+            first_col_name = self.column_names[0]
+            writer = csv.DictWriter(csvfile, fieldnames=self.column_names)
+            writer.writeheader()
+            col_dict = dict()
+            for col_name in self.column_names:
+                col_name = str(col_name)
+                col_dict[col_name] = list(self[col_name])
             complete_di_list = []
-            sample_len = len(self[n])
+            sample_len = len(self[first_col_name])
             for i in range(sample_len):
                 single_sample_di = dict()
-                for na in self.column_names:
-                    single_sample_di[na] = di[na][i]
+                for col_name in self.column_names:
+                    single_sample_di[col_name] = col_dict[col_name][i]
                 complete_di_list.append(single_sample_di)
-            dw.writerows(complete_di_list)
+            writer.writerows(complete_di_list)
             csvfile.close()
 
     @property
@@ -332,13 +331,13 @@ class DataFrame(Entity, DataSet):
 
         :type: array of str
         """
-        u = self._h5group.get_attr("units")
-        if u is None:
-            return u
-        for idx, _ in enumerate(u):
-            if u[idx] == "":
-                u[idx] = None
-        return u
+        units = self._h5group.get_attr("units")
+        if units is None:
+            return units
+        for idx, _ in enumerate(units):
+            if units[idx] == "":
+                units[idx] = None
+        return units
 
     @units.setter
     def units(self, units):
@@ -393,10 +392,10 @@ class DataFrame(Entity, DataSet):
         """
         dt = self._h5group.group["data"].dtype
         key = self.column_names
-        di = OrderedDict()
+        col_dict = OrderedDict()
         for k in key:
-            di[k] = dt.fields[k]
-        raw_dt = di.values()
+            col_dict[k] = dt.fields[k]
+        raw_dt = col_dict.values()
         raw_dt = list(raw_dt)
         raw_dt_list = [ele[0] for ele in raw_dt]
         return tuple(raw_dt_list)
@@ -410,12 +409,9 @@ class DataFrame(Entity, DataSet):
 
         :type: tuple
         """
-        x = len(self._h5group.group["data"])
-        y = len(self.column_names)
-        df_shape = (x, y)
-        df_shape = tuple(df_shape)
-        self._h5group.set_attr("df_shape", df_shape)
-        return self._h5group.get_attr("df_shape")
+        n_rows = len(self._h5group.group["data"])
+        n_cols = len(self.column_names)
+        return n_rows, n_cols
 
     @property
     def metadata(self):

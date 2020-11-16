@@ -9,7 +9,7 @@ def format_obj(obj):
     return "{} '{}' (ID: {})".format(type(obj).__name__, obj.name, obj.id)
 
 
-def print_header(text, h=1):
+def print_header(text):
     print("  {}".format(text))
     print("  " + "-"*len(text))
 
