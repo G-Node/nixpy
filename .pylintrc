@@ -281,9 +281,11 @@ good-names=i,
            ex,
            Run,
            _,
+           nf,  # common for nix.File
            da,  # common for DataArray
            mt,  # common for MultiTag
            df,  # common for DataFrame
+           dv,  # common for DataView
            dt,  # common for time difference/step
            id,  # entity id attribute
 
