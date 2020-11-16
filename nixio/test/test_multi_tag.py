@@ -19,7 +19,7 @@ from .tmp import TempDir
 class TestMultiTags(unittest.TestCase):
 
     def setUp(self):
-        iv = 1.0
+        interval = 1.0
         ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
         unit = "ms"
 
@@ -59,7 +59,7 @@ class TestMultiTags(unittest.TestCase):
 
         set_dim = self.data_array.append_set_dimension()
         set_dim.labels = ["label_a", "label_b"]
-        sampled_dim = self.data_array.append_sampled_dimension(iv)
+        sampled_dim = self.data_array.append_sampled_dimension(interval)
         sampled_dim.unit = unit
         range_dim = self.data_array.append_range_dimension(ticks)
         range_dim.unit = unit
@@ -106,8 +106,8 @@ class TestMultiTags(unittest.TestCase):
         self.tmpdir.cleanup()
 
     def test_multi_tag_new_constructor(self):
-        pos = np.random.random((2, 3))
-        ext = np.random.random((2, 3))
+        pos = np.random.random_sample((2, 3))
+        ext = np.random.random_sample((2, 3))
         mt = self.block.create_multi_tag("conv_test", "test", pos, ext)
         np.testing.assert_almost_equal(pos, mt.positions[:])
         np.testing.assert_almost_equal(ext, mt.extents[:])
@@ -118,23 +118,23 @@ class TestMultiTags(unittest.TestCase):
         assert mt.extents.type == "test-extents"
         # test positions extents deleted if multitag creation failed
         pos = None
-        ext = np.random.random((2, 3))
+        ext = np.random.random_sample((2, 3))
         self.assertRaises(ValueError, self.block.create_multi_tag,
                           "err_test", "test", pos, ext)
         self.block.create_data_array("dup_test-"
                                      "positions", "test", data=[0])
-        pos = np.random.random((2, 3))
-        ext = np.random.random((2, 3))
+        pos = np.random.random_sample((2, 3))
+        ext = np.random.random_sample((2, 3))
         self.assertRaises(DuplicateName, self.block.create_multi_tag,
                           "dup_test", "test", pos, ext)
         del self.block.data_arrays["dup_test-positions"]
         self.block.create_data_array("dup_test2-"
                                      "extents", "test", data=[0])
-        pos = np.random.random((2, 3))
-        ext = np.random.random((2, 3))
+        pos = np.random.random_sample((2, 3))
+        ext = np.random.random_sample((2, 3))
         self.assertRaises(DuplicateName, self.block.create_multi_tag,
                           "dup_test2", "test", pos, ext)
-        pos = np.random.random((2, 3))
+        pos = np.random.random_sample((2, 3))
         ext = [None, None]
         self.assertRaises(TypeError, self.block.create_multi_tag,
                           "dup_test3", "test", pos, ext)
@@ -424,7 +424,7 @@ class TestMultiTags(unittest.TestCase):
         ext.append_set_dimension()
         ext.append_set_dimension()
         units = ["none", "ms", "ms"]
-        data = np.random.random((3, 10, 5))
+        data = np.random.random_sample((3, 10, 5))
         da = self.block.create_data_array("dimtest", "test",
                                           data=data)
         setdim = da.append_set_dimension()
