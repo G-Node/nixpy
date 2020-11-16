@@ -35,80 +35,80 @@ class TestDataArray(unittest.TestCase):
         self.tmpdir.cleanup()
 
     def test_data_array_eq(self):
-        assert(self.array == self.array)
-        assert(not self.array == self.other)
-        assert(self.array is not None)
+        assert self.array == self.array
+        assert not self.array == self.other
+        assert self.array is not None
 
     def test_data_array_id(self):
-        assert(self.array.id is not None)
+        assert self.array.id is not None
 
     def test_data_array_name(self):
-        assert(self.array.name is not None)
+        assert self.array.name is not None
 
     def test_data_array_type(self):
         def set_none():
             self.array.type = None
 
-        assert(self.array.type is not None)
+        assert self.array.type is not None
         self.assertRaises(Exception, set_none)
 
         self.array.type = "foo type"
-        assert(self.array.type == "foo type")
+        assert self.array.type == "foo type"
 
     def test_data_array_definition(self):
-        assert(self.array.definition is None)
+        assert self.array.definition is None
 
         self.array.definition = "definition"
-        assert(self.array.definition == "definition")
+        assert self.array.definition == "definition"
 
         self.array.definition = None
-        assert(self.array.definition is None)
+        assert self.array.definition is None
 
     def test_data_array_timestamps(self):
         created_at = self.array.created_at
-        assert(created_at > 0)
+        assert created_at > 0
 
         updated_at = self.array.updated_at
-        assert(updated_at > 0)
+        assert updated_at > 0
 
         self.array.force_created_at(1403530068)
-        assert(self.array.created_at == 1403530068)
+        assert self.array.created_at == 1403530068
 
     def test_data_array_label(self):
-        assert(self.array.label is None)
+        assert self.array.label is None
 
         self.array.label = "label"
-        assert(self.array.label == "label")
+        assert self.array.label == "label"
 
         self.array.label = None
-        assert(self.array.label is None)
+        assert self.array.label is None
 
     def test_data_array_unit(self):
-        assert(self.array.unit is None)
+        assert self.array.unit is None
 
         self.array.unit = "mV"
-        assert(self.array.unit == "mV")
+        assert self.array.unit == "mV"
 
         self.array.unit = "0.5*ms"
-        assert(self.array.unit == "0.5*ms")
+        assert self.array.unit == "0.5*ms"
 
         self.array.unit = None
-        assert(self.array.unit is None)
+        assert self.array.unit is None
 
     def test_data_array_exp_origin(self):
-        assert(self.array.expansion_origin is None)
+        assert self.array.expansion_origin is None
 
         self.array.expansion_origin = 10.2
-        assert(self.array.expansion_origin == 10.2)
+        assert self.array.expansion_origin == 10.2
 
         self.array.expansion_origin = None
-        assert(self.array.expansion_origin is None)
+        assert self.array.expansion_origin is None
 
     def test_data_array_coefficients(self):
-        assert(self.array.polynom_coefficients == ())
+        assert self.array.polynom_coefficients == ()
 
         self.array.polynom_coefficients = (1.1, 2.2)
-        assert(self.array.polynom_coefficients == (1.1, 2.2))
+        assert self.array.polynom_coefficients == (1.1, 2.2)
 
         data = [10, 29, 33]
         intarray = self.block.create_data_array("intarray", "array",
@@ -121,44 +121,44 @@ class TestDataArray(unittest.TestCase):
 
     def test_data_array_data(self):
 
-        assert(self.array.polynom_coefficients == ())
+        assert self.array.polynom_coefficients == ()
 
         data = np.array([float(i) for i in range(100)])
         dout = np.empty_like(data)
         self.array.write_direct(data)
-        assert(self.array.dtype == np.dtype(float))
+        assert self.array.dtype == np.dtype(float)
         self.array.read_direct(dout)
-        assert(np.array_equal(data, dout))
+        assert np.array_equal(data, dout)
         dout = np.array(self.array)
-        assert(np.array_equal(data, dout))
-        assert(self.array.data_extent == data.shape)
-        assert(self.array.data_extent == self.array.shape)
-        assert(self.array.size == data.size)
+        assert np.array_equal(data, dout)
+        assert self.array.data_extent == data.shape
+        assert self.array.data_extent == self.array.shape
+        assert self.array.size == data.size
 
-        assert(len(self.array) == len(data))
+        assert len(self.array) == len(data)
 
         dout = np.array([self.array[i] for i in range(100)])
-        assert(np.array_equal(data, dout))
+        assert np.array_equal(data, dout)
 
         dout = self.array[...]
-        assert(np.array_equal(data, dout))
+        assert np.array_equal(data, dout)
 
         # indexed writing (1-d)
         data = np.array([float(-i) for i in range(100)])
         self.array[()] = data
-        assert(np.array_equal(self.array[...], data))
+        assert np.array_equal(self.array[...], data)
 
         self.array[...] = [float(-i) for i in range(100)]
-        assert(np.array_equal(self.array[()], data))
-        assert(np.array_equal(self.array[0:-10], data[0:-10]))
-        assert(np.array_equal(self.array[-10], data[-10]))
+        assert np.array_equal(self.array[()], data)
+        assert np.array_equal(self.array[0:-10], data[0:-10])
+        assert np.array_equal(self.array[-10], data[-10])
 
         self.array[0] = 42
-        assert(self.array[0] == 42.0)
+        assert self.array[0] == 42.0
 
         # changing shape via data_extent property
         self.array.data_extent = (200, )
-        assert(self.array.data_extent == (200, ))
+        assert self.array.data_extent == (200, )
 
         # TODO delete does not work
         data = np.eye(123)
@@ -168,61 +168,61 @@ class TestDataArray(unittest.TestCase):
         dset.write_direct(data)
         dout = np.empty_like(data)
         dset.read_direct(dout)
-        assert(np.array_equal(data, dout))
+        assert np.array_equal(data, dout)
 
         # indexing support in 2-d arrays
         with self.assertRaises(IndexError):
             self.array[[], [1, 2]]
 
         dout = dset[12]
-        assert(dout.shape == data[12].shape)
-        assert(np.array_equal(dout, data[12]))
-        assert(np.array_equal(dset[()], data))
-        assert(np.array_equal(dset[...], data))
-        assert(np.array_equal(dset[12, ...], data[12, ...]))
-        assert(np.array_equal(dset[..., 12], data[..., 12]))
-        assert(np.array_equal(dset[1:], data[1:]))
-        assert(np.array_equal(dset[-20:, -20:], data[123-20:, 123-20:]))
-        assert(np.array_equal(dset[:1], data[:1]))
-        assert(np.array_equal(dset[:-1, :-1], data[1:123, 1:123]))
-        assert(np.array_equal(dset[1:10, 1:10], data[1:10, 1:10]))
-        assert(np.array_equal(dset[1:-2, 1:-2], data[1:121, 1:121]))
+        assert dout.shape == data[12].shape
+        assert np.array_equal(dout, data[12])
+        assert np.array_equal(dset[()], data)
+        assert np.array_equal(dset[...], data)
+        assert np.array_equal(dset[12, ...], data[12, ...])
+        assert np.array_equal(dset[..., 12], data[..., 12])
+        assert np.array_equal(dset[1:], data[1:])
+        assert np.array_equal(dset[-20:, -20:], data[123-20:, 123-20:])
+        assert np.array_equal(dset[:1], data[:1])
+        assert np.array_equal(dset[:-1, :-1], data[1:123, 1:123])
+        assert np.array_equal(dset[1:10, 1:10], data[1:10, 1:10])
+        assert np.array_equal(dset[1:-2, 1:-2], data[1:121, 1:121])
 
         a3 = self.block.create_data_array("int identity array", "signal",
                                           nix.DataType.Int32, (123, 123))
-        assert(a3.shape == (123, 123))
-        assert(a3.dtype == np.dtype('i4'))
+        assert a3.shape == (123, 123)
+        assert a3.dtype == np.dtype('i4')
 
         data = np.random.rand(3, 4, 5)
         a4 = self.block.create_data_array("3d array", "signal",
                                           nix.DataType.Double, (3, 4, 5))
         dset = a4
         dset.write_direct(data)
-        assert(dset.shape == data.shape)
-        assert(len(dset) == len(data))
-        assert(dset.size == data.size)
-        assert(np.array_equal(dset[2, ...], data[2, ...]))
-        assert(np.array_equal(dset[-1, ...], data[2, ...]))
-        assert(np.array_equal(dset[..., 3], data[..., 3]))
-        assert(np.array_equal(dset[..., -2], data[..., 3]))
-        assert(np.array_equal(dset[2, ..., 3], data[2, ..., 3]))
-        assert(np.array_equal(dset[2, ..., -2], data[2, ..., 3]))
-        assert(np.array_equal(dset[1:2, ..., 3:5], data[1:2, ..., 3:5]))
-        assert(np.array_equal(dset[1:2, ..., 3:-1], data[1:2, ..., 3:4]))
+        assert dset.shape == data.shape
+        assert len(dset) == len(data)
+        assert dset.size == data.size
+        assert np.array_equal(dset[2, ...], data[2, ...])
+        assert np.array_equal(dset[-1, ...], data[2, ...])
+        assert np.array_equal(dset[..., 3], data[..., 3])
+        assert np.array_equal(dset[..., -2], data[..., 3])
+        assert np.array_equal(dset[2, ..., 3], data[2, ..., 3])
+        assert np.array_equal(dset[2, ..., -2], data[2, ..., 3])
+        assert np.array_equal(dset[1:2, ..., 3:5], data[1:2, ..., 3:5])
+        assert np.array_equal(dset[1:2, ..., 3:-1], data[1:2, ..., 3:4])
 
         # indexed writing (n-d)
         d2 = np.random.rand(2, 2)
         dset[1, 0:2, 0:2] = d2
-        assert(np.array_equal(dset[1, 0:2, 0:2], d2))
+        assert np.array_equal(dset[1, 0:2, 0:2], d2)
 
         # test inferring shape & dtype from data, and writing the data
         test_ten = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
         test_data = np.array(test_ten, dtype=int)
         da = self.block.create_data_array('created_from_data', 'b',
                                           data=test_data)
-        assert(da.shape == test_data.shape)
-        assert(np.array_equal(test_data, da[:]))
-        assert(test_ten == [x for x in da])
+        assert da.shape == test_data.shape
+        assert np.array_equal(test_data, da[:])
+        assert test_ten == [x for x in da]
 
         # test for exceptions
         self.assertRaises(ValueError, self.block.create_data_array, 'x', 'y')
@@ -235,38 +235,38 @@ class TestDataArray(unittest.TestCase):
         to_append = np.zeros((2, 5))
 
         da.append(to_append)
-        assert(da.shape == (12, 5))
+        assert da.shape == (12, 5)
 
         to_append = np.zeros((12, 2))
         da.append(to_append, axis=1)
-        assert(da.shape == (12, 7))
+        assert da.shape == (12, 7)
 
         self.assertRaises(ValueError, da.append, np.zeros((3, 3, 3)))
         self.assertRaises(ValueError, da.append, np.zeros((5, 5)))
 
     def test_data_array_dtype(self):
         da = self.block.create_data_array('dtype_f8', 'b', 'f8', (10, 10))
-        assert(da.dtype == np.dtype('f8'))
+        assert da.dtype == np.dtype('f8')
 
         da = self.block.create_data_array('dtype_i16', 'b', np.int16, (10, 10))
         data = da[:]
-        assert(da.dtype == np.int16)
-        assert(data.dtype == np.int16)
+        assert da.dtype == np.int16
+        assert data.dtype == np.int16
 
         da = self.block.create_data_array('dtype_int', 'b', int, (10, 10))
-        assert(da.dtype == np.dtype(int))
+        assert da.dtype == np.dtype(int)
 
         da = self.block.create_data_array('dtype_ndouble', 'b',
                                           nix.DataType.Double, (10, 10))
-        assert(da.dtype == np.dtype('f8'))
+        assert da.dtype == np.dtype('f8')
 
         da = self.block.create_data_array('dtype_auto', 'b', None, (10, 10))
-        assert(da.dtype == np.dtype('f8'))
+        assert da.dtype == np.dtype('f8')
 
         test_data = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 0], dtype=int)
         da = self.block.create_data_array('dtype_int_from_data', 'b',
                                           data=test_data)
-        assert(da.dtype == test_data.dtype)
+        assert da.dtype == test_data.dtype
 
         bdata = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
         if sys.version_info[0] == 3:
@@ -274,8 +274,8 @@ class TestDataArray(unittest.TestCase):
 
         void_data = np.array(bdata, dtype='V1')
         da = self.block.create_data_array('dtype_opaque', 'b', data=void_data)
-        assert(da.dtype == np.dtype('V1'))
-        assert(np.array_equal(void_data, da[:]))
+        assert da.dtype == np.dtype('V1')
+        assert np.array_equal(void_data, da[:])
 
     def test_array_unicode(self):
         da = self.block.create_data_array("unicode", "lotsatext",
@@ -286,24 +286,24 @@ class TestDataArray(unittest.TestCase):
         assert data == list(da[:])
 
     def test_data_array_dimensions(self):
-        assert(len(self.array.dimensions) == 0)
+        assert len(self.array.dimensions) == 0
 
         self.array.append_set_dimension()
         self.array.append_range_dimension(range(10))
         self.array.append_sampled_dimension(0.1)
 
-        assert(len(self.array.dimensions) == 3)
+        assert len(self.array.dimensions) == 3
 
         self.assertRaises(KeyError, lambda: self.array.dimensions["notexist"])
         self.assertRaises(IndexError, lambda: self.array.dimensions[-4])
         self.assertRaises(IndexError, lambda: self.array.dimensions[3])
 
-        assert(isinstance(str(self.array.dimensions), string_types))
-        assert(isinstance(repr(self.array.dimensions), string_types))
+        assert isinstance(str(self.array.dimensions), string_types)
+        assert isinstance(repr(self.array.dimensions), string_types)
 
         dims = list(self.array.dimensions)
         for i in range(3):
-            assert(dims[i].index == self.array.dimensions[i].index)
+            assert dims[i].index == self.array.dimensions[i].index
             assert(dims[i].dimension_type ==
                    self.array.dimensions[i].dimension_type)
 
@@ -316,22 +316,22 @@ class TestDataArray(unittest.TestCase):
         source1 = self.block.create_source("source1", "channel")
         source2 = self.block.create_source("source2", "electrode")
 
-        assert(len(self.array.sources) == 0)
+        assert len(self.array.sources) == 0
 
         self.array.sources.append(source1)
         self.array.sources.append(source2)
 
         self.assertRaises(TypeError, self.array.sources.append, 100)
 
-        assert(len(self.array.sources) == 2)
-        assert(source1 in self.array.sources)
-        assert(source2 in self.array.sources)
+        assert len(self.array.sources) == 2
+        assert source1 in self.array.sources
+        assert source2 in self.array.sources
 
         del self.array.sources[source2]
-        assert(self.array.sources[0] == source1)
+        assert self.array.sources[0] == source1
 
         del self.array.sources[source1]
-        assert(len(self.array.sources) == 0)
+        assert len(self.array.sources) == 0
 
     def test_data_array_indexing(self):
         data = np.random.rand(50)

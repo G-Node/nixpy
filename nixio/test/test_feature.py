@@ -48,34 +48,34 @@ class TestFeatures(unittest.TestCase):
         self.tmpdir.cleanup()
 
     def test_feature_eq(self):
-        assert(self.feature_1 == self.feature_1)
-        assert(not self.feature_1 == self.feature_2)
-        assert(self.feature_1 is not None)
+        assert self.feature_1 == self.feature_1
+        assert not self.feature_1 == self.feature_2
+        assert self.feature_1 is not None
 
     def test_feature_id(self):
-        assert(self.feature_1.id is not None)
+        assert self.feature_1.id is not None
 
     def test_feature_link_type(self):
         def set_none():
             self.feature_1.link_type = None
 
-        assert(self.feature_1.link_type is not None)
+        assert self.feature_1.link_type is not None
         self.assertRaises(Exception, set_none)
 
         self.feature_1.link_type = nix.LinkType.Untagged
-        assert(self.feature_1.link_type == nix.LinkType.Untagged)
+        assert self.feature_1.link_type == nix.LinkType.Untagged
 
     def test_feature_data(self):
         def set_none():
             self.feature_1.data = None
 
-        assert(self.feature_1.data is not None)
+        assert self.feature_1.data is not None
         self.assertRaises(Exception, set_none)
 
         new_data_ref = self.block.create_data_array("test", "current",
                                                     nix.DataType.Float, (0, ))
         self.feature_1.data = new_data_ref
-        assert(self.feature_1.data == new_data_ref)
+        assert self.feature_1.data == new_data_ref
 
     def test_feature_dataframe(self):
         coltypes = OrderedDict(

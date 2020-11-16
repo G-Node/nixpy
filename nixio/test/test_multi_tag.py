@@ -371,11 +371,11 @@ class TestMultiTags(unittest.TestCase):
 
     def test_multi_tag_tagged_data(self):
         sample_iv = 0.001
-        x = np.arange(0, 10, sample_iv)
-        y = np.sin(2 * np.pi * x)
+        x_data = np.arange(0, 10, sample_iv)
+        y_data = np.sin(2 * np.pi * x_data)
 
         block = self.block
-        da = block.create_data_array("sin", "data", data=y)
+        da = block.create_data_array("sin", "data", data=y_data)
         da.unit = 'dB'
         dim = da.append_sampled_dimension(sample_iv)
         dim.unit = 's'
@@ -397,17 +397,17 @@ class TestMultiTags(unittest.TestCase):
         mtag.references.append(da)
 
         assert mtag.tagged_data(0, 0).shape == (2001,)
-        assert np.array_equal(y[:2001], mtag.tagged_data(0, 0)[:])
+        assert np.array_equal(y_data[:2001], mtag.tagged_data(0, 0)[:])
 
         # get by name
         data = mtag.tagged_data(0, da.name)
         assert data.shape == (2001,)
-        assert np.array_equal(y[:2001], data[:])
+        assert np.array_equal(y_data[:2001], data[:])
 
         # get by id
         data = mtag.tagged_data(0, da.id)
         assert data.shape == (2001,)
-        assert np.array_equal(y[:2001], data[:])
+        assert np.array_equal(y_data[:2001], data[:])
 
         # multi dimensional data
         sample_iv = 1.0

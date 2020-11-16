@@ -41,96 +41,96 @@ class TestDimension(unittest.TestCase):
         self.tmpdir.cleanup()
 
     def test_set_dimension(self):
-        assert(self.set_dim.index == 1)
-        assert(self.set_dim.dimension_type == nix.DimensionType.Set)
-        assert(self.array.dimensions[0].index == 1)
+        assert self.set_dim.index == 1
+        assert self.set_dim.dimension_type == nix.DimensionType.Set
+        assert self.array.dimensions[0].index == 1
 
-        assert(self.set_dim.labels == ())
+        assert self.set_dim.labels == ()
         self.set_dim.labels = test_labels
-        assert(self.set_dim.labels == test_labels)
+        assert self.set_dim.labels == test_labels
 
     def test_sample_dimension(self):
-        assert(self.sample_dim.index == 2)
-        assert(self.sample_dim.dimension_type == nix.DimensionType.Sample)
-        assert(self.array.dimensions[1].index == 2)
+        assert self.sample_dim.index == 2
+        assert self.sample_dim.dimension_type == nix.DimensionType.Sample
+        assert self.array.dimensions[1].index == 2
 
-        assert(self.sample_dim.label is None)
+        assert self.sample_dim.label is None
         self.sample_dim.label = test_label
-        assert(self.sample_dim.label == test_label)
+        assert self.sample_dim.label == test_label
         self.sample_dim.label = None
-        assert(self.sample_dim.label is None)
+        assert self.sample_dim.label is None
 
-        assert(self.sample_dim.unit is None)
+        assert self.sample_dim.unit is None
         self.sample_dim.unit = "mV"
-        assert(self.sample_dim.unit == "mV")
+        assert self.sample_dim.unit == "mV"
         self.sample_dim.unit = None
-        assert(self.sample_dim.unit is None)
+        assert self.sample_dim.unit is None
 
-        assert(self.sample_dim.sampling_interval == test_sampl)
+        assert self.sample_dim.sampling_interval == test_sampl
         self.sample_dim.sampling_interval = 1.123
-        assert(self.sample_dim.sampling_interval == 1.123)
+        assert self.sample_dim.sampling_interval == 1.123
 
-        assert(self.sample_dim.offset is None)
+        assert self.sample_dim.offset is None
         self.sample_dim.offset = 0.3
-        assert(self.sample_dim.offset == 0.3)
+        assert self.sample_dim.offset == 0.3
         self.sample_dim.offset = None
-        assert(self.sample_dim.offset is None)
+        assert self.sample_dim.offset is None
 
         self.sample_dim.sampling_interval = 2.
         self.sample_dim.offset = 3.
 
-        assert(self.sample_dim.index_of(3.14) == 0)
-        assert(self.sample_dim.index_of(23.) == 10)
-        assert(type(self.sample_dim.index_of(23.) == int))
+        assert self.sample_dim.index_of(3.14) == 0
+        assert self.sample_dim.index_of(23.) == 10
+        assert type(self.sample_dim.index_of(23.) == int)
 
-        assert(self.sample_dim.position_at(0) == 3.)
-        assert(self.sample_dim.position_at(200) == 200*2.+3.)
+        assert self.sample_dim.position_at(0) == 3.
+        assert self.sample_dim.position_at(200) == 200*2.+3.
 
-        assert(len(self.sample_dim.axis(10)) == 10)
-        assert(self.sample_dim.axis(10)[0] == 3.)
-        assert(self.sample_dim.axis(10)[-1] == 9*2.+3.)
+        assert len(self.sample_dim.axis(10)) == 10
+        assert self.sample_dim.axis(10)[0] == 3.
+        assert self.sample_dim.axis(10)[-1] == 9*2.+3.
 
-        assert(len(self.sample_dim.axis(10, 2)) == 10)
-        assert(self.sample_dim.axis(10, 2)[0] == 2 * 2. + 3.)
-        assert(self.sample_dim.axis(10, 2)[-1] == (9 + 2) * 2. + 3.)
+        assert len(self.sample_dim.axis(10, 2)) == 10
+        assert self.sample_dim.axis(10, 2)[0] == 2 * 2. + 3.
+        assert self.sample_dim.axis(10, 2)[-1] == (9 + 2) * 2. + 3.
 
     def test_range_dimension(self):
-        assert(self.range_dim.index == 3)
-        assert(self.range_dim.dimension_type == nix.DimensionType.Range)
-        assert(self.array.dimensions[2].index == 3)
+        assert self.range_dim.index == 3
+        assert self.range_dim.dimension_type == nix.DimensionType.Range
+        assert self.array.dimensions[2].index == 3
 
-        assert(self.range_dim.label is None)
+        assert self.range_dim.label is None
         self.range_dim.label = test_label
-        assert(self.range_dim.label == test_label)
+        assert self.range_dim.label == test_label
         self.range_dim.label = None
-        assert(self.range_dim.label is None)
+        assert self.range_dim.label is None
 
-        assert(self.range_dim.unit is None)
+        assert self.range_dim.unit is None
         self.range_dim.unit = "mV"
-        assert(self.range_dim.unit == "mV")
+        assert self.range_dim.unit == "mV"
         self.range_dim.unit = None
-        assert(self.range_dim.unit is None)
+        assert self.range_dim.unit is None
 
-        assert(self.range_dim.ticks == test_range)
+        assert self.range_dim.ticks == test_range
         other = tuple([i*3.14 for i in range(10)])
         self.range_dim.ticks = other
-        assert(self.range_dim.ticks == other)
+        assert self.range_dim.ticks == other
 
-        assert(self.range_dim.index_of(0.) == 0)
-        assert(self.range_dim.index_of(10.) == (np.floor(10./3.14)))
-        assert(self.range_dim.index_of(18.84) == 6)
-        assert(self.range_dim.index_of(28.26) == 9)
-        assert(self.range_dim.index_of(100.) == 9)
-        assert(self.range_dim.index_of(-100.) == 0)
+        assert self.range_dim.index_of(0.) == 0
+        assert self.range_dim.index_of(10.) == (np.floor(10./3.14))
+        assert self.range_dim.index_of(18.84) == 6
+        assert self.range_dim.index_of(28.26) == 9
+        assert self.range_dim.index_of(100.) == 9
+        assert self.range_dim.index_of(-100.) == 0
 
-        assert(self.range_dim.tick_at(0) == 0)
-        assert(self.range_dim.tick_at(9) == other[-1])
+        assert self.range_dim.tick_at(0) == 0
+        assert self.range_dim.tick_at(9) == other[-1]
         with self.assertRaises(IndexError):
             self.range_dim.tick_at(100)
 
-        assert(self.range_dim.axis(10) == other)
-        assert(self.range_dim.axis(2) == other[:2])
-        assert(self.range_dim.axis(2, 2) == other[2:4])
+        assert self.range_dim.axis(10) == other
+        assert self.range_dim.axis(2) == other[:2]
+        assert self.range_dim.axis(2, 2) == other[2:4]
         with self.assertRaises(IndexError):
             self.range_dim.axis(10, 2)
             self.range_dim.axis(100)
