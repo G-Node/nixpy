@@ -52,14 +52,14 @@ class Feature(object):
         return LinkType(self._h5group.get_attr("link_type"))
 
     @link_type.setter
-    def link_type(self, lt):
-        if isinstance(lt, string_types):
-            lt = lt.lower()
-        lt = LinkType(lt)
-        self._h5group.set_attr("link_type", lt.value)
+    def link_type(self, link_type):
+        if isinstance(link_type, string_types):
+            link_type = link_type.lower()
+        link_type = LinkType(link_type)
+        self._h5group.set_attr("link_type", link_type.value)
         if self.file.auto_update_timestamps:
-            t = util.now_int()
-            self._h5group.set_attr("updated_at", util.time_to_str(t))
+            time = util.now_int()
+            self._h5group.set_attr("updated_at", util.time_to_str(time))
 
     @property
     def data(self):
@@ -100,8 +100,8 @@ class Feature(object):
             del self._h5group["data"]
         self._h5group.create_link(dataobj, "data")
         if self.file.auto_update_timestamps:
-            t = util.now_int()
-            self._h5group.set_attr("updated_at", util.time_to_str(t))
+            time = util.now_int()
+            self._h5group.set_attr("updated_at", util.time_to_str(time))
 
     @property
     def created_at(self):
