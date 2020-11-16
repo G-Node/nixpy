@@ -28,10 +28,11 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude="docs,.eggs,build,scripts"
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=80 --statistics --exclude="docs,.eggs,build,scripts"
-    - name: Lint with pycodestyle
+    - name: Lint with Pylint
       run: |
-        pip install pycodestyle
-        pycodestyle . --exclude="docs,.eggs,build,scripts"
+        pip install pylint
+        # Make sure it uses the project rcfile
+        pylint --rcfile=.pylintrc nixio
     - name: Test with pytest
       run: |
         pip install pytest
