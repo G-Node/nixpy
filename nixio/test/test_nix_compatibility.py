@@ -410,10 +410,10 @@ def test_multi_tag_references(tmpdir):
     nixfilepath = os.path.join(str(tmpdir), "blocktest.nix")
     nix_file = nix.File.open(nixfilepath, mode=nix.FileMode.Overwrite)
     interval = 0.001
-    x = np.arange(0, 10, interval)
-    y = np.sin(2*np.pi*x)
+    data_x = np.arange(0, 10, interval)
+    data_y = np.sin(2*np.pi*data_x)
     blk = nix_file.create_block("blk", "reftest")
-    da = blk.create_data_array("sin", "data", data=y)
+    da = blk.create_data_array("sin", "data", data=data_y)
     da.unit = "dB"
     dim = da.append_sampled_dimension(interval)
     dim.unit = "s"
@@ -686,8 +686,8 @@ def test_full_file_write(tmpdir, bindir):
     # All types of data
     dtypeblock = nix_file.create_block("datablock", "block of data")
 
-    for n, dt in enumerate(dtypes):
-        dtypeblock.create_data_array(str(n), "dtype-test-array",
+    for idx, dt in enumerate(dtypes):
+        dtypeblock.create_data_array(str(idx), "dtype-test-array",
                                      dtype=dt, data=dt(0))
 
     # Unicode DataArray on last Block
@@ -702,35 +702,35 @@ def test_full_file_write(tmpdir, bindir):
     # validate(nixfilepath)
 
 
-def check_block_children_counts(block, ngrp, nda, nt, nmt):
+def check_block_children_counts(block, ngrp, nda, ntg, nmt):
     assert ngrp == len(block.groups),\
         "Group count mismatch in Block {}".format(block.name)
     assert nda == len(block.data_arrays),\
         "DataArray count mismatch in Block {}".format(block.name)
-    assert nt == len(block.tags),\
+    assert ntg == len(block.tags),\
         "Tag count mismatch in Block {}".format(block.name)
     assert nmt == len(block.multi_tags),\
         "MultiTag count mismatch in Block {}".format(block.name)
 
 
-def check_group_children_counts(group, nda, nt, nmt):
+def check_group_children_counts(group, nda, ntg, nmt):
     assert nda == len(group.data_arrays),\
         "DataArray count mismatch in Group {}".format(group.name)
-    assert nt == len(group.tags),\
+    assert ntg == len(group.tags),\
         "Tag count mismatch in Group {}".format(group.name)
     assert nmt == len(group.multi_tags),\
         "MultiTag count mismatch in Group {}".format(group.name)
 
 
-def compare(exp, actual):
-    if (isinstance(exp, Iterable) and
+def compare(expected, actual):
+    if (isinstance(expected, Iterable) and
             isinstance(actual, Iterable) and not
-            isinstance(exp, string_types)):
-        assert len(exp) == len(actual),\
-            "Expected {}, got {}".format(exp, actual)
-        [compare(e, a) for e, a in zip(exp, actual)]
+            isinstance(expected, string_types)):
+        assert len(expected) == len(actual), "Expected {}, got {}".format(expected, actual)
+        for exp, act in zip(expected, actual):
+            compare(exp, act)
         return
-    assert exp == actual, "Expected {}, got {}".format(exp, actual)
+    assert expected == actual, "Expected {}, got {}".format(expected, actual)
 
 
 @pytest.mark.compatibility
@@ -886,9 +886,8 @@ def test_full_file_read(tmpdir, bindir):
     group = block.groups[0]
     assert mtag.id not in group.multi_tags, "MultiTag found in incorrect Group"
     for idx in range(1, len(block.groups)):
-        tag.id not in block.groups[idx].tags, "Tag found in incorrect Group"
-        mtag.id not in block.groups[idx].multi_tags,\
-            "MultiTag found in incorrect Group"
+        assert tag.id not in block.groups[idx].tags, "Tag found in incorrect Group"
+        assert mtag.id not in block.groups[idx].multi_tags, "MultiTag found in incorrect Group"
 
     # Second block DataArray
     block = nix_file.blocks[1]
@@ -911,8 +910,8 @@ def test_full_file_read(tmpdir, bindir):
     compare("second-level-source", src.sources[0].type)
     compare("second-level-source", src.sources[1].type)
 
-    for s in src.sources:
-        compare(0, len(s.sources))
+    for chsrc in src.sources:
+        compare(0, len(chsrc.sources))
 
     da = block.data_arrays[0]
     compare(2, len(da.sources))
@@ -924,8 +923,8 @@ def test_full_file_read(tmpdir, bindir):
     compare("mda", nix_file.sections[0].name)
     compare("mdb", nix_file.sections[1].name)
     compare("mdc", nix_file.sections[2].name)
-    for s in nix_file.sections:
-        compare("root-section", s.type)
+    for chsec in nix_file.sections:
+        compare("root-section", chsec.type)
 
     mdc = nix_file.sections[2]
     compare(6, len(mdc.sections))

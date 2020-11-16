@@ -229,8 +229,8 @@ class TestFileVer(unittest.TestCase):
     fformat = filepy.FILE_FORMAT
 
     def try_open(self, mode):
-        f = nix.File.open(self.testfilename, mode)
-        f.close()
+        nix_file = nix.File.open(self.testfilename, mode)
+        nix_file.close()
 
     def set_header(self, fformat=None, version=None, fileid=None):
         if fformat is None:
@@ -263,28 +263,28 @@ class TestFileVer(unittest.TestCase):
         self.try_open(nix.FileMode.ReadWrite)
 
     def test_read_only(self):
-        vx, vy, vz = self.filever
-        roversion = (vx, vy, vz+2)
+        ver_x, ver_y, ver_z = self.filever
+        roversion = (ver_x, ver_y, ver_z+2)
         self.set_header(version=roversion)
         self.try_open(nix.FileMode.ReadOnly)
         with self.assertRaises(RuntimeError):
             self.try_open(nix.FileMode.ReadWrite)
 
     def test_no_open(self):
-        vx, vy, vz = self.filever
-        noversion = (vx, vy+3, vz+2)
+        ver_x, ver_y, ver_z = self.filever
+        noversion = (ver_x, ver_y+3, ver_z+2)
         self.set_header(version=noversion)
         with self.assertRaises(RuntimeError):
             self.try_open(nix.FileMode.ReadWrite)
         with self.assertRaises(RuntimeError):
             self.try_open(nix.FileMode.ReadOnly)
-        noversion = (vx, vy+1, vz)
+        noversion = (ver_x, ver_y+1, ver_z)
         self.set_header(version=noversion)
         with self.assertRaises(RuntimeError):
             self.try_open(nix.FileMode.ReadWrite)
         with self.assertRaises(RuntimeError):
             self.try_open(nix.FileMode.ReadOnly)
-        noversion = (vx+1, vy, vz)
+        noversion = (ver_x+1, ver_y, ver_z)
         self.set_header(version=noversion)
         with self.assertRaises(RuntimeError):
             self.try_open(nix.FileMode.ReadWrite)

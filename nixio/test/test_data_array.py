@@ -162,9 +162,9 @@ class TestDataArray(unittest.TestCase):
 
         # TODO delete does not work
         data = np.eye(123)
-        a1 = self.block.create_data_array("double array", "signal",
-                                          nix.DataType.Double, (123, 123))
-        dset = a1
+        da1 = self.block.create_data_array("double array", "signal",
+                                           nix.DataType.Double, (123, 123))
+        dset = da1
         dset.write_direct(data)
         dout = np.empty_like(data)
         dset.read_direct(dout)
@@ -172,7 +172,7 @@ class TestDataArray(unittest.TestCase):
 
         # indexing support in 2-d arrays
         with self.assertRaises(IndexError):
-            self.array[[], [1, 2]]
+            _ = self.array[[], [1, 2]]
 
         dout = dset[12]
         assert dout.shape == data[12].shape
@@ -188,15 +188,15 @@ class TestDataArray(unittest.TestCase):
         assert np.array_equal(dset[1:10, 1:10], data[1:10, 1:10])
         assert np.array_equal(dset[1:-2, 1:-2], data[1:121, 1:121])
 
-        a3 = self.block.create_data_array("int identity array", "signal",
-                                          nix.DataType.Int32, (123, 123))
-        assert a3.shape == (123, 123)
-        assert a3.dtype == np.dtype('i4')
+        da3 = self.block.create_data_array("int identity array", "signal",
+                                           nix.DataType.Int32, (123, 123))
+        assert da3.shape == (123, 123)
+        assert da3.dtype == np.dtype('i4')
 
         data = np.random.rand(3, 4, 5)
-        a4 = self.block.create_data_array("3d array", "signal",
-                                          nix.DataType.Double, (3, 4, 5))
-        dset = a4
+        da4 = self.block.create_data_array("3d array", "signal",
+                                           nix.DataType.Double, (3, 4, 5))
+        dset = da4
         dset.write_direct(data)
         assert dset.shape == data.shape
         assert len(dset) == len(data)
@@ -211,9 +211,9 @@ class TestDataArray(unittest.TestCase):
         assert np.array_equal(dset[1:2, ..., 3:-1], data[1:2, ..., 3:4])
 
         # indexed writing (n-d)
-        d2 = np.random.rand(2, 2)
-        dset[1, 0:2, 0:2] = d2
-        assert np.array_equal(dset[1, 0:2, 0:2], d2)
+        data = np.random.rand(2, 2)
+        dset[1, 0:2, 0:2] = data
+        assert np.array_equal(dset[1, 0:2, 0:2], data)
 
         # test inferring shape & dtype from data, and writing the data
         test_ten = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0]
@@ -375,11 +375,11 @@ class TestDataArray(unittest.TestCase):
         oobtestda = self.block.create_data_array("oobdatatest",
                                                  "data", data=[1, 2, 10])
         with self.assertRaises(IndexError):
-            oobtestda[3]
+            _ = oobtestda[3]
         with self.assertRaises(IndexError):
-            oobtestda[10]
+            _ = oobtestda[10]
         with self.assertRaises(IndexError):
-            oobtestda[-7]
+            _ = oobtestda[-7]
 
     def test_data_array_numpy_indexing(self):
         data = np.random.rand(50)
@@ -411,8 +411,8 @@ class TestDataArray(unittest.TestCase):
         data3d = np.random.random_sample((30, 30, 5))
         da3d = self.block.create_data_array("get_slice 3d", "Data",
                                             data=data3d)
-        sd = da3d.append_sampled_dimension(0.1)
-        sd.offset = 0.5
+        sdim = da3d.append_sampled_dimension(0.1)
+        sdim.offset = 0.5
         da3d.append_sampled_dimension(2.0)
         da3d.append_set_dimension()
 

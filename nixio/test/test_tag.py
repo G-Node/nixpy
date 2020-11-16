@@ -65,8 +65,8 @@ class TestTags(unittest.TestCase):
         tag1d.references.extend([da1d, da2d, da3d])
         assert list(tag1d.references) == [da1d, da2d, da3d]
         ref1 = tag1d.tagged_data(1)  # 1d tag to 2d data
-        for (y, z) in zip(ref1[:].flatten(), da2d[1:3, :].flatten()):
-            assert y == z
+        for (ref_val, da_val) in zip(ref1[:].flatten(), da2d[1:3, :].flatten()):
+            assert ref_val == da_val
         tag2d.extent = [1, 2]
         tag2d.references.extend([da1d, da2d, da3d])
         tag2d.tagged_data(0)  # 2d tag to 1d data

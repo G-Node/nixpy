@@ -159,8 +159,8 @@ class TestSections(unittest.TestCase):
 
         assert len(self.section) == 1
 
-        for p in self.section:
-            assert p in self.section
+        for prop in self.section:
+            assert prop in self.section
 
         assert "test prop" in self.section
         assert "notexist" not in self.section
@@ -199,8 +199,7 @@ class TestSections(unittest.TestCase):
 
         self.section.props["cp_str"].values = "anotherstr"
 
-        res = [x in self.section for x in ['ep_str', 'ep_int', 'ep_float']]
-        assert all(res)
+        assert all([name in self.section for name in ['ep_str', 'ep_int', 'ep_float']])
 
         assert self.section['ep_str'] == 'str'
         assert self.section['ep_int'] == 23
@@ -212,9 +211,9 @@ class TestSections(unittest.TestCase):
 
         self.assertRaises(TypeError, create_hetero_section)
 
-        sections = [x.id for x in self.section]
-        for x in sections:
-            del self.section[x]
+        section_ids = [sec.id for sec in self.section]
+        for s_id in section_ids:
+            del self.section[s_id]
 
         assert len(self.section) == 0
 
@@ -290,13 +289,13 @@ class TestSections(unittest.TestCase):
 
         self.assertNotIn("PropOnSection", self.other)
         with self.assertRaises(KeyError):
-            self.other["PropOnSection"]
+            _ = self.other["PropOnSection"]
 
         self.other.link = self.section
 
         self.assertNotIn("PropOnSection", self.other)
         with self.assertRaises(KeyError):
-            self.other["PropOnSection"]
+            _ = self.other["PropOnSection"]
 
         inhpropnames = [p.name for p in self.other.inherited_properties()]
         self.assertIn("PropOnSection", inhpropnames)

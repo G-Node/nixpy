@@ -162,11 +162,8 @@ class TestBlock(unittest.TestCase):
 
         assert len(self.block.find_sources()) == 8
         assert len(self.block.find_sources(limit=1)) == 2
-        assert(len(self.block.find_sources(filtr=lambda x: "level2-p1-s" in
-                                                           x.name)) == 2)
-        assert(len(self.block.find_sources(filtr=lambda x: "level2-p1-s" in
-                                                           x.name,
-                                           limit=1)) == 0)
+        assert len(self.block.find_sources(filtr=lambda x: "level2-p1-s" in x.name)) == 2
+        assert len(self.block.find_sources(filtr=lambda x: "level2-p1-s" in x.name, limit=1)) == 0
 
     def test_block_groups(self):
         assert len(self.block.groups) == 0

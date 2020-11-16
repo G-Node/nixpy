@@ -21,8 +21,8 @@ class TestDataFrame(unittest.TestCase):
         self.testfilename = os.path.join(self.tmpdir.path, "dataframetest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
-        di = OrderedDict([('name', np.int64), ('id', str), ('time', float),
-                          ('sig1', np.float64), ('sig2', np.int32)])
+        col_dict = OrderedDict([('name', np.int64), ('id', str), ('time', float),
+                                ('sig1', np.float64), ('sig2', np.int32)])
         arr = [(1, "a", 20.18, 5.0, 100), (2, 'b', 20.09, 5.5, 101),
                (2, 'c', 20.05, 5.1, 100), (1, "d", 20.15, 5.3, 150),
                (2, 'e', 20.23, 5.7, 200), (2, 'f', 20.07, 5.2, 300),
@@ -31,9 +31,9 @@ class TestDataFrame(unittest.TestCase):
         other_arr = np.arange(11101, 11200).reshape((33, 3))
         other_di = OrderedDict({'name': np.int64, 'id': int, 'time': float})
         self.df1 = self.block.create_data_frame("test df", "signal1",
-                                                data=arr, col_dict=di)
+                                                data=arr, col_dict=col_dict)
         self.df2 = self.block.create_data_frame("other df", "signal2",
-                                                data=arr, col_dict=di)
+                                                data=arr, col_dict=col_dict)
         self.df3 = self.block.create_data_frame("reference df", "signal3",
                                                 data=other_arr,
                                                 col_dict=other_di)
@@ -117,8 +117,8 @@ class TestDataFrame(unittest.TestCase):
     def test_read_column(self):
         # read single columns by index
         single_col = self.df1.read_columns(index=[1])
-        t = np.array(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'], dtype=bytes)
-        np.testing.assert_array_equal(single_col, t)
+        data = np.array(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'], dtype=bytes)
+        np.testing.assert_array_equal(single_col, data)
         # read multiple columns by name
         multi_col = self.df1.read_columns(name=['sig1', 'sig2'])
         assert len(multi_col) == 10
@@ -148,13 +148,13 @@ class TestDataFrame(unittest.TestCase):
         self.assertRaises(ValueError, self.df1.write_cell, 11, col_name='sig1')
 
     def test_append_column(self):
-        y = np.arange(start=16000, stop=16010, step=1)
-        self.df1.append_column(y, name='trial_col', datatype=int)
+        col_data = np.arange(start=16000, stop=16010, step=1)
+        self.df1.append_column(col_data, name='trial_col', datatype=int)
         assert self.df1.column_names == ('name', 'id', 'time',
                                          'sig1', 'sig2', 'trial_col')
         assert len(self.df1.dtype) == 6
         k = np.array(self.df1[0:10]["trial_col"], dtype=np.int64)
-        np.testing.assert_almost_equal(k, y)
+        np.testing.assert_almost_equal(k, col_data)
         # too short column
         sh_col = np.arange(start=16000, stop=16003, step=1)
         with self.assertRaises(ValueError):

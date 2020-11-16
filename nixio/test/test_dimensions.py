@@ -15,9 +15,9 @@ from .tmp import TempDir
 from collections import OrderedDict
 
 
+TEST_SAMPL = 0.1
+TEST_LABEL = "test label"
 test_range = tuple([float(i) for i in range(10)])
-test_sampl = 0.1
-test_label = "test label"
 test_labels = tuple([str(i) + "_label" for i in range(10)])
 
 
@@ -32,7 +32,7 @@ class TestDimension(unittest.TestCase):
                                                   nix.DataType.Float, (0, ))
 
         self.set_dim = self.array.append_set_dimension()
-        self.sample_dim = self.array.append_sampled_dimension(test_sampl)
+        self.sample_dim = self.array.append_sampled_dimension(TEST_SAMPL)
         self.range_dim = self.array.append_range_dimension(test_range)
 
     def tearDown(self):
@@ -55,8 +55,8 @@ class TestDimension(unittest.TestCase):
         assert self.array.dimensions[1].index == 2
 
         assert self.sample_dim.label is None
-        self.sample_dim.label = test_label
-        assert self.sample_dim.label == test_label
+        self.sample_dim.label = TEST_LABEL
+        assert self.sample_dim.label == TEST_LABEL
         self.sample_dim.label = None
         assert self.sample_dim.label is None
 
@@ -66,7 +66,7 @@ class TestDimension(unittest.TestCase):
         self.sample_dim.unit = None
         assert self.sample_dim.unit is None
 
-        assert self.sample_dim.sampling_interval == test_sampl
+        assert self.sample_dim.sampling_interval == TEST_SAMPL
         self.sample_dim.sampling_interval = 1.123
         assert self.sample_dim.sampling_interval == 1.123
 
@@ -100,8 +100,8 @@ class TestDimension(unittest.TestCase):
         assert self.array.dimensions[2].index == 3
 
         assert self.range_dim.label is None
-        self.range_dim.label = test_label
-        assert self.range_dim.label == test_label
+        self.range_dim.label = TEST_LABEL
+        assert self.range_dim.label == TEST_LABEL
         self.range_dim.label = None
         assert self.range_dim.label is None
 
@@ -274,10 +274,10 @@ class TestLinkDimension(unittest.TestCase):
                                            ("duration", nix.DataType.Double)])
 
         def randtick():
-            ts = 0
+            time_stamp = 0
             while True:
-                ts += np.random.random_sample()
-                yield ts
+                time_stamp += np.random.random_sample()
+                yield time_stamp
 
         tickgen = randtick()
 

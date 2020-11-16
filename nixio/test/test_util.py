@@ -91,11 +91,11 @@ class TestUtil(unittest.TestCase):
         unit_2 = 'mV^2'
         unit_3 = 'Hz^-1'
 
-        p, u, po = units.split(unit_1)
-        assert p == 'k' and u == 'V' and po == ''
+        prefix, base, power = units.split(unit_1)
+        assert prefix == 'k' and base == 'V' and power == ''
 
-        p, u, po = units.split(unit_2)
-        assert p == 'm' and u == 'V' and po == '2'
+        prefix, base, power = units.split(unit_2)
+        assert prefix == 'm' and base == 'V' and power == '2'
 
-        p, u, po = units.split(unit_3)
-        assert p == '' and u == 'Hz' and po == '-1'
+        prefix, base, power = units.split(unit_3)
+        assert prefix == '' and base == 'Hz' and power == '-1'
