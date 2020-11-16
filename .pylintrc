@@ -285,6 +285,7 @@ good-names=i,
            mt,  # common for MultiTag
            df,  # common for DataFrame
            dt,  # common for time difference/step
+           id,  # entity id attribute
 
 # Good variable names regexes, separated by a comma. If names match any regex,
 # they will always be accepted
