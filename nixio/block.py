@@ -302,10 +302,10 @@ class Block(Entity):
         if (isinstance(col_dict, dict)
                 and not isinstance(col_dict, OrderedDict)
                 and sys.version_info[0] < 3):
-            raise TypeError("Python 2 users should use name_list "
-                            "or OrderedDict created with LIST and TUPLES "
-                            "to create DataFrames as the order "
-                            "of the columns cannot be maintained in Py2")
+            raise TypeError("Cannot create a DataFrame from a dictionary "
+                            "in Python 2 as the order of keys is not "
+                            "preserved. Please use the OrderedDict class "
+                            "from the collections module instead.")
 
         if data is not None:
             shape = len(data)

@@ -52,6 +52,10 @@ class H5DataSet(object):
             # h5py throws ValueError for out-of-bounds index
             # Let's change it to IndexError
             raise IndexError(ve)
+        except TypeError as te:
+            # h5py 2.10 in Python2 throws TypeError for out-of-bounds index
+            # Let's change it to IndexError
+            raise IndexError(te)
 
     def set_attr(self, name, value):
         if value is None:

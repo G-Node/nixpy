@@ -61,7 +61,7 @@ class TestDataFrame(unittest.TestCase):
         assert df_li.column_names == self.df1.column_names
         assert df_li.dtype == self.df1.dtype
         for i in df_li[:]:
-            self.assertIsInstance(i['id'], string_types)
+            self.assertIsInstance(i['id'], (bytes, string_types))
             self.assertIsInstance(i['sig2'], np.int32)
 
     def test_column_name_collision(self):
@@ -83,9 +83,9 @@ class TestDataFrame(unittest.TestCase):
     def test_write_row(self):
         # test write single row
         row = ["1", 'abc', 3, 4.4556356242341, 5.1111111]
-        self.assertAlmostEqual(list(self.df1[9]), [2, 'j', 20.08, 5.1, 200])
+        assert list(self.df1[9]) == [2, b'j', 20.08, 5.1, 200]
         self.df1.write_rows([row], [9])
-        assert list(self.df1[9]) == [1, 'abc', 3., 4.4556356242341, 5]
+        assert list(self.df1[9]) == [1, b'abc', 3., 4.4556356242341, 5]
         self.assertIsInstance(self.df1[9]['name'],  np.integer)
         self.assertIsInstance(self.df1[9]['sig2'],  np.int32)
         assert self.df1[9]['sig2'] == int(5)
@@ -93,8 +93,8 @@ class TestDataFrame(unittest.TestCase):
         multi_rows = [[1775, '12355', 1777, 1778, 1779],
                       [1785, '12355', 1787, 1788, 1789]]
         self.df1.write_rows(multi_rows, [1, 2])
-        assert list(self.df1[1]) == [1775, '12355', 1777, 1778, 1779]
-        assert list(self.df1[2]) == [1785, '12355', 1787, 1788, 1789]
+        assert list(self.df1[1]) == [1775, b'12355', 1777, 1778, 1779]
+        assert list(self.df1[2]) == [1785, b'12355', 1787, 1788, 1789]
 
     def test_write_column(self):
         # write by name
@@ -109,7 +109,7 @@ class TestDataFrame(unittest.TestCase):
 
     def test_read_row(self):
         # read single row
-        assert list(self.df1.read_rows(0)) == [1, 'a', 20.18, 5.0, 100]
+        assert list(self.df1.read_rows(0)) == [1, b'a', 20.18, 5.0, 100]
         # read multiple
         multi_rows = self.df1.read_rows(np.arange(4, 9))
         np.testing.assert_array_equal(multi_rows, self.df1[4:9])
@@ -117,8 +117,7 @@ class TestDataFrame(unittest.TestCase):
     def test_read_column(self):
         # read single columns by index
         single_col = self.df1.read_columns(index=[1])
-        t = np.array(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'])
-        t = np.array(t, dtype=str)
+        t = np.array(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'], dtype=bytes)
         np.testing.assert_array_equal(single_col, t)
         # read multiple columns by name
         multi_col = self.df1.read_columns(name=['sig1', 'sig2'])
@@ -133,7 +132,7 @@ class TestDataFrame(unittest.TestCase):
         assert scell == 5.2
         # read cell by row_idx + col_name
         crcell = self.df1.read_cell(col_name=['id'], row_idx=9)
-        assert crcell == 'j'
+        assert crcell == b'j'
         # test error raise if only one param given
         self.assertRaises(ValueError, self.df1.read_cell, row_idx=10)
         self.assertRaises(ValueError, self.df1.read_cell, col_name='sig1')
@@ -144,7 +143,7 @@ class TestDataFrame(unittest.TestCase):
         assert self.df1[8]['sig1'] == 105
         # write cell by rowid colname
         self.df1.write_cell('test', col_name='id', row_idx=3)
-        assert self.df1[3]['id'] == 'test'
+        assert self.df1[3]['id'] == b'test'
         # test error raise
         self.assertRaises(ValueError, self.df1.write_cell, 11, col_name='sig1')
 
@@ -167,14 +166,13 @@ class TestDataFrame(unittest.TestCase):
 
     def test_append_rows(self):
         # append single row
-        srow = [1, "test", 3, 4, 5]
+        srow = [1, b"test", 3, 4, 5]
         self.df1.append_rows([srow])
         assert list(self.df1[10]) == srow
         # append multi-rows
-        mrows = [[1, '2', 3, 4, 5], [6, 'testing', 8, 9, 10]]
+        mrows = [[1, "2", 3, 4, 5], [6, "testing", 8, 9, 10]]
         self.df1.append_rows(mrows)
-        assert [list(i) for i in self.df1[-2:]] == \
-               [[1, '2', 3., 4., 5], [6, 'testing', 8., 9., 10]]
+        assert [list(i) for i in self.df1[-2:]] == [[1, b'2', 3., 4., 5], [6, b'testing', 8., 9., 10]]
         # append row with incorrect length
         errrow = [5, 6, 7, 8]
         self.assertRaises(ValueError, self.df1.append_rows, [errrow])
@@ -214,7 +212,7 @@ class TestDataFrame(unittest.TestCase):
                                           col_dict=OrderedDict({"idx": int}))
         dftime = df.updated_at
         time.sleep(1)
-        df.units = "ly"
+        df.units = ("ly",)
         self.assertNotEqual(dftime, df.updated_at)
 
     def test_timestamp_noautoupdate(self):
@@ -223,5 +221,5 @@ class TestDataFrame(unittest.TestCase):
                                           col_dict=OrderedDict({"idx": int}))
         dftime = df.updated_at
         time.sleep(1)
-        df.units = "ly"
+        df.units = ("ly",)
         self.assertEqual(dftime, df.updated_at)

@@ -341,13 +341,17 @@ class DataFrame(Entity, DataSet):
         return u
 
     @units.setter
-    def units(self, u):
-        for i in u:
-            if i is not None:
-                i = util.units.sanitizer(i)
-                util.check_attr_type(i, str)
-        unit = np.array(u, util.vlen_str_dtype)
-        self._h5group.set_attr("units", unit)
+    def units(self, units):
+        units_arr = np.array(units, util.vlen_str_dtype)
+        for idx, unit in enumerate(units_arr):
+            if unit is not None:
+                unit = util.units.sanitizer(unit)
+                util.check_attr_type(unit, str)
+                units_arr[idx] = unit
+            else:
+                # Write None units as empty string
+                units_arr[idx] = ""
+        self._h5group.set_attr("units", units_arr)
         if self.file.auto_update_timestamps:
             self.force_updated_at()
 
