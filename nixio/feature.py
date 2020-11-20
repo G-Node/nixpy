@@ -7,7 +7,9 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 from .data_array import DataArray
+from .data_frame import DataFrame
 from .link_type import LinkType
+from .exceptions import UnsupportedLinkType
 from six import string_types
 from .util import util
 
@@ -22,6 +24,8 @@ class Feature(object):
 
     @classmethod
     def create_new(cls, nixfile, nixparent, h5parent, data, link_type):
+        if isinstance(data, DataFrame) and link_type == LinkType.Tagged:
+            raise UnsupportedLinkType(str(type(data)), LinkType.Tagged)
         id_ = util.create_id()
         h5group = h5parent.open_group(id_)
         h5group.set_attr("entity_id", id_)
@@ -60,20 +64,41 @@ class Feature(object):
     @property
     def data(self):
         if "data" not in self._h5group:
-            raise RuntimeError("Feature.data: DataArray not found!")
-        return DataArray(self.file, self._parent._parent,
-                         self._h5group.open_group("data"))
+            raise RuntimeError("Feature.data: Data object not found!")
+        objtype = self._h5group.get_attr("target_type")
+        if not objtype:
+            # Missing target_type property: Default to DataArray (older files)
+            objtype = "DataArray"
+        if objtype == "DataArray":
+            return DataArray(self.file, self._parent._parent,
+                             self._h5group.open_group("data"))
+        if objtype == "DataFrame":
+            return DataFrame(self.file, self._parent._parent,
+                             self._h5group.open_group("data"))
+        raise RuntimeError("Feature.data: Unknown target type defind: {}".format(objtype))
 
     @data.setter
-    def data(self, da):
-        if da is None:
+    def data(self, dataobj):
+        if dataobj is None:
             raise TypeError("Feature.data cannot be None.")
         parblock = self._parent._parent
-        if da not in parblock.data_arrays:
-            raise RuntimeError("Feature.data: DataArray not found in Block!")
+        if isinstance(dataobj, DataArray):
+            if dataobj not in parblock.data_arrays:
+                raise RuntimeError("Feature.data: DataArray not found in Block!")
+            objtype = "DataArray"
+        elif isinstance(dataobj, DataFrame):
+            if dataobj not in parblock.data_frames:
+                raise RuntimeError("Feature.data: DataFrame not found in Block!")
+            if self.link_type == LinkType.Tagged:
+                raise UnsupportedLinkType(str(type(dataobj)), LinkType.Tagged)
+            objtype = "DataFrame"
+        else:
+            raise TypeError("Unknown data object type: {}".format(type(dataobj)))
+        self._h5group.set_attr("target_type", objtype)
+
         if "data" in self._h5group:
             del self._h5group["data"]
-        self._h5group.create_link(da, "data")
+        self._h5group.create_link(dataobj, "data")
         if self.file.auto_update_timestamps:
             t = util.now_int()
             self._h5group.set_attr("updated_at", util.time_to_str(t))

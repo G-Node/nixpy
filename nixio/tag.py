@@ -59,6 +59,11 @@ class BaseTag(Entity):
     """
     Base class for Tag and MultiTag
     """
+    def __init__(self, nixfile, nixparent, h5group):
+        super(BaseTag, self).__init__(nixfile, nixparent, h5group)
+        self._sources = None
+        self._references = None
+        self._features = None
 
     @property
     def units(self):
@@ -164,13 +169,23 @@ class BaseTag(Entity):
         return int(index)
 
 
-class Tag(BaseTag):
+    @property
+    def features(self):
+        """
+        A property containing all features. Features can be obtained
+        via their index or their ID. Features can be deleted from the list.
+        Adding new features is done using the create_feature method.
+        This is a read only attribute.
 
-    def __init__(self, nixfile, nixparent, h5group):
-        super(Tag, self).__init__(nixfile, nixparent, h5group)
-        self._sources = None
-        self._references = None
-        self._features = None
+        :type: Container of Feature.
+        """
+        if self._features is None:
+            self._features = FeatureContainer("features", self.file,
+                                              self, Feature)
+        return self._features
+
+
+class Tag(BaseTag):
 
     @classmethod
     def create_new(cls, nixfile, nixparent, h5parent, name, type_, position):
@@ -306,18 +321,18 @@ class Tag(BaseTag):
                     break
             if feat is None:
                 raise
-        da = feat.data
-        if da is None:
+        data = feat.data
+        if data is None:
             raise UninitializedEntity()
         if feat.link_type == LinkType.Tagged:
-            slices = self._calc_data_slices(da)
-            if not self._slices_in_data(da, slices):
+            slices = self._calc_data_slices(data)
+            if not self._slices_in_data(data, slices):
                 raise OutOfBounds("Requested data slice out of the extent "
                                   "of the Feature!")
-            return DataView(da, slices)
+            return DataView(data, slices)
         # For untagged and indexed return the full data
-        fullslices = tuple(slice(0, stop) for stop in da.shape)
-        return DataView(da, fullslices)
+        fullslices = tuple(slice(0, stop) for stop in data.shape)
+        return DataView(data, fullslices)
 
     @property
     def references(self):
@@ -335,21 +350,6 @@ class Tag(BaseTag):
             self._references = LinkContainer("references", self, DataArray,
                                              self._parent.data_arrays)
         return self._references
-
-    @property
-    def features(self):
-        """
-        A property containing all features of the tag. Features can be obtained
-        via their index or their id. Features can be deleted from the list.
-        Adding new features to the tag is done using the create_feature method.
-        This is a read only attribute.
-
-        :type: Container of Feature.
-        """
-        if self._features is None:
-            self._features = FeatureContainer("features", self.file,
-                                              self, Feature)
-        return self._features
 
     @property
     def sources(self):

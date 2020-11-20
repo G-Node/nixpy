@@ -9,10 +9,11 @@
 import os
 import time
 import unittest
+from collections import OrderedDict
 import numpy as np
 import nixio as nix
+from nixio.exceptions import DuplicateName, UnsupportedLinkType
 from .tmp import TempDir
-from nixio.exceptions import DuplicateName
 
 
 class TestMultiTags(unittest.TestCase):
@@ -198,85 +199,85 @@ class TestMultiTags(unittest.TestCase):
                                        da3d[1:3, 2:4, 3:5])
 
     def test_multi_tag_eq(self):
-        assert (self.my_tag == self.my_tag)
-        assert (not self.my_tag == self.your_tag)
-        assert (self.my_tag is not None)
+        assert self.my_tag == self.my_tag
+        assert not self.my_tag == self.your_tag
+        assert self.my_tag is not None
 
     def test_multi_tag_id(self):
-        assert (self.my_tag.id is not None)
+        assert self.my_tag.id is not None
 
     def test_multi_tag_name(self):
-        assert (self.my_tag.name is not None)
+        assert self.my_tag.name is not None
 
     def test_multi_tag_type(self):
         def set_none():
             self.my_tag.type = None
 
-        assert (self.my_tag.type is not None)
+        assert self.my_tag.type is not None
         self.assertRaises(Exception, set_none)
 
         self.my_tag.type = "foo type"
-        assert (self.my_tag.type == "foo type")
+        assert self.my_tag.type == "foo type"
 
     def test_multi_tag_definition(self):
-        assert (self.my_tag.definition is None)
+        assert self.my_tag.definition is None
 
         self.my_tag.definition = "definition"
-        assert (self.my_tag.definition == "definition")
+        assert self.my_tag.definition == "definition"
 
         self.my_tag.definition = None
-        assert (self.my_tag.definition is None)
+        assert self.my_tag.definition is None
 
     def test_multi_tag_timestamps(self):
         created_at = self.my_tag.created_at
-        assert (created_at > 0)
+        assert created_at > 0
 
         updated_at = self.my_tag.updated_at
-        assert (updated_at > 0)
+        assert updated_at > 0
 
         self.my_tag.force_created_at(1403530068)
-        assert (self.my_tag.created_at == 1403530068)
+        assert self.my_tag.created_at == 1403530068
 
     def test_multi_tag_units(self):
-        assert (self.my_tag.units == ())
+        assert self.my_tag.units == ()
 
         self.my_tag.units = ["mV", "ms"]
-        assert (self.my_tag.units == ("mV", "ms"))
+        assert self.my_tag.units == ("mV", "ms")
 
         self.my_tag.units = []  # () also works!
-        assert (self.my_tag.units == ())
+        assert self.my_tag.units == ()
 
     def test_multi_tag_positions(self):
         def set_none():
             self.my_tag.positions = None
 
-        assert (self.my_tag.positions is not None)
+        assert self.my_tag.positions is not None
         old_positions = self.my_tag.positions
 
         new_positions = self.block.create_data_array("pos", "position",
                                                      nix.DataType.Int16,
                                                      (0, 0))
         self.my_tag.positions = new_positions
-        assert (self.my_tag.positions == new_positions)
+        assert self.my_tag.positions == new_positions
 
         self.assertRaises(TypeError, set_none)
 
         self.my_tag.positions = old_positions
-        assert (self.my_tag.positions == old_positions)
+        assert self.my_tag.positions == old_positions
 
     def test_multi_tag_extents(self):
-        assert (self.my_tag.extents is None)
+        assert self.my_tag.extents is None
 
         new_extents = self.block.create_data_array("ext", "extent",
                                                    nix.DataType.Int16, (0, 0))
         self.my_tag.extents = new_extents
-        assert (self.my_tag.extents == new_extents)
+        assert self.my_tag.extents == new_extents
 
         self.my_tag.extents = None
-        assert (self.my_tag.extents is None)
+        assert self.my_tag.extents is None
 
     def test_multi_tag_references(self):
-        assert (len(self.my_tag.references) == 0)
+        assert len(self.my_tag.references) == 0
 
         self.assertRaises(TypeError, self.my_tag.references.append, 100)
 
@@ -288,56 +289,85 @@ class TestMultiTags(unittest.TestCase):
         self.my_tag.references.append(reference1)
         self.my_tag.references.append(reference2)
 
-        assert (len(self.my_tag.references) == 2)
-        assert (reference1 in self.my_tag.references)
-        assert (reference2 in self.my_tag.references)
+        assert len(self.my_tag.references) == 2
+        assert reference1 in self.my_tag.references
+        assert reference2 in self.my_tag.references
 
         # id and name access
-        assert (reference1 == self.my_tag.references[reference1.name])
-        assert (reference1 == self.my_tag.references[reference1.id])
-        assert (reference2 == self.my_tag.references[reference2.name])
-        assert (reference2 == self.my_tag.references[reference2.id])
+        assert reference1 == self.my_tag.references[reference1.name]
+        assert reference1 == self.my_tag.references[reference1.id]
+        assert reference2 == self.my_tag.references[reference2.name]
+        assert reference2 == self.my_tag.references[reference2.id]
 
-        assert (reference1.name in self.my_tag.references)
-        assert (reference2.name in self.my_tag.references)
-        assert (reference1.id in self.my_tag.references)
-        assert (reference2.id in self.my_tag.references)
+        assert reference1.name in self.my_tag.references
+        assert reference2.name in self.my_tag.references
+        assert reference1.id in self.my_tag.references
+        assert reference2.id in self.my_tag.references
 
         del self.my_tag.references[reference2]
-        assert (self.my_tag.references[0] == reference1)
+        assert self.my_tag.references[0] == reference1
 
         del self.my_tag.references[reference1]
-        assert (len(self.my_tag.references) == 0)
+        assert len(self.my_tag.references) == 0
 
     def test_multi_tag_features(self):
-        assert (len(self.my_tag.features) == 0)
+        assert len(self.my_tag.features) == 0
 
         data_array = self.block.create_data_array("feature", "stimuli",
                                                   nix.DataType.Int16, (0,))
         feature = self.my_tag.create_feature(data_array,
                                              nix.LinkType.Untagged)
-        assert (len(self.my_tag.features) == 1)
+        assert len(self.my_tag.features) == 1
 
-        assert (feature in self.my_tag.features)
-        assert (feature.id in self.my_tag.features)
-        assert ("notexist" not in self.my_tag.features)
+        assert feature in self.my_tag.features
+        assert feature.id in self.my_tag.features
+        assert "notexist" not in self.my_tag.features
 
-        assert (feature.id == self.my_tag.features[0].id)
-        assert (feature.id == self.my_tag.features[-1].id)
+        assert feature.id == self.my_tag.features[0].id
+        assert feature.id == self.my_tag.features[-1].id
 
         # id and name access
-        assert (feature.id == self.my_tag.features[feature.id].id)
-        assert (feature.id == self.my_tag.features[data_array.id].id)
-        assert (feature.id == self.my_tag.features[data_array.name].id)
-        assert (data_array == self.my_tag.features[data_array.id].data)
-        assert (data_array == self.my_tag.features[data_array.name].data)
+        assert feature.id == self.my_tag.features[feature.id].id
+        assert feature.id == self.my_tag.features[data_array.id].id
+        assert feature.id == self.my_tag.features[data_array.name].id
+        assert data_array == self.my_tag.features[data_array.id].data
+        assert data_array == self.my_tag.features[data_array.name].data
 
-        assert (data_array.id in self.my_tag.features)
-        assert (data_array.name in self.my_tag.features)
+        assert data_array.id in self.my_tag.features
+        assert data_array.name in self.my_tag.features
+
+        data_frame = self.block.create_data_frame(
+            "dataframe feature", "test",
+            col_dict=OrderedDict([("number", nix.DataType.Float)]),
+            data=[(10.,)]
+        )
+        df_feature = self.my_tag.create_feature(data_frame, nix.LinkType.Untagged)
+
+        assert len(self.my_tag.features) == 2
+
+        assert df_feature in self.my_tag.features
+        assert df_feature.id in self.my_tag.features
+
+        assert df_feature.id == self.my_tag.features[1].id
+        assert df_feature.id == self.my_tag.features[-1].id
+
+        # id and name access
+        assert df_feature.id == self.my_tag.features[df_feature.id].id
+        assert df_feature.id == self.my_tag.features[data_frame.id].id
+        assert df_feature.id == self.my_tag.features[data_frame.name].id
+        assert data_frame == self.my_tag.features[data_frame.id].data
+        assert data_frame == self.my_tag.features[data_frame.name].data
+
+        assert data_frame.id in self.my_tag.features
+        assert data_frame.name in self.my_tag.features
+
+        assert isinstance(self.my_tag.features[0].data, nix.DataArray)
+        assert isinstance(self.my_tag.features[1].data, nix.DataFrame)
 
         del self.my_tag.features[0]
-
-        assert (len(self.my_tag.features) == 0)
+        assert len(self.my_tag.features) == 1
+        del self.my_tag.features[0]
+        assert len(self.my_tag.features) == 0
 
     def test_multi_tag_tagged_data(self):
         sample_iv = 0.001
@@ -366,18 +396,18 @@ class TestMultiTags(unittest.TestCase):
         mtag.units = ['ms']
         mtag.references.append(da)
 
-        assert (mtag.tagged_data(0, 0).shape == (2001,))
-        assert (np.array_equal(y[:2001], mtag.tagged_data(0, 0)[:]))
+        assert mtag.tagged_data(0, 0).shape == (2001,)
+        assert np.array_equal(y[:2001], mtag.tagged_data(0, 0)[:])
 
         # get by name
         data = mtag.tagged_data(0, da.name)
-        assert (data.shape == (2001,))
-        assert (np.array_equal(y[:2001], data[:]))
+        assert data.shape == (2001,)
+        assert np.array_equal(y[:2001], data[:])
 
         # get by id
         data = mtag.tagged_data(0, da.id)
-        assert (data.shape == (2001,))
-        assert (np.array_equal(y[:2001], data[:]))
+        assert data.shape == (2001,)
+        assert np.array_equal(y[:2001], data[:])
 
         # multi dimensional data
         sample_iv = 1.0
@@ -414,22 +444,22 @@ class TestMultiTags(unittest.TestCase):
         segtag.units = units
 
         posdata = postag.tagged_data(0, 0)
-        assert (len(posdata.shape) == 3)
-        assert (posdata.shape == (1, 1, 1))
-        assert (np.isclose(posdata[0, 0, 0], data[1, 1, 0]))
+        assert len(posdata.shape) == 3
+        assert posdata.shape == (1, 1, 1)
+        assert np.isclose(posdata[0, 0, 0], data[1, 1, 0])
 
         posdata = postag.tagged_data(1, 0)
-        assert (len(posdata.shape) == 3)
-        assert (posdata.shape == (1, 1, 1))
-        assert (np.isclose(posdata[0, 0, 0], data[1, 1, 0]))
+        assert len(posdata.shape) == 3
+        assert posdata.shape == (1, 1, 1)
+        assert np.isclose(posdata[0, 0, 0], data[1, 1, 0])
 
         segdata = segtag.tagged_data(0, 0)
-        assert (len(segdata.shape) == 3)
-        assert (segdata.shape == (2, 6, 2))
+        assert len(segdata.shape) == 3
+        assert segdata.shape == (2, 6, 2)
 
         segdata = segtag.tagged_data(1, 0)
-        assert (len(segdata.shape) == 3)
-        assert (segdata.shape == (1, 5, 1))
+        assert len(segdata.shape) == 3
+        assert segdata.shape == (1, 5, 1)
 
         # retrieve all positions for all references
         for ridx, _ in enumerate(mtag.references):
@@ -513,51 +543,51 @@ class TestMultiTags(unittest.TestCase):
         self.feature_tag.create_feature(index_data, nix.LinkType.Untagged)
 
         # preparations done, actually test
-        assert (len(self.feature_tag.features) == 3)
+        assert len(self.feature_tag.features) == 3
 
         # indexed feature
         feat_data = self.feature_tag.feature_data(0, 0)
-        assert (len(feat_data.shape) == 2)
-        assert (feat_data.size == 10)
-        assert (np.sum(feat_data) == 55)
+        assert len(feat_data.shape) == 2
+        assert feat_data.size == 10
+        assert np.sum(feat_data) == 55
 
         # disabled, don't understand how it could ever have worked,
         # there are only 3 positions
         data_view = self.feature_tag.feature_data(9, 0)
-        assert (np.sum(data_view[:, :]) == 9055)
+        assert np.sum(data_view[:, :]) == 9055
 
         # untagged feature
         data_view = self.feature_tag.feature_data(0, 2)
-        assert (data_view.size == 100)
+        assert data_view.size == 100
 
         data_view = self.feature_tag.feature_data(0, 2)
-        assert (data_view.size == 100)
-        assert (np.sum(data_view) == total)
+        assert data_view.size == 100
+        assert np.sum(data_view) == total
 
         # tagged feature
         data_view = self.feature_tag.feature_data(0, 1)
-        assert (len(data_view.shape) == 3)
+        assert len(data_view.shape) == 3
 
         data_view = self.feature_tag.feature_data(1, 1)
-        assert (len(data_view.shape) == 3)
+        assert len(data_view.shape) == 3
 
         # === retrieve by name ===
         # indexed feature
         feat_data = self.feature_tag.feature_data(0, index_data.name)
-        assert (len(feat_data.shape) == 2)
-        assert (feat_data.size == 10)
-        assert (np.sum(feat_data) == 55)
+        assert len(feat_data.shape) == 2
+        assert feat_data.size == 10
+        assert np.sum(feat_data) == 55
 
         # disabled, there are only 3 positions
         data_view = self.feature_tag.feature_data(9, index_data.name)
-        assert (np.sum(data_view[:, :]) == 9055)
+        assert np.sum(data_view[:, :]) == 9055
 
         # tagged feature
         data_view = self.feature_tag.feature_data(0, tagged_data.name)
-        assert (len(data_view.shape) == 3)
+        assert len(data_view.shape) == 3
 
         data_view = self.feature_tag.feature_data(1, tagged_data.name)
-        assert (len(data_view.shape) == 3)
+        assert len(data_view.shape) == 3
 
         def out_of_bounds():
             self.feature_tag.feature_data(2, 1)
@@ -602,3 +632,61 @@ class TestMultiTags(unittest.TestCase):
                                                     "test.time",
                                                     nix.DataType.Int8, (0,))
         self.assertEqual(mtag.updated_at, mtagtime)
+
+    def test_multi_tag_feature_dataframe(self):
+        numberdata = np.random.random(20)
+        number_feat = self.block.create_data_frame(
+            "number feature", "test",
+            col_dict=OrderedDict([("number", nix.DataType.Float)]),
+            data=[(n,) for n in numberdata]
+        )
+        column_descriptions = OrderedDict([("name", nix.DataType.String),
+                                           ("duration", nix.DataType.Double)])
+        values = [("One", 0.1), ("Two", 0.2), ("Three", 0.3), ("Four", 0.4),
+                  ("Five", 0.5), ("Six", 0.6), ("Seven", 0.7), ("Eight", 0.8),
+                  ("Nine", 0.9), ("Ten", 1.0)]
+        ramp_feat = self.block.create_data_frame("ramp feature", "test",
+                                                 col_dict=column_descriptions,
+                                                 data=values)
+        ramp_feat.label = "voltage"
+        ramp_feat.units = (None, "s")
+
+        pos_tag = self.block.create_multi_tag("feature test", "test", [4, 7, 8])
+
+        with self.assertRaises(UnsupportedLinkType):
+            pos_tag.create_feature(number_feat, nix.LinkType.Tagged)
+        pos_tag.create_feature(number_feat, nix.LinkType.Untagged)
+        pos_tag.create_feature(number_feat, nix.LinkType.Indexed)
+        with self.assertRaises(UnsupportedLinkType):
+            pos_tag.create_feature(ramp_feat, nix.LinkType.Tagged)
+        pos_tag.create_feature(ramp_feat, nix.LinkType.Untagged)
+        pos_tag.create_feature(ramp_feat, nix.LinkType.Indexed)
+        assert len(pos_tag.features) == 4
+
+        for idx, _ in enumerate(pos_tag.positions):
+            data1 = pos_tag.feature_data(idx, 0)
+            data2 = pos_tag.feature_data(idx, 1)
+            data3 = pos_tag.feature_data(idx, 2)
+            data4 = pos_tag.feature_data(idx, 3)
+
+            # check expected data
+            assert np.all(data1[:] == number_feat[:])
+            assert np.all(data2[:] == number_feat[idx])
+            assert np.all(data3[:] == ramp_feat[:])
+            assert np.all(data4[:] == ramp_feat[idx])
+
+        # add extents (should have no effect)
+        extents = self.block.create_data_array("feature test.extents", "test",
+                                               data=[2, 2, 5])
+        pos_tag.extents = extents
+        for idx, _ in enumerate(pos_tag.positions):
+            data1 = pos_tag.feature_data(idx, 0)
+            data2 = pos_tag.feature_data(idx, 1)
+            data3 = pos_tag.feature_data(idx, 2)
+            data4 = pos_tag.feature_data(idx, 3)
+
+            # check expected data
+            assert np.all(data1[:] == number_feat[:])
+            assert np.all(data2[:] == number_feat[idx])
+            assert np.all(data3[:] == ramp_feat[:])
+            assert np.all(data4[:] == ramp_feat[idx])
