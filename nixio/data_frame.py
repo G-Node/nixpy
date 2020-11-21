@@ -139,19 +139,29 @@ class DataFrame(Entity, DataSet):
         else:
             slc = np.s_[slc]
         if len(name) == 1:
-            get_col = self._read_data(slc=slc)[name]
-            get_col = [i[0] for i in get_col]
-            return np.array(get_col)
+            get_col = self._read_data(slc=slc)[name[0]]
+            if get_col.dtype == util.vlen_str_dtype:
+                get_col = np.array([s.decode() for s in get_col], dtype=util.vlen_str_dtype)
+            return get_col
         if group_by_cols:
-            gcol = []
+            gcol = list()
             for col_name in name:
                 get_col = self._read_data(slc=slc)[col_name]
                 get_col = [i for i in get_col]
                 gcol.append(get_col)
             return np.array(gcol)
-        else:
-            get_col = self._read_data(slc=slc)[name]
-            return get_col
+
+        get_col = self._read_data(slc=slc)[name]
+        # find string column indexes
+        str_cols = list()
+        for idx, (col_name, (col_type, _)) in enumerate(get_col.dtype.fields.items()):
+            if col_type == util.vlen_str_dtype:
+                str_cols.append(idx)
+        if str_cols:
+            for row in get_col:
+                for idx in str_cols:
+                    row[idx] = row[idx].decode()
+        return get_col
 
     def write_rows(self, rows, index):
         """
