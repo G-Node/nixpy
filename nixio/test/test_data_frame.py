@@ -21,19 +21,24 @@ class TestDataFrame(unittest.TestCase):
         self.testfilename = os.path.join(self.tmpdir.path, "dataframetest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
-        col_dict = OrderedDict([('name', np.int64), ('id', str), ('time', float),
-                                ('sig1', np.float64), ('sig2', np.int32)])
-        arr = [(1, "a", 20.18, 5.0, 100), (2, 'b', 20.09, 5.5, 101),
-               (2, 'c', 20.05, 5.1, 100), (1, "d", 20.15, 5.3, 150),
-               (2, 'e', 20.23, 5.7, 200), (2, 'f', 20.07, 5.2, 300),
-               (1, "g", 20.12, 5.1, 39), (1, "h", 20.27, 5.1, 600),
-               (2, 'i', 20.15, 5.6, 400), (2, 'j', 20.08, 5.1, 200)]
+        self.df1_dtype = OrderedDict([('name', np.int64), ('id', str), ('time', float),
+                                      ('sig1', np.float64), ('sig2', np.int32)])
+        self.df1_data = [(1, "a", 20.18, 5.0, 100),
+                         (2, "b", 20.09, 5.5, 101),
+                         (2, "c", 20.05, 5.1, 100),
+                         (1, "d", 20.15, 5.3, 150),
+                         (2, "e", 20.23, 5.7, 200),
+                         (2, "f", 20.07, 5.2, 300),
+                         (1, "g", 20.12, 5.1,  39),
+                         (1, "h", 20.27, 5.1, 600),
+                         (2, "i", 20.15, 5.6, 400),
+                         (2, "j", 20.08, 5.1, 200)]
         other_arr = np.arange(11101, 11200).reshape((33, 3))
         other_di = OrderedDict({'name': np.int64, 'id': int, 'time': float})
         self.df1 = self.block.create_data_frame("test df", "signal1",
-                                                data=arr, col_dict=col_dict)
+                                                data=self.df1_data, col_dict=self.df1_dtype)
         self.df2 = self.block.create_data_frame("other df", "signal2",
-                                                data=arr, col_dict=col_dict)
+                                                data=self.df1_data, col_dict=self.df1_dtype)
         self.df3 = self.block.create_data_frame("reference df", "signal3",
                                                 data=other_arr,
                                                 col_dict=other_di)
@@ -115,16 +120,36 @@ class TestDataFrame(unittest.TestCase):
         np.testing.assert_array_equal(multi_rows, self.df1[4:9])
 
     def test_read_column(self):
-        # read single columns by index
-        single_col = self.df1.read_columns(index=[1])
-        data = np.array(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'], dtype=bytes)
-        np.testing.assert_array_equal(single_col, data)
+        # read single column by index
+        single_idx_col = self.df1.read_columns(index=[1])
+        data = np.array([row[1] for row in self.df1_data], dtype=nix.DataType.String)
+        np.testing.assert_array_equal(single_idx_col, data)
+
         # read multiple columns by name
         multi_col = self.df1.read_columns(name=['sig1', 'sig2'])
+        data = [(row[3], row[4]) for row in self.df1_data]
         assert len(multi_col) == 10
+        for data_row, df_row in zip(data, multi_col):
+            assert data_row == tuple(df_row)
+
         # read columns with slices
-        sl_col = self.df1.read_columns(name=['sig1', 'sig2'], slc=slice(0, 10))
-        assert len(sl_col) == 10
+        slice_cols = self.df1.read_columns(name=['sig1', 'sig2'], slc=slice(0, 6))
+        data = [(row[3], row[4]) for row in self.df1_data[:6]]
+        assert len(slice_cols) == 6
+        for data_row, df_row in zip(data, slice_cols):
+            assert data_row == tuple(df_row)
+
+        # read single column by name
+        single_idx_col = self.df1.read_columns(name=["sig2"])
+        data = np.array([100, 101, 100, 150, 200, 300, 39, 600, 400, 200], dtype=nix.DataType.Int32)
+        np.testing.assert_array_equal(single_idx_col, data)
+
+        # Read multiple columns where one is string
+        slice_str_cols = self.df1.read_columns(name=['id', 'sig2'], slc=slice(3, 10))
+        data = [(row[1], row[4]) for row in self.df1_data[3:10]]
+        assert len(slice_str_cols) == 7
+        for data_row, df_row in zip(data, slice_str_cols):
+            assert data_row == tuple(df_row)
 
     def test_read_cell(self):
         # read cell by position
