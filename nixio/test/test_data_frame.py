@@ -16,23 +16,22 @@ import sys
 class TestDataFrame(unittest.TestCase):
 
     def setUp(self):
-
         self.tmpdir = TempDir("dataframetest")
         self.testfilename = os.path.join(self.tmpdir.path, "dataframetest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
         self.df1_dtype = OrderedDict([('name', np.int64), ('id', str), ('time', float),
                                       ('sig1', np.float64), ('sig2', np.int32)])
-        self.df1_data = [(1, "a", 20.18, 5.0, 100),
-                         (2, "b", 20.09, 5.5, 101),
-                         (2, "c", 20.05, 5.1, 100),
-                         (1, "d", 20.15, 5.3, 150),
-                         (2, "e", 20.23, 5.7, 200),
-                         (2, "f", 20.07, 5.2, 300),
-                         (1, "g", 20.12, 5.1,  39),
-                         (1, "h", 20.27, 5.1, 600),
-                         (2, "i", 20.15, 5.6, 400),
-                         (2, "j", 20.08, 5.1, 200)]
+        self.df1_data = [(1, "alpha", 20.18, 5.0, 100),
+                         (2, "beta", 20.09, 5.5, 101),
+                         (2, "gamma", 20.05, 5.1, 100),
+                         (1, "delta", 20.15, 5.3, 150),
+                         (2, "epsilon", 20.23, 5.7, 200),
+                         (2, "fi", 20.07, 5.2, 300),
+                         (1, "zeta", 20.12, 5.1,  39),
+                         (1, "eta", 20.27, 5.1, 600),
+                         (2, "theta", 20.15, 5.6, 400),
+                         (2, "iota", 20.08, 5.1, 200)]
         other_arr = np.arange(11101, 11200).reshape((33, 3))
         other_di = OrderedDict({'name': np.int64, 'id': int, 'time': float})
         self.df1 = self.block.create_data_frame("test df", "signal1",
