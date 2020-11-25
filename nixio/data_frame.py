@@ -206,8 +206,13 @@ class DataFrame(Entity, DataSet):
         :type index: list of int
         """
         if isinstance(index, Iterable):
-            index = list(index)
-        get_row = self._read_data(slc=(index,))
+            index_list = list(index)
+        else:
+            index_list = [index]
+        get_row = self._read_data(slc=(index_list,))
+        get_row = self._convert_string_cols(get_row)
+        if not isinstance(index, Iterable):
+            get_row = get_row[0]
         return get_row
 
     def write_cell(self, cell, position=None, col_name=None, row_idx=None):
