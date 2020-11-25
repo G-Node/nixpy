@@ -34,7 +34,11 @@ class DataFrame(Entity, DataSet):
         self._rows = None
 
     def __getitem__(self, index):
-        return self.read_rows(index)
+        get_row = self._read_data(slc=index)
+        if get_row.dtype.fields:
+            # compound type
+            return self._convert_string_cols(get_row)
+        return get_row
 
     @classmethod
     def create_new(cls, nixfile, nixparent, h5parent, name, type_, shape, col_dtype, compression):
@@ -164,10 +168,18 @@ class DataFrame(Entity, DataSet):
         for idx, (_, (col_type, _)) in enumerate(data.dtype.fields.items()):
             if col_type == util.vlen_str_dtype:
                 str_cols.append(idx)
+
+        def conv_row(row):
+            for idx in str_cols:
+                row[idx] = ensure_str(row[idx])
         if str_cols:
-            for row in data:
-                for idx in str_cols:
-                    row[idx] = ensure_str(row[idx])
+            if not data.shape:
+                # single row
+                conv_row(data)
+            else:
+                # multiple rows
+                for row in data:
+                    conv_row(row)
         return data
 
     def write_rows(self, rows, index):
@@ -208,16 +220,7 @@ class DataFrame(Entity, DataSet):
         :param index: Index of row(s) to be returned
         :type index: list of int
         """
-        if isinstance(index, Iterable):
-            get_row = self._read_data(slc=(list(index),))
-        elif not isinstance(index, slice):
-            get_row = self._read_data(slc=([index],))
-        else:
-            get_row = self._read_data(slc=index)
-        get_row = self._convert_string_cols(get_row)
-        if not isinstance(index, Iterable):
-            get_row = get_row[0]
-        return get_row
+        return self[index]
 
     def write_cell(self, cell, position=None, col_name=None, row_idx=None):
         """
