@@ -112,11 +112,14 @@ class TestDataFrame(unittest.TestCase):
         assert list(self.df1[:]['sig2']) == list(column2)
 
     def test_read_row(self):
+        df1_array = np.array(self.df1_data, dtype=list(self.df1_dtype.items()))
         # read single row
-        assert list(self.df1.read_rows(0)) == [1, b'a', 20.18, 5.0, 100]
+        assert self.df1.read_rows(0) == df1_array[0]
         # read multiple
         multi_rows = self.df1.read_rows(np.arange(4, 9))
-        np.testing.assert_array_equal(multi_rows, self.df1[4:9])
+        np.testing.assert_array_equal(multi_rows, df1_array[4:9])
+        multi_rows = self.df1.read_rows([3, 6])
+        np.testing.assert_array_equal(multi_rows, [df1_array[3], df1_array[6]])
 
     def test_read_column(self):
         # read single column by index
