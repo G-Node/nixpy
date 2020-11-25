@@ -33,6 +33,9 @@ class DataFrame(Entity, DataSet):
         self._columns = None
         self._rows = None
 
+    def __getitem__(self, index):
+        return self.read_rows(index)
+
     @classmethod
     def create_new(cls, nixfile, nixparent, h5parent, name, type_, shape, col_dtype, compression):
         newentity = super(DataFrame, cls).create_new(nixfile, nixparent, h5parent, name, type_)
@@ -206,10 +209,11 @@ class DataFrame(Entity, DataSet):
         :type index: list of int
         """
         if isinstance(index, Iterable):
-            index_list = list(index)
+            get_row = self._read_data(slc=(list(index),))
+        elif not isinstance(index, slice):
+            get_row = self._read_data(slc=([index],))
         else:
-            index_list = [index]
-        get_row = self._read_data(slc=(index_list,))
+            get_row = self._read_data(slc=index)
         get_row = self._convert_string_cols(get_row)
         if not isinstance(index, Iterable):
             get_row = get_row[0]
