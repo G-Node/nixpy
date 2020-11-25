@@ -13,6 +13,7 @@ except ImportError:
     from collections import Iterable
 from collections import OrderedDict
 from inspect import isclass
+from six import ensure_str
 import numpy as np
 from .exceptions import OutOfBounds
 from .entity import Entity
@@ -141,7 +142,7 @@ class DataFrame(Entity, DataSet):
         if len(name) == 1:
             get_col = self._read_data(slc=slc)[name[0]]
             if get_col.dtype == util.vlen_str_dtype:
-                get_col = np.array([s.decode() for s in get_col], dtype=util.vlen_str_dtype)
+                get_col = np.array([ensure_str(s) for s in get_col], dtype=util.vlen_str_dtype)
             return get_col
         if group_by_cols:
             gcol = list()
@@ -152,16 +153,19 @@ class DataFrame(Entity, DataSet):
             return np.array(gcol)
 
         get_col = self._read_data(slc=slc)[name]
-        # find string column indexes
+        return self._convert_string_cols(get_col)
+
+    @staticmethod
+    def _convert_string_cols(data):
         str_cols = list()
-        for idx, (col_name, (col_type, _)) in enumerate(get_col.dtype.fields.items()):
+        for idx, (_, (col_type, _)) in enumerate(data.dtype.fields.items()):
             if col_type == util.vlen_str_dtype:
                 str_cols.append(idx)
         if str_cols:
-            for row in get_col:
+            for row in data:
                 for idx in str_cols:
-                    row[idx] = row[idx].decode()
-        return get_col
+                    row[idx] = ensure_str(row[idx])
+        return data
 
     def write_rows(self, rows, index):
         """
