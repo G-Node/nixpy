@@ -153,6 +153,11 @@ class TestDataFrame(unittest.TestCase):
         for data_row, df_row in zip(data, slice_str_cols):
             assert data_row == tuple(df_row)
 
+    def test_index_column_by_name(self):
+        for colidx, colname in enumerate(self.df1_dtype.keys()):
+            expdata = [row[colidx] for row in self.df1_data]
+            assert all(self.df1[colname] == expdata)
+
     def test_read_cell(self):
         # read cell by position
         scell = self.df1.read_cell(position=[5, 3])
