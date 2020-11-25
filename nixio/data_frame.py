@@ -34,11 +34,11 @@ class DataFrame(Entity, DataSet):
         self._rows = None
 
     def __getitem__(self, index):
-        get_row = self._read_data(slc=index)
-        if get_row.dtype.fields:
+        data = self._read_data(slc=index)
+        if data.dtype.fields:
             # compound type
-            return self._convert_string_cols(get_row)
-        return get_row
+            return self._convert_string_cols(data)
+        return data
 
     @classmethod
     def create_new(cls, nixfile, nixparent, h5parent, name, type_, shape, col_dtype, compression):
@@ -147,20 +147,20 @@ class DataFrame(Entity, DataSet):
         else:
             slc = np.s_[slc]
         if len(name) == 1:
-            get_col = self._read_data(slc=slc)[name[0]]
-            if get_col.dtype == util.vlen_str_dtype:
-                get_col = np.array([ensure_str(s) for s in get_col], dtype=util.vlen_str_dtype)
-            return get_col
+            data = self._read_data(slc=slc)[name[0]]
+            if data.dtype == util.vlen_str_dtype:
+                data = np.array([ensure_str(s) for s in data], dtype=util.vlen_str_dtype)
+            return data
         if group_by_cols:
             gcol = list()
             for col_name in name:
-                get_col = self._read_data(slc=slc)[col_name]
-                get_col = [i for i in get_col]
-                gcol.append(get_col)
+                data = self._read_data(slc=slc)[col_name]
+                data = [i for i in data]
+                gcol.append(data)
             return np.array(gcol)
 
-        get_col = self._read_data(slc=slc)[name]
-        return self._convert_string_cols(get_col)
+        data = self._read_data(slc=slc)[name]
+        return self._convert_string_cols(data)
 
     @staticmethod
     def _convert_string_cols(data):
