@@ -65,7 +65,7 @@ class TestDataFrame(unittest.TestCase):
         assert df_li.column_names == self.df1.column_names
         assert df_li.dtype == self.df1.dtype
         for i in df_li[:]:
-            self.assertIsInstance(i['id'], (bytes, string_types))
+            self.assertIsInstance(i['id'], string_types)
             self.assertIsInstance(i['sig2'], np.int32)
 
     def test_column_name_collision(self):
@@ -87,9 +87,9 @@ class TestDataFrame(unittest.TestCase):
     def test_write_row(self):
         # test write single row
         row = ["1", 'abc', 3, 4.4556356242341, 5.1111111]
-        assert list(self.df1[9]) == [2, b'j', 20.08, 5.1, 200]
+        assert list(self.df1[9]) == [2, 'iota', 20.08, 5.1, 200]
         self.df1.write_rows([row], [9])
-        assert list(self.df1[9]) == [1, b'abc', 3., 4.4556356242341, 5]
+        assert list(self.df1[9]) == [1, 'abc', 3., 4.4556356242341, 5]
         self.assertIsInstance(self.df1[9]['name'],  np.integer)
         self.assertIsInstance(self.df1[9]['sig2'],  np.int32)
         assert self.df1[9]['sig2'] == int(5)
@@ -97,8 +97,8 @@ class TestDataFrame(unittest.TestCase):
         multi_rows = [[1775, '12355', 1777, 1778, 1779],
                       [1785, '12355', 1787, 1788, 1789]]
         self.df1.write_rows(multi_rows, [1, 2])
-        assert list(self.df1[1]) == [1775, b'12355', 1777, 1778, 1779]
-        assert list(self.df1[2]) == [1785, b'12355', 1787, 1788, 1789]
+        assert list(self.df1[1]) == [1775, '12355', 1777, 1778, 1779]
+        assert list(self.df1[2]) == [1785, '12355', 1787, 1788, 1789]
 
     def test_write_column(self):
         # write by name
@@ -164,7 +164,7 @@ class TestDataFrame(unittest.TestCase):
         assert scell == 5.2
         # read cell by row_idx + col_name
         crcell = self.df1.read_cell(col_name=['id'], row_idx=9)
-        assert crcell == b'j'
+        assert crcell == 'iota'
         # test error raise if only one param given
         self.assertRaises(ValueError, self.df1.read_cell, row_idx=10)
         self.assertRaises(ValueError, self.df1.read_cell, col_name='sig1')
@@ -175,7 +175,7 @@ class TestDataFrame(unittest.TestCase):
         assert self.df1[8]['sig1'] == 105
         # write cell by rowid colname
         self.df1.write_cell('test', col_name='id', row_idx=3)
-        assert self.df1[3]['id'] == b'test'
+        assert self.df1[3]['id'] == 'test'
         # test error raise
         self.assertRaises(ValueError, self.df1.write_cell, 11, col_name='sig1')
 
@@ -198,13 +198,13 @@ class TestDataFrame(unittest.TestCase):
 
     def test_append_rows(self):
         # append single row
-        srow = [1, b"test", 3, 4, 5]
+        srow = (1, "test", 3, 4, 5)
         self.df1.append_rows([srow])
-        assert list(self.df1[10]) == srow
+        assert self.df1[10] == np.array(srow, dtype=list(self.df1_dtype.items()))
         # append multi-rows
-        mrows = [[1, "2", 3, 4, 5], [6, "testing", 8, 9, 10]]
+        mrows = [(1, "2", 3, 4, 5), (6, "testing", 8, 9, 10)]
         self.df1.append_rows(mrows)
-        assert [list(i) for i in self.df1[-2:]] == [[1, b'2', 3., 4., 5], [6, b'testing', 8., 9., 10]]
+        assert all(self.df1[-2:] == np.array(mrows, dtype=list(self.df1_dtype.items())))
         # append row with incorrect length
         errrow = [5, 6, 7, 8]
         self.assertRaises(ValueError, self.df1.append_rows, [errrow])
@@ -231,7 +231,7 @@ class TestDataFrame(unittest.TestCase):
         assert self.df1.dtype[0] != self.df1.dtype[4]
         assert self.df1.dtype[2] == self.df1.dtype[3]
 
-    def test_creation_without_name(self):
+    def test_create_without_dtypes(self):
         data = np.array([("a", 1, 2.2), ("b", 2, 3.3), ("c", 3, 4.4)],
                         dtype=[('name', 'U10'), ("id", 'i4'), ('val', 'f4')])
         df = self.block.create_data_frame("without_name", "test", data=data)
