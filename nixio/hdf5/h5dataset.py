@@ -107,7 +107,10 @@ class H5DataSet(object):
 
     @property
     def dtype(self):
-        return self.dataset.dtype
+        dtype = self.dataset.dtype
+        if dtype == util.vlen_str_dtype:
+            return DataType.String
+        return dtype
 
     def __str__(self):
         return "<H5DataSet object: {}>".format(self.dataset.name)
