@@ -306,9 +306,7 @@ class Tag(BaseTag):
 
     def feature_data(self, featidx):
         if len(self.features) == 0:
-            raise OutOfBounds(
-                "There are no features associated with this tag!"
-            )
+            raise OutOfBounds("There are no features associated with this tag!")
 
         try:
             feat = self.features[featidx]
