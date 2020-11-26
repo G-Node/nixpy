@@ -13,7 +13,6 @@ except ImportError:
     from collections import Iterable
 from collections import OrderedDict
 from inspect import isclass
-from six import ensure_str
 import numpy as np
 from .exceptions import OutOfBounds
 from .entity import Entity
@@ -32,13 +31,6 @@ class DataFrame(Entity, DataSet):
         self._sources = None
         self._columns = None
         self._rows = None
-
-    def __getitem__(self, index):
-        data = self._read_data(slc=index)
-        if data.dtype.fields:
-            # compound type
-            return self._convert_string_cols(data)
-        return data
 
     @classmethod
     def create_new(cls, nixfile, nixparent, h5parent, name, type_, shape, col_dtype, compression):
@@ -147,10 +139,7 @@ class DataFrame(Entity, DataSet):
         else:
             slc = np.s_[slc]
         if len(name) == 1:
-            data = self._read_data(slc=slc)[name[0]]
-            if data.dtype == util.vlen_str_dtype:
-                data = np.array([ensure_str(s) for s in data], dtype=util.vlen_str_dtype)
-            return data
+            return self._read_data(slc=slc)[name[0]]
         if group_by_cols:
             gcol = list()
             for col_name in name:
@@ -159,28 +148,7 @@ class DataFrame(Entity, DataSet):
                 gcol.append(data)
             return np.array(gcol)
 
-        data = self._read_data(slc=slc)[name]
-        return self._convert_string_cols(data)
-
-    @staticmethod
-    def _convert_string_cols(data):
-        str_cols = list()
-        for idx, (_, (col_type, _)) in enumerate(data.dtype.fields.items()):
-            if col_type == util.vlen_str_dtype:
-                str_cols.append(idx)
-
-        def conv_row(row):
-            for idx in str_cols:
-                row[idx] = ensure_str(row[idx])
-        if str_cols:
-            if not data.shape:
-                # single row
-                conv_row(data)
-            else:
-                # multiple rows
-                for row in data:
-                    conv_row(row)
-        return data
+        return self._read_data(slc=slc)[name]
 
     def write_rows(self, rows, index):
         """

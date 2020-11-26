@@ -6,6 +6,8 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from six import ensure_str
+import numpy as np
 from ..datatype import DataType
 from .. import util
 
@@ -45,9 +47,9 @@ class H5DataSet(object):
 
     def read_data(self, slc=None):
         if slc is None:
-            return self.dataset[:]
+            slc = slice(None, None, None)
         try:
-            return self.dataset[slc]
+            data = self.dataset[slc]
         except ValueError as ve_exc:
             # h5py throws ValueError for out-of-bounds index
             # Let's change it to IndexError
@@ -56,6 +58,31 @@ class H5DataSet(object):
             # h5py 2.10 in Python2 throws TypeError for out-of-bounds index
             # Let's change it to IndexError
             raise IndexError(te_exc)
+        if data.dtype == util.vlen_str_dtype:
+            data = np.array([ensure_str(s) for s in data], dtype=util.vlen_str_dtype)
+        elif data.dtype.fields:
+            data = self._convert_string_cols(data)
+        return data
+
+    @staticmethod
+    def _convert_string_cols(data):
+        str_cols = list()
+        for idx, (_, (col_type, _)) in enumerate(data.dtype.fields.items()):
+            if col_type == util.vlen_str_dtype:
+                str_cols.append(idx)
+
+        def conv_row(row):
+            for idx in str_cols:
+                row[idx] = ensure_str(row[idx])
+        if str_cols:
+            if not data.shape:
+                # single row
+                conv_row(data)
+            else:
+                # multiple rows
+                for row in data:
+                    conv_row(row)
+        return data
 
     def set_attr(self, name, value):
         if value is None:

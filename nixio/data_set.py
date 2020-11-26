@@ -7,8 +7,6 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import numpy as np
-from six import ensure_str
-from . import util
 
 
 class DataSet(object):
@@ -123,12 +121,7 @@ class DataSet(object):
         dataset.write_data(data,  slc)
 
     def _read_data(self, slc=None):
-        dataset = self._h5group.get_dataset("data")
-        data = dataset.read_data(slc)
-        if data.dtype == util.vlen_str_dtype:
-            data = np.array([ensure_str(d) for d in data],
-                            dtype=util.vlen_str_dtype)
-        return data
+        return self._h5group.get_dataset("data").read_data(slc)
 
     @property
     def data_extent(self):
