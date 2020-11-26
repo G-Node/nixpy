@@ -67,13 +67,14 @@ class H5DataSet(object):
     @staticmethod
     def _convert_string_cols(data):
         str_cols = list()
-        for idx, (_, (col_type, _)) in enumerate(data.dtype.fields.items()):
+        for field_name, (col_type, _) in data.dtype.fields.items():
             if col_type == util.vlen_str_dtype:
-                str_cols.append(idx)
+                str_cols.append(field_name)
 
         def conv_row(row):
-            for idx in str_cols:
-                row[idx] = ensure_str(row[idx])
+            for field in str_cols:
+                print(field, row[field])
+                row[field] = ensure_str(row[field])
         if str_cols:
             if not data.shape:
                 # single row
