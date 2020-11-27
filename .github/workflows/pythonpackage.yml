@@ -9,7 +9,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [2.7, 3.5, 3.6, 3.7]
+        python-version: [3.6, 3.7, 3.8]
 
     steps:
     - uses: actions/checkout@v1
@@ -21,17 +21,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install h5py
-    - name: Lint with flake8
+    - name: Lint with Pylint
       run: |
-        pip install flake8
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude="docs,.eggs,build,scripts"
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=80 --statistics --exclude="docs,.eggs,build,scripts"
-    - name: Lint with pycodestyle
-      run: |
-        pip install pycodestyle
-        pycodestyle . --exclude="docs,.eggs,build,scripts"
+        pip install pylint
+        # Make sure it uses the project rcfile
+        pylint --rcfile=.pylintrc nixio
     - name: Test with pytest
       run: |
         pip install pytest

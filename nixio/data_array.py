@@ -216,9 +216,9 @@ class DataArray(Entity, DataSet):
         return self._h5group.get_attr("expansion_origin")
 
     @expansion_origin.setter
-    def expansion_origin(self, eo):
-        util.check_attr_type(eo, Number)
-        self._h5group.set_attr("expansion_origin", eo)
+    def expansion_origin(self, origin):
+        util.check_attr_type(origin, Number)
+        self._h5group.set_attr("expansion_origin", origin)
         if self.file.auto_update_timestamps:
             self.force_updated_at()
 
@@ -234,9 +234,9 @@ class DataArray(Entity, DataSet):
         return self._h5group.get_attr("label")
 
     @label.setter
-    def label(self, l):
-        util.check_attr_type(l, str)
-        self._h5group.set_attr("label", l)
+    def label(self, label):
+        util.check_attr_type(label, str)
+        self._h5group.set_attr("label", label)
         if self.file.auto_update_timestamps:
             self.force_updated_at()
 
@@ -251,13 +251,13 @@ class DataArray(Entity, DataSet):
         return self._h5group.get_attr("unit")
 
     @unit.setter
-    def unit(self, u):
-        if u:
-            u = util.units.sanitizer(u)
-        if u == "":
-            u = None
-        util.check_attr_type(u, str)
-        self._h5group.set_attr("unit", u)
+    def unit(self, unit):
+        if unit:
+            unit = util.units.sanitizer(unit)
+        if unit == "":
+            unit = None
+        util.check_attr_type(unit, str)
+        self._h5group.set_attr("unit", unit)
         if self.file.auto_update_timestamps:
             self.force_updated_at()
 
@@ -280,8 +280,8 @@ class DataArray(Entity, DataSet):
                 "DataArray.get_slice"
             )
         if mode == DataSliceMode.Index:
-            sl = tuple(slice(p, p+e) for p, e in zip(positions, extents))
-            return DataView(self, sl)
+            slices = tuple(slice(p, p+e) for p, e in zip(positions, extents))
+            return DataView(self, slices)
         elif mode == DataSliceMode.Data:
             return self._get_slice_bydim(positions, extents)
         else:
@@ -299,8 +299,8 @@ class DataArray(Entity, DataSet):
             elif dim.dimension_type == DimensionType.Set:
                 dpos.append(int(pos))
                 dext.append(int(ext))
-        sl = tuple(slice(p, p+e) for p, e in zip(dpos, dext))
-        return DataView(self, sl)
+        slices = tuple(slice(p, p+e) for p, e in zip(dpos, dext))
+        return DataView(self, slices)
 
     @property
     def data(self):

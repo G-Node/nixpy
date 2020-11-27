@@ -31,100 +31,100 @@ class TestSections(unittest.TestCase):
         self.tmpdir.cleanup()
 
     def test_section_eq(self):
-        assert(self.section == self.section)
-        assert(not self.section == self.other)
-        assert(self.section is not None)
+        assert self.section == self.section
+        assert not self.section == self.other
+        assert self.section is not None
 
     def test_section_id(self):
-        assert(self.section.id is not None)
+        assert self.section.id is not None
 
         # Check setting id on section via file create
         oid = "4a6e8483-0a9a-464d-bdd9-b39818334bcd"
         sec = self.file.create_section("assign id", "sec type", oid)
-        assert (sec.id == oid)
+        assert sec.id == oid
 
         nonid = "I am not a proper uuid"
         sec = self.file.create_section("invalid id", "sec type", nonid)
-        assert (sec.id != nonid)
+        assert sec.id != nonid
 
         # Check setting id on section via section create
         oid = "4a6e8483-0a9a-464d-bdd9-b39818334bcd"
         sub_sec = sec.create_section("assign id", "sec type", oid)
-        assert (sub_sec.id == oid)
+        assert sub_sec.id == oid
 
         nonid = "I am not a proper uuid"
         sub_sec = sec.create_section("invalid id", "sec type", nonid)
-        assert (sub_sec.id != nonid)
+        assert sub_sec.id != nonid
 
     def test_section_name(self):
-        assert(self.section.name is not None)
+        assert self.section.name is not None
 
     def test_section_type(self):
         def set_none():
             self.section.type = None
 
-        assert(self.section.type is not None)
+        assert self.section.type is not None
         self.assertRaises(Exception, set_none)
 
         self.section.type = "foo type"
-        assert(self.section.type == "foo type")
+        assert self.section.type == "foo type"
 
     def test_section_definition(self):
-        assert(self.section.definition is None)
+        assert self.section.definition is None
 
         self.section.definition = "definition"
-        assert(self.section.definition == "definition")
+        assert self.section.definition == "definition"
 
         self.section.definition = None
-        assert(self.section.definition is None)
+        assert self.section.definition is None
 
     def test_section_repository(self):
-        assert(self.section.repository is None)
+        assert self.section.repository is None
 
         self.section.repository = "repository"
-        assert(self.section.repository == "repository")
+        assert self.section.repository == "repository"
 
         self.section.repository = None
-        assert(self.section.repository is None)
+        assert self.section.repository is None
 
     def test_property_reference(self):
-        assert(self.section.reference is None)
+        assert self.section.reference is None
 
         self.section.reference = "reference"
-        assert(self.section.reference == "reference")
+        assert self.section.reference == "reference"
 
         self.section.reference = None
-        assert(self.section.reference is None)
+        assert self.section.reference is None
         self.section.reference = None
 
     def test_section_sections(self):
-        assert(len(self.section.sections) == 0)
+        assert len(self.section.sections) == 0
 
         child = self.section.create_section("test section", "electrode")
-        assert(child.parent == self.section)
+        assert child.parent == self.section
 
-        assert(len(self.section.sections) == 1)
+        assert len(self.section.sections) == 1
 
-        assert(child in self.section.sections)
-        assert(child.id in self.section.sections)
-        assert("notexist" not in self.section.sections)
+        assert child in self.section.sections
+        assert child.id in self.section.sections
+        assert "notexist" not in self.section.sections
 
-        assert(child.id == self.section.sections[0].id)
-        assert(child.id == self.section.sections[-1].id)
+        assert child.id == self.section.sections[0].id
+        assert child.id == self.section.sections[-1].id
 
         del self.section.sections[0]
 
-        assert(len(self.section.sections) == 0)
+        assert len(self.section.sections) == 0
 
         self.section['easy subsection'] = nix.S('electrode')
         subject = self.section['subject'] = nix.S('subject')
 
-        assert(self.section['subject'] == subject)
-        assert(self.section['subject'].id == subject.id)
+        assert self.section['subject'] == subject
+        assert self.section['subject'].id == subject.id
         assert('easy subsection' in
                [v.name for k, v in self.section.sections.items()])
-        assert('easy subsection' in self.section.sections)
-        assert(self.section['easy subsection'].name == 'easy subsection')
+        assert 'easy subsection' in self.section.sections
+        assert self.section['easy subsection'].name == 'easy subsection'
 
     def test_section_find_sections(self):
         for i in range(2):
@@ -140,8 +140,8 @@ class TestSections(unittest.TestCase):
                 "level3-p1-s" + str(i), "dummy"
             )
 
-        assert(len(self.section.find_sections()) == 9)
-        assert(len(self.section.find_sections(limit=1)) == 3)
+        assert len(self.section.find_sections()) == 9
+        assert len(self.section.find_sections(limit=1)) == 3
         assert(len(self.section.find_sections(
             filtr=lambda x: "level2-p1-s" in x.name)) == 2
                )
@@ -149,37 +149,37 @@ class TestSections(unittest.TestCase):
             filtr=lambda x: "level2-p1-s" in x.name, limit=1)) == 0
                )
 
-        assert(len(self.section.find_related()) == 3)
-        assert(len(self.section.sections[0].find_related()) == 5)
+        assert len(self.section.find_related()) == 3
+        assert len(self.section.sections[0].find_related()) == 5
 
     def test_section_properties(self):
-        assert(len(self.section) == 0)
+        assert len(self.section) == 0
 
         prop = self.section.create_property("test prop", nix.DataType.String)
 
-        assert(len(self.section) == 1)
+        assert len(self.section) == 1
 
-        for p in self.section:
-            assert(p in self.section)
+        for prop in self.section:
+            assert prop in self.section
 
-        assert("test prop" in self.section)
-        assert("notexist" not in self.section)
-        assert(self.section["test prop"] is not None)
+        assert "test prop" in self.section
+        assert "notexist" not in self.section
+        assert self.section["test prop"] is not None
         # NOTE: the following raises KeyError: Do we want it to return None?
-        # assert(self.section["notexist"] is None)
+        # assert self.section["notexist"] is None
 
-        assert(len(self.section.inherited_properties()) == 1)
+        assert len(self.section.inherited_properties()) == 1
 
-        assert(prop in self.section)
-        assert(prop.id in self.section)
-        assert(prop.name in self.section)
-        assert("notexist" not in self.section)
+        assert prop in self.section
+        assert prop.id in self.section
+        assert prop.name in self.section
+        assert "notexist" not in self.section
 
         props = dict(self.section.items())
-        assert(props["test prop"] == prop)
+        assert props["test prop"] == prop
 
-        assert(prop.id == self.section.props[0].id)
-        assert(prop.id == self.section.props[-1].id)
+        assert prop.id == self.section.props[0].id
+        assert prop.id == self.section.props[-1].id
 
         # easy prop creation
         self.section['ep_str'] = 'str'
@@ -199,24 +199,23 @@ class TestSections(unittest.TestCase):
 
         self.section.props["cp_str"].values = "anotherstr"
 
-        res = [x in self.section for x in ['ep_str', 'ep_int', 'ep_float']]
-        assert(all(res))
+        assert all([name in self.section for name in ['ep_str', 'ep_int', 'ep_float']])
 
-        assert(self.section['ep_str'] == 'str')
-        assert(self.section['ep_int'] == 23)
-        assert(self.section['ep_float'] == 42.0)
-        assert(self.section['ep_list'] == [1, 2, 3])
+        assert self.section['ep_str'] == 'str'
+        assert self.section['ep_int'] == 23
+        assert self.section['ep_float'] == 42.0
+        assert self.section['ep_list'] == [1, 2, 3]
 
         def create_hetero_section():
             self.section['ep_ex'] = [1, 1.0]
 
         self.assertRaises(TypeError, create_hetero_section)
 
-        sections = [x.id for x in self.section]
-        for x in sections:
-            del self.section[x]
+        section_ids = [sec.id for sec in self.section]
+        for s_id in section_ids:
+            del self.section[s_id]
 
-        assert(len(self.section) == 0)
+        assert len(self.section) == 0
 
     def test_parent(self):
         self.assertIs(self.section.parent, None)
@@ -290,13 +289,13 @@ class TestSections(unittest.TestCase):
 
         self.assertNotIn("PropOnSection", self.other)
         with self.assertRaises(KeyError):
-            self.other["PropOnSection"]
+            _ = self.other["PropOnSection"]
 
         self.other.link = self.section
 
         self.assertNotIn("PropOnSection", self.other)
         with self.assertRaises(KeyError):
-            self.other["PropOnSection"]
+            _ = self.other["PropOnSection"]
 
         inhpropnames = [p.name for p in self.other.inherited_properties()]
         self.assertIn("PropOnSection", inhpropnames)

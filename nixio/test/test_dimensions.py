@@ -15,9 +15,9 @@ from .tmp import TempDir
 from collections import OrderedDict
 
 
+TEST_SAMPL = 0.1
+TEST_LABEL = "test label"
 test_range = tuple([float(i) for i in range(10)])
-test_sampl = 0.1
-test_label = "test label"
 test_labels = tuple([str(i) + "_label" for i in range(10)])
 
 
@@ -32,7 +32,7 @@ class TestDimension(unittest.TestCase):
                                                   nix.DataType.Float, (0, ))
 
         self.set_dim = self.array.append_set_dimension()
-        self.sample_dim = self.array.append_sampled_dimension(test_sampl)
+        self.sample_dim = self.array.append_sampled_dimension(TEST_SAMPL)
         self.range_dim = self.array.append_range_dimension(test_range)
 
     def tearDown(self):
@@ -41,96 +41,96 @@ class TestDimension(unittest.TestCase):
         self.tmpdir.cleanup()
 
     def test_set_dimension(self):
-        assert(self.set_dim.index == 1)
-        assert(self.set_dim.dimension_type == nix.DimensionType.Set)
-        assert(self.array.dimensions[0].index == 1)
+        assert self.set_dim.index == 1
+        assert self.set_dim.dimension_type == nix.DimensionType.Set
+        assert self.array.dimensions[0].index == 1
 
-        assert(self.set_dim.labels == ())
+        assert self.set_dim.labels == ()
         self.set_dim.labels = test_labels
-        assert(self.set_dim.labels == test_labels)
+        assert self.set_dim.labels == test_labels
 
     def test_sample_dimension(self):
-        assert(self.sample_dim.index == 2)
-        assert(self.sample_dim.dimension_type == nix.DimensionType.Sample)
-        assert(self.array.dimensions[1].index == 2)
+        assert self.sample_dim.index == 2
+        assert self.sample_dim.dimension_type == nix.DimensionType.Sample
+        assert self.array.dimensions[1].index == 2
 
-        assert(self.sample_dim.label is None)
-        self.sample_dim.label = test_label
-        assert(self.sample_dim.label == test_label)
+        assert self.sample_dim.label is None
+        self.sample_dim.label = TEST_LABEL
+        assert self.sample_dim.label == TEST_LABEL
         self.sample_dim.label = None
-        assert(self.sample_dim.label is None)
+        assert self.sample_dim.label is None
 
-        assert(self.sample_dim.unit is None)
+        assert self.sample_dim.unit is None
         self.sample_dim.unit = "mV"
-        assert(self.sample_dim.unit == "mV")
+        assert self.sample_dim.unit == "mV"
         self.sample_dim.unit = None
-        assert(self.sample_dim.unit is None)
+        assert self.sample_dim.unit is None
 
-        assert(self.sample_dim.sampling_interval == test_sampl)
+        assert self.sample_dim.sampling_interval == TEST_SAMPL
         self.sample_dim.sampling_interval = 1.123
-        assert(self.sample_dim.sampling_interval == 1.123)
+        assert self.sample_dim.sampling_interval == 1.123
 
-        assert(self.sample_dim.offset is None)
+        assert self.sample_dim.offset is None
         self.sample_dim.offset = 0.3
-        assert(self.sample_dim.offset == 0.3)
+        assert self.sample_dim.offset == 0.3
         self.sample_dim.offset = None
-        assert(self.sample_dim.offset is None)
+        assert self.sample_dim.offset is None
 
         self.sample_dim.sampling_interval = 2.
         self.sample_dim.offset = 3.
 
-        assert(self.sample_dim.index_of(3.14) == 0)
-        assert(self.sample_dim.index_of(23.) == 10)
-        assert(type(self.sample_dim.index_of(23.) == int))
+        assert self.sample_dim.index_of(3.14) == 0
+        assert self.sample_dim.index_of(23.) == 10
+        assert type(self.sample_dim.index_of(23.) == int)
 
-        assert(self.sample_dim.position_at(0) == 3.)
-        assert(self.sample_dim.position_at(200) == 200*2.+3.)
+        assert self.sample_dim.position_at(0) == 3.
+        assert self.sample_dim.position_at(200) == 200*2.+3.
 
-        assert(len(self.sample_dim.axis(10)) == 10)
-        assert(self.sample_dim.axis(10)[0] == 3.)
-        assert(self.sample_dim.axis(10)[-1] == 9*2.+3.)
+        assert len(self.sample_dim.axis(10)) == 10
+        assert self.sample_dim.axis(10)[0] == 3.
+        assert self.sample_dim.axis(10)[-1] == 9*2.+3.
 
-        assert(len(self.sample_dim.axis(10, 2)) == 10)
-        assert(self.sample_dim.axis(10, 2)[0] == 2 * 2. + 3.)
-        assert(self.sample_dim.axis(10, 2)[-1] == (9 + 2) * 2. + 3.)
+        assert len(self.sample_dim.axis(10, 2)) == 10
+        assert self.sample_dim.axis(10, 2)[0] == 2 * 2. + 3.
+        assert self.sample_dim.axis(10, 2)[-1] == (9 + 2) * 2. + 3.
 
     def test_range_dimension(self):
-        assert(self.range_dim.index == 3)
-        assert(self.range_dim.dimension_type == nix.DimensionType.Range)
-        assert(self.array.dimensions[2].index == 3)
+        assert self.range_dim.index == 3
+        assert self.range_dim.dimension_type == nix.DimensionType.Range
+        assert self.array.dimensions[2].index == 3
 
-        assert(self.range_dim.label is None)
-        self.range_dim.label = test_label
-        assert(self.range_dim.label == test_label)
+        assert self.range_dim.label is None
+        self.range_dim.label = TEST_LABEL
+        assert self.range_dim.label == TEST_LABEL
         self.range_dim.label = None
-        assert(self.range_dim.label is None)
+        assert self.range_dim.label is None
 
-        assert(self.range_dim.unit is None)
+        assert self.range_dim.unit is None
         self.range_dim.unit = "mV"
-        assert(self.range_dim.unit == "mV")
+        assert self.range_dim.unit == "mV"
         self.range_dim.unit = None
-        assert(self.range_dim.unit is None)
+        assert self.range_dim.unit is None
 
-        assert(self.range_dim.ticks == test_range)
+        assert self.range_dim.ticks == test_range
         other = tuple([i*3.14 for i in range(10)])
         self.range_dim.ticks = other
-        assert(self.range_dim.ticks == other)
+        assert self.range_dim.ticks == other
 
-        assert(self.range_dim.index_of(0.) == 0)
-        assert(self.range_dim.index_of(10.) == (np.floor(10./3.14)))
-        assert(self.range_dim.index_of(18.84) == 6)
-        assert(self.range_dim.index_of(28.26) == 9)
-        assert(self.range_dim.index_of(100.) == 9)
-        assert(self.range_dim.index_of(-100.) == 0)
+        assert self.range_dim.index_of(0.) == 0
+        assert self.range_dim.index_of(10.) == (np.floor(10./3.14))
+        assert self.range_dim.index_of(18.84) == 6
+        assert self.range_dim.index_of(28.26) == 9
+        assert self.range_dim.index_of(100.) == 9
+        assert self.range_dim.index_of(-100.) == 0
 
-        assert(self.range_dim.tick_at(0) == 0)
-        assert(self.range_dim.tick_at(9) == other[-1])
+        assert self.range_dim.tick_at(0) == 0
+        assert self.range_dim.tick_at(9) == other[-1]
         with self.assertRaises(IndexError):
             self.range_dim.tick_at(100)
 
-        assert(self.range_dim.axis(10) == other)
-        assert(self.range_dim.axis(2) == other[:2])
-        assert(self.range_dim.axis(2, 2) == other[2:4])
+        assert self.range_dim.axis(10) == other
+        assert self.range_dim.axis(2) == other[:2]
+        assert self.range_dim.axis(2, 2) == other[2:4]
         with self.assertRaises(IndexError):
             self.range_dim.axis(10, 2)
             self.range_dim.axis(100)
@@ -191,7 +191,7 @@ class TestLinkDimension(unittest.TestCase):
         self.block = self.file.create_block("test block", "test.session")
         self.array = self.block.create_data_array(
             "test array", "signal", nix.DataType.Float,
-            data=np.random.random((3, 15))
+            data=np.random.random_sample((3, 15))
         )
 
         self.set_dim = self.array.append_set_dimension()
@@ -216,10 +216,10 @@ class TestLinkDimension(unittest.TestCase):
 
         tickarray3d = self.block.create_data_array(
             "ticks3d", "array.dimension.ticks",
-            data=np.random.random((20, 15, 4))
+            data=np.random.random_sample((20, 15, 4))
         )
         tickarray3d.unit = "mA"
-        ticks = np.cumsum(np.random.random(15))
+        ticks = np.cumsum(np.random.random_sample(15))
         tickarray3d[3, :, 1] = ticks
         tickarray3d.label = "DIMENSION LABEL 2"
         self.range_dim.link_data_array(tickarray3d, [3, -1, 1])
@@ -249,7 +249,7 @@ class TestLinkDimension(unittest.TestCase):
     def test_data_array_self_link_range_dimension(self):
         # The new way of making alias range dimension
         da = self.block.create_data_array("alias da", "dimticks",
-                                          data=np.random.random(10))
+                                          data=np.random.random_sample(10))
         da.label = "alias dimension label"
         da.unit = "F"
         rdim = da.append_range_dimension()
@@ -262,7 +262,7 @@ class TestLinkDimension(unittest.TestCase):
     def test_data_array_self_link_set_dimension(self):
         # The new way of making alias range dimension
         labelda = self.block.create_data_array("alias da", "dimlabels",
-                                               data=np.random.random(10))
+                                               data=np.random.random_sample(10))
         rdim = labelda.append_set_dimension()
         rdim.link_data_array(labelda, [-1])
         assert len(labelda.dimensions) == 1
@@ -274,10 +274,10 @@ class TestLinkDimension(unittest.TestCase):
                                            ("duration", nix.DataType.Double)])
 
         def randtick():
-            ts = 0
+            time_stamp = 0
             while True:
-                ts += np.random.random()
-                yield ts
+                time_stamp += np.random.random_sample()
+                yield time_stamp
 
         tickgen = randtick()
 
@@ -309,7 +309,7 @@ class TestLinkDimension(unittest.TestCase):
                                            ("duration", nix.DataType.Float)])
 
         def rdura():
-            return np.random.random() * 30
+            return np.random.random_sample() * 30
 
         values = [("Alpha", "a", rdura()),
                   ("Beta", 'b',  rdura()),
@@ -332,7 +332,7 @@ class TestLinkDimension(unittest.TestCase):
 
     def test_data_array_linking_errors(self):
         da = self.block.create_data_array("baddim", "dimension.error.test",
-                                          data=np.random.random((3, 4, 2)))
+                                          data=np.random.random_sample((3, 4, 2)))
 
         # index dimensionality mismatch
         with self.assertRaises(nix.exceptions.IncompatibleDimensions):
@@ -387,7 +387,7 @@ class TestLinkDimension(unittest.TestCase):
         sdim = self.array.append_sampled_dimension(0.1)
 
         da = self.block.create_data_array("baddim", "dimension.error.test",
-                                          data=np.random.random((3, 4, 2)))
+                                          data=np.random.random_sample((3, 4, 2)))
         with self.assertRaises(RuntimeError):
             sdim.link_data_array(da, [0])
 
@@ -414,10 +414,10 @@ class TestLinkDimension(unittest.TestCase):
     def test_write_linked_array_props(self):
         tickarray = self.block.create_data_array(
             "ticks3d", "array.dimension.ticks",
-            data=np.random.random((10, 5, 4))
+            data=np.random.random_sample((10, 5, 4))
         )
         tickarray.unit = "whatever"
-        ticks = np.cumsum(np.random.random(5))
+        ticks = np.cumsum(np.random.random_sample(5))
         tickarray[3, :, 1] = ticks
         tickarray.label = "DIMENSION LABEL"
         self.range_dim.link_data_array(tickarray, [3, -1, 1])
@@ -479,7 +479,7 @@ class TestLinkDimension(unittest.TestCase):
         assert "ticks" not in self.range_dim._h5group
 
         # replace with ticks
-        self.range_dim.ticks = np.cumsum(np.random.random(10))
+        self.range_dim.ticks = np.cumsum(np.random.random_sample(10))
         assert "link" not in self.range_dim._h5group
         assert "ticks" in self.range_dim._h5group
 

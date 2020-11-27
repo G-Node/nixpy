@@ -19,7 +19,7 @@ class TestDataView(unittest.TestCase):
         self.tmpdir = TempDir("dvtest")
         self.testfilename = os.path.join(self.tmpdir.path, "dvtest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
-        self.data = np.random.random((40, 80))
+        self.data = np.random.random_sample((40, 80))
         block = self.file.create_block("testblock", "nix.test.block")
         block.create_data_array("data", "nix.test.data", data=self.data)
 
@@ -76,21 +76,21 @@ class TestDataView(unittest.TestCase):
         npeq = np.testing.assert_almost_equal
 
         # straightforward slicing
-        ow = np.random.random((3, 4))
-        dv[0:3, 1:5] = ow
-        newdata[10:13, 21:25] = ow
+        rand_data = np.random.random_sample((3, 4))
+        dv[0:3, 1:5] = rand_data
+        newdata[10:13, 21:25] = rand_data
         npeq(da[:], newdata)
 
         # slicing with steps
-        ow = np.random.random((5, 3))
-        dv[0:20:4, 0:15:5] = ow
-        newdata[10:30:4, 20:35:5] = ow
+        rand_data = np.random.random_sample((5, 3))
+        dv[0:20:4, 0:15:5] = rand_data
+        newdata[10:30:4, 20:35:5] = rand_data
         npeq(da[:], newdata)
 
         # steps only
-        ow = np.random.random((5, 3))
-        dv[::4, ::5] = ow
-        newdata[10:30:4, 20:35:5] = ow
+        rand_data = np.random.random_sample((5, 3))
+        dv[::4, ::5] = rand_data
+        newdata[10:30:4, 20:35:5] = rand_data
         npeq(da[:], newdata)
 
         # plain index
@@ -104,21 +104,21 @@ class TestDataView(unittest.TestCase):
         npeq(da[:], newdata)
 
         # negative slice start
-        ow = np.random.random(3)
-        dv[-3::, 10] = ow
-        newdata[27:30, 30] = ow
+        rand_data = np.random.random_sample(3)
+        dv[-3::, 10] = rand_data
+        newdata[27:30, 30] = rand_data
         npeq(da[:], newdata)
 
         # negative slice stop
-        ow = np.random.random(15)
-        dv[:-5, 2] = ow
-        newdata[10:25, 22] = ow
+        rand_data = np.random.random_sample(15)
+        dv[:-5, 2] = rand_data
+        newdata[10:25, 22] = rand_data
         npeq(da[:], newdata)
 
         # negative slice start and stop
-        ow = np.random.random(10)
-        dv[10, -15:-5] = ow
-        newdata[20, 20:30] = ow
+        rand_data = np.random.random_sample(10)
+        dv[10, -15:-5] = rand_data
+        newdata[20, 20:30] = rand_data
         npeq(da[:], newdata)
 
     def test_data_view_oob(self):
@@ -136,29 +136,29 @@ class TestDataView(unittest.TestCase):
         dv = da.get_slice((5, 8), extents=(10, 20))
 
         with self.assertRaises(nix.exceptions.OutOfBounds):
-            dv[12, :]
+            _ = dv[12, :]
 
         with self.assertRaises(nix.exceptions.OutOfBounds):
-            dv[12, :]
+            _ = dv[12, :]
 
         with self.assertRaises(nix.exceptions.OutOfBounds):
-            dv[10]
+            _ = dv[10]
 
         with self.assertRaises(nix.exceptions.OutOfBounds):
-            dv[0, 20]
+            _ = dv[0, 20]
 
         with self.assertRaises(nix.exceptions.OutOfBounds):
-            dv[:, 25]
+            _ = dv[:, 25]
 
         with self.assertRaises(nix.exceptions.OutOfBounds):
-            dv[-11]
+            _ = dv[-11]
 
         with self.assertRaises(nix.exceptions.OutOfBounds):
-            dv[0, -21]
+            _ = dv[0, -21]
 
     def test_data_view_ellipsis(self):
         block = self.file.blocks[0]
-        data = np.random.random((10, 11, 12, 13, 14))
+        data = np.random.random_sample((10, 11, 12, 13, 14))
         da = block.create_data_array("data2", "nix.test.data", data=data)
 
         npeq = np.testing.assert_almost_equal

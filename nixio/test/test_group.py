@@ -24,12 +24,11 @@ class TestGroups(unittest.TestCase):
                                                      nix.DataType.Int16, (1, ))
         self.my_tag = self.block.create_tag("my tag", "test", [0.25])
         self.my_group = self.block.create_group("my group", "group")
-        self.my_multiTag = self.block.create_multi_tag("my_mt", "test",
-                                                       self.my_array)
+        self.my_multi_tag = self.block.create_multi_tag("my_mt", "test", self.my_array)
 
         self.my_group.data_arrays.append(self.my_array)
         self.my_group.tags.append(self.my_tag)
-        self.my_group.multi_tags.append(self.my_multiTag)
+        self.my_group.multi_tags.append(self.my_multi_tag)
 
         self.your_array = self.block.create_data_array("your array", "test",
                                                        nix.DataType.Int16,
@@ -43,96 +42,96 @@ class TestGroups(unittest.TestCase):
         self.tmpdir.cleanup()
 
     def test_group_eq(self):
-        assert(self.my_group == self.my_group)
-        assert(not self.my_group == self.your_group)
-        assert(self.my_group is not None)
+        assert self.my_group == self.my_group
+        assert not self.my_group == self.your_group
+        assert self.my_group is not None
 
     def test_group_id(self):
-        assert(self.my_group.id is not None)
+        assert self.my_group.id is not None
 
     def test_group_name(self):
-        assert(self.my_group.name is not None)
+        assert self.my_group.name is not None
 
     def test_group_type(self):
         def set_none():
             self.my_group.type = None
 
-        assert(self.my_group.type is not None)
+        assert self.my_group.type is not None
         self.assertRaises(Exception, set_none)
 
         self.my_group.type = "foo type"
-        assert(self.my_group.type == "foo type")
+        assert self.my_group.type == "foo type"
 
     def test_group_definition(self):
-        assert(self.my_group.definition is None)
+        assert self.my_group.definition is None
 
         self.my_group.definition = "definition"
-        assert(self.my_group.definition == "definition")
+        assert self.my_group.definition == "definition"
 
         self.my_group.definition = None
-        assert(self.my_group.definition is None)
+        assert self.my_group.definition is None
 
     def test_group_timestamps(self):
         created_at = self.my_group.created_at
-        assert(created_at > 0)
+        assert created_at > 0
 
         updated_at = self.my_group.updated_at
-        assert(updated_at > 0)
+        assert updated_at > 0
 
         self.my_group.force_created_at(1403530068)
-        assert(self.my_group.created_at == 1403530068)
+        assert self.my_group.created_at == 1403530068
 
     def test_group_data_arrays(self):
-        assert(len(self.my_group.data_arrays) == 1)
+        assert len(self.my_group.data_arrays) == 1
 
         self.assertRaises(TypeError, self.my_group.data_arrays.append, 100)
 
-        a1 = self.block.create_data_array("reference1", "stimuli",
-                                          nix.DataType.Int16, (1, ))
-        a2 = self.block.create_data_array("reference2", "stimuli",
-                                          nix.DataType.Int16, (1, ))
+        da1 = self.block.create_data_array("reference1", "stimuli",
+                                           nix.DataType.Int16, (1, ))
+        da2 = self.block.create_data_array("reference2", "stimuli",
+                                           nix.DataType.Int16, (1, ))
 
-        self.my_group.data_arrays.append(a1)
-        self.my_group.data_arrays.append(a2)
+        self.my_group.data_arrays.append(da1)
+        self.my_group.data_arrays.append(da2)
 
-        assert(len(self.my_group.data_arrays) == 3)
-        assert(a1 in self.my_group.data_arrays)
-        assert(a2 in self.my_group.data_arrays)
+        assert len(self.my_group.data_arrays) == 3
+        assert da1 in self.my_group.data_arrays
+        assert da2 in self.my_group.data_arrays
 
-        del self.my_group.data_arrays[a2]
-        assert(self.my_array in self.my_group.data_arrays)
-        assert(a1 in self.my_group.data_arrays)
+        del self.my_group.data_arrays[da2]
+        assert self.my_array in self.my_group.data_arrays
+        assert da1 in self.my_group.data_arrays
 
-        del self.my_group.data_arrays[a1]
-        assert(len(self.my_group.data_arrays) == 1)
+        del self.my_group.data_arrays[da1]
+        assert len(self.my_group.data_arrays) == 1
 
     def test_group_tags(self):
-        assert(len(self.my_group.tags) == 1)
+        assert len(self.my_group.tags) == 1
 
         self.assertRaises(TypeError, self.my_group.tags.append, 100)
 
-        t1 = self.block.create_tag("tag1", "stimuli", [1.0])
-        t2 = self.block.create_tag("tag2", "stimuli", [2.])
+        tag1 = self.block.create_tag("tag1", "stimuli", [1.0])
+        tag2 = self.block.create_tag("tag2", "stimuli", [2.])
 
-        self.my_group.tags.append(t1)
-        self.my_group.tags.append(t2)
+        self.my_group.tags.append(tag1)
+        self.my_group.tags.append(tag2)
 
-        assert(len(self.my_group.tags) == 3)
-        assert(t1 in self.my_group.tags)
-        assert(t2 in self.my_group.tags)
+        assert len(self.my_group.tags) == 3
+        assert tag1 in self.my_group.tags
+        assert tag2 in self.my_group.tags
 
-        del self.my_group.tags[t2]
-        assert(self.my_tag in self.my_group.tags)
-        assert(t1 in self.my_group.tags)
+        del self.my_group.tags[tag2]
+        assert self.my_tag in self.my_group.tags
+        assert tag1 in self.my_group.tags
 
-        del self.my_group.tags[t1]
-        assert(len(self.my_group.tags) == 1)
+        del self.my_group.tags[tag1]
+        assert len(self.my_group.tags) == 1
 
-        self.my_group.tags.extend([t1, t2])
-        assert(len(self.my_group.tags) == 3)
+        self.my_group.tags.extend([tag1, tag2])
+        assert len(self.my_group.tags) == 3
 
     def test_group_multi_tags(self):
-        assert(len(self.my_group.multi_tags) == 1)
+        assert len(self.my_group.multi_tags) == 1
 
         self.assertRaises(TypeError, self.my_group.multi_tags.append, 100)
 
@@ -142,19 +141,19 @@ class TestGroups(unittest.TestCase):
         self.my_group.multi_tags.append(mt1)
         self.my_group.multi_tags.append(mt2)
 
-        assert(len(self.my_group.multi_tags) == 3)
-        assert(mt1 in self.my_group.multi_tags)
-        assert(mt2 in self.my_group.multi_tags)
+        assert len(self.my_group.multi_tags) == 3
+        assert mt1 in self.my_group.multi_tags
+        assert mt2 in self.my_group.multi_tags
 
         del self.my_group.multi_tags[mt2]
-        assert(self.my_multiTag in self.my_group.multi_tags)
-        assert(mt1 in self.my_group.multi_tags)
+        assert self.my_multi_tag in self.my_group.multi_tags
+        assert mt1 in self.my_group.multi_tags
 
         del self.my_group.multi_tags[mt1]
-        assert(len(self.my_group.multi_tags) == 1)
+        assert len(self.my_group.multi_tags) == 1
 
         self.my_group.multi_tags.extend([mt1, mt2])
-        assert(len(self.my_group.multi_tags) == 3)
+        assert len(self.my_group.multi_tags) == 3
 
     def test_group_get_by_name(self):
         for idx in range(3):
@@ -165,12 +164,12 @@ class TestGroups(unittest.TestCase):
             mt = self.block.create_multi_tag("mt"+str(idx), "mt",
                                              da)
             self.my_group.multi_tags.append(mt)
-            tg = self.block.create_tag("tg"+str(idx), "tg", [0.3, 0.6])
-            self.my_group.tags.append(tg)
+            tag = self.block.create_tag("tg"+str(idx), "tg", [0.3, 0.6])
+            self.my_group.tags.append(tag)
 
         da_names = [da.name for da in self.my_group.data_arrays]
         mt_names = [mt.name for mt in self.my_group.multi_tags]
-        tg_names = [tg.name for tg in self.my_group.tags]
+        tg_names = [tag.name for tag in self.my_group.tags]
 
         for name in da_names:
             assert(self.block.data_arrays[name].id ==
@@ -179,18 +178,18 @@ class TestGroups(unittest.TestCase):
             assert(self.block.multi_tags[name].id ==
                    self.my_group.multi_tags[name].id)
         for name in tg_names:
-            assert(self.block.tags[name].id == self.my_group.tags[name].id)
+            assert self.block.tags[name].id == self.my_group.tags[name].id
 
     def test_group_invalid_add(self):
         da = self.block.data_arrays[0]
         mt = self.block.multi_tags[0]
-        tg = self.block.tags[0]
+        tag = self.block.tags[0]
 
         newblock = self.file.create_block("second block", "block")
         newgroup = newblock.create_group("second block group", "group")
 
         self.assertRaises(RuntimeError, newgroup.data_arrays.append, da)
         self.assertRaises(RuntimeError, newgroup.multi_tags.append, mt)
-        self.assertRaises(RuntimeError, newgroup.tags.append, tg)
+        self.assertRaises(RuntimeError, newgroup.tags.append, tag)
 
         del self.file.blocks[newblock.id]

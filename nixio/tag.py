@@ -36,12 +36,12 @@ class FeatureContainer(Container):
     def __getitem__(self, item):
         try:
             return Container.__getitem__(self, item)
-        except KeyError as ke:
+        except KeyError as exc:
             # item might be the ID of the referenced data; try it as well
             for feat in self:
                 if feat.data.id == item or feat.data.name == item:
                     return feat
-            raise ke
+            raise exc
 
     def __contains__(self, item):
         if isinstance(item, Feature):
@@ -84,10 +84,10 @@ class BaseTag(Entity):
                 del self._h5group["units"]
         else:
             sanitized = []
-            for u in units:
-                util.check_attr_type(u, str)
-                u = util.units.sanitizer(u)
-                sanitized.append(u)
+            for unit in units:
+                util.check_attr_type(unit, str)
+                unit = util.units.sanitizer(unit)
+                sanitized.append(unit)
 
             dtype = DataType.String
             self._h5group.write_data("units", sanitized, dtype)
@@ -167,7 +167,6 @@ class BaseTag(Entity):
             index = dim.index_of(pos * scaling)
 
         return int(index)
-
 
     @property
     def features(self):
@@ -315,9 +314,9 @@ class Tag(BaseTag):
             feat = self.features[featidx]
         except KeyError:
             feat = None
-            for f in self.features:
-                if f.data.name == featidx or f.data.id == featidx:
-                    feat = f
+            for feature in self.features:
+                if feature.data.name == featidx or feature.data.id == featidx:
+                    feat = feature
                     break
             if feat is None:
                 raise

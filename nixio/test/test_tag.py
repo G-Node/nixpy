@@ -65,8 +65,8 @@ class TestTags(unittest.TestCase):
         tag1d.references.extend([da1d, da2d, da3d])
         assert list(tag1d.references) == [da1d, da2d, da3d]
         ref1 = tag1d.tagged_data(1)  # 1d tag to 2d data
-        for (y, z) in zip(ref1[:].flatten(), da2d[1:3, :].flatten()):
-            assert y == z
+        for (ref_val, da_val) in zip(ref1[:].flatten(), da2d[1:3, :].flatten()):
+            assert ref_val == da_val
         tag2d.extent = [1, 2]
         tag2d.references.extend([da1d, da2d, da3d])
         tag2d.tagged_data(0)  # 2d tag to 1d data
@@ -244,7 +244,7 @@ class TestTags(unittest.TestCase):
         pos = [0.0, 2.0, 3.4]
         ext = [0.0, 6.0, 2.3]
         units = ["none", "ms", "ms"]
-        data = np.random.random((2, 10, 5))
+        data = np.random.random_sample((2, 10, 5))
         da = self.block.create_data_array("dimtest", "test",
                                           data=data)
         setdim = da.append_set_dimension()

@@ -75,9 +75,8 @@ class TestContainer(unittest.TestCase):
 
     def test_file_references(self):
         # add some sources
-        self.source = self.block.create_source("test source", "containertest")
-        self.child_source = self.source.create_source("test source 2",
-                                                      "containertest")
+        source = self.block.create_source("test source", "containertest")
+        child_source = source.create_source("test source 2", "containertest")
         # using assertIs since the reference should be the same instance as
         # the original
 
@@ -88,8 +87,8 @@ class TestContainer(unittest.TestCase):
         self.assertIs(self.tag.file, self.file)
         self.assertIs(self.multi_tag.file, self.file)
         self.assertIs(self.positions.file, self.file)
-        self.assertIs(self.source.file, self.file)
-        self.assertIs(self.child_source.file, self.file)
+        self.assertIs(source.file, self.file)
+        self.assertIs(child_source.file, self.file)
 
         # instantiated through container getters
         blk = self.file.blocks[0]
@@ -108,9 +107,8 @@ class TestContainer(unittest.TestCase):
 
     def test_parent_references(self):
         # add some sources
-        self.source = self.block.create_source("test source", "containertest")
-        self.child_source = self.source.create_source("test source 2",
-                                                      "containertest")
+        source = self.block.create_source("test source", "containertest")
+        child_source = source.create_source("test source 2", "containertest")
 
         self.assertEqual(self.block._parent, self.file)
         self.assertEqual(self.group._parent, self.block)
@@ -118,8 +116,8 @@ class TestContainer(unittest.TestCase):
         self.assertEqual(self.tag._parent, self.block)
         self.assertEqual(self.multi_tag._parent, self.block)
         self.assertEqual(self.positions._parent, self.block)
-        self.assertEqual(self.source._parent, self.block)
-        self.assertEqual(self.child_source._parent, self.source)
+        self.assertEqual(source._parent, self.block)
+        self.assertEqual(child_source._parent, source)
 
     def test_link_parent_references(self):
         self.assertEqual(self.group.data_arrays[0]._parent, self.block)
@@ -148,13 +146,13 @@ class TestContainer(unittest.TestCase):
 
         # check counts
         self.assertEqual(len(nf.blocks), 2)
-        for bl in nf.blocks:
-            self.assertEqual(len(bl.groups), 2)
-            self.assertEqual(len(bl.data_arrays), 4)
-            self.assertEqual(len(bl.tags), 4)
-            for g in bl.groups:
-                self.assertEqual(len(g.data_arrays), 2)
-                self.assertEqual(len(g.tags), 2)
+        for blk in nf.blocks:
+            self.assertEqual(len(blk.groups), 2)
+            self.assertEqual(len(blk.data_arrays), 4)
+            self.assertEqual(len(blk.tags), 4)
+            for grp in blk.groups:
+                self.assertEqual(len(grp.data_arrays), 2)
+                self.assertEqual(len(grp.tags), 2)
 
         # cross-block append
         with self.assertRaises(RuntimeError):
@@ -181,17 +179,17 @@ class TestContainer(unittest.TestCase):
             )
 
         # let's do sources
-        for bl in nf.blocks:
+        for blk in nf.blocks:
             for sourcename in ["a", "b"]:
-                src = bl.create_source(bl.name + sourcename, "source")
+                src = blk.create_source(blk.name + sourcename, "source")
                 for chsourcename in ["a", "b", "c"]:
-                    src.create_source(bl.name + sourcename + chsourcename,
+                    src.create_source(blk.name + sourcename + chsourcename,
                                       "source")
 
         # check counts
-        for bl in nf.blocks:
-            self.assertEqual(len(bl.sources), 2)
-            for src in bl.sources:
+        for blk in nf.blocks:
+            self.assertEqual(len(blk.sources), 2)
+            for src in blk.sources:
                 self.assertEqual(len(src.sources), 3)
 
         # cross-block source append
@@ -213,15 +211,15 @@ class TestContainer(unittest.TestCase):
 
         # bad membership test
         with self.assertRaises(TypeError):
-            nf.blocks[1].data_arrays[1] in nf.blocks[0].tags
+            _ = nf.blocks[1].data_arrays[1] in nf.blocks[0].tags
 
         # another
         with self.assertRaises(TypeError):
-            nf.blocks[1].data_arrays[1] in nf.blocks[0].groups[0]
+            _ = nf.blocks[1].data_arrays[1] in nf.blocks[0].groups[0]
 
         # bad membership test on LinkContainer
         with self.assertRaises(TypeError):
-            nf.blocks[1].data_arrays[1] in nf.blocks[0].groups[0].tags
+            _ = nf.blocks[1].data_arrays[1] in nf.blocks[0].groups[0].tags
 
     def test_delete_links_da(self):
         # delete DataArray from Block and check Group
@@ -270,7 +268,7 @@ class TestContainer(unittest.TestCase):
         self.assertEqual(mtag.positions, pos)
         del self.block.data_arrays[posname]
         with self.assertRaises(RuntimeError):
-            mtag.positions
+            _ = mtag.positions
         # ext still here
         self.assertEqual(mtag.extents, ext)
         # delete ext and check extents
@@ -471,7 +469,7 @@ class TestContainer(unittest.TestCase):
             self.assertNotIn(dataname, tag.features)
 
         with self.assertRaises(RuntimeError):
-            tag.features[dataname].data
+            _ = tag.features[dataname].data
 
     def test_delete_links_section_link(self):
         parsec = self.file.create_section("TopDog", "Root Section")
