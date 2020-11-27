@@ -227,8 +227,7 @@ class Block(Entity):
         if copy_from:
             if not isinstance(copy_from, DataArray):
                 raise TypeError("Object to be copied is not a DataArray")
-            objid = self._copy_objects(copy_from, "data_arrays",
-                                    keep_copy_id, name)
+            objid = self._copy_objects(copy_from, "data_arrays", keep_copy_id, name)
             return self.data_arrays[objid]
 
         if data is None:
