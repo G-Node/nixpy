@@ -41,7 +41,7 @@ matrix:
             - cppunit
             - hdf5
             - numpy
-          update: true
+          update: false
     - language: generic
       os: osx
       env: pymajor=3
@@ -53,7 +53,7 @@ matrix:
             - cppunit
             - hdf5
             - numpy
-          update: true
+          update: false
   allow_failures:
     - env: pymajor=3 compat=1
 
