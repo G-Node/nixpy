@@ -481,6 +481,39 @@ class TestMultiTags(unittest.TestCase):
         segtag.extents = wrong_ext
         self.assertRaises(IndexError, segtag.tagged_data, 0, 1)
 
+    def test_multi_tag_data_coefficients(self):
+        sample_iv = 0.001
+        x_data = np.arange(0, 10, sample_iv)
+        y_data = np.sin(2 * np.pi * x_data)
+
+        block = self.block
+        da = block.create_data_array("sin", "data", data=y_data)
+        da.unit = 'V'
+        da.polynom_coefficients = (10, 0.3)
+        dim = da.append_sampled_dimension(sample_iv)
+        dim.unit = 's'
+
+        pos = block.create_data_array('pos1', 'positions',
+                                      data=np.array([0.]).reshape(1, 1))
+        pos.append_set_dimension()
+        pos.append_set_dimension()
+        pos.unit = 'ms'
+        ext = block.create_data_array('ext1', 'extents',
+                                      data=np.array([2000.]).reshape(1, 1))
+        ext.append_set_dimension()
+        ext.append_set_dimension()
+        ext.unit = 'ms'
+
+        mtag = block.create_multi_tag("sin1", "tag", pos)
+        mtag.extents = ext
+        mtag.units = ['ms']
+        mtag.references.append(da)
+
+        assert np.array_equal(da[:2001], mtag.tagged_data(0, 0)[:])
+
+        da.expansion_origin = 0.89
+        assert np.array_equal(da[:2001], mtag.tagged_data(0, 0)[:])
+
     def test_multi_tag_tagged_data_1d(self):
         # MultiTags to vectors behave a bit differently
         # Testing separately
