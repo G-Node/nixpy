@@ -531,6 +531,19 @@ class TestDataArray(unittest.TestCase):
         array.unit = "Ms"
         self.assertEqual(datime, array.updated_at)
 
+    def test_data_deletion(self):
+        data = [42.1337, 720.3, 190.0009]
+        array = self.block.create_data_array("del.test", "test", data=data)
+        np.testing.assert_almost_equal(data, array[:])
+
+        array[:] = None
+        np.testing.assert_almost_equal([np.nan]*len(data), array[:])
+
+        nda = len(self.block.data_arrays)
+        del self.block.data_arrays["del.test"]
+        assert len(self.block.data_arrays) == nda-1
+        assert "del.test" not in self.block.data_arrays
+
     def test_single_value_retrieval(self):
         assert self.array[1].shape == (1,)
         self.array.expansion_origin = 0.3
