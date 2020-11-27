@@ -522,3 +522,23 @@ class TestDataArray(unittest.TestCase):
         time.sleep(1)
         array.unit = "Ms"
         self.assertEqual(datime, array.updated_at)
+
+    def test_single_value_retrieval(self):
+        assert self.array[1].shape == (1,)
+        self.array.expansion_origin = 0.3
+        assert self.array[1].shape == (1,)
+        self.array.expansion_origin = None
+
+        assert self.array[1].shape == (1,)
+        self.array.polynom_coefficients = (1.2, 3.4)
+        assert self.array[1].shape == (1,)
+        self.array.polynom_coefficients = None
+
+        assert self.array[1].shape == (1,)
+        self.array.expansion_origin = 0.9
+        self.array.polynom_coefficients = (1.2, 3.4)
+        assert self.array[1].shape == (1,)
+        self.array.expansion_origin = None
+        self.array.polynom_coefficients = None
+
+        assert self.array[1].shape == (1,)
