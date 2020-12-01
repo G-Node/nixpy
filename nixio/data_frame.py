@@ -139,19 +139,16 @@ class DataFrame(Entity, DataSet):
         else:
             slc = np.s_[slc]
         if len(name) == 1:
-            get_col = self._read_data(slc=slc)[name]
-            get_col = [i[0] for i in get_col]
-            return np.array(get_col)
+            return self._read_data(slc=slc)[name[0]]
         if group_by_cols:
-            gcol = []
+            gcol = list()
             for col_name in name:
-                get_col = self._read_data(slc=slc)[col_name]
-                get_col = [i for i in get_col]
-                gcol.append(get_col)
+                data = self._read_data(slc=slc)[col_name]
+                data = [i for i in data]
+                gcol.append(data)
             return np.array(gcol)
-        else:
-            get_col = self._read_data(slc=slc)[name]
-            return get_col
+
+        return self._read_data(slc=slc)[name]
 
     def write_rows(self, rows, index):
         """
@@ -191,10 +188,7 @@ class DataFrame(Entity, DataSet):
         :param index: Index of row(s) to be returned
         :type index: list of int
         """
-        if isinstance(index, Iterable):
-            index = list(index)
-        get_row = self._read_data(slc=(index,))
-        return get_row
+        return self[index]
 
     def write_cell(self, cell, position=None, col_name=None, row_idx=None):
         """

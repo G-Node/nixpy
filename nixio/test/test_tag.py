@@ -360,14 +360,10 @@ class TestTags(unittest.TestCase):
             col_dict=OrderedDict([("number", nix.DataType.Float)]),
             data=[(n,) for n in numberdata]
         )
-        column_descriptions = OrderedDict([("name", nix.DataType.String),
-                                           ("duration", nix.DataType.Double)])
-        values = [("One", 0.1), ("Two", 0.2), ("Three", 0.3), ("Four", 0.4),
-                  ("Five", 0.5), ("Six", 0.6), ("Seven", 0.7), ("Eight", 0.8),
-                  ("Nine", 0.9), ("Ten", 1.0)]
-        ramp_feat = self.block.create_data_frame("ramp feature", "test",
-                                                 col_dict=column_descriptions,
-                                                 data=values)
+        column_descriptions = OrderedDict([("name", nix.DataType.String), ("duration", nix.DataType.Double)])
+        values = [("One", 0.1), ("Two", 0.2), ("Three", 0.3), ("Four", 0.4), ("Five", 0.5),
+                  ("Six", 0.6), ("Seven", 0.7), ("Eight", 0.8), ("Nine", 0.9), ("Ten", 1.0)]
+        ramp_feat = self.block.create_data_frame("ramp feature", "test", col_dict=column_descriptions, data=values)
         ramp_feat.label = "voltage"
         ramp_feat.units = (None, "s")
 

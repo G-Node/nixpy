@@ -330,12 +330,7 @@ class Property(Entity):
 
     @property
     def data_type(self):
-        dtype = self._h5dataset.dtype
-
-        if dtype == util.vlen_str_dtype:
-            return DataType.String
-
-        return dtype
+        return self._h5dataset.dtype
 
     def delete_values(self):
         self._h5dataset.shape = (0,)

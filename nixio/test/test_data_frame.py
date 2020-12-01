@@ -16,24 +16,28 @@ import sys
 class TestDataFrame(unittest.TestCase):
 
     def setUp(self):
-
         self.tmpdir = TempDir("dataframetest")
         self.testfilename = os.path.join(self.tmpdir.path, "dataframetest.nix")
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
-        col_dict = OrderedDict([('name', np.int64), ('id', str), ('time', float),
-                                ('sig1', np.float64), ('sig2', np.int32)])
-        arr = [(1, "a", 20.18, 5.0, 100), (2, 'b', 20.09, 5.5, 101),
-               (2, 'c', 20.05, 5.1, 100), (1, "d", 20.15, 5.3, 150),
-               (2, 'e', 20.23, 5.7, 200), (2, 'f', 20.07, 5.2, 300),
-               (1, "g", 20.12, 5.1, 39), (1, "h", 20.27, 5.1, 600),
-               (2, 'i', 20.15, 5.6, 400), (2, 'j', 20.08, 5.1, 200)]
+        self.df1_dtype = OrderedDict([('name', np.int64), ('id', str), ('time', float),
+                                      ('sig1', np.float64), ('sig2', np.int32)])
+        self.df1_data = [(1, "alpha", 20.18, 5.0, 100),
+                         (2, "beta", 20.09, 5.5, 101),
+                         (2, "gamma", 20.05, 5.1, 100),
+                         (1, "delta", 20.15, 5.3, 150),
+                         (2, "epsilon", 20.23, 5.7, 200),
+                         (2, "fi", 20.07, 5.2, 300),
+                         (1, "zeta", 20.12, 5.1,  39),
+                         (1, "eta", 20.27, 5.1, 600),
+                         (2, "theta", 20.15, 5.6, 400),
+                         (2, "iota", 20.08, 5.1, 200)]
         other_arr = np.arange(11101, 11200).reshape((33, 3))
         other_di = OrderedDict({'name': np.int64, 'id': int, 'time': float})
         self.df1 = self.block.create_data_frame("test df", "signal1",
-                                                data=arr, col_dict=col_dict)
+                                                data=self.df1_data, col_dict=self.df1_dtype)
         self.df2 = self.block.create_data_frame("other df", "signal2",
-                                                data=arr, col_dict=col_dict)
+                                                data=self.df1_data, col_dict=self.df1_dtype)
         self.df3 = self.block.create_data_frame("reference df", "signal3",
                                                 data=other_arr,
                                                 col_dict=other_di)
@@ -61,7 +65,7 @@ class TestDataFrame(unittest.TestCase):
         assert df_li.column_names == self.df1.column_names
         assert df_li.dtype == self.df1.dtype
         for i in df_li[:]:
-            self.assertIsInstance(i['id'], (bytes, string_types))
+            self.assertIsInstance(i['id'], string_types)
             self.assertIsInstance(i['sig2'], np.int32)
 
     def test_column_name_collision(self):
@@ -83,9 +87,9 @@ class TestDataFrame(unittest.TestCase):
     def test_write_row(self):
         # test write single row
         row = ["1", 'abc', 3, 4.4556356242341, 5.1111111]
-        assert list(self.df1[9]) == [2, b'j', 20.08, 5.1, 200]
+        assert list(self.df1[9]) == [2, 'iota', 20.08, 5.1, 200]
         self.df1.write_rows([row], [9])
-        assert list(self.df1[9]) == [1, b'abc', 3., 4.4556356242341, 5]
+        assert list(self.df1[9]) == [1, 'abc', 3., 4.4556356242341, 5]
         self.assertIsInstance(self.df1[9]['name'],  np.integer)
         self.assertIsInstance(self.df1[9]['sig2'],  np.int32)
         assert self.df1[9]['sig2'] == int(5)
@@ -93,8 +97,8 @@ class TestDataFrame(unittest.TestCase):
         multi_rows = [[1775, '12355', 1777, 1778, 1779],
                       [1785, '12355', 1787, 1788, 1789]]
         self.df1.write_rows(multi_rows, [1, 2])
-        assert list(self.df1[1]) == [1775, b'12355', 1777, 1778, 1779]
-        assert list(self.df1[2]) == [1785, b'12355', 1787, 1788, 1789]
+        assert list(self.df1[1]) == [1775, '12355', 1777, 1778, 1779]
+        assert list(self.df1[2]) == [1785, '12355', 1787, 1788, 1789]
 
     def test_write_column(self):
         # write by name
@@ -108,23 +112,51 @@ class TestDataFrame(unittest.TestCase):
         assert list(self.df1[:]['sig2']) == list(column2)
 
     def test_read_row(self):
+        df1_array = np.array(self.df1_data, dtype=list(self.df1_dtype.items()))
         # read single row
-        assert list(self.df1.read_rows(0)) == [1, b'a', 20.18, 5.0, 100]
+        assert self.df1.read_rows(0) == df1_array[0]
         # read multiple
         multi_rows = self.df1.read_rows(np.arange(4, 9))
-        np.testing.assert_array_equal(multi_rows, self.df1[4:9])
+        np.testing.assert_array_equal(multi_rows, df1_array[4:9])
+        multi_rows = self.df1.read_rows([3, 6])
+        np.testing.assert_array_equal(multi_rows, [df1_array[3], df1_array[6]])
 
     def test_read_column(self):
-        # read single columns by index
-        single_col = self.df1.read_columns(index=[1])
-        data = np.array(['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'], dtype=bytes)
-        np.testing.assert_array_equal(single_col, data)
+        # read single column by index
+        single_idx_col = self.df1.read_columns(index=[1])
+        data = np.array([row[1] for row in self.df1_data], dtype=nix.DataType.String)
+        np.testing.assert_array_equal(single_idx_col, data)
+
         # read multiple columns by name
         multi_col = self.df1.read_columns(name=['sig1', 'sig2'])
+        data = [(row[3], row[4]) for row in self.df1_data]
         assert len(multi_col) == 10
+        for data_row, df_row in zip(data, multi_col):
+            assert data_row == tuple(df_row)
+
         # read columns with slices
-        sl_col = self.df1.read_columns(name=['sig1', 'sig2'], slc=slice(0, 10))
-        assert len(sl_col) == 10
+        slice_cols = self.df1.read_columns(name=['sig1', 'sig2'], slc=slice(0, 6))
+        data = [(row[3], row[4]) for row in self.df1_data[:6]]
+        assert len(slice_cols) == 6
+        for data_row, df_row in zip(data, slice_cols):
+            assert data_row == tuple(df_row)
+
+        # read single column by name
+        single_idx_col = self.df1.read_columns(name=["sig2"])
+        data = np.array([100, 101, 100, 150, 200, 300, 39, 600, 400, 200], dtype=nix.DataType.Int32)
+        np.testing.assert_array_equal(single_idx_col, data)
+
+        # Read multiple columns where one is string
+        slice_str_cols = self.df1.read_columns(name=['id', 'sig2'], slc=slice(3, 10))
+        data = [(row[1], row[4]) for row in self.df1_data[3:10]]
+        assert len(slice_str_cols) == 7
+        for data_row, df_row in zip(data, slice_str_cols):
+            assert data_row == tuple(df_row)
+
+    def test_index_column_by_name(self):
+        for colidx, colname in enumerate(self.df1_dtype.keys()):
+            expdata = [row[colidx] for row in self.df1_data]
+            assert all(self.df1[colname] == expdata)
 
     def test_read_cell(self):
         # read cell by position
@@ -132,7 +164,7 @@ class TestDataFrame(unittest.TestCase):
         assert scell == 5.2
         # read cell by row_idx + col_name
         crcell = self.df1.read_cell(col_name=['id'], row_idx=9)
-        assert crcell == b'j'
+        assert crcell == 'iota'
         # test error raise if only one param given
         self.assertRaises(ValueError, self.df1.read_cell, row_idx=10)
         self.assertRaises(ValueError, self.df1.read_cell, col_name='sig1')
@@ -143,7 +175,7 @@ class TestDataFrame(unittest.TestCase):
         assert self.df1[8]['sig1'] == 105
         # write cell by rowid colname
         self.df1.write_cell('test', col_name='id', row_idx=3)
-        assert self.df1[3]['id'] == b'test'
+        assert self.df1[3]['id'] == 'test'
         # test error raise
         self.assertRaises(ValueError, self.df1.write_cell, 11, col_name='sig1')
 
@@ -166,13 +198,13 @@ class TestDataFrame(unittest.TestCase):
 
     def test_append_rows(self):
         # append single row
-        srow = [1, b"test", 3, 4, 5]
+        srow = (1, "test", 3, 4, 5)
         self.df1.append_rows([srow])
-        assert list(self.df1[10]) == srow
+        assert self.df1[10] == np.array(srow, dtype=list(self.df1_dtype.items()))
         # append multi-rows
-        mrows = [[1, "2", 3, 4, 5], [6, "testing", 8, 9, 10]]
+        mrows = [(1, "2", 3, 4, 5), (6, "testing", 8, 9, 10)]
         self.df1.append_rows(mrows)
-        assert [list(i) for i in self.df1[-2:]] == [[1, b'2', 3., 4., 5], [6, b'testing', 8., 9., 10]]
+        assert all(self.df1[-2:] == np.array(mrows, dtype=list(self.df1_dtype.items())))
         # append row with incorrect length
         errrow = [5, 6, 7, 8]
         self.assertRaises(ValueError, self.df1.append_rows, [errrow])
@@ -199,7 +231,7 @@ class TestDataFrame(unittest.TestCase):
         assert self.df1.dtype[0] != self.df1.dtype[4]
         assert self.df1.dtype[2] == self.df1.dtype[3]
 
-    def test_creation_without_name(self):
+    def test_create_without_dtypes(self):
         data = np.array([("a", 1, 2.2), ("b", 2, 3.3), ("c", 3, 4.4)],
                         dtype=[('name', 'U10'), ("id", 'i4'), ('val', 'f4')])
         df = self.block.create_data_frame("without_name", "test", data=data)

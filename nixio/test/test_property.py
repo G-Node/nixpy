@@ -8,7 +8,6 @@
 # LICENSE file in the root of the Project.
 import os
 import unittest
-import six
 import nixio as nix
 from .tmp import TempDir
 
@@ -200,5 +199,4 @@ class TestProperties(unittest.TestCase):
 
         # read them back
         for name, value in unistrings.items():
-            value = [six.ensure_text(v) for v in value]  # py2compat
             assert tuple(value) == sec.props[name].values
