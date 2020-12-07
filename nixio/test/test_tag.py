@@ -286,6 +286,72 @@ class TestTags(unittest.TestCase):
         assert len(segdata.shape) == 3
         assert segdata.shape == (1, 7, 2)
 
+    def test_tag_tagged_data_slice_mode(self):
+        data = np.random.random_sample((3, 100, 10))
+        da = self.block.create_data_array("signals", "test.signals", data=data)
+        da.unit = "mV"
+        da.append_set_dimension(labels=["A", "B", "C"])
+        sample_iv = 0.001
+        timedim = da.append_sampled_dimension(sampling_interval=sample_iv)
+        timedim.unit = "s"
+        posdim = da.append_range_dimension([1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9])
+        posdim.unit = "mm"
+
+        # exact_tag has a pos+ext that is exactly equal to a dimension tick
+        exact_tag = self.block.create_tag("tickpoint", "test.tag", position=[0, 0.03, 0.0011])
+        exact_tag.extent = [0, 0.02, 0.0005]
+        exact_tag.units = ["none", "s", "m"]
+
+        exact_tag.references.append(da)
+
+        # dim2: [0.001, 0.002, ..., 0.03, 0.031, ..., 0.049, 0.05, 0.051, ...]
+        #                           ^ pos [30]               ^ pos+ext [50]
+        # Inclusive mode includes index 50, exclusive does not
+        #
+        # dim3: [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9]
+        #             ^ pos [1]                ^ pos+ext [6]
+        # Inclusive mode includes index 6, exclusive does not
+
+        slice_default = exact_tag.tagged_data(0)
+        assert slice_default.shape == (1, 20, 5)
+        np.testing.assert_array_equal(slice_default, da[0:1, 30:50, 1:6])  # default exclusive
+
+        slice_inclusive = exact_tag.tagged_data(0, stop_rule=nix.SliceMode.Inclusive)
+        assert slice_inclusive.shape == (1, 21, 6)
+        np.testing.assert_array_equal(slice_inclusive, da[0:1, 30:51, 1:7])
+
+        slice_exclusive = exact_tag.tagged_data(0, stop_rule=nix.SliceMode.Exclusive)
+        assert slice_exclusive.shape == (1, 20, 5)
+        np.testing.assert_array_equal(slice_exclusive, da[0:1, 30:50, 1:6])
+
+        # midpoint_tag has a pos+ext that falls between dimension ticks
+        midpoint_tag = self.block.create_tag("midpoint", "test.tag", position=[0, 0.03, 0.0011])
+        midpoint_tag.extent = [0, 0.0301, 0.00051]  # .1 offset
+        midpoint_tag.units = ["none", "s", "m"]
+
+        # dim2: [0.001, 0.002, ..., 0.03, 0.031, ..., 0.059, 0.06,|   0.061, ...]
+        #                           ^ pos [30]                    ^ pos+ext [60] + 0.1
+        # Both inclusive and exclusive include index 60
+        #
+        # dim3: [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6,|   1.7, 1.8, 1.9]
+        #             ^ pos [1]                    ^ pos+ext [6] + 0.1
+        # Both inclusive and exclusive include index 6
+
+        midpoint_tag.references.append(da)
+
+        # all slicing is inclusive since the pos+ext points are between ticks
+        slice_default = midpoint_tag.tagged_data(0)
+        assert slice_default.shape == (1, 31, 6)
+        np.testing.assert_array_equal(slice_default, da[0:1, 30:61, 1:7])
+
+        slice_inclusive = midpoint_tag.tagged_data(0, stop_rule=nix.SliceMode.Inclusive)
+        assert slice_inclusive.shape == (1, 31, 6)
+        np.testing.assert_array_equal(slice_inclusive, da[0:1, 30:61, 1:7])
+
+        slice_exclusive = midpoint_tag.tagged_data(0, stop_rule=nix.SliceMode.Exclusive)
+        assert slice_exclusive.shape == (1, 31, 6)
+        np.testing.assert_array_equal(slice_exclusive, da[0:1, 30:61, 1:7])
+
     def test_tag_feature_data(self):
         number_data = np.random.random(20)
         number_feat = self.block.create_data_array("number feature", "test",
