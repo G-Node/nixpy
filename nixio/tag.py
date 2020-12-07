@@ -126,7 +126,7 @@ class BaseTag(Entity):
         return np.all(np.less_equal(stops, dasize))
 
     @staticmethod
-    def _pos_to_idx(pos, unit, dim):
+    def _pos_to_idx(pos, unit, dim, stop_rule):
         dimtype = dim.dimension_type
         if dimtype == DimensionType.Set:
             dimunit = None
@@ -148,19 +148,20 @@ class BaseTag(Entity):
                         "Cannot apply a position with unit to a SetDimension",
                         "Tag._pos_to_idx"
                     )
-
-            index = dim.index_of(pos * scaling)
+            index = dim.index_of(pos * scaling, stop_rule == SliceMode.Inclusive)
         elif dimtype == DimensionType.Set:
             if unit and unit != "none":
                 raise IncompatibleDimensions(
                     "Cannot apply a position with unit to a SetDimension",
                     "Tag._pos_to_idx"
                 )
-            index = np.round(pos)
+            index = int(pos)  # floor it
+            if stop_rule == SliceMode.Exclusive and index == pos:
+                # pos falls on an index which should be excluded
+                index -= 1
             nlabels = len(dim.labels)
             if nlabels and index > nlabels:
-                raise OutOfBounds("Position is out of bounds in SetDimension",
-                                  pos)
+                raise OutOfBounds("Position is out of bounds in SetDimension", pos)
         else:  # dimtype == DimensionType.Range:
             if dimunit and unit is not None:
                 try:
@@ -170,7 +171,7 @@ class BaseTag(Entity):
                         "Provided units are not scalable!",
                         "Tag._pos_to_idx"
                     )
-            index = dim.index_of(pos * scaling)
+            index = dim.index_of(pos * scaling, stop_rule == SliceMode.Inclusive)
 
         return int(index)
 
@@ -240,7 +241,7 @@ class Tag(BaseTag):
         if self.file.auto_update_timestamps:
             self.force_updated_at()
 
-    def _calc_data_slices(self, data):
+    def _calc_data_slices(self, data, stop_rule):
         refslice = list()
         position = self.position
         extent = self.extent
@@ -266,12 +267,14 @@ class Tag(BaseTag):
                 unit = self.units[idx]
             else:
                 unit = None
-            start = self._pos_to_idx(pos, unit, dim)
+            # Start is always inclusive
+            start = self._pos_to_idx(pos, unit, dim, SliceMode.Inclusive)
             stop = 0
             if idx < len(extent):
                 ext = extent[idx]
-                stop = self._pos_to_idx(pos + ext, unit, dim) + 1
+                stop = self._pos_to_idx(pos + ext, unit, dim, stop_rule)
             if stop == 0:
+                # always return at least one element per dimension
                 stop = start + 1
             refslice.append(slice(start, stop))
         return tuple(refslice)
@@ -282,7 +285,7 @@ class Tag(BaseTag):
         warnings.warn(msg, category=DeprecationWarning)
         return self.tagged_data(refidx)
 
-    def tagged_data(self, refidx):
+    def tagged_data(self, refidx, stop_rule=SliceMode.Exclusive):
         references = self.references
         position = self.position
         extent = self.extent
@@ -298,7 +301,7 @@ class Tag(BaseTag):
                 "Number of dimensions in position and extent "
                 "do not match ", extent)
 
-        slices = self._calc_data_slices(ref)
+        slices = self._calc_data_slices(ref, stop_rule)
         if not self._slices_in_data(ref, slices):
             raise OutOfBounds("References data slice out of the extent of the "
                               "DataArray!")
@@ -310,7 +313,7 @@ class Tag(BaseTag):
         warnings.warn(msg, category=DeprecationWarning)
         return self.feature_data(featidx)
 
-    def feature_data(self, featidx):
+    def feature_data(self, featidx, stop_rule=SliceMode.Exclusive):
         if len(self.features) == 0:
             raise OutOfBounds("There are no features associated with this tag!")
 
@@ -328,7 +331,7 @@ class Tag(BaseTag):
         if data is None:
             raise UninitializedEntity()
         if feat.link_type == LinkType.Tagged:
-            slices = self._calc_data_slices(data)
+            slices = self._calc_data_slices(data, stop_rule)
             if not self._slices_in_data(data, slices):
                 raise OutOfBounds("Requested data slice out of the extent "
                                   "of the Feature!")

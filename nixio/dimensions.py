@@ -315,21 +315,36 @@ class SampledDimension(Dimension):
         sample = self.sampling_interval
         return index * sample + offset
 
-    def index_of(self, position):
+    def index_of(self, position, leq=True):
         """
         Returns the index of a certain position in the dimension.
 
         :param position: The position.
+        :param leq: Less or Equal mode (default True).
+                    Whether to return the index if it matches the position exactly.
+                    If 'leq' is False and the position matches an index, it returns the previous index.
+                    This can be used to maintain consistency with cases when the position falls between indexes, in
+                    which case the previous valid index is returned.
 
-        :returns: The nearest index.
+        :returns: The matching index
         :rtype: int
         """
         offset = self.offset if self.offset else 0
         sample = self.sampling_interval
-        index = np.round((position - offset) / sample)
-        if index < 0:
+        scaled_position = (position - offset) / sample
+        if scaled_position < 0:
             raise IndexError("Position is out of bounds of this dimension!")
-        return int(index)
+
+        index = int(scaled_position)
+        if not scaled_position.is_integer():
+            # inexact position: floored regardless of leq
+            return index
+
+        # exact position: return if leq, otherwise previous
+        if leq:
+            return index
+
+        return index-1
 
     def axis(self, count, start=0):
         """
@@ -463,24 +478,29 @@ class RangeDimension(Dimension):
         else:
             self._h5group.set_attr("unit", unit)
 
-    def index_of(self, position):
+    def index_of(self, position, leq=True):
         """
         Returns the index of a certain position in the dimension.
 
         :param position: The position.
+        :param leq: Less or Equal mode (default True).
+                    Whether to return the index if it matches the position exactly.
+                    If 'leq' is False and the position matches an index, it returns the previous index.
+                    This can be used to maintain consistency with cases when the position falls between indexes, in
+                    which case the previous valid index is returned.
 
-        :returns: The nearest index.
+        :returns: The matching index
         :rtype: int
         """
         ticks = self.ticks
         if position <= ticks[0]:
             return 0
-        elif position >= ticks[-1]:
-            return len(ticks) - 1
 
         ticks = np.array(ticks)
-        pidxs = np.searchsorted(ticks, position, side="right") - 1
-        return int(pidxs)
+        if leq:
+            return np.where(ticks <= position)[0][-1]
+
+        return np.where(ticks < position)[0][-1]
 
     def tick_at(self, index):
         """
