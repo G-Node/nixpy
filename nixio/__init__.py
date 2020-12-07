@@ -29,6 +29,7 @@ from .datatype import DataType
 from .dimension_type import DimensionType
 from .link_type import LinkType
 from .compression import Compression
+from .tag import SliceMode
 
 # version
 from .info import VERSION
@@ -37,7 +38,7 @@ __all__ = ("File", "Block", "Group", "DataArray", "DataFrame", "Tag",
            "MultiTag", "Source", "Section", "S", "Feature", "Property",
            "OdmlType", "SampledDimension", "RangeDimension", "SetDimension",
            "FileMode", "DataSliceMode", "DataType", "DimensionType",
-           "LinkType", "Compression", "validator")
+           "LinkType", "Compression",  "SliceMode", "validator")
 __author__ = ('Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, '
               'Balint Morvai, Achilleas Koutsou')
 __version__ = VERSION

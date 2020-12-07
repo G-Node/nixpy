@@ -25,6 +25,12 @@ from .dimension_type import DimensionType
 from .link_type import LinkType
 from . import util
 from .section import Section
+from enum import Enum
+
+
+class SliceMode(Enum):
+    Exclusive = "exclusive"
+    Inclusive = "inclusive"
 
 
 class FeatureContainer(Container):
