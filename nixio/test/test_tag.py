@@ -72,10 +72,9 @@ class TestTags(unittest.TestCase):
         tag2d.tagged_data(0)  # 2d tag to 1d data
         tag3d.extent = [1, 2, 3]
         tag3d.references.extend([da1d, da2d, da3d])
-        np.testing.assert_array_equal(tag3d.tagged_data(0), da1d[1:3])
-        np.testing.assert_array_equal(tag3d.tagged_data(1), da2d[1:3, 1:4])
-        np.testing.assert_array_equal(tag3d.tagged_data(2),
-                                      da3d[1:3, 1:4, 1:5])
+        np.testing.assert_array_equal(tag3d.tagged_data(0), da1d[1:2])
+        np.testing.assert_array_equal(tag3d.tagged_data(1), da2d[1:2, 1:3])
+        np.testing.assert_array_equal(tag3d.tagged_data(2), da3d[1:2, 1:3, 1:4])
 
     def test_tag_eq(self):
         assert self.my_tag == self.my_tag
@@ -269,7 +268,7 @@ class TestTags(unittest.TestCase):
 
         segdata = segtag.tagged_data(0)
         assert len(segdata.shape) == 3
-        assert segdata.shape == (1, 7, 2)
+        assert segdata.shape == (1, 6, 2)
 
         # retrieve data by id and name
         posdata = postag.tagged_data(da.name)
@@ -277,14 +276,14 @@ class TestTags(unittest.TestCase):
         assert posdata.shape == (1, 1, 1)
         segdata = segtag.tagged_data(da.name)
         assert len(segdata.shape) == 3
-        assert segdata.shape == (1, 7, 2)
+        assert segdata.shape == (1, 6, 2)
 
         posdata = postag.tagged_data(da.id)
         assert len(posdata.shape) == 3
         assert posdata.shape == (1, 1, 1)
         segdata = segtag.tagged_data(da.id)
         assert len(segdata.shape) == 3
-        assert segdata.shape == (1, 7, 2)
+        assert segdata.shape == (1, 6, 2)
 
     def test_tag_tagged_data_slice_mode(self):
         data = np.random.random_sample((3, 100, 10))
@@ -412,10 +411,10 @@ class TestTags(unittest.TestCase):
         data5 = pos_tag.feature_data(4)
         data6 = pos_tag.feature_data(5)
 
-        assert np.all(data1[:] == number_data[4:7])  # end is inclusive
+        assert np.all(data1[:] == number_data[4:6])
         assert np.all(data2[:] == number_data[:])
         assert np.all(data3[:] == number_data[:])
-        assert np.all(data4[:] == ramp_data[3:6])  # end is inclusive
+        assert np.all(data4[:] == ramp_data[3:5])
         assert np.all(data5[:] == ramp_data[:])
         assert np.all(data6[:] == ramp_data[:])
 
