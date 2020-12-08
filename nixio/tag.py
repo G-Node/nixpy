@@ -145,7 +145,7 @@ class BaseTag(Entity):
                     scaling = util.units.scaling(unit, dimunit)
                 except InvalidUnit:
                     raise IncompatibleDimensions(
-                        "Cannot apply a position with unit to a SetDimension",
+                        "Cannot scale Tag unit {} to match dimension unit {}".format(unit, dimunit),
                         "Tag._pos_to_idx"
                     )
             index = dim.index_of(pos * scaling, stop_rule == SliceMode.Inclusive)
@@ -168,7 +168,7 @@ class BaseTag(Entity):
                     scaling = util.units.scaling(unit, dimunit)
                 except InvalidUnit:
                     raise IncompatibleDimensions(
-                        "Provided units are not scalable!",
+                        "Cannot scale Tag unit {} to match dimension unit {}".format(unit, dimunit),
                         "Tag._pos_to_idx"
                     )
             index = dim.index_of(pos * scaling, stop_rule == SliceMode.Inclusive)
