@@ -275,7 +275,7 @@ class Tag(BaseTag):
             if idx < len(extent):
                 ext = extent[idx]
                 stop = self._pos_to_idx(pos + ext, unit, dim, stop_rule)
-            if stop == 0:
+            if stop <= start:
                 # always return at least one element per dimension
                 stop = start + 1
             refslice.append(slice(start, stop))
