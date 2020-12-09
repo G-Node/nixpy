@@ -245,36 +245,27 @@ class Tag(BaseTag):
         refslice = list()
         position = self.position
         extent = self.extent
-        dimcount = len(data.dimensions)
-        if dimcount > len(position):
-            # Tag doesn't specify (pos, ext) for all dimensions: will return entire remaining dimensions (0:len)
-            pdiff = dimcount-len(position)
-            pos_list = list(position)
-            pos_list.extend([0] * pdiff)
-            position = tuple(pos_list)
-            # if there is at least one extent dimension, pad it with the length of the data on each
-            if extent is not None and len(extent) != 0:
-                lext = list(extent)
-                for i in range(len(position)-1, dimcount):
-                    lext.append(len(data[i])+1)
-                extent = tuple(lext)
-        elif dimcount < len(position):
-            pdiff = dimcount - len(position)  # a negative value
-            position = position[:pdiff]
-            if extent is not None and len(extent) != 0:
-                extent = extent[:pdiff]
-
-        for idx, (pos, dim) in enumerate(zip(position, data.dimensions)):
-            if self.units:
-                unit = self.units[idx]
+        if not self.units:
+            units = [None]*len(data.dimensions)
+        else:
+            units = self.units
+        for idx, dim in enumerate(data.dimensions):
+            if idx < len(position):
+                pos = position[idx]
+                start = self._pos_to_idx(pos, units[idx], dim, SliceMode.Inclusive)
             else:
-                unit = None
-            # Start is always inclusive
-            start = self._pos_to_idx(pos, unit, dim, SliceMode.Inclusive)
-            stop = 0
-            if idx < len(extent):
+                # Tag doesn't specify (pos, ext) for all dimensions: will return entire remaining dimensions (0:len)
+                start = 0
+            if not extent:
+                # no extents: return one element
+                stop = start + 1
+            elif idx < len(extent):
                 ext = extent[idx]
-                stop = self._pos_to_idx(pos + ext, unit, dim, stop_rule)
+                stop = self._pos_to_idx(pos+ext, units[idx], dim, stop_rule) + 1
+            else:
+                # Tag doesn't specify (pos, ext) for all dimensions: will return entire remaining dimensions (0:len)
+                stop = data.shape[idx]
+
             if stop <= start:
                 # always return at least one element per dimension
                 stop = start + 1
