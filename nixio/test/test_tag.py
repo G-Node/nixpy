@@ -241,7 +241,7 @@ class TestTags(unittest.TestCase):
         ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
         unit = "ms"
         pos = [0.0, 2.0, 3.4]
-        ext = [0.0, 6.0, 2.3]
+        ext = [0.1, 6.0, 2.3]
         units = ["none", "ms", "ms"]
         data = np.random.random_sample((2, 10, 5))
         da = self.block.create_data_array("dimtest", "test",
@@ -298,7 +298,7 @@ class TestTags(unittest.TestCase):
 
         # exact_tag has a pos+ext that is exactly equal to a dimension tick
         exact_tag = self.block.create_tag("tickpoint", "test.tag", position=[0, 0.03, 0.0011])
-        exact_tag.extent = [0, 0.02, 0.0005]
+        exact_tag.extent = [0.2, 0.02, 0.0005]
         exact_tag.units = ["none", "s", "m"]
 
         exact_tag.references.append(da)
@@ -325,7 +325,7 @@ class TestTags(unittest.TestCase):
 
         # midpoint_tag has a pos+ext that falls between dimension ticks
         midpoint_tag = self.block.create_tag("midpoint", "test.tag", position=[0, 0.03, 0.0011])
-        midpoint_tag.extent = [0, 0.0301, 0.00051]  # .1 offset
+        midpoint_tag.extent = [0.1, 0.0301, 0.00051]  # .1 offset
         midpoint_tag.units = ["none", "s", "m"]
 
         # dim2: [0.001, 0.002, ..., 0.03, 0.031, ..., 0.059, 0.06,|   0.061, ...]
@@ -504,3 +504,145 @@ class TestTags(unittest.TestCase):
         time.sleep(1)  # wait for time to change
         tag.units = "Mm"
         self.assertEqual(tag.updated_at, tagtime)
+
+    def test_tagged_set_dim(self):
+        """
+        Simple test where the slice can be calculated directly from the position and extent and compared to the original
+        data.
+        Set dimension slicing.
+        """
+        nsignals = 30
+        data = np.random.random_sample((nsignals, 100))
+        da = self.block.create_data_array("data", "data", data=data)
+        da.append_set_dimension()
+        da.append_sampled_dimension(sampling_interval=1).unit = "s"
+
+        tag = self.block.create_tag("tag", "simple", position=[])
+
+        tag.references.append(da)
+
+        for pos in range(nsignals):
+            for ext in range(2, nsignals-pos):
+                tag.position = [pos]
+                tag.extent = [ext]
+                np.testing.assert_array_almost_equal(tag.tagged_data(0), da[pos:pos+ext])
+                np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Exclusive), da[pos:pos+ext])
+                np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Inclusive), da[pos:pos+ext+1])
+
+                # +0.1 should round up (ceil) the start position
+                # +0.1 * 2 should round down (floor) the stop position and works the same for both inclusive and
+                # exclusive
+                tag.position = [pos+0.1]
+                tag.extent = [ext+0.1]
+                start = pos+1
+                stop = pos+ext+1
+                np.testing.assert_array_almost_equal(tag.tagged_data(0), da[start:stop])
+                np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Exclusive), da[start:stop])
+                np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Inclusive), da[start:stop])
+
+                if pos+ext+2 < len(da):
+                    # +0.9 should round up (ceil) the start position
+                    # +0.9 *2 should round down (floor) the stop position and works the same for both inclusive and
+                    # exclusive
+                    tag.position = [pos+0.9]
+                    tag.extent = [ext+0.9]
+                    start = pos+1
+                    stop = pos+ext+2
+                    np.testing.assert_array_almost_equal(tag.tagged_data(0), da[start:stop])
+                    np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Exclusive), da[start:stop])
+                    np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Inclusive), da[start:stop])
+
+    def test_tagged_range_dim(self):
+        """
+        Simple test where the slice can be calculated directly from the position and extent and compared to the original
+        data.
+        Range dimension slicing.
+        """
+        nticks = 30
+        data = np.random.random_sample((nticks, 100))
+        da = self.block.create_data_array("data", "data", data=data)
+        da.append_range_dimension(ticks=range(nticks))
+        da.append_sampled_dimension(sampling_interval=1).unit = "s"
+
+        tag = self.block.create_tag("tag", "simple", position=[])
+
+        tag.references.append(da)
+
+        for pos in range(nticks):
+            for ext in range(2, nticks-pos):
+                tag.position = [pos]
+                tag.extent = [ext]
+                np.testing.assert_array_almost_equal(tag.tagged_data(0), da[pos:pos+ext])
+                np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Exclusive), da[pos:pos+ext])
+                np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Inclusive), da[pos:pos+ext+1])
+
+                # +0.1 should round up (ceil) the start position
+                # +0.1 * 2 should round down (floor) the stop position and works the same for both inclusive and
+                # exclusive
+                tag.position = [pos+0.1]
+                tag.extent = [ext+0.1]
+                start = pos+1
+                stop = pos+ext+1
+                np.testing.assert_array_almost_equal(tag.tagged_data(0), da[start:stop])
+                np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Exclusive), da[start:stop])
+                np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Inclusive), da[start:stop])
+
+                if pos+ext+2 < len(da):
+                    # +0.9 should round up (ceil) the start position
+                    # +0.9 * 2 should round down (floor) the stop position and works the same for both inclusive and
+                    # exclusive
+                    tag.position = [pos+0.9]
+                    tag.extent = [ext+0.9]
+                    start = pos+1
+                    stop = pos+ext+2
+                    np.testing.assert_array_almost_equal(tag.tagged_data(0), da[start:stop])
+                    np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Exclusive), da[start:stop])
+                    np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Inclusive), da[start:stop])
+
+    def test_tagged_sampled_dim(self):
+        """
+        Simple test where the slice can be calculated directly from the position and extent and compared to the original
+        data.
+        Sampled dimension slicing.
+        """
+        nticks = 30
+        data = np.random.random_sample((nticks, 100))
+        da = self.block.create_data_array("data", "data", data=data)
+        da.append_sampled_dimension(sampling_interval=1).unit = "V"
+        da.append_sampled_dimension(sampling_interval=1).unit = "s"
+
+        tag = self.block.create_tag("tag", "simple", position=[])
+        tag.units = ["V", "s"]
+
+        tag.references.append(da)
+
+        for pos in range(nticks):
+            for ext in range(2, nticks-pos):
+                tag.position = [pos]
+                tag.extent = [ext]
+                np.testing.assert_array_almost_equal(tag.tagged_data(0), da[pos:pos+ext])
+                np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Exclusive), da[pos:pos+ext])
+                np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Inclusive), da[pos:pos+ext+1])
+
+                # +0.1 should round up (ceil) the start position
+                # +0.1 * 2 should round down (floor) the stop position and works the same for both inclusive and
+                # exclusive
+                tag.position = [pos+0.1]
+                tag.extent = [ext+0.1]
+                start = pos+1
+                stop = pos+ext+1
+                np.testing.assert_array_almost_equal(tag.tagged_data(0), da[start:stop])
+                np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Exclusive), da[start:stop])
+                np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Inclusive), da[start:stop])
+
+                if pos+ext+2 < len(da):
+                    # +0.9 should round up (ceil) the start position
+                    # +0.9 * 2 should round down (floor) the stop position and works the same for both inclusive and
+                    # exclusive
+                    tag.position = [pos+0.9]
+                    tag.extent = [ext+0.9]
+                    start = pos+1
+                    stop = pos+ext+2
+                    np.testing.assert_array_almost_equal(tag.tagged_data(0), da[start:stop])
+                    np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Exclusive), da[start:stop])
+                    np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Inclusive), da[start:stop])
