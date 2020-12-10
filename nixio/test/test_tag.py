@@ -511,7 +511,7 @@ class TestTags(unittest.TestCase):
         data.
         Set dimension slicing.
         """
-        nsignals = 30
+        nsignals = 10
         data = np.random.random_sample((nsignals, 100))
         da = self.block.create_data_array("data", "data", data=data)
         da.append_set_dimension()
@@ -558,7 +558,7 @@ class TestTags(unittest.TestCase):
         data.
         Range dimension slicing.
         """
-        nticks = 30
+        nticks = 10
         data = np.random.random_sample((nticks, 100))
         da = self.block.create_data_array("data", "data", data=data)
         da.append_range_dimension(ticks=range(nticks))
@@ -605,7 +605,7 @@ class TestTags(unittest.TestCase):
         data.
         Sampled dimension slicing.
         """
-        nticks = 30
+        nticks = 10
         data = np.random.random_sample((nticks, 100))
         da = self.block.create_data_array("data", "data", data=data)
         da.append_sampled_dimension(sampling_interval=1).unit = "V"
