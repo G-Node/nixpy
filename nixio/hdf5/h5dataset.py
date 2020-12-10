@@ -40,6 +40,8 @@ class H5DataSet(object):
         return cls(parent, name)
 
     def write_data(self, data, slc=None):
+        if data is None:  # py2compat
+            data = np.full(self.shape, np.nan)[slc]
         if slc is None:
             self.dataset[:] = data
         else:

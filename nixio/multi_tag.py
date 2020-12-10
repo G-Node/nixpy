@@ -108,7 +108,7 @@ class MultiTag(BaseTag):
                 "MultiTag._calc_data_slices")
 
         if len(pos_size) == 1:
-            dimpos = np.array([positions[index]])
+            dimpos = positions[index]
         else:
             dimpos = positions[index, 0:len(data.dimensions)]
         if len(data.dimensions) > len(dimpos):
@@ -125,13 +125,13 @@ class MultiTag(BaseTag):
 
         if extents is not None:
             if len(ext_size) == 1:
-                extent = np.array([extents[index]])
+                extent = extents[index]
             else:
                 extent = extents[index, 0:len(data.dimensions)]
             if len(data.dimensions) > len(extent):
                 da_len = list(data.data_extent)
                 ndim = len(extent)
-                extension = [x - 1 for x in da_len[ndim:]]
+                extension = np.array([x - 1 for x in da_len[ndim:]])
                 extent = np.concatenate((extent, extension))
             for idx in range(extent.size):
                 dim = data.dimensions[idx]

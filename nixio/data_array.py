@@ -9,6 +9,7 @@
 import warnings
 from numbers import Number
 from enum import Enum
+import numpy as np
 
 from .data_view import DataView
 from .data_set import DataSet
@@ -50,17 +51,17 @@ class DataArray(Entity, DataSet):
     def _read_data(self, sl=None):
         coeff = self.polynom_coefficients
         origin = self.expansion_origin
-        sup = super(DataArray, self)
+        data = np.array(super(DataArray, self)._read_data(sl))
+        if not len(data.shape):
+            # single value retrieval as length-1 array
+            data.shape = (1,)
         if len(coeff) or origin:
             if not origin:
                 origin = 0.0
 
-            # when there are coefficients, convert the dtype of the returned
-            # data array to double
-            data = sup._read_data(sl).astype(DataType.Double)
+            # when there are coefficients or exp origin, convert the dtype of the returned data array to double
+            data = data.astype(DataType.Double)
             util.apply_polynomial(coeff, origin, data)
-        else:
-            data = sup._read_data(sl)
         return data
 
     @property

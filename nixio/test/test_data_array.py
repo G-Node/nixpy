@@ -98,11 +98,19 @@ class TestDataArray(unittest.TestCase):
     def test_data_array_exp_origin(self):
         assert self.array.expansion_origin is None
 
-        self.array.expansion_origin = 10.2
-        assert self.array.expansion_origin == 10.2
+        data = [10, 29, 33]
+        intarray = self.block.create_data_array("intarray", "array", nix.DataType.Int64, data=data)
 
-        self.array.expansion_origin = None
-        assert self.array.expansion_origin is None
+        intarray.expansion_origin = 10.2
+        assert intarray.expansion_origin == 10.2
+        np.testing.assert_almost_equal(intarray[:], np.array(data) - 10.2)
+
+        # single value retrieval
+        np.testing.assert_almost_equal(intarray[1], data[1] - 10.2)
+
+        intarray.expansion_origin = None
+        assert intarray.expansion_origin is None
+        np.testing.assert_almost_equal(intarray[:], np.array(data))
 
     def test_data_array_coefficients(self):
         assert self.array.polynom_coefficients == ()
@@ -111,16 +119,18 @@ class TestDataArray(unittest.TestCase):
         assert self.array.polynom_coefficients == (1.1, 2.2)
 
         data = [10, 29, 33]
-        intarray = self.block.create_data_array("intarray", "array",
-                                                nix.DataType.Int64,
-                                                data=data)
+        intarray = self.block.create_data_array("intarray", "array", nix.DataType.Int64, data=data)
         intarray.polynom_coefficients = (0.0, 0.1)
         np.testing.assert_almost_equal(intarray[:], np.array(data) * 0.1)
 
-        # TODO delete does not work
+        # single value retrieval
+        np.testing.assert_almost_equal(intarray[1], data[1] * 0.1)
+
+        # Coefficient deletion
+        intarray.polynom_coefficients = None
+        np.testing.assert_almost_equal(intarray[:], np.array(data))
 
     def test_data_array_data(self):
-
         assert self.array.polynom_coefficients == ()
 
         data = np.array([float(i) for i in range(100)])
@@ -137,7 +147,7 @@ class TestDataArray(unittest.TestCase):
 
         assert len(self.array) == len(data)
 
-        dout = np.array([self.array[i] for i in range(100)])
+        dout = np.array(range(100))
         assert np.array_equal(data, dout)
 
         dout = self.array[...]
@@ -151,7 +161,7 @@ class TestDataArray(unittest.TestCase):
         self.array[...] = [float(-i) for i in range(100)]
         assert np.array_equal(self.array[()], data)
         assert np.array_equal(self.array[0:-10], data[0:-10])
-        assert np.array_equal(self.array[-10], data[-10])
+        assert np.array_equal(self.array[-10], np.array([data[-10]]))
 
         self.array[0] = 42
         assert self.array[0] == 42.0
@@ -160,10 +170,8 @@ class TestDataArray(unittest.TestCase):
         self.array.data_extent = (200, )
         assert self.array.data_extent == (200, )
 
-        # TODO delete does not work
         data = np.eye(123)
-        da1 = self.block.create_data_array("double array", "signal",
-                                           nix.DataType.Double, (123, 123))
+        da1 = self.block.create_data_array("double array", "signal", nix.DataType.Double, (123, 123))
         dset = da1
         dset.write_direct(data)
         dout = np.empty_like(data)
@@ -353,7 +361,7 @@ class TestDataArray(unittest.TestCase):
             'test', 'test',
             data=np.random.randint(65000, size=shape)
         )
-        self.assertEqual(da[0, 0, 0, 0].shape, ())
+        self.assertEqual(da[0, 0, 0, 0].shape, (1,))
         self.assertEqual(da[0, 0, 0, :].shape, (20,))
         self.assertEqual(da[0, 0, :, 0].shape, (15,))
         self.assertEqual(da[0, 0, :, :].shape, (15, 20))
@@ -522,3 +530,36 @@ class TestDataArray(unittest.TestCase):
         time.sleep(1)
         array.unit = "Ms"
         self.assertEqual(datime, array.updated_at)
+
+    def test_data_deletion(self):
+        data = [42.1337, 720.3, 190.0009]
+        array = self.block.create_data_array("del.test", "test", data=data)
+        np.testing.assert_almost_equal(data, array[:])
+
+        array[:] = None
+        np.testing.assert_almost_equal([np.nan]*len(data), array[:])
+
+        nda = len(self.block.data_arrays)
+        del self.block.data_arrays["del.test"]
+        assert len(self.block.data_arrays) == nda-1
+        assert "del.test" not in self.block.data_arrays
+
+    def test_single_value_retrieval(self):
+        assert self.array[1].shape == (1,)
+        self.array.expansion_origin = 0.3
+        assert self.array[1].shape == (1,)
+        self.array.expansion_origin = None
+
+        assert self.array[1].shape == (1,)
+        self.array.polynom_coefficients = (1.2, 3.4)
+        assert self.array[1].shape == (1,)
+        self.array.polynom_coefficients = None
+
+        assert self.array[1].shape == (1,)
+        self.array.expansion_origin = 0.9
+        self.array.polynom_coefficients = (1.2, 3.4)
+        assert self.array[1].shape == (1,)
+        self.array.expansion_origin = None
+        self.array.polynom_coefficients = None
+
+        assert self.array[1].shape == (1,)
