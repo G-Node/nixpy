@@ -12,6 +12,7 @@ try:
     from collections.abc import Sequence
 except ImportError:
     from collections import Sequence
+from enum import Enum
 
 import numpy as np
 
@@ -20,6 +21,20 @@ from .dimension_type import DimensionType
 from . import util
 from .container import Container
 from .exceptions import IncompatibleDimensions, OutOfBounds
+
+
+class IndexMode(Enum):
+    """
+    IndexMode is used to define the behaviour of the index_of() methods.
+    """
+    # The ones we need for now: More can be added if we expand the functionality.
+    Less = "less"
+    LessOrEqual = "leq"
+    GreaterOrEqual = "geq"
+
+    # Aliases
+    LEQ = "leq"
+    GEQ = "geq"
 
 
 class DimensionContainer(Container):
@@ -315,36 +330,54 @@ class SampledDimension(Dimension):
         sample = self.sampling_interval
         return index * sample + offset
 
-    def index_of(self, position, leq=True):
+    def index_of(self, position, mode=IndexMode.LessOrEqual):
         """
         Returns the index of a certain position in the dimension.
+        Raises IndexError if the position is out of bounds (depending on mode).
 
         :param position: The position.
-        :param leq: Less or Equal mode (default True).
-                    Whether to return the index if it matches the position exactly.
-                    If 'leq' is False and the position matches an index, it returns the previous index.
-                    This can be used to maintain consistency with cases when the position falls between indexes, in
-                    which case the previous valid index is returned.
+        :param mode: The IndexMode to use (default LessOrEqual).
+                    The default value (LessOrEqual) will return the index of the position calculated based on the
+                    dimension offset and sampling_interval if it matches a dimension tick exactly. If it does not match
+                    a tick, the previous index is returned.
+                    If the mode is Less, the previous index of the calculated position is always returned.
+                    If the mode is GreaterOrEqual and the calculated position does not match a tick exactly, the next
+                    index is returned.
 
-        :returns: The matching index
+        :returns: The matching index.
         :rtype: int
         """
         offset = self.offset if self.offset else 0
         sample = self.sampling_interval
         scaled_position = (position - offset) / sample
         if scaled_position < 0:
-            raise IndexError("Position is out of bounds of this dimension!")
+            if mode == IndexMode.GreaterOrEqual:
+                return 0
+            # position is OOB (left side) but can't round up
+            raise IndexError("Position {} is out of bounds for SampledDimension with offset {} and mode {}".format(
+                position, offset, mode.name
+            ))
 
-        index = int(scaled_position)
-        if not scaled_position.is_integer():
-            # inexact position: floored regardless of leq
+        if np.isclose(position, 0) and mode == IndexMode.Less:
+            raise IndexError("Position {} is out of bounds for SetDimension with mode {}".format(position, mode.name))
+
+        index = int(np.floor(scaled_position))
+        if np.isclose(scaled_position, index):
+            # exact position
+            if mode in (IndexMode.GreaterOrEqual, IndexMode.LessOrEqual):
+                # exact position and *Equal mode
+                return index
+            if mode == IndexMode.Less:
+                # exact position and Less mode
+                return index - 1
+            raise ValueError("Unknown IndexMode: {}".format(mode))
+
+        if mode == IndexMode.GreaterOrEqual:  # and inexact position
+            return index + 1
+        if mode in (IndexMode.LessOrEqual, IndexMode.Less):  # and inexact position
             return index
 
-        # exact position: return if leq, otherwise previous
-        if leq:
-            return index
-
-        return index-1
+        raise ValueError("Unknown IndexMode: {}".format(mode))
 
     def axis(self, count, start=0):
         """
@@ -478,29 +511,46 @@ class RangeDimension(Dimension):
         else:
             self._h5group.set_attr("unit", unit)
 
-    def index_of(self, position, leq=True):
+    def index_of(self, position, mode=IndexMode.LessOrEqual):
         """
         Returns the index of a certain position in the dimension.
+        Raises IndexError if the position is out of bounds (depending on mode).
 
         :param position: The position.
-        :param leq: Less or Equal mode (default True).
-                    Whether to return the index if it matches the position exactly.
-                    If 'leq' is False and the position matches an index, it returns the previous index.
-                    This can be used to maintain consistency with cases when the position falls between indexes, in
-                    which case the previous valid index is returned.
+        :param mode: The IndexMode to use (default LessOrEqual).
+                    The default value (LessOrEqual) will return the index of the position that matches a tick if it
+                    matches a dimension tick exactly. If it does not match a tick, the previous index is returned.
+                    If the mode is Less, the previous index of the matching tick is always returned.
+                    If the mode is GreaterOrEqual and the position does not match a tick exactly, the next index is
+                    returned.
 
         :returns: The matching index
         :rtype: int
         """
         ticks = self.ticks
-        if position <= ticks[0]:
-            return 0
+        if position < ticks[0]:
+            if mode == IndexMode.GreaterOrEqual:
+                return 0
+            # position is OOB (left side) of ticks but can't round up
+            raise IndexError("Position {} is out of bounds for ticks ({}, ..., {}) with mode {}".format(
+                position, ticks[0], ticks[-1], mode.name
+            ))
+        if position > ticks[-1]:
+            if mode in (IndexMode.Less, IndexMode.LessOrEqual):
+                return len(ticks) - 1
+            raise IndexError("Position {} is out of bounds for ticks ({}, ..., {}) with mode {}".format(
+                position, ticks[0], ticks[-1], mode.name
+            ))
 
         ticks = np.array(ticks)
-        if leq:
+        if mode == IndexMode.LessOrEqual:
             return np.where(ticks <= position)[0][-1]
+        if mode == IndexMode.Less:
+            return np.where(ticks < position)[0][-1]
+        if mode == IndexMode.GreaterOrEqual:
+            return np.where(ticks >= position)[0][0]
 
-        return np.where(ticks < position)[0][-1]
+        raise ValueError("Unknown IndexMode: {}".format(mode))
 
     def tick_at(self, index):
         """
@@ -567,3 +617,54 @@ class SetDimension(Dimension):
                                "data object cannot be modified")
         dt = util.vlen_str_dtype
         self._h5group.write_data("labels", labels, dtype=dt)
+
+    def index_of(self, position, mode=IndexMode.LessOrEqual):
+        """
+        Returns the index of a certain position in the dimension.
+        Raises IndexError if the position is out of bounds (depending on mode and number of labels).
+
+        :param position: The position.
+        :param mode: The IndexMode to use (default LessOrEqual).
+                    The modes LessOrEqual and GreaterOrEqual will return the integer representation of the position if
+                    it is equal to the nearest integer.
+                    If the position is not an integer (or is not equal to the nearest integer), then the value is
+                    rounded down (for LessOrEqual) or rounded up (for GreaterOrEqual).
+                    If the mode is Less, the previous integer is always returned.
+
+        :returns: The matching index
+        :rtype: int
+        """
+        if position < 0:
+            if mode == IndexMode.GreaterOrEqual:
+                return 0
+            # position is OOB (left side) of indices but can't round up
+            raise IndexError("Position {} is out of bounds for SetDimension with mode {}".format(position, mode.name))
+
+        if position == 0 and mode == IndexMode.Less:
+            raise IndexError("Position {} is out of bounds for SetDimension with mode {}".format(position, mode.name))
+
+        labels = self.labels
+        if labels and len(labels) and position > len(labels)-1:
+            if mode in (IndexMode.Less, IndexMode.LessOrEqual):
+                return len(labels) - 1
+            raise IndexError("Position {} is out of bounds for SetDimension with length {} and mode {}".format(
+                position, len(labels), mode.name
+            ))
+
+        index = int(np.floor(position))
+        if np.isclose(position, index):
+            # exact position
+            if mode in (IndexMode.GreaterOrEqual, IndexMode.LessOrEqual):
+                # exact position and *Equal mode
+                return index
+            if mode == IndexMode.Less:
+                # exact position and Less mode
+                return index - 1
+            raise ValueError("Unknown IndexMode: {}".format(mode))
+
+        if mode == IndexMode.GreaterOrEqual:  # and inexact position
+            return index + 1
+        if mode in (IndexMode.LessOrEqual, IndexMode.Less):  # and inexact position
+            return index
+
+        raise ValueError("Unknown IndexMode: {}".format(mode))

@@ -26,11 +26,18 @@ from .link_type import LinkType
 from . import util
 from .section import Section
 from enum import Enum
+from .dimensions import IndexMode
 
 
 class SliceMode(Enum):
     Exclusive = "exclusive"
     Inclusive = "inclusive"
+
+    def to_index_mode(self):
+        if self == self.Exclusive:
+            return IndexMode.Less
+        if self == self.Inclusive:
+            return IndexMode.LessOrEqual
 
 
 class FeatureContainer(Container):
@@ -129,7 +136,7 @@ class BaseTag(Entity):
         for idx, dim in enumerate(data.dimensions):
             if idx < len(position):
                 pos = position[idx]
-                start = self._pos_to_idx(pos, units[idx], dim, SliceMode.Inclusive)
+                start = self._pos_to_idx(pos, units[idx], dim, IndexMode.GreaterOrEqual)
             else:
                 # Tag doesn't specify (pos, ext) for all dimensions: will return entire remaining dimensions (0:len)
                 start = 0
@@ -138,7 +145,7 @@ class BaseTag(Entity):
                 stop = start + 1
             elif idx < len(extent):
                 ext = extent[idx]
-                stop = self._pos_to_idx(pos+ext, units[idx], dim, stop_rule) + 1
+                stop = self._pos_to_idx(pos+ext, units[idx], dim, stop_rule.to_index_mode()) + 1
             else:
                 # Tag doesn't specify (pos, ext) for all dimensions: will return entire remaining dimensions (0:len)
                 stop = data.shape[idx]
@@ -156,7 +163,7 @@ class BaseTag(Entity):
         return np.all(np.less_equal(stops, dasize))
 
     @staticmethod
-    def _pos_to_idx(pos, unit, dim, stop_rule):
+    def _pos_to_idx(pos, unit, dim, mode):
         dimtype = dim.dimension_type
         if dimtype == DimensionType.Set:
             dimunit = None
@@ -178,20 +185,14 @@ class BaseTag(Entity):
                         "Cannot scale Tag unit {} to match dimension unit {}".format(unit, dimunit),
                         "Tag._pos_to_idx"
                     )
-            index = dim.index_of(pos * scaling, stop_rule == SliceMode.Inclusive)
+            index = dim.index_of(pos * scaling, mode)
         elif dimtype == DimensionType.Set:
             if unit and unit != "none":
                 raise IncompatibleDimensions(
                     "Cannot apply a position with unit to a SetDimension",
                     "Tag._pos_to_idx"
                 )
-            index = int(pos)  # floor it
-            if stop_rule == SliceMode.Exclusive and index == pos:
-                # pos falls on an index which should be excluded
-                index -= 1
-            nlabels = len(dim.labels)
-            if nlabels and index > nlabels:
-                raise OutOfBounds("Position is out of bounds in SetDimension", pos)
+            index = dim.index_of(pos, mode)
         else:  # dimtype == DimensionType.Range:
             if dimunit and unit is not None:
                 try:
@@ -201,7 +202,7 @@ class BaseTag(Entity):
                         "Cannot scale Tag unit {} to match dimension unit {}".format(unit, dimunit),
                         "Tag._pos_to_idx"
                     )
-            index = dim.index_of(pos * scaling, stop_rule == SliceMode.Inclusive)
+            index = dim.index_of(pos * scaling, mode)
 
         return int(index)
 
