@@ -25,6 +25,19 @@ from .dimension_type import DimensionType
 from .link_type import LinkType
 from . import util
 from .section import Section
+from enum import Enum
+from .dimensions import IndexMode
+
+
+class SliceMode(Enum):
+    Exclusive = "exclusive"
+    Inclusive = "inclusive"
+
+    def to_index_mode(self):
+        if self == self.Exclusive:
+            return IndexMode.Less
+        if self == self.Inclusive:
+            return IndexMode.LessOrEqual
 
 
 class FeatureContainer(Container):
@@ -113,6 +126,36 @@ class BaseTag(Entity):
         feat = Feature.create_new(self.file, self, features, data, link_type)
         return feat
 
+    def _calc_data_slices(self, data, position, extent, stop_rule):
+        refslice = list()
+        if not self.units:
+            units = [None]*len(data.dimensions)
+        else:
+            units = self.units
+
+        for idx, dim in enumerate(data.dimensions):
+            if idx < len(position):
+                pos = position[idx]
+                start = self._pos_to_idx(pos, units[idx], dim, IndexMode.GreaterOrEqual)
+            else:
+                # Tag doesn't specify (pos, ext) for all dimensions: will return entire remaining dimensions (0:len)
+                start = 0
+            if extent is None or len(extent) == 0:
+                # no extents: return one element
+                stop = start + 1
+            elif idx < len(extent):
+                ext = extent[idx]
+                stop = self._pos_to_idx(pos+ext, units[idx], dim, stop_rule.to_index_mode()) + 1
+            else:
+                # Tag doesn't specify (pos, ext) for all dimensions: will return entire remaining dimensions (0:len)
+                stop = data.shape[idx]
+
+            if stop <= start:
+                # always return at least one element per dimension
+                stop = start + 1
+            refslice.append(slice(start, stop))
+        return tuple(refslice)
+
     @staticmethod
     def _slices_in_data(data, slices):
         dasize = data.data_extent
@@ -120,7 +163,7 @@ class BaseTag(Entity):
         return np.all(np.less_equal(stops, dasize))
 
     @staticmethod
-    def _pos_to_idx(pos, unit, dim):
+    def _pos_to_idx(pos, unit, dim, mode):
         dimtype = dim.dimension_type
         if dimtype == DimensionType.Set:
             dimunit = None
@@ -139,32 +182,27 @@ class BaseTag(Entity):
                     scaling = util.units.scaling(unit, dimunit)
                 except InvalidUnit:
                     raise IncompatibleDimensions(
-                        "Cannot apply a position with unit to a SetDimension",
+                        "Cannot scale Tag unit {} to match dimension unit {}".format(unit, dimunit),
                         "Tag._pos_to_idx"
                     )
-
-            index = dim.index_of(pos * scaling)
+            index = dim.index_of(pos * scaling, mode)
         elif dimtype == DimensionType.Set:
             if unit and unit != "none":
                 raise IncompatibleDimensions(
                     "Cannot apply a position with unit to a SetDimension",
                     "Tag._pos_to_idx"
                 )
-            index = np.round(pos)
-            nlabels = len(dim.labels)
-            if nlabels and index > nlabels:
-                raise OutOfBounds("Position is out of bounds in SetDimension",
-                                  pos)
+            index = dim.index_of(pos, mode)
         else:  # dimtype == DimensionType.Range:
             if dimunit and unit is not None:
                 try:
                     scaling = util.units.scaling(unit, dimunit)
                 except InvalidUnit:
                     raise IncompatibleDimensions(
-                        "Provided units are not scalable!",
+                        "Cannot scale Tag unit {} to match dimension unit {}".format(unit, dimunit),
                         "Tag._pos_to_idx"
                     )
-            index = dim.index_of(pos * scaling)
+            index = dim.index_of(pos * scaling, mode)
 
         return int(index)
 
@@ -234,49 +272,13 @@ class Tag(BaseTag):
         if self.file.auto_update_timestamps:
             self.force_updated_at()
 
-    def _calc_data_slices(self, data):
-        refslice = list()
-        position = self.position
-        extent = self.extent
-        dimcount = len(data.dimensions)
-        if dimcount > len(position):
-            ldiff = dimcount-len(position)
-            tmp_pos = list(position)
-            tmp_pos.extend([0] * ldiff)
-            position = tuple(tmp_pos)
-            if extent is not None and len(extent) != 0:
-                tmp_ext = list(extent)
-                for i in range(len(position)-1, dimcount):
-                    tmp_ext.append(len(data[i])-1)
-                extent = tuple(tmp_ext)
-        elif dimcount < len(position):
-            ldiff = dimcount - len(position)  # a negative value
-            position = position[:ldiff]
-            if extent is not None and len(extent) != 0:
-                extent = extent[:ldiff]
-
-        for idx, (pos, dim) in enumerate(zip(position, data.dimensions)):
-            if self.units:
-                unit = self.units[idx]
-            else:
-                unit = None
-            start = self._pos_to_idx(pos, unit, dim)
-            stop = 0
-            if idx < len(extent):
-                ext = extent[idx]
-                stop = self._pos_to_idx(pos + ext, unit, dim) + 1
-            if stop == 0:
-                stop = start + 1
-            refslice.append(slice(start, stop))
-        return tuple(refslice)
-
     def retrieve_data(self, refidx):
         msg = ("Call to deprecated method Tag.retrieve_data. "
                "Use Tag.tagged_data instead.")
         warnings.warn(msg, category=DeprecationWarning)
         return self.tagged_data(refidx)
 
-    def tagged_data(self, refidx):
+    def tagged_data(self, refidx, stop_rule=SliceMode.Exclusive):
         references = self.references
         position = self.position
         extent = self.extent
@@ -292,7 +294,7 @@ class Tag(BaseTag):
                 "Number of dimensions in position and extent "
                 "do not match ", extent)
 
-        slices = self._calc_data_slices(ref)
+        slices = self._calc_data_slices(ref, self.position, self.extent, stop_rule)
         if not self._slices_in_data(ref, slices):
             raise OutOfBounds("References data slice out of the extent of the "
                               "DataArray!")
@@ -304,7 +306,7 @@ class Tag(BaseTag):
         warnings.warn(msg, category=DeprecationWarning)
         return self.feature_data(featidx)
 
-    def feature_data(self, featidx):
+    def feature_data(self, featidx, stop_rule=SliceMode.Exclusive):
         if len(self.features) == 0:
             raise OutOfBounds("There are no features associated with this tag!")
 
@@ -322,7 +324,7 @@ class Tag(BaseTag):
         if data is None:
             raise UninitializedEntity()
         if feat.link_type == LinkType.Tagged:
-            slices = self._calc_data_slices(data)
+            slices = self._calc_data_slices(data, self.position, self.extent, stop_rule)
             if not self._slices_in_data(data, slices):
                 raise OutOfBounds("Requested data slice out of the extent "
                                   "of the Feature!")

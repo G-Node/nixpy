@@ -121,7 +121,7 @@ class TestDimension(unittest.TestCase):
         assert self.range_dim.index_of(18.84) == 6
         assert self.range_dim.index_of(28.26) == 9
         assert self.range_dim.index_of(100.) == 9
-        assert self.range_dim.index_of(-100.) == 0
+        assert self.range_dim.index_of(-100., mode=nix.IndexMode.GreaterOrEqual) == 0
 
         assert self.range_dim.tick_at(0) == 0
         assert self.range_dim.tick_at(9) == other[-1]
@@ -180,6 +180,136 @@ class TestDimension(unittest.TestCase):
         assert slabel == smpldim.label
         assert sunit == smpldim.unit
         assert soffset == smpldim.offset
+
+    def test_set_dimension_modes(self):
+        # exact
+        assert self.set_dim.index_of(0) == 0
+        assert self.set_dim.index_of(0, nix.IndexMode.LessOrEqual) == 0
+        assert self.set_dim.index_of(0, nix.IndexMode.GreaterOrEqual) == 0
+        assert self.set_dim.index_of(7) == 7
+        assert self.set_dim.index_of(7, nix.IndexMode.LessOrEqual) == 7
+        assert self.set_dim.index_of(7, nix.IndexMode.LessOrEqual) == 7
+        assert self.set_dim.index_of(7, nix.IndexMode.GreaterOrEqual) == 7
+        assert self.set_dim.index_of(7, nix.IndexMode.Less) == 6
+
+        # rounding
+        assert self.set_dim.index_of(4.2) == 4
+        assert self.set_dim.index_of(4.2, nix.IndexMode.LessOrEqual) == 4
+        assert self.set_dim.index_of(4.2, nix.IndexMode.Less) == 4
+        assert self.set_dim.index_of(4.2, nix.IndexMode.GreaterOrEqual) == 5
+
+        # valid oob below
+        assert self.set_dim.index_of(-30, nix.IndexMode.GreaterOrEqual) == 0
+
+        self.set_dim.labels = test_labels
+        # valid oob above
+        assert self.set_dim.index_of(12989) == len(test_labels) - 1
+        assert self.set_dim.index_of(12989, nix.IndexMode.LessOrEqual) == len(test_labels) - 1
+        assert self.set_dim.index_of(12989, nix.IndexMode.Less) == len(test_labels) - 1
+
+        # invalid oob
+        with self.assertRaises(IndexError):
+            self.set_dim.index_of(0, nix.IndexMode.Less)
+        with self.assertRaises(IndexError):
+            self.set_dim.index_of(-1, nix.IndexMode.Less)
+        with self.assertRaises(IndexError):
+            self.set_dim.index_of(-10, nix.IndexMode.LessOrEqual)
+        with self.assertRaises(IndexError):
+            self.set_dim.index_of(-10)
+        with self.assertRaises(IndexError):
+            self.set_dim.index_of(12398, nix.IndexMode.GreaterOrEqual)
+        with self.assertRaises(IndexError):
+            self.set_dim.index_of(len(test_labels)-0.5, nix.IndexMode.GreaterOrEqual)
+
+    def test_sampled_dimension_modes(self):
+        # exact
+        assert self.sample_dim.index_of(0) == 0
+        assert self.sample_dim.index_of(0, nix.IndexMode.LessOrEqual) == 0
+        assert self.sample_dim.index_of(0, nix.IndexMode.GreaterOrEqual) == 0
+        assert self.sample_dim.index_of(7.2) == 72
+        assert self.sample_dim.index_of(7.2, nix.IndexMode.LessOrEqual) == 72
+        assert self.sample_dim.index_of(7.2, nix.IndexMode.LessOrEqual) == 72
+        assert self.sample_dim.index_of(7.2, nix.IndexMode.GreaterOrEqual) == 72
+        assert self.sample_dim.index_of(7.2, nix.IndexMode.Less) == 71
+        assert self.sample_dim.index_of(7.3, nix.IndexMode.Less) == 72
+
+        # rounding
+        assert self.sample_dim.index_of(4.205) == 42
+        assert self.sample_dim.index_of(4.205, nix.IndexMode.LessOrEqual) == 42
+        assert self.sample_dim.index_of(4.205, nix.IndexMode.Less) == 42
+        assert self.sample_dim.index_of(4.205, nix.IndexMode.GreaterOrEqual) == 43
+
+        # valid oob below
+        assert self.sample_dim.index_of(-30, nix.IndexMode.GreaterOrEqual) == 0
+
+        # invalid oob
+        with self.assertRaises(IndexError):
+            self.sample_dim.index_of(0, nix.IndexMode.Less)
+        with self.assertRaises(IndexError):
+            self.sample_dim.index_of(-0.001, nix.IndexMode.Less)
+        with self.assertRaises(IndexError):
+            self.sample_dim.index_of(-1, nix.IndexMode.Less)
+        with self.assertRaises(IndexError):
+            self.sample_dim.index_of(-10, nix.IndexMode.LessOrEqual)
+        with self.assertRaises(IndexError):
+            self.sample_dim.index_of(-10)
+
+        # with offset
+        offset = 3.1
+        self.sample_dim.offset = offset
+
+        # valid oob below
+        assert self.sample_dim.index_of(-30, nix.IndexMode.GreaterOrEqual) == 0
+        assert self.sample_dim.index_of(offset-0.3, nix.IndexMode.GreaterOrEqual) == 0
+
+        # invalid oob
+        with self.assertRaises(IndexError):
+            self.sample_dim.index_of(offset-0.2, nix.IndexMode.Less)
+        with self.assertRaises(IndexError):
+            self.sample_dim.index_of(0, nix.IndexMode.Less)
+        with self.assertRaises(IndexError):
+            self.sample_dim.index_of(offset-0.01, nix.IndexMode.LessOrEqual)
+        with self.assertRaises(IndexError):
+            self.sample_dim.index_of(offset-0.5)
+
+    def test_range_dimension_modes(self):
+        # exact
+        assert self.range_dim.index_of(0) == 0
+        assert self.range_dim.index_of(0, nix.IndexMode.LessOrEqual) == 0
+        assert self.range_dim.index_of(0, nix.IndexMode.GreaterOrEqual) == 0
+        assert self.range_dim.index_of(7) == 7
+        assert self.range_dim.index_of(7, nix.IndexMode.LessOrEqual) == 7
+        assert self.range_dim.index_of(7, nix.IndexMode.LessOrEqual) == 7
+        assert self.range_dim.index_of(7, nix.IndexMode.GreaterOrEqual) == 7
+        assert self.range_dim.index_of(7, nix.IndexMode.Less) == 6
+
+        # rounding
+        assert self.range_dim.index_of(4.2) == 4
+        assert self.range_dim.index_of(4.2, nix.IndexMode.LessOrEqual) == 4
+        assert self.range_dim.index_of(4.2, nix.IndexMode.Less) == 4
+        assert self.range_dim.index_of(4.2, nix.IndexMode.GreaterOrEqual) == 5
+
+        # valid oob below
+        assert self.range_dim.index_of(-30, nix.IndexMode.GreaterOrEqual) == 0
+
+        # valid oob above
+        assert self.range_dim.index_of(12989) == test_range[-1]
+        assert self.range_dim.index_of(12989, nix.IndexMode.LessOrEqual) == test_range[-1]
+        assert self.range_dim.index_of(12989, nix.IndexMode.Less) == test_range[-1]
+
+        # invalid oob
+        with self.assertRaises(IndexError):
+            self.range_dim.index_of(0, nix.IndexMode.Less)
+        with self.assertRaises(IndexError):
+            self.range_dim.index_of(-1, nix.IndexMode.Less)
+        with self.assertRaises(IndexError):
+            self.range_dim.index_of(-10, nix.IndexMode.LessOrEqual)
+        with self.assertRaises(IndexError):
+            self.range_dim.index_of(-10)
+        with self.assertRaises(IndexError):
+            self.range_dim.index_of(12398, nix.IndexMode.GreaterOrEqual)
+        with self.assertRaises(IndexError):
+            self.range_dim.index_of(test_range[-1]+0.001, nix.IndexMode.GreaterOrEqual)
 
 
 class TestLinkDimension(unittest.TestCase):

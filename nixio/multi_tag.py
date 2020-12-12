@@ -9,7 +9,7 @@
 import warnings
 import numpy as np
 
-from .tag import BaseTag
+from .tag import BaseTag, SliceMode
 from .container import LinkContainer
 from .source_link_container import SourceLinkContainer
 from .data_array import DataArray
@@ -90,62 +90,34 @@ class MultiTag(BaseTag):
                                              self._parent.data_arrays)
         return self._references
 
-    def _calc_data_slices(self, data, index):
+    def _calc_data_slices_mtag(self, data, index, stop_rule):
         positions = self.positions
         extents = self.extents
-        pos_size = positions.data_extent if positions else tuple()
-        ext_size = extents.data_extent if extents else tuple()
-
-        if not positions or index >= pos_size[0]:
+        if not positions or index >= positions.shape[0]:
             raise OutOfBounds("Index out of bounds of positions!")
 
-        if extents and index >= ext_size[0]:
+        if extents and index >= extents.shape[0]:
             raise OutOfBounds("Index out of bounds of extents!")
 
         if extents and positions.data_extent != extents.data_extent:
-            raise IncompatibleDimensions(
-                "Number of dimensions in position and extent do not match",
-                "MultiTag._calc_data_slices")
+            raise IncompatibleDimensions("Number of dimensions in position and extent do not match",
+                                         "MultiTag._calc_data_slices_mtag")
 
-        if len(pos_size) == 1:
-            dimpos = positions[index]
-        else:
-            dimpos = positions[index, 0:len(data.dimensions)]
-        if len(data.dimensions) > len(dimpos):
-            extension = np.array([0]*(len(data.dimensions)-len(dimpos)))
-            dimpos = np.concatenate((dimpos, extension))
-        units = self.units
-        starts, stops = list(), list()
-        for idx in range(dimpos.size):
-            dim = data.dimensions[idx]
-            unit = None
-            if idx <= len(units) and len(units):
-                unit = units[idx]
-            starts.append(self._pos_to_idx(dimpos.item(idx), unit, dim))
+        if len(positions.shape) == 1:
+            # 1D positions => multiple positions for 1D data
+            # Convert to 2D => each position an array with len 1
+            positions = np.array([p for p in positions])
 
-        if extents is not None:
-            if len(ext_size) == 1:
-                extent = extents[index]
-            else:
-                extent = extents[index, 0:len(data.dimensions)]
-            if len(data.dimensions) > len(extent):
-                da_len = list(data.data_extent)
-                ndim = len(extent)
-                extension = np.array([x - 1 for x in da_len[ndim:]])
-                extent = np.concatenate((extent, extension))
-            for idx in range(extent.size):
-                dim = data.dimensions[idx]
-                unit = None
-                if idx <= len(units) and len(units):
-                    unit = units[idx]
-                stop = self._pos_to_idx(dimpos.item(idx) + extent[idx],
-                                        unit, dim)
-                stop += 1
-                minstop = starts[idx] + 1
-                stops.append(max(stop, minstop))
-        else:
-            stops = [start + 1 for start in starts]
-        return tuple(slice(start, stop) for start, stop in zip(starts, stops))
+        if extents and len(extents.shape) == 1:
+            # 1D extents => multiple extents for 1D data
+            # Convert to 2D => each extent an array with len 1
+            extents = np.array([e for e in extents])
+
+        position = positions[index]
+        extent = None
+        if extents is not None and len(extents) > 0:
+            extent = extents[index]
+        return self._calc_data_slices(data, position, extent, stop_rule)
 
     def retrieve_data(self, posidx, refidx):
         msg = ("Call to deprecated method MultiTag.retrieve_data. "
@@ -153,7 +125,7 @@ class MultiTag(BaseTag):
         warnings.warn(msg, category=DeprecationWarning)
         return self.tagged_data(posidx, refidx)
 
-    def tagged_data(self, posidx, refidx):
+    def tagged_data(self, posidx, refidx, stop_rule=SliceMode.Exclusive):
         references = self.references
         positions = self.positions
         extents = self.extents
@@ -166,10 +138,9 @@ class MultiTag(BaseTag):
 
         ref = references[refidx]
 
-        slices = self._calc_data_slices(ref, posidx)
+        slices = self._calc_data_slices_mtag(ref, posidx, stop_rule)
         if not self._slices_in_data(ref, slices):
-            raise OutOfBounds("References data slice out of the extent of the "
-                              "DataArray!")
+            raise OutOfBounds("References data slice out of the extent of the DataArray!")
         return DataView(ref, slices)
 
     def retrieve_feature_data(self, posidx, featidx):
@@ -178,7 +149,7 @@ class MultiTag(BaseTag):
         warnings.warn(msg, category=DeprecationWarning)
         return self.feature_data(posidx, featidx)
 
-    def feature_data(self, posidx, featidx):
+    def feature_data(self, posidx, featidx, stop_rule=SliceMode.Exclusive):
         if len(self.features) == 0:
             msg = "There are no features associated with this tag!"
             raise OutOfBounds(msg)
@@ -197,7 +168,7 @@ class MultiTag(BaseTag):
         if data is None:
             raise UninitializedEntity()
         if feat.link_type == LinkType.Tagged:
-            slices = self._calc_data_slices(data, posidx)
+            slices = self._calc_data_slices_mtag(data, posidx, stop_rule)
             if not self._slices_in_data(data, slices):
                 raise OutOfBounds("Requested data slice out of the extent "
                                   "of the Feature!")

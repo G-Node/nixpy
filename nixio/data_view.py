@@ -61,7 +61,7 @@ class DataView(DataSet):
 
     def _read_data(self, sl=None):
         tsl = self._slices
-        if sl:
+        if sl is not None:
             tsl = self._transform_coordinates(sl)
         return self.array._read_data(tsl)
 

@@ -28,23 +28,13 @@ class TestMultiTags(unittest.TestCase):
         self.file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
         self.block = self.file.create_block("test block", "recordingsession")
 
-        self.my_array = self.block.create_data_array("my array", "test",
-                                                     nix.DataType.Int16,
-                                                     (0, 0))
-        self.my_tag = self.block.create_multi_tag(
-            "my tag", "tag", self.my_array
-        )
+        self.my_array = self.block.create_data_array("my array", "test", nix.DataType.Int16, (0, 0))
+        self.my_tag = self.block.create_multi_tag("my tag", "tag", self.my_array)
 
-        self.your_array = self.block.create_data_array("your array", "test",
-                                                       nix.DataType.Int16,
-                                                       (0, 0))
-        self.your_tag = self.block.create_multi_tag(
-            "your tag", "tag", self.your_array
-        )
+        self.your_array = self.block.create_data_array("your array", "test", nix.DataType.Int16, (0, 0))
+        self.your_tag = self.block.create_multi_tag("your tag", "tag", self.your_array)
 
-        self.data_array = self.block.create_data_array("featureTest", "test",
-                                                       nix.DataType.Double,
-                                                       (2, 10, 5))
+        self.data_array = self.block.create_data_array("featureTest", "test", nix.DataType.Double, (2, 10, 5))
 
         data = np.zeros((2, 10, 5))
         value = 0.
@@ -74,11 +64,11 @@ class TestMultiTags(unittest.TestCase):
         event_positions[1, 2] = 2.3
 
         event_extents = np.zeros((2, 3))
-        event_extents[0, 0] = 0.0
+        event_extents[0, 0] = 1.0
         event_extents[0, 1] = 6.0
         event_extents[0, 2] = 2.3
 
-        event_extents[1, 0] = 0.0
+        event_extents[1, 0] = 1.0
         event_extents[1, 1] = 3.0
         event_extents[1, 2] = 2.0
 
@@ -142,16 +132,12 @@ class TestMultiTags(unittest.TestCase):
     def test_multi_tag_flex(self):
         pos1d = self.block.create_data_array("pos1", "pos", data=[[0], [1]])
         pos1d1d = self.block.create_data_array("pos1d1d", "pos", data=[0, 1])
-        pos2d = self.block.create_data_array("pos2", "pos",
-                                             data=[[0, 0], [1, 1]])
-        pos3d = self.block.create_data_array("pos3", "pos",
-                                             data=[[0, 1, 2], [1, 2, 3]])
+        pos2d = self.block.create_data_array("pos2", "pos", data=[[0, 0], [1, 1]])
+        pos3d = self.block.create_data_array("pos3", "pos", data=[[0, 1, 2], [1, 2, 3]])
         ext1d = self.block.create_data_array('ext1', 'ext', data=[[1], [1]])
         ext1d1d = self.block.create_data_array('ext1d1d', 'ext', data=[1, 1])
-        ext2d = self.block.create_data_array('ext2', 'ext',
-                                             data=[[1, 2], [0, 2]])
-        ext3d = self.block.create_data_array('ext3', 'ext',
-                                             data=[[1, 1, 1], [1, 1, 1]])
+        ext2d = self.block.create_data_array('ext2', 'ext', data=[[1, 2], [0, 2]])
+        ext3d = self.block.create_data_array('ext3', 'ext', data=[[1, 1, 1], [1, 1, 1]])
         mt1d = self.block.create_multi_tag("mt1d", "mt", pos1d)
         mt1d.extents = ext1d
         mt1d1d = self.block.create_multi_tag("mt1d1d", "mt", pos1d1d)
@@ -163,14 +149,10 @@ class TestMultiTags(unittest.TestCase):
         # create some references
         da1d = self.block.create_data_array('ref1d', 'ref', data=np.arange(10))
         da1d.append_sampled_dimension(1., label="time", unit="s")
-        da2d = self.block.create_data_array('ref2d', 'ref',
-                                            data=np.arange(100).reshape(
-                                                (10, 10)))
+        da2d = self.block.create_data_array('ref2d', 'ref', data=np.arange(100).reshape((10, 10)))
         da2d.append_sampled_dimension(1., label="time", unit="s")
         da2d.append_set_dimension()
-        da3d = self.block.create_data_array('ref3d', 'ref',
-                                            data=np.arange(1000).reshape(
-                                                (10, 10, 10)))
+        da3d = self.block.create_data_array('ref3d', 'ref', data=np.arange(1000).reshape((10, 10, 10)))
         da3d.append_sampled_dimension(1., label="time", unit="s")
         da3d.append_set_dimension()
         da3d.append_set_dimension()
@@ -178,25 +160,18 @@ class TestMultiTags(unittest.TestCase):
         mt1d1d.references.extend([da1d, da2d, da3d])
         mt2d.references.extend([da1d, da2d, da3d])
         mt3d.references.extend([da1d, da2d, da3d])
-        np.testing.assert_almost_equal(mt1d.tagged_data(0, 0)[:], da1d[0:2])
-        np.testing.assert_almost_equal(mt1d.tagged_data(0, 1)[:], da2d[0:2, :])
-        np.testing.assert_almost_equal(mt1d.tagged_data(0, 2)[:],
-                                       da3d[0:2, :, :])
-        np.testing.assert_almost_equal(mt1d1d.tagged_data(0, 0)[:], da1d[0:2])
-        np.testing.assert_almost_equal(mt1d1d.tagged_data(0, 1)[:],
-                                       da2d[0:2, :])
-        np.testing.assert_almost_equal(mt1d1d.tagged_data(0, 2)[:],
-                                       da3d[0:2, :, :])
-        np.testing.assert_almost_equal(mt2d.tagged_data(0, 0)[:], da1d[0:2])
-        np.testing.assert_almost_equal(mt2d.tagged_data(0, 1)[:],
-                                       da2d[0:2, 0:3])
-        np.testing.assert_almost_equal(mt2d.tagged_data(0, 2)[:],
-                                       da3d[0:2, 0:3, :])
-        np.testing.assert_almost_equal(mt3d.tagged_data(1, 0)[:], da1d[1:3])
-        np.testing.assert_almost_equal(mt3d.tagged_data(1, 1)[:],
-                                       da2d[1:3, 2:4])
-        np.testing.assert_almost_equal(mt3d.tagged_data(1, 2)[:],
-                                       da3d[1:3, 2:4, 3:5])
+        np.testing.assert_almost_equal(mt1d.tagged_data(0, 0)[:], da1d[0:1])
+        np.testing.assert_almost_equal(mt1d.tagged_data(0, 1)[:], da2d[0:1, :])
+        np.testing.assert_almost_equal(mt1d.tagged_data(0, 2)[:], da3d[0:1, :, :])
+        np.testing.assert_almost_equal(mt1d1d.tagged_data(0, 0)[:], da1d[0:1])
+        np.testing.assert_almost_equal(mt1d1d.tagged_data(0, 1)[:], da2d[0:1, :])
+        np.testing.assert_almost_equal(mt1d1d.tagged_data(0, 2)[:], da3d[0:1, :, :])
+        np.testing.assert_almost_equal(mt2d.tagged_data(0, 0)[:], da1d[0:1])
+        np.testing.assert_almost_equal(mt2d.tagged_data(0, 1)[:], da2d[0:1, 0:2])
+        np.testing.assert_almost_equal(mt2d.tagged_data(0, 2)[:], da3d[0:1, 0:2, :])
+        np.testing.assert_almost_equal(mt3d.tagged_data(1, 0)[:], da1d[1:2])
+        np.testing.assert_almost_equal(mt3d.tagged_data(1, 1)[:], da2d[1:2, 2:3])
+        np.testing.assert_almost_equal(mt3d.tagged_data(1, 2)[:], da3d[1:2, 2:3, 3:4])
 
     def test_multi_tag_eq(self):
         assert self.my_tag == self.my_tag
@@ -380,13 +355,11 @@ class TestMultiTags(unittest.TestCase):
         dim = da.append_sampled_dimension(sample_iv)
         dim.unit = 's'
 
-        pos = block.create_data_array('pos1', 'positions',
-                                      data=np.array([0.]).reshape(1, 1))
+        pos = block.create_data_array('pos1', 'positions', data=np.array([0.]).reshape(1, 1))
         pos.append_set_dimension()
         pos.append_set_dimension()
         pos.unit = 'ms'
-        ext = block.create_data_array('ext1', 'extents',
-                                      data=np.array([2000.]).reshape(1, 1))
+        ext = block.create_data_array('ext1', 'extents', data=np.array([2000.]).reshape(1, 1))
         ext.append_set_dimension()
         ext.append_set_dimension()
         ext.unit = 'ms'
@@ -396,37 +369,34 @@ class TestMultiTags(unittest.TestCase):
         mtag.units = ['ms']
         mtag.references.append(da)
 
-        assert mtag.tagged_data(0, 0).shape == (2001,)
-        assert np.array_equal(y_data[:2001], mtag.tagged_data(0, 0)[:])
+        assert mtag.tagged_data(0, 0).shape == (2000,)
+        assert np.array_equal(y_data[:2000], mtag.tagged_data(0, 0)[:])
+        assert mtag.tagged_data(0, 0, stop_rule=nix.SliceMode.Inclusive).shape == (2001,)
+        assert np.array_equal(y_data[:2001], mtag.tagged_data(0, 0, stop_rule=nix.SliceMode.Inclusive)[:])
 
         # get by name
         data = mtag.tagged_data(0, da.name)
-        assert data.shape == (2001,)
-        assert np.array_equal(y_data[:2001], data[:])
+        assert data.shape == (2000,)
+        assert np.array_equal(y_data[:2000], data[:])
 
         # get by id
         data = mtag.tagged_data(0, da.id)
-        assert data.shape == (2001,)
-        assert np.array_equal(y_data[:2001], data[:])
+        assert data.shape == (2000,)
+        assert np.array_equal(y_data[:2000], data[:])
 
         # multi dimensional data
         sample_iv = 1.0
         ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
         unit = "ms"
-        pos = self.block.create_data_array("pos", "test",
-                                           data=[[1, 1, 1],
-                                                 [1, 1, 1]])
+        pos = self.block.create_data_array("pos", "test", data=[[1, 1, 1], [1, 1, 1]])
         pos.append_set_dimension()
         pos.append_set_dimension()
-        ext = self.block.create_data_array("ext", "test",
-                                           data=[[1, 5, 2],
-                                                 [0, 4, 1]])
+        ext = self.block.create_data_array("ext", "test", data=[[1, 5, 2], [0, 4, 1]])
         ext.append_set_dimension()
         ext.append_set_dimension()
         units = ["none", "ms", "ms"]
         data = np.random.random_sample((3, 10, 5))
-        da = self.block.create_data_array("dimtest", "test",
-                                          data=data)
+        da = self.block.create_data_array("dimtest", "test", data=data)
         setdim = da.append_set_dimension()
         setdim.labels = ["Label A", "Label B", "Label D"]
         samdim = da.append_sampled_dimension(sample_iv)
@@ -455,27 +425,23 @@ class TestMultiTags(unittest.TestCase):
 
         segdata = segtag.tagged_data(0, 0)
         assert len(segdata.shape) == 3
-        assert segdata.shape == (2, 6, 2)
+        assert segdata.shape == (1, 5, 2)
 
         segdata = segtag.tagged_data(1, 0)
         assert len(segdata.shape) == 3
-        assert segdata.shape == (1, 5, 1)
+        assert segdata.shape == (1, 4, 1)
 
         # retrieve all positions for all references
         for ridx, _ in enumerate(mtag.references):
             for pidx, _ in enumerate(mtag.positions):
                 mtag.tagged_data(pidx, ridx)
 
-        wrong_pos = self.block.create_data_array("incorpos", "test",
-                                                 data=[[1, 1, 1],
-                                                       [100, 1, 1]])
+        wrong_pos = self.block.create_data_array("incorpos", "test", data=[[1, 1, 1], [100, 1, 1]])
         wrong_pos.append_set_dimension()
         wrong_pos.append_set_dimension()
         postag.positions = wrong_pos
         self.assertRaises(IndexError, postag.tagged_data, 1, 1)
-        wrong_ext = self.block.create_data_array("incorext", "test",
-                                                 data=[[1, 500, 2],
-                                                       [0, 4, 1]])
+        wrong_ext = self.block.create_data_array("incorext", "test", data=[[1, 500, 2], [0, 4, 1]])
         wrong_ext.append_set_dimension()
         wrong_ext.append_set_dimension()
         segtag.extents = wrong_ext
@@ -493,13 +459,11 @@ class TestMultiTags(unittest.TestCase):
         dim = da.append_sampled_dimension(sample_iv)
         dim.unit = 's'
 
-        pos = block.create_data_array('pos1', 'positions',
-                                      data=np.array([0.]).reshape(1, 1))
+        pos = block.create_data_array('pos1', 'positions', data=np.array([0.]).reshape(1, 1))
         pos.append_set_dimension()
         pos.append_set_dimension()
         pos.unit = 'ms'
-        ext = block.create_data_array('ext1', 'extents',
-                                      data=np.array([2000.]).reshape(1, 1))
+        ext = block.create_data_array('ext1', 'extents', data=np.array([2000.]).reshape(1, 1))
         ext.append_set_dimension()
         ext.append_set_dimension()
         ext.unit = 'ms'
@@ -509,10 +473,10 @@ class TestMultiTags(unittest.TestCase):
         mtag.units = ['ms']
         mtag.references.append(da)
 
-        assert np.array_equal(da[:2001], mtag.tagged_data(0, 0)[:])
+        assert np.array_equal(da[:2000], mtag.tagged_data(0, 0)[:])
 
         da.expansion_origin = 0.89
-        assert np.array_equal(da[:2001], mtag.tagged_data(0, 0)[:])
+        assert np.array_equal(da[:2000], mtag.tagged_data(0, 0)[:])
 
     def test_multi_tag_tagged_data_1d(self):
         # MultiTags to vectors behave a bit differently
@@ -529,10 +493,8 @@ class TestMultiTags(unittest.TestCase):
             onedmtag.tagged_data(pidx, 0)
 
     def test_multi_tag_feature_data(self):
-        index_data = self.block.create_data_array("indexed feature data",
-                                                  "test",
-                                                  dtype=nix.DataType.Double,
-                                                  shape=(10, 10))
+        index_data = self.block.create_data_array("indexed feature data", "test",
+                                                  dtype=nix.DataType.Double, shape=(10, 10))
         dim1 = index_data.append_sampled_dimension(1.0)
         dim1.unit = "ms"
         dim2 = index_data.append_sampled_dimension(1.0)
@@ -550,10 +512,8 @@ class TestMultiTags(unittest.TestCase):
 
         index_data[:, :] = data1
 
-        tagged_data = self.block.create_data_array("tagged feature data",
-                                                   "test",
-                                                   dtype=nix.DataType.Double,
-                                                   shape=(10, 20, 10))
+        tagged_data = self.block.create_data_array("tagged feature data", "test",
+                                                   dtype=nix.DataType.Double, shape=(10, 20, 10))
         dim1 = tagged_data.append_sampled_dimension(1.0)
         dim1.unit = "ms"
         dim2 = tagged_data.append_sampled_dimension(1.0)
@@ -723,3 +683,276 @@ class TestMultiTags(unittest.TestCase):
             assert np.all(data2[:] == number_feat[idx])
             assert np.all(data3[:] == ramp_feat[:])
             assert np.all(data4[:] == ramp_feat[idx])
+
+    def test_multi_tag_tagged_data_slice_mode(self):
+        data = np.random.random_sample((3, 100, 10))
+        da = self.block.create_data_array("signals", "test.signals", data=data)
+        da.unit = "mV"
+        da.append_set_dimension(labels=["A", "B", "C"])
+        sample_iv = 0.001
+        timedim = da.append_sampled_dimension(sampling_interval=sample_iv)
+        timedim.unit = "s"
+        posdim = da.append_range_dimension([1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9])
+        posdim.unit = "mm"
+
+        # exact_tag has a pos+ext that is exactly equal to a dimension tick
+        exact_tag = self.block.create_multi_tag("tickpoint", "test.tag",
+                                                positions=[(0, 0.03, 0.0011), (1, 0.05, 0.0015)],
+                                                extents=[(1, 0.02, 0.0005), (1, 0.04, 0.0003)])
+        exact_tag.units = ["none", "s", "m"]
+
+        exact_tag.references.append(da)
+
+        # FIRST TAG
+        # dim2: [0.001, 0.002, ..., 0.03, 0.031, ..., 0.049, 0.05, 0.051, ...]
+        #                           ^ pos [30]               ^ pos+ext [50]
+        # Inclusive mode includes index 50, exclusive does not
+        #
+        # dim3: [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9]
+        #             ^ pos [1]                ^ pos+ext [6]
+        # Inclusive mode includes index 6, exclusive does not
+
+        slice_default = exact_tag.tagged_data(0, 0)
+        assert slice_default.shape == (1, 20, 5)
+        np.testing.assert_array_equal(slice_default, da[0:1, 30:50, 1:6])  # default exclusive
+
+        slice_inclusive = exact_tag.tagged_data(0, 0, stop_rule=nix.SliceMode.Inclusive)
+        assert slice_inclusive.shape == (2, 21, 6)
+        np.testing.assert_array_equal(slice_inclusive, da[0:2, 30:51, 1:7])
+
+        slice_exclusive = exact_tag.tagged_data(0, 0, stop_rule=nix.SliceMode.Exclusive)
+        assert slice_exclusive.shape == (1, 20, 5)
+        np.testing.assert_array_equal(slice_exclusive, da[0:1, 30:50, 1:6])
+
+        # SECOND TAG
+        # dim2: [0.001, 0.002, ..., 0.05, 0.051, ..., 0.089, 0.09, 0.091, ...]
+        #                           ^ pos [50]               ^ pos+ext [90]
+        # Inclusive mode includes index 90, exclusive does not
+        #
+        # dim3: [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9]
+        #                                 ^ pos [5]        ^ pos+ext [8]
+        # Inclusive mode includes index 8, exclusive does not
+
+        slice_default = exact_tag.tagged_data(1, 0)
+        assert slice_default.shape == (1, 40, 3)
+        np.testing.assert_array_equal(slice_default, da[1:2, 50:90, 5:8])  # default exclusive
+
+        slice_inclusive = exact_tag.tagged_data(1, 0, stop_rule=nix.SliceMode.Inclusive)
+        assert slice_inclusive.shape == (2, 41, 4)
+        np.testing.assert_array_equal(slice_inclusive, da[1:3, 50:91, 5:9])
+
+        slice_exclusive = exact_tag.tagged_data(1, 0, stop_rule=nix.SliceMode.Exclusive)
+        assert slice_exclusive.shape == (1, 40, 3)
+        np.testing.assert_array_equal(slice_exclusive, da[1:2, 50:90, 5:8])
+
+        # midpoint_tag has a pos+ext that falls between dimension ticks
+        midpoint_tag = self.block.create_multi_tag("midpoint", "test.tag",
+                                                   positions=([0, 0.03, 0.0011], [1, 0.05, 0.0015]),
+                                                   extents=([1, 0.0301, 0.00051], [1, 0.0401, 0.00031]))  # .1 offset
+        midpoint_tag.units = ["none", "s", "m"]
+
+        # FIRST TAG
+        # dim2: [0.001, 0.002, ..., 0.03, 0.031, ..., 0.059, 0.06,|   0.061, ...]
+        #                           ^ pos [30]                    ^ pos+ext [60] + 0.1
+        # Both inclusive and exclusive include index 60
+        #
+        # dim3: [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6,|   1.7, 1.8, 1.9]
+        #             ^ pos [1]                    ^ pos+ext [6] + 0.1
+        # Both inclusive and exclusive include index 6
+
+        midpoint_tag.references.append(da)
+
+        # all slicing is inclusive since the pos+ext points are between ticks
+        slice_default = midpoint_tag.tagged_data(0, 0)
+        assert slice_default.shape == (1, 31, 6)
+        np.testing.assert_array_equal(slice_default, da[0:1, 30:61, 1:7])
+
+        slice_inclusive = midpoint_tag.tagged_data(0, 0, stop_rule=nix.SliceMode.Inclusive)
+        assert slice_inclusive.shape == (2, 31, 6)
+        np.testing.assert_array_equal(slice_inclusive, da[0:2, 30:61, 1:7])
+
+        slice_exclusive = midpoint_tag.tagged_data(0, 0, stop_rule=nix.SliceMode.Exclusive)
+        assert slice_exclusive.shape == (1, 31, 6)
+        np.testing.assert_array_equal(slice_exclusive, da[0:1, 30:61, 1:7])
+
+        # SECOND TAG
+        # dim2: [0.001, 0.002, ..., 0.05, 0.051, ..., 0.089, 0.09,|    0.091, ...]
+        #                           ^ pos [50]                    ^ pos+ext [90] + 0.1
+        # Both inclusive and exclusive include index 90
+        #
+        # dim3: [1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8,|    1.9]
+        #                                 ^ pos [5]          ^ pos+ext [8] + 0.1
+        # Both inclusive and exclusive include index 8
+
+        midpoint_tag.references.append(da)
+
+        # all slicing is inclusive since the pos+ext points are between ticks
+        slice_default = midpoint_tag.tagged_data(1, 0)
+        assert slice_default.shape == (1, 41, 4)
+        np.testing.assert_array_equal(slice_default, da[1:2, 50:91, 5:9])
+
+        slice_inclusive = midpoint_tag.tagged_data(1, 0, stop_rule=nix.SliceMode.Inclusive)
+        assert slice_inclusive.shape == (2, 41, 4)
+        np.testing.assert_array_equal(slice_inclusive, da[1:3, 50:91, 5:9])
+
+        slice_exclusive = midpoint_tag.tagged_data(1, 0, stop_rule=nix.SliceMode.Exclusive)
+        assert slice_exclusive.shape == (1, 41, 4)
+        np.testing.assert_array_equal(slice_exclusive, da[1:2, 50:91, 5:9])
+
+    def test_tagged_set_dim(self):
+        """
+        Simple test where the slice can be calculated directly from the position and extent and compared to the original
+        data.
+        Set dimension slicing.
+        """
+        nsignals = 10
+        data = np.random.random_sample((nsignals, 100))
+        da = self.block.create_data_array("data", "data", data=data)
+        da.append_set_dimension()
+        da.append_sampled_dimension(sampling_interval=1).unit = "s"
+
+        posarray = self.block.create_data_array("mtag.positions", "test.positions", dtype=float, shape=(1,))
+        extarray = self.block.create_data_array("mtag.extents", "test.extents", dtype=float, shape=(1,))
+        mtag = self.block.create_multi_tag("mtag", "simple", positions=posarray)
+        mtag.extents = extarray
+
+        mtag.references.append(da)
+
+        for pos in range(nsignals):
+            for ext in range(2, nsignals-pos):
+                mtag.positions[:] = [pos]
+                mtag.extents[:] = [ext]
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0), da[pos:pos+ext])
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Exclusive), da[pos:pos+ext])
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Inclusive), da[pos:pos+ext+1])
+
+                # +0.1 should round up (ceil) the start position
+                # +0.1 * 2 should round down (floor) the stop position and works the same for both inclusive and
+                # exclusive
+                mtag.positions[:] = [pos+0.1]
+                mtag.extents[:] = [ext+0.1]
+                start = pos+1
+                stop = pos+ext+1
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0), da[start:stop])
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Exclusive), da[start:stop])
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Inclusive), da[start:stop])
+
+                if pos+ext+2 < len(da):
+                    # +0.9 should round up (ceil) the start position
+                    # +0.9 * 2 should round down (floor) the stop position and works the same for both inclusive and
+                    # exclusive
+                    mtag.positions[:] = [pos+0.9]
+                    mtag.extents[:] = [ext+0.9]
+                    start = pos+1
+                    stop = pos+ext+2
+                    np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0), da[start:stop])
+                    np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Exclusive),
+                                                         da[start:stop])
+                    np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Inclusive),
+                                                         da[start:stop])
+
+    def test_tagged_range_dim(self):
+        """
+        Simple test where the slice can be calculated directly from the position and extent and compared to the original
+        data.
+        Range dimension slicing.
+        """
+        nticks = 10
+        data = np.random.random_sample((nticks, 100))
+        da = self.block.create_data_array("data", "data", data=data)
+        da.append_range_dimension(ticks=range(nticks))
+        da.append_sampled_dimension(sampling_interval=1).unit = "s"
+
+        posarray = self.block.create_data_array("mtag.positions", "test.positions", dtype=float, shape=(1,))
+        extarray = self.block.create_data_array("mtag.extents", "test.extents", dtype=float, shape=(1,))
+        mtag = self.block.create_multi_tag("mtag", "simple", positions=posarray)
+        mtag.extents = extarray
+
+        mtag.references.append(da)
+
+        for pos in range(nticks):
+            for ext in range(2, nticks-pos):
+                mtag.positions[:] = [pos]
+                mtag.extents[:] = [ext]
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0), da[pos:pos+ext])
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Exclusive), da[pos:pos+ext])
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Inclusive), da[pos:pos+ext+1])
+
+                # +0.1 should round up (ceil) the start position
+                # +0.1 * 2 should round down (floor) the stop position and works the same for both inclusive and
+                # exclusive
+                mtag.positions[:] = [pos+0.1]
+                mtag.extents[:] = [ext+0.1]
+                start = pos+1
+                stop = pos+ext+1
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0), da[start:stop])
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Exclusive), da[start:stop])
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Inclusive), da[start:stop])
+
+                if pos+ext+2 < len(da):
+                    # +0.9 should round up (ceil) the start position
+                    # +0.9 * 2 should round down (floor) the stop position and works the same for both inclusive and
+                    # exclusive
+                    mtag.positions[:] = [pos+0.9]
+                    mtag.extents[:] = [ext+0.9]
+                    start = pos+1
+                    stop = pos+ext+2
+                    np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0), da[start:stop])
+                    np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Exclusive),
+                                                         da[start:stop])
+                    np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Inclusive),
+                                                         da[start:stop])
+
+    def test_tagged_sampled_dim(self):
+        """
+        Simple test where the slice can be calculated directly from the position and extent and compared to the original
+        data.
+        Sampled dimension slicing.
+        """
+        nticks = 10
+        data = np.random.random_sample((nticks, 100))
+        da = self.block.create_data_array("data", "data", data=data)
+        da.append_sampled_dimension(sampling_interval=1).unit = "V"
+        da.append_sampled_dimension(sampling_interval=1).unit = "s"
+
+        posarray = self.block.create_data_array("mtag.positions", "test.positions", dtype=float, shape=(1,))
+        extarray = self.block.create_data_array("mtag.extents", "test.extents", dtype=float, shape=(1,))
+        mtag = self.block.create_multi_tag("mtag", "simple", positions=posarray)
+        mtag.extents = extarray
+        mtag.units = ["V", "s"]
+
+        mtag.references.append(da)
+
+        for pos in range(nticks):
+            for ext in range(2, nticks-pos):
+                mtag.positions[:] = [pos]
+                mtag.extents[:] = [ext]
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0), da[pos:pos+ext])
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Exclusive), da[pos:pos+ext])
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Inclusive),
+                                                     da[pos:pos+ext+1])
+
+                # +0.1 should round up (ceil) the start position
+                # +0.1 * 2 should round down (floor) the stop position and works the same for both inclusive and
+                # exclusive
+                mtag.positions[:] = [pos+0.1]
+                mtag.extents[:] = [ext+0.1]
+                start = pos+1
+                stop = pos+ext+1
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0), da[start:stop])
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Exclusive), da[start:stop])
+                np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Inclusive), da[start:stop])
+
+                if pos+ext+2 < len(da):
+                    # +0.9 should round up (ceil) the start position
+                    # +0.9 * 2 should round down (floor) the stop position and works the same for both inclusive and
+                    # exclusive
+                    mtag.positions[:] = [pos+0.9]
+                    mtag.extents[:] = [ext+0.9]
+                    start = pos+1
+                    stop = pos+ext+2
+                    np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0), da[start:stop])
+                    np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Exclusive),
+                                                         da[start:stop])
+                    np.testing.assert_array_almost_equal(mtag.tagged_data(0, 0, nix.SliceMode.Inclusive),
+                                                         da[start:stop])
