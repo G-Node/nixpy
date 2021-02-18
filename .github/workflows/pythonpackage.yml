@@ -41,3 +41,24 @@ jobs:
         pip install pytest
         # pytest will skip cross-compatibility tests since NIX isn't installed
         pytest
+
+  run-coveralls:
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+      - name: Install dependencies
+        run: |
+          python setup.py install
+          pip install h5py
+          pip install pytest coveralls
+      - name: Create coverage
+        run: |
+          coverage run --source=nixio -m pytest nixio/test/
+      - name: Submit to coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: coveralls --service=github
