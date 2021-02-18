@@ -43,6 +43,7 @@ jobs:
         pytest
 
   run-conda-test:
+    needs: [build]
     name: Running tests using miniconda
     runs-on: ${{ matrix.os }}
     defaults:
@@ -76,6 +77,7 @@ jobs:
           pytest
 
   run-coveralls:
+    needs: [build]
     runs-on: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v2
@@ -97,6 +99,7 @@ jobs:
         run: coveralls --service=github
 
   run-codecov:
+    needs: [build]
     runs-on: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v2
