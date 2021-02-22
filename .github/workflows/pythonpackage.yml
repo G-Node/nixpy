@@ -1,20 +1,30 @@
 name: NIXPy tests and linting
 
-on: [push]
+on:
+  # Run one build a month at 01:00
+  schedule:
+  - cron:  '0 1 1 * *'
+  push:
+    branches:
+      - master
+      - dev
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.6, 3.7, 3.8]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.6, 3.7, 3.8, 3.9]
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -31,3 +41,82 @@ jobs:
         pip install pytest
         # pytest will skip cross-compatibility tests since NIX isn't installed
         pytest
+
+  run-conda-test:
+    needs: [build]
+    name: Running tests using miniconda
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash -l {0}
+    strategy:
+      max-parallel: 4
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.8]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: deptest-${{ matrix.python-version }}
+          python-version: ${{ matrix.python-version }}
+          channels: conda-forge
+      - name: Show conda details
+        run: |
+          conda info
+          conda list
+          which python
+          conda --version
+      - name: Install Python dependencies
+        run: |
+          python setup.py install
+          pip install h5py
+          pip install pytest
+      - name: Run tests
+        run: |
+          pytest
+
+  run-coveralls:
+    needs: [build]
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+      - name: Install dependencies
+        run: |
+          python setup.py install
+          pip install h5py
+          pip install pytest coveralls
+      - name: Create coverage
+        run: |
+          coverage run --source=nixio -m pytest nixio/test/
+      - name: Submit to coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: coveralls --service=github
+
+  run-codecov:
+    needs: [build]
+    runs-on: [ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.8"
+      - name: Install dependencies
+        run: |
+          python setup.py install
+          pip install h5py
+          pip install pytest pytest-cov
+      - name: Create coverage
+        run: |
+          pytest --cov=./ --cov-report=xml
+      - uses: codecov/codecov-action@v1
+        with:
+          name: Submit Codecov coverage
+          files: ./coverage.xml
+          verbose: true # optional (default = false)
