@@ -67,7 +67,6 @@ disable=all
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once). See also the "--disable" option for examples.
 enable=C0102,  # Black listed name "%s"**
-       C0103,  # Invalid %s name "%s"**
        C0121,  # Missing required attribute "%s"**
        C0202,  # Class method %s should have cls as first argument**
        C0203,  # Metaclass method %s should have mcs as first argument**
