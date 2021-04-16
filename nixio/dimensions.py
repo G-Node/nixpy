@@ -12,6 +12,7 @@ try:
     from collections.abc import Sequence
 except ImportError:
     from collections import Sequence
+from enum import Enum
 
 import numpy as np
 
@@ -20,6 +21,20 @@ from .dimension_type import DimensionType
 from . import util
 from .container import Container
 from .exceptions import IncompatibleDimensions, OutOfBounds
+
+
+class IndexMode(Enum):
+    """
+    IndexMode is used to define the behaviour of the index_of() methods.
+    """
+    # The ones we need for now: More can be added if we expand the functionality.
+    Less = "less"
+    LessOrEqual = "leq"
+    GreaterOrEqual = "geq"
+
+    # Aliases
+    LEQ = "leq"
+    GEQ = "geq"
 
 
 class DimensionContainer(Container):
@@ -241,7 +256,7 @@ class Dimension(object):
             raise ValueError(invalid_idx_msg)
 
         if self.has_link:
-            self._h5group.delete("link")
+            self.remove_link()
         DimensionLink.create_new(self._file, self, self._h5group,
                                  data_array, "DataArray", index)
 
@@ -249,9 +264,14 @@ class Dimension(object):
         if not 0 <= index < len(data_frame.columns):
             raise OutOfBounds("DataFrame index is out of bounds", index)
         if self.has_link:
-            self._h5group.delete("link")
+            self.remove_link()
         DimensionLink.create_new(self._file, self, self._h5group,
                                  data_frame, "DataFrame", index)
+
+    def remove_link(self):
+        if not self.has_link:
+            raise RuntimeError("Dimension has no link")
+        self._h5group.delete("link", False)
 
     @property
     def has_link(self):
@@ -310,21 +330,54 @@ class SampledDimension(Dimension):
         sample = self.sampling_interval
         return index * sample + offset
 
-    def index_of(self, position):
+    def index_of(self, position, mode=IndexMode.LessOrEqual):
         """
         Returns the index of a certain position in the dimension.
+        Raises IndexError if the position is out of bounds (depending on mode).
 
         :param position: The position.
+        :param mode: The IndexMode to use (default LessOrEqual).
+                    The default value (LessOrEqual) will return the index of the position calculated based on the
+                    dimension offset and sampling_interval if it matches a dimension tick exactly. If it does not match
+                    a tick, the previous index is returned.
+                    If the mode is Less, the previous index of the calculated position is always returned.
+                    If the mode is GreaterOrEqual and the calculated position does not match a tick exactly, the next
+                    index is returned.
 
-        :returns: The nearest index.
+        :returns: The matching index.
         :rtype: int
         """
         offset = self.offset if self.offset else 0
         sample = self.sampling_interval
-        index = np.round((position - offset) / sample)
-        if index < 0:
-            raise IndexError("Position is out of bounds of this dimension!")
-        return int(index)
+        scaled_position = (position - offset) / sample
+        if scaled_position < 0:
+            if mode == IndexMode.GreaterOrEqual:
+                return 0
+            # position is OOB (left side) but can't round up
+            raise IndexError("Position {} is out of bounds for SampledDimension with offset {} and mode {}".format(
+                position, offset, mode.name
+            ))
+
+        if np.isclose(position, 0) and mode == IndexMode.Less:
+            raise IndexError("Position {} is out of bounds for SetDimension with mode {}".format(position, mode.name))
+
+        index = int(np.floor(scaled_position))
+        if np.isclose(scaled_position, index):
+            # exact position
+            if mode in (IndexMode.GreaterOrEqual, IndexMode.LessOrEqual):
+                # exact position and *Equal mode
+                return index
+            if mode == IndexMode.Less:
+                # exact position and Less mode
+                return index - 1
+            raise ValueError("Unknown IndexMode: {}".format(mode))
+
+        if mode == IndexMode.GreaterOrEqual:  # and inexact position
+            return index + 1
+        if mode in (IndexMode.LessOrEqual, IndexMode.Less):  # and inexact position
+            return index
+
+        raise ValueError("Unknown IndexMode: {}".format(mode))
 
     def axis(self, count, start=0):
         """
@@ -367,23 +420,23 @@ class SampledDimension(Dimension):
         return self._h5group.get_attr("unit")
 
     @unit.setter
-    def unit(self, u):
-        util.check_attr_type(u, str)
-        self._h5group.set_attr("unit", u)
+    def unit(self, unit):
+        util.check_attr_type(unit, str)
+        self._h5group.set_attr("unit", unit)
 
     @property
     def offset(self):
         return self._h5group.get_attr("offset")
 
     @offset.setter
-    def offset(self, o):
-        util.check_attr_type(o, Number)
-        self._h5group.set_attr("offset", o)
+    def offset(self, offset):
+        util.check_attr_type(offset, Number)
+        self._h5group.set_attr("offset", offset)
 
-    def link_data_array(self, data_array, index):
+    def link_data_array(self, *_):
         raise RuntimeError("SampledDimension does not support linking")
 
-    def link_data_frame(self, data_array, index):
+    def link_data_frame(self, *_):
         raise RuntimeError("SampledDimension does not support linking")
 
 
@@ -392,6 +445,18 @@ class RangeDimension(Dimension):
     def __init__(self, data_array, index):
         nixfile = data_array.file
         super(RangeDimension, self).__init__(nixfile, data_array, index)
+
+    def link_data_array(self, data_array, index):
+        if "ticks" in self._h5group:
+            # delete ticks to replace with link
+            self._h5group.delete("ticks", False)
+        super(RangeDimension, self).link_data_array(data_array, index)
+
+    def link_data_frame(self, data_frame, index):
+        if "ticks" in self._h5group:
+            # delete ticks to replace with link
+            self._h5group.delete("ticks", False)
+        super(RangeDimension, self).link_data_frame(data_frame, index)
 
     @classmethod
     def create_new(cls, data_array, index, ticks):
@@ -414,8 +479,8 @@ class RangeDimension(Dimension):
         if np.any(np.diff(ticks) < 0):
             raise ValueError("Ticks are not given in an ascending order.")
         if self.has_link:
-            raise RuntimeError("The ticks of a RangeDimension linked to a "
-                               "data object cannot be modified")
+            # unlick object and set ticks
+            self.remove_link()
         self._h5group.write_data("ticks", ticks)
 
     @property
@@ -439,31 +504,53 @@ class RangeDimension(Dimension):
         return self._h5group.get_attr("unit")
 
     @unit.setter
-    def unit(self, u):
-        util.check_attr_type(u, str)
+    def unit(self, unit):
+        util.check_attr_type(unit, str)
         if self.has_link:
-            self.dimension_link.unit = u
+            self.dimension_link.unit = unit
         else:
-            self._h5group.set_attr("unit", u)
+            self._h5group.set_attr("unit", unit)
 
-    def index_of(self, position):
+    def index_of(self, position, mode=IndexMode.LessOrEqual):
         """
         Returns the index of a certain position in the dimension.
+        Raises IndexError if the position is out of bounds (depending on mode).
 
         :param position: The position.
+        :param mode: The IndexMode to use (default LessOrEqual).
+                    The default value (LessOrEqual) will return the index of the position that matches a tick if it
+                    matches a dimension tick exactly. If it does not match a tick, the previous index is returned.
+                    If the mode is Less, the previous index of the matching tick is always returned.
+                    If the mode is GreaterOrEqual and the position does not match a tick exactly, the next index is
+                    returned.
 
-        :returns: The nearest index.
+        :returns: The matching index
         :rtype: int
         """
         ticks = self.ticks
-        if position <= ticks[0]:
-            return 0
-        elif position >= ticks[-1]:
-            return len(ticks) - 1
+        if position < ticks[0]:
+            if mode == IndexMode.GreaterOrEqual:
+                return 0
+            # position is OOB (left side) of ticks but can't round up
+            raise IndexError("Position {} is out of bounds for ticks ({}, ..., {}) with mode {}".format(
+                position, ticks[0], ticks[-1], mode.name
+            ))
+        if position > ticks[-1]:
+            if mode in (IndexMode.Less, IndexMode.LessOrEqual):
+                return len(ticks) - 1
+            raise IndexError("Position {} is out of bounds for ticks ({}, ..., {}) with mode {}".format(
+                position, ticks[0], ticks[-1], mode.name
+            ))
 
         ticks = np.array(ticks)
-        pidxs = np.searchsorted(ticks, position, side="right") - 1
-        return int(pidxs)
+        if mode == IndexMode.LessOrEqual:
+            return np.where(ticks <= position)[0][-1]
+        if mode == IndexMode.Less:
+            return np.where(ticks < position)[0][-1]
+        if mode == IndexMode.GreaterOrEqual:
+            return np.where(ticks >= position)[0][0]
+
+        raise ValueError("Unknown IndexMode: {}".format(mode))
 
     def tick_at(self, index):
         """
@@ -530,3 +617,54 @@ class SetDimension(Dimension):
                                "data object cannot be modified")
         dt = util.vlen_str_dtype
         self._h5group.write_data("labels", labels, dtype=dt)
+
+    def index_of(self, position, mode=IndexMode.LessOrEqual):
+        """
+        Returns the index of a certain position in the dimension.
+        Raises IndexError if the position is out of bounds (depending on mode and number of labels).
+
+        :param position: The position.
+        :param mode: The IndexMode to use (default LessOrEqual).
+                    The modes LessOrEqual and GreaterOrEqual will return the integer representation of the position if
+                    it is equal to the nearest integer.
+                    If the position is not an integer (or is not equal to the nearest integer), then the value is
+                    rounded down (for LessOrEqual) or rounded up (for GreaterOrEqual).
+                    If the mode is Less, the previous integer is always returned.
+
+        :returns: The matching index
+        :rtype: int
+        """
+        if position < 0:
+            if mode == IndexMode.GreaterOrEqual:
+                return 0
+            # position is OOB (left side) of indices but can't round up
+            raise IndexError("Position {} is out of bounds for SetDimension with mode {}".format(position, mode.name))
+
+        if position == 0 and mode == IndexMode.Less:
+            raise IndexError("Position {} is out of bounds for SetDimension with mode {}".format(position, mode.name))
+
+        labels = self.labels
+        if labels and len(labels) and position > len(labels)-1:
+            if mode in (IndexMode.Less, IndexMode.LessOrEqual):
+                return len(labels) - 1
+            raise IndexError("Position {} is out of bounds for SetDimension with length {} and mode {}".format(
+                position, len(labels), mode.name
+            ))
+
+        index = int(np.floor(position))
+        if np.isclose(position, index):
+            # exact position
+            if mode in (IndexMode.GreaterOrEqual, IndexMode.LessOrEqual):
+                # exact position and *Equal mode
+                return index
+            if mode == IndexMode.Less:
+                # exact position and Less mode
+                return index - 1
+            raise ValueError("Unknown IndexMode: {}".format(mode))
+
+        if mode == IndexMode.GreaterOrEqual:  # and inexact position
+            return index + 1
+        if mode in (IndexMode.LessOrEqual, IndexMode.Less):  # and inexact position
+            return index
+
+        raise ValueError("Unknown IndexMode: {}".format(mode))

@@ -77,3 +77,10 @@ class DuplicateColumnName(Exception):
     def __init__(self):
         self.message = "Column names for a DataFrame have to be unique."
         super(DuplicateColumnName, self).__init__(self.message)
+
+
+class UnsupportedLinkType(Exception):
+
+    def __init__(self, objtype, linktype):
+        self.message = "LinkType {} is not supported for {}".format(linktype, objtype)
+        super(UnsupportedLinkType, self).__init__(self.message)

@@ -6,7 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-from six import string_types, text_type
+from six import string_types
 import numpy as np
 
 import h5py
@@ -16,7 +16,7 @@ from ..exceptions import exceptions
 from . import names
 
 
-vlen_str_dtype = h5py.special_dtype(vlen=text_type)
+vlen_str_dtype = h5py.string_dtype(encoding='utf-8', length=None)
 
 
 def create_id():
@@ -29,9 +29,9 @@ def create_id():
     return str(uuid4())
 
 
-def is_uuid(id_):
+def is_uuid(id_str):
     try:
-        UUID(str(id_))
+        UUID(str(id_str))
         return True
     except ValueError:
         return False
@@ -87,20 +87,20 @@ def now_int():
     return int(now.total_seconds())
 
 
-def time_to_str(t):
+def time_to_str(time):
     """
     Returns the time represented by the parameter in the format of Boost's
     posix time `to_iso_string` function.
 
-    :param t: integer POSIX time
+    :param time: integer POSIX time
     :return: string in the form "YYYYMMDDTHHMMSS", where T is the date-time
     separator
     """
-    dt = datetime.utcfromtimestamp(t)
+    dt = datetime.utcfromtimestamp(time)
     return dt.strftime("%Y%m%dT%H%M%S").encode("utf-8")
 
 
-def str_to_time(s):
+def str_to_time(time_str):
     """
     Returns the POSIX time represented by the given string as an integer.
 
@@ -108,9 +108,9 @@ def str_to_time(s):
     separator
     :return: integer POSIX time
     """
-    if isinstance(s, bytes):
-        s = s.decode()
-    dt = datetime.strptime(s, "%Y%m%dT%H%M%S") - datetime(1970, 1, 1)
+    if isinstance(time_str, bytes):
+        time_str = time_str.decode()
+    dt = datetime.strptime(time_str, "%Y%m%dT%H%M%S") - datetime(1970, 1, 1)
     return int(dt.total_seconds())
 
 

@@ -66,19 +66,19 @@ class Entity(object):
         """
         return self._file
 
-    def force_created_at(self, t=None):
+    def force_created_at(self, time=None):
         """
         Sets the creation time `created_at` to the given time
         (default: current time).
 
-        :param t: The time to set.
-        :type t: int
+        :param time: The time to set.
+        :type time: int
         """
-        if t is None:
-            t = util.now_int()
+        if time is None:
+            time = util.now_int()
         else:
-            util.check_attr_type(t, int)
-        self._h5group.set_attr("created_at", util.time_to_str(t))
+            util.check_attr_type(time, int)
+        self._h5group.set_attr("created_at", util.time_to_str(time))
 
     @property
     def updated_at(self):
@@ -91,19 +91,19 @@ class Entity(object):
         """
         return util.str_to_time(self._h5group.get_attr("updated_at"))
 
-    def force_updated_at(self, t=None):
+    def force_updated_at(self, time=None):
         """
         Sets the update time `updated_at` to the given time.
         (default: current time)
 
-        :param t: The time to set.
-        :type t: int
+        :param time: The time to set.
+        :type time: int
         """
-        if t is None:
-            t = util.now_int()
+        if time is None:
+            time = util.now_int()
         else:
-            util.check_attr_type(t, int)
-        self._h5group.set_attr("updated_at", util.time_to_str(t))
+            util.check_attr_type(time, int)
+        self._h5group.set_attr("updated_at", util.time_to_str(time))
 
     @property
     def definition(self):
@@ -117,9 +117,9 @@ class Entity(object):
         return self._h5group.get_attr("definition")
 
     @definition.setter
-    def definition(self, d):
-        util.check_attr_type(d, str)
-        self._h5group.set_attr("definition", d)
+    def definition(self, definition):
+        util.check_attr_type(definition, str)
+        self._h5group.set_attr("definition", definition)
         if self.file.auto_update_timestamps:
             self.force_updated_at()
 
@@ -146,11 +146,11 @@ class Entity(object):
         return self._h5group.get_attr("type")
 
     @type.setter
-    def type(self, t):
-        if t is None:
+    def type(self, typ):
+        if typ is None:
             raise AttributeError("type can't be None")
-        util.check_attr_type(t, str)
-        self._h5group.set_attr("type", t)
+        util.check_attr_type(typ, str)
+        self._h5group.set_attr("type", typ)
         if self.file.auto_update_timestamps:
             self.force_updated_at()
 

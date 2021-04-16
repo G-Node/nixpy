@@ -9,47 +9,17 @@ env:
 
 matrix:
   include:
-    - python: "2.7"
-      os: linux
-      dist: xenial
-      env: pymajor=2
-    - python: "3.6"
-      os: linux
-      dist: xenial
-      env: pymajor=3
     - python: "3.7"
       os: linux
-      env: pymajor=3 coverage=1
+      env: pymajor=3 compat=1
       dist: xenial
       sudo: true
-    - python: "3.7"
+    - python: "3.8"
       os: linux
-      env: pymajor=3 nocompat=1
-      dist: xenial
-    - language: generic
-      os: osx
-      env: pymajor=2
-      addons:
-        homebrew:
-          packages:
-            - python2
-            - cmake
-            - cppunit
-            - hdf5
-            - numpy
-          update: true
-    - language: generic
-      os: osx
       env: pymajor=3
-      addons:
-        homebrew:
-          packages:
-            - python3
-            - cmake
-            - cppunit
-            - hdf5
-            - numpy
-          update: true
+      dist: xenial
+  allow_failures:
+    - env: pymajor=3 compat=1
 
 addons:
   apt:
@@ -61,7 +31,7 @@ addons:
 
 before_install:
   # build nix for compat tests
-  - if [[ -z "${nocompat}" ]]; then
+  - if [[ "${compat}" == 1 ]]; then
       nixprefix="/usr/local";
       export NIX_INCDIR=${nixprefix}/include/nixio-1.0;
       export NIX_LIBDIR=${nixprefix}/lib;
@@ -90,14 +60,8 @@ install:
   - python${pymajor} setup.py build
 
 script:
-  - if [[ "${nocompat}" == 1 ]]; then
-      pytest --cov=nixio -nauto;
-    else
+  - if [[ "${compat}" == 1 ]]; then
       pytest --cov=nixio --nix-compat -nauto;
-    fi
-
-after_success:
-  - if [[ "${coverage}" == 1 ]]; then
-      pip install codecov;
-      codecov;
+    else
+      pytest --cov=nixio -nauto;
     fi

@@ -202,7 +202,7 @@ class H5Group(object):
                                               idx=pos)
         return self.get_by_name(name)
 
-    def delete(self, id_or_name):
+    def delete(self, id_or_name, delete_if_empty=True):
         """
         Deletes the child HDF5 group that matches the given name or id.
         """
@@ -216,7 +216,7 @@ class H5Group(object):
             raise ValueError("Error deleting {} ".format(name))
         # Delete if empty and non-root container
         groupdepth = len(self.group.name.split("/")) - 1
-        if not len(self.group) and groupdepth > 1:
+        if delete_if_empty and not len(self.group) and groupdepth > 1:
             del self.parent.group[self.name]
             # del self.group
             self.group = None
@@ -234,13 +234,13 @@ class H5Group(object):
         # iteration issues since it's deleted before descending into the
         # children of the current group
 
-        def delete_by_id(name, obj):
+        def delete_by_id(_, obj):
             if not isinstance(obj, h5py.Group):
                 return
             grp = self.create_from_h5obj(obj)
-            for ch in grp:
-                if ch.get_attr("entity_id") in eid:
-                    del grp[ch.name]
+            for child in grp:
+                if child.get_attr("entity_id") in eid:
+                    del grp[child.name]
 
         self._group.visititems(delete_by_id)
 
@@ -282,17 +282,17 @@ class H5Group(object):
         dest_grp = dest.group[cls]
         grp.copy(source=source, dest=dest_grp, name=name, shallow=shallow)
 
-        g = dest_grp[name]
-        g.attrs["name"] = name
+        grp = dest_grp[name]
+        grp.attrs["name"] = name
         if not keep_id:
             def change_id(_, igrp):
                 if "entity_id" in igrp.attrs:
                     id_ = util.create_id()
                     igrp.attrs.modify("entity_id", np.string_(id_))
             id_ = util.create_id()
-            g.attrs.modify("entity_id", np.string_(id_))
-            g.visititems(change_id)
-        return g
+            grp.attrs.modify("entity_id", np.string_(id_))
+            grp.visititems(change_id)
+        return grp
 
     @property
     def parent(self):

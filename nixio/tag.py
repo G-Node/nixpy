@@ -25,6 +25,19 @@ from .dimension_type import DimensionType
 from .link_type import LinkType
 from . import util
 from .section import Section
+from enum import Enum
+from .dimensions import IndexMode
+
+
+class SliceMode(Enum):
+    Exclusive = "exclusive"
+    Inclusive = "inclusive"
+
+    def to_index_mode(self):
+        if self == self.Exclusive:
+            return IndexMode.Less
+        if self == self.Inclusive:
+            return IndexMode.LessOrEqual
 
 
 class FeatureContainer(Container):
@@ -36,12 +49,12 @@ class FeatureContainer(Container):
     def __getitem__(self, item):
         try:
             return Container.__getitem__(self, item)
-        except KeyError as ke:
+        except KeyError as exc:
             # item might be the ID of the referenced data; try it as well
             for feat in self:
                 if feat.data.id == item or feat.data.name == item:
                     return feat
-            raise ke
+            raise exc
 
     def __contains__(self, item):
         if isinstance(item, Feature):
@@ -59,6 +72,11 @@ class BaseTag(Entity):
     """
     Base class for Tag and MultiTag
     """
+    def __init__(self, nixfile, nixparent, h5group):
+        super(BaseTag, self).__init__(nixfile, nixparent, h5group)
+        self._sources = None
+        self._references = None
+        self._features = None
 
     @property
     def units(self):
@@ -79,10 +97,10 @@ class BaseTag(Entity):
                 del self._h5group["units"]
         else:
             sanitized = []
-            for u in units:
-                util.check_attr_type(u, str)
-                u = util.units.sanitizer(u)
-                sanitized.append(u)
+            for unit in units:
+                util.check_attr_type(unit, str)
+                unit = util.units.sanitizer(unit)
+                sanitized.append(unit)
 
             dtype = DataType.String
             self._h5group.write_data("units", sanitized, dtype)
@@ -108,6 +126,36 @@ class BaseTag(Entity):
         feat = Feature.create_new(self.file, self, features, data, link_type)
         return feat
 
+    def _calc_data_slices(self, data, position, extent, stop_rule):
+        refslice = list()
+        if not self.units:
+            units = [None]*len(data.dimensions)
+        else:
+            units = self.units
+
+        for idx, dim in enumerate(data.dimensions):
+            if idx < len(position):
+                pos = position[idx]
+                start = self._pos_to_idx(pos, units[idx], dim, IndexMode.GreaterOrEqual)
+            else:
+                # Tag doesn't specify (pos, ext) for all dimensions: will return entire remaining dimensions (0:len)
+                start = 0
+            if extent is None or len(extent) == 0:
+                # no extents: return one element
+                stop = start + 1
+            elif idx < len(extent):
+                ext = extent[idx]
+                stop = self._pos_to_idx(pos+ext, units[idx], dim, stop_rule.to_index_mode()) + 1
+            else:
+                # Tag doesn't specify (pos, ext) for all dimensions: will return entire remaining dimensions (0:len)
+                stop = data.shape[idx]
+
+            if stop <= start:
+                # always return at least one element per dimension
+                stop = start + 1
+            refslice.append(slice(start, stop))
+        return tuple(refslice)
+
     @staticmethod
     def _slices_in_data(data, slices):
         dasize = data.data_extent
@@ -115,7 +163,7 @@ class BaseTag(Entity):
         return np.all(np.less_equal(stops, dasize))
 
     @staticmethod
-    def _pos_to_idx(pos, unit, dim):
+    def _pos_to_idx(pos, unit, dim, mode):
         dimtype = dim.dimension_type
         if dimtype == DimensionType.Set:
             dimunit = None
@@ -134,43 +182,47 @@ class BaseTag(Entity):
                     scaling = util.units.scaling(unit, dimunit)
                 except InvalidUnit:
                     raise IncompatibleDimensions(
-                        "Cannot apply a position with unit to a SetDimension",
+                        "Cannot scale Tag unit {} to match dimension unit {}".format(unit, dimunit),
                         "Tag._pos_to_idx"
                     )
-
-            index = dim.index_of(pos * scaling)
+            index = dim.index_of(pos * scaling, mode)
         elif dimtype == DimensionType.Set:
             if unit and unit != "none":
                 raise IncompatibleDimensions(
                     "Cannot apply a position with unit to a SetDimension",
                     "Tag._pos_to_idx"
                 )
-            index = np.round(pos)
-            nlabels = len(dim.labels)
-            if nlabels and index > nlabels:
-                raise OutOfBounds("Position is out of bounds in SetDimension",
-                                  pos)
+            index = dim.index_of(pos, mode)
         else:  # dimtype == DimensionType.Range:
             if dimunit and unit is not None:
                 try:
                     scaling = util.units.scaling(unit, dimunit)
                 except InvalidUnit:
                     raise IncompatibleDimensions(
-                        "Provided units are not scalable!",
+                        "Cannot scale Tag unit {} to match dimension unit {}".format(unit, dimunit),
                         "Tag._pos_to_idx"
                     )
-            index = dim.index_of(pos * scaling)
+            index = dim.index_of(pos * scaling, mode)
 
         return int(index)
 
+    @property
+    def features(self):
+        """
+        A property containing all features. Features can be obtained
+        via their index or their ID. Features can be deleted from the list.
+        Adding new features is done using the create_feature method.
+        This is a read only attribute.
+
+        :type: Container of Feature.
+        """
+        if self._features is None:
+            self._features = FeatureContainer("features", self.file,
+                                              self, Feature)
+        return self._features
+
 
 class Tag(BaseTag):
-
-    def __init__(self, nixfile, nixparent, h5group):
-        super(Tag, self).__init__(nixfile, nixparent, h5group)
-        self._sources = None
-        self._references = None
-        self._features = None
 
     @classmethod
     def create_new(cls, nixfile, nixparent, h5parent, name, type_, position):
@@ -220,49 +272,13 @@ class Tag(BaseTag):
         if self.file.auto_update_timestamps:
             self.force_updated_at()
 
-    def _calc_data_slices(self, data):
-        refslice = list()
-        position = self.position
-        extent = self.extent
-        dimcount = len(data.dimensions)
-        if dimcount > len(position):
-            ldiff = dimcount-len(position)
-            tmp_pos = list(position)
-            tmp_pos.extend([0] * ldiff)
-            position = tuple(tmp_pos)
-            if extent is not None and len(extent) != 0:
-                tmp_ext = list(extent)
-                for i in range(len(position)-1, dimcount):
-                    tmp_ext.append(len(data[i])-1)
-                extent = tuple(tmp_ext)
-        elif dimcount < len(position):
-            ldiff = dimcount - len(position)  # a negative value
-            position = position[:ldiff]
-            if extent is not None and len(extent) != 0:
-                extent = extent[:ldiff]
-
-        for idx, (pos, dim) in enumerate(zip(position, data.dimensions)):
-            if self.units:
-                unit = self.units[idx]
-            else:
-                unit = None
-            start = self._pos_to_idx(pos, unit, dim)
-            stop = 0
-            if idx < len(extent):
-                ext = extent[idx]
-                stop = self._pos_to_idx(pos + ext, unit, dim) + 1
-            if stop == 0:
-                stop = start + 1
-            refslice.append(slice(start, stop))
-        return tuple(refslice)
-
     def retrieve_data(self, refidx):
         msg = ("Call to deprecated method Tag.retrieve_data. "
                "Use Tag.tagged_data instead.")
         warnings.warn(msg, category=DeprecationWarning)
         return self.tagged_data(refidx)
 
-    def tagged_data(self, refidx):
+    def tagged_data(self, refidx, stop_rule=SliceMode.Exclusive):
         references = self.references
         position = self.position
         extent = self.extent
@@ -278,7 +294,7 @@ class Tag(BaseTag):
                 "Number of dimensions in position and extent "
                 "do not match ", extent)
 
-        slices = self._calc_data_slices(ref)
+        slices = self._calc_data_slices(ref, self.position, self.extent, stop_rule)
         if not self._slices_in_data(ref, slices):
             raise OutOfBounds("References data slice out of the extent of the "
                               "DataArray!")
@@ -290,34 +306,32 @@ class Tag(BaseTag):
         warnings.warn(msg, category=DeprecationWarning)
         return self.feature_data(featidx)
 
-    def feature_data(self, featidx):
+    def feature_data(self, featidx, stop_rule=SliceMode.Exclusive):
         if len(self.features) == 0:
-            raise OutOfBounds(
-                "There are no features associated with this tag!"
-            )
+            raise OutOfBounds("There are no features associated with this tag!")
 
         try:
             feat = self.features[featidx]
         except KeyError:
             feat = None
-            for f in self.features:
-                if f.data.name == featidx or f.data.id == featidx:
-                    feat = f
+            for feature in self.features:
+                if feature.data.name == featidx or feature.data.id == featidx:
+                    feat = feature
                     break
             if feat is None:
                 raise
-        da = feat.data
-        if da is None:
+        data = feat.data
+        if data is None:
             raise UninitializedEntity()
         if feat.link_type == LinkType.Tagged:
-            slices = self._calc_data_slices(da)
-            if not self._slices_in_data(da, slices):
+            slices = self._calc_data_slices(data, self.position, self.extent, stop_rule)
+            if not self._slices_in_data(data, slices):
                 raise OutOfBounds("Requested data slice out of the extent "
                                   "of the Feature!")
-            return DataView(da, slices)
+            return DataView(data, slices)
         # For untagged and indexed return the full data
-        fullslices = tuple(slice(0, stop) for stop in da.shape)
-        return DataView(da, fullslices)
+        fullslices = tuple(slice(0, stop) for stop in data.shape)
+        return DataView(data, fullslices)
 
     @property
     def references(self):
@@ -335,21 +349,6 @@ class Tag(BaseTag):
             self._references = LinkContainer("references", self, DataArray,
                                              self._parent.data_arrays)
         return self._references
-
-    @property
-    def features(self):
-        """
-        A property containing all features of the tag. Features can be obtained
-        via their index or their id. Features can be deleted from the list.
-        Adding new features to the tag is done using the create_feature method.
-        This is a read only attribute.
-
-        :type: Container of Feature.
-        """
-        if self._features is None:
-            self._features = FeatureContainer("features", self.file,
-                                              self, Feature)
-        return self._features
 
     @property
     def sources(self):

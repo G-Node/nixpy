@@ -151,8 +151,8 @@ class Property(Entity):
         filever = tuple(dataset._parent.file.attrs["version"])
         if filever < (1, 1, 1):
             val = self._h5dataset.dataset[:]
-            v = val[0]["uncertainty"]
-            return v
+            uncertainty = val[0]["uncertainty"]
+            return uncertainty
         return self._h5dataset.get_attr("uncertainty")
 
     @uncertainty.setter
@@ -167,8 +167,8 @@ class Property(Entity):
         filever = tuple(dataset._parent.file.attrs["version"])
         if filever < (1, 1, 1):
             val = self._h5dataset.dataset[:]
-            v = val[0]["reference"]
-            return v
+            reference = val[0]["reference"]
+            return reference
         return self._h5dataset.get_attr("reference")
 
     @reference.setter
@@ -238,8 +238,8 @@ class Property(Entity):
         dataset = self._h5dataset
         filever = tuple(dataset._parent.file.attrs["version"])
         if filever < (1, 1, 1):
-            v = self._read_old_values()
-            return v
+            values = self._read_old_values()
+            return values
         if not sum(dataset.shape):
             return tuple()
 
@@ -262,13 +262,11 @@ class Property(Entity):
         :param vals: a single value or list of values.
         """
         # Make sure boolean value 'False' gets through as well...
-        if vals is None or (isinstance(vals, (Sequence, Iterable)) and
-                            not len(vals)):
+        if vals is None or (isinstance(vals, (Sequence, Iterable)) and not len(vals)):
             self.delete_values()
             return
 
-        if not isinstance(vals, (Sequence, Iterable)) \
-                or isinstance(vals, string_types):
+        if not isinstance(vals, (Sequence, Iterable)) or isinstance(vals, string_types):
             vals = [vals]
 
         # Make sure all values are of the same data type
@@ -287,15 +285,14 @@ class Property(Entity):
         vtype = self._check_new_value_types(data)
 
         arr = np.array(data, dtype=vtype).flatten('C')
-        ds = self._h5dataset
+        dataset = self._h5dataset
         src_len = len(self.values)
         dlen = len(arr)
-        ds.shape = (src_len+dlen,)
-        ds.write_data(arr, sl=np.s_[src_len: src_len+dlen])
+        dataset.shape = (src_len+dlen,)
+        dataset.write_data(arr, slc=np.s_[src_len: src_len+dlen])
 
     def _check_new_value_types(self, data):
-        if (isinstance(data, (Sequence, Iterable)) and
-                not isinstance(data, string_types)):
+        if isinstance(data, (Sequence, Iterable)) and not isinstance(data, string_types):
             single_val = data[0]
         else:
             single_val = data
@@ -333,12 +330,7 @@ class Property(Entity):
 
     @property
     def data_type(self):
-        dtype = self._h5dataset.dtype
-
-        if dtype == util.vlen_str_dtype:
-            return DataType.String
-
-        return dtype
+        return self._h5dataset.dtype
 
     def delete_values(self):
         self._h5dataset.shape = (0,)

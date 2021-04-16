@@ -1,5 +1,7 @@
+"""
+Validate NIX files for missing or inconsistent objects and annotations.
+"""
 import os
-import argparse
 import nixio as nix
 
 
@@ -7,7 +9,7 @@ def format_obj(obj):
     return "{} '{}' (ID: {})".format(type(obj).__name__, obj.name, obj.id)
 
 
-def print_header(text, h=1):
+def print_header(text):
     print("  {}".format(text))
     print("  " + "-"*len(text))
 
@@ -37,13 +39,13 @@ def validate(filename):
     print()
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Validate NIX files"
-    )
+def create_subcmd_parser(parser):
     parser.add_argument("file", type=str, nargs="+",
                         help="path to file to validate (at least one)")
-    args = parser.parse_args()
+    return parser
+
+
+def main(args):
     filenames = args.file
 
     for nixfn in filenames:
@@ -51,7 +53,3 @@ def main():
             validate(nixfn)
         else:
             print("error: No such file '{}'".format(nixfn))
-
-
-if __name__ == "__main__":
-    main()

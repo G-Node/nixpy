@@ -30,54 +30,54 @@ class TestFile(unittest.TestCase):
         self.tmpdir.cleanup()
 
     def test_file_format(self):
-        assert(self.file.format == "nix")
-        assert(self.file.version == filepy.HDF_FF_VERSION)
+        assert self.file.format == "nix"
+        assert self.file.version == filepy.HDF_FF_VERSION
 
     def test_file_timestamps(self):
         created_at = self.file.created_at
-        assert(created_at > 0)
+        assert created_at > 0
 
         updated_at = self.file.updated_at
-        assert(updated_at > 0)
+        assert updated_at > 0
 
         self.file.force_created_at(1403530068)
-        assert(self.file.created_at == 1403530068)
+        assert self.file.created_at == 1403530068
 
     def test_file_blocks(self):
-        assert(len(self.file.blocks) == 0)
+        assert len(self.file.blocks) == 0
 
         block = self.file.create_block("test block", "recordingsession")
 
-        assert(len(self.file.blocks) == 1)
+        assert len(self.file.blocks) == 1
 
-        assert(block in self.file.blocks)
-        assert(block.id in self.file.blocks)
-        assert("notexist" not in self.file.blocks)
+        assert block in self.file.blocks
+        assert block.id in self.file.blocks
+        assert "notexist" not in self.file.blocks
 
-        assert(block.id == self.file.blocks[0].id)
-        assert(block.id == self.file.blocks[-1].id)
+        assert block.id == self.file.blocks[0].id
+        assert block.id == self.file.blocks[-1].id
 
         del self.file.blocks[0]
 
-        assert(len(self.file.blocks) == 0)
+        assert len(self.file.blocks) == 0
 
     def test_file_sections(self):
-        assert(len(self.file.sections) == 0)
+        assert len(self.file.sections) == 0
 
         section = self.file.create_section("test section", "recordingsession")
 
-        assert(len(self.file.sections) == 1)
+        assert len(self.file.sections) == 1
 
-        assert(section in self.file.sections)
-        assert(section.id in self.file.sections)
-        assert("notexist" not in self.file.sections)
+        assert section in self.file.sections
+        assert section.id in self.file.sections
+        assert "notexist" not in self.file.sections
 
-        assert(section.id == self.file.sections[0].id)
-        assert(section.id == self.file.sections[-1].id)
+        assert section.id == self.file.sections[0].id
+        assert section.id == self.file.sections[-1].id
 
         del self.file.sections[0]
 
-        assert(len(self.file.sections) == 0)
+        assert len(self.file.sections) == 0
 
     def test_file_find_sections(self):
         for i in range(2):
@@ -93,8 +93,8 @@ class TestFile(unittest.TestCase):
                 "level3-p1-s" + str(i), "dummy"
             )
 
-        assert(len(self.file.find_sections()) == 8)
-        assert(len(self.file.find_sections(limit=1)) == 2)
+        assert len(self.file.find_sections()) == 8
+        assert len(self.file.find_sections(limit=1)) == 2
         assert(len(self.file.find_sections(filtr=lambda x: "level2-p1-s" in
                                                            x.name)) == 2)
         assert(len(self.file.find_sections(filtr=lambda x: "level2-p1-s" in
@@ -229,8 +229,8 @@ class TestFileVer(unittest.TestCase):
     fformat = filepy.FILE_FORMAT
 
     def try_open(self, mode):
-        f = nix.File.open(self.testfilename, mode)
-        f.close()
+        nix_file = nix.File.open(self.testfilename, mode)
+        nix_file.close()
 
     def set_header(self, fformat=None, version=None, fileid=None):
         if fformat is None:
@@ -263,28 +263,28 @@ class TestFileVer(unittest.TestCase):
         self.try_open(nix.FileMode.ReadWrite)
 
     def test_read_only(self):
-        vx, vy, vz = self.filever
-        roversion = (vx, vy, vz+2)
+        ver_x, ver_y, ver_z = self.filever
+        roversion = (ver_x, ver_y, ver_z+2)
         self.set_header(version=roversion)
         self.try_open(nix.FileMode.ReadOnly)
         with self.assertRaises(RuntimeError):
             self.try_open(nix.FileMode.ReadWrite)
 
     def test_no_open(self):
-        vx, vy, vz = self.filever
-        noversion = (vx, vy+3, vz+2)
+        ver_x, ver_y, ver_z = self.filever
+        noversion = (ver_x, ver_y+3, ver_z+2)
         self.set_header(version=noversion)
         with self.assertRaises(RuntimeError):
             self.try_open(nix.FileMode.ReadWrite)
         with self.assertRaises(RuntimeError):
             self.try_open(nix.FileMode.ReadOnly)
-        noversion = (vx, vy+1, vz)
+        noversion = (ver_x, ver_y+1, ver_z)
         self.set_header(version=noversion)
         with self.assertRaises(RuntimeError):
             self.try_open(nix.FileMode.ReadWrite)
         with self.assertRaises(RuntimeError):
             self.try_open(nix.FileMode.ReadOnly)
-        noversion = (vx+1, vy, vz)
+        noversion = (ver_x+1, ver_y, ver_z)
         self.set_header(version=noversion)
         with self.assertRaises(RuntimeError):
             self.try_open(nix.FileMode.ReadWrite)

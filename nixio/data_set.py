@@ -7,8 +7,6 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import numpy as np
-from six import ensure_str
-from . import util
 
 
 class DataSet(object):
@@ -60,7 +58,7 @@ class DataSet(object):
     @property
     def dtype(self):
         """
-        :type: :class:`numpy.dtype` object holding type infromation about
+        :type: :class:`numpy.dtype` object holding type information about
                the data stored in the DataSet.
         """
         return np.dtype(self._get_dtype())
@@ -115,20 +113,15 @@ class DataSet(object):
         enlarge = tuple(self.shape[i] + (0 if i != axis else x)
                         for i, x in enumerate(data.shape))
         self.data_extent = enlarge
-        sl = tuple(slice(o, c+o) for o, c in zip(offset, count))
-        self._write_data(data, sl)
+        slc = tuple(slice(o, c+o) for o, c in zip(offset, count))
+        self._write_data(data, slc)
 
-    def _write_data(self, data, sl=None):
+    def _write_data(self, data, slc=None):
         dataset = self._h5group.get_dataset("data")
-        dataset.write_data(data,  sl)
+        dataset.write_data(data,  slc)
 
-    def _read_data(self, sl=None):
-        dataset = self._h5group.get_dataset("data")
-        data = dataset.read_data(sl)
-        if data.dtype == util.vlen_str_dtype:
-            data = np.array([ensure_str(d) for d in data],
-                            dtype=util.vlen_str_dtype)
-        return data
+    def _read_data(self, slc=None):
+        return self._h5group.get_dataset("data").read_data(slc)
 
     @property
     def data_extent(self):

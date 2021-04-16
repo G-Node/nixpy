@@ -46,9 +46,9 @@ def can_read(nixfile):
     filever = nixfile.version
     if len(filever) != 3:
         raise RuntimeError("Invalid version specified in file.")
-    vx, vy, _ = HDF_FF_VERSION
-    fx, fy, _ = filever
-    if vx == fx and vy >= fy:
+    ver_x, ver_y, _ = HDF_FF_VERSION
+    file_x, file_y, _ = filever
+    if ver_x == file_x and ver_y >= file_y:
         return True
     else:
         return False
@@ -204,8 +204,8 @@ class File(object):
             return
 
         # convert to np.int32 since py3 defaults to 64
-        v = np.array(HDF_FF_VERSION, dtype=np.int32)
-        self._root.set_attr("version", v)
+        file_ver = np.array(HDF_FF_VERSION, dtype=np.int32)
+        self._root.set_attr("version", file_ver)
 
     @property
     def format(self):
@@ -250,19 +250,19 @@ class File(object):
         """
         return util.str_to_time(self._h5file.attrs["created_at"])
 
-    def force_created_at(self, t=None):
+    def force_created_at(self, time=None):
         """
         Sets the creation time `created_at` to the given time
         (default: current time).
 
-        :param t: The time to set
-        :type t: int
+        :param time: The time to set
+        :type time: int
         """
-        if t is None:
-            t = util.now_int()
+        if time is None:
+            time = util.now_int()
         else:
-            util.check_attr_type(t, int)
-        self._h5file.attrs["created_at"] = util.time_to_str(t)
+            util.check_attr_type(time, int)
+        self._h5file.attrs["created_at"] = util.time_to_str(time)
 
     @property
     def updated_at(self):
@@ -275,19 +275,19 @@ class File(object):
         """
         return util.str_to_time(self._h5file.attrs["updated_at"])
 
-    def force_updated_at(self, t=None):
+    def force_updated_at(self, time=None):
         """
         Sets the update time `updated_at` to the given time.
         (default: current time)
 
-        :param t: The time to set (default: now)
-        :type t: int
+        :param time: The time to set (default: now)
+        :type time: int
         """
-        if t is None:
-            t = util.now_int()
+        if time is None:
+            time = util.now_int()
         else:
-            util.check_attr_type(t, int)
-        self._h5file.attrs["updated_at"] = util.time_to_str(t)
+            util.check_attr_type(time, int)
+        self._h5file.attrs["updated_at"] = util.time_to_str(time)
 
     def is_open(self):
         """
@@ -297,7 +297,7 @@ class File(object):
         :rtype: bool
         """
         try:
-            self._h5file.mode
+            _ = self._h5file.mode
             return True
         except ValueError:
             return False
@@ -366,9 +366,8 @@ class File(object):
                                   shallow=not children, keep_id=keep_id)
 
         if not children:
-            for p in obj.props:
-                self.sections[obj.name].create_property(copy_from=p,
-                                                        keep_copy_id=keep_id)
+            for prop in obj.props:
+                self.sections[obj.name].create_property(copy_from=prop, keep_copy_id=keep_id)
 
         return self.sections[obj.name]
 
@@ -414,12 +413,10 @@ class File(object):
                 raise NameError("Name already exist. Possible solution is to "
                                 "provide a new name when copying destination "
                                 "is the same as the source parent")
-            b = copy_from._parent._h5group.copy(source=src, dest=self._h5group,
-                                                name=name,
-                                                cls=clsname,
-                                                keep_id=keep_copy_id)
-            id_ = b.attrs["entity_id"]
-            return self.blocks[id_]
+            blk = copy_from._parent._h5group.copy(source=src, dest=self._h5group, name=name, cls=clsname,
+                                                  keep_id=keep_copy_id)
+            entity_id = blk.attrs["entity_id"]
+            return self.blocks[entity_id]
 
         if name in self._data:
             raise ValueError("Block with the given name already exists!")

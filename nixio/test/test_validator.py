@@ -29,14 +29,14 @@ class TestValidate (unittest.TestCase):
             da1d = blk.create_data_array("data-1d",
                                          "validation-test.data_array",
                                          dtype=nix.DataType.Float,
-                                         data=np.random.random(5))
+                                         data=np.random.random_sample(5))
             rdim = da1d.append_range_dimension(ticks=[0.1, 0.2, 1.5, 2.4, 3.0])
             rdim.unit = "ms"
 
             da2d = blk.create_data_array("data-2d",
                                          "validation-test.data_array",
                                          dtype=nix.DataType.Float,
-                                         data=np.random.random((2, 10)))
+                                         data=np.random.random_sample((2, 10)))
             setdim = da2d.append_set_dimension()
             setdim.labels = ("A", "B")
             da2d.append_sampled_dimension(0.1)
@@ -44,7 +44,7 @@ class TestValidate (unittest.TestCase):
             da3d = blk.create_data_array("data-3d",
                                          "validation-test.data_array",
                                          dtype=nix.DataType.Float,
-                                         data=np.random.random((4, 2, 10)))
+                                         data=np.random.random_sample((4, 2, 10)))
             setdim = da3d.append_set_dimension()
             setdim.labels = ("1", "2", "3", "4")
             da3d.append_set_dimension()  # set dim without labels

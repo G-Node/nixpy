@@ -33,62 +33,62 @@ class TestSources(unittest.TestCase):
         self.tmpdir.cleanup()
 
     def test_source_eq(self):
-        assert(self.source == self.source)
-        assert(not self.source == self.other)
-        assert(self.source is not None)
+        assert self.source == self.source
+        assert not self.source == self.other
+        assert self.source is not None
 
     def test_source_id(self):
-        assert(self.source.id is not None)
+        assert self.source.id is not None
 
     def test_source_name(self):
-        assert(self.source.name is not None)
+        assert self.source.name is not None
 
     def test_source_type(self):
         def set_none():
             self.source.type = None
 
-        assert(self.source.type is not None)
+        assert self.source.type is not None
         self.assertRaises(Exception, set_none)
 
         self.source.type = "foo type"
-        assert(self.source.type == "foo type")
+        assert self.source.type == "foo type"
 
     def test_source_definition(self):
-        assert(self.source.definition is None)
+        assert self.source.definition is None
 
         self.source.definition = "definition"
-        assert(self.source.definition == "definition")
+        assert self.source.definition == "definition"
 
         self.source.definition = None
-        assert(self.source.definition is None)
+        assert self.source.definition is None
 
     def test_source_timestamps(self):
         created_at = self.source.created_at
-        assert(created_at > 0)
+        assert created_at > 0
 
         updated_at = self.source.updated_at
-        assert(updated_at > 0)
+        assert updated_at > 0
 
         self.source.force_created_at(1403530068)
-        assert(self.source.created_at == 1403530068)
+        assert self.source.created_at == 1403530068
 
     def test_source_sources(self):
-        assert(len(self.source.sources) == 0)
+        assert len(self.source.sources) == 0
 
         source = self.source.create_source("test source", "electrode")
 
-        assert(len(self.source.sources) == 1)
+        assert len(self.source.sources) == 1
 
-        assert(source in self.source.sources)
-        assert(source.id in self.source.sources)
-        assert("notexist" not in self.source.sources)
+        assert source in self.source.sources
+        assert source.id in self.source.sources
+        assert "notexist" not in self.source.sources
 
-        assert(source.id == self.source.sources[0].id)
-        assert(source.id == self.source.sources[-1].id)
+        assert source.id == self.source.sources[0].id
+        assert source.id == self.source.sources[-1].id
 
         del self.source.sources[0]
 
-        assert(len(self.source.sources) == 0)
+        assert len(self.source.sources) == 0
 
     def test_source_find_sources(self):
         for i in range(2):
@@ -104,8 +104,8 @@ class TestSources(unittest.TestCase):
                 "level3-p1-s" + str(i), "dummy"
             )
 
-        assert(len(self.source.find_sources()) == 9)
-        assert(len(self.source.find_sources(limit=1)) == 3)
+        assert len(self.source.find_sources()) == 9
+        assert len(self.source.find_sources(limit=1)) == 3
         assert(len(self.source.find_sources(filtr=lambda x:
                                             "level2-p1-s" in x.name)) == 2)
         assert(len(self.source.find_sources(filtr=lambda x:
@@ -113,14 +113,14 @@ class TestSources(unittest.TestCase):
                                             limit=1)) == 0)
 
     def test_sources_extend(self):
-        assert(len(self.array.sources) == 0)
+        assert len(self.array.sources) == 0
         self.array.sources.extend([self.source, self.other])
-        assert(len(self.array.sources) == 2)
+        assert len(self.array.sources) == 2
         with self.assertRaises(TypeError):
             self.array.sources.extend(self.third)
-        assert(len(self.array.sources) == 2)
+        assert len(self.array.sources) == 2
         self.array.sources.extend([self.third])
-        assert(len(self.array.sources) == 3)
+        assert len(self.array.sources) == 3
 
     def test_inverse_search(self):
         da_one = self.block.create_data_array("foo", "data_array",

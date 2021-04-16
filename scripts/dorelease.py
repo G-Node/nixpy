@@ -190,7 +190,9 @@ def update_ci_confs(newver):
 
 def tag_head(newverstr):
     try:
-        tagrev = check_output(["git", "rev-parse", newverstr], stderr=DEVNULL)
+        tagcommitstr = newverstr + "^{commit}"
+        tagrev = check_output(["git", "rev-parse", tagcommitstr],
+                              stderr=DEVNULL)
         headrev = check_output(["git", "rev-parse", "HEAD"])
         if tagrev != headrev:
             die("Tag or object named {} already exists "

@@ -80,9 +80,8 @@ class Block(Entity):
         if copy_from:
             if not isinstance(copy_from, MultiTag):
                 raise TypeError("Object to be copied is not a MultiTag")
-            id = self._copy_objects(copy_from, "multi_tags",
-                                    keep_copy_id, name)
-            return self.multi_tags[id]
+            objid = self._copy_objects(copy_from, "multi_tags", keep_copy_id, name)
+            return self.multi_tags[objid]
 
         util.check_entity_name_and_type(name, type_)
         multi_tags = self._h5group.open_group("multi_tags")
@@ -105,7 +104,7 @@ class Block(Entity):
                 extcreated = True
             mtag = MultiTag.create_new(self.file, self, multi_tags,
                                        name, type_, positions)
-        except Exception as e:
+        except Exception as exp:
             msg = "MultiTag Creation Failed"
             if poscreated:
                 del self.data_arrays["{}-positions".format(name)]
@@ -116,7 +115,7 @@ class Block(Entity):
             elif poscreated and not extcreated:
                 msg += " due to invalid extents"
             print(msg)
-            raise e
+            raise exp
 
         if extents is not None:
             mtag.extents = extents
@@ -145,8 +144,8 @@ class Block(Entity):
         if copy_from:
             if not isinstance(copy_from, Tag):
                 raise TypeError("Object to be copied is not a Tag")
-            id = self._copy_objects(copy_from, "tags", keep_copy_id, name)
-            return self.tags[id]
+            objid = self._copy_objects(copy_from, "tags", keep_copy_id, name)
+            return self.tags[objid]
 
         util.check_entity_name_and_type(name, type_)
         tags = self._h5group.open_group("tags")
@@ -228,9 +227,8 @@ class Block(Entity):
         if copy_from:
             if not isinstance(copy_from, DataArray):
                 raise TypeError("Object to be copied is not a DataArray")
-            id = self._copy_objects(copy_from, "data_arrays",
-                                    keep_copy_id, name)
-            return self.data_arrays[id]
+            objid = self._copy_objects(copy_from, "data_arrays", keep_copy_id, name)
+            return self.data_arrays[objid]
 
         if data is None:
             if shape is None:
@@ -294,18 +292,17 @@ class Block(Entity):
         if copy_from:
             if not isinstance(copy_from, DataFrame):
                 raise TypeError("Object to be copied is not a DataFrame")
-            id = self._copy_objects(copy_from, "data_frames",
-                                    keep_copy_id, name)
-            return self.data_frames[id]
+            objid = self._copy_objects(copy_from, "data_frames", keep_copy_id, name)
+            return self.data_frames[objid]
 
         util.check_entity_name_and_type(name, type_)
         if (isinstance(col_dict, dict)
                 and not isinstance(col_dict, OrderedDict)
                 and sys.version_info[0] < 3):
-            raise TypeError("Python 2 users should use name_list "
-                            "or OrderedDict created with LIST and TUPLES "
-                            "to create DataFrames as the order "
-                            "of the columns cannot be maintained in Py2")
+            raise TypeError("Cannot create a DataFrame from a dictionary "
+                            "in Python 2 as the order of keys is not "
+                            "preserved. Please use the OrderedDict class "
+                            "from the collections module instead.")
 
         if data is not None:
             shape = len(data)
@@ -322,8 +319,8 @@ class Block(Entity):
                     )
                 elif col_dtypes is None and data is not None:
                     col_dtypes = []
-                    for x in data[0]:
-                        col_dtypes.append(type(x))
+                    for val in data[0]:
+                        col_dtypes.append(type(val))
                     col_dict = OrderedDict(
                         (str(nam), dt)
                         for nam, dt in zip(col_names, col_dtypes)
@@ -337,11 +334,11 @@ class Block(Entity):
             else:  # if col_names is None
                 if data is not None and type(data[0]) == np.void:
                     col_dtype = data[0].dtype
-                    cn = list(col_dtype.fields.keys())
+                    col_names = list(col_dtype.fields.keys())
                     raw_dt = col_dtype.fields.values()
                     raw_dt = list(raw_dt)
                     raw_dt_list = [ele[0] for ele in raw_dt]
-                    col_dict = OrderedDict(zip(cn, raw_dt_list))
+                    col_dict = OrderedDict(zip(col_names, raw_dt_list))
                     if len(col_dtype.fields.values()) != len(col_dict):
                         raise exceptions.DuplicateColumnName
 
@@ -425,12 +422,12 @@ class Block(Entity):
             for tag in grp.tags:
                 self._pp(tag, max_length,
                          indent*(start_depth + 2), extra, True)
-                for fe in tag.features:
-                    self._pp(fe, max_length, indent*(start_depth + 3), False)
+                for feat in tag.features:
+                    self._pp(feat, max_length, indent*(start_depth + 3), False)
             for mt in grp.multi_tags:
                 self._pp(mt, max_length, indent*(start_depth + 2), extra, True)
-                for fe in mt.features:
-                    self._pp(fe, max_length, indent*(start_depth + 3), False)
+                for feat in mt.features:
+                    self._pp(feat, max_length, indent*(start_depth + 3), False)
         for da in self.data_arrays:
             self._pp(da, max_length, indent*(start_depth + 1), extra)
             for dim in da.dimensions:
@@ -439,21 +436,21 @@ class Block(Entity):
             self._pp(df, max_length, indent*(start_depth + 1), extra)
         for tag in self.tags:
             self._pp(tag, max_length, indent*(start_depth + 1), extra)
-            for fe in tag.features:
-                self._pp(fe, max_length, indent*(start_depth + 2), False)
+            for feat in tag.features:
+                self._pp(feat, max_length, indent*(start_depth + 2), False)
         for mt in self.multi_tags:
             self._pp(mt, max_length, indent*(start_depth + 1), extra)
-            for fe in mt.features:
-                self._pp(fe, max_length, indent*(start_depth + 2), False)
+            for feat in mt.features:
+                self._pp(feat, max_length, indent*(start_depth + 2), False)
 
     @staticmethod
-    def _pp(obj, ml, indent, ex, grp=False):
+    def _pp(obj, max_len, indent, extra, grp=False):
         spaces = " "*(indent)
         if grp:
             prefix = "*"
         else:
             prefix = ""
-        if ex:
+        if extra:
             stat = ""
             if isinstance(obj, MultiTag):
                 stat = "Position Shape:{} Units: {}".format(
@@ -467,25 +464,25 @@ class Block(Entity):
                                                      obj.column_names)
             elif isinstance(obj, DataArray):
                 stat = "Shape: {} Unit:{}".format(obj.shape, obj.unit)
-            p = "{}{}{}".format(spaces, prefix, obj)
-            n = "{}  {}".format(spaces, stat)
+            objstr = "{}{}{}".format(spaces, prefix, obj)
+            stat = "{}  {}".format(spaces, stat)
         else:
-            p = "{}{}{}".format(spaces, prefix, obj)
-        if len(p) > ml - 4:
-            split_len = int(ml/2)
-            str1 = p[0:split_len]
-            str2 = p[-split_len:]
+            objstr = "{}{}{}".format(spaces, prefix, obj)
+        if len(objstr) > max_len - 4:
+            split_len = int(max_len/2)
+            str1 = objstr[0:split_len]
+            str2 = objstr[-split_len:]
             print("{} ... {}".format(str1, str2))
         else:
-            print(p)
-        if ex:
-            if len(n) > ml - 4:
-                split_len = int(ml/2)
-                nstr1 = n[0:split_len]
-                nstr2 = n[-split_len:]
+            print(objstr)
+        if extra:
+            if len(stat) > max_len - 4:
+                split_len = int(max_len/2)
+                nstr1 = stat[0:split_len]
+                nstr2 = stat[-split_len:]
                 print("{} ... {}".format(nstr1, nstr2))
             else:
-                print(n)
+                print(stat)
 
     def _copy_objects(self, obj, clsname, keep_id=True, name=""):
         src = "{}/{}".format(clsname, obj.name)
@@ -496,11 +493,8 @@ class Block(Entity):
             raise NameError("Name already exist. Possible solution is to "
                             "provide a new name when copying destination "
                             "is the same as the source parent")
-        o = obj._parent._h5group.copy(source=src, dest=self._h5group,
-                                      name=name, cls=clsname,
-                                      keep_id=keep_id)
-
-        return o.attrs["entity_id"]
+        obj_copy = obj._parent._h5group.copy(source=src, dest=self._h5group, name=name, cls=clsname, keep_id=keep_id)
+        return obj_copy.attrs["entity_id"]
 
     @property
     def sources(self):

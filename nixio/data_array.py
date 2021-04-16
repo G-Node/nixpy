@@ -9,6 +9,7 @@
 import warnings
 from numbers import Number
 from enum import Enum
+import numpy as np
 
 from .data_view import DataView
 from .data_set import DataSet
@@ -50,17 +51,17 @@ class DataArray(Entity, DataSet):
     def _read_data(self, sl=None):
         coeff = self.polynom_coefficients
         origin = self.expansion_origin
-        sup = super(DataArray, self)
+        data = np.array(super(DataArray, self)._read_data(sl))
+        if not len(data.shape):
+            # single value retrieval as length-1 array
+            data.shape = (1,)
         if len(coeff) or origin:
             if not origin:
                 origin = 0.0
 
-            # when there are coefficients, convert the dtype of the returned
-            # data array to double
-            data = sup._read_data(sl).astype(DataType.Double)
+            # when there are coefficients or exp origin, convert the dtype of the returned data array to double
+            data = data.astype(DataType.Double)
             util.apply_polynomial(coeff, origin, data)
-        else:
-            data = sup._read_data(sl)
         return data
 
     @property
@@ -129,12 +130,14 @@ class DataArray(Entity, DataSet):
         :rtype: RangeDimension
         """
         index = len(self.dimensions) + 1
+
         rdim = RangeDimension.create_new(self, index, ticks)
-        if label:
-            rdim.label = label
-            rdim.unit = unit
+        rdim.label = label
+        rdim.unit = unit
         if self.file.auto_update_timestamps:
             self.force_updated_at()
+        if ticks is not None:
+            rdim.ticks = ticks
         return rdim
 
     def delete_dimensions(self):
@@ -214,9 +217,9 @@ class DataArray(Entity, DataSet):
         return self._h5group.get_attr("expansion_origin")
 
     @expansion_origin.setter
-    def expansion_origin(self, eo):
-        util.check_attr_type(eo, Number)
-        self._h5group.set_attr("expansion_origin", eo)
+    def expansion_origin(self, origin):
+        util.check_attr_type(origin, Number)
+        self._h5group.set_attr("expansion_origin", origin)
         if self.file.auto_update_timestamps:
             self.force_updated_at()
 
@@ -232,9 +235,9 @@ class DataArray(Entity, DataSet):
         return self._h5group.get_attr("label")
 
     @label.setter
-    def label(self, l):
-        util.check_attr_type(l, str)
-        self._h5group.set_attr("label", l)
+    def label(self, label):
+        util.check_attr_type(label, str)
+        self._h5group.set_attr("label", label)
         if self.file.auto_update_timestamps:
             self.force_updated_at()
 
@@ -249,13 +252,13 @@ class DataArray(Entity, DataSet):
         return self._h5group.get_attr("unit")
 
     @unit.setter
-    def unit(self, u):
-        if u:
-            u = util.units.sanitizer(u)
-        if u == "":
-            u = None
-        util.check_attr_type(u, str)
-        self._h5group.set_attr("unit", u)
+    def unit(self, unit):
+        if unit:
+            unit = util.units.sanitizer(unit)
+        if unit == "":
+            unit = None
+        util.check_attr_type(unit, str)
+        self._h5group.set_attr("unit", unit)
         if self.file.auto_update_timestamps:
             self.force_updated_at()
 
@@ -278,8 +281,8 @@ class DataArray(Entity, DataSet):
                 "DataArray.get_slice"
             )
         if mode == DataSliceMode.Index:
-            sl = tuple(slice(p, p+e) for p, e in zip(positions, extents))
-            return DataView(self, sl)
+            slices = tuple(slice(p, p+e) for p, e in zip(positions, extents))
+            return DataView(self, slices)
         elif mode == DataSliceMode.Data:
             return self._get_slice_bydim(positions, extents)
         else:
@@ -297,8 +300,8 @@ class DataArray(Entity, DataSet):
             elif dim.dimension_type == DimensionType.Set:
                 dpos.append(int(pos))
                 dext.append(int(ext))
-        sl = tuple(slice(p, p+e) for p, e in zip(dpos, dext))
-        return DataView(self, sl)
+        slices = tuple(slice(p, p+e) for p, e in zip(dpos, dext))
+        return DataView(self, slices)
 
     @property
     def data(self):

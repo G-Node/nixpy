@@ -21,10 +21,10 @@ if platform.platform().startswith("Windows"):
     WINDOWS = True
 
 
-def cc(filenames, dest,
-       library_dirs=None, include_dirs=None,
-       libraries=None, compile_args=None,
-       runtime_lib_dirs=None):
+def ccomp(filenames, destination,
+          library_dirs=None, include_dirs=None,
+          libraries=None, compile_args=None,
+          runtime_lib_dirs=None):
     compiler = ccompiler.new_compiler()
 
     distutils.sysconfig.customize_compiler(compiler)
@@ -38,12 +38,12 @@ def cc(filenames, dest,
         compiler.set_runtime_library_dirs(runtime_lib_dirs)
 
     try:
-        objnames = compiler.compile(filenames, output_dir=dest,
+        objnames = compiler.compile(filenames, output_dir=destination,
                                     extra_postargs=compile_args)
         for obj in objnames:
             execname, _ = os.path.splitext(obj)
             compiler.link_executable(
-                [obj], execname, output_dir=dest,
+                [obj], execname, output_dir=destination,
                 target_lang="c++",
             )
     except (CompileError, LinkError):
@@ -51,7 +51,7 @@ def cc(filenames, dest,
     return True
 
 
-def maketests(dest):
+def maketests(destination):
     scriptloc, _ = os.path.split(os.path.abspath(__file__))
     os.chdir(scriptloc)
     filenames = glob("*.cpp")
@@ -66,7 +66,7 @@ def maketests(dest):
                     "/usr/include/nixio-1.0", "/usr/local/include/nixio-1.0",
                     "src"]
     incenv = os.getenv("NIX_INCDIR", None)
-    if incenv:
+    if incenv and libenv:
         include_dirs.append(libenv)
 
     boost_libenv = os.getenv("BOOST_LIBDIR", None)
@@ -86,12 +86,12 @@ def maketests(dest):
         compile_args = []
 
     print("Compiling {}".format(" ".join(filenames)))
-    success = cc(filenames, dest,
-                 library_dirs=library_dirs,
-                 include_dirs=include_dirs,
-                 libraries=libraries,
-                 compile_args=compile_args,
-                 runtime_lib_dirs=runtime_dirs)
+    success = ccomp(filenames, destination,
+                    library_dirs=library_dirs,
+                    include_dirs=include_dirs,
+                    libraries=libraries,
+                    compile_args=compile_args,
+                    runtime_lib_dirs=runtime_dirs)
     if success:
         print("Done")
     else:

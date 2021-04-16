@@ -23,7 +23,7 @@ class DataView(DataSet):
             # the check here for future bug catching
             raise IncompatibleDimensions(
                 "Number of dimensions for DataView does not match underlying "
-                "DataArray: {} != {}".format(len(slices), len(da.shape)),
+                "data object: {} != {}".format(len(slices), len(da.shape)),
                 "DataView"
             )
 
@@ -61,9 +61,9 @@ class DataView(DataSet):
 
     def _read_data(self, sl=None):
         tsl = self._slices
-        if sl:
+        if sl is not None:
             tsl = self._transform_coordinates(sl)
-        return super(DataView, self)._read_data(tsl)
+        return self.array._read_data(tsl)
 
     def _transform_coordinates(self, user_slices):
         """
