@@ -21,6 +21,7 @@ class Source(Entity):
     def __init__(self, nixfile, nixparent, h5group):
         super(Source, self).__init__(nixfile, nixparent, h5group)
         self._sources = None
+        self._parent_block = None
 
     @classmethod
     def create_new(cls, nixfile, nixparent, h5parent, name, type_):
@@ -47,6 +48,16 @@ class Source(Entity):
             raise exceptions.DuplicateName("create_source")
         src = Source.create_new(self.file, self, sources, name, type_)
         return src
+    
+    @property
+    def parent_block(self):
+        if self._parent_block is not None:
+            return self._parent_block
+        maybe_block = self._parent
+        if not hasattr(maybe_block, "data_arrays"):
+            maybe_block = maybe_block.parent_block
+        self._parent_block = maybe_block
+        return self._parent_block
 
     @property
     def referring_objects(self):
@@ -58,15 +69,18 @@ class Source(Entity):
 
     @property
     def referring_data_arrays(self):
-        return [da for da in self._parent.data_arrays if self in da.sources]
+        block = self.parent_block
+        return [da for da in block.data_arrays if self in da.sources]
 
     @property
     def referring_tags(self):
-        return [tg for tg in self._parent.tags if self in tg.sources]
+        block = self.parent_block
+        return [tg for tg in block.tags if self in tg.sources]
 
     @property
     def referring_multi_tags(self):
-        return [mt for mt in self._parent.multi_tags if self in mt.sources]
+        block = self.parent_block
+        return [mt for mt in block.multi_tags if self in mt.sources]
 
     def find_sources(self, filtr=lambda _: True, limit=None):
         """
