@@ -159,3 +159,30 @@ class TestSources(unittest.TestCase):
         self.assertEqual(lvl2.sources["lvl3"]._parent, lvl3._parent)
         # TODO: Uncomment once fixed
         # self.assertEqual(group.sources["lvl3"]._parent, lvl3._parent)
+
+    def test_referring_objects(self):
+        nested = self.third.create_source("nested source", "sometype")
+        self.array.sources.append(nested)
+        
+        tag = self.block.create_tag("test tag", "some type", [0.0])
+        tag.sources.append(nested)
+
+        positions = self.block.create_data_array("positions array", "positions",
+                                                 dtype=nix.DataType.Double,
+                                                 shape=(1, 1) )
+        mtag = self.block.create_multi_tag("points", "points", positions=positions)
+        mtag.sources.append(nested)
+
+        self.assertEqual(len(nested.referring_data_arrays), 1)
+        self.assertEqual(nested.referring_data_arrays[0], self.array)
+        
+        self.assertEqual(len(nested.referring_tags), 1)
+        self.assertEqual(nested.referring_tags[0], tag)
+        
+        self.assertEqual(len(nested.referring_multi_tags), 1)
+        self.assertEqual(nested.referring_multi_tags[0], mtag)
+        
+        self.assertEqual(len(nested.referring_objects), 3)
+        self.assertTrue(self.array in nested.referring_objects)
+        self.assertTrue(tag in nested.referring_objects)
+        self.assertTrue(mtag in nested.referring_objects)
