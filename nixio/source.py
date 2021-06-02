@@ -88,9 +88,8 @@ class Source(Entity):
         block = self.parent_block
         if self in block.sources:
             return None
-        id = self.id
         for s in block.sources:
-            p = Source._find_parent_recursive(s, id)
+            p = Source._find_parent_recursive(s, self.id)
             if p is not None:
                 return p
         return None
