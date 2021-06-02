@@ -48,9 +48,15 @@ class Source(Entity):
             raise exceptions.DuplicateName("create_source")
         src = Source.create_new(self.file, self, sources, name, type_)
         return src
-    
+
     @property
     def parent_block(self):
+        """
+        Returns the block this source is contained in.
+
+        Returns:
+            block [nix.Block]: the Block containing this source
+        """
         if self._parent_block is not None:
             return self._parent_block
         maybe_block = self._parent
@@ -58,6 +64,36 @@ class Source(Entity):
             maybe_block = maybe_block.parent_block
         self._parent_block = maybe_block
         return self._parent_block
+
+    @staticmethod
+    def _find_parent_recursive(source, name_or_id_of_child):
+        if name_or_id_of_child in source.sources:
+            return source
+        else:
+            for s in source.sources:
+                s = Source._find_parent_recursive(s, name_or_id_of_child)
+                if s is not None:
+                    return s
+        return None
+
+    @property
+    def parent_source(self):
+        """
+        Get the parent source of this source. If this source at the root, None will be returned
+
+        Returns:
+            nix.Source or None: the parent source
+        """
+        # for now we need to do a search
+        block = self.parent_block
+        if self in block.sources:
+            return None
+        id = self.id
+        for s in block.sources:
+            p = Source._find_parent_recursive(s, id)
+            if p is not None:
+                return p
+        return None
 
     @property
     def referring_objects(self):
