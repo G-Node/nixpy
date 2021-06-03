@@ -468,10 +468,14 @@ class RangeDimension(Dimension):
 
     @property
     def is_alias(self):
-        """[summary]
+        """
+        In versions < 1.5 a RangeDimension that was referring to the DataArray it describes
+        was called an AliasRangeDimension. This has been made more flexible by allowing to link
+        to any DataArray or DataFrame.
+        For downward compatibility this method has been re-introduced in 1.5.1.
 
-        Returns:
-            [type]: [description]
+        :returns: True, if this dimension links to an DataArray, False otherwise
+        :rtype: bool
         """
         if self.has_link:
             if self.dimension_link._data_object_type == "DataArray":
