@@ -86,7 +86,7 @@ class DimensionLink(object):
 
     @property
     def id(self):
-        self._h5group.get_attr("entity_id")
+        return self._h5group.get_attr("entity_id")
 
     @property
     def file(self):
