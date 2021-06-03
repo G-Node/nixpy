@@ -54,8 +54,8 @@ class Source(Entity):
         """
         Returns the block this source is contained in.
 
-        Returns:
-            block [nix.Block]: the Block containing this source
+        :returns: the Block containing this source
+        :rtype: Block
         """
         if self._parent_block is not None:
             return self._parent_block
@@ -79,10 +79,10 @@ class Source(Entity):
     @property
     def parent_source(self):
         """
-        Get the parent source of this source. If this source at the root, None will be returned
+        Get the parent source of this source. If this source is at the root, None will be returned
 
-        Returns:
-            nix.Source or None: the parent source
+        :returns: the parent source
+        :rtype: Source or None
         """
         # for now we need to do a search
         block = self.parent_block
