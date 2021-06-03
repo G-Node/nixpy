@@ -467,6 +467,18 @@ class RangeDimension(Dimension):
         return newdim
 
     @property
+    def is_alias(self):
+        """[summary]
+
+        Returns:
+            [type]: [description]
+        """
+        if self.has_link:
+            if self.dimension_link._data_object_type == "DataArray":
+                return True
+        return False
+
+    @property
     def ticks(self):
         if self.has_link:
             ticks = self.dimension_link.values
