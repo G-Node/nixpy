@@ -140,6 +140,27 @@ class DataArray(Entity, DataSet):
             rdim.ticks = ticks
         return rdim
 
+    def append_range_dimension_using_self(self, index=[-1]):
+        """
+        Convenience function to append a new RangeDimension to the list of
+        existing dimensions that uses the DataArray itself as provider for the ticks.
+        This is a replacement for
+        rdim = array.append_range_dimension()
+        rdim.link_data_array(self, index)
+        
+        :param index: The slice of the DataArray that contains the tick
+        values. This must be a vector of the data. Defaults to [-1], i.e. the full first dimension. 
+        :type: list of int
+        
+        :returns: the newly created RangeDimension
+        :rtype: RangeDimension
+        """
+        index = len(self.dimensions) + 1
+
+        rdim = RangeDimension.create_new(self, index, None)
+        rdim.link_data_array(self, index)
+        return rdim
+
     def delete_dimensions(self):
         """
         Delete all the dimension descriptors for this DataArray.
