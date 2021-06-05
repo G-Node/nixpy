@@ -109,6 +109,12 @@ class Source(Entity):
 
     @property
     def referring_objects(self):
+        """
+        Returns the list of entities that link to this source.
+
+        :returns: all objects referring to this source.
+        :rtype: list
+        """
         objs = []
         objs.extend(self.referring_data_arrays)
         objs.extend(self.referring_tags)
@@ -117,16 +123,34 @@ class Source(Entity):
 
     @property
     def referring_data_arrays(self):
+        """
+        Returns all DataArray entities linking to this source.
+
+        :returns: all DataArrays referring to this source.
+        :rtype: list
+        """
         block = self.parent_block
         return [da for da in block.data_arrays if self in da.sources]
 
     @property
     def referring_tags(self):
+        """
+        Returns all Tag entities linking to this source.
+
+        :returns: all Tags referring to this source.
+        :rtype: list
+        """
         block = self.parent_block
         return [tg for tg in block.tags if self in tg.sources]
 
     @property
     def referring_multi_tags(self):
+        """
+        Returns all MultiTag entities linking to this source.
+
+        :returns: all MultiTags referring to this source.
+        :rtype: list
+        """
         block = self.parent_block
         return [mt for mt in block.multi_tags if self in mt.sources]
 
@@ -182,6 +206,14 @@ class Source(Entity):
 
     @metadata.setter
     def metadata(self, sect):
+        """
+        Setter for the metadata section that contains meta information about this Source.
+
+        :param sect: The metadata section.
+        :type sect: Section
+
+        :raises: TypeError if sect is not of type Section
+        """
         if not isinstance(sect, Section):
             raise TypeError("{} is not of type Section".format(sect))
         self._h5group.create_link(sect, "metadata")
