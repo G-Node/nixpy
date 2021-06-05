@@ -388,7 +388,7 @@ class TestLinkDimension(unittest.TestCase):
         assert da.dimensions[0].label == da.label
         assert da.dimensions[0].unit == da.unit
         assert np.all(da.dimensions[0].ticks == da[:])
-        assert rdim.is_alias == True
+        assert rdim.is_alias
 
     def test_data_array_self_link_set_dimension(self):
         # The new way of making alias range dimension
@@ -433,7 +433,7 @@ class TestLinkDimension(unittest.TestCase):
                                        tuple(v[2] for v in values))
         assert self.range_dim.unit == df.units[2]
         assert self.range_dim.label == df.column_names[2]
-        assert self.range_dim.is_alias == False
+        assert not self.range_dim.is_alias
 
     def test_data_frame_set_link_dimension(self):
         column_descriptions = OrderedDict([("name", nix.DataType.String),
