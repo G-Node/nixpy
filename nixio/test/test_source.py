@@ -159,3 +159,56 @@ class TestSources(unittest.TestCase):
         self.assertEqual(lvl2.sources["lvl3"]._parent, lvl3._parent)
         # TODO: Uncomment once fixed
         # self.assertEqual(group.sources["lvl3"]._parent, lvl3._parent)
+
+    def test_referring_objects(self):
+        nested = self.third.create_source("nested source", "sometype")
+        self.array.sources.append(nested)
+
+        tag = self.block.create_tag("test tag", "some type", [0.0])
+        tag.sources.append(nested)
+
+        positions = self.block.create_data_array("positions array", "positions",
+                                                 dtype=nix.DataType.Double,
+                                                 shape=(1, 1) )
+        mtag = self.block.create_multi_tag("points", "points", positions=positions)
+        mtag.sources.append(nested)
+
+        self.assertEqual(len(nested.referring_data_arrays), 1)
+        self.assertEqual(nested.referring_data_arrays[0], self.array)
+
+        self.assertEqual(len(nested.referring_tags), 1)
+        self.assertEqual(nested.referring_tags[0], tag)
+
+        self.assertEqual(len(nested.referring_multi_tags), 1)
+        self.assertEqual(nested.referring_multi_tags[0], mtag)
+
+        self.assertEqual(len(nested.referring_objects), 3)
+        self.assertTrue(self.array in nested.referring_objects)
+        self.assertTrue(tag in nested.referring_objects)
+        self.assertTrue(mtag in nested.referring_objects)
+
+    def test_parent_source(self):
+        """
+        root 
+          |--> leaf1
+          |      |--> leaf1a
+          |      |--> leaf1b
+          |--> leaf2
+                 |--> leaf2a
+        """
+        root = self.block.create_source("a root", "test")
+        leaf1 = root.create_source("leaf1", "test")
+        leaf2 = root.create_source("leaf2", "test")
+        leaf1a = leaf1.create_source("leaf1a", "test")
+        leaf1b = leaf1.create_source("leaf1b", "test")
+        leaf2a = leaf2.create_source("leaf2a", "test")
+
+        self.assertIsNone(root.parent_source)
+        self.assertEqual(leaf1.parent_source, root)
+        self.assertEqual(leaf1a.parent_source, leaf1)
+        self.assertEqual(leaf1b.parent_source, leaf1)
+        self.assertEqual(leaf2a.parent_source, leaf2)
+
+        with self.assertRaises(ValueError):
+            leaf2._find_parent_recursive(leaf2a.name)
+        self.assertEqual(leaf2._find_parent_recursive(leaf2a.name, False), leaf2)

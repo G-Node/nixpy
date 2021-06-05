@@ -21,6 +21,7 @@ class Source(Entity):
     def __init__(self, nixfile, nixparent, h5group):
         super(Source, self).__init__(nixfile, nixparent, h5group)
         self._sources = None
+        self._parent_block = None
 
     @classmethod
     def create_new(cls, nixfile, nixparent, h5parent, name, type_):
@@ -49,7 +50,71 @@ class Source(Entity):
         return src
 
     @property
+    def parent_block(self):
+        """
+        Returns the block this source is contained in.
+
+        :returns: the Block containing this source
+        :rtype: Block
+        """
+        if self._parent_block is not None:
+            return self._parent_block
+        maybe_block = self._parent
+        if not hasattr(maybe_block, "data_arrays"):
+            maybe_block = maybe_block.parent_block
+        self._parent_block = maybe_block
+        return self._parent_block
+
+    def _find_parent_recursive(self, child_id, check_id=True):
+        """
+        Find the parent source of this source. Search is based on the ID of of a child source. Searching by name might be ambiguous.
+        By default it will raise an ValueError if the child_id does not look like an UUID.
+
+        :param child_id: The ID of the child whose parent is searched.
+        :type child_id: str
+        :param check_id: Controls whether or not to check if the child_is looks like an UUID. Defaults to True.
+        :type check_id: bool
+
+        :returns: the parent source, if any, otherwise None.
+        :rtype: Source
+        """
+        if check_id and not util.is_uuid(child_id):
+            raise ValueError("Error calling find_parent_source: argument child_id (%s) does not look like an UUID " % child_id)
+        if child_id in self.sources:
+            return self
+        else:
+            for s in self.sources:
+                src = s._find_parent_recursive(child_id, False)
+                if src is not None:
+                    return src
+        return None
+
+    @property
+    def parent_source(self):
+        """
+        Get the parent source of this source. If this source is at the root, None will be returned
+
+        :returns: the parent source
+        :rtype: Source or None
+        """
+        # for now we need to do a search
+        block = self.parent_block
+        if self in block.sources:
+            return None
+        for s in block.sources:
+            p = s._find_parent_recursive(self.id, False)
+            if p is not None:
+                return p
+        return None
+
+    @property
     def referring_objects(self):
+        """
+        Returns the list of entities that link to this source.
+
+        :returns: all objects referring to this source.
+        :rtype: list
+        """
         objs = []
         objs.extend(self.referring_data_arrays)
         objs.extend(self.referring_tags)
@@ -58,15 +123,36 @@ class Source(Entity):
 
     @property
     def referring_data_arrays(self):
-        return [da for da in self._parent.data_arrays if self in da.sources]
+        """
+        Returns all DataArray entities linking to this source.
+
+        :returns: all DataArrays referring to this source.
+        :rtype: list
+        """
+        block = self.parent_block
+        return [da for da in block.data_arrays if self in da.sources]
 
     @property
     def referring_tags(self):
-        return [tg for tg in self._parent.tags if self in tg.sources]
+        """
+        Returns all Tag entities linking to this source.
+
+        :returns: all Tags referring to this source.
+        :rtype: list
+        """
+        block = self.parent_block
+        return [tg for tg in block.tags if self in tg.sources]
 
     @property
     def referring_multi_tags(self):
-        return [mt for mt in self._parent.multi_tags if self in mt.sources]
+        """
+        Returns all MultiTag entities linking to this source.
+
+        :returns: all MultiTags referring to this source.
+        :rtype: list
+        """
+        block = self.parent_block
+        return [mt for mt in block.multi_tags if self in mt.sources]
 
     def find_sources(self, filtr=lambda _: True, limit=None):
         """
@@ -120,6 +206,14 @@ class Source(Entity):
 
     @metadata.setter
     def metadata(self, sect):
+        """
+        Setter for the metadata section that contains meta information about this Source.
+
+        :param sect: The metadata section.
+        :type sect: Section
+
+        :raises: TypeError if sect is not of type Section
+        """
         if not isinstance(sect, Section):
             raise TypeError("{} is not of type Section".format(sect))
         self._h5group.create_link(sect, "metadata")
