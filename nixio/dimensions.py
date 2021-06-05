@@ -389,13 +389,12 @@ class SampledDimension(Dimension):
         :param start: positive integer, indicates the starting sample.
 
         :returns: The created axis
-        :rtype: list
+        :rtype: tuple
         """
         offset = self.offset if self.offset else 0.0
         sample = self.sampling_interval
         start_val = start * sample + offset
-        end_val = (start + count) * sample + offset
-        return tuple(np.arange(start_val, end_val, sample))
+        return tuple(np.arange(count) * sample + start_val)
 
     @property
     def label(self):
