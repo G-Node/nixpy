@@ -208,3 +208,7 @@ class TestSources(unittest.TestCase):
         self.assertEqual(leaf1a.parent_source, leaf1)
         self.assertEqual(leaf1b.parent_source, leaf1)
         self.assertEqual(leaf2a.parent_source, leaf2)
+
+        with self.assertRaises(ValueError):
+            leaf2._find_parent_recursive(leaf2a.name)
+        self.assertEqual(leaf2._find_parent_recursive(leaf2a.name, False), leaf2)

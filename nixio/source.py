@@ -65,15 +65,28 @@ class Source(Entity):
         self._parent_block = maybe_block
         return self._parent_block
 
-    @staticmethod
-    def _find_parent_recursive(source, name_or_id_of_child):
-        if name_or_id_of_child in source.sources:
-            return source
+    def _find_parent_recursive(self, child_id, check_id=True):
+        """
+        Find the parent source of this source. Search is based on the ID of of a child source. Searching by name might be ambiguous.
+        By default it will raise an ValueError if the child_id does not look like an UUID.
+
+        :param child_id: The ID of the child whose parent is searched.
+        :type child_id: str
+        :param check_id: Controls whether or not to check if the child_is looks like an UUID. Defaults to True.
+        :type check_id: bool
+
+        :returns: the parent source, if any, otherwise None.
+        :rtype: Source
+        """
+        if check_id and not util.is_uuid(child_id):
+            raise ValueError("Error calling find_parent_source: argument child_id (%s) does not look like an UUID " % child_id)
+        if child_id in self.sources:
+            return self
         else:
-            for s in source.sources:
-                s = Source._find_parent_recursive(s, name_or_id_of_child)
-                if s is not None:
-                    return s
+            for s in self.sources:
+                src = s._find_parent_recursive(child_id, False)
+                if src is not None:
+                    return src
         return None
 
     @property
@@ -89,7 +102,7 @@ class Source(Entity):
         if self in block.sources:
             return None
         for s in block.sources:
-            p = Source._find_parent_recursive(s, self.id)
+            p = s._find_parent_recursive(self.id, False)
             if p is not None:
                 return p
         return None
