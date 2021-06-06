@@ -40,7 +40,7 @@ class Source(Entity):
         :type type_: str
 
         :returns: The newly created source.
-        :rtype: Source
+        :rtype: nixio.Source
         """
         util.check_entity_name_and_type(name, type_)
         sources = self._h5group.open_group("sources", True)
@@ -55,7 +55,7 @@ class Source(Entity):
         Returns the block this source is contained in.
 
         :returns: the Block containing this source
-        :rtype: Block
+        :rtype: nixio.Block
         """
         if self._parent_block is not None:
             return self._parent_block
@@ -76,7 +76,7 @@ class Source(Entity):
         :type check_id: bool
 
         :returns: the parent source, if any, otherwise None.
-        :rtype: Source
+        :rtype: nixio.Source
         """
         if check_id and not util.is_uuid(child_id):
             raise ValueError("Error calling find_parent_source: argument child_id (%s) does not look like an UUID " % child_id)
@@ -170,7 +170,7 @@ class Source(Entity):
         :type limit:  int
 
         :returns: A list containing the matching sources.
-        :rtype: list of Source
+        :rtype: list of nixio.Source
         """
         if limit is None:
             limit = maxint
@@ -197,7 +197,7 @@ class Source(Entity):
         this attribute can provide additional annotations. This is an optional
         read-write property, and can be None if no metadata is available.
 
-        :type: Section
+        :type: nixio.Section
         """
         if "metadata" in self._h5group:
             return Section(self.file, None, self._h5group.open_group("metadata"))
@@ -210,7 +210,7 @@ class Source(Entity):
         Setter for the metadata section that contains meta information about this Source.
 
         :param sect: The metadata section.
-        :type sect: Section
+        :type sect: nixio.Section
 
         :raises: TypeError if sect is not of type Section
         """
