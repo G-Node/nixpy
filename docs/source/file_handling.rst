@@ -6,22 +6,22 @@ File handling
 
 The *File* entity encapsulates all information of a dataset. *File*
 entities keep some general information such as creation time and date,
-format version etc. The entry-point to a *NIX* file.
+format version etc. It is the entry-point to a *NIX* file.
 
 File modes
 ----------
 
 A *NIX* file can be opened in one of three modes:
 
-1. **Overwrite** Used for creating a new file or overwriting any content
+1. ``nix.FileMode.Overwrite`` Used for creating a new file or overwriting any content
    in an existing one!
-2. **ReadWrite** Opens a file if it exists or otherwise creates a new
+2. ``nix.FileMode.ReadWrite`` Opens a file if it exists or otherwise creates a new
    one. Does **not** overwrite existing content.
-3. **ReadOnly** Opens an existing file. The content can not be changed.
+3. ``nix.FileMode.ReadOnly`` Opens an existing file. The content can not be changed.
    Will raise an error when the provided path is invalid (e.g. the file
    does not exist).
 
-Creating a new file.
+Creating a new file
 --------------------
 
 .. literalinclude:: examples/fileCreate.py
@@ -31,8 +31,10 @@ Creating a new file.
 
 As mentioned above, using ``nix.FileMode.Overwrite`` will destroy any existing content of the file. **By default**, if the ``FileMode`` flag is not specified, a file is opened in the ``FileMode.ReadWrite`` mode.
 
-Open existing files.
---------------------
+In this tutorial files will always have the extension ``*.nix``. This is not specified in the library and you are free to use any file extension.
+
+Opening existing files
+-----------------------
 
 Use ``nix.FileMode.ReadWrite`` or ``nix.FileMode.ReadOnly`` to open
 an existing file to work with the data. If you want to overwrite *any*
