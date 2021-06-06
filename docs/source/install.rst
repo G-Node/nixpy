@@ -1,22 +1,23 @@
-=======================
-Installation Guidelines
-=======================
-
+=========================
 Installation instructions
 =========================
 
 The latest stable release of NIXPy is available on PyPi as `nixio`_.
 NIXPy works with Python versions 3.6+ on Windows, macOS, and Linux. Support for python 2 has been dropped with the official end of life for python 2.
-The simplest way to install NIXPy is to use pip::
+The simplest way to install NIXPy is to use pip
 
-  pip3 install nixio
+.. code-block:: shell
+
+    pip3 install nixio
 
 
 Install developer version
 ---------------------------
-The latest unstable (beta) version of `NIXPy`_ at any given time is also on PyPi and can be installed with pip::
+The latest unstable (beta) version of `NIXPy`_ at any given time is also on PyPi and can be installed with pip
 
-  pip3 install nixio --pre
+.. code-block:: shell
+
+    pip3 install nixio --pre
 
 *Note that this version may contain untested code and should be used for testing new features in the format.*
 
@@ -25,14 +26,18 @@ Build NIXPy from Source
 -----------------------
 
 You can also build NIXPy from source, if you want to test changes that are newer than the latest beta release or want to modify the source.
-The source code is available on `GitHub`_ and can be built as follows::
+The source code is available on `GitHub`_ and can be built as follows
 
-  git clone https://github.com/G-Node/nixpy
-  python setup.py install
+.. code-block:: bash
 
-Alternatively, to install in one step using pip::
+    git clone https://github.com/G-Node/nixpy
+    python setup.py install
 
-  pip install git+https://github.com/G-Node/nixpy
+Alternatively, to install in one step using pip
+
+.. code-block:: bash
+
+    pip install git+https://github.com/G-Node/nixpy
 
 
 Dependencies
