@@ -390,14 +390,18 @@ class TestLinkDimension(unittest.TestCase):
         assert da.dimensions[0].unit == da.unit
         assert np.all(da.dimensions[0].ticks == da[:])
         assert rdim.is_alias
-        
+
         da.delete_dimensions()
         da.append_range_dimension_using_self()
         assert len(da.dimensions) == 1
         assert da.dimensions[0].is_alias
-        
+
         da.delete_dimensions()
-        self.assertRaises(IncompatibleDimensions, da.append_range_dimension_using_self([0, -1]))
+        with self.assertRaises(IncompatibleDimensions):
+            da.append_range_dimension_using_self([0, -1])
+        with self.assertRaises(ValueError):
+            da.append_range_dimension_using_self([-2])
+
         da.append_range_dimension_using_self([-1])
         assert len(da.dimensions) == 1
         assert da.dimensions[0].is_alias

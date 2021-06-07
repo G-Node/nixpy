@@ -155,11 +155,19 @@ class DataArray(Entity, DataSet):
         :returns: the newly created RangeDimension
         :rtype: RangeDimension
         """
-        dim_index = len(self.dimensions) + 1
-        rdim = RangeDimension.create_new(self, dim_index, None)
         if index is None:
             index = [0] * len(self.shape)
             index[0] = -1
+        msg = RangeDimension._check_index(index)
+        if msg is not None:
+            raise ValueError(msg)
+
+        msg = RangeDimension._check_link_dimensionality(self, index)
+        if msg is not None:
+            raise IncompatibleDimensions(msg, "RangeDimension.append_range_dimension_using_self")
+
+        dim_index = len(self.dimensions) + 1
+        rdim = RangeDimension.create_new(self, dim_index, None)
         rdim.link_data_array(self, index)
         return rdim
 
