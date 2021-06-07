@@ -236,16 +236,8 @@ class Dimension(object):
     def index(self):
         return self.dim_index
 
-    def link_data_array(self, data_array, index):
-        if len(data_array.data_extent) != len(index):
-            raise IncompatibleDimensions(
-                "Length of linked DataArray indices ({}) does not match"
-                "number of DataArray dimensions ({})".format(
-                    len(data_array.data_extent), len(index)
-                ),
-                "Dimension.link_data_array"
-            )
-
+    @staticmethod
+    def _check_index(index):
         invalid_idx_msg = (
             "Invalid linked DataArray index: "
             "One of the values must be -1, indicating the relevant vector. "
@@ -253,7 +245,28 @@ class Dimension(object):
         )
         if index.count(-1) != 1 or sum(idx < 0 for idx in index) != 1:
             # TODO: Add link to relevant docs
-            raise ValueError(invalid_idx_msg)
+            return invalid_idx_msg
+
+        return None
+
+    @staticmethod
+    def _check_link_dimensionality(data_array, index):
+        invalid_dim_msg = ("Length of linked DataArray indices ({}) does not match " 
+                           "number of DataArray dimensions ({})"
+                          ).format(len(data_array.data_extent), len(index))
+
+        if len(data_array.data_extent) != len(index):
+            return invalid_dim_msg
+        return None
+
+    def link_data_array(self, data_array, index):
+        msg = RangeDimension._check_link_dimensionality(data_array, index)
+        if msg is not None:
+            raise IncompatibleDimensions(msg, "Dimension.link_data_array")
+
+        msg = self._check_index(index)
+        if msg is not None:
+            raise ValueError(msg)
 
         if self.has_link:
             self.remove_link()
