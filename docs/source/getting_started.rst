@@ -50,7 +50,3 @@ Most code examples are standalone and you should be able to run them. The code i
    standardization
    finding_things
    :maxdepth: 1
-
-.. toctree::
-   example_guide
-   :maxdepth: 1

@@ -119,10 +119,6 @@ Referenced by
    :caption: Troubleshooting:
    :maxdepth: 1
 
-.. toctree::
-   api/library_root
-   :maxdepth: 3
-   :caption: API Reference
 
 
 Indices and tables
@@ -142,6 +138,7 @@ User API documentation for Data and Metadata
 .. toctree::
    user_api
    :maxdepth: 2
+   :caption: High Level API
 
 
 Advanced
@@ -155,5 +152,6 @@ The API documentation of internal modules, for NIXPy developers.
 .. toctree::
    api/nixio
    :maxdepth: 2
+   :caption: Internal API
 
 
