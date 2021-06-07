@@ -6,6 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from nixio.exceptions.exceptions import IncompatibleDimensions
 import os
 import unittest
 import numpy as np
@@ -389,6 +390,17 @@ class TestLinkDimension(unittest.TestCase):
         assert da.dimensions[0].unit == da.unit
         assert np.all(da.dimensions[0].ticks == da[:])
         assert rdim.is_alias
+        
+        da.delete_dimensions()
+        da.append_range_dimension_using_self()
+        assert len(da.dimensions) == 1
+        assert da.dimensions[0].is_alias
+        
+        da.delete_dimensions()
+        self.assertRaises(IncompatibleDimensions, da.append_range_dimension_using_self([0, -1]))
+        da.append_range_dimension_using_self([-1])
+        assert len(da.dimensions) == 1
+        assert da.dimensions[0].is_alias
 
     def test_data_array_self_link_set_dimension(self):
         # The new way of making alias range dimension
