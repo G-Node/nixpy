@@ -335,7 +335,7 @@ class File(object):
         Copy a section to the file.
 
         :param obj: The Section to be copied
-        :type obj: Section
+        :type obj: nixio.Section
         :param children: Specify if the copy should be recursive
         :type children: bool
         :param keep_id: Specify if the id should be kept
@@ -344,7 +344,7 @@ class File(object):
         :type name: str
 
         :returns: The copied section
-        :rtype: Section
+        :rtype: nixio.Section
         """
         if not isinstance(obj, Section):
             raise TypeError("Object to be copied is not a Section")
@@ -395,12 +395,12 @@ class File(object):
         :type type_: str
         :param compression: No, DeflateNormal, Auto (default: Auto)
         :param copy_from: The Block to be copied, None in normal mode
-        :type copy_from: Block
+        :type copy_from: nixio.Block
         :param keep_copy_id: Specify if the id should be copied in copy mode
         :type keep_copy_id: bool
 
         :returns: The newly created block.
-        :rtype: Block
+        :rtype: nixio.Block
         """
         if copy_from:
             if not isinstance(copy_from, Block):
@@ -439,7 +439,7 @@ class File(object):
         :type oid: str
 
         :returns: The newly created section.
-        :rtype: Section
+        :rtype: nixio.Section
         """
         if name in self.sections:
             raise DuplicateName("create_section")
@@ -475,7 +475,7 @@ class File(object):
         :type limit:  int
 
         :returns: A list containing the matching sections.
-        :rtype: list of Section
+        :rtype: list of nixio.Section
         """
         if limit is None:
             limit = maxint

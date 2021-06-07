@@ -188,14 +188,12 @@ class TestSources(unittest.TestCase):
         self.assertTrue(mtag in nested.referring_objects)
 
     def test_parent_source(self):
-        """
-        root 
-          |--> leaf1
-          |      |--> leaf1a
-          |      |--> leaf1b
-          |--> leaf2
-                 |--> leaf2a
-        """
+        # root 
+        #  |--> leaf1
+        #  |      |--> leaf1a
+        #  |      |--> leaf1b
+        #  |--> leaf2
+        #         |--> leaf2a
         root = self.block.create_source("a root", "test")
         leaf1 = root.create_source("leaf1", "test")
         leaf2 = root.create_source("leaf2", "test")

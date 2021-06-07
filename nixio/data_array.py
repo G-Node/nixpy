@@ -83,7 +83,7 @@ class DataArray(Entity, DataSet):
         descriptors.
 
         :returns: The newly created SetDimension.
-        :rtype: SetDimension
+        :rtype: nixio.SetDimension
         """
         index = len(self.dimensions) + 1
         setdim = SetDimension.create_new(self, index)
@@ -99,12 +99,11 @@ class DataArray(Entity, DataSet):
         Append a new SampledDimension to the list of existing dimension
         descriptors.
 
-        :param sampling_interval: The sampling interval of the SetDimension
-                                  to create.
+        :param sampling_interval: The sampling interval of the SetDimension to create.
         :type sampling_interval: float
 
         :returns: The newly created SampledDimension.
-        :rtype: SampledDimension
+        :rtype: nixio.SampledDimension
         """
         index = len(self.dimensions) + 1
         smpldim = SampledDimension.create_new(self, index, sampling_interval)
@@ -127,7 +126,7 @@ class DataArray(Entity, DataSet):
         :type ticks: list of float
 
         :returns: The newly created RangeDimension.
-        :rtype: RangeDimension
+        :rtype: nixio.RangeDimension
         """
         index = len(self.dimensions) + 1
 
@@ -148,12 +147,11 @@ class DataArray(Entity, DataSet):
         rdim = array.append_range_dimension()
         rdim.link_data_array(self, index)
 
-        :param index: The slice of the DataArray that contains the tick
-        values. This must be a vector of the data. Defaults to None, which will be replaced by an index referring to the full first dimension.
+        :param index: The slice of the DataArray that contains the tick values. This must be a vector of the data. Defaults to [-1], i.e. the full first dimension. 
         :type: list of int
 
-        :returns: the newly created RangeDimension
-        :rtype: RangeDimension
+        :returns: the newly created nixio.RangeDimension
+        :rtype: nixio.RangeDimension
         """
         if index is None:
             index = [0] * len(self.shape)
@@ -210,7 +208,8 @@ class DataArray(Entity, DataSet):
         The data type of the data stored in the DataArray.
         This is a read only property.
 
-        :return: DataType
+        :return: The data type
+        :rtype: nixio.DataType
         """
         return self._h5group.group["data"].dtype
 
@@ -221,7 +220,7 @@ class DataArray(Entity, DataSet):
         set to a {0.0, 1.0} for a linear calibration with zero offset.
         This is a read-write property and can be set to None
 
-        :type: list of float
+        :rtype: list of float
         """
         return tuple(self._h5group.get_data("polynom_coefficients"))
 
@@ -369,7 +368,7 @@ class DataArray(Entity, DataSet):
         this attribute can provide additional annotations. This is an optional
         read-write property, and can be None if no metadata is available.
 
-        :type: Section
+        :type: nixio.Section
         """
         if "metadata" in self._h5group:
             return Section(self.file, None,
