@@ -392,6 +392,10 @@ class TestLinkDimension(unittest.TestCase):
         assert rdim.is_alias
 
         da.delete_dimensions()
+        da.append_range_dimension()
+        assert not da.dimensions[0].is_alias
+        
+        da.delete_dimensions()
         da.append_range_dimension_using_self()
         assert len(da.dimensions) == 1
         assert da.dimensions[0].is_alias

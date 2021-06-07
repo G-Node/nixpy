@@ -486,12 +486,15 @@ class RangeDimension(Dimension):
         to any DataArray or DataFrame.
         For downward compatibility this method has been re-introduced in 1.5.1.
 
-        :returns: True, if this dimension links to an DataArray, False otherwise
+        :returns: True, if this dimension links to a DataArray, False otherwise
         :rtype: bool
         """
-        if self.has_link:
-            if self.dimension_link._data_object_type == "DataArray":
-                return True
+        if self._h5group.has_data("ticks"):
+            return False
+        elif not self.has_link and len(self._h5group) > 0:
+            return True
+        elif self.has_link and self.dimension_link._data_object_type == "DataArray":
+            return True
         return False
 
     @property
