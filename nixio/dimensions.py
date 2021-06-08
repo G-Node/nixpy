@@ -496,9 +496,26 @@ class RangeDimension(Dimension):
         elif self.has_link and self.dimension_link._data_object_type == "DataArray":
             return True
         return False
-
+    
+    @property
+    def _redirgrp(self):
+        """
+        If the dimension is an Alias Range dimension, this property returns
+        the H5Group of the linked DataArray. Otherwise, it returns the H5Group
+        representing the dimension.
+        """
+        if self.is_alias:
+            gname = self._h5group.get_by_pos(0).name
+            return self._h5group.open_group(gname)
+        return self._h5group
+    
     @property
     def ticks(self):
+        if self.is_alias and not self.has_link:
+            g = self._redirgrp
+            if g.has_data("data"):
+                ticks = g.get_data("data")
+                return tuple(ticks)
         if self.has_link:
             ticks = self.dimension_link.values
         else:
