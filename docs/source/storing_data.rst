@@ -149,6 +149,23 @@ added to the *DataArray* entity upon creation:
    :emphasize-lines: 5
 
 
+SetDimension
+------------
+
+.. figure:: ./images/set_dimension.png
+   :alt: simple plot with categories
+
+If we need to store data that falls into categories, i.e. the
+x-positions are not numeric or the dimension does not have a natural
+order, a *SetDimension* is used. It stores a label for each entry along
+the described dimension.
+
+.. literalinclude:: examples/categoryData.py
+   :language: python
+   :lines: 16 - 20
+   :caption: A categorical data dimension is described with a *SetDimension* which (optionally) stores labels for each category (:download:`categoryData.py <examples/categoryData.py>`)
+
+
 RangeDimension
 --------------
 
@@ -210,29 +227,7 @@ dimension descriptor will change the *DataArray* itself. Adding an
 **Note!** An *AliasRangeDimension* is only permitted if the data is 1-D
 and the values are numeric, an exception will be thrown otherwise.
 
-SetDimension
-------------
 
-.. figure:: ./images/set_dimension.png
-   :alt: simple plot with categories
-
-   set_dim_plot
-
-If we need to store data that falls into categories, i.e. the
-x-positions are not numeric or the dimension does not have a natural
-order, a *SetDimension* is used. It stores a label for each entry along
-the described dimension.
-
-.. code:: cpp
-
-    std::vector<std::string> labels = {"A", "B", "C", "D", "E"};
-
-    nix::DataArray array = block.createDataArray("temperatures", "nix.categorical", temperatures);
-    array.label("temperature");
-    array.unit("K")
-
-    SetDimension dim = array.appendSetDimension();
-    dim.labels(labels);
 
 Advanced storing
 ================
