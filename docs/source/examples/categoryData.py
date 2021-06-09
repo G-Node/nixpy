@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import nixio as nix
+import nixio
 import matplotlib.pyplot as plt
 
 
@@ -32,7 +32,7 @@ def plot(data_array):
 def main():
     data, categories = create_data()
 
-    nixfile = nix.File.open("categoryData.nix", nix.FileMode.Overwrite)
+    nixfile = nixio.File.open("categoryData.nix", nixio.FileMode.Overwrite)
     data_array = store(nixfile, data, categories)
 
     plot(data_array)

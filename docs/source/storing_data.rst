@@ -10,6 +10,7 @@ be **self-explanatory**, that is, they must contain sufficient
 information to draw a basic plot of the data.
 
 |sampled_plot| 
+.. _sampled_plot:
 
 Considering the simple plot above, we can list all
 information that it shows and by extension, that needs to be stored in
@@ -54,17 +55,17 @@ dimension. The following snippet shows how to create a *DataArray* and
 store data in it.
 
 .. literalinclude:: examples/regularlySampledData.py
-   :caption: Storing data in an DataArray. Full code in ``regularlySampledData.py``.
+   :caption: Storing data in a DataArray (:download:`example code <regularlySampledData.py>`).
    :language: python
    :lines: 57 - 62
-   :emphasize-lines: 58
+   :emphasize-lines: 2
 
-As promised, the *DataArray* contains all information to create a basic plot.
+As promised, the *DataArray* contains all information to create a basic plot (see the figure above).
 
 .. literalinclude:: examples/regularlySampledData.py
    :language: python
    :lines: 29 - 40
-   :emphasize-lines: 30, 31, 35-36
+   :emphasize-lines: 2, 3, 7-8
 
 The highlighted lines emphasize how information from the dimension descriptor (a *SampledDimension*) and the *DataArray* itself are used for labeling the plot.
 
@@ -83,7 +84,7 @@ later filling e.g. during data acquisition.
 
 The resulting *DataArray* will have an initial size (100 elements) which
 will be automatically resized, if required. The data type is set to
-``nix.DataType.Double``. The *NIX* library will further try to convert passed data to the
+``nixio.DataType.Double``. The *NIX* library will further try to convert passed data to the
 defined data type, if possible. **Note:** Data type and rank (i.e. the number of dimensions) cannot be altered after the *DataArray* has been created.
 
 Data is then set by calling
@@ -128,7 +129,6 @@ SampledDimension
 .. figure:: ./images/regular_sampled.png
    :alt: 1-D regular sampled data
 
-   sampled_plot
 
 Here we have the same situation as before, the data has been sampled in
 regular intervals. That is, the time between successive data points is
@@ -147,6 +147,7 @@ added to the *DataArray* entity upon creation:
    :language: python
    :lines: 58 - 63
    :emphasize-lines: 5
+   :caption: A dimension in which the data has been gathered in regular intervals is described using a *SampledDimension* (:download:`example code <examples/regularlySampledData.py>`  
 
 
 SetDimension
@@ -173,10 +174,9 @@ RangeDimension
    :alt: 1-D irregularly sampled data
 
 
-Similar to what we had before, but this time the temporal
-distance between the sampled voltages is not regular. Storing this kind
-of data is not as efficient as in the regularly sampled case. The
-following information needs to be stored to describe the dimension:
+A signal similar to what we had before is recorded but this time the temporal
+distance between the measurements is not regular. Storing this kind
+of data is not as efficient as in the regularly sampled case since we need to store the time of each measurement and the measured value. The following information needs to be stored to describe the dimension:
 
 1. x-positions of the data points, i.e. *ticks*
 2. label
@@ -187,28 +187,25 @@ name *RangeDimension*. It needs to be added to the *DataArray* when it
 is created.
 
 .. literalinclude:: examples/irregularlySampledData.py
-   :caption: Storing irregularly sampled data. Full code in ``irregularlySampledData.py``.
+   :caption: Storing irregularly sampled data (:download:`example code <examples/irregularlySampledData.py>`).
    :language: python
    :lines: 45 - 60
    :emphasize-lines: 2, 16
 
 **Note:** The *ticks* of a *RangeDimension* must be numeric and ascending.
 
-AliasRangeDimension
-~~~~~~~~~~~~~~~~~~~
-
-A special case of a *RangeDimension* that is used when storing something
-equivalent to event times.
+The *RangeDimension* can do a more. Consider the case that the times of an event are stored:
 
 .. figure:: ./images/alias_range.png
    :alt: 1-D event data
+   :caption: The event times stored in a separate *DataArray* can be used as ticks in a *RangeDimension*
 
-   alias_range_plot
+For example these might be the times of action potentials (aka spikes) recorded in a nerve. In such a case it is basically the x-values that are of interest. It would be inefficient to store them twice, first as values in the *DataArray* and then again as ticks in the dimension descriptor.
+To model such cases the *RangeDimension* is set up to link to the *DataArray* itself.
 
-In the plot above, each dot marks the occurrence of an event. In such a
-case it is basically the x-values that are of interest. It would be
-inefficient to store them twice, first as values in the *DataArray* and
-then again as ticks in the dimension descriptor.
+
+Often, the sampling points or *ticks* are stored in their own *DataArrays* or as entries in a column of a *DataFrame*. E.g. the times of certain events.
+
 
 The *AliasRangeDimension* is used in such situations. Internally, it is
 a *RangeDimension* whose information is tied to the information stored
@@ -237,28 +234,26 @@ Data compression
 
 By default data is stored uncompressed. If you want to use data
 compression this can be enabled by providing the
-``nix::Compression::DeflateNormal`` flag during file-opening:
+``nixio.Compression.DeflateNormal`` flag during file-opening:
 
-.. code:: cpp
+.. code-block:: python
 
-    nix::File f = nix::File::open("test.nix", nix::FileMode::Overwrite, "hdf5",
-                                  nix::Compression::DeflateNormal);
+   import nixio
+   f = nixio.File.open("test.nix", nixio.FileMode.Overwrite, compression=nixio.Compression.DeflateNormal)
 
-By doing this, **all** data will be stored with compression enabled, if
+By doing this, all data will be stored with compression enabled, if
 not explicitly stated otherwise. At any time you can select or deselect
-compression by providing a ``nix::Compression`` flag during *DataArray*
+compression by providing a ``nixio.Compression`` flag during *DataArray*
 creation. Available flags are:
 
--  ``nix::Compression::Auto``: compression as defined during
+-  ``nixio.Compression.Auto``: compression as defined during
    file-opening.
--  ``nix::Compression::DeflateNormal``: use compression (fixed level).
--  ``nix::Compression::None``: no compression.
+-  ``nixio.Compression.DeflateNormal``: use compression (fixed level).
+-  ``nixio.CompressionNo``: no compression.
 
-.. code:: cpp
+.. code-block:: python
 
-     nix::DataArray array = b.createDataArray("some data", "nix.sampled", data,
-                                              nix::DataType::Double,
-                                              nix::Compression::DeflateNormal);
+   data_array = b.create_data_array("some data", "nix.sampled", data, compression=nix.Compression.DeflateNormal);
 
 Note the following:
 
@@ -266,187 +261,68 @@ Note the following:
 2. Data compression is fixed once the *DataArray* has been created, it
    cannot be changed afterwards.
 3. Opening and extending an compressed *DataArray* is easily possible
-   even if the file has not been openend with the
-   ``nix::Compression::DeflateNormal`` flag.
+   even if the file has not been opened with the
+   ``nixio.Compression.DeflateNormal`` flag.
 
 Supported DataTypes
 -------------------
 
 *DataArrays* can store a multitude of different data types. The
-supported data types are defined in the ``nix::DataType`` enumeration:
+supported data types are defined in the ``nixio.DataType`` enumeration:
 
--  ``nix::DataType::Bool``: 1 bit boolean value.
--  ``nix::DataType::Char``: 8 bit charater.
--  ``nix::DataType::Float``: floating point number.
--  ``nix::DataType::Double``: double precision floating point number.
--  ``nix::DataType::Int8``: 8 bit integer, signed.
--  ``nix::DataType::Int16``: 16 bit integer, signed.
--  ``nix::DataType::Int32``: 32 bit integer, signed.
--  ``nix::DataType::Int64``: 64 bit integer, signed.
--  ``nix::DataType::UInt8``: 8 bit unsigned int.
--  ``Nix::DataType::UInt16``: 16 bit unsigned int.
--  ``nix::DataType::UInt32``: 32 bit unsigned int.
--  ``nix::DataType::UInt64``: 64 bit unsigned int.
--  ``nix::DataType::String``: std::string value.
--  ``nix::DataType::Opaque``: data type for binary data.
+-  ``nixio.DataType.Bool``: 1 bit boolean value.
+-  ``nixio.DataType.Char``: 8 bit charater.
+-  ``nixio.DataType.Float``: floating point number.
+-  ``nixio.DataType.Double``: double precision floating point number.
+-  ``nixio.DataType.Int8``: 8 bit integer, signed.
+-  ``nixio.DataType.Int16``: 16 bit integer, signed.
+-  ``nixio.DataType.Int32``: 32 bit integer, signed.
+-  ``nixio.DataType.Int64``: 64 bit integer, signed.
+-  ``nixio.DataType.UInt8``: 8 bit unsigned int.
+-  ``nixio.DataType.UInt16``: 16 bit unsigned int.
+-  ``nixio.DataType.UInt32``: 32 bit unsigned int.
+-  ``nixio.DataType.UInt64``: 64 bit unsigned int.
+-  ``nixio.DataType.String``: string value.
+-  ``nixio.DataType.Opaque``: data type for binary data.
 
 The data type of a *DataArray* must be specified at creation time and
 cannot be changed. In many cases, the *NIX* library will try to handle
 data types transparently and cast data to the data type specified for
 the *DataArray* in which it is supposed to be stored.
 
-Multi-dimensional data
-----------------------
-
-For storing multi-dimensional data we support native as well as Boost
-MultiArrays. The following example illustrates the use of MultiArrays.
-MultiArray support is implemented in the ``nix/hydra/multiArray.hpp``
-header.
-
-.. code:: cpp
-
-    #include <nix.hpp>
-    #include <nix/hydra/multiArray.hpp>
-
-    int main() {
-        typedef boost::multi_array<int, 4> array_type_4d;
-        typedef array_type_4d::index index;
-
-        array_type_4d data(boost::extents[10][10][10][10]);
-        for(index i = 0; i < 10; ++i) {
-            for(index j = 0; j < 10; ++j) {
-                for (index k = 0; k < 10; ++k) {
-                    for (index l = 0; l < 10; ++l) {
-                        data[i][j][k][l] = std::rand() % 100 + 1;
-                    }
-                }
-            }
-        }
-        nix::NDSize data_shape(4, 10);  // NDSize object with rank four 10 elements per dim
-
-        // open a nix file, enable compression
-        nix::File f = nix::File::open("4d_data.nix", nix::FileMode::Overwrite, "hdf5",
-                                      nix::Compression::DeflateNormal);
-        nix::Block b = f.createBlock("demo block", "nix.demo");
-
-        // create the DataArray and store the data.
-        nix::DataArray array = b.createDataArray("4d random data", "nix.sampled.4d", data);
-
-        for (int i = 0; i < 4; ++i) {
-            nix::SampledDimension dim = array.appendSampledDimension(1.);
-            dim.label("width");
-            dim.unit("mm");
-        }
-
-        std::cerr << array.dataType() << std::endl;
-        std::cerr << array.dataExtent() << std::endl;
-        return 0;
-    }
 
 Extending datasets on the fly
 -----------------------------
 
 The dimensionality (aka rank) and the stored *DataType* of a *DataArray*
-are fixed. The actual size of the stored dataset, however, can be
-changed. This is often used when you acquire data continuously e.g. when
-recording during an experiment.
+are fixed. The actual size of the stored dataset, however, can
+changed. This is often used when you acquire data continuously e.g. while
+recording during an experiment. In nixpy the resizing is handled transparently.
 
 The workflow would be:
 
-1. Preparations: Open a nix-file in ``nix::FileMode::ReadWrite`` or
-   ``nix::FileMode::Overwrite``. Create or open the *DataArray*.
+1. Preparations: Open a nix-file in ``nixio.FileMode.ReadWrite`` or
+   ``nixio.FileMode.Overwrite``. Create or open the *DataArray*.
 2. Acquire more data.
-3. If necessary resize the *DataArray* and update the offset within the
-   dataset.
-4. Write the data.
-5. Acquire more data.
+3. Append the acquired data to the data array.
+4. Acquire more data.
+
 
 The following code shows how this works.
 
-.. code:: cpp
+.. literalinclude:: examples/continuousRecording.py
+   :caption: Extending *DataArray* size e.g while recording continuously (:download:`example code <examples/continuousRecording.py>`) 
+   :lines: 47-66
+   :language: python
 
-    #include <nix.hpp>
-
-    int main() {
-        // 1. open a nix file, enable compression
-        nix::File f = nix::File::open("extending_data.nix", nix::FileMode::Overwrite, "hdf5",
-                                      nix::Compression::DeflateNormal);
-        nix::Block b = f.createBlock("demo block", "nix.demo");
-
-        nix::NDSize shape(1, 2000); // initial shape
-        nix::DataArray array = b.createDataArray("4d random data", "nix.sampled.4d",
-                                                 nix::DataType::Double, shape);
-        array.appendSampledDimension(1.);
-
-        int iterations = 100;
-        nix::NDSize offset(1, 0); // inital offset for writing
-
-        for (int i = 0; i < iterations; ++i) {
-            // 2. acquire data
-            std::vector<double> data(2000, 3.14 * i / 10); // just some data
-
-            // 3. resize DataArray, update offset
-            shape[0] = (i + 1) * 2000;
-            array.dataExtent(shape);
-            offset[0] = i * 2000;
-
-            // 4. write data
-            array.setData(data, offset);
-
-            std::cerr << array.dataExtent();
-        }
-        f.close();
-        return 0;
-    }
 
 **Note!** Selecting the initial shape defines the chunk size used to
 write the data to file. Choose it appropriately for the expected size
 increment. Selecting a size that is too small can severly affect
 efficiency.
 
-Writing data directly using a data pointer
-------------------------------------------
+.. figure:: ./images/multiple_channels.png
+   :alt: recording multiple channels
 
-When writing binary data (e.g. the dump of any object using the
-``nix::DataType::Opaque`` data type) or data stored in custom objects
-that provide a pointer to the data a slightly different approach is
-chosen.
-
-Consider the following example in which we write data stored in a
-std::vector directly. We use std::vector::data() method to get a pointer
-to the stored data.
-
-.. code:: cpp
-
-    #include <nix.hpp>
-
-    int main() {
-        // some data
-        std::vector<double> random_data;
-        for (size_t i =0; i < 100000; ++i) {
-            random_data.push_back((std::rand() % 1000) / 1000.);
-        }
-
-        // create a NIX file, enable compression
-        nix::File f = nix::File::open("write_direct.nix", nix::FileMode::Overwrite, "hdf5",
-                                      nix::Compression::DeflateNormal);
-        nix::Block b = f.createBlock("demo", "nix.demo");
-
-        // prepare the DataArray, need to set the DataType and shape appropriately
-        nix::NDSize shape(1, random_data.size());
-        nix::NDSize offset(1, 0);
-        nix::DataArray array = b.createDataArray("random data", "nix.sampled",
-                                                 nix::DataType::Double, shape);
-        array.appendSetDimension();  // this dimension does not mean anything special
-
-        // write data, random_data.data() returns a pointer
-        array.setDataDirect(nix::DataType::Double, random_data.data(), shape, offset);
-
-        return 0;
-    }
-
-In this case it is the user’s responsibility to provide the required
-information. Specifying mismatched data types, or wrong shapes can lead
-to corrupted data or segmentation faults.
 
 .. |sampled_plot| image:: ./images/regular_sampled.png
