@@ -164,7 +164,7 @@ the described dimension.
 .. literalinclude:: examples/categoryData.py
    :language: python
    :lines: 16 - 20
-   :caption: A categorical data dimension is described with a *SetDimension* which (optionally) stores labels for each category (:download:`categoryData.py <examples/categoryData.py>`)
+   :caption: A categorical data dimension is described with a *SetDimension* which (optionally) stores labels for each category (:download:`example code <examples/categoryData.py>`)
 
 
 RangeDimension
@@ -198,32 +198,26 @@ The *RangeDimension* can do a more. Consider the case that the times of an event
 
 .. figure:: ./images/alias_range.png
    :alt: 1-D event data
-   :caption: The event times stored in a separate *DataArray* can be used as ticks in a *RangeDimension*
 
 For example these might be the times of action potentials (aka spikes) recorded in a nerve. In such a case it is basically the x-values that are of interest. It would be inefficient to store them twice, first as values in the *DataArray* and then again as ticks in the dimension descriptor.
-To model such cases the *RangeDimension* is set up to link to the *DataArray* itself.
+In such cases the *RangeDimension* is set up to link to the *DataArray* itself.
 
+.. literalinclude:: examples/rangeDimensionLink.py
+   :lines: 12 - 19
+   :language: python
+   :caption: A *RangeDimension* can link to a *DataArray* as a source of the ticks (:download:`exmaple code <examples/rangeDimensionLink.py>`). 
+   :emphasize-lines: 8
 
-Often, the sampling points or *ticks* are stored in their own *DataArrays* or as entries in a column of a *DataFrame*. E.g. the times of certain events.
+In the highlighted line we use a convenience function to establish the link between the dimension descriptor and the 
 
+This function is a shortcut for:
 
-The *AliasRangeDimension* is used in such situations. Internally, it is
-a *RangeDimension* whose information is tied to the information stored
-in the *DataArray* itself. Changing the ticks, label or unit on the
-dimension descriptor will change the *DataArray* itself. Adding an
-*AliasRangeDimension* is straightforward:
+.. code-block:: python
 
-.. code:: cpp
+    rdim = data_array.append_range_dimension()
+    rdim.create_link(data_array, index=[-1])
 
-    nix::DataArray array = block.createDataArray("events", "nix.irregular_sampled", event_times);
-    array.label("time");
-    array.unit("s");
-
-    nix::RangeDimension dim = array.appendAliasRangeDimension();
-
-**Note!** An *AliasRangeDimension* is only permitted if the data is 1-D
-and the values are numeric, an exception will be thrown otherwise.
-
+In the same way one can set up the *RangeDimension* to use a *DataFrame*. The ``index`` defines which slice of the data stored in the *DataArray/Frame* holds the ticks. The slice must be a 1-D vector within the linked data. If, for example, the *DataArray* is 2-D and the ticks are in the 3rd column then the index would be ``[-1, 3]``. The ``-1`` marks the dimension along which to look for the ticks. When linking *DataFrames* the index notes the column. 
 
 
 Advanced storing
