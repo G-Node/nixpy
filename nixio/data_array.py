@@ -293,6 +293,30 @@ class DataArray(Entity, DataSet):
             self.force_updated_at()
 
     def get_slice(self, positions, extents=None, mode=DataSliceMode.Index):
+        """
+        Reads a slice of the data. The slice can be specified either in indices or in data coordinates.
+        For example, if the *DataArray* stores 1D data spanning one second in time sampled with 1kHz (1000 data points). If one wants to read the data of the interval 0.25 to 0.5 seconds, one can use either of the following statements:
+
+        ```
+          interval_data = data_array.get_slice([250], [500], mode=DataSliceMode.Index)[:]
+          interval_data = data_array.get_slice([0.25],[0.25], mode=DataSliceMode.Data)[:]
+        ```
+
+        Note: The extents are *not* the end positions but the extent of the slice!
+
+        :param positions: Specifies the start of the data slice. List of either indices or data positions depending on the DataSliceMode.
+        :type positions: list length must match dimensionality of the data.
+        :param extents: Specifies the extents of the slice for each dimension.
+        :type extents: list, defaults to None
+        :param mode: Specifies how positions and extents are interpreted, they are either treated as indices (DataSliceMode.Index) or as positions in data coordinates (DataSliceMode.Data), Defaults to nixio.DataSliceMode.Index.
+        :type mode: nixio.DataSliceMode
+
+        :raises: nixio.IncompatibleDimensions: if length of positions or, if given, extents does not match the rank of the data.
+        :raises: ValueError: if an invalid slice mode is given
+
+        :returns: A nixio.DataView object
+        :rtype: nixio.DataView
+        """
         datadim = len(self.shape)
         if not len(positions) == datadim:
             raise IncompatibleDimensions(
