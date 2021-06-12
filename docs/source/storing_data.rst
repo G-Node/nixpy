@@ -55,7 +55,7 @@ dimension. The following snippet shows how to create a *DataArray* and
 store data in it.
 
 .. literalinclude:: examples/regularlySampledData.py
-   :caption: Storing data in a DataArray (:download:`example code <regularlySampledData.py>`).
+   :caption: Storing data in a DataArray (:download:`example code <examples/regularlySampledData.py>`).
    :language: python
    :lines: 57 - 62
    :emphasize-lines: 2
