@@ -140,6 +140,37 @@ class DataArray(Entity, DataSet):
             rdim.ticks = ticks
         return rdim
 
+    def append_range_dimension_using_self(self, index=None):
+        """
+        Convenience function to append a new RangeDimension to the list of
+        existing dimensions that uses the DataArray itself as provider for the ticks.
+        This is a replacement for
+        rdim = array.append_range_dimension()
+        rdim.link_data_array(self, index)
+
+        :param index: The slice of the DataArray that contains the tick
+        values. This must be a vector of the data. Defaults to None, which will be replaced by an index referring to the full first dimension.
+        :type: list of int
+
+        :returns: the newly created RangeDimension
+        :rtype: RangeDimension
+        """
+        if index is None:
+            index = [0] * len(self.shape)
+            index[0] = -1
+        msg = RangeDimension._check_index(index)
+        if msg is not None:
+            raise ValueError(msg)
+
+        msg = RangeDimension._check_link_dimensionality(self, index)
+        if msg is not None:
+            raise IncompatibleDimensions(msg, "RangeDimension.append_range_dimension_using_self")
+
+        dim_index = len(self.dimensions) + 1
+        rdim = RangeDimension.create_new(self, dim_index, None)
+        rdim.link_data_array(self, index)
+        return rdim
+
     def delete_dimensions(self):
         """
         Delete all the dimension descriptors for this DataArray.
@@ -147,7 +178,7 @@ class DataArray(Entity, DataSet):
         dimgroup = self._h5group.open_group("dimensions")
         ndims = len(dimgroup)
         for idx in range(ndims):
-            del dimgroup[str(idx+1)]
+            del dimgroup[str(idx + 1)]
         return True
 
     def _dimension_count(self):
@@ -171,7 +202,7 @@ class DataArray(Entity, DataSet):
         which returns the index starting from one and the dimensions.
         """
         for idx, dim in enumerate(self.dimensions):
-            yield idx+1, dim
+            yield idx + 1, dim
 
     @property
     def dtype(self):
@@ -281,7 +312,7 @@ class DataArray(Entity, DataSet):
                 "DataArray.get_slice"
             )
         if mode == DataSliceMode.Index:
-            slices = tuple(slice(p, p+e) for p, e in zip(positions, extents))
+            slices = tuple(slice(p, p + e) for p, e in zip(positions, extents))
             return DataView(self, slices)
         elif mode == DataSliceMode.Data:
             return self._get_slice_bydim(positions, extents)
@@ -296,11 +327,11 @@ class DataArray(Entity, DataSet):
             if dim.dimension_type in (DimensionType.Sample,
                                       DimensionType.Range):
                 dpos.append(dim.index_of(pos))
-                dext.append(dim.index_of(pos+ext)-dpos[-1])
+                dext.append(dim.index_of(pos + ext) - dpos[-1])
             elif dim.dimension_type == DimensionType.Set:
                 dpos.append(int(pos))
                 dext.append(int(ext))
-        slices = tuple(slice(p, p+e) for p, e in zip(dpos, dext))
+        slices = tuple(slice(p, p + e) for p, e in zip(dpos, dext))
         return DataView(self, slices)
 
     @property

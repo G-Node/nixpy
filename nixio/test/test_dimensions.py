@@ -6,6 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from nixio.exceptions.exceptions import IncompatibleDimensions
 import os
 import unittest
 import numpy as np
@@ -388,6 +389,26 @@ class TestLinkDimension(unittest.TestCase):
         assert da.dimensions[0].label == da.label
         assert da.dimensions[0].unit == da.unit
         assert np.all(da.dimensions[0].ticks == da[:])
+        assert rdim.is_alias
+
+        da.delete_dimensions()
+        da.append_range_dimension()
+        assert not da.dimensions[0].is_alias
+        
+        da.delete_dimensions()
+        da.append_range_dimension_using_self()
+        assert len(da.dimensions) == 1
+        assert da.dimensions[0].is_alias
+
+        da.delete_dimensions()
+        with self.assertRaises(IncompatibleDimensions):
+            da.append_range_dimension_using_self([0, -1])
+        with self.assertRaises(ValueError):
+            da.append_range_dimension_using_self([-2])
+
+        da.append_range_dimension_using_self([-1])
+        assert len(da.dimensions) == 1
+        assert da.dimensions[0].is_alias
 
     def test_data_array_self_link_set_dimension(self):
         # The new way of making alias range dimension
@@ -432,6 +453,7 @@ class TestLinkDimension(unittest.TestCase):
                                        tuple(v[2] for v in values))
         assert self.range_dim.unit == df.units[2]
         assert self.range_dim.label == df.column_names[2]
+        assert not self.range_dim.is_alias
 
     def test_data_frame_set_link_dimension(self):
         column_descriptions = OrderedDict([("name", nix.DataType.String),
