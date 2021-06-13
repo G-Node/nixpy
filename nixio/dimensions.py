@@ -392,21 +392,41 @@ class SampledDimension(Dimension):
 
         raise ValueError("Unknown IndexMode: {}".format(mode))
 
-    def axis(self, count, start=0):
+    def axis(self, count, start=None, start_position=None):
         """
-        Get an axis as defined by this sampled dimension.
+        Get an axis as defined by this nixio.SampledDimension. It either starts at the offset of the dimension,
+        a number of sample points later, or at a given position. The latter must not be less than the offset. If
+        start and start_position are given, start takes precedence.
 
-        :param count: A positive integer specifying the length of the axis
-                      (no of samples).
+        :param count: A positive integer specifying the length of the axis (no of samples).
+        :type count: int
+        :param start: positive integer, indicates the starting sample. Defaults to None. Precedes over the start_position.
+        :type start: int
+        :param start_position: The start position of the axis. Defaults to None.
+        :type start_position: double
 
-        :param start: positive integer, indicates the starting sample.
+        :raises: ValueError if start is negative or if the start_position is given and is less than offset.
 
         :returns: The created axis
         :rtype: tuple
         """
         offset = self.offset if self.offset else 0.0
         sample = self.sampling_interval
-        start_val = start * sample + offset
+
+        if start is not None:
+            if start < 0:
+                raise ValueError("Start index (%i) must not be negative!" % start)
+            start_val = start * sample + offset
+        else:
+            if start_position is not None:
+                if start_position < offset:
+                    raise ValueError("SampledDimension.axis: Start position (%.f) must not be "
+                                     "less than the offset of the dimension (%.f)!" % (start_position, offset))
+                else:
+                    start_val = start_position
+            else:
+                start_val = offset
+
         return tuple(np.arange(count) * sample + start_val)
 
     @property

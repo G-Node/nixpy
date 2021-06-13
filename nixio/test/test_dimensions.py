@@ -85,15 +85,22 @@ class TestDimension(unittest.TestCase):
         assert type(self.sample_dim.index_of(23.) == int)
 
         assert self.sample_dim.position_at(0) == 3.
-        assert self.sample_dim.position_at(200) == 200*2.+3.
+        assert self.sample_dim.position_at(200) == 200 * 2. + 3.
 
         assert len(self.sample_dim.axis(10)) == 10
         assert self.sample_dim.axis(10)[0] == 3.
-        assert self.sample_dim.axis(10)[-1] == 9*2.+3.
+        assert self.sample_dim.axis(10)[-1] == 9 * 2. + 3.
 
         assert len(self.sample_dim.axis(10, 2)) == 10
         assert self.sample_dim.axis(10, 2)[0] == 2 * 2. + 3.
         assert self.sample_dim.axis(10, 2)[-1] == (9 + 2) * 2. + 3.
+
+        with self.assertRaises(ValueError):
+            self.sample_dim.axis(10, -10)
+            self.sample_dim.axis(10, start_position=0.0)
+        assert self.sample_dim.axis(10, 0, 5.0)[0] == 3
+        assert self.sample_dim.axis(10, start_position=5.0)[0] == 5.0
+        assert self.sample_dim.axis(10, start_position=5.0)[-1] == 5.0 + 9 * 2
 
     def test_range_dimension(self):
         assert self.range_dim.index == 3
