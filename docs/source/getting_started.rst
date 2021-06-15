@@ -44,8 +44,8 @@ Most code examples are standalone and you should be able to run them. The code i
 .. toctree::
    file_handling
    storing_data
-   data_handling
    tagging
+   data_handling
    annotating
    standardization
    finding_things

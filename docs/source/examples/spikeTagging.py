@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Copyright © 2014 German Neuroinformatics Node (G-Node)
+"""Copyright © 2014 - 2021 German Neuroinformatics Node (G-Node)
 
  All rights reserved.
 
@@ -18,7 +18,7 @@
 
 """
 
-import nixio as nix
+import nixio
 import lif
 import numpy as np
 import matplotlib.pylab as plt
@@ -26,7 +26,7 @@ import matplotlib.pylab as plt
 
 def fake_neuron():
     lif_model = lif.LIF()
-    t, v, spike_times = lif_model.run_const_stim(10000, 0.005)
+    t, v, spike_times = lif_model.run_const_stim(5000, 0.005)
     return t, v, spike_times
 
 
@@ -47,7 +47,7 @@ def plot_data(tag):
     plt.ylabel(data_array.label + ((" [" + data_array.unit + "]") if data_array.unit else ""))
     plt.title(data_array.name)
     plt.xlim(0, np.max(time))
-    plt.ylim((1.2 * np.min(voltage), 1.2 * np.max(voltage)))
+    plt.ylim((1.5 * np.min(voltage), 1.5 * np.max(voltage)))
     plt.legend()
     plt.show()
 
@@ -56,8 +56,8 @@ if __name__ == '__main__':
     time, voltage, spike_times = fake_neuron()
 
     # create a new file overwriting any existing content
-    file_name = 'spike_tagging.h5'
-    file = nix.File.open(file_name, nix.FileMode.Overwrite)
+    file_name = 'spike_tagging.nix'
+    file = nixio.File.open(file_name, nixio.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.
     # it gets a name and a type
@@ -67,14 +67,11 @@ if __name__ == '__main__':
     data = block.create_data_array("membrane voltage", "nix.regular_sampled.time_series", data=voltage)
     data.label = "membrane voltage"
     # add descriptors for time axis
-    time_dim = data.append_sampled_dimension(time[1]-time[0])
-    time_dim.label = "time"
-    time_dim.unit = "s"
-
+    time_dim = data.append_sampled_dimension(time[1]-time[0], label="time", unit="s")
+    
     # create the positions DataArray
-    positions = block.create_data_array("times", "nix.positions", data=spike_times)
-    positions.append_set_dimension() # these can be empty
-    positions.append_set_dimension()
+    positions = block.create_data_array("spike times", "nix.events.spike_times", data=spike_times)
+    positions.append_range_dimension_using_self()
 
     # create a MultiTag
     multi_tag = block.create_multi_tag("spike times", "nix.events.spike_times", positions)
