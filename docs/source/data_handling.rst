@@ -9,10 +9,10 @@ Storing data is one thing, but we want to work with it. The following examples i
 .. figure:: ./images/tag1.png
    :alt: a system's response to a stimulus
 
-At some instance in time a system was exposed to a stimulus that leads to the system's response. The response hase been reocrded and stored in a *DataArray* the A *Tag* is used to highlight the "stimulus-on" segment of the data.
+At some instance in time a system was exposed to a stimulus that leads to the system's response. The response has been recorded and stored in a *DataArray* the A *Tag* is used to highlight the "stimulus-on" segment of the data.
 
-.. literalinclude:: examples/taggingExample.py
-    :caption: :download:`example code <examples/taggingExample.py>`
+.. literalinclude:: examples/tagging_example.py
+    :caption: :download:`example code <examples/tagging_example.py>`
     :lines: 78 - 90 
 
 In this example we know the interesting entities by name, i.e. the
@@ -29,10 +29,10 @@ The first and maybe most common problem is to read the data stored in a
 Reading all data
 ~~~~~~~~~~~~~~~~
 
-In *NIX* when you open a *DataArray* the stored the data is **not** automatically read from file. This keeps the object lightweight and easy to create. To read the data you can simpy access the data in a numpy style:
+In *NIX* when you open a *DataArray* the stored the data is **not** automatically read from file. This keeps the object lightweight and easy to create. To read the data you can simply access the data in a numpy style:
 
-.. literalinclude:: examples/taggingExample.py
-    :caption: :download:`example code <examples/taggingExample.py>`
+.. literalinclude:: examples/tagging_example.py
+    :caption: :download:`example code <examples/tagging_example.py>`
     :lines: 71 - 73 
 
 There are a few noteworthy things:
@@ -54,14 +54,14 @@ Reading partial data
 In other instances it might be wanted to read only parts of the data.
 Reading slices of the data ist straight forward using the the numpy style.
 
-.. literalinclude:: examples/taggingExample.py
-    :caption: :download:`example code <examples/taggingExample.py>`
+.. literalinclude:: examples/tagging_example.py
+    :caption: :download:`example code <examples/tagging_example.py>`
     :lines: 98-101
 
 An alternative approach is to use the ``DataArray.get_slice`` method which by default works with indices but can also work in data coordinates. E.g. we know that the data is 1-D and covers a span of 3.5s and we want to have the data in the interval 0.5s through 1.75s. The method returns a ``nixio.DataView`` object. The actual reading is done be accessing the data.
 
-.. literalinclude:: examples/taggingExample.py
-    :caption: :download:`example code <examples/taggingExample.py>`
+.. literalinclude:: examples/tagging_example.py
+    :caption: :download:`example code <examples/tagging_example.py>`
     :lines: 103-106
     :emphasize-lines: 3
 
@@ -87,7 +87,7 @@ In order to read the data that belongs to the highlighted region(s) *Tag* and *M
 
 The *MultiTag* version of the ``tagged_data`` method takes two arguments. The first is the index of the tagged region (0 for the first), the second argument is name (you can also use the index or the id) of the referenced *DataArray*. Since the *Tag* tags only a single region, it only takes one argument, i.e. the name (id, index) of the referenced *DataArray*.
 
-.. figure:: ./images/read_tagged_data.png
+.. figure:: ./images/reading_tagged_data.png
    :alt: reading tagged data
    
 

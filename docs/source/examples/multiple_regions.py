@@ -94,7 +94,7 @@ def plot_tagged_data(nixfile):
     num_segments = len(mtag.positions[:])
     for i in range(num_segments):
         data = mtag.tagged_data(i, "signal")[:]
-        time = signal_dim.axis(len(data), mtag.positions[i])
+        time = signal_dim.axis(len(data), start_position=mtag.positions[i])
         ax = fig.add_subplot(1, num_segments, i + 1)
         ax.plot(time, data)
         ax.spines["top"].set_visible(False)
