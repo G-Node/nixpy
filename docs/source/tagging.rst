@@ -75,92 +75,32 @@ The same principle shown above for 1-D data extends to two or more dimensions. T
 Tagging multiple points in 1D
 -----------------------------
 
-Often it is not a single point or region but a multiple points that we want to 
-Consider the following situation: A signal has been recorded and within
-this signal, certain events have been detected (figure below).
+Often it is not a single point or region but a multitude of points that we want to note in a recorded signal. In the following situation a signal has been recorded and within this signal certain events, threshold crossings have been detected (figure below).
 
 .. figure:: ./images/multiple_points.png
    :alt: multiple events
-
    
 
-For storing this kind of data we need two *DataArrays*, the first stores
-the recorded signal, the other the events. Finally, a *MultiTag* entity
-is used to link both. One can use the event times stored in one of the
-*DataArrays* to tag multiple points in the signal.
+For storing this kind of data we need two *DataArrays*, the first stores the recorded signal, the other the events. Finally, a *MultiTag* entity is used to link both. One can use the event times stored in one of the *DataArrays* to tag multiple points in the other signal.
 
-.. code:: cpp
+.. literalinclude:: examples/multiple_points.py
+    :lines: 49-61
+    :caption: To mark several points in a recorded signal we use a *MultiTag* to bind the signal and event times (:download:`example code <examples/multiple_points.py>)` 
 
-    #include <nix.hpp>
-    #include <numeric>
-
-    int main() {
-        // create dummy data
-        std::vector<double> time(1000);
-        std::vector<double> voltage;
-        std::vector<double> threshold_crossings;
-        double threshold = 0.5;
-        double interval = 0.001;
-        double pi = 3.1415;
-        double freq = 5.;
-
-        std::iota(time.begin(), time.end(), 0.);
-        std::transform(time.begin(), time.end(), time.begin(),
-                       [interval](double t){ return t * interval; });
-        std::transform(time.begin(), time.end(), std::back_inserter(voltage),
-                       [pi, freq](double t){ return std::sin(t * freq * 2 * pi) + std::sin(t * freq * 4 * pi) * 0.4; });
-        for (size_t i = 0; i < voltage.size() - 1; ++i) {
-            if (voltage[i] <= threshold && voltage[i+1] > threshold) {
-                threshold_crossings.push_back(time[i]);
-            }
-        }
-
-        // open a file, create a block that will host the data
-        nix::File f = nix::File::open("mtag_test.nix", nix::FileMode::Overwrite, "hdf5",
-                                      nix::Compression::DeflateNormal);
-        nix::Block b = f.createBlock("demo block", "demo");
-
-        // create two DataArrays, one for the signal, the other one for the events
-        nix::DataArray signal = b.createDataArray("signal", "nix.sampled", voltage);
-        signal.label("voltage");
-        signal.unit("mV");
-
-        nix::SampledDimension dim = signal.appendSampledDimension(interval);
-        dim.label("time");
-        dim.unit("s");
-
-        nix::DataArray events = b.createDataArray("threshold crossings", "nix.event_times", threshold_crossings);
-        events.label("time");
-        events.unit("s");
-
-        events.appendAliasRangeDimension();
-
-        // create the MultiTag entity to link signal and events
-        nix::MultiTag mtag = b.createMultiTag("event tag", "nix.event_tag", events);
-        mtag.addReference(signal);
-
-        f.close();
-        return 0;
-    }
-
-Creating the *MultiTag* is very similar to the creation of the simpler
-*Tag* above. The main difference is that the tagged positions are not
-stored in the *MultiTag* itself but we use the event *DataArray* (events
-in the code example) for this purpose. Finally, the signal *DataArray*
-is added to the list of references.
+Creating the *MultiTag* is very similar to the creation of the simpler *Tag* above. The main difference is that the tagged positions are not stored in the *MultiTag* itself but we use the event *DataArray* (events in the code example) for this purpose. Finally, the signal *DataArray* is added to the list of references.
 
 Tagging multiple intervals in 1D
 --------------------------------
 
-In the following exampled we want to plot multiple intervals in which,
+A very similar approach is taken for tagging multiple intervals in which,
 for example, a stimulus was switched on.
 
 .. figure:: ./images/multiple_regions.png
    :alt: multiple regions
 
-   multiple_regions_plot
+   With a *MultiTag* we can also tag multiple regions in a signal.
 
-For storing such data we again need one *DataArray* to store the recorded signal. Storing the regions is similar to the approach for the simpler *Tag*, i.e. *positions* and the *extents* need to be provided. Accordingly, **two** additional *DataArray*\ s are required. The first of which stores the positions and the second the extents.
+For storing such data we again need one *DataArray* to store the recorded signal. Storing the regions is similar to the approach for the simpler *Tag*, i.e. *positions* and the *extents* need to be provided. Accordingly, **two** additional *DataArray*\ s are required. The first of which stores the positions and the second the extents of the tagged regions. 
 
 .. literalinclude:: examples/multiple_regions.py
    :caption: The following code tags multiple regions in a 1-D signal (:download:`example code <examples/multiple_regions.py>`).
@@ -178,8 +118,8 @@ The following figures show the tagging of multiple regions in 2- and 3D.
 .. figure:: ./images/2d_mtag.png
    :alt: multiple regions in 2D
 
-   multiple_regions_2D_plot
-
+   Tagging multiple regions in n-D data requires the *DataArrays* for storing positions and extents to be two-dimensional. The first dimension represents the number of regions, the second has as many entries as the referenced data.
+ 
 According to the number of dimensions of the data (here, width and
 height) each starting point and the extent of a tagged region is defined
 by two numbers. Thus, the **position** and **extent** *DataArrays* are

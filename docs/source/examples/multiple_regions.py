@@ -31,10 +31,10 @@ def create_example_data(nixfile):
     data_array.unit = "mV"
     data_array.append_sampled_dimension(sampling_interval, label="time", unit="s")
 
-    positions = block.create_data_array("stimulus onsets", "nix.events.onset", data=stim_onsets)
+    positions = block.create_data_array("stimulus onsets", "nix.region.onsets", data=stim_onsets)
     positions.append_set_dimension()
 
-    extents = block.create_data_array("stimulus extents", "nix.extents", data=stim_extents)
+    extents = block.create_data_array("stimulus extents", "nix.region.extents", data=stim_extents)
     extents.append_set_dimension()
 
     frequencies = block.create_data_array("stimulus frequency", "nix.feature", data=stim_frequencies)
