@@ -9,7 +9,7 @@ The data shown below is simulation data created using a Leaky Integrate and Fire
 
 .. literalinclude:: examples/spikeTagging.py
     :lines: 58-78
-    :caption: We create some simulation data and then use a *MultiTag* to bind the recorded membrane voltage and the spike times together (:download:`example code <examples/spikeTagging.py>` 
+    :caption: We create some simulation data and then use a *MultiTag* to bind the recorded membrane voltage and the spike times together (:download:`example code <examples/spikeTagging.py>`) 
 
 .. figure:: ./images/spike_tagging.png
     :alt: spike times in a neuron's activity
@@ -73,32 +73,7 @@ position has to be used as an index in the first dimension of the Feature data. 
 
 .. literalinclude:: examples/spikeFeatures.py
     :lines: 135-147
+    :caption: From the stimulus, a set of snippets has been extracted and stored in 2D-DataArray. To be used as an ``Indexed`` feature it must be organized that the first dimension represents the number of snippets. The second dimension is the time. (:download:`example code <examples/spikeFeatures.py>`).
 
-.. image:: examples/spike_feature.png
-    :width: 240
-
-Source code for this example: :download:`spikeFeatures.py <examples/spikeFeatures.py>`.
-
-
-.. _feature_data:
-
-Retrieving feature data
-"""""""""""""""""""""""
-
-The above sections have shown how to attach features to tagged
-regions. To get the feature data back there are two ways. (i) You can
-access the data via the selected feature as it is shown in the example above (:download: `spikeFeatures.py <examples/spikeFeatures.py>`) (line 61).
-
-.. literalinclude:: examples/spikeFeatures.py
-            :lines: 61
-
-With this line of code you get all the data stored in the Feature as
-one numpy array.  If you want to get the feature data that is related
-to a singe point (or region) one can call (line 62):
-
-.. literalinclude:: examples/spikeFeatures.py
-            :lines: 62
-
-with the first argument being the index of the position and the second
-one that of the feature. In case of **Tag** entities, there is only
-one argument that is the index of the feature you want the data from.
+.. figure:: images/spike_features.png
+    :alt: indexed feature
