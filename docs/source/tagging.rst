@@ -85,7 +85,7 @@ For storing this kind of data we need two *DataArrays*, the first stores the rec
 
 .. literalinclude:: examples/multiple_points.py
     :lines: 49-61
-    :caption: To mark several points in a recorded signal we use a *MultiTag* to bind the signal and event times (:download:`example code <examples/multiple_points.py>)` 
+    :caption: To mark several points in a recorded signal we use a *MultiTag* to bind the signal and event times ( :download:`example code <examples/multiple_points.py>`) 
 
 Creating the *MultiTag* is very similar to the creation of the simpler *Tag* above. The main difference is that the tagged positions are not stored in the *MultiTag* itself but we use the event *DataArray* (events in the code example) for this purpose. Finally, the signal *DataArray* is added to the list of references.
 
