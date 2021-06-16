@@ -11,7 +11,6 @@ The data shown below is simulation data created using a Leaky Integrate and Fire
     :lines: 58-78
     :caption: We create some simulation data and then use a *MultiTag* to bind the recorded membrane voltage and the spike times together (:download:`example code <examples/spikeTagging.py>` 
 
-
 .. figure:: ./images/spike_tagging.png
     :alt: spike times in a neuron's activity
  
@@ -47,46 +46,36 @@ In the recorded membrane voltage data is 10s long and we tag the interval betwee
 Tagged Feature
 """"""""""""""
 
-Tagged **Features** are used in cases in which the positions and
-extents of a tag also apply to another linked dataset. In the
-following example the spike times should also be applied to the
-stimulus that led to the responses. The stimulus is saved in an
-additional **DataArray** and is linked to the spike times as a
-**Feature** setting the **LinkType** to *tagged*.
+Tagged **Features** are used in cases in which the positions and extents of a tag also apply to another linked dataset. In the 
+following example the spike times should also be applied to the stimulus that led to the responses. The stimulus is saved in an 
+additional **DataArray** and is linked to the spike times as a **Feature** setting the **LinkType** to *tagged*.
 
 .. literalinclude:: examples/taggedFeature.py
-            :lines: 108-121
+    :lines: 52-74
+    :caption: Source code for this example: :download:`taggedFeature.py <examples/taggedFeature.py>`.
 
-.. image:: examples/tagged_feature.png
+.. figure:: images/tagged_feature.png
     :alt: tagged feature
-    :width: 240
 
-Source code for this example: :download:`taggedFeature.py <examples/taggedFeature.py>`.
-
+The spike times are used to tag the recording of the membrane voltage using a *MultiTag*. The stimulus is added to the *MultiTag* as a **tagged** feature. That is, the positions of the tag (the spike times) should be applied also to the stimulus. Extracting the ``feature_data`` gives the stimulus intensities at the times of the spikes, the orange distribution.
 
 .. _indexed_feature:
 
 Indexed Feature
 """""""""""""""
 
-In the example, the signal is the membrane potential of a (model)
-neuron which was stimulated with some stimulus. The events are again
-the action potentials (or spikes) fired by that neuron. A typical
-analysis performed on such data is the Spike triggered average which
-represent the average stimulus that led to a spike. For each spike, a
-snippet of the respective stimulus is cut out and later averaged. In
-this example we store these stimulus snippets and link them to the
-events by adding a **Feature** to the **MultiTag**. There are three
-different flags that define how this link has to be interpreted. In
-this case there is one snippet for each spike. The index of each
-position has to be used as an index in the first dimension of the
-Feature data. The **LinkType** has to be set to *indexed*.
+In the example, the signal is the membrane potential of a (model) neuron which was stimulated with some stimulus. The events are again
+the action potentials (or spikes) fired by that neuron. A typical analysis performed on such data is the Spike triggered average which
+represent the average stimulus that led to a spike. For each spike, a snippet of the respective stimulus is cut out and later averaged. In
+this example we store these stimulus snippets and link them to the events by adding a **Feature** to the **MultiTag**. There are three
+different flags that define how this link has to be interpreted. In this case there is one snippet for each spike. The index of each
+position has to be used as an index in the first dimension of the Feature data. The **LinkType** has to be set to *indexed*.
 
 .. literalinclude:: examples/spikeFeatures.py
-            :lines: 135-147
+    :lines: 135-147
 
 .. image:: examples/spike_feature.png
-        :width: 240
+    :width: 240
 
 Source code for this example: :download:`spikeFeatures.py <examples/spikeFeatures.py>`.
 
