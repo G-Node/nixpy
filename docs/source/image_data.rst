@@ -1,7 +1,7 @@
-.. _image-data-tutorial:
-
 .. toctree::
     :maxdepth: 1
+
+.. _Image Data:
  
 Image data
 ==========

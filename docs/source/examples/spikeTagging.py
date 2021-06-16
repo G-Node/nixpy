@@ -41,14 +41,17 @@ def plot_data(tag):
     spike_times = np.zeros(tag.positions.data_extent)
     tag.positions.data.read_direct(spike_times)
 
-    plt.plot(time, voltage, color='dodgerblue', label=data_array.name)
-    plt.scatter(spike_times, np.ones(spike_times.shape)*np.max(voltage), color='red', label=tag.name)
-    plt.xlabel(x_axis.label + ((" [" + x_axis.unit + "]") if x_axis.unit else ""))
-    plt.ylabel(data_array.label + ((" [" + data_array.unit + "]") if data_array.unit else ""))
-    plt.title(data_array.name)
-    plt.xlim(0, np.max(time))
-    plt.ylim((1.5 * np.min(voltage), 1.5 * np.max(voltage)))
-    plt.legend()
+    fig = plt.figure(figsize=(5.5, 2.5))
+    ax = fig.add_subplot(111)
+    ax.plot(time, voltage, color='dodgerblue', label=data_array.name)
+    ax.scatter(spike_times, np.ones(spike_times.shape)*np.max(voltage), color='red', label=tag.name)
+    ax.set_xlabel(x_axis.label + ((" [" + x_axis.unit + "]") if x_axis.unit else ""))
+    ax.set_ylabel(data_array.label + ((" [" + data_array.unit + "]") if data_array.unit else ""))
+    ax.set_xlim(0, np.max(time))
+    ax.set_ylim((1.5 * np.min(voltage), 1.5 * np.max(voltage)))
+    ax.legend()
+    fig.subplots_adjust(bottom=0.175, top=0.975, right=0.975)
+    fig.savefig("../images/spike_tagging.png")
     plt.show()
 
 
@@ -66,8 +69,9 @@ if __name__ == '__main__':
     # create a 'DataArray' to take the membrane voltage
     data = block.create_data_array("membrane voltage", "nix.regular_sampled.time_series", data=voltage)
     data.label = "membrane voltage"
+    data.unit = "mV"
     # add descriptors for time axis
-    time_dim = data.append_sampled_dimension(time[1]-time[0], label="time", unit="s")
+    data.append_sampled_dimension(time[1]-time[0], label="time", unit="s")
     
     # create the positions DataArray
     positions = block.create_data_array("spike times", "nix.events.spike_times", data=spike_times)

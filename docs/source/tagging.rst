@@ -104,7 +104,7 @@ For storing such data we again need one *DataArray* to store the recorded signal
 
 .. literalinclude:: examples/multiple_regions.py
    :caption: The following code tags multiple regions in a 1-D signal (:download:`example code <examples/multiple_regions.py>`).
-   :lines: 27 - 46 
+   :lines: 27 - 38, 44-46 
 
 The example code is rather straight forward. The *DataArrays* ‘positions’ and ‘extents’ take respective data and are added to the created *MultiTag* entity. Finally, the *DataArray* in which we tag the regions is added to the list of *references* of the *MultiTag*.
 
@@ -131,32 +131,27 @@ This approach can be extended into n-D. The following figure illustrates the 3-D
 
 The only things that need to be changed in the above code, are the layout of the data (now 3-dimensional) and further entries into **position** and **extent** *DataArrays* along the second dimension (compare tables in the figure). Again, these *DataArrays* are **always** 2D, the first dimension represents the number of tagged regions, the second the number of dimensions.
 
-For an example see :ref:`_image-data-tutorial`.
+For an example see :ref:`Image Data`.
 
 Adding features
 ---------------
 
-We use the above example to increase complexity a bit. So far, the *MultiTag* ‘mtag’ just notes that in the data stored in ‘array’ there are some interesting intervals in which something happened. The name of the *MultiTag* entity tells us that the highlighted intervals represent stimulus regions. Using *Features* we can now add further information to these regions. Let’s assume we wanted to store the stimulus intensity. The following lines of code can be inserted into the previous example
+We use the above example to increase complexity a bit. So far, the *MultiTag* ‘mtag’ just notes that in the data stored in ‘array’ there are some interesting intervals in which something happened. The name of the *MultiTag* entity tells us that the highlighted intervals represent stimulus regions. Using *Features* we can now add further information to these regions. Let’s assume we wanted to store the stimulus frequency. The following lines of code can be inserted into the previous example
 before the file is closed.
 
-.. code:: cpp
+.. literalinclude:: examples/multiple_regions.py
+   :caption: The following code tags multiple regions in a 1-D signal and adds a feature describing the tagged regions (:download:`example code <examples/multiple_regions.py>`).
+   :lines: 40 - 47 
+   :emphasize-lines: 8
 
-        // extract stimulus intensities from the stimulus vector
-        std::vector<double> stimulus_intensities;
-        for (double stim_on_time : stim_on_times) {
-            stimulus_intensities.push_back(stimulus[size_t(stim_on_time / interval) + 1]);
-        }
+The feature data is used to create the text labels below the segments in the plot above (:ref:`above<Tagging multiple intervals in 1D>`). Each entry in the frequencies *DataArray* corresponds to one of the tagged sections. Thus we use the ``nixio.LinkType.Indexed`` flag while creating the feature. We can read the feature data that belongs to the respective position index by calling the ``feature_data`` method on the *MultiTag*.
 
-        nix::DataArray stimulus_intensities = b.createDataArray("stimulus intensities", "nix.collection", stimulus_intensities);
-        stimulus_intensities.label("voltage");
-        stimulus_intensities.unit("V");
-        stimulus_intensities.appendSetDimensions();
+.. literalinclude:: examples/multiple_regions.py
+   :caption: :download:`example code <examples/multiple_regions.py>`.
+   :lines: 73-75 
 
-        mtag.createFeature(stimulus_intensities, nix::LinkType::Indexed);
 
-The *Feature* adds the information stored in a *DataArray* to the
-*Tag/MultiTag*. The way this information has to be interpreted is
-specified via the *LinkType*. There are three distinct types:
+The *Feature* adds the information stored in a *DataArray* to the *Tag/MultiTag*. The way this information has to be interpreted is specified via the *LinkType*. There are three distinct types:
 
 1. **Indexed**: For each position in the referring *Tag/MultiTag* there
    is one entry in the linked *DataArray*. In case the linked
@@ -169,11 +164,7 @@ specified via the *LinkType*. There are three distinct types:
    feature of the *Tag/MultiTag* ignoring any indexing, positions or
    extents.
 
-In the above example we have a single stimulus intensity for each
-position. Hence, the *LinkType::Indexed* is used.
-
-
-
+For more examples see the :ref:`Spike Time Data` tutorial.
 
 
 Handling of units
