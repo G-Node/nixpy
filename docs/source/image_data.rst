@@ -1,4 +1,4 @@
-.. _image_data_tutorial:
+.. _image-data-tutorial:
 
 .. toctree::
     :maxdepth: 1

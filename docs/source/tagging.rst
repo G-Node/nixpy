@@ -131,7 +131,7 @@ This approach can be extended into n-D. The following figure illustrates the 3-D
 
 The only things that need to be changed in the above code, are the layout of the data (now 3-dimensional) and further entries into **position** and **extent** *DataArrays* along the second dimension (compare tables in the figure). Again, these *DataArrays* are **always** 2D, the first dimension represents the number of tagged regions, the second the number of dimensions.
 
-For an example see :ref:`_image_data_tutorial`.
+For an example see :ref:`_image-data-tutorial`.
 
 Adding features
 ---------------
