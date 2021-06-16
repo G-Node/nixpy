@@ -120,96 +120,23 @@ The following figures show the tagging of multiple regions in 2- and 3D.
 
    Tagging multiple regions in n-D data requires the *DataArrays* for storing positions and extents to be two-dimensional. The first dimension represents the number of regions, the second has as many entries as the referenced data.
  
-According to the number of dimensions of the data (here, width and
-height) each starting point and the extent of a tagged region is defined
-by two numbers. Thus, the **position** and **extent** *DataArrays* are
-two dimensional. The first dimension represents the number of tagged
-regions, the second the number of dimensions.
+According to the number of dimensions of the data (here, width and height) each  starting point and the extent of a tagged region is defined by two numbers. Thus, the **position** and **extent** *DataArrays* are two dimensional. The first dimension represents the number of tagged regions, the second the number of dimensions.
 
-.. code:: cpp
-
-    #include <nix.hpp>
-    #include <nix/hydra/multiArray.hpp>
-
-    int main() {
-        typedef boost::multi_array<int, 2> array_type_2d;
-        typedef array_type_2d::index index;
-
-        array_type_2d data(boost::extents[100][100]);
-        for(index i = 0; i < 100; ++i) {
-            for(index j = 0; j < 100; ++j) {
-                data[i][j] = std::rand() % 100 + 1;
-            }
-        }
-        nix::NDSize data_shape(2, 100);
-
-        // store data in a nix file
-        nix::File f = nix::File::open("2d_multiple_regions.nix", nix::FileMode::Overwrite, "hdf5",
-                                      nix::Compression::DeflateNormal);
-        nix::Block b = f.createBlock("demo block", "nix.demo");
-
-        nix::DataArray array = b.createDataArray("2d random data", "nix.sampled.2d", data);
-        nix::SampledDimension dim = array.appendSampledDimension(1.);
-        dim.label("width");
-        dim.unit("mm");
-        dim = array.appendSampledDimension(1.);
-        dim.label("height");
-        dim.unit("mm");
-
-        array_type_2d pos(boost::extents[2][2]); // 2 regions, 2 dimensions
-        nix::NDSize pos_shape = {2, 2};
-        pos[0][0] = 10;
-        pos[1][0] = 90;
-        pos[0][1] = 60;
-        pos[1][1] = 5;
-        nix::DataArray positions = b.createDataArray("positions", "nix.positions", pos);
-        positions.appendSetDimension();
-        positions.appendSetDimension();
-
-        array_type_2d ext(boost::extents[2][2]);
-        nix::NDSize ext_shape = pos_shape;
-        ext[0][0] = 30;
-        ext[1][0] = -30;
-        ext[0][1] = 30;
-        ext[1][1] = 20;
-        nix::DataArray extents = b.createDataArray("extents", "nix.extents", ext);
-        extents.appendSetDimension();
-        extents.appendSetDimension();
-
-        // bind everything together using a MultiTag
-        nix::MultiTag regions = b.createMultiTag("regions", "nix.regions.2d", positions);
-        regions.extents(extents);
-        regions.addReference(array);
-
-        f.close();
-        return 0;
-    }
-
-This approach can be extended into n-D. The following figure illustrates
-the 3-D case.
+This approach can be extended into n-D. The following figure illustrates the 3-D case.
 
 .. figure:: ./images/3d_mtag.png
    :alt: multiple regions in 3D
 
    multiple_regions_3D_plot
 
-The only things that need to be changed in the above code, are the
-layout of the data (now 3-dimensional) and further entries into
-**position** and **extent** *DataArrays* along the second dimension
-(compare tables in the figure). Again, these *DataArrays* are **always**
-2D, the first dimension represents the number of tagged regions, the
-second the number of dimensions.
+The only things that need to be changed in the above code, are the layout of the data (now 3-dimensional) and further entries into **position** and **extent** *DataArrays* along the second dimension (compare tables in the figure). Again, these *DataArrays* are **always** 2D, the first dimension represents the number of tagged regions, the second the number of dimensions.
+
+For an example see :ref:`_image_data_tutorial`.
 
 Adding features
 ---------------
 
-We use the above example to increase complexity a bit. So far, the
-*MultiTag* ‘mtag’ just notes that in the data stored in ‘array’ there
-are some interesting intervals in which something happened. The name of
-the *MultiTag* entity tells us that the highlighted intervals represent
-stimulus regions. Using *Features* we can now add further information to
-these regions. Let’s assume we wanted to store the stimulus intensity.
-The following lines of code can be inserted into the previous example
+We use the above example to increase complexity a bit. So far, the *MultiTag* ‘mtag’ just notes that in the data stored in ‘array’ there are some interesting intervals in which something happened. The name of the *MultiTag* entity tells us that the highlighted intervals represent stimulus regions. Using *Features* we can now add further information to these regions. Let’s assume we wanted to store the stimulus intensity. The following lines of code can be inserted into the previous example
 before the file is closed.
 
 .. code:: cpp
@@ -246,62 +173,7 @@ In the above example we have a single stimulus intensity for each
 position. Hence, the *LinkType::Indexed* is used.
 
 
-Image data
-==========
 
-Color images can be stored as 3-D data in a *DataArray*. The first two
-dimensions represent *width* and *height* of the image while the 3rd
-dimension represents the color channels. Accordingly, we need three
-dimension descriptors. The first two are *SampledDimensions* since the
-pixels of the image are regularly sampled in space. The third
-dimension is a *SetDimension* with labels for each of the channels.
-In this tutorial the "Lenna" image is used. Please see the author
-attribution in the code.
-
-.. literalinclude:: examples/imageData.py
-		    :lines: 59-66
-
-.. image:: examples/lenna.png
-	   :width: 240
-
-if the image is not shown install *imagemagick* or *xv* tools (Linux)
-Source code for this example: :download:`imageData.py <examples/imageData.py>`.
-
-:ref:`toc`
-
-Tagging regions
----------------
-
-One key feature of the nix-model is its ability to annotate, or "tag",
-points or regions-of-interest in the stored data. This feature can be
-used to state the occurrence of events during the recording, to state
-the intervals of a certain condition, e.g. a stimulus presentation, or
-to mark the regions of interests in image data. In the nix data-model
-two types of Tags are discriminated. (1) the **Tag** for single points
-or regions, and (2) the **MultiTag** to annotate multiple points or
-regions using the same entity.
-
-.. _single_roi:
-
-Single point or region
-""""""""""""""""""""""
-
-Single points of regions-of-interest are annotated using a **Tag**
-object. The Tag contains the start *position* and, optional, the
-*extent* of the point or region. The link to the data is established
-by adding the **DataArray** that contains the data to the list of
-references. It is important to note that *position* and *extent* are
-arrays with the length matching the dimensionality of the referenced
-data. The same Tag can be applied to many references as long as
-*position* and *extent* can be applied to these.
-
-.. literalinclude:: examples/singleROI.py
-		    :lines: 80-84
-
-.. image:: examples/single_roi.png
-	   :width: 240
-
-Source code for this example :download:`singleROI.py <examples/singleROI.py>`.
 
 
 Handling of units

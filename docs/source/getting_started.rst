@@ -49,4 +49,5 @@ Most code examples are standalone and you should be able to run them. The code i
    annotating
    standardization
    finding_things
+   image_data
    :maxdepth: 1
