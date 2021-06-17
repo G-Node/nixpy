@@ -1,3 +1,6 @@
+.. toctree::
+    :maxdepth: 1
+
 Noting the origin of data
 =========================
 
@@ -33,7 +36,7 @@ The output should yield:
 Search and find
 ---------------
 
-In a data-centered search we can then ask the *DataArray* for it's *Source* to get information about the cell and get the linked metadata. A *DataArray* may have several sources attached to it. To make sure we get the right one (with the cell information) we performa a search on the sources using the **type** information.
+In a data-centered search we can then ask the *DataArray* for it's *Source* to get information about the cell and get the linked metadata. A *DataArray* may have several sources attached to it. To make sure we get the right one (with the cell information) we perform a search on the sources using the **type** information.
 
 .. literalinclude:: examples/sources.py
     :lines: 59 - 61 

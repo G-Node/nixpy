@@ -1,3 +1,6 @@
+.. toctree::
+    :maxdepth: 1
+
 .. _metadata:
 
 Annotations with arbitrary metadata
