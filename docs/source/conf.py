@@ -26,6 +26,7 @@ try:
 
     html_theme_options = {'logo_only': True,
                           'display_version': True,
+                          'style_external_links': True,
                           'prev_next_buttons_location': "both"}
 
     html_logo = "nix_logo.png"

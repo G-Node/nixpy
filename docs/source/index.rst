@@ -40,7 +40,7 @@ Introduction
 
 We have assembled `introductory material <getting_started.html>`__
 that illustrates using nix. The tutorials contain several code
-examples. `The use_cases <use_cases.html>`__ explain in more detail how
+examples. `The use_cases <https://nixio.readthedocs.io/en/master/use_cases.html>`__ explain in more detail how
 nix is used in real world situations.
 
 Support
@@ -99,7 +99,11 @@ Referenced by
 --------------
 
 .. toctree::
+   basic_idea
    install
+   standardization
+   :caption: Introduction
+
    :maxdepth: 1
    :caption: Getting started:
 
@@ -111,7 +115,7 @@ Referenced by
 .. toctree::
    getting_started
    :maxdepth: 1
-   :caption: Introduction:
+   :caption: Tutorials
 
 .. toctree::
    contact
@@ -154,4 +158,12 @@ The API documentation of internal modules, for NIXPy developers.
    :maxdepth: 2
    :caption: Internal API
 
+Source code
+===========
 
+All sources are available under MIT open-souce license and is hosted on `GitHub <https://github.com/g-node/nixpy>`_.
+
+.. toctree::
+    Sources on GitHub <https://github.com/g-node/nixpy>
+    :maxdepth: 1
+    :caption: Source code
