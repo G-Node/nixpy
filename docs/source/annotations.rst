@@ -19,7 +19,7 @@ For a quick view of the metadata tree pretty-print it:
 
 which leads to an output like this. The argument ``max_depth=-1`` notes that the full depth of the tree should be displayed. In the default case (``max_depth=1``) the display will be more compact and will not recursively traverse the whole tree. 
 
-.. code-block:: shell
+.. code-block:: text
 
     recording session [odml.recording]
         |- experimenter: ('John Doe',)
