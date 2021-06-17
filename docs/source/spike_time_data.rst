@@ -26,8 +26,8 @@ The following examples show how this works.
 
 .. _untagged_feature:
     
-Untagged Feature
-""""""""""""""""
+Tagging stimulus segments
+-------------------------
     
 Let's say we record the neuronal activity and in a certain epoch of that recording a stimulus was presented. This time interval is annotated using a **Tag**. This inidicates the time in which the stimulus was on but we may also want to link the stimulus itself to it. The stimulus is also stored as a **DataArray** be linked to the *Tag* as an *untagged* **Feature** of it.
 
@@ -43,8 +43,8 @@ In the recorded membrane voltage data is 10s long and we tag the interval betwee
 
 .. _tagged_feature:
 
-Tagged Feature
-""""""""""""""
+Tagging with spike times
+------------------------
 
 Tagged **Features** are used in cases in which the positions and extents of a tag also apply to another linked dataset. In the 
 following example the spike times should also be applied to the stimulus that led to the responses. The stimulus is saved in an 
@@ -61,8 +61,8 @@ The spike times are used to tag the recording of the membrane voltage using a *M
 
 .. _indexed_feature:
 
-Indexed Feature
-"""""""""""""""
+Storing wavelets as Features of the spike times
+-----------------------------------------------
 
 In the example, the signal is the membrane potential of a (model) neuron which was stimulated with some stimulus. The events are again
 the action potentials (or spikes) fired by that neuron. A typical analysis performed on such data is the Spike triggered average which

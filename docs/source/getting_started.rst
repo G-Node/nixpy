@@ -20,7 +20,8 @@ Most code examples are standalone and you should be able to run them. The code i
    storing_data
    tagging
    data_handling
-   annotating
+   annotations
+   sources
    finding_things
    image_data
    spike_time_data
