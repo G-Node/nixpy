@@ -1,5 +1,5 @@
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
 Storing data
 ============
@@ -117,14 +117,14 @@ Data is read from a DataArray by accessing it in numpy style.
 
 
 Dimensions
-==========
+----------
 
 Within the *DataArray* we can store n-dimensional data. For each
 dimension we must provide a *dimension descriptor*. The following
 introduces the individual descriptors.
 
 SampledDimension
-----------------
+****************
 
 .. figure:: ./images/regular_sampled.png
    :alt: 1-D regular sampled data
@@ -151,7 +151,7 @@ added to the *DataArray* entity upon creation:
 
 
 SetDimension
-------------
+************
 
 .. figure:: ./images/set_dimension.png
    :alt: simple plot with categories
@@ -168,7 +168,7 @@ the described dimension.
 
 
 RangeDimension
---------------
+**************
 
 .. figure:: ./images/irregular_sampled.png
    :alt: 1-D irregularly sampled data
@@ -221,10 +221,10 @@ In the same way one can set up the *RangeDimension* to use a *DataFrame*. The ``
 
 
 Advanced storing
-================
+----------------
 
 Data compression
-----------------
+****************
 
 By default data is stored uncompressed. If you want to use data
 compression this can be enabled by providing the
@@ -259,7 +259,7 @@ Note the following:
    ``nixio.Compression.DeflateNormal`` flag.
 
 Supported DataTypes
--------------------
+*******************
 
 *DataArrays* can store a multitude of different data types. The
 supported data types are defined in the ``nixio.DataType`` enumeration:
@@ -286,7 +286,7 @@ the *DataArray* in which it is supposed to be stored.
 
 
 Extending datasets on the fly
------------------------------
+*****************************
 
 The dimensionality (aka rank) and the stored *DataType* of a *DataArray*
 are fixed. The actual size of the stored dataset, however, can
@@ -320,3 +320,64 @@ efficiency.
 
 
 .. |sampled_plot| image:: ./images/regular_sampled.png
+
+
+The DataFrame
+-------------
+
+The DataFrame stores tabular data in a rows-and-columns format. Each Column has a name, a data type, and, optionally, a unit and a definition.
+
+.. literalinclude:: examples/tabulardata.py
+   :lines: 8 - 25
+   :caption: A DataFrame is created by providing the column definition which consists of a name and the data type that should be stored in each column. Units can be added lateron. It is best to use OrderdDicts to make sure, that the column order is as defined (standard dictionaries do not guarantee the order of the items). :download:`example code <examples/tabulardata.py>`
+   
+For a quick overview one can use the ``DataFrame.print_table()`` method
+
+.. code-block:: text
+
+   column:     name       id       time   amplitude frequency 
+   unit:                          s         mV        Hz    
+   [0]:    alpha   e28e0735-1  20.18      5.0      100.0   
+   [1]:     beta   74942839-1  20.09      5.5      101.0   
+   [2]:    gamma   0886ef1a-2  20.05      5.1      100.0   
+   [3]:    delta   0ac53fd2-7  20.15      5.3      150.0   
+   [4]:   epsilon  a54b35df-1  20.23      5.7      200.0   
+   [5]:      fi    70eb952c-0  20.07      5.2      300.0   
+   [6]:     zeta   130ad527-d  20.12      5.1       39.0   
+   [7]:     eta    042a460c-e  20.27      5.1      600.0   
+   [8]:    theta   1f2c1df8-f  20.15      5.6      400.0   
+   [9]:     iota   c4598a1e-b  20.08      5.1      200.0
+
+The DataFrame offers several methods to get basic information about the table:
+
+.. literalinclude:: examples/tabulardata.py
+   :lines: 30-33
+
+Leading to the following output:
+
+.. code-block:: text
+
+   size, aka number of rows:  10
+   column names:  ('name', 'id', 'time', 'amplitude', 'frequency')
+   column definition:  [('name', dtype('O'), None), ('id', dtype('O'), None), ('time', dtype('<f8'), 's'), ('amplitude', dtype('<f8'), 'mV'), ('frequency', dtype('<f8'), 'Hz')]
+   column units:  [None None 's' 'mV' 'Hz']
+
+Reading of the table data is possible for individual cells, entire columns, or selected rows
+
+.. literalinclude:: examples/tabulardata.py
+   :lines: 35-41
+
+Which yields the following outputs:
+
+.. code-block:: text
+
+   single cell by position:  alpha
+   single cell by name and row index:  alpha
+   Entire ID column:  ['f0299d50-b' 'c74d3b7c-0' 'e27bb6f7-2' '8bac251b-7' 'aecc18d4-a'
+   '268c8dea-f' '88de352a-d' '4bdac82c-b' '5671ed6e-b' '0a7bf5e4-9']
+   Two columns, id and name, joined:  [('f0299d50-b', 'alpha') ('c74d3b7c-0', 'beta') ('e27bb6f7-2', 'gamma')
+   ('8bac251b-7', 'delta') ('aecc18d4-a', 'epsilon') ('268c8dea-f', 'fi')
+   ('88de352a-d', 'zeta') ('4bdac82c-b', 'eta') ('5671ed6e-b', 'theta')
+   ('0a7bf5e4-9', 'iota')]
+   Entire rows with indices 0 and 2:  [('alpha', 'f0299d50-b', 20.18, 5. , 100.)
+   ('gamma', 'e27bb6f7-2', 20.05, 5.1, 100.)]
