@@ -11,10 +11,6 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- This tutorial shows how to store a voltage trace, mark in this the
- occurence of action poentials and also save for each spike the
- evoking stimulus as a feature.
-
  See https://github.com/G-node/nix/wiki for more information.
 
 """

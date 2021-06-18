@@ -10,9 +10,7 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- This tutorial shows how multiple regularly sampled data that belong
- together can be stored in a single DataArray in nix-files. See
- https://github.com/G-node/nix/wiki for more information.
+ See https://github.com/G-node/nix/wiki for more information.
 
 """
 
@@ -22,9 +20,9 @@ import matplotlib.pylab as plt
 
 
 def create_data(duration=1, freq=10, stepsize=0.01):
-    x = np.arange(0, duration*2*np.pi, stepsize)
-    sine = np.sin(freq*x)
-    cosine = np.cos(freq*x)
+    x = np.arange(0, duration * 2 * np.pi, stepsize)
+    sine = np.sin(freq * x)
+    cosine = np.cos(freq * x)
     return x, sine, cosine
 
 
@@ -47,13 +45,12 @@ def plot_data(data_array):
     plt.savefig('multiple_time_series.png')
     plt.show()
 
-
-if __name__ == "__main__":
+def main():
     # fake some data
     duration = 2
     frequency = 2
     stepsize = 0.02
-    x, sine, cosine = create_data(duration, frequency, stepsize)
+    _, sine, cosine = create_data(duration, frequency, stepsize)
 
     # create a new file overwriting any existing content
     file_name = 'multiple_regular_data_example.h5'
@@ -74,8 +71,12 @@ if __name__ == "__main__":
     dim = data.append_sampled_dimension(stepsize)
     dim.unit = "s"
     dim.label = "time"
-    dim.offset = 0.0 # optional
+    dim.offset = 0.0  # optional
 
     # let's plot the data from the stored information
     plot_data(data)
     file.close()
+
+
+if __name__ == "__main__":
+    main()

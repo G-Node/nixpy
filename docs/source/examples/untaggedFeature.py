@@ -11,10 +11,6 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- This tutorial shows how to store a voltage trace and mark in this the
- interval in which a stimulus was presented. The stimulus itself is
- linked to this interval as an untagged Feature.
-
  See https://github.com/G-node/nix/wiki for more information.
 
 """

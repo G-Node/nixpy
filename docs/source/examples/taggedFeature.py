@@ -11,13 +11,9 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- This tutorial shows how to store a voltage trace, mark in this the
- occurrence of action potentials, and save the stimulus as a feature.
-
  See https://github.com/G-node/nix/wiki for more information.
 
 """
-
 import nixio
 import lif
 import numpy as np

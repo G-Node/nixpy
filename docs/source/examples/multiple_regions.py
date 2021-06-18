@@ -72,7 +72,7 @@ def plot(nixfile):
         ax.add_patch(rect)
         ax.text(interval + extent / 2, -1.25,
                 "%.1f %s" % (mtag.feature_data(i, "stimulus frequency")[:],
-                mtag.features["stimulus frequency"].data.unit), fontsize=8, ha="center")
+                             mtag.features["stimulus frequency"].data.unit), fontsize=8, ha="center")
     ax.legend((l, rect), (signal_da.name, mtag.name), loc=1, frameon=False, ncol=2)
 
     ax.spines["top"].set_visible(False)

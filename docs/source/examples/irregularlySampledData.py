@@ -12,7 +12,6 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- This tutorial shows how irregularly sampled data is stored in nix-files.
  See https://github.com/G-node/nix/wiki for more information.
 """
 import nixio

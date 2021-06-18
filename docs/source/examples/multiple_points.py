@@ -3,7 +3,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-
 def create_data(interval=0.001):
     time = np.arange(0., 1.0, interval)
     freq = 5.
@@ -25,7 +24,7 @@ def plot(multi_tag):
     ax = fig.add_subplot(111)
     ax.plot(time, signal, label='voltage', zorder=0)
     ax.scatter(event_times, np.ones(event_times.shape) * 0.5, marker=".", s=75, color='red',
-            label=event_array.name, zorder=1)
+               label=event_array.name, zorder=1)
 
     ax.set_xlim([0., 1.])
     ax.set_ylim([-1.75, 1.75])
@@ -37,7 +36,7 @@ def plot(multi_tag):
     ax.spines["right"].set_visible(False)
     fig.subplots_adjust(bottom=0.175, left=0.15, right=0.95, top=0.95)
     ax.legend(loc=3, frameon=False, ncol=2)
-    #fig.savefig("../images/multiple_points.png")
+    # fig.savefig("../images/multiple_points.png")
     plt.show()
 
 

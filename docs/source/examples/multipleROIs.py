@@ -11,7 +11,6 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- This tutorial shows how to store image data in nix-files.
  See https://github.com/G-node/nix/wiki for more information.
 
  We use the "Lenna" image in this tutorial.
@@ -48,14 +47,14 @@ def draw_rect(img_data, position, extent):
 
 def plot_data(tag):
     data_array = tag.references[0]
+    positions = tag.positions
     img_data = data_array[:]
     img_data = np.array(img_data, dtype='uint8')
     positions_data = tag.positions[:]
     extents_data = tag.extents[:]
     for i in range(positions.data_extent[0]):
-        img_data = draw_rect(
-            img_data, positions_data[i, :], extents_data[i, :])
-    new_img = img.fromarray(img_data)
+        img_data = draw_rect(img_data, positions_data[i, :], extents_data[i, :])
+    # new_img = img.fromarray(img_data)
     plt.imshow(img_data)
     plt.gcf().set_size_inches((5.5, 5.5))
     # plt.savefig("../images/multiple_rois.png")
@@ -68,15 +67,15 @@ def plot_roi_data(tag):
     for p in range(position_count):
         roi_data = tag.tagged_data(p, "lenna")[:]
         roi_data = np.array(roi_data, dtype='uint8')
-        ax = fig.add_subplot(position_count, 1, p+1)
+        ax = fig.add_subplot(position_count, 1, p + 1)
         image = img.fromarray(roi_data)
         ax.imshow(image)
-    
+
     # fig.savefig('../images/retrieved_rois.png')
     plt.show()
 
 
-if __name__ == '__main__':
+def main():
     img_data, channels = load_image()
     # create a new file overwriting any existing content
     file_name = 'multiple_roi.nix'
@@ -125,3 +124,7 @@ if __name__ == '__main__':
     plot_data(multi_tag)
     plot_roi_data(multi_tag)
     file.close()
+
+
+if __name__ == '__main__':
+    main()

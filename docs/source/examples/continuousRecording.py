@@ -1,6 +1,6 @@
 import nixio
 import numpy as np
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 
 
 def record_data(samples, channels, dt):
@@ -8,7 +8,7 @@ def record_data(samples, channels, dt):
     t = np.arange(samples) * dt
     for i in range(channels):
         phase = i * 2 * np.pi / channels
-        data[:, i] = np.sin(2* np.pi * t + phase) + (np.random.randn(samples) * 0.1)
+        data[:, i] = np.sin(2 * np.pi * t + phase) + (np.random.randn(samples) * 0.1)
 
     return data
 
@@ -34,7 +34,7 @@ def plot(data_array):
         axis.text(0.0, 0.5, labels[channel], rotation=0, fontsize=8, ha="right", transform=axis.transAxes)
 
     axis.spines["bottom"].set_visible(True)
-    axis.set_xticks(np.arange(0, plot_samples * dt + dt, plot_samples/5 * dt , dtype=int))
+    axis.set_xticks(np.arange(0, plot_samples * dt + dt, plot_samples / 5 * dt, dtype=int))
     axis.set_xlabel("%s %s" % (data_array.dimensions[0].label, "[%s]" % data_array.dimensions[0].unit if data_array.dimensions[0].unit else ""))
     fig.subplots_adjust(left=0.15, bottom=0.175, top=0.975, right=0.975)
     plt.show()
@@ -63,9 +63,9 @@ def main():
             data_array.append(data, axis=0)
         chunks_recorded += 1
         print("recorded chunks %i: array shape %s" % (chunks_recorded, str(data_array.shape)))
-    
+
     plot(data_array)
     nixfile.close()
 
 if __name__ == "__main__":
-   main() 
+    main()

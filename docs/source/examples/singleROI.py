@@ -11,9 +11,6 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- This tutorial shows how to store image data in nix-files.
- See https://github.com/G-node/nix/wiki for more information.
-
  We use the "Lenna" image in this tutorial.
 
  "Lenna" by Original full portrait: "Playmate of the Month". Playboy
@@ -39,7 +36,7 @@ def load_image():
 
 def draw_rect(img_data, position, extent):
     img_data[position[0]:position[0] + extent[0], position[1], :] = 255
-    img_data[position[0]:position[0] + extent[0], position[1]+extent[1], :] = 255
+    img_data[position[0]:position[0] + extent[0], position[1] + extent[1], :] = 255
     img_data[position[0], position[1]:position[1] + extent[1], :] = 255
     img_data[position[0] + extent[0], position[1]:position[1] + extent[1], :] = 255
 
@@ -57,7 +54,7 @@ def plot_data(tag):
     new_img.show()
 
 
-if __name__ == '__main__':
+def main():
     img_data, channels = load_image()
     # create a new file overwriting any existing content
     file_name = 'single_roi.h5'
@@ -87,3 +84,7 @@ if __name__ == '__main__':
     # let's plot the data from the stored information
     plot_data(tag)
     f.close()
+
+
+if __name__ == '__main__':
+    main()
