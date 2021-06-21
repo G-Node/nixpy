@@ -51,13 +51,15 @@ def plot_data(tag):
     ext = tuple(map(int, tag.extent))
     draw_rect(img_data, pos, ext)
     new_img = img.fromarray(img_data)
+
+    new_img.save("../images/single_roi.png")
     new_img.show()
 
 
 def main():
     img_data, channels = load_image()
     # create a new file overwriting any existing content
-    file_name = 'single_roi.h5'
+    file_name = 'single_roi.nix'
     f = nix.File.open(file_name, nix.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.

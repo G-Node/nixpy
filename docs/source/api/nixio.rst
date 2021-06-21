@@ -1,5 +1,5 @@
-nixio package
-=============
+Internal API
+============
 
 Subpackages
 -----------

@@ -48,21 +48,6 @@ Support
 If you need help, want to get in touch, or have any other request
 `these <contact.html>`__ are your options.
 
-Contributing & Governance
-=========================
-
-Any kind of contribution is welcome! This includes reporting bugs and
-issues. If you want to contribute to code or documentation please refer
-to the `contributing
-guide <https://github.com/G-Node/nix/blob/master/CONTRIBUTING.md>`__.
-
-License
-=======
-
-This project is open source published under the BSD-3 license see
-`license file <https://github.com/G-Node/nix/blob/master/LICENSE>`__ for
-details.
-
 Citing
 ======
 
@@ -76,6 +61,8 @@ Neuroinform. Conference Abstract: Neuroinformatics 2014. doi:
 
 Referenced by
 =============
+-  Sinz et al. (2020)
+   `doi:10.1152/jn.00615.2019 <https://doi.org/10.1152/jn.00615.2019>`__
 -  Buccino et al. (2019)
    `doi:10.1101/796599 <https://www.biorxiv.org/content/10.1101/796599v1>`__
 -  Sprenger et al. (2019)
@@ -94,76 +81,52 @@ Referenced by
    `doi:10.1007/978-3-319-50862-7_5 <https://doi.org/doi:10.1007/978-3-319-50862-7_5>`__
 -  Teeters et al (2015)
    `doi:10.1016/j.neuron.2015.10.025 <https://doi.org/doi:10.1016/j.neuron.2015.10.025>`__
-   
-
---------------
 
 .. toctree::
+   :caption: Introduction
+   :maxdepth: 1
+
    basic_idea
    install
    standardization
-   :caption: Introduction
-
-   :maxdepth: 1
-   :caption: Getting started:
+   Use-cases <https://nixio.readthedocs.io/en/master/use_cases.html>
 
 .. toctree::
-   news
    :maxdepth: 1
    :caption: News
+   :hidden:
+
+   news
 
 .. toctree::
-   getting_started
    :maxdepth: 1
    :caption: Tutorials
 
+   getting_started
+
 .. toctree::
-   contact
-   faq
    :caption: Troubleshooting:
    :maxdepth: 1
+   :hidden:
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-
-
-High Level API Reference
-========================
-
-User API documentation for Data and Metadata
+   contact
+   faq
 
 .. toctree::
+   :maxdepth: 1
+   :caption: API Reference
+   :hidden:
+
    user_api
-   :maxdepth: 2
-   :caption: High Level API
-
-
-Advanced
-========
-
-Internal NIXIO API Developer Documentation
-------------------------------------------
-
-The API documentation of internal modules, for NIXPy developers.
-
-.. toctree::
    api/nixio
-   :maxdepth: 2
-   :caption: Internal API
-
-Source code
-===========
-
-All sources are available under MIT open-souce license and is hosted on `GitHub <https://github.com/g-node/nixpy>`_.
 
 .. toctree::
-    Sources on GitHub <https://github.com/g-node/nixpy>
-    :maxdepth: 1
-    :caption: Source code
+   :caption: Appendix
+   :maxdepth: 1
+   :hidden:
+
+   genindex
+   py-modindex
+   Sources on GitHub <https://github.com/g-node/nixpy>
+   License <https://github.com/G-Node/nixpy/blob/master/LICENSE>
+   Contributing guide <https://github.com/G-Node/nix/blob/master/CONTRIBUTING.md>

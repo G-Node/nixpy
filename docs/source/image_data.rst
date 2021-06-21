@@ -1,7 +1,6 @@
 .. toctree::
     :maxdepth: 1
 
-.. _Image Data:
  
 Image data
 ==========
@@ -47,7 +46,7 @@ data. The same Tag can be applied to many references as long as
     :lines: 80-84
     :caption: A *Tag* is used to tag a a single region of interest. Most image data is 3D with the third dimension representing the color channels (:download:`singleROI.py <examples/singleROI.py>`).
 
-.. image:: examples/single_roi.png
+.. image:: images/single_roi.png
     :alt: single roi
     :width: 240
 
