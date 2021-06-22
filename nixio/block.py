@@ -196,7 +196,7 @@ class Block(Entity):
 
     def create_data_array(self, name="", array_type="", dtype=None, shape=None,
                           data=None, compression=Compression.Auto,
-                          copy_from=None, keep_copy_id=True):
+                          copy_from=None, keep_copy_id=True, label=None, unit=None):
         """
         Create/copy a new data array for this block. Either ``shape``
         or ``data`` must be given. If both are given their shape must agree.
@@ -219,6 +219,10 @@ class Block(Entity):
         :type copy_from: DataArray
         :param keep_copy_id: Specify if the id should be copied in copy mode
         :type keep_copy_id: bool
+        :param label: The label, defaults to None.
+        :type label: str
+        :param unit: The unit of the stored data. Defaults to None.
+        :type unit: str 
 
         :returns: The newly created data array.
         :rtype: :class:`~nixio.DataArray`
@@ -254,6 +258,8 @@ class Block(Entity):
                                   dtype, shape, compression)
         if data is not None:
             da.write_direct(data)
+        da.unit = unit
+        da.label = label
         return da
 
     def create_data_frame(self, name="", type_="", col_dict=None,
