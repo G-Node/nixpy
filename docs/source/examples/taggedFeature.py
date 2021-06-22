@@ -60,9 +60,7 @@ def main():
     multi_tag.references.append(data)
 
     # save stimulus snippets in a DataArray
-    stimulus_array = block.create_data_array("stimulus", "nix.sampled", data=stimulus)
-    stimulus_array.label = "stimulus"
-    stimulus_array.unit = "nA"
+    stimulus_array = block.create_data_array("stimulus", "nix.sampled", data=stimulus, label="stimulus", unit="nA")
     # add a descriptor for the time axis
     stimulus_array.append_sampled_dimension(stepsize, label="time", unit="s")
 

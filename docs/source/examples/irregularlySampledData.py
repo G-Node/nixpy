@@ -52,9 +52,8 @@ def main():
     block = file.create_block("block name", "nix.session")
 
     # create a 'DataArray' to take the data, add some information about the signal
-    data = block.create_data_array("sinewave", "nix.irregular_sampled", data=values)
-    data.unit = "mV"
-    data.label = "voltage"
+    data = block.create_data_array("sinewave", "nix.irregular_sampled", data=values,
+                                   label="voltage", unit="mV")
     # add a descriptor for the xaxis
     data.append_range_dimension(ticks=times, label="time", unit="s")
 

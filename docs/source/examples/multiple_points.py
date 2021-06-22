@@ -46,14 +46,10 @@ def main():
 
     nixfile = nixio.File.open("multiple_points.nix", nixio.FileMode.Overwrite)
     block = nixfile.create_block("recording session", "nix.session")
-    signal_array = block.create_data_array("signal", "nix.sampled", data=signal)
-    signal_array.label = "voltage"
-    signal_array.unit = "mV"
+    signal_array = block.create_data_array("signal", "nix.sampled", data=signal, label="voltage", unit="mV")
     signal_array.append_sampled_dimension(sampling_interval, label="time", unit="s")
 
-    event_array = block.create_data_array("threshold crossings", "nix.events.threshold_crossings", data=events)
-    event_array.label = "time"
-    event_array.unit = "s"
+    event_array = block.create_data_array("threshold crossings", "nix.events.threshold_crossings", data=events, label="time", unit="s")
     event_array.append_range_dimension_using_self()
 
     mtag = block.create_multi_tag("event tag", "nix.tag.events", event_array)

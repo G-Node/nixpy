@@ -13,10 +13,7 @@ def create_data():
 
 def store(nixfile, data, categories):
     b = nixfile.create_block("test", "nix.session")
-    data_array = b.create_data_array("category data", "nix.categorical", data=data)
-    data_array.label = "temperature"
-    data_array.unit = "K"
-
+    data_array = b.create_data_array("category data", "nix.categorical", data=data, label="temperature", unit="K")
     data_array.append_set_dimension(categories)
 
     return data_array

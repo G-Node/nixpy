@@ -48,9 +48,8 @@ def main():
 
     nixfile = nixio.File.open("continuous_recording.nix", nixio.FileMode.Overwrite, compression=nixio.Compression.DeflateNormal)
     block = nixfile.create_block("Session 1", "nix.recording_session")
-    data_array = block.create_data_array("multichannel_data", "nix.sampled.multichannel", dtype=nixio.DataType.Double, shape=(chunk_samples, number_of_channels))
-    data_array.label = "voltage"
-    data_array.unit = "mV"
+    data_array = block.create_data_array("multichannel_data", "nix.sampled.multichannel", dtype=nixio.DataType.Double,
+                                         shape=(chunk_samples, number_of_channels), label="voltage", unit="mV")
     data_array.append_sampled_dimension(0.001, label="time", unit="s")
     data_array.append_set_dimension(labels=["channel %i" % i for i in range(number_of_channels)])
 

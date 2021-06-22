@@ -84,7 +84,7 @@ Often it is not a single point or region but a multitude of points that we want 
 For storing this kind of data we need two *DataArrays*, the first stores the recorded signal, the other the events. Finally, a *MultiTag* entity is used to link both. One can use the event times stored in one of the *DataArrays* to tag multiple points in the other signal.
 
 .. literalinclude:: examples/multiple_points.py
-    :lines: 49-61
+    :lines: 49-56
     :caption: To mark several points in a recorded signal we use a *MultiTag* to bind the signal and event times ( :download:`example code <examples/multiple_points.py>`) 
 
 Creating the *MultiTag* is very similar to the creation of the simpler *Tag* above. The main difference is that the tagged positions are not stored in the *MultiTag* itself but we use the event *DataArray* (events in the code example) for this purpose. Finally, the signal *DataArray* is added to the list of references.

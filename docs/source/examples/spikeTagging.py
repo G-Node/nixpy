@@ -64,12 +64,11 @@ if __name__ == '__main__':
     block = file.create_block("block name", "nix.session")
 
     # create a 'DataArray' to take the membrane voltage
-    data = block.create_data_array("membrane voltage", "nix.regular_sampled.time_series", data=voltage)
-    data.label = "membrane voltage"
-    data.unit = "mV"
+    data = block.create_data_array("membrane voltage", "nix.regular_sampled.time_series", data=voltage, label="membrane voltage", unit="mV")
+
     # add descriptors for time axis
     data.append_sampled_dimension(time[1]-time[0], label="time", unit="s")
-    
+
     # create the positions DataArray
     positions = block.create_data_array("spike times", "nix.events.spike_times", data=spike_times)
     positions.append_range_dimension_using_self()

@@ -114,8 +114,7 @@ def main():
     block = file.create_block("block name", "nix.session")
 
     # create a 'DataArray' to take the membrane voltage
-    data = block.create_data_array("membrane voltage", "nix.regular_sampled.time_series", data=voltage)
-    data.label = "membrane voltage"
+    data = block.create_data_array("membrane voltage", "nix.regular_sampled.time_series", data=voltage, label="membrane voltage")
     # add descriptors for the time axis
     data.append_sampled_dimension(stepsize, label="time", unit="s")
 
@@ -128,9 +127,7 @@ def main():
     multi_tag.references.append(data)
 
     # save stimulus snippets in a DataArray
-    snippets = block.create_data_array("spike triggered stimulus", "nix.regular_sampled.multiple_series", data=sts)
-    snippets.label = "stimulus"
-    snippets.unit = "nA"
+    snippets = block.create_data_array("spike triggered stimulus", "nix.regular_sampled.multiple_series", data=sts, label="stimulus", unit="nA")
     snippets.append_set_dimension()
     snippets.append_sampled_dimension(stepsize, offset= -sta_offset * stepsize, label="time", unit="s")
 

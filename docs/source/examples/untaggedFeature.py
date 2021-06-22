@@ -91,7 +91,7 @@ def plot_data(tag):
 
 
 if __name__ == '__main__':
-    stepsize = 0.0001 # s
+    stepsize = 0.0001  # s
     time, voltage, stimulus, stim_onset, stim_duration = fake_neuron(stepsize=stepsize)
 
     # create a new file overwriting any existing content
@@ -103,17 +103,15 @@ if __name__ == '__main__':
     block = file.create_block("block name", "nix.session")
 
     # create a 'DataArray' to take the membrane voltage
-    data = block.create_data_array("membrane voltage", "nix.sampled.time_series", data=voltage)
-    data.label = "membrane voltage"
-    data.unit = "mV"
+    data = block.create_data_array("membrane voltage", "nix.sampled.time_series", data=voltage,
+                                   label="membrane voltage", unit="mV")
     data.append_sampled_dimension(stepsize, label="time", unit="s")
-    
+
     # create a stimulus DataArray
-    stim = block.create_data_array("stimulus", "nix.sampled.time_series", data=stimulus)
-    stim.label = "stimulus current"
-    stim.unit = "nA"
+    stim = block.create_data_array("stimulus", "nix.sampled.time_series", data=stimulus,
+                                   label="current stimulus", unit="nA")
     stim.append_sampled_dimension(stepsize, label="time", unit="s")
-    
+
     # create the Tag to highlight the stimulus-on segment
     tag = block.create_tag("stimulus presentation", "nix.epoch.stimulus_presentation", [stim_onset])
     tag.extent = [stim_duration]

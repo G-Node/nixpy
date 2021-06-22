@@ -13,9 +13,7 @@ def main():
     nixfile = nixio.File.open("range_link.nix", nixio.FileMode.Overwrite)
     b = nixfile.create_block("session", "nix.session")
 
-    data_array = b.create_data_array("event times", "nix.event.times", data=event_times)
-    data_array.label = "time"
-    data_array.unit = "s"
+    data_array = b.create_data_array("event times", "nix.event.times", data=event_times, label="time", unit="s")
     data_array.append_range_dimension_using_self()
 
     nixfile.close()

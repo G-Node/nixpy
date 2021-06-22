@@ -69,12 +69,9 @@ def main():
     # create a 'DataArray' to take the sinewave, add some information about the signal
     data = block.create_data_array("lenna", "nix.image.rgb", data=img_data)
     # add descriptors for width, height and channels
-    height_dim = data.append_sampled_dimension(1)
-    height_dim.label = "height"
-    width_dim = data.append_sampled_dimension(1)
-    width_dim.label = "width"
-    color_dim = data.append_set_dimension()
-    color_dim.labels = channels
+    data.append_sampled_dimension(1, label="height")
+    data.append_sampled_dimension(1, label="width")
+    data.append_set_dimension(labels=channels)
 
     # create a Tag, position and extent must be 3-D since the data is 3-D
     position = [250, 250, 0]

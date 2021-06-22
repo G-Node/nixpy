@@ -61,17 +61,11 @@ def main():
     block = file.create_block("block name", "nix.session")
     # create a 'DataArray' to take the data, add some information about the signal
     y = np.vstack((sine, cosine))
-    data = block.create_data_array("waveforms", "nix.regular_sampled.multiple_series", data=y)
-    data.unit = "mV"
-    data.label = "voltage"
+    data = block.create_data_array("waveforms", "nix.regular_sampled.multiple_series", data=y, label="voltage", unit="mV")
     # descriptor for first dimension is a set
-    set_dim = data.append_set_dimension()
-    set_dim.labels = ['sin', 'cos']
+    data.append_set_dimension(labels=['sin', 'cos'])
     # add a descriptor for the xaxis
-    dim = data.append_sampled_dimension(stepsize)
-    dim.unit = "s"
-    dim.label = "time"
-    dim.offset = 0.0  # optional
+    data.append_sampled_dimension(stepsize, offset=0.0, label="time", unit="s")
 
     # let's plot the data from the stored information
     plot_data(data)

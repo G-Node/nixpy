@@ -32,7 +32,7 @@ Tagging stimulus segments
 Let's say we record the neuronal activity and in a certain epoch of that recording a stimulus was presented. This time interval is annotated using a **Tag**. This inidicates the time in which the stimulus was on but we may also want to link the stimulus itself to it. The stimulus is also stored as a **DataArray** be linked to the *Tag* as an *untagged* **Feature** of it.
 
 .. literalinclude:: examples/untaggedFeature.py
-    :lines: 115-127
+    :lines: 111-122
     :caption: Source code for this example: :download:`untaggedFeature.py <examples/untaggedFeature.py>`.
     :emphasize-lines: 13
 

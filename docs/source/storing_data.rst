@@ -57,8 +57,7 @@ store data in it.
 .. literalinclude:: examples/regularlySampledData.py
    :caption: Storing data in a DataArray (:download:`example code <examples/regularlySampledData.py>`).
    :language: python
-   :lines: 57 - 62
-   :emphasize-lines: 2
+   :lines: 57 - 61
 
 As promised, the *DataArray* contains all information to create a basic plot (see the figure above).
 
@@ -145,8 +144,8 @@ added to the *DataArray* entity upon creation:
 
 .. literalinclude:: examples/regularlySampledData.py
    :language: python
-   :lines: 58 - 63
-   :emphasize-lines: 5
+   :lines: 57 - 60
+   :emphasize-lines: 4
    :caption: A dimension in which the data has been gathered in regular intervals is described using a *SampledDimension* (:download:`example code <examples/regularlySampledData.py>`  
 
 
@@ -163,7 +162,7 @@ the described dimension.
 
 .. literalinclude:: examples/categoryData.py
    :language: python
-   :lines: 16 - 20
+   :lines: 16 - 17
    :caption: A categorical data dimension is described with a *SetDimension* which (optionally) stores labels for each category (:download:`example code <examples/categoryData.py>`)
 
 
@@ -189,8 +188,8 @@ is created.
 .. literalinclude:: examples/irregularlySampledData.py
    :caption: Storing irregularly sampled data (:download:`example code <examples/irregularlySampledData.py>`).
    :language: python
-   :lines: 45 - 60
-   :emphasize-lines: 2, 16
+   :lines: 45 - 58
+   :emphasize-lines: 14
 
 **Note:** The *ticks* of a *RangeDimension* must be numeric and ascending.
 
@@ -203,10 +202,10 @@ For example these might be the times of action potentials (aka spikes) recorded 
 In such cases the *RangeDimension* is set up to link to the *DataArray* itself.
 
 .. literalinclude:: examples/rangeDimensionLink.py
-   :lines: 12 - 19
+   :lines: 12 - 17
    :language: python
    :caption: A *RangeDimension* can link to a *DataArray* as a source of the ticks (:download:`exmaple code <examples/rangeDimensionLink.py>`). 
-   :emphasize-lines: 8
+   :emphasize-lines: 6
 
 In the highlighted line we use a convenience function to establish the link between the dimension descriptor and the 
 
@@ -306,7 +305,7 @@ The following code shows how this works.
 
 .. literalinclude:: examples/continuousRecording.py
    :caption: Extending *DataArray* size e.g while recording continuously (:download:`example code <examples/continuousRecording.py>`) 
-   :lines: 47-66
+   :lines: 49-65
    :language: python
 
 
