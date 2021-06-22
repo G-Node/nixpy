@@ -75,7 +75,6 @@ class H5DataSet(object):
 
         def conv_row(row):
             for field in str_cols:
-                print(field, row[field])
                 row[field] = ensure_str(row[field])
         if str_cols:
             if not data.shape:

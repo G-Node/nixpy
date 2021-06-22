@@ -261,7 +261,9 @@ class DataFrame(Entity, DataSet):
         row_form = "{:^10}" * (len(column) + 1)
         print(row_form.format("column:", *column))
         if self.units is not None:
-            print(row_form.format(" unit:", *self.units[col_sl]))
+            if None in self.units:
+                units = [u if u is not None else "" for u in self.units[col_sl]]
+            print(row_form.format(" unit:", *units))
         if not isinstance(row_sl, Iterable):
             ridx = list(range(len(self)))[row_sl]
         else:
