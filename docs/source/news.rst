@@ -3,20 +3,29 @@ Changes in version 1.5
 ######################
 
 With version 1.5 we introduced several changes on the library as well as on the data model side (nix model version 1.2). Some are even breaking changes.
-1.5 libraries can open files that have been written with pre 1.5 libraries. Old files cannot be opened for ReadWrite access.
-You may want to convert such files using the ``nixio`` command line tool that comes with the library.
+1.5 libraries can open files that have been written with pre 1.5 libraries. Old files cannot be opened for ``ReadWrite`` access.
+You may want to convert such files using the ``nixio`` command line tool that comes with the library or via also implement upgrade into a script.
 
 .. code-block:: bash
 
    nixio upgrade --help
 
+.. code-block:: python
+
+    import nixio
+    filename = "test.nix"
+    nixio.file_upgrade(filename, quiet=False)
+
+Pass ``quiet=False`` in order to get some feedback on what the tool did. **Note** Files are replaced *in place*. Make sure to backup your files before upgrading.
+
 Model changes
 #############
 
-* the metadata model was simplified and reflects the changes introduced to the underlying **odml** data model. Accordingly the *Value* entity does no longer exist. New versions of the library can read but not write old data.
-* New *DataFrame* entity
+* the metadata model was simplified to reflects the changes introduced to the underlying **odml** data model. Accordingly the *Value* entity does no longer exist. New versions of the library can read but not write old data.
+* New *DataFrame* entity.
 * *Tags* and *MultiTags* can link to DataFrames as features.
 * *RangeDimension* can link to DataFrames as source for the ticks.
+* *AliasRangeDimension* has been removed, the equivalent can be achieved with linking to a *DataArray*.
 
 The *DataFrame*
 ###############
@@ -26,8 +35,8 @@ The *DataFrame* is a new entity that stored tabular data. Each column has a name
 *RangeDimension*
 ################
 
-* *RangeDimensions* ticks can now be stored within the dimension descriptor, or in linked DataArrays or DataFrames. Ticks must still be one-dimensional. (see :ref:`RangeDimension` for more information)
-* Because of the above change, the former "AliasRangeDimension" is no longer needed. The same functionality is achieved by linking the *RangeDimension* to the *DataArray* itself.
+* *RangeDimensions* ticks can now be stored within the dimension descriptor, or in linked DataArrays or DataFrames. Ticks must still be one-dimensional (see :ref:`RangeDimension` for more information).
+* Because of the above change, the former *AliasRangeDimension* is no longer needed. The same functionality is achieved by linking the *RangeDimension* to the *DataArray* itself.
 
 API changes
 ###########
