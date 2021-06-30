@@ -143,6 +143,9 @@ def update_alias_range_dimension(fname):
     dims = list()
     with h5py.File(fname, mode="r") as hfile:
         for block in hfile["data"].values():
+            if "data_arrays" not in block:
+                continue
+
             for data_array in block["data_arrays"].values():
                 if "dimensions" not in data_array:
                     continue
@@ -215,11 +218,13 @@ def update_format_version(fname):
 
 
 def collect_tasks(fname):
+    print(f"{fname}:")
+
     file_ver = get_file_version(fname)
     file_verstr = ".".join(str(v) for v in file_ver)
     lib_verstr = ".".join(str(v) for v in nix.file.HDF_FF_VERSION)
     if file_ver >= nix.file.HDF_FF_VERSION:
-        print(f"{fname}: Up to date ({file_verstr})")
+        print(f"  Up to date ({file_verstr})")
         return
 
     # even if the version string indicates the file is old, check format
@@ -241,7 +246,7 @@ def collect_tasks(fname):
     tasks.append(update_format_version(fname))
 
     # print task list
-    print(f"{fname}: {file_verstr} -> {lib_verstr}")
+    print(f"  {file_verstr} -> {lib_verstr}")
     print("  - " + "\n  - ".join(t.__doc__ for t in tasks) + "\n")
 
     return tasks
