@@ -29,6 +29,19 @@ def main():
 
     print(session.find_sections(lambda s: "resting potential" in s.props))
     print(session.find_sections(lambda s: "resting potential" in s.props)[0]["resting potential"])
+
+    observations = subject.create_property("observations", ["p10", "p12", "p14"])
+    observations.definition = "Some behavioral observations I did on several days"
+    print(observations.values)
+
+    observations.extend_values("p16")
+    observations.extend_values(["p18", "p20"])
+
+    try:
+        observations.extend_values(22)
+    except TypeError as e:
+        print(e)
+
     nixfile.close()
 
 if __name__ == "__main__":
