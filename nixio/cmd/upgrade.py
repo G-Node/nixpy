@@ -192,7 +192,7 @@ def update_alias_range_dimension(fname):
 
 
 def create_property(hfile, name, dtype, data, definition=None, unit=None):
-    prop = hfile.create_dataset(name, dtype=dtype, data=data)
+    prop = hfile.create_dataset(name, dtype=dtype, data=data, chunks=True)
     prop.attrs["name"] = name.split("/")[-1]
     prop.attrs["entity_id"] = nix.util.create_id()
     prop.attrs["created_at"] = nix.util.time_to_str(nix.util.now_int())
