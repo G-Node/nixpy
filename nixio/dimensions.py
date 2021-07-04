@@ -37,6 +37,16 @@ class IndexMode(Enum):
     GEQ = "geq"
 
 
+class RangeMode(Enum):
+    """
+    RangeMode used for slicing along dimensions. 
+    *Inclusive* ranges are defines as [start, end], i.e. start and end are included
+    *Exclusive* ranges are defined as [start, end), i.e. start is included, end is not
+    """
+    Inclusive = "inclusive"
+    Exclusive = "exclusive"
+
+
 class DimensionContainer(Container):
     """
     DimensionContainer extends Container to support returning different types
