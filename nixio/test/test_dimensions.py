@@ -6,6 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from nixio.dimensions import RangeMode
 from nixio.exceptions.exceptions import IncompatibleDimensions
 import os
 import unittest
@@ -107,6 +108,16 @@ class TestDimension(unittest.TestCase):
         assert self.sample_dim.axis(10, 0, 5.0)[0] == 3
         assert self.sample_dim.axis(10, start_position=5.0)[0] == 5.0
         assert self.sample_dim.axis(10, start_position=5.0)[-1] == 5.0 + 9 * 2
+
+        with self.assertRaises(ValueError):
+            self.sample_dim.range_indices(0, 1, mode="invalid")
+        with self.assertRaises(IndexError):
+            self.sample_dim.range_indices(10, -10, mode=RangeMode.Inclusive)
+        assert self.sample_dim.range_indices(2, 11, mode=RangeMode.Inclusive)[0] == 0
+        assert self.sample_dim.range_indices(2, 11, mode=RangeMode.Inclusive)[-1] == 4
+
+        assert self.sample_dim.range_indices(2, 11, mode=RangeMode.Exclusive)[0] == 0
+        assert self.sample_dim.range_indices(2, 11, mode=RangeMode.Exclusive)[-1] == 3
 
     def test_range_dimension(self):
         assert self.range_dim.index == 3

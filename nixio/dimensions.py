@@ -391,7 +391,7 @@ class SampledDimension(Dimension):
             ))
 
         if np.isclose(position, 0) and mode == IndexMode.Less:
-            raise IndexError("Position {} is out of bounds for SetDimension with mode {}".format(position, mode.name))
+            raise IndexError("Position {} is out of bounds for SampledDimension with mode {}".format(position, mode.name))
 
         index = int(np.floor(scaled_position))
         if np.isclose(scaled_position, index):
@@ -410,6 +410,36 @@ class SampledDimension(Dimension):
             return index
 
         raise ValueError("Unknown IndexMode: {}".format(mode))
+
+    def range_indices(self, start_position, end_position, mode=RangeMode.Exclusive):
+        """
+        Returns the start and end indices in this dimension that are matching to the given start and end position.
+
+        :param start_position: the start position of the range.
+        :type start_position: float
+        :param end_position: the end position of the range.
+        :type end_position: fload
+        :param mode: The nixio.RangeMode. Defaults to nixio.RangeMode.Exclusive, i.e. the end position is not part of the range.
+        :type mode: nixio.RangeMode
+        
+        :returns: The respective start and end indices.
+        :rtype: tuple of int
+        
+        :raises: ValueError if invalid mode is given
+        :raises: Index Error if start position is greater than end position.
+        """
+        if mode is not RangeMode.Exclusive and mode is not RangeMode.Inclusive:
+            raise ValueError("Unknown RangeMode: {}".format(mode))
+
+        end_mode = IndexMode.Less if mode == RangeMode.Exclusive else IndexMode.LessOrEqual
+        try:
+            start_index = self.index_of(start_position, mode=IndexMode.GreaterOrEqual)
+            end_index = self.index_of(end_position, mode=end_mode)
+        except IndexError as e:
+            raise e
+        if start_index > end_index:
+            raise IndexError("Start position {} is greater than end position {}.".format(start_position, end_position))
+        return (start_index, end_index)
 
     def axis(self, count, start=None, start_position=None):
         """
