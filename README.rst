@@ -27,13 +27,6 @@ The simplest way to install *NIXPY* is from PyPI using pip. The name of the pack
 
     pip install nixio
 
-Bindings for C++ NIX
---------------------
-
-The setup script will automatically build the bindings for *NIX* if it is detected on the system, otherwise only the pure Python version will be installed.
-
-For instructions on building *NIX*, see the `NIX README <https://github.com/G-Node/nix/blob/master/README.md>`_ file.
-
 
 To check if installed properly
 ------------------------------
