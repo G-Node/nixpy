@@ -33,17 +33,10 @@ One key feature of the nix-model is its ability to annotate, or "tag", points or
 Tagging a single point or region
 --------------------------------
 
-Single points of regions-of-interest are annotated using a **Tag**
-object. The Tag contains the start *position* and, optional, the
-*extent* of the point or region. The link to the data is established
-by adding the **DataArray** that contains the data to the list of
-references. It is important to note that *position* and *extent* are
-arrays with the length matching the dimensionality of the referenced
-data. The same Tag can be applied to many references as long as
-*position* and *extent* can be applied to these.
+Single points of regions-of-interest are annotated using a **Tag** object. The Tag contains the start *position* and, optional, the *extent* of the point or region. The link to the data is established by adding the **DataArray** that contains the data to the list of references. It is important to note that *position* and *extent* are arrays with the length matching the dimensionality of the referenced data. The same Tag can be applied to many references as long as *position* and *extent* can be applied to these.
 
 .. literalinclude:: examples/singleROI.py
-    :lines: 80-84
+    :lines: 77-81
     :caption: A *Tag* is used to tag a a single region of interest. Most image data is 3-D with the third dimension representing the color channels (:download:`singleROI.py <examples/singleROI.py>`).
 
 .. image:: images/single_roi.png

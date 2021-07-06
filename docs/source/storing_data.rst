@@ -109,9 +109,9 @@ Data is read from a DataArray by accessing it in numpy style.
 
 .. code-block:: python
 
-   data_array = block.create_data_array("test data", "test", data=np.random.randn(100))
+   array = block.create_data_array("test data", "test", data=np.random.randn(100))
    print(array.shape)
-   data_array.append(np.ones(100))
+   array.append(np.ones(100))
    print(array.shape)
 
 

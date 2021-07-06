@@ -14,9 +14,9 @@ Q: What does this error mean? “Cannot open a nonexistent file in ReadOnly mode
 -------------------------------------------------------------------------------
 
 Arises when the provided file path is invalid and you try to open it
-with the nix::FileMode::ReadOnly mode. Solution: provide the path to an
-existing file to be opened in ``nix::ReadOnly`` mode or use the
-``nix::FileMode::ReadWrite`` or ``nix::FileMode::Overwrite`` flag to
+with the nixio.FileMode.ReadOnly mode. Solution: provide the path to an
+existing file to be opened in ``nixio.FileMode.ReadOnly`` mode or use the
+``nixio.FileMode.ReadWrite`` or ``nixio.FileMode.Overwrite`` flag to
 create a new one.
 
 Q: Is it ok to use non-SI units?
