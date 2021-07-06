@@ -23,7 +23,7 @@ subject.
 As mentioned above the Sources build a tree. The block (as the root of the tree) at the moment has only a single source attached to it 
 
 .. literalinclude:: examples/sources.py
-    :lines: 53 - 55 
+    :lines: 52 - 54 
 
 The output should yield:
 
@@ -39,7 +39,7 @@ Search and find
 In a data-centered search we can then ask the *DataArray* for it's *Source* to get information about the cell and get the linked metadata. A *DataArray* may have several sources attached to it. To make sure we get the right one (with the cell information) we perform a search on the sources using the **type** information.
 
 .. literalinclude:: examples/sources.py
-    :lines: 59 - 61 
+    :lines: 58 - 60 
 
 The output should give
 
@@ -53,10 +53,10 @@ The output should give
         |- BaselineRate: (15,)Hz
         |- Layer: ('4',)
 
-In a or source-centered search we can ask for the *DataArrays* that link to a source.
+In a source-centered search we can ask for the *DataArrays* that link to a source.
 
 .. literalinclude:: examples/sources.py
-    :lines: 63 
+    :lines: 62 
 
 This should return a list with a single entry:
 

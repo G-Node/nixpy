@@ -79,7 +79,7 @@ later filling e.g. during data acquisition.
 
 .. code-block:: python
 
-    data_array = block.create_data_array("sinewave", "nix.sampled", dtype=nix.DataType.Double, shape=(100));
+    data_array = block.create_data_array("sinewave", "nix.sampled", dtype=nixio.DataType.Double, shape=(100));
 
 The resulting *DataArray* will have an initial size (100 elements) which
 will be automatically resized, if required. The data type is set to
@@ -193,7 +193,7 @@ is created.
 
 **Note:** The *ticks* of a *RangeDimension* must be numeric and ascending.
 
-The *RangeDimension* can do a more. Consider the case that the times of an event are stored:
+The *RangeDimension* can do more. Consider the case that the times of an event are stored:
 
 .. figure:: ./images/alias_range.png
    :alt: 1-D event data
@@ -207,7 +207,7 @@ In such cases the *RangeDimension* is set up to link to the *DataArray* itself.
    :caption: A *RangeDimension* can link to a *DataArray* as a source of the ticks (:download:`exmaple code <examples/rangeDimensionLink.py>`). 
    :emphasize-lines: 6
 
-In the highlighted line we use a convenience function to establish the link between the dimension descriptor and the 
+In the highlighted line we use a convenience function to establish the link between the dimension descriptor and the data stored via the dimensions of its own DataArray.
 
 This function is a shortcut for:
 
@@ -246,14 +246,14 @@ creation. Available flags are:
 
 .. code-block:: python
 
-   data_array = b.create_data_array("some data", "nix.sampled", data, compression=nix.Compression.DeflateNormal);
+   data_array = b.create_data_array("some data", "nix.sampled", data, compression=nixio.Compression.DeflateNormal);
 
 Note the following:
 
 1. Compression comes with a little cost of read-write performance.
 2. Data compression is fixed once the *DataArray* has been created, it
    cannot be changed afterwards.
-3. Opening and extending an compressed *DataArray* is easily possible
+3. Opening and extending a compressed *DataArray* is easily possible
    even if the file has not been opened with the
    ``nixio.Compression.DeflateNormal`` flag.
 
@@ -328,7 +328,7 @@ The DataFrame stores tabular data in a rows-and-columns format. Each Column has 
 
 .. literalinclude:: examples/tabulardata.py
    :lines: 8 - 25
-   :caption: A DataFrame is created by providing the column definition which consists of a name and the data type that should be stored in each column. Units can be added lateron. It is best to use OrderdDicts to make sure, that the column order is as defined (standard dictionaries do not guarantee the order of the items). :download:`example code <examples/tabulardata.py>`
+   :caption: A DataFrame is created by providing the column definition which consists of a name and the data type that should be stored in each column. Units can be added later on. It is best to use OrderdDicts to make sure, that the column order is as defined (standard dictionaries do not guarantee the order of the items). :download:`example code <examples/tabulardata.py>`
    
 For a quick overview one can use the ``DataFrame.print_table()`` method
 

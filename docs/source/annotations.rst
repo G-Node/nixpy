@@ -71,4 +71,4 @@ If we do not know the exact path of the *Section* we are looking for, we need to
 .. literalinclude:: examples/annotations.py
     :lines: 28 - 31
 
-The result of the ``find_sections`` will always be list which may be empty if no match was found. Therefore, the call in the last line is to some extent risky and would lead to an OutOfBounds exception if the search failed.
+The result of the ``find_sections`` will always be a list which may be empty if no match was found. Therefore, the call in the last line is to some extent risky and would lead to an ``OutOfBounds`` exception if the search failed.

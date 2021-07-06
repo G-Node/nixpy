@@ -19,11 +19,11 @@ the list of *references*. The following figure illustrates, how a
 *MultiTag* links two *DataArrays* to create a new construct.
 
 .. figure:: ./images/mtag_concept.png
-   :alt: An MultiTag can link the data stored in several DataArrays.
+   :alt: A MultiTag can link the data stored in several DataArrays.
 
    *MultiTags* tag several points or regions in referenced *DataArrays*. By binding entities together they can provide context.
 
-Tagging in 1D
+Tagging in 1-D
 -------------
 
 Suppose, we are recording the response of a system to a certain
@@ -38,7 +38,7 @@ We may want to store:
 
 1. The recorded system’s response before, during, and after the
    stimulus.
-2. The time span, the stimulus was on.
+2. The time span the stimulus was on.
 
 In the *NIX* data model *Tag* entities are used to tag regions in a
 *DataArray*. For this, the *Tag* refers to the *DataArray* and stores
@@ -47,7 +47,7 @@ In the *NIX* data model *Tag* entities are used to tag regions in a
 .. figure:: ./images/tag2.png
    :alt: a system's response to a stimulus
 
-   The system's response is stored in a *DataArray* we do need to add information about the start position and the extent of the stimulus-on segment. The extent is optional, if not specified. the *Tag*/*MultiTag* tags only a point in the data.
+   The system's response is stored in a *DataArray*, we do need to add information about the start position and the extent of the stimulus-on segment. The extent is optional, if not specified. the *Tag*/*MultiTag* tags only a point in the data.
 
 The following code snippet shows how to create the *Tag*.
 
@@ -55,13 +55,13 @@ The following code snippet shows how to create the *Tag*.
     :caption: Creating a Tag for a time span in recorded data :download:`example code <examples/tagging_example.py>`
     :lines: 78 - 90 
 
-Line 11 creates the *Tag* with the start position and in line 12 we add the extent of the tagged segment. In line 13 we add the *DataArray* we want to point at to the list of *references*. A Tag can refer to more than just a single *DataArray*. Both position and extent are passed as lists with one entry for each dimension of the data. If the length of e.g. position is less than number of dimensions in the referenced *DataArray* it is assumed that the tag refers to the full extent of the non-restricted dimensions. The same applies to missing extents. For the sake of clearness it is advisable to fully specify the positions and extents.
+Line 11 creates the *Tag* with the start position and in line 12 we add the extent of the tagged segment. In line 13 we add the *DataArray* we want to point at to the list of *references*. A Tag can refer to more than just a single *DataArray*. Both position and extent are passed as lists with one entry for each dimension of the data. If the length of e.g. position is less than the number of dimensions in the referenced *DataArray*, it is assumed that the tag refers to the full extent of the non-restricted dimensions. The same applies to missing extents. For the sake of clearness it is advisable to fully specify the positions and extents.
  
 **Note!** Position and extent of the tagged region are given as
 lists. Extent is optional, not setting it tags a point instead
 of a segment of the referenced data.
 
-Tagging in 2D
+Tagging in 2-D
 -------------
 
 The same principle shown above for 1-D data extends to two or more dimensions. The only difference is that one has to provide vectors of positions/extents whose length matches the number of dimensions of the referenced *DataArray*.
@@ -69,10 +69,10 @@ The same principle shown above for 1-D data extends to two or more dimensions. T
 .. figure:: ./images/2d_tag.png
    :alt: tagging in 2-D
 
-   Tagging works also in 2-D. In this case, position and extent must 2-element vectors (one entry for each dimension). 
+   Tagging works also in 2-D. In this case, position and extent must be 2-element vectors (one entry for each dimension). 
 
 
-Tagging multiple points in 1D
+Tagging multiple points in 1-D
 -----------------------------
 
 Often it is not a single point or region but a multitude of points that we want to note in a recorded signal. In the following situation a signal has been recorded and within this signal certain events, threshold crossings have been detected (figure below).
@@ -89,7 +89,7 @@ For storing this kind of data we need two *DataArrays*, the first stores the rec
 
 Creating the *MultiTag* is very similar to the creation of the simpler *Tag* above. The main difference is that the tagged positions are not stored in the *MultiTag* itself but we use the event *DataArray* (events in the code example) for this purpose. Finally, the signal *DataArray* is added to the list of references.
 
-Tagging multiple intervals in 1D
+Tagging multiple intervals in 1-D
 --------------------------------
 
 A very similar approach is taken for tagging multiple intervals in which,
@@ -104,7 +104,7 @@ For storing such data we again need one *DataArray* to store the recorded signal
 
 .. literalinclude:: examples/multiple_regions.py
    :caption: The following code tags multiple regions in a 1-D signal (:download:`example code <examples/multiple_regions.py>`).
-   :lines: 27 - 38, 44-46 
+   :lines: 27 - 38, 45-47 
 
 The example code is rather straight forward. The *DataArrays* ‘positions’ and ‘extents’ take respective data and are added to the created *MultiTag* entity. Finally, the *DataArray* in which we tag the regions is added to the list of *references* of the *MultiTag*.
 
@@ -113,10 +113,10 @@ Tagging in n-D
 
 The same principle as demonstrated above applies also to n-dimensional data. Tagging in n dimensions requires **positions** and **extents** stored in *DataArrays* of appropriate shapes.
 
-The following figures show the tagging of multiple regions in 2- and 3D.
+The following figures show the tagging of multiple regions in 2- and 3-D.
 
 .. figure:: ./images/2d_mtag.png
-   :alt: multiple regions in 2D
+   :alt: multiple regions in 2-D
 
    Tagging multiple regions in n-D data requires the *DataArrays* for storing positions and extents to be two-dimensional. The first dimension represents the number of regions, the second has as many entries as the referenced data.
  
@@ -125,11 +125,11 @@ According to the number of dimensions of the data (here, width and height) each 
 This approach can be extended into n-D. The following figure illustrates the 3-D case.
 
 .. figure:: ./images/3d_mtag.png
-   :alt: multiple regions in 3D
+   :alt: multiple regions in 3-D
 
    multiple_regions_3D_plot
 
-The only things that need to be changed in the above code, are the layout of the data (now 3-dimensional) and further entries into **position** and **extent** *DataArrays* along the second dimension (compare tables in the figure). Again, these *DataArrays* are **always** 2D, the first dimension represents the number of tagged regions, the second the number of dimensions.
+The only things that need to be changed in the above code, are the layout of the data (now 3-dimensional) and further entries into **position** and **extent** *DataArrays* along the second dimension (compare tables in the figure). Again, these *DataArrays* are **always** 2-D, the first dimension represents the number of tagged regions, the second the number of dimensions.
 
 For an example see :ref:`Image Data`.
 

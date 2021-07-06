@@ -28,7 +28,7 @@ units which is not supported/not necessarily possible for non-SI units.
 It is largely safe to use non-SI units when providing metadata or
 specifying the unit of the data stored in a *DataArray*. It may become
 problematic in the context of *Dimensions*. Some functions support
-reading data with the positions provided by the *Tags* in these cases we
+reading data with the positions provided by the *Tags*, in these cases we
 rely on scalability of the units.
 
 If you feel this is unjustified, feel free to improve our unit-handling

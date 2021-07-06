@@ -4,12 +4,12 @@
 Working with data
 =================
 
-Storing data is one thing, but we want to work with it. The following examples illustrate reading of data from *DataArray*, *Tag* and *MultiTag* entities We will use the dummy dataset already used in the :doc:`tagging <./tagging>` example. The figure below shows what is stored in the dataset. 
+Storing data is one thing, but we want to work with it. The following examples illustrate reading of data from *DataArray*, *Tag* and *MultiTag* entities. We will use the dummy dataset already used in the :doc:`tagging <./tagging>` example. The figure below shows what is stored in the dataset. 
 
 .. figure:: ./images/tag1.png
    :alt: a system's response to a stimulus
 
-At some instance in time a system was exposed to a stimulus that leads to the system's response. The response has been recorded and stored in a *DataArray* the A *Tag* is used to highlight the "stimulus-on" segment of the data.
+At some instance in time a system was exposed to a stimulus that leads to the system's response. The response has been recorded and stored in a *DataArray*, a *Tag* is used to highlight the "stimulus-on" segment of the data.
 
 .. literalinclude:: examples/tagging_example.py
     :caption: :download:`example code <examples/tagging_example.py>`
@@ -29,7 +29,7 @@ The first and maybe most common problem is to read the data stored in a
 Reading all data
 ~~~~~~~~~~~~~~~~
 
-In *NIX* when you open a *DataArray* the stored the data is **not** automatically read from file. This keeps the object lightweight and easy to create. To read the data you can simply access the data in a numpy style:
+In *NIX* when you open a *DataArray* the stored data is **not** automatically read from file. This keeps the object lightweight and easy to create. To read the data you can simply access it in a numpy style:
 
 .. literalinclude:: examples/tagging_example.py
     :caption: :download:`example code <examples/tagging_example.py>`
@@ -52,13 +52,13 @@ Reading partial data
 ~~~~~~~~~~~~~~~~~~~~
 
 In other instances it might be wanted to read only parts of the data.
-Reading slices of the data ist straight forward using the the numpy style.
+Reading slices of the data is straight forward using the numpy style.
 
 .. literalinclude:: examples/tagging_example.py
     :caption: :download:`example code <examples/tagging_example.py>`
     :lines: 98-101
 
-An alternative approach is to use the ``DataArray.get_slice`` method which by default works with indices but can also work in data coordinates. E.g. we know that the data is 1-D and covers a span of 3.5s and we want to have the data in the interval 0.5s through 1.75s. The method returns a ``nixio.DataView`` object. The actual reading is done be accessing the data.
+An alternative approach is to use the ``DataArray.get_slice`` method which by default works with indices but can also work in data coordinates. E.g. we know that the data is 1-D and covers a span of 3.5s and we want to have the data in the interval 0.5s through 1.75s. The method returns a ``nixio.DataView`` object. The actual reading is done by accessing the data.
 
 .. literalinclude:: examples/tagging_example.py
     :caption: :download:`example code <examples/tagging_example.py>`
@@ -66,7 +66,7 @@ An alternative approach is to use the ``DataArray.get_slice`` method which by de
     :emphasize-lines: 3
 
 The arguments ``positions`` and ``extents`` are passed as lists. There must be one entry for each dimension of the data. In this case, since the data is 1-D, positions and extents are 1-element lists.
-Note: the slice is defined by the starting point(s) and the *extent(s)* not with start and end points.
+Note: the slice is defined by the starting point(s) and the *extent(s)*, not with start and end points.
 
 Reading tagged data
 ~~~~~~~~~~~~~~~~~~~
@@ -85,7 +85,7 @@ In order to read the data that belongs to the highlighted region(s) *Tag* and *M
    :emphasize-lines: 10
    :caption: Reading data segments tagged by the *Tag* or *MultiTag* can be done using the ``tagged_data`` method (:download:`example code <examples/multiple_regions.py>`).
 
-The *MultiTag* version of the ``tagged_data`` method takes two arguments. The first is the index of the tagged region (0 for the first), the second argument is name (you can also use the index or the id) of the referenced *DataArray*. Since the *Tag* tags only a single region, it only takes one argument, i.e. the name (id, index) of the referenced *DataArray*.
+The *MultiTag* version of the ``tagged_data`` method takes two arguments. The first is the index of the tagged region (0 for the first), the second argument is the name of the referenced *DataArray* (you can also use the index or the id). Since the *Tag* tags only a single region, it takes only one argument, i.e. the name (id, index) of the referenced *DataArray*.
 
 .. figure:: ./images/reading_tagged_data.png
    :alt: reading tagged data
@@ -98,4 +98,3 @@ obtained using the ``feature_data`` methods.
    :lines: 69 - 76
    :emphasize-lines: 6, 7
    :caption: ``feature_data`` works analogously, the first argument is the index of the tagged region, the second the name (or id or index) of the feature. Here the feature stores a single number, i.e. the frequency of the stimulus for each tagged region which is plotted below the highlighted regions in the figure above (:download:`example code <examples/multiple_regions.py>`). 
-

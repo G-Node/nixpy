@@ -16,7 +16,7 @@ attribution in the code.
 
 .. literalinclude:: examples/imageData.py
     :lines: 59-64
-    :caption: Image data is just 3D data that can be easily stored in a *DataArray*. We need to add three dimension descriptors, though (to run the example you need the :download:`example code <examples/imageData.py>` , the :download:`image <examples/lenna.png>` *imagemagick* or *xv* packages). 
+    :caption: Image data is just 3-D data that can be easily stored in a *DataArray*. We need to add three dimension descriptors, though (to run the example you need the :download:`example code <examples/imageData.py>` , the :download:`image <examples/lenna.png>` *imagemagick* or *xv* packages). 
 
 .. image:: examples/lenna.png
     :alt: lenna
@@ -44,7 +44,7 @@ data. The same Tag can be applied to many references as long as
 
 .. literalinclude:: examples/singleROI.py
     :lines: 80-84
-    :caption: A *Tag* is used to tag a a single region of interest. Most image data is 3D with the third dimension representing the color channels (:download:`singleROI.py <examples/singleROI.py>`).
+    :caption: A *Tag* is used to tag a a single region of interest. Most image data is 3-D with the third dimension representing the color channels (:download:`singleROI.py <examples/singleROI.py>`).
 
 .. image:: images/single_roi.png
     :alt: single roi
@@ -64,7 +64,7 @@ For tagging multiple regions in the image data we again use a *MultiTag* entity.
     :alt: many rois
     :width: 240
 
-The start positions and extents of the ROIs are stored in two separate *DataArrays*, these are each 2-D the first dimension represents the number of regions , the second defines the position/extent for each single dimension of the data (height, width, color channels).
+The start positions and extents of the ROIs are stored in two separate *DataArrays*, these are each 2-D, the first dimension represents the number of regions, the second defines the position/extent for each single dimension of the data (height, width, color channels).
 
 The *MultiTag* has a ``tagged_data`` method that is used to retrieve the data tagged by the *MultiTag*.
 
