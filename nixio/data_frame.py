@@ -48,7 +48,7 @@ class DataFrame(Entity, DataSet):
         :param name: The name of new column
         :type name: str
         :param datatype: The DataType of new column
-        :type datatype: DataType
+        :type datatype: nixio.DataType
         """
         if len(column) < len(self):
             raise ValueError("Not enough entries for column in this dataframe")
@@ -416,7 +416,7 @@ class DataFrame(Entity, DataSet):
         this attribute can provide additional annotations. This is an optional
         read-write property, and can be None if no metadata is available.
 
-        :type: Section
+        :type: nixio.Section
         """
         if "metadata" in self._h5group:
             return Section(self.file, None,

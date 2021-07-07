@@ -93,8 +93,10 @@ def time_to_str(time):
     posix time `to_iso_string` function.
 
     :param time: integer POSIX time
-    :return: string in the form "YYYYMMDDTHHMMSS", where T is the date-time
-    separator
+    :type time: int
+
+    :return: string in the form "YYYYMMDDTHHMMSS", where T is the date-time separator
+    :rtype: str
     """
     dt = datetime.utcfromtimestamp(time)
     return dt.strftime("%Y%m%dT%H%M%S").encode("utf-8")
@@ -104,9 +106,11 @@ def str_to_time(time_str):
     """
     Returns the POSIX time represented by the given string as an integer.
 
-    :param s: string in the form "YYYYMMDDTHHMMSS", where T is the date-time
-    separator
+    :param time_str: string in the form "YYYYMMDDTHHMMSS", where T is the date-time separator
+    :type time_str: str
+
     :return: integer POSIX time
+    :rtype: int
     """
     if isinstance(time_str, bytes):
         time_str = time_str.decode()

@@ -83,7 +83,7 @@ class DataArray(Entity, DataSet):
         descriptors.
 
         :returns: The newly created SetDimension.
-        :rtype: SetDimension
+        :rtype: nixio.SetDimension
         """
         index = len(self.dimensions) + 1
         setdim = SetDimension.create_new(self, index)
@@ -99,12 +99,11 @@ class DataArray(Entity, DataSet):
         Append a new SampledDimension to the list of existing dimension
         descriptors.
 
-        :param sampling_interval: The sampling interval of the SetDimension
-                                  to create.
+        :param sampling_interval: The sampling interval of the SetDimension to create.
         :type sampling_interval: float
 
         :returns: The newly created SampledDimension.
-        :rtype: SampledDimension
+        :rtype: nixio.SampledDimension
         """
         index = len(self.dimensions) + 1
         smpldim = SampledDimension.create_new(self, index, sampling_interval)
@@ -127,7 +126,7 @@ class DataArray(Entity, DataSet):
         :type ticks: list of float
 
         :returns: The newly created RangeDimension.
-        :rtype: RangeDimension
+        :rtype: nixio.RangeDimension
         """
         index = len(self.dimensions) + 1
 
@@ -148,12 +147,11 @@ class DataArray(Entity, DataSet):
         rdim = array.append_range_dimension()
         rdim.link_data_array(self, index)
 
-        :param index: The slice of the DataArray that contains the tick
-        values. This must be a vector of the data. Defaults to None, which will be replaced by an index referring to the full first dimension.
+        :param index: The slice of the DataArray that contains the tick values. This must be a vector of the data. Defaults to [-1], i.e. the full first dimension. 
         :type: list of int
 
-        :returns: the newly created RangeDimension
-        :rtype: RangeDimension
+        :returns: the newly created nixio.RangeDimension
+        :rtype: nixio.RangeDimension
         """
         if index is None:
             index = [0] * len(self.shape)
@@ -210,7 +208,8 @@ class DataArray(Entity, DataSet):
         The data type of the data stored in the DataArray.
         This is a read only property.
 
-        :return: DataType
+        :return: The data type
+        :rtype: nixio.DataType
         """
         return self._h5group.group["data"].dtype
 
@@ -221,7 +220,7 @@ class DataArray(Entity, DataSet):
         set to a {0.0, 1.0} for a linear calibration with zero offset.
         This is a read-write property and can be set to None
 
-        :type: list of float
+        :rtype: list of float
         """
         return tuple(self._h5group.get_data("polynom_coefficients"))
 
@@ -294,6 +293,30 @@ class DataArray(Entity, DataSet):
             self.force_updated_at()
 
     def get_slice(self, positions, extents=None, mode=DataSliceMode.Index):
+        """
+        Reads a slice of the data. The slice can be specified either in indices or in data coordinates.
+        For example, if the *DataArray* stores 1D data spanning one second in time sampled with 1kHz (1000 data points). If one wants to read the data of the interval 0.25 to 0.5 seconds, one can use either of the following statements:
+
+        ```
+          interval_data = data_array.get_slice([250], [500], mode=DataSliceMode.Index)[:]
+          interval_data = data_array.get_slice([0.25],[0.25], mode=DataSliceMode.Data)[:]
+        ```
+
+        Note: The extents are *not* the end positions but the extent of the slice!
+
+        :param positions: Specifies the start of the data slice. List of either indices or data positions depending on the DataSliceMode.
+        :type positions: list length must match dimensionality of the data.
+        :param extents: Specifies the extents of the slice for each dimension.
+        :type extents: list, defaults to None
+        :param mode: Specifies how positions and extents are interpreted, they are either treated as indices (DataSliceMode.Index) or as positions in data coordinates (DataSliceMode.Data), Defaults to nixio.DataSliceMode.Index.
+        :type mode: nixio.DataSliceMode
+
+        :raises: nixio.IncompatibleDimensions: if length of positions or, if given, extents does not match the rank of the data.
+        :raises: ValueError: if an invalid slice mode is given
+
+        :returns: A nixio.DataView object
+        :rtype: nixio.DataView
+        """
         datadim = len(self.shape)
         if not len(positions) == datadim:
             raise IncompatibleDimensions(
@@ -369,7 +392,7 @@ class DataArray(Entity, DataSet):
         this attribute can provide additional annotations. This is an optional
         read-write property, and can be None if no metadata is available.
 
-        :type: Section
+        :type: nixio.Section
         """
         if "metadata" in self._h5group:
             return Section(self.file, None,

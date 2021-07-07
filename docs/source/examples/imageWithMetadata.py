@@ -11,7 +11,6 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- This tutorial shows how to store image data in nix-files.
  See https://github.com/G-node/nix/wiki for more information.
 
  We use the "Lenna" image in this tutorial.

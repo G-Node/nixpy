@@ -68,14 +68,14 @@ class Block(Entity):
         :param type_: The type of tag.
         :type type_: str
         :param positions: A data array defining all positions of the tag.
-        :type positions: DataArray
+        :type positions: nixio.DataArray
         :param copy_from: The MultiTag to be copied, None in normal mode
-        :type copy_from: MultiTag
+        :type copy_from: nixio.MultiTag
         :param keep_copy_id: Specify if the id should be copied in copy mode
         :type keep_copy_id: bool
 
         :returns: The newly created tag.
-        :rtype: MultiTag
+        :rtype: nixio.MultiTag
         """
         if copy_from:
             if not isinstance(copy_from, MultiTag):
@@ -134,12 +134,12 @@ class Block(Entity):
         :param position: Coordinates of the start position
                          in units of the respective data dimension.
         :param copy_from: The Tag to be copied, None in normal mode
-        :type copy_from: Tag
+        :type copy_from: nixio.Tag
         :param keep_copy_id: Specify if the id should be copied in copy mode
         :type keep_copy_id: bool
 
         :returns: The newly created tag.
-        :rtype: Tag
+        :rtype: nixio.Tag
         """
         if copy_from:
             if not isinstance(copy_from, Tag):
@@ -165,7 +165,7 @@ class Block(Entity):
         :type type_: str
 
         :returns: The newly created source.
-        :rtype: Source
+        :rtype: nixio.Source
         """
         util.check_entity_name_and_type(name, type_)
         sources = self._h5group.open_group("sources")
@@ -185,7 +185,7 @@ class Block(Entity):
         :type type_: str
 
         :returns: The newly created group.
-        :rtype: Group
+        :rtype: nixio.Group
         """
         util.check_entity_name_and_type(name, type_)
         groups = self._h5group.open_group("groups")
@@ -216,7 +216,7 @@ class Block(Entity):
         :param compression: En-/disable dataset compression.
         :type compression: :class:`~nixio.Compression`
         :param copy_from: The DataArray to be copied, None in normal mode
-        :type copy_from: DataArray
+        :type copy_from: nixio.DataArray
         :param keep_copy_id: Specify if the id should be copied in copy mode
         :type keep_copy_id: bool
         :param label: The label, defaults to None.
@@ -288,7 +288,7 @@ class Block(Entity):
         :param compression: En-/disable dataset compression.
         :type compression: :class:`~nixio.Compression`
         :param copy_from: The DataFrame to be copied, None in normal mode
-        :type copy_from: DataFrame
+        :type copy_from: nixio.DataFrame
         :param keep_copy_id: Specify if the id should be copied in copy mode
         :type keep_copy_id: bool
 
@@ -395,7 +395,7 @@ class Block(Entity):
         :type limit:  int
 
         :returns: A list containing the matching sources.
-        :rtype: list of Source
+        :rtype: list of nixio.Source
         """
         if limit is None:
             limit = maxint
@@ -580,7 +580,7 @@ class Block(Entity):
         this attribute can provide additional annotations. This is an optional
         read-write property, and can be None if no metadata is available.
 
-        :type: Section
+        :type: nixio.Section
         """
         if "metadata" in self._h5group:
             return Section(self.file, None,

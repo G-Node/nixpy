@@ -34,7 +34,7 @@ class MultiTag(BaseTag):
         """
         The positions defined by the tag. This is a read-write property.
 
-        :type: DataArray
+        :type: nixio.DataArray
         """
         if "positions" not in self._h5group:
             raise RuntimeError("MultiTag.positions: DataArray not found!")
@@ -57,7 +57,7 @@ class MultiTag(BaseTag):
         The extents defined by the tag. This is an optional read-write
         property and may be set to None.
 
-        :type: DataArray or None
+        :type: nixio.DataArray or None
         """
         if "extents" in self._h5group:
             return DataArray(self.file, self._parent,
@@ -83,7 +83,7 @@ class MultiTag(BaseTag):
         of the list.
         This is a read only attribute.
 
-        :type: LinkContainer of DataArray
+        :type: nixio.LinkContainer of nixio.DataArray
         """
         if self._references is None:
             self._references = LinkContainer("references", self, DataArray,
@@ -210,7 +210,7 @@ class MultiTag(BaseTag):
         this attribute can provide additional annotations. This is an optional
         read-write property, and can be None if no metadata is available.
 
-        :type: Section
+        :type: nixio.Section
         """
         if "metadata" in self._h5group:
             return Section(self.file, None, self._h5group.open_group("metadata"))

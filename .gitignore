@@ -46,3 +46,6 @@ Makefile
 .cache
 .eggs
 .mypy_cache
+
+# vscode
+.vscode

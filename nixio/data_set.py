@@ -144,7 +144,7 @@ class DataSet(object):
         The data type of the data stored in the DataArray. This is a read only
         property.
 
-        :type: DataType
+        :type: nixio.DataType
         """
         return self._get_dtype()
 

@@ -11,9 +11,6 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- This tutorial shows how to store image data in nix-files.
- See https://github.com/G-node/nix/wiki for more information.
-
  We use the "Lenna" image in this tutorial.
 
  "Lenna" by Original full portrait: "Playmate of the Month". Playboy
@@ -39,7 +36,7 @@ def load_image():
 
 def draw_rect(img_data, position, extent):
     img_data[position[0]:position[0] + extent[0], position[1], :] = 255
-    img_data[position[0]:position[0] + extent[0], position[1]+extent[1], :] = 255
+    img_data[position[0]:position[0] + extent[0], position[1] + extent[1], :] = 255
     img_data[position[0], position[1]:position[1] + extent[1], :] = 255
     img_data[position[0] + extent[0], position[1]:position[1] + extent[1], :] = 255
 
@@ -54,13 +51,15 @@ def plot_data(tag):
     ext = tuple(map(int, tag.extent))
     draw_rect(img_data, pos, ext)
     new_img = img.fromarray(img_data)
+
+    new_img.save("../images/single_roi.png")
     new_img.show()
 
 
-if __name__ == '__main__':
+def main():
     img_data, channels = load_image()
     # create a new file overwriting any existing content
-    file_name = 'single_roi.h5'
+    file_name = 'single_roi.nix'
     f = nix.File.open(file_name, nix.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.
@@ -70,12 +69,9 @@ if __name__ == '__main__':
     # create a 'DataArray' to take the sinewave, add some information about the signal
     data = block.create_data_array("lenna", "nix.image.rgb", data=img_data)
     # add descriptors for width, height and channels
-    height_dim = data.append_sampled_dimension(1)
-    height_dim.label = "height"
-    width_dim = data.append_sampled_dimension(1)
-    width_dim.label = "width"
-    color_dim = data.append_set_dimension()
-    color_dim.labels = channels
+    data.append_sampled_dimension(1, label="height")
+    data.append_sampled_dimension(1, label="width")
+    data.append_set_dimension(labels=channels)
 
     # create a Tag, position and extent must be 3-D since the data is 3-D
     position = [250, 250, 0]
@@ -87,3 +83,7 @@ if __name__ == '__main__':
     # let's plot the data from the stored information
     plot_data(tag)
     f.close()
+
+
+if __name__ == '__main__':
+    main()
