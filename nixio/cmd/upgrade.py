@@ -143,6 +143,9 @@ def update_alias_range_dimension(fname):
     dims = list()
     with h5py.File(fname, mode="r") as hfile:
         for block in hfile["data"].values():
+            if "data_arrays" not in block:
+                continue
+
             for data_array in block["data_arrays"].values():
                 if "dimensions" not in data_array:
                     continue
@@ -189,7 +192,7 @@ def update_alias_range_dimension(fname):
 
 
 def create_property(hfile, name, dtype, data, definition=None, unit=None):
-    prop = hfile.create_dataset(name, dtype=dtype, data=data)
+    prop = hfile.create_dataset(name, dtype=dtype, data=data, chunks=True)
     prop.attrs["name"] = name.split("/")[-1]
     prop.attrs["entity_id"] = nix.util.create_id()
     prop.attrs["created_at"] = nix.util.time_to_str(nix.util.now_int())
@@ -215,16 +218,15 @@ def update_format_version(fname):
 
 
 def collect_tasks(fname):
+    tasks = list()
     file_ver = get_file_version(fname)
     file_verstr = ".".join(str(v) for v in file_ver)
     lib_verstr = ".".join(str(v) for v in nix.file.HDF_FF_VERSION)
     if file_ver >= nix.file.HDF_FF_VERSION:
-        print(f"{fname}: Up to date ({file_verstr})")
-        return
+        return tasks, file_verstr, lib_verstr
 
     # even if the version string indicates the file is old, check format
     # details before scheduling tasks
-    tasks = list()
     id_task = add_file_id(fname)
     if id_task:
         tasks.append(id_task)
@@ -240,11 +242,7 @@ def collect_tasks(fname):
     # always update the format last
     tasks.append(update_format_version(fname))
 
-    # print task list
-    print(f"{fname}: {file_verstr} -> {lib_verstr}")
-    print("  - " + "\n  - ".join(t.__doc__ for t in tasks) + "\n")
-
-    return tasks
+    return tasks, file_verstr, lib_verstr
 
 
 def create_subcmd_parser(parser):
@@ -255,12 +253,54 @@ def create_subcmd_parser(parser):
     return parser
 
 
+def print_tasks(fname, tasklist, fileversion, libversion):
+    if len(tasklist) == 0:
+        print(f"File {fname} is up to date ({fileversion})")
+        return
+    print(f"{fname}: {fileversion} -> {libversion}")
+    print("  - " + "\n  - ".join(t.__doc__ for t in tasklist) + "\n")
+
+
+def process_tasks(fname, tasklist, quiet=True):
+    if not quiet:
+        print(f"Processing {fname} ", end="", flush=True)
+    for task in tasklist:
+        task()
+    if not quiet:
+        print("done")
+
+
+def file_upgrade(fname, quiet=True):
+    """
+    Upgrades a file from an old format version to the current version.
+
+    :param fname: The fully qualified filename.
+    :type fname: str
+    :param quiet: Whether or not the upgrade tool should give feedback on the command line. Defaults to True, no output.
+    :type quiet: bool
+
+    :returns: True if the conversion succeeded, False otherwise, it the file does not need upgrading True is returned.
+    :rtype : bool
+    """
+    try:
+        tasklist, fileversion, libversion = collect_tasks(fname)
+        if not quiet:
+            print_tasks(fname, tasklist, fileversion, libversion)
+
+        process_tasks(fname, tasklist, quiet=quiet)
+    except Exception as e:
+        print(f"An Exception occurred while upgrading file {fname}. Error is {e}")
+        return False
+    return True
+
+
 def main(args):
     filenames = args.file
 
     tasks = dict()
     for fname in filenames:
-        tasklist = collect_tasks(fname)
+        tasklist, fileversion, libversion = collect_tasks(fname)
+        print_tasks(fname, tasklist, fileversion, libversion)
         if not tasklist:
             continue
 
@@ -291,7 +331,4 @@ MAKE SURE YOUR FILES AND DATA ARE BACKED UP BEFORE CONTINUING.
 
     if conf in ("y", "yes"):
         for fname, tasklist in tasks.items():
-            print(f"Processing {fname} ", end="", flush=True)
-            for task in tasklist:
-                task()
-            print("done")
+            process_tasks(fname, tasklist, quiet=False)

@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""Copyright © 2014 German Neuroinformatics Node (G-Node)
+"""Copyright © 2014 - 2021 German Neuroinformatics Node (G-Node)
 
  All rights reserved.
 
@@ -11,7 +11,6 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- This tutorial shows how to store image data in nix-files.
  See https://github.com/G-node/nix/wiki for more information.
 
  We use the "Lenna" image in this tutorial.
@@ -25,7 +24,7 @@
 
 """
 
-import nixio as nix
+import nixio
 import numpy as np
 from PIL import Image as img
 import matplotlib.pyplot as plt
@@ -48,34 +47,39 @@ def draw_rect(img_data, position, extent):
 
 def plot_data(tag):
     data_array = tag.references[0]
+    positions = tag.positions
     img_data = data_array[:]
     img_data = np.array(img_data, dtype='uint8')
     positions_data = tag.positions[:]
     extents_data = tag.extents[:]
     for i in range(positions.data_extent[0]):
-        img_data = draw_rect(
-            img_data, positions_data[i, :], extents_data[i, :])
-    new_img = img.fromarray(img_data)
-    new_img.show()
-
+        img_data = draw_rect(img_data, positions_data[i, :], extents_data[i, :])
+    # new_img = img.fromarray(img_data)
+    plt.imshow(img_data)
+    plt.gcf().set_size_inches((5.5, 5.5))
+    # plt.savefig("../images/multiple_rois.png")
+    plt.show()
 
 def plot_roi_data(tag):
     position_count = tag.positions.shape[0]
+
+    fig = plt.figure(figsize=(5.5, 5.5))
     for p in range(position_count):
-        roi_data = tag.tagged_data(p, 0)[:]
+        roi_data = tag.tagged_data(p, "lenna")[:]
         roi_data = np.array(roi_data, dtype='uint8')
-        ax = plt.gcf().add_subplot(position_count, 1, p+1)
+        ax = fig.add_subplot(position_count, 1, p + 1)
         image = img.fromarray(roi_data)
         ax.imshow(image)
-    plt.savefig('retrieved_rois.png')
+
+    # fig.savefig('../images/retrieved_rois.png')
     plt.show()
 
 
-if __name__ == '__main__':
+def main():
     img_data, channels = load_image()
     # create a new file overwriting any existing content
-    file_name = 'multiple_roi.h5'
-    file = nix.File.open(file_name, nix.FileMode.Overwrite)
+    file_name = 'multiple_roi.nix'
+    file = nixio.File.open(file_name, nixio.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.
     # it gets a name and a type
@@ -85,20 +89,18 @@ if __name__ == '__main__':
     # the signal
     data = block.create_data_array("lenna", "nix.image.rgb", data=img_data)
     # add descriptors for width, height and channels
-    height_dim = data.append_sampled_dimension(1)
-    height_dim.label = "height"
-    width_dim = data.append_sampled_dimension(1)
-    width_dim.label = "width"
-    color_dim = data.append_set_dimension()
-    color_dim.labels = channels
+    data.append_sampled_dimension(1, label="height")
+    data.append_sampled_dimension(1, label="width")
+    data.append_set_dimension(labels=channels)
 
-    # some space for three regions-of-interest
-    roi_starts = np.zeros((3, 3), dtype=int)
+    num_regions = 3
+    num_dimensions = len(data.dimensions)
+    roi_starts = np.zeros((num_regions, num_dimensions), dtype=int)
     roi_starts[0, :] = [250, 245, 0]
     roi_starts[1, :] = [250, 315, 0]
     roi_starts[2, :] = [340, 260, 0]
 
-    roi_extents = np.zeros((3, 3), dtype=int)
+    roi_extents = np.zeros((num_regions, num_dimensions), dtype=int)
     roi_extents[0, :] = [30, 45, 3]
     roi_extents[1, :] = [30, 40, 3]
     roi_extents[2, :] = [25, 65, 3]
@@ -122,3 +124,7 @@ if __name__ == '__main__':
     plot_data(multi_tag)
     plot_roi_data(multi_tag)
     file.close()
+
+
+if __name__ == '__main__':
+    main()

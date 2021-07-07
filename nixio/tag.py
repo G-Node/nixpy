@@ -112,12 +112,12 @@ class BaseTag(Entity):
         Create a new feature.
 
         :param data: The data array of this feature.
-        :type data: DataArray
+        :type data: nixio.DataArray
         :param link_type: The link type of this feature.
-        :type link_type: LinkType
+        :type link_type: nixio.LinkType
 
         :returns: The created feature object.
-        :rtype: Feature
+        :rtype: nixio.Feature
         """
         if isinstance(link_type, string_types):
             link_type = link_type.lower()
@@ -129,7 +129,7 @@ class BaseTag(Entity):
     def _calc_data_slices(self, data, position, extent, stop_rule):
         refslice = list()
         if not self.units:
-            units = [None]*len(data.dimensions)
+            units = [None] * len(data.dimensions)
         else:
             units = self.units
 
@@ -145,7 +145,7 @@ class BaseTag(Entity):
                 stop = start + 1
             elif idx < len(extent):
                 ext = extent[idx]
-                stop = self._pos_to_idx(pos+ext, units[idx], dim, stop_rule.to_index_mode()) + 1
+                stop = self._pos_to_idx(pos + ext, units[idx], dim, stop_rule.to_index_mode()) + 1
             else:
                 # Tag doesn't specify (pos, ext) for all dimensions: will return entire remaining dimensions (0:len)
                 stop = data.shape[idx]
@@ -214,7 +214,7 @@ class BaseTag(Entity):
         Adding new features is done using the create_feature method.
         This is a read only attribute.
 
-        :type: Container of Feature.
+        :type: Container of nixio.Feature.
         """
         if self._features is None:
             self._features = FeatureContainer("features", self.file,
@@ -343,7 +343,7 @@ class Tag(BaseTag):
         of the list.
         This is a read only attribute.
 
-        :type: Container of DataArray
+        :type: Container of nixio.DataArray
         """
         if self._references is None:
             self._references = LinkContainer("references", self, DataArray,
@@ -372,7 +372,7 @@ class Tag(BaseTag):
         this attribute can provide additional annotations. This is an optional
         read-write property, and can be None if no metadata is available.
 
-        :type: Section
+        :type: nixio.Section
         """
         if "metadata" in self._h5group:
             return Section(self.file, None, self._h5group.open_group("metadata"))

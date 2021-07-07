@@ -1,4 +1,4 @@
-version: 1.4.{build}
+version: 1.5.{build}
 
 image: Visual Studio 2017
 
@@ -58,6 +58,7 @@ install:
   #     Invoke-WebRequest -URI $env:nix_exe_url -OutFile "nix.exe"
   # - 7z x nix.exe
   # - cd ..
+  - python -m pip install certifi
   - python -m pip install -U pip wheel
   - python -m pip install numpy h5py pytest-xdist
   - ps: cd "$env:APPVEYOR_BUILD_FOLDER"

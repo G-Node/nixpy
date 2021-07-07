@@ -86,7 +86,7 @@ class DimensionLink(object):
 
     @property
     def id(self):
-        self._h5group.get_attr("entity_id")
+        return self._h5group.get_attr("entity_id")
 
     @property
     def file(self):
@@ -236,16 +236,8 @@ class Dimension(object):
     def index(self):
         return self.dim_index
 
-    def link_data_array(self, data_array, index):
-        if len(data_array.data_extent) != len(index):
-            raise IncompatibleDimensions(
-                "Length of linked DataArray indices ({}) does not match"
-                "number of DataArray dimensions ({})".format(
-                    len(data_array.data_extent), len(index)
-                ),
-                "Dimension.link_data_array"
-            )
-
+    @staticmethod
+    def _check_index(index):
         invalid_idx_msg = (
             "Invalid linked DataArray index: "
             "One of the values must be -1, indicating the relevant vector. "
@@ -253,7 +245,28 @@ class Dimension(object):
         )
         if index.count(-1) != 1 or sum(idx < 0 for idx in index) != 1:
             # TODO: Add link to relevant docs
-            raise ValueError(invalid_idx_msg)
+            return invalid_idx_msg
+
+        return None
+
+    @staticmethod
+    def _check_link_dimensionality(data_array, index):
+        invalid_dim_msg = ("Length of linked DataArray indices ({}) does not match " 
+                           "number of DataArray dimensions ({})"
+                          ).format(len(data_array.data_extent), len(index))
+
+        if len(data_array.data_extent) != len(index):
+            return invalid_dim_msg
+        return None
+
+    def link_data_array(self, data_array, index):
+        msg = RangeDimension._check_link_dimensionality(data_array, index)
+        if msg is not None:
+            raise IncompatibleDimensions(msg, "Dimension.link_data_array")
+
+        msg = self._check_index(index)
+        if msg is not None:
+            raise ValueError(msg)
 
         if self.has_link:
             self.remove_link()
@@ -379,23 +392,42 @@ class SampledDimension(Dimension):
 
         raise ValueError("Unknown IndexMode: {}".format(mode))
 
-    def axis(self, count, start=0):
+    def axis(self, count, start=None, start_position=None):
         """
-        Get an axis as defined by this sampled dimension.
+        Get an axis as defined by this nixio.SampledDimension. It either starts at the offset of the dimension,
+        a number of sample points later, or at a given position. The latter must not be less than the offset. If
+        start and start_position are given, start takes precedence.
 
-        :param count: A positive integer specifying the length of the axis
-                      (no of samples).
+        :param count: A positive integer specifying the length of the axis (no of samples).
+        :type count: int
+        :param start: positive integer, indicates the starting sample. Defaults to None. Precedes over the start_position.
+        :type start: int
+        :param start_position: The start position of the axis. Defaults to None.
+        :type start_position: double
 
-        :param start: positive integer, indicates the starting sample.
+        :raises: ValueError if start is negative or if the start_position is given and is less than offset.
 
         :returns: The created axis
-        :rtype: list
+        :rtype: tuple
         """
         offset = self.offset if self.offset else 0.0
         sample = self.sampling_interval
-        start_val = start * sample + offset
-        end_val = (start + count) * sample + offset
-        return tuple(np.arange(start_val, end_val, sample))
+
+        if start is not None:
+            if start < 0:
+                raise ValueError("Start index (%i) must not be negative!" % start)
+            start_val = start * sample + offset
+        else:
+            if start_position is not None:
+                if start_position < offset:
+                    raise ValueError("SampledDimension.axis: Start position (%.f) must not be "
+                                     "less than the offset of the dimension (%.f)!" % (start_position, offset))
+                else:
+                    start_val = start_position
+            else:
+                start_val = offset
+
+        return tuple(np.arange(count) * sample + start_val)
 
     @property
     def label(self):
@@ -467,7 +499,43 @@ class RangeDimension(Dimension):
         return newdim
 
     @property
+    def is_alias(self):
+        """
+        In versions < 1.5 a RangeDimension that was referring to the DataArray it describes
+        was called an AliasRangeDimension. This has been made more flexible by allowing to link
+        to any DataArray or DataFrame.
+        For downward compatibility this method has been re-introduced in 1.5.1.
+
+        :returns: True, if this dimension links to a DataArray, False otherwise
+        :rtype: bool
+        """
+        if self._h5group.has_data("ticks"):
+            return False
+        elif not self.has_link and len(self._h5group) > 0:
+            return True
+        elif self.has_link and self.dimension_link._data_object_type == "DataArray":
+            return True
+        return False
+    
+    @property
+    def _redirgrp(self):
+        """
+        If the dimension is an Alias Range dimension, this property returns
+        the H5Group of the linked DataArray. Otherwise, it returns the H5Group
+        representing the dimension.
+        """
+        if self.is_alias:
+            gname = self._h5group.get_by_pos(0).name
+            return self._h5group.open_group(gname)
+        return self._h5group
+    
+    @property
     def ticks(self):
+        if self.is_alias and not self.has_link:
+            g = self._redirgrp
+            if g.has_data("data"):
+                ticks = g.get_data("data")
+                return tuple(ticks)
         if self.has_link:
             ticks = self.dimension_link.values
         else:

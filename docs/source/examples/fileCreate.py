@@ -1,42 +1,40 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import nixio
+import datetime as dt
 
-from __future__ import print_function
-
-import nixio as nix
-
-
-file_name = 'file_create_example.h5'
+file_name = 'file_create_example.nix'
 
 # create a new file overwriting any existing content
-nixfile = nix.File.open(file_name, nix.FileMode.Overwrite)
-print(nixfile.format, nixfile.version, nixfile.created_at)
-
-# close file
+nixfile = nixio.File.open(file_name, nixio.FileMode.Overwrite)
+print("Nix file: %s\n\tformat: %s\n\tversion: %s\n\tcreated at: %s" % (file_name, nixfile.format, nixfile.version,
+                                                                       str(dt.datetime.fromtimestamp(nixfile.created_at))))
 nixfile.close()
 
 # re-open file for read-only access
-nixfile = nix.File.open(file_name, nix.FileMode.ReadOnly)
+nixfile = nixio.File.open(file_name, nixio.FileMode.ReadOnly)
 
-# this command will fail putting out HDF5 Errors
+# this command will fail putting out an error
 try:
     nixfile.create_block("test block", "test")
 except ValueError:
     print("Error caught: cannot create a new group in nix.FileMode.ReadOnly mode")
 
-
 nixfile.close()
 
-# re-open for read-write access
-nixfile = nix.File.open(file_name, nix.FileMode.ReadWrite)
-
-# the following command now works fine
+# re-open for read-write access, creating new entities will work
+nixfile = nixio.File.open(file_name, nixio.FileMode.ReadWrite)
 nixfile.create_block("test block", "test")
-
 nixfile.close()
 
+# the following file open command will fail
+nonexistingfilename = "nonexistingfile.nix"
 
+try:
+    nixfile = nixio.File.open(nonexistingfilename, nixio.FileMode.ReadOnly)
+except RuntimeError as e:
+    print("Error caught: %s" % str(e))
+    print("One cannot open a file, that is not existing and forbidding the library to write it.")
 
-
-
-
+nixfile = nixio.File.open(file_name, mode=nixio.FileMode.Overwrite, compression=nixio.Compression.DeflateNormal)
+nixfile.close()

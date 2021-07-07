@@ -87,6 +87,19 @@ class TestBlock(unittest.TestCase):
 
         assert len(self.block.data_arrays) == 0
 
+        data_array = self.block.create_data_array("test data_array",
+                                                  "recordingsession",
+                                                  nix.DataType.Int32, (0, ), label="voltage", unit="V")
+
+        assert len(self.block.data_arrays) == 1
+        assert data_array.unit == "V"
+        assert data_array.label == "voltage"
+
+        del self.block.data_arrays[0]
+
+        assert len(self.block.data_arrays) == 0
+
+
     def test_block_multi_tags(self):
         assert len(self.block.multi_tags) == 0
 

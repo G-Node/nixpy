@@ -112,7 +112,7 @@ class Group(Entity):
         this attribute can provide additional annotations. This is an optional
         read-write property, and can be None if no metadata is available.
 
-        :type: Section
+        :type: nixio.Section
         """
         if "metadata" in self._h5group:
             return Section(self.file, None,

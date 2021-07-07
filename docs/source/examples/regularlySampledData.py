@@ -1,7 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
- Copyright © 2014 German Neuroinformatics Node (G-Node)
+ Copyright © 2014 - 2021 German Neuroinformatics Node (G-Node)
 
  All rights reserved.
 
@@ -11,18 +11,17 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- This tutorial shows how regulary sampled data is stored in nix-files.
  See https://github.com/G-node/nix/wiki for more information.
 """
 
-import nixio as nix
+import nixio
 import numpy as np
-import matplotlib.pylab as plt
+import matplotlib.pyplot as plt
 
 
 def create_sinewave(duration=1, freq=10, stepsize=0.01):
-    x = np.arange(0, duration*2*np.pi, stepsize)
-    y = np.sin(freq*x)
+    x = np.arange(0, duration * 2 * np.pi, stepsize)
+    y = np.sin(freq * x)
     return x, y
 
 
@@ -30,40 +29,40 @@ def plot_data(data_array):
     x_axis = data_array.dimensions[0]
     x = x_axis.axis(data_array.data.shape[0])
     y = data_array.data[:]
-    plt.plot(x, y, marker=".", markersize=5)
+
+    plt.plot(x, y, marker=".", markersize=5, label=data_array.name)
     plt.xlabel(x_axis.label + " [" + x_axis.unit + "]")
     plt.ylabel(data_array.label + " [" + data_array.unit + "]")
-    plt.title(data_array.name)
     plt.xlim(0, np.max(x))
     plt.ylim((1.1 * np.min(y), 1.1 * np.max(y)))
+    plt.legend()
     plt.show()
 
 
-if __name__ == "__main__":
+def main():
     # fake some data
-    duration = 1.
+    duration = 10.
     frequency = 5
-    stepsize = 0.02
-    x, y = create_sinewave(duration, frequency, stepsize)
+    stepsize = 0.002
+    _, y = create_sinewave(duration, frequency, stepsize)
 
     # create a new file overwriting any existing content
-    file_name = 'regular_data_example.h5'
-    file = nix.File.open(file_name, nix.FileMode.Overwrite)
+    file_name = 'regular_data_example.nix'
+    file = nixio.File.open(file_name, nixio.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.
-    # it gets a name and a type
     block = file.create_block("block name", "nix.session")
 
     # create a 'DataArray' to take the sinewave, add some information about the signal
-    data = block.create_data_array("sinewave", "nix.regular_sampled", data=y)
-    data.unit = "mV"
-    data.label = "voltage"
+    data = block.create_data_array("sinewave", "nix.regular_sampled", data=y,
+                                   label="voltage", unit="mV")
     # add a descriptor for the xaxis
-    dim = data.append_sampled_dimension(stepsize)
-    dim.unit = "s"
-    dim.label = "time"
-    dim.offset = 0.0 # optional
+    data.append_sampled_dimension(stepsize, label="time", unit="s", offset=0.0)
 
     # let's plot the data from the stored information
     plot_data(data)
     file.close()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,8 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 """
- Copyright © 2014 German Neuroinformatics Node (G-Node)
+ Copyright © 2014 - 2021 German Neuroinformatics Node (G-Node)
 
  All rights reserved.
 
@@ -12,7 +12,6 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- This tutorial shows how to store image data in nix-files.
  See https://github.com/G-node/nix/wiki for more information.
 
  We use the "Lenna" image in this tutorial.
@@ -26,7 +25,7 @@
 
 """
 
-import nixio as nix
+import nixio
 import numpy as np
 from PIL import Image as img
 
@@ -49,22 +48,19 @@ def plot_data(data_array):
 if __name__ == '__main__':
     img_data, channels = load_image()
     # create a new file overwriting any existing content
-    file_name = 'image_example.h5'
-    file = nix.File.open(file_name, nix.FileMode.Overwrite)
+    file_name = 'image_example.nix'
+    file = nixio.File.open(file_name, nixio.FileMode.Overwrite)
 
     # create a 'Block' that represents a grouping object. Here, the recording session.
     # it gets a name and a type
     block = file.create_block("block name", "nix.session")
 
-    # create a 'DataArray' to take the sinewave, add some information about the signal
+    # create a 'DataArray' and store the image data
     data = block.create_data_array("lenna", "nix.image.rgb", data=img_data)
-    # add descriptors for width, height and channels
-    height_dim = data.append_sampled_dimension(1)
-    height_dim.label = "height"
-    width_dim = data.append_sampled_dimension(1)
-    width_dim.label = "width"
-    color_dim = data.append_set_dimension()
-    color_dim.labels = channels
+    # add descriptors for width, height and channel dimensions
+    data.append_sampled_dimension(1, label="height")
+    data.append_sampled_dimension(1, label="width")
+    data.append_set_dimension(labels=channels)
 
     # let's plot the data from the stored information
     plot_data(data)

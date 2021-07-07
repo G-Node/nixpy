@@ -77,7 +77,7 @@ class Section(Entity):
         :type oid: str
 
         :returns: The newly created section.
-        :rtype: Section
+        :rtype: nixio.Section
         """
         util.check_entity_name_and_type(name, type_)
         sections = self._h5group.open_group("sections", True)
@@ -96,17 +96,17 @@ class Section(Entity):
         :param name: The name of the property to create/copy.
         :type name: str
         :param values_or_dtype: The values of the property or a valid DataType.
-        :type values_or_dtype: list of values or a DataType
+        :type values_or_dtype: list of values or a nixio.DataType
         :param oid: object id, UUID string as specified in RFC 4122. If no id
                     is provided, an id will be generated and assigned.
         :type oid: str
         :param copy_from: The Property to be copied, None in normal mode
-        :type copy_from: Property
+        :type copy_from: nixio.Property
         :param keep_copy_id: Specify if the id should be copied in copy mode
         :type keep_copy_id: bool
 
         :returns: The newly created property.
-        :rtype: Property
+        :rtype: nixio.Property
         """
         if copy_from:
             if not isinstance(copy_from, Property):
@@ -175,7 +175,7 @@ class Section(Entity):
         Copy a section to the section.
 
         :param obj: The Section to be copied
-        :type obj: Section
+        :type obj: nixio.Section
         :param children: Specify if the copy should be recursive
         :type children: bool
         :param keep_id: Specify if the id should be kept
@@ -184,7 +184,7 @@ class Section(Entity):
         :type name: str
 
         :returns: The copied section
-        :rtype: Section
+        :rtype: nixio.Section
         """
         if not isinstance(obj, Section):
             raise TypeError("Object to be copied is not a Section")
@@ -230,7 +230,7 @@ class Section(Entity):
         the linking section inherits all properties from the target section.
         This is an optional read-write property and may be set to None.
 
-        :type: Section
+        :type: nixio.Section
         """
         if "link" not in self._h5group:
             return None
@@ -283,7 +283,7 @@ class Section(Entity):
 
         Accessing this property can be slow when the metadata tree is large.
 
-        :type: Section
+        :type: nixio.Section
         """
         if self._sec_parent is not None:
             return self._sec_parent
@@ -384,7 +384,7 @@ class Section(Entity):
         :type limit:  int
 
         :returns: A list containing the matching sections.
-        :rtype: list of Section
+        :rtype: list of nixio.Section
         """
         if limit is None:
             limit = maxint
@@ -403,7 +403,7 @@ class Section(Entity):
         :type filtr:  function
 
         :returns: A list containing the matching related sections.
-        :rtype: list of Section
+        :rtype: list of nixio.Section
         """
         result = []
         if self.parent is not None:
@@ -423,7 +423,7 @@ class Section(Entity):
         create_section method.
         This is a read-only attribute.
 
-        :type: Container of Section
+        :type: Container of nixio.Section
         """
         if self._sections is None:
             self._sections = SectionContainer("sections", self.file,
@@ -484,7 +484,7 @@ class Section(Entity):
         using the create_property method.
         This is a read-only attribute.
 
-        :type: Container of Property
+        :type: Container of nixio.Property
         """
         if self._properties is None:
             self._properties = Container("properties", self.file,
