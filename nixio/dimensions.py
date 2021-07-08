@@ -803,19 +803,17 @@ class SetDimension(Dimension):
         :param mode: The nixio.RangeMode. Defaults to nixio.RangeMode.Exclusive, i.e. the end position is not part of the range.
         :type mode: nixio.RangeMode
 
-        :returns: The respective start and end indices.
+        :returns: The respective start and end indices. None, if the range is empty
         :rtype: tuple of int
 
         :raises: ValueError if invalid mode is given
         :raises: Index Error if start position is greater than end position.
         """
-
-        dim_labels = self.labels
         if mode is not RangeMode.Exclusive and mode is not RangeMode.Inclusive:
             raise ValueError("Unknown RangeMode: {}".format(mode))
 
+        dim_labels = self.labels
         end_mode = IndexMode.Less if mode == RangeMode.Exclusive else IndexMode.LessOrEqual
-
         if start_position > end_position:
             raise IndexError("Start position {} is greater than end position {}.".format(start_position, end_position))
         try:
@@ -823,4 +821,6 @@ class SetDimension(Dimension):
             end = self.index_of(end_position, mode=end_mode, dim_labels=dim_labels)
         except IndexError as e:
             raise IndexError("Error using SetDimension.range_indices: {}".format(e))
+        if start > end:
+            return None
         return (start, end)
