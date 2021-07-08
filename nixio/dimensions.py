@@ -418,13 +418,13 @@ class SampledDimension(Dimension):
         :param start_position: the start position of the range.
         :type start_position: float
         :param end_position: the end position of the range.
-        :type end_position: fload
+        :type end_position: float
         :param mode: The nixio.RangeMode. Defaults to nixio.RangeMode.Exclusive, i.e. the end position is not part of the range.
         :type mode: nixio.RangeMode
-        
+
         :returns: The respective start and end indices.
         :rtype: tuple of int
-        
+
         :raises: ValueError if invalid mode is given
         :raises: Index Error if start position is greater than end position.
         """
@@ -436,7 +436,7 @@ class SampledDimension(Dimension):
             start_index = self.index_of(start_position, mode=IndexMode.GreaterOrEqual)
             end_index = self.index_of(end_position, mode=end_mode)
         except IndexError as e:
-            raise e
+            raise IndexError("Error using SampledDimension.range_indices: {}".format(e))
         if start_index > end_index:
             raise IndexError("Start position {} is greater than end position {}.".format(start_position, end_position))
         return (start_index, end_index)
@@ -739,7 +739,7 @@ class SetDimension(Dimension):
             labels = list(labels)
         self._h5group.write_data("labels", labels, dtype=dt)
 
-    def index_of(self, position, mode=IndexMode.LessOrEqual):
+    def index_of(self, position, mode=IndexMode.LessOrEqual, dim_labels=None):
         """
         Returns the index of a certain position in the dimension.
         Raises IndexError if the position is out of bounds (depending on mode and number of labels).
@@ -751,6 +751,7 @@ class SetDimension(Dimension):
                     If the position is not an integer (or is not equal to the nearest integer), then the value is
                     rounded down (for LessOrEqual) or rounded up (for GreaterOrEqual).
                     If the mode is Less, the previous integer is always returned.
+        :param dim_labels: The labels of this dimension, if None (default) the labels will be read from file.
 
         :returns: The matching index
         :rtype: int
@@ -764,12 +765,13 @@ class SetDimension(Dimension):
         if position == 0 and mode == IndexMode.Less:
             raise IndexError("Position {} is out of bounds for SetDimension with mode {}".format(position, mode.name))
 
-        labels = self.labels
-        if labels and len(labels) and position > len(labels)-1:
+        if dim_labels is None:
+            dim_labels = self.labels
+        if dim_labels and len(dim_labels) and position > len(dim_labels) - 1:
             if mode in (IndexMode.Less, IndexMode.LessOrEqual):
-                return len(labels) - 1
+                return len(dim_labels) - 1
             raise IndexError("Position {} is out of bounds for SetDimension with length {} and mode {}".format(
-                position, len(labels), mode.name
+                position, len(dim_labels), mode.name
             ))
 
         index = int(np.floor(position))
@@ -789,3 +791,36 @@ class SetDimension(Dimension):
             return index
 
         raise ValueError("Unknown IndexMode: {}".format(mode))
+
+    def range_indices(self, start_position, end_position, mode=RangeMode.Exclusive):
+        """
+        Returns the start and end indices in this dimension that are matching to the given start and end position.
+
+        :param start_position: the start position of the range.
+        :type start_position: float
+        :param end_position: the end position of the range.
+        :type end_position: float
+        :param mode: The nixio.RangeMode. Defaults to nixio.RangeMode.Exclusive, i.e. the end position is not part of the range.
+        :type mode: nixio.RangeMode
+
+        :returns: The respective start and end indices.
+        :rtype: tuple of int
+
+        :raises: ValueError if invalid mode is given
+        :raises: Index Error if start position is greater than end position.
+        """
+
+        dim_labels = self.labels
+        if mode is not RangeMode.Exclusive and mode is not RangeMode.Inclusive:
+            raise ValueError("Unknown RangeMode: {}".format(mode))
+
+        end_mode = IndexMode.Less if mode == RangeMode.Exclusive else IndexMode.LessOrEqual
+
+        if start_position > end_position:
+            raise IndexError("Start position {} is greater than end position {}.".format(start_position, end_position))
+        try:
+            start = self.index_of(start_position, mode=IndexMode.GreaterOrEqual, dim_labels=dim_labels)
+            end = self.index_of(end_position, mode=end_mode, dim_labels=dim_labels)
+        except IndexError as e:
+            raise IndexError("Error using SetDimension.range_indices: {}".format(e))
+        return (start, end)

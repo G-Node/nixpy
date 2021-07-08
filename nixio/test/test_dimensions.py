@@ -260,7 +260,16 @@ class TestDimension(unittest.TestCase):
         with self.assertRaises(IndexError):
             self.set_dim.index_of(12398, nix.IndexMode.GreaterOrEqual)
         with self.assertRaises(IndexError):
-            self.set_dim.index_of(len(test_labels)-0.5, nix.IndexMode.GreaterOrEqual)
+            self.set_dim.index_of(len(test_labels) - 0.5, nix.IndexMode.GreaterOrEqual)
+
+        with self.assertRaises(ValueError):
+            self.set_dim.range_indices(0, 10, mode="invalid")
+        with self.assertRaises(IndexError):
+            self.set_dim.range_indices(10, -10)
+        assert self.set_dim.range_indices(0, 9, mode=RangeMode.Exclusive)[0] == 0
+        assert self.set_dim.range_indices(0, 9, mode=RangeMode.Exclusive)[-1] == 8
+        assert self.set_dim.range_indices(0, 9, mode=RangeMode.Inclusive)[0] == 0
+        assert self.set_dim.range_indices(0, 9, mode=RangeMode.Inclusive)[-1] == 9
 
     def test_sampled_dimension_modes(self):
         # exact
