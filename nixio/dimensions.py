@@ -422,7 +422,7 @@ class SampledDimension(Dimension):
         :param mode: The nixio.RangeMode. Defaults to nixio.RangeMode.Exclusive, i.e. the end position is not part of the range.
         :type mode: nixio.RangeMode
 
-        :returns: The respective start and end indices.
+        :returns: The respective start and end indices. None, if the range is empty!
         :rtype: tuple of int
 
         :raises: ValueError if invalid mode is given
@@ -438,7 +438,7 @@ class SampledDimension(Dimension):
         except IndexError as e:
             raise IndexError("Error using SampledDimension.range_indices: {}".format(e))
         if start_index > end_index:
-            raise IndexError("Start position {} is greater than end position {}.".format(start_position, end_position))
+            return None
         return (start_index, end_index)
 
     def axis(self, count, start=None, start_position=None):

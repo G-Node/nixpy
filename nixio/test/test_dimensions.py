@@ -113,11 +113,30 @@ class TestDimension(unittest.TestCase):
             self.sample_dim.range_indices(0, 1, mode="invalid")
         with self.assertRaises(IndexError):
             self.sample_dim.range_indices(10, -10, mode=RangeMode.Inclusive)
-        assert self.sample_dim.range_indices(2, 11, mode=RangeMode.Inclusive)[0] == 0
-        assert self.sample_dim.range_indices(2, 11, mode=RangeMode.Inclusive)[-1] == 4
+        range_indices = self.sample_dim.range_indices(2, 11, mode=RangeMode.Inclusive)
+        assert range_indices[0] == 0
+        assert range_indices[-1] == 4
 
-        assert self.sample_dim.range_indices(2, 11, mode=RangeMode.Exclusive)[0] == 0
-        assert self.sample_dim.range_indices(2, 11, mode=RangeMode.Exclusive)[-1] == 3
+        range_indices = self.sample_dim.range_indices(2, 11, mode=RangeMode.Exclusive)
+        assert range_indices[0] == 0
+        assert range_indices[-1] == 3
+
+        range_indices = self.sample_dim.range_indices(3., 3.1, mode=RangeMode.Inclusive)
+        assert range_indices[0] == 0
+        assert range_indices[-1] == 0
+        range_indices = self.sample_dim.range_indices(3., 3.1, mode=RangeMode.Exclusive)
+        assert range_indices[0] == 0
+        assert range_indices[-1] == 0
+
+        range_indices = self.sample_dim.range_indices(3.1, 3.2, mode=RangeMode.Inclusive)
+        self.assertIsNone(range_indices)
+        range_indices = self.sample_dim.range_indices(3.1, 3.2, mode=RangeMode.Exclusive)
+        self.assertIsNone(range_indices)
+
+        range_indices = self.sample_dim.range_indices(3.1, 5.0, mode=RangeMode.Inclusive)
+        self.assertIsNotNone(range_indices)
+        range_indices = self.sample_dim.range_indices(3.1, 5.0, mode=RangeMode.Exclusive)
+        self.assertIsNone(range_indices)
 
     def test_range_dimension(self):
         assert self.range_dim.index == 3
