@@ -625,7 +625,7 @@ class RangeDimension(Dimension):
         else:
             self._h5group.set_attr("unit", unit)
 
-    def index_of(self, position, mode=IndexMode.LessOrEqual):
+    def index_of(self, position, mode=IndexMode.LessOrEqual, ticks=None):
         """
         Returns the index of a certain position in the dimension.
         Raises IndexError if the position is out of bounds (depending on mode).
@@ -641,7 +641,8 @@ class RangeDimension(Dimension):
         :returns: The matching index
         :rtype: int
         """
-        ticks = self.ticks
+        if ticks is None:
+            ticks = self.ticks
         if position < ticks[0]:
             if mode == IndexMode.GreaterOrEqual:
                 return 0
@@ -665,6 +666,38 @@ class RangeDimension(Dimension):
             return np.where(ticks >= position)[0][0]
 
         raise ValueError("Unknown IndexMode: {}".format(mode))
+
+    def range_indices(self, start_position, end_position, mode=RangeMode.Exclusive):
+        """
+        Returns the start and end indices in this dimension that are matching to the given start and end position.
+
+        :param start_position: the start position of the range.
+        :type start_position: float
+        :param end_position: the end position of the range.
+        :type end_position: float
+        :param mode: The nixio.RangeMode. Defaults to nixio.RangeMode.Exclusive, i.e. the end position is not part of the range.
+        :type mode: nixio.RangeMode
+
+        :returns: The respective start and end indices. None, if range is empty
+        :rtype: tuple of int
+
+        :raises: ValueError if invalid mode is given
+        :raises: Index Error if start position is greater than end position.
+        """
+        if mode is not RangeMode.Exclusive and mode is not RangeMode.Inclusive:
+            raise ValueError("Unknown RangeMode: {}".format(mode))
+        if start_position > end_position:
+            raise IndexError("Start position {} is greater than end position {}.".format(start_position, end_position))
+        ticks = self.ticks
+        end_mode = IndexMode.Less if mode == RangeMode.Exclusive else IndexMode.LessOrEqual
+        try:
+            start_index = self.index_of(start_position, mode=IndexMode.GreaterOrEqual, ticks=ticks)
+            end_index = self.index_of(end_position, mode=end_mode, ticks=ticks)
+        except IndexError as e:
+            raise IndexError("Error using SampledDimension.range_indices: {}".format(e))
+        if start_index > end_index:
+            return None
+        return (start_index, end_index)
 
     def tick_at(self, index):
         """
