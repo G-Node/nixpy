@@ -111,9 +111,6 @@ class TestDimension(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self.sample_dim.range_indices(0, 1, mode="invalid")
-        with self.assertRaises(IndexError):
-            self.sample_dim.range_indices(10, -10, mode=RangeMode.Inclusive)
-        range_indices = self.sample_dim.range_indices(2, 11, mode=RangeMode.Inclusive)
         self.assertIsNone(self.sample_dim.range_indices(10, -10, mode=SliceMode.Inclusive))
         range_indices = self.sample_dim.range_indices(2, 11, mode=SliceMode.Inclusive)
         assert range_indices[0] == 0

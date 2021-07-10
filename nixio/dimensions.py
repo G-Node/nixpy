@@ -436,8 +436,8 @@ class SampledDimension(Dimension):
         try:
             start_index = self.index_of(start_position, mode=IndexMode.GreaterOrEqual)
             end_index = self.index_of(end_position, mode=end_mode)
-        except IndexError as e:
-            raise IndexError("Error using SampledDimension.range_indices: {}".format(e))
+        except IndexError:
+            return None
         if start_index > end_index:
             return None
         return (start_index, end_index)
@@ -694,8 +694,8 @@ class RangeDimension(Dimension):
         try:
             start_index = self.index_of(start_position, mode=IndexMode.GreaterOrEqual, ticks=ticks)
             end_index = self.index_of(end_position, mode=end_mode, ticks=ticks)
-        except IndexError as e:
-            raise IndexError("Error using SampledDimension.range_indices: {}".format(e))
+        except IndexError:
+            return None
         if start_index > end_index:
             return None
         return (start_index, end_index)
@@ -853,8 +853,8 @@ class SetDimension(Dimension):
         try:
             start = self.index_of(start_position, mode=IndexMode.GreaterOrEqual, dim_labels=dim_labels)
             end = self.index_of(end_position, mode=end_mode, dim_labels=dim_labels)
-        except IndexError as e:
-            raise IndexError("Error using SetDimension.range_indices: {}".format(e))
+        except IndexError:
+            return None
         if start > end:
             return None
         return (start, end)
