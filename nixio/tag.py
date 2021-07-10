@@ -25,19 +25,7 @@ from .dimension_type import DimensionType
 from .link_type import LinkType
 from . import util
 from .section import Section
-from enum import Enum
-from .dimensions import IndexMode
-
-
-class SliceMode(Enum):
-    Exclusive = "exclusive"
-    Inclusive = "inclusive"
-
-    def to_index_mode(self):
-        if self == self.Exclusive:
-            return IndexMode.Less
-        if self == self.Inclusive:
-            return IndexMode.LessOrEqual
+from .dimensions import SliceMode
 
 
 class FeatureContainer(Container):
