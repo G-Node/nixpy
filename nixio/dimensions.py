@@ -557,7 +557,7 @@ class RangeDimension(Dimension):
         elif self.has_link and self.dimension_link._data_object_type == "DataArray":
             return True
         return False
-    
+
     @property
     def _redirgrp(self):
         """
@@ -569,7 +569,7 @@ class RangeDimension(Dimension):
             gname = self._h5group.get_by_pos(0).name
             return self._h5group.open_group(gname)
         return self._h5group
-    
+
     @property
     def ticks(self):
         if self.is_alias and not self.has_link:
@@ -638,6 +638,8 @@ class RangeDimension(Dimension):
                     If the mode is Less, the previous index of the matching tick is always returned.
                     If the mode is GreaterOrEqual and the position does not match a tick exactly, the next index is
                     returned.
+        :param ticks: Optional, the ticks stored in this dimension. If not passed as argument, they are (re)read from file.
+        :type ticks: iterable
 
         :returns: The matching index
         :rtype: int
@@ -786,6 +788,7 @@ class SetDimension(Dimension):
                     rounded down (for LessOrEqual) or rounded up (for GreaterOrEqual).
                     If the mode is Less, the previous integer is always returned.
         :param dim_labels: The labels of this dimension, if None (default) the labels will be read from file.
+        :type dim_labels: iterable
 
         :returns: The matching index
         :rtype: int
