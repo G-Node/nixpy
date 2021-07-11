@@ -123,7 +123,6 @@ class TestDataView(unittest.TestCase):
 
     def test_data_view_oob(self):
         da = self.file.blocks[0].data_arrays[0]
-        from IPython import embed
 
         dv = da.get_slice((41, 81), extents=(1, 1))
         assert not dv.valid
