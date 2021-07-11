@@ -151,6 +151,37 @@ class BaseTag(Entity):
         return np.all(np.less_equal(stops, dasize))
 
     @staticmethod
+    def _scale_position(pos, unit, dim):
+        dimtype = dim.dimension_type
+        if dimtype == DimensionType.Set:
+            dimunit = None
+        else:
+            dimunit = dim.unit
+        scaling = 1.0
+        if dimtype == DimensionType.Set:
+            if unit and unit != "none":
+                raise IncompatibleDimensions(
+                    "Cannot apply a position with unit to a SetDimension",
+                    "Tag._pos_to_idx"
+                )
+        else:
+            if dimunit is None and unit is not None:
+                raise IncompatibleDimensions(
+                    "Units of position and SampledDimension "
+                    "must both be given!",
+                    "Tag._pos_to_idx"
+                )
+            elif dimunit is not None and unit is not None:
+                try:
+                    scaling = util.units.scaling(unit, dimunit)
+                except InvalidUnit:
+                    raise IncompatibleDimensions(
+                        "Cannot scale Tag unit {} to match dimension unit {}".format(unit, dimunit),
+                        "Tag._pos_to_idx"
+                    )
+        return pos * scaling, scaling
+
+    @staticmethod
     def _pos_to_idx(pos, unit, dim, mode):
         dimtype = dim.dimension_type
         if dimtype == DimensionType.Set:
