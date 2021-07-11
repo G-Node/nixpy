@@ -11,39 +11,66 @@ try:
     from collections.abc import Iterable
 except ImportError:
     from collections import Iterable
+import numpy as np
 from .data_set import DataSet
-from .exceptions import OutOfBounds, IncompatibleDimensions
+from .exceptions import OutOfBounds, InvalidSlice
 
 
 class DataView(DataSet):
 
     def __init__(self, da, slices):
-        if len(slices) != len(da.shape):
+        self._valid = slices is not None and all(slices)
+        self._slices = slices
+        if not self.valid:
+            self._error_message = (
+                "InvalidSlice error!"
+                "Given slice {} is invalid! At least one slice along one dimension"
+                "does not contain data.".format(slices)
+            )
+        else:
+            self._error_message = ""
+
+        if self.valid and len(slices) != len(da.shape):
             # This is always checked by the calling function, but we repeat
             # the check here for future bug catching
-            raise IncompatibleDimensions(
+            self._valid = False
+            self._error_message = (
+                "IncompatibleDimensions error."
                 "Number of dimensions for DataView does not match underlying "
                 "data object: {} != {}".format(len(slices), len(da.shape)),
-                "DataView"
             )
 
-        if any(s.stop > e for s, e in zip(slices, da.data_extent)):
-            raise OutOfBounds(
-                "Trying to create DataView which is out of bounds of the "
-                "underlying DataArray"
+        if self.valid and any(s.stop > e for s, e in zip(slices, da.data_extent)):
+            self._valid = False
+            self._error_message = (
+                "OutOfBounds error!"
+                "Trying to create DataView with slices {} which are out of bounds of the "
+                "underlying DataArray {}".format(self._slices, da.shape)
             )
 
         # Simplify all slices
-        slices = tuple(slice(*sl.indices(dimlen))
-                       for sl, dimlen in zip(slices, da.shape))
+        if self.valid:
+            slices = tuple(slice(*sl.indices(dimlen))
+                           for sl, dimlen in zip(slices, da.shape))
+            self._slices = slices
 
         self.array = da
         self._h5group = self.array._h5group
-        self._slices = slices
+
+    @property
+    def valid(self):
+        return self._valid
+
+    @property
+    def debug_message(self):
+        return self._error_message
 
     @property
     def data_extent(self):
-        return tuple(s.stop - s.start for s in self._slices)
+        if self.valid:
+            return tuple(s.stop - s.start for s in self._slices)
+        else:
+            return None
 
     @data_extent.setter
     def data_extent(self, v):
@@ -54,12 +81,19 @@ class DataView(DataSet):
         return self.array.data_type
 
     def _write_data(self, data, sl=None):
+        if not self.valid:
+            raise InvalidSlice(
+                "Write Data failed due to an invalid slice."
+                "Reason is: {}".format(self._error_message)
+            )
         tsl = self._slices
         if sl:
             tsl = self._transform_coordinates(sl)
         super(DataView, self)._write_data(data, tsl)
 
     def _read_data(self, sl=None):
+        if not self.valid:
+            return np.array([])
         tsl = self._slices
         if sl is not None:
             tsl = self._transform_coordinates(sl)
@@ -90,7 +124,7 @@ class DataView(DataSet):
             ustart, ustop, ustep = uslice.indices(dimlen)
             if ustop < 0:  # special case for None stop
                 ustop = dimlen + ustop
-            tslice = slice(dvslice.start+ustart, dvslice.start+ustop, ustep)
+            tslice = slice(dvslice.start + ustart, dvslice.start + ustop, ustep)
             if tslice.stop > dvslice.stop:
                 raise oob
 
@@ -141,7 +175,7 @@ class DataView(DataSet):
             expidx = user_slices.index(Ellipsis)
             npad = len(self.data_extent) - len(user_slices) + 1
             padding = (slice(None),) * npad
-            return user_slices[:expidx] + padding + user_slices[expidx+1:]
+            return user_slices[:expidx] + padding + user_slices[expidx + 1:]
 
         # expand slices at the end
         npad = len(self.data_extent) - len(user_slices)
