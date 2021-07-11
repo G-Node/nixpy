@@ -122,30 +122,31 @@ class BaseTag(Entity):
             units = self.units
 
         for idx, dim in enumerate(data.dimensions):
+            scaling = 1.0
             if idx < len(position):
-                pos = position[idx]
-                start = self._pos_to_idx(pos, units[idx], dim, IndexMode.GreaterOrEqual)
-            else:
-                # Tag doesn't specify (pos, ext) for all dimensions: will return entire remaining dimensions (0:len)
-                start = 0
-            if extent is None or len(extent) == 0:
-                # no extents: return one element
-                stop = start + 1
-            elif idx < len(extent):
-                ext = extent[idx]
-                stop = self._pos_to_idx(pos + ext, units[idx], dim, stop_rule.to_index_mode()) + 1
-            else:
-                # Tag doesn't specify (pos, ext) for all dimensions: will return entire remaining dimensions (0:len)
-                stop = data.shape[idx]
+                start_pos = position[idx]
+                start_pos, scaling = self._scale_position(start_pos, units[idx], dim)
+                if extent is not None and idx < len(extent):
+                    stop_pos = extent[idx]
+                    stop_pos *= scaling
+                    stop_pos += start_pos
+                    slice_mode = stop_rule if extent[idx] > 0.0 else SliceMode.Inclusive
+                else:
+                    stop_pos = start_pos
+                    slice_mode = SliceMode.Inclusive
+                range_indices = dim.range_indices(start_pos, stop_pos, slice_mode)
+                refslice.append(range_indices if range_indices is None else slice(range_indices[0], range_indices[1] + 1))
+            else:  # no position, we take the whole slice for this dimension
+                start_index = 0
+                stop_index = data.shape[idx]
+                refslice.append(slice(start_index, stop_index))
 
-            if stop <= start:
-                # always return at least one element per dimension
-                stop = start + 1
-            refslice.append(slice(start, stop))
         return tuple(refslice)
 
     @staticmethod
     def _slices_in_data(data, slices):
+        if slices is None or not all(slices):
+            return False
         dasize = data.data_extent
         stops = tuple(sl.stop for sl in slices)
         return np.all(np.less_equal(stops, dasize))
