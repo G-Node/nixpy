@@ -29,10 +29,10 @@ def create_data(duration=1, freq=10, stepsize=0.01):
 def plot_data(data_array):
     set_dim = data_array.dimensions[0]
     x_axis = data_array.dimensions[1]
-    x = np.arange(0, data_array.data.shape[1])
+    x = np.arange(0, data_array.shape[1])
     x = x * x_axis.sampling_interval + x_axis.offset
-    y = np.zeros(data_array.data.shape)
-    data_array.data.read_direct(y)
+    y = np.zeros(data_array.shape)
+    data_array.read_direct(y)
     for i, label in enumerate(set_dim.labels):
         plt.plot(x, y[i, :], label=label)
 

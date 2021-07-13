@@ -27,8 +27,8 @@ def create_sinewave(duration=1, freq=10, stepsize=0.01):
 
 def plot_data(data_array):
     x_axis = data_array.dimensions[0]
-    x = x_axis.axis(data_array.data.shape[0])
-    y = data_array.data[:]
+    x = x_axis.axis(data_array.shape[0])
+    y = data_array[:]
 
     plt.plot(x, y, marker=".", markersize=5, label=data_array.name)
     plt.xlabel(x_axis.label + " [" + x_axis.unit + "]")

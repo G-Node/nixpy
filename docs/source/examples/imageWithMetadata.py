@@ -63,8 +63,8 @@ def load_image():
 
 
 def plot_data(data_array):
-    img_data = np.zeros(data_array.data.shape)
-    data_array.data.read_direct(img_data)
+    img_data = np.zeros(data_array.shape)
+    data_array.read_direct(img_data)
     img_data = np.array(img_data, dtype='uint8')
     new_img = img.fromarray(img_data)
 
