@@ -60,7 +60,7 @@ install:
   # - cd ..
   - python -m pip install certifi
   - python -m pip install -U pip wheel
-  - python -m pip install numpy h5py pytest-xdist scipy pillow
+  - python -m pip install numpy h5py pytest-xdist scipy pillow matplotlib
   - ps: cd "$env:APPVEYOR_BUILD_FOLDER"
   - set DISTUTILS_USE_SDK="1"
   - set MSSdk="1"
