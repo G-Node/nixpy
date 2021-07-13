@@ -48,7 +48,7 @@ def plot_data(tag):
     ax.set_ylim((1.5 * np.min(voltage), 1.5 * np.max(voltage)))
     ax.legend()
     fig.subplots_adjust(bottom=0.175, top=0.975, right=0.975)
-    fig.savefig("../images/spike_tagging.png")
+    # fig.savefig("../images/spike_tagging.png")
     plt.show()
 
 
