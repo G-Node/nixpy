@@ -35,7 +35,7 @@ def print_metadata_table(section, ax):
     cell_text = []
     for p in section.items():
         for i, v in enumerate(p[1].values):
-            value = str(v.value)
+            value = str(v)
             if len(value) > 30:
                 value = value[:30] + '...'
             if i == 0:
