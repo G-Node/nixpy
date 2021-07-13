@@ -37,7 +37,7 @@ jobs:
         pylint --rcfile=.pylintrc nixio
     - name: Test with pytest
       run: |
-        pip install pytest
+        pip install pytest scipy pillow
         # pytest will skip cross-compatibility tests since NIX isn't installed
         pytest
 
@@ -69,7 +69,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python setup.py install
-          pip install pytest
+          pip install pytest scipy pillow
       - name: Run tests
         run: |
           pytest
@@ -86,7 +86,7 @@ jobs:
       - name: Install dependencies
         run: |
           python setup.py install
-          pip install pytest coveralls
+          pip install pytest coveralls scipy pillow
       - name: Create coverage
         run: |
           coverage run --source=nixio -m pytest nixio/test/
@@ -107,7 +107,7 @@ jobs:
       - name: Install dependencies
         run: |
           python setup.py install
-          pip install pytest pytest-cov
+          pip install pytest pytest-cov scipy pillow
       - name: Create coverage
         run: |
           pytest --cov=./ --cov-report=xml
