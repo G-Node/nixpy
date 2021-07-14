@@ -1,6 +1,7 @@
 import importlib.util as getmod
 import os
 import runpy
+import sys
 import unittest
 
 from pathlib import Path
@@ -69,11 +70,13 @@ class TestDocumentationExamples(unittest.TestCase):
         os.remove("file_create_example.nix")
 
     def test_image_data(self):
-        # Requires PIL package and the "Lenna" image.
-        self.handle_image()
-        self.run_script("imageData.py")
-        # cleanup
-        os.remove("image_example.nix")
+        # test will open image with an external program; does not work on windows
+        if sys.platform == 'linux':
+            # Requires PIL package and the "Lenna" image.
+            self.handle_image()
+            self.run_script("imageData.py")
+            # cleanup
+            os.remove("image_example.nix")
 
     def test_image_with_metadata(self):
         # Requires PIL package and the "Lenna" image.
@@ -119,11 +122,13 @@ class TestDocumentationExamples(unittest.TestCase):
         os.remove("regular_data_example.nix")
 
     def test_single_roi(self):
-        # Requires PIL package and the "Lenna" image.
-        self.handle_image()
-        self.run_script("singleROI.py")
-        # cleanup
-        os.remove("single_roi.nix")
+        # test will open image with an external program; does not work on windows
+        if sys.platform == 'linux':
+            # Requires PIL package and the "Lenna" image.
+            self.handle_image()
+            self.run_script("singleROI.py")
+            # cleanup
+            os.remove("single_roi.nix")
 
     def test_sources(self):
         self.run_script("sources.py")
