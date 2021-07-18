@@ -122,7 +122,6 @@ class BaseTag(Entity):
             units = self.units
 
         for idx, dim in enumerate(data.dimensions):
-            scaling = 1.0
             if idx < len(position):
                 start_pos = position[idx]
                 start_pos, scaling = self._scale_position(start_pos, units[idx], dim)
