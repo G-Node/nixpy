@@ -153,6 +153,11 @@ class TestDimension(unittest.TestCase):
         setdim.labels = newlabels
         assert tuple(newlabels) == setdim.labels
 
+    def test_set_dim_label_array(self):
+        labels = np.array(["A", "B"])
+        setdim = self.array.append_set_dimension(labels)
+        assert tuple(labels) == setdim.labels
+
     def test_range_dim_ticks_resize(self):
         rangedim = self.array.append_range_dimension([1, 2, 100])
         ticks = [1, 1, 30]
