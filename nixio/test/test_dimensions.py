@@ -158,15 +158,16 @@ class TestDimension(unittest.TestCase):
         setdim = self.array.append_set_dimension(labels)
         assert tuple(labels) == setdim.labels
 
-    def test_set_dim_labels_single_string(self):
-        labels = 'Sample 1'
-        setdim = self.array.append_set_dimension(labels)
-        assert tuple([labels]) == setdim.labels
+    def test_set_dim_invalid_labels(self):
+        # don't accept non list-like labels
+        with self.assertRaises(ValueError):
+            self.array.append_set_dimension('Sample 1')
+        with self.assertRaises(ValueError):
+            self.array.append_set_dimension(1000)
 
-    def test_set_dim_labels_single_float(self):
-        labels = 1000
-        setdim = self.array.append_set_dimension(labels)
-        assert tuple([str(labels)]) == setdim.labels
+        # don't accept list of non-string objects
+        with self.assertRaises(ValueError):
+            self.array.append_set_dimension([1, 2, 3])
 
     def test_range_dim_ticks_resize(self):
         rangedim = self.array.append_range_dimension([1, 2, 100])
