@@ -91,7 +91,7 @@ class DataArray(Entity, DataSet):
         index = len(self.dimensions) + 1
         setdim = SetDimension.create_new(self, index)
         if labels is not None:
-            if not isinstance(labels, list):
+            if not isinstance(labels, (list, str)):
                 labels = list(labels)
             setdim.labels = labels
         if self.file.auto_update_timestamps:
