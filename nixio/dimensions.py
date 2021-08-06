@@ -684,6 +684,13 @@ class SetDimension(Dimension):
             raise RuntimeError("The labels of a SetDimension linked to a "
                                "data object cannot be modified")
         dt = util.vlen_str_dtype
+        if not hasattr(labels, '__iter__') or isinstance(labels, str):
+            raise ValueError('`labels` has to be a list-like object.')
+        for label in labels:
+            if not isinstance(label, str):
+                raise ValueError(f'`labels` has to contain string objects, not {type(label)}')
+        if not isinstance(labels, list):
+            labels = list(labels)
         self._h5group.write_data("labels", labels, dtype=dt)
 
     def index_of(self, position, mode=IndexMode.LessOrEqual):

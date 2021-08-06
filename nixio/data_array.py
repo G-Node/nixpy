@@ -91,13 +91,6 @@ class DataArray(Entity, DataSet):
         index = len(self.dimensions) + 1
         setdim = SetDimension.create_new(self, index)
         if labels is not None:
-            if not hasattr(labels, '__iter__') or isinstance(labels, str):
-                raise ValueError('`labels` has to be a list-like object.')
-            for label in labels:
-                if not isinstance(label, str):
-                    raise ValueError(f'`labels` has to contain string objects, not {type(label)}')
-            if not isinstance(labels, list):
-                labels = list(labels)
             setdim.labels = labels
         if self.file.auto_update_timestamps:
             self.force_updated_at()
