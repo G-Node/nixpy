@@ -73,7 +73,7 @@ setup(
     license='BSD',
     packages=packages,
     scripts=[],
-    tests_require=['pytest'],
+    tests_require=['pytest', 'scipy', 'pillow', 'matplotlib'],
     test_suite='pytest',
     setup_requires=['pytest-runner'],
     install_requires=['numpy', 'h5py', 'six', 'enum34;python_version<"3.4"'],

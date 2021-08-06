@@ -47,8 +47,8 @@ def fake_neuron(stepsize=0.001, offset=.8, sta_offset=1000):
 
 def plot_data(tag):
     data_array = tag.references[0]
-    voltage = np.zeros(data_array.data.shape)
-    data_array.data.read_direct(voltage)
+    voltage = np.zeros(data_array.shape)
+    data_array.read_direct(voltage)
 
     x_axis = data_array.dimensions[0]
     time = x_axis.axis(data_array.data_extent[0])
