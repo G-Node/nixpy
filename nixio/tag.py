@@ -167,8 +167,7 @@ class BaseTag(Entity):
         else:
             if dimunit is None and unit is not None:
                 raise IncompatibleDimensions(
-                    "Units of position and SampledDimension "
-                    "must both be given!",
+                    "If a unit if given for the position the dimension must not be without a unit!",
                     "Tag._pos_to_idx"
                 )
             elif dimunit is not None and unit is not None:

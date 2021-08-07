@@ -21,14 +21,13 @@ class DataView(DataSet):
     def __init__(self, da, slices):
         self._valid = slices is not None and all(slices)
         self._slices = slices
+        self._error_message = ""
         if not self.valid:
             self._error_message = (
                 "InvalidSlice error!"
                 "Given slice {} is invalid! At least one slice along one dimension"
                 "does not contain data.".format(slices)
             )
-        else:
-            self._error_message = ""
 
         if self.valid and len(slices) != len(da.shape):
             # This is always checked by the calling function, but we repeat
