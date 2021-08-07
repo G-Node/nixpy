@@ -82,12 +82,15 @@ class DataArray(Entity, DataSet):
         Append a new SetDimension to the list of existing dimension
         descriptors.
 
+        :param labels: The set of sample labels
+        :type labels: list or convertible to list
+
         :returns: The newly created SetDimension.
         :rtype: nixio.SetDimension
         """
         index = len(self.dimensions) + 1
         setdim = SetDimension.create_new(self, index)
-        if labels:
+        if labels is not None:
             setdim.labels = labels
         if self.file.auto_update_timestamps:
             self.force_updated_at()
@@ -101,6 +104,12 @@ class DataArray(Entity, DataSet):
 
         :param sampling_interval: The sampling interval of the SetDimension to create.
         :type sampling_interval: float
+        :param label: The label of the dimension
+        :type label: str
+        :param unit: The physical unit of the dimension
+        :type unit: str
+        :param offset: The offset between 0 and the first sample
+        :type offset: float
 
         :returns: The newly created SampledDimension.
         :rtype: nixio.SampledDimension
@@ -124,6 +133,10 @@ class DataArray(Entity, DataSet):
 
         :param ticks: The ticks of the RangeDimension to create.
         :type ticks: list of float
+        :param label: The label of the dimension
+        :type label: str
+        :param unit: The physical unit of the dimension
+        :type unit: str
 
         :returns: The newly created RangeDimension.
         :rtype: nixio.RangeDimension
