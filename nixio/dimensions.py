@@ -386,15 +386,14 @@ class SampledDimension(Dimension):
         if scaled_position < 0:
             if mode == IndexMode.GreaterOrEqual:
                 return 0
-            # position is OOB (left side) but can't round up
+            # position is OOB (left side) but can't round up because LessOrEqual or Less
             raise IndexError("Position {} is out of bounds for SampledDimension with offset {} and mode {}".format(
                 position, offset, mode.name
             ))
 
         if np.isclose(position, 0) and mode == IndexMode.Less:
             raise IndexError("Position {} is out of bounds for SampledDimension with mode {}".format(position, mode.name))
-
-        index = int(np.floor(scaled_position))
+        index = int(np.round(scaled_position))
         if np.isclose(scaled_position, index):
             # exact position
             if mode in (IndexMode.GreaterOrEqual, IndexMode.LessOrEqual):
@@ -404,13 +403,20 @@ class SampledDimension(Dimension):
                 # exact position and Less mode
                 return index - 1
             raise ValueError("Unknown IndexMode: {}".format(mode))
-
-        if mode == IndexMode.GreaterOrEqual:  # and inexact position
-            return index + 1
-        if mode in (IndexMode.LessOrEqual, IndexMode.Less):  # and inexact position
-            return index
-
-        raise ValueError("Unknown IndexMode: {}".format(mode))
+        if index < scaled_position:
+            if mode in (IndexMode.LessOrEqual, IndexMode.Less):
+                return index
+            elif mode == IndexMode.GreaterOrEqual:
+                return index + 1
+            else:
+                raise ValueError("Unknown IndexMode: {}".format(mode))
+        else:
+            if mode in (IndexMode.LessOrEqual, IndexMode.Less):
+                return index - 1
+            elif mode == IndexMode.GreaterOrEqual:
+                return index
+            else:
+                raise ValueError("Unknown IndexMode: {}".format(mode))
 
     def range_indices(self, start_position, end_position, mode=SliceMode.Exclusive):
         """
