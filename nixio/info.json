@@ -1,7 +1,7 @@
 {
-    "VERSION": "1.5.0.dev",
+    "VERSION": "1.5.1.dev",
     "STATUS": "Release",
-    "RELEASE": "1.5.0 Development",
+    "RELEASE": "1.5.1 Development",
     "AUTHOR": "Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, Balint Morvai, Achilleas Koutsou",
     "COPYRIGHT": "2014-2020, German Neuroinformatics Node, Christian Kellner, Adrian Stoewer, Andrey Sobolev, Jan Grewe, Balint Morvai, Achilleas Koutsou",
     "CONTACT": "dev@g-node.org",
