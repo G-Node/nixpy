@@ -50,6 +50,12 @@ class TestDimension(unittest.TestCase):
         self.set_dim.labels = test_labels
         assert self.set_dim.labels == test_labels
 
+        assert self.set_dim.label is None
+        self.set_dim.label = TEST_LABEL
+        assert self.set_dim.label == TEST_LABEL
+        self.set_dim.label = None
+        assert self.set_dim.label is None
+
     def test_sample_dimension(self):
         assert self.sample_dim.index == 2
         assert self.sample_dim.dimension_type == nix.DimensionType.Sample
