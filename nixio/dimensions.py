@@ -553,6 +553,9 @@ class RangeDimension(Dimension):
 
     @property
     def label(self):
+        if self.is_alias and not self.has_link:
+            g = self._redirgrp
+            return g.get_attr("label")
         if self.has_link:
             return self.dimension_link.label
         return self._h5group.get_attr("label")
@@ -567,6 +570,9 @@ class RangeDimension(Dimension):
 
     @property
     def unit(self):
+        if self.is_alias and not self.has_link:
+            g = self._redirgrp
+            return g.get_attr("unit")
         if self.has_link:
             return self.dimension_link.unit
         return self._h5group.get_attr("unit")
