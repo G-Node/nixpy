@@ -47,6 +47,13 @@ class InvalidEntity(Exception):
         super(InvalidEntity, self).__init__(self.message, *args, **kwargs)
 
 
+class InvalidSlice(Exception):
+
+    def __init__(self, *args, **kwargs):
+        self.message = "Trying to access data with an invalid slice."
+        super(InvalidSlice, self).__init__(self.message, *args, **kwargs)
+
+
 class OutOfBounds(IndexError):
 
     def __init__(self, message, index=None):

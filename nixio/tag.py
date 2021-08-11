@@ -25,19 +25,7 @@ from .dimension_type import DimensionType
 from .link_type import LinkType
 from . import util
 from .section import Section
-from enum import Enum
-from .dimensions import IndexMode
-
-
-class SliceMode(Enum):
-    Exclusive = "exclusive"
-    Inclusive = "inclusive"
-
-    def to_index_mode(self):
-        if self == self.Exclusive:
-            return IndexMode.Less
-        if self == self.Inclusive:
-            return IndexMode.LessOrEqual
+from .dimensions import SliceMode
 
 
 class FeatureContainer(Container):
@@ -135,32 +123,62 @@ class BaseTag(Entity):
 
         for idx, dim in enumerate(data.dimensions):
             if idx < len(position):
-                pos = position[idx]
-                start = self._pos_to_idx(pos, units[idx], dim, IndexMode.GreaterOrEqual)
-            else:
-                # Tag doesn't specify (pos, ext) for all dimensions: will return entire remaining dimensions (0:len)
-                start = 0
-            if extent is None or len(extent) == 0:
-                # no extents: return one element
-                stop = start + 1
-            elif idx < len(extent):
-                ext = extent[idx]
-                stop = self._pos_to_idx(pos + ext, units[idx], dim, stop_rule.to_index_mode()) + 1
-            else:
-                # Tag doesn't specify (pos, ext) for all dimensions: will return entire remaining dimensions (0:len)
-                stop = data.shape[idx]
+                start_pos = position[idx]
+                start_pos, scaling = self._scale_position(start_pos, units[idx], dim)
+                if extent is not None and idx < len(extent):
+                    stop_pos = extent[idx]
+                    stop_pos *= scaling
+                    stop_pos += start_pos
+                    slice_mode = stop_rule if extent[idx] > 0.0 else SliceMode.Inclusive
+                else:
+                    stop_pos = start_pos
+                    slice_mode = SliceMode.Inclusive
+                range_indices = dim.range_indices(start_pos, stop_pos, slice_mode)
+                refslice.append(range_indices if range_indices is None else slice(range_indices[0], range_indices[1] + 1))
+            else:  # no position, we take the whole slice for this dimension
+                start_index = 0
+                stop_index = data.shape[idx]
+                refslice.append(slice(start_index, stop_index))
 
-            if stop <= start:
-                # always return at least one element per dimension
-                stop = start + 1
-            refslice.append(slice(start, stop))
         return tuple(refslice)
 
     @staticmethod
     def _slices_in_data(data, slices):
+        if slices is None or not all(slices):
+            return False
         dasize = data.data_extent
         stops = tuple(sl.stop for sl in slices)
         return np.all(np.less_equal(stops, dasize))
+
+    @staticmethod
+    def _scale_position(pos, unit, dim):
+        dimtype = dim.dimension_type
+        if dimtype == DimensionType.Set:
+            dimunit = None
+        else:
+            dimunit = dim.unit
+        scaling = 1.0
+        if dimtype == DimensionType.Set:
+            if unit and unit != "none":
+                raise IncompatibleDimensions(
+                    "Cannot apply a position with unit to a SetDimension",
+                    "Tag._pos_to_idx"
+                )
+        else:
+            if dimunit is None and unit is not None:
+                raise IncompatibleDimensions(
+                    "If a unit if given for the position the dimension must not be without a unit!",
+                    "Tag._pos_to_idx"
+                )
+            elif dimunit is not None and unit is not None:
+                try:
+                    scaling = util.units.scaling(unit, dimunit)
+                except InvalidUnit:
+                    raise IncompatibleDimensions(
+                        "Cannot scale Tag unit {} to match dimension unit {}".format(unit, dimunit),
+                        "Tag._pos_to_idx"
+                    )
+        return pos * scaling, scaling
 
     @staticmethod
     def _pos_to_idx(pos, unit, dim, mode):

@@ -124,16 +124,19 @@ class TestDataView(unittest.TestCase):
     def test_data_view_oob(self):
         da = self.file.blocks[0].data_arrays[0]
 
-        with self.assertRaises(nix.exceptions.OutOfBounds):
-            da.get_slice((41, 81), extents=(1, 1))
+        dv = da.get_slice((41, 81), extents=(1, 1))
+        assert not dv.valid
+        assert "OutOfBounds error" in dv.debug_message
 
-        with self.assertRaises(nix.exceptions.OutOfBounds):
-            da.get_slice((0, 0), extents=(100, 5))
+        dv = da.get_slice((0, 0), extents=(100, 5))
+        assert not dv.valid
+        assert "OutOfBounds error" in dv.debug_message
 
         with self.assertRaises(nix.exceptions.IncompatibleDimensions):
             da.get_slice((0, 0, 0), extents=(5, 5, 5))
 
         dv = da.get_slice((5, 8), extents=(10, 20))
+        assert dv.valid
 
         with self.assertRaises(nix.exceptions.OutOfBounds):
             _ = dv[12, :]

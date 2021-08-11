@@ -37,6 +37,17 @@ class IndexMode(Enum):
     GEQ = "geq"
 
 
+class SliceMode(Enum):
+    Exclusive = "exclusive"
+    Inclusive = "inclusive"
+
+    def to_index_mode(self):
+        if self == self.Exclusive:
+            return IndexMode.Less
+        if self == self.Inclusive:
+            return IndexMode.LessOrEqual
+
+
 class DimensionContainer(Container):
     """
     DimensionContainer extends Container to support returning different types
@@ -375,15 +386,14 @@ class SampledDimension(Dimension):
         if scaled_position < 0:
             if mode == IndexMode.GreaterOrEqual:
                 return 0
-            # position is OOB (left side) but can't round up
+            # position is OOB (left side) but can't round up because LessOrEqual or Less
             raise IndexError("Position {} is out of bounds for SampledDimension with offset {} and mode {}".format(
                 position, offset, mode.name
             ))
 
         if np.isclose(position, 0) and mode == IndexMode.Less:
-            raise IndexError("Position {} is out of bounds for SetDimension with mode {}".format(position, mode.name))
-
-        index = int(np.floor(scaled_position))
+            raise IndexError("Position {} is out of bounds for SampledDimension with mode {}".format(position, mode.name))
+        index = int(np.round(scaled_position))
         if np.isclose(scaled_position, index):
             # exact position
             if mode in (IndexMode.GreaterOrEqual, IndexMode.LessOrEqual):
@@ -393,13 +403,50 @@ class SampledDimension(Dimension):
                 # exact position and Less mode
                 return index - 1
             raise ValueError("Unknown IndexMode: {}".format(mode))
+        if index < scaled_position:
+            if mode in (IndexMode.LessOrEqual, IndexMode.Less):
+                return index
+            elif mode == IndexMode.GreaterOrEqual:
+                return index + 1
+            else:
+                raise ValueError("Unknown IndexMode: {}".format(mode))
+        else:
+            if mode in (IndexMode.LessOrEqual, IndexMode.Less):
+                return index - 1
+            elif mode == IndexMode.GreaterOrEqual:
+                return index
+            else:
+                raise ValueError("Unknown IndexMode: {}".format(mode))
 
-        if mode == IndexMode.GreaterOrEqual:  # and inexact position
-            return index + 1
-        if mode in (IndexMode.LessOrEqual, IndexMode.Less):  # and inexact position
-            return index
+    def range_indices(self, start_position, end_position, mode=SliceMode.Exclusive):
+        """
+        Returns the start and end indices in this dimension that are matching to the given start and end position.
 
-        raise ValueError("Unknown IndexMode: {}".format(mode))
+        :param start_position: the start position of the range.
+        :type start_position: float
+        :param end_position: the end position of the range.
+        :type end_position: float
+        :param mode: The nixio.SliceMode. Defaults to nixio.SliceMode.Exclusive, i.e. the end position is not part of the range.
+        :type mode: nixio.SliceMode
+
+        :returns: The respective start and end indices. None, if the range is empty!
+        :rtype: tuple of int
+
+        :raises: ValueError if invalid mode is given
+        :raises: Index Error if start position is greater than end position.
+        """
+        if mode is not SliceMode.Exclusive and mode is not SliceMode.Inclusive:
+            raise ValueError("Unknown SliceMode: {}".format(mode))
+
+        end_mode = IndexMode.Less if mode == SliceMode.Exclusive else IndexMode.LessOrEqual
+        try:
+            start_index = self.index_of(start_position, mode=IndexMode.GreaterOrEqual)
+            end_index = self.index_of(end_position, mode=end_mode)
+        except IndexError:
+            return None
+        if start_index > end_index:
+            return None
+        return (start_index, end_index)
 
     def axis(self, count, start=None, start_position=None):
         """
@@ -516,7 +563,7 @@ class RangeDimension(Dimension):
         elif self.has_link and self.dimension_link._data_object_type == "DataArray":
             return True
         return False
-    
+
     @property
     def _redirgrp(self):
         """
@@ -528,7 +575,7 @@ class RangeDimension(Dimension):
             gname = self._h5group.get_by_pos(0).name
             return self._h5group.open_group(gname)
         return self._h5group
-    
+
     @property
     def ticks(self):
         if self.is_alias and not self.has_link:
@@ -585,7 +632,7 @@ class RangeDimension(Dimension):
         else:
             self._h5group.set_attr("unit", unit)
 
-    def index_of(self, position, mode=IndexMode.LessOrEqual):
+    def index_of(self, position, mode=IndexMode.LessOrEqual, ticks=None):
         """
         Returns the index of a certain position in the dimension.
         Raises IndexError if the position is out of bounds (depending on mode).
@@ -597,11 +644,14 @@ class RangeDimension(Dimension):
                     If the mode is Less, the previous index of the matching tick is always returned.
                     If the mode is GreaterOrEqual and the position does not match a tick exactly, the next index is
                     returned.
+        :param ticks: Optional, the ticks stored in this dimension. If not passed as argument, they are (re)read from file.
+        :type ticks: iterable
 
         :returns: The matching index
         :rtype: int
         """
-        ticks = self.ticks
+        if ticks is None:
+            ticks = self.ticks
         if position < ticks[0]:
             if mode == IndexMode.GreaterOrEqual:
                 return 0
@@ -625,6 +675,38 @@ class RangeDimension(Dimension):
             return np.where(ticks >= position)[0][0]
 
         raise ValueError("Unknown IndexMode: {}".format(mode))
+
+    def range_indices(self, start_position, end_position, mode=SliceMode.Exclusive):
+        """
+        Returns the start and end indices in this dimension that are matching to the given start and end position.
+
+        :param start_position: the start position of the range.
+        :type start_position: float
+        :param end_position: the end position of the range.
+        :type end_position: float
+        :param mode: The nixio.SliceMode. Defaults to nixio.SliceMode.Exclusive, i.e. the end position is not part of the range.
+        :type mode: nixio.SliceMode
+
+        :returns: The respective start and end indices. None, if range is empty
+        :rtype: tuple of int
+
+        :raises: ValueError if invalid mode is given
+        :raises: Index Error if start position is greater than end position.
+        """
+        if mode is not SliceMode.Exclusive and mode is not SliceMode.Inclusive:
+            raise ValueError("Unknown SliceMode: {}".format(mode))
+        if start_position > end_position:
+            raise IndexError("Start position {} is greater than end position {}.".format(start_position, end_position))
+        ticks = self.ticks
+        end_mode = IndexMode.Less if mode == SliceMode.Exclusive else IndexMode.LessOrEqual
+        try:
+            start_index = self.index_of(start_position, mode=IndexMode.GreaterOrEqual, ticks=ticks)
+            end_index = self.index_of(end_position, mode=end_mode, ticks=ticks)
+        except IndexError:
+            return None
+        if start_index > end_index:
+            return None
+        return (start_index, end_index)
 
     def tick_at(self, index):
         """
@@ -699,7 +781,7 @@ class SetDimension(Dimension):
             labels = list(labels)
         self._h5group.write_data("labels", labels, dtype=dt)
 
-    def index_of(self, position, mode=IndexMode.LessOrEqual):
+    def index_of(self, position, mode=IndexMode.LessOrEqual, dim_labels=None):
         """
         Returns the index of a certain position in the dimension.
         Raises IndexError if the position is out of bounds (depending on mode and number of labels).
@@ -711,6 +793,8 @@ class SetDimension(Dimension):
                     If the position is not an integer (or is not equal to the nearest integer), then the value is
                     rounded down (for LessOrEqual) or rounded up (for GreaterOrEqual).
                     If the mode is Less, the previous integer is always returned.
+        :param dim_labels: The labels of this dimension, if None (default) the labels will be read from file.
+        :type dim_labels: iterable
 
         :returns: The matching index
         :rtype: int
@@ -724,12 +808,13 @@ class SetDimension(Dimension):
         if position == 0 and mode == IndexMode.Less:
             raise IndexError("Position {} is out of bounds for SetDimension with mode {}".format(position, mode.name))
 
-        labels = self.labels
-        if labels and len(labels) and position > len(labels)-1:
+        if dim_labels is None:
+            dim_labels = self.labels
+        if dim_labels and len(dim_labels) and position > len(dim_labels) - 1:
             if mode in (IndexMode.Less, IndexMode.LessOrEqual):
-                return len(labels) - 1
+                return len(dim_labels) - 1
             raise IndexError("Position {} is out of bounds for SetDimension with length {} and mode {}".format(
-                position, len(labels), mode.name
+                position, len(dim_labels), mode.name
             ))
 
         index = int(np.floor(position))
@@ -749,3 +834,36 @@ class SetDimension(Dimension):
             return index
 
         raise ValueError("Unknown IndexMode: {}".format(mode))
+
+    def range_indices(self, start_position, end_position, mode=SliceMode.Exclusive):
+        """
+        Returns the start and end indices in this dimension that are matching to the given start and end position.
+
+        :param start_position: the start position of the range.
+        :type start_position: float
+        :param end_position: the end position of the range.
+        :type end_position: float
+        :param mode: The nixio.SliceMode. Defaults to nixio.SliceMode.Exclusive, i.e. the end position is not part of the range.
+        :type mode: nixio.SliceMode
+
+        :returns: The respective start and end indices. None, if the range is empty
+        :rtype: tuple of int
+
+        :raises: ValueError if invalid mode is given
+        :raises: Index Error if start position is greater than end position.
+        """
+        if mode is not SliceMode.Exclusive and mode is not SliceMode.Inclusive:
+            raise ValueError("Unknown SliceMode: {}".format(mode))
+
+        dim_labels = self.labels
+        end_mode = IndexMode.Less if mode == SliceMode.Exclusive else IndexMode.LessOrEqual
+        if start_position > end_position:
+            raise IndexError("Start position {} is greater than end position {}.".format(start_position, end_position))
+        try:
+            start = self.index_of(start_position, mode=IndexMode.GreaterOrEqual, dim_labels=dim_labels)
+            end = self.index_of(end_position, mode=end_mode, dim_labels=dim_labels)
+        except IndexError:
+            return None
+        if start > end:
+            return None
+        return (start, end)
