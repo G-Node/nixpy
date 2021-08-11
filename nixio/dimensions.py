@@ -249,9 +249,18 @@ class Dimension(object):
 
         return None
 
+    @property
+    def label(self):
+        return self._h5group.get_attr("label")
+
+    @label.setter
+    def label(self, label):
+        util.check_attr_type(label, str)
+        self._h5group.set_attr("label", label)
+
     @staticmethod
     def _check_link_dimensionality(data_array, index):
-        invalid_dim_msg = ("Length of linked DataArray indices ({}) does not match " 
+        invalid_dim_msg = ("Length of linked DataArray indices ({}) does not match "
                            "number of DataArray dimensions ({})"
                           ).format(len(data_array.data_extent), len(index))
 
@@ -428,15 +437,6 @@ class SampledDimension(Dimension):
                 start_val = offset
 
         return tuple(np.arange(count) * sample + start_val)
-
-    @property
-    def label(self):
-        return self._h5group.get_attr("label")
-
-    @label.setter
-    def label(self, label):
-        util.check_attr_type(label, str)
-        self._h5group.set_attr("label", label)
 
     @property
     def sampling_interval(self):
