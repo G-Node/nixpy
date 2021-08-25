@@ -6,6 +6,7 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from nixio.dimensions import SliceMode
 from nixio.exceptions.exceptions import IncompatibleDimensions
 import os
 import unittest
@@ -49,6 +50,12 @@ class TestDimension(unittest.TestCase):
         assert self.set_dim.labels == ()
         self.set_dim.labels = test_labels
         assert self.set_dim.labels == test_labels
+
+        assert self.set_dim.label is None
+        self.set_dim.label = TEST_LABEL
+        assert self.set_dim.label == TEST_LABEL
+        self.set_dim.label = None
+        assert self.set_dim.label is None
 
     def test_sample_dimension(self):
         assert self.sample_dim.index == 2
@@ -102,6 +109,34 @@ class TestDimension(unittest.TestCase):
         assert self.sample_dim.axis(10, start_position=5.0)[0] == 5.0
         assert self.sample_dim.axis(10, start_position=5.0)[-1] == 5.0 + 9 * 2
 
+        with self.assertRaises(ValueError):
+            self.sample_dim.range_indices(0, 1, mode="invalid")
+        self.assertIsNone(self.sample_dim.range_indices(10, -10, mode=SliceMode.Inclusive))
+        range_indices = self.sample_dim.range_indices(2, 11, mode=SliceMode.Inclusive)
+        assert range_indices[0] == 0
+        assert range_indices[-1] == 4
+
+        range_indices = self.sample_dim.range_indices(2, 11, mode=SliceMode.Exclusive)
+        assert range_indices[0] == 0
+        assert range_indices[-1] == 3
+
+        range_indices = self.sample_dim.range_indices(3., 3.1, mode=SliceMode.Inclusive)
+        assert range_indices[0] == 0
+        assert range_indices[-1] == 0
+        range_indices = self.sample_dim.range_indices(3., 3.1, mode=SliceMode.Exclusive)
+        assert range_indices[0] == 0
+        assert range_indices[-1] == 0
+
+        range_indices = self.sample_dim.range_indices(3.1, 3.2, mode=SliceMode.Inclusive)
+        self.assertIsNone(range_indices)
+        range_indices = self.sample_dim.range_indices(3.1, 3.2, mode=SliceMode.Exclusive)
+        self.assertIsNone(range_indices)
+
+        range_indices = self.sample_dim.range_indices(3.1, 5.0, mode=SliceMode.Inclusive)
+        self.assertIsNotNone(range_indices)
+        range_indices = self.sample_dim.range_indices(3.1, 5.0, mode=SliceMode.Exclusive)
+        self.assertIsNone(range_indices)
+
     def test_range_dimension(self):
         assert self.range_dim.index == 3
         assert self.range_dim.dimension_type == nix.DimensionType.Range
@@ -120,12 +155,12 @@ class TestDimension(unittest.TestCase):
         assert self.range_dim.unit is None
 
         assert self.range_dim.ticks == test_range
-        other = tuple([i*3.14 for i in range(10)])
+        other = tuple([i * 3.14 for i in range(10)])
         self.range_dim.ticks = other
         assert self.range_dim.ticks == other
 
         assert self.range_dim.index_of(0.) == 0
-        assert self.range_dim.index_of(10.) == (np.floor(10./3.14))
+        assert self.range_dim.index_of(10.) == (np.floor(10. / 3.14))
         assert self.range_dim.index_of(18.84) == 6
         assert self.range_dim.index_of(28.26) == 9
         assert self.range_dim.index_of(100.) == 9
@@ -143,6 +178,29 @@ class TestDimension(unittest.TestCase):
             self.range_dim.axis(10, 2)
             self.range_dim.axis(100)
 
+        #  ticks = (0.0, 3.14, 6.28, 9.42, 12.56, 15.7, 18.84, 21.98, 25.12, 28.26)
+        with self.assertRaises(ValueError):
+            self.range_dim.range_indices(0, 10, mode="invalid")
+        with self.assertRaises(IndexError):
+            self.range_dim.range_indices(10, -10)
+
+        self.assertIsNone(self.range_dim.range_indices(3.15, 3.16, mode=SliceMode.Inclusive))
+        self.assertIsNone(self.range_dim.range_indices(3.15, 3.16, mode=SliceMode.Exclusive))
+
+        range_indices = self.range_dim.range_indices(3.14, 4.0, mode=SliceMode.Inclusive)
+        assert range_indices[0] == 1
+        assert range_indices[1] == 1
+        range_indices = self.range_dim.range_indices(3.14, 4.0, mode=SliceMode.Exclusive)
+        assert range_indices[0] == 1
+        assert range_indices[1] == 1
+
+        range_indices = self.range_dim.range_indices(6.2, 25.12, mode=SliceMode.Inclusive)
+        assert range_indices[0] == 2
+        assert range_indices[1] == 8
+        range_indices = self.range_dim.range_indices(6.2, 25.12, mode=SliceMode.Exclusive)
+        assert range_indices[0] == 2
+        assert range_indices[1] == 7
+
     def test_set_dim_label_resize(self):
         setdim = self.array.append_set_dimension()
         labels = ["A", "B"]
@@ -152,6 +210,22 @@ class TestDimension(unittest.TestCase):
         newlabels = ["C", "B", "A"]
         setdim.labels = newlabels
         assert tuple(newlabels) == setdim.labels
+
+    def test_set_dim_labels_array(self):
+        labels = np.array(["A", "B"])
+        setdim = self.array.append_set_dimension(labels)
+        assert tuple(labels) == setdim.labels
+
+    def test_set_dim_invalid_labels(self):
+        # don't accept non list-like labels
+        with self.assertRaises(ValueError):
+            self.array.append_set_dimension('Sample 1')
+        with self.assertRaises(ValueError):
+            self.array.append_set_dimension(1000)
+
+        # don't accept list of non-string objects
+        with self.assertRaises(ValueError):
+            self.array.append_set_dimension([1, 2, 3])
 
     def test_range_dim_ticks_resize(self):
         rangedim = self.array.append_range_dimension([1, 2, 100])
@@ -227,7 +301,34 @@ class TestDimension(unittest.TestCase):
         with self.assertRaises(IndexError):
             self.set_dim.index_of(12398, nix.IndexMode.GreaterOrEqual)
         with self.assertRaises(IndexError):
-            self.set_dim.index_of(len(test_labels)-0.5, nix.IndexMode.GreaterOrEqual)
+            self.set_dim.index_of(len(test_labels) - 0.5, nix.IndexMode.GreaterOrEqual)
+
+        with self.assertRaises(ValueError):
+            self.set_dim.range_indices(0, 10, mode="invalid")
+        with self.assertRaises(IndexError):
+            self.set_dim.range_indices(10, -10)
+
+        range_indices = self.set_dim.range_indices(0.1, 0.4, mode=SliceMode.Inclusive)
+        self.assertIsNone(range_indices)
+        range_indices = self.set_dim.range_indices(0.1, 0.4, mode=SliceMode.Exclusive)
+        self.assertIsNone(range_indices)
+
+        range_indices = self.set_dim.range_indices(0.1, 1.0, mode=SliceMode.Inclusive)
+        self.assertIsNotNone(range_indices)
+        assert range_indices[0] == 1
+        assert range_indices[1] == 1
+        range_indices = self.set_dim.range_indices(0.1, 1.0, mode=SliceMode.Exclusive)
+        self.assertIsNone(range_indices)
+        range_indices = self.set_dim.range_indices(0.1, 1.1, mode=SliceMode.Exclusive)
+        self.assertIsNotNone(range_indices)
+        assert range_indices[0] == 1
+        assert range_indices[1] == 1
+        range_indices = self.set_dim.range_indices(0, 9, mode=SliceMode.Exclusive)
+        assert range_indices[0] == 0
+        assert range_indices[-1] == 8
+        range_indices = self.set_dim.range_indices(0, 9, mode=SliceMode.Inclusive)
+        assert range_indices[0] == 0
+        assert range_indices[-1] == 9
 
     def test_sampled_dimension_modes(self):
         # exact
@@ -268,17 +369,17 @@ class TestDimension(unittest.TestCase):
 
         # valid oob below
         assert self.sample_dim.index_of(-30, nix.IndexMode.GreaterOrEqual) == 0
-        assert self.sample_dim.index_of(offset-0.3, nix.IndexMode.GreaterOrEqual) == 0
+        assert self.sample_dim.index_of(offset - 0.3, nix.IndexMode.GreaterOrEqual) == 0
 
         # invalid oob
         with self.assertRaises(IndexError):
-            self.sample_dim.index_of(offset-0.2, nix.IndexMode.Less)
+            self.sample_dim.index_of(offset - 0.2, nix.IndexMode.Less)
         with self.assertRaises(IndexError):
             self.sample_dim.index_of(0, nix.IndexMode.Less)
         with self.assertRaises(IndexError):
-            self.sample_dim.index_of(offset-0.01, nix.IndexMode.LessOrEqual)
+            self.sample_dim.index_of(offset - 0.01, nix.IndexMode.LessOrEqual)
         with self.assertRaises(IndexError):
-            self.sample_dim.index_of(offset-0.5)
+            self.sample_dim.index_of(offset - 0.5)
 
     def test_range_dimension_modes(self):
         # exact

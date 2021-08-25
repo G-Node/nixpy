@@ -139,8 +139,6 @@ class MultiTag(BaseTag):
         ref = references[refidx]
 
         slices = self._calc_data_slices_mtag(ref, posidx, stop_rule)
-        if not self._slices_in_data(ref, slices):
-            raise OutOfBounds("References data slice out of the extent of the DataArray!")
         return DataView(ref, slices)
 
     def retrieve_feature_data(self, posidx, featidx):

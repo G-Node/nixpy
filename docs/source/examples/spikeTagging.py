@@ -29,14 +29,14 @@ def fake_neuron():
 
 def plot_data(tag):
     data_array = tag.references[0]
-    voltage = np.zeros(data_array.data.shape)
-    data_array.data.read_direct(voltage)
+    voltage = np.zeros(data_array.shape)
+    data_array.read_direct(voltage)
 
     x_axis = data_array.dimensions[0]
-    time = x_axis.axis(data_array.data.shape[0])
+    time = x_axis.axis(data_array.shape[0])
 
     spike_times = np.zeros(tag.positions.data_extent)
-    tag.positions.data.read_direct(spike_times)
+    tag.positions.read_direct(spike_times)
 
     fig = plt.figure(figsize=(5.5, 2.5))
     ax = fig.add_subplot(111)
@@ -48,7 +48,7 @@ def plot_data(tag):
     ax.set_ylim((1.5 * np.min(voltage), 1.5 * np.max(voltage)))
     ax.legend()
     fig.subplots_adjust(bottom=0.175, top=0.975, right=0.975)
-    fig.savefig("../images/spike_tagging.png")
+    # fig.savefig("../images/spike_tagging.png")
     plt.show()
 
 

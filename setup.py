@@ -49,7 +49,6 @@ def get_wheel_data():
 classifiers = [
     'Development Status :: 5 - Production/Stable',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2.7',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
     'Topic :: Scientific/Engineering'
@@ -73,7 +72,7 @@ setup(
     license='BSD',
     packages=packages,
     scripts=[],
-    tests_require=['pytest'],
+    tests_require=['pytest', 'scipy', 'pillow', 'matplotlib'],
     test_suite='pytest',
     setup_requires=['pytest-runner'],
     install_requires=['numpy', 'h5py', 'six', 'enum34;python_version<"3.4"'],

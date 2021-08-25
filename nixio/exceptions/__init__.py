@@ -1,6 +1,6 @@
 from .exceptions import (DuplicateName, UninitializedEntity, InvalidUnit,
                          InvalidAttrType, InvalidEntity, OutOfBounds,
-                         IncompatibleDimensions, InvalidFile,
+                         IncompatibleDimensions, InvalidFile, InvalidSlice,
                          DuplicateColumnName, UnsupportedLinkType)
 
 __all__ = (

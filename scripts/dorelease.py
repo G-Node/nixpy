@@ -131,32 +131,33 @@ def update_info(newver):
 
 def update_ci_confs(newver):
     change = False
-    nixbranch = ".".join(newver.split(".")[:-1])
-    travisfn = os.path.join(gitroot, ".travis.yml")
-    with open(travisfn) as travisconf:
-        oldconf = travisconf.readlines()
+    if os.path.exists(os.path.join(gitroot, ".travis.yml")):
+        nixbranch = ".".join(newver.split(".")[:-1])
+        travisfn = os.path.join(gitroot, ".travis.yml")
+        with open(travisfn) as travisconf:
+            oldconf = travisconf.readlines()
 
-    newconf = []
-    for line in oldconf:
-        if "NIX_BRANCH" in line:
-            line = re.sub("1\.[0-9\.]+[0-9\.a-z]+(dev){0,1}", nixbranch, line)
-            line = line.replace("master", nixbranch)
-        newconf.append(line)
+        newconf = []
+        for line in oldconf:
+            if "NIX_BRANCH" in line:
+                line = re.sub("1\.[0-9\.]+[0-9\.a-z]+(dev){0,1}", nixbranch, line)
+                line = line.replace("master", nixbranch)
+            newconf.append(line)
 
-    diff = diff_lines(oldconf, newconf)
+        diff = diff_lines(oldconf, newconf)
 
-    if len(diff) == 0:
-        print("No changes required in .travis.yml")
-        wait_for_ret()
-    else:
-        print("".join(diff))
-        print("{}The above changes will be written to .travis.yml{}".format(
-            red_begin, red_end
-        ))
-        wait_for_ret()
-        with open(travisfn, "w") as travisconf:
-            travisconf.writelines(newconf)
-        change = True
+        if len(diff) == 0:
+            print("No changes required in .travis.yml")
+            wait_for_ret()
+        else:
+            print("".join(diff))
+            print("{}The above changes will be written to .travis.yml{}".format(
+                red_begin, red_end
+            ))
+            wait_for_ret()
+            with open(travisfn, "w") as travisconf:
+                travisconf.writelines(newconf)
+            change = True
 
     # Appveyor is currently not building NIX so let's not bother changing
 

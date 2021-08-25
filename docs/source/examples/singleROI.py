@@ -43,8 +43,8 @@ def draw_rect(img_data, position, extent):
 
 def plot_data(tag):
     data_array = tag.references[0]
-    img_data = np.zeros(data_array.data.shape)
-    data_array.data.read_direct(img_data)
+    img_data = np.zeros(data_array.shape)
+    data_array.read_direct(img_data)
     img_data = np.array(img_data, dtype='uint8')
     # positions and extents are double by default, need to convert to int
     pos = tuple(map(int, tag.position))
@@ -52,7 +52,7 @@ def plot_data(tag):
     draw_rect(img_data, pos, ext)
     new_img = img.fromarray(img_data)
 
-    new_img.save("../images/single_roi.png")
+    # new_img.save("../images/single_roi.png")
     new_img.show()
 
 

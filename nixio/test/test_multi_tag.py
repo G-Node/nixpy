@@ -6,6 +6,7 @@
 # Redistribution and use in section and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
+from nixio.exceptions.exceptions import InvalidSlice
 import os
 import time
 import unittest
@@ -385,13 +386,16 @@ class TestMultiTags(unittest.TestCase):
         assert np.array_equal(y_data[:2000], data[:])
 
         # multi dimensional data
+        # position 1 should fail since the position in the third dimension does not point to a valid point
+        # positon 2 and 3 should deliver valid DataViews
+        # same for segment 0 should again return an invalid DataView because of dimension 3
         sample_iv = 1.0
         ticks = [1.2, 2.3, 3.4, 4.5, 6.7]
         unit = "ms"
-        pos = self.block.create_data_array("pos", "test", data=[[1, 1, 1], [1, 1, 1]])
+        pos = self.block.create_data_array("pos", "test", data=[[1, 1, 1], [1, 1, 1.2], [1, 1, 1.2]])
         pos.append_set_dimension()
         pos.append_set_dimension()
-        ext = self.block.create_data_array("ext", "test", data=[[1, 5, 2], [0, 4, 1]])
+        ext = self.block.create_data_array("ext", "test", data=[[1, 5, 2], [1, 5, 2], [0, 4, 1]])
         ext.append_set_dimension()
         ext.append_set_dimension()
         units = ["none", "ms", "ms"]
@@ -414,20 +418,31 @@ class TestMultiTags(unittest.TestCase):
         segtag.units = units
 
         posdata = postag.tagged_data(0, 0)
-        assert len(posdata.shape) == 3
-        assert posdata.shape == (1, 1, 1)
-        assert np.isclose(posdata[0, 0, 0], data[1, 1, 0])
+        assert not posdata.valid
+        assert "InvalidSlice error" in posdata.debug_message
+        assert posdata.data_extent is None
+        assert posdata.shape is None
+        with self.assertRaises(InvalidSlice):
+            posdata._write_data(np.random.randn(1))
+        assert sum(posdata[:].shape) == 0
 
         posdata = postag.tagged_data(1, 0)
+        assert posdata.valid
+        assert posdata.debug_message == ""
         assert len(posdata.shape) == 3
         assert posdata.shape == (1, 1, 1)
         assert np.isclose(posdata[0, 0, 0], data[1, 1, 0])
 
-        segdata = segtag.tagged_data(0, 0)
+        posdata = postag.tagged_data(2, 0)
+        assert len(posdata.shape) == 3
+        assert posdata.shape == (1, 1, 1)
+        assert np.isclose(posdata[0, 0, 0], data[1, 1, 0])
+
+        segdata = segtag.tagged_data(1, 0)
         assert len(segdata.shape) == 3
         assert segdata.shape == (1, 5, 2)
 
-        segdata = segtag.tagged_data(1, 0)
+        segdata = segtag.tagged_data(2, 0)
         assert len(segdata.shape) == 3
         assert segdata.shape == (1, 4, 1)
 

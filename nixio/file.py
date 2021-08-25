@@ -29,7 +29,7 @@ from .compression import Compression
 
 
 FILE_FORMAT = "nix"
-HDF_FF_VERSION = (1, 2, 0)
+HDF_FF_VERSION = (1, 2, 1)
 
 
 def can_write(nixfile):

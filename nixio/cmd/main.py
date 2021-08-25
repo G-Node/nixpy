@@ -7,6 +7,7 @@ Command line interface for nixio tools.
                   annotations.
   nixio upgrade:  Update older files to the newest file format.
 """
+import sys
 import argparse
 from . import explore, validate, upgrade
 
@@ -15,9 +16,13 @@ def main():
     parser = argparse.ArgumentParser(
         description="Command line interface for nixio tools"
     )
-
-    subcmds = parser.add_subparsers(title="commands", required=True,
-                                    dest="cmd")
+    if sys.version_info.major < 3 or sys.version_info.minor < 6:
+        raise RuntimeError("nixio does not support python versions less than 3.6!")
+    if sys.version_info.minor < 7:
+        subcmds = parser.add_subparsers(title="commands", dest="cmd")
+    else:
+        subcmds = parser.add_subparsers(title="commands", required=True,
+                                        dest="cmd")
 
     # nixio explore
     explore_cmd = subcmds.add_parser("explore", help=explore.__doc__)
