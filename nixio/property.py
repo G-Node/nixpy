@@ -231,6 +231,8 @@ class Property(Entity):
 
     def _read_old_values(self):
         val = self._h5dataset.dataset[:]
+        if len(val) > 0 and isinstance(val[0]["value"], bytes):
+            return tuple(ensure_str(v["value"]) for v in val)
         return tuple(v["value"] for v in val)
 
     @property
