@@ -415,6 +415,9 @@ class TestDataArray(unittest.TestCase):
         dslice = da2d.get_slice((12.0, 1), (4.0, 1),
                                 mode=nix.DataSliceMode.Data)
         np.testing.assert_almost_equal(data, dslice)
+        dslice2 = da2d.get_slice((0.0, 1), (16.0, 1),
+                                mode=nix.DataSliceMode.Data)
+        np.testing.assert_almost_equal(da2d[0:30, 1:2], dslice2)
 
         data3d = np.random.random_sample((30, 30, 5))
         da3d = self.block.create_data_array("get_slice 3d", "Data",
