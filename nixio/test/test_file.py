@@ -13,6 +13,7 @@ import numpy as np
 import time
 
 import nixio as nix
+from nixio.exceptions.exceptions import DuplicateName
 import nixio.file as filepy
 from nixio.exceptions import InvalidFile
 from .tmp import TempDir
@@ -47,7 +48,8 @@ class TestFile(unittest.TestCase):
         assert len(self.file.blocks) == 0
 
         block = self.file.create_block("test block", "recordingsession")
-
+        with self.assertRaises(DuplicateName):
+            self.file.create_block("test block", "recordingsession")
         assert len(self.file.blocks) == 1
 
         assert block in self.file.blocks
