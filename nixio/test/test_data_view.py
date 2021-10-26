@@ -33,6 +33,21 @@ class TestDataView(unittest.TestCase):
         dv = da.get_slice((10, 3), extents=(1, 3))
         np.testing.assert_almost_equal(dv[:], da[10:11, 3:6])
 
+    def test_data_view_read_2d_str_array(self):
+        numbers = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"]
+        data = np.empty((10, 4), dtype=str)
+        for i in range(10):
+            for j in range(4):
+                data[i, j] = " ".join([numbers[i], numbers[j]])
+        da = self.file.blocks[0].create_data_array("str_2d_array", "test", dtype=nix.DataType.String, data=data)
+        da.append_set_dimension()
+        da.append_set_dimension()
+        
+        dv = da.get_slice((0, 0), extents=(10, 4))
+        npeq = np.testing.assert_equal
+        npeq(dv.shape, da.shape)
+        npeq(dv[:], data)
+
     def test_data_view_fancy_slicing(self):
         da = self.file.blocks[0].data_arrays[0]
         dv = da.get_slice((5, 8), extents=(10, 20))
