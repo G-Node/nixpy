@@ -66,9 +66,9 @@ class TestFile(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.file.create_block()
             self.file.create_block(name="a name")
-        
+
         b = self.file.create_block(type_="type_a")
-        assert(b.id == b.name)
+        assert b.id == b.name
 
     def test_file_sections(self):
         assert len(self.file.sections) == 0
