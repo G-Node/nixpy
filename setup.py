@@ -6,6 +6,8 @@ from setuptools import setup
 
 __author__ = 'Christian Kellner, Achilleas Koutsou'
 
+if sys.version_info.major < 3 and sys.version_info.minor < 6:
+    sys.exit('Sorry, nixio requires python >= 3.6!')
 
 with open('README.rst') as f:
     description_text = f.read()
