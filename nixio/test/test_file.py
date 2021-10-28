@@ -7,15 +7,15 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import os
-import unittest
-import h5py
-import numpy as np
 import time
+import h5py
+import unittest
+import numpy as np
 
 import nixio as nix
-from nixio.exceptions.exceptions import DuplicateName
 import nixio.file as filepy
-from nixio.exceptions import InvalidFile
+from nixio.exceptions import InvalidFile, DuplicateName
+
 from .tmp import TempDir
 
 
