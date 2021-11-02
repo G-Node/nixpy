@@ -6,6 +6,8 @@ from setuptools import setup
 
 __author__ = 'Christian Kellner, Achilleas Koutsou'
 
+if sys.version_info.major < 3 or (sys.version_info.major > 2 and sys.version_info.minor < 6):
+    sys.exit('Sorry, nixio requires python >= 3.6!')
 
 with open('README.rst') as f:
     description_text = f.read()
@@ -72,6 +74,7 @@ setup(
     license='BSD',
     packages=packages,
     scripts=[],
+    python_requires=">=3.6",
     tests_require=['pytest', 'scipy', 'pillow', 'matplotlib'],
     test_suite='pytest',
     setup_requires=['pytest-runner'],

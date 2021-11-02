@@ -7,14 +7,15 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 import os
-import unittest
-import h5py
-import numpy as np
 import time
+import h5py
+import unittest
+import numpy as np
 
 import nixio as nix
 import nixio.file as filepy
-from nixio.exceptions import InvalidFile
+from nixio.exceptions import InvalidFile, DuplicateName
+
 from .tmp import TempDir
 
 
@@ -47,7 +48,8 @@ class TestFile(unittest.TestCase):
         assert len(self.file.blocks) == 0
 
         block = self.file.create_block("test block", "recordingsession")
-
+        with self.assertRaises(DuplicateName):
+            self.file.create_block("test block", "recordingsession")
         assert len(self.file.blocks) == 1
 
         assert block in self.file.blocks
@@ -60,6 +62,13 @@ class TestFile(unittest.TestCase):
         del self.file.blocks[0]
 
         assert len(self.file.blocks) == 0
+
+        with self.assertRaises(ValueError):
+            self.file.create_block()
+            self.file.create_block(name="a name")
+
+        b = self.file.create_block(type_="type_a")
+        assert b.id == b.name
 
     def test_file_sections(self):
         assert len(self.file.sections) == 0
