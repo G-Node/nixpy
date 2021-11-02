@@ -419,7 +419,7 @@ class File(object):
             return self.blocks[entity_id]
 
         if name in self._data:
-            raise ValueError("Block with the given name already exists!")
+            raise DuplicateName("Block with the given name already exists!")
         if compression == Compression.Auto:
             compression = self._compr
         block = Block.create_new(self, self._data, name, type_, compression)

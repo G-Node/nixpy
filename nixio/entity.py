@@ -21,11 +21,12 @@ class Entity(object):
     @classmethod
     def create_new(cls, nixfile, nixparent, h5parent, name=None, type_=None):
         if name and type_:
-            util.check_entity_name_and_type(name, type_)
             id_ = util.create_id()
-        else:
+        if not name:
             name = util.create_id()
             id_ = name
+        util.check_entity_name_and_type(name, type_)
+
         h5group = h5parent.open_group(name)
         h5group.set_attr("name", name)
         h5group.set_attr("type", type_)

@@ -231,6 +231,8 @@ class Property(Entity):
 
     def _read_old_values(self):
         val = self._h5dataset.dataset[:]
+        if len(val) > 0 and isinstance(val[0]["value"], bytes):
+            return tuple(ensure_str(v["value"]) for v in val)
         return tuple(v["value"] for v in val)
 
     @property
@@ -288,8 +290,8 @@ class Property(Entity):
         dataset = self._h5dataset
         src_len = len(self.values)
         dlen = len(arr)
-        dataset.shape = (src_len+dlen,)
-        dataset.write_data(arr, slc=np.s_[src_len: src_len+dlen])
+        dataset.shape = (src_len + dlen,)
+        dataset.write_data(arr, slc=np.s_[src_len: src_len + dlen])
 
     def _check_new_value_types(self, data):
         if isinstance(data, (Sequence, Iterable)) and not isinstance(data, string_types):
@@ -367,8 +369,8 @@ class Property(Entity):
             value_string = "{}{}".format(self.values, self.unit)
         p_len = len(property_spaces) + len(self.name) + len(value_string)
         if p_len >= max_length - 4:
-            split_len = int((max_length - len(property_spaces)
-                             + len(self.name) - len(prefix))/2)
+            split_len = int((max_length - len(property_spaces) +
+                             len(self.name) - len(prefix)) / 2)
             str1 = value_string[0: split_len]
             str2 = value_string[-split_len:]
             print(("{}{} {}: {} ... {}".format(property_spaces, prefix,

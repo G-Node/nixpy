@@ -16,7 +16,7 @@ from .data_set import DataSet
 from .entity import Entity
 from .source_link_container import SourceLinkContainer
 from .datatype import DataType
-from .dimensions import (Dimension, SampledDimension, RangeDimension,
+from .dimensions import (Dimension, IndexMode, SampledDimension, RangeDimension,
                          SetDimension, DimensionType, DimensionContainer)
 from . import util
 from .compression import Compression
@@ -362,7 +362,7 @@ class DataArray(Entity, DataSet):
         for dim, pos, ext in zip(self.dimensions, positions, extents):
             if dim.dimension_type in (DimensionType.Sample,
                                       DimensionType.Range):
-                dpos.append(dim.index_of(pos))
+                dpos.append(dim.index_of(pos, mode=IndexMode.GreaterOrEqual))
                 dext.append(dim.index_of(pos + ext) - dpos[-1])
             elif dim.dimension_type == DimensionType.Set:
                 dpos.append(int(pos))

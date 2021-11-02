@@ -491,13 +491,13 @@ class Section(Entity):
                                          self, Property)
         return self._properties
 
-    def pprint(self, indent=2, max_depth=1, max_length=80, current_depth=0):
+    def pprint(self, indent=2, max_depth=-1, max_length=80, current_depth=0):
         """
         Pretty print method.
 
         :param indent: The number of indentation spaces per recursion
         :type indent:  int
-        :param max_depth: The maximum times of recursion
+        :param max_depth: The maximum times of recursion, -1 for the full depth
         :type max_depth:  int
         :param max_length: The maximum length of each line of output
         :type max_length:  int
@@ -512,7 +512,7 @@ class Section(Entity):
             prop.pprint(current_depth=current_depth, indent=indent, max_length=max_length)
         if max_depth == -1 or current_depth < max_depth:
             for sec in self.sections:
-                sec.pprint(current_depth=current_depth+1, max_depth=max_depth, indent=indent, max_length=max_length)
+                sec.pprint(current_depth=current_depth + 1, max_depth=max_depth, indent=indent, max_length=max_length)
         elif max_depth == current_depth:
             child_sec_indent = spaces + " " * indent
             more_indent = spaces + " " * (current_depth + 2 * indent)
