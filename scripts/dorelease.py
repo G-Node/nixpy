@@ -1,7 +1,7 @@
 import os
 import sys
 import re
-from subprocess import check_output, call, CalledProcessError, DEVNULL
+from subprocess import check_output, call, CalledProcessError, DEVNULL, STDOUT
 from difflib import Differ
 import requests
 import json
@@ -241,6 +241,20 @@ def print_appveyor_urls():
                                    "artifacts", a["fileName"]))
 
 
+def check_python_command():
+    cmd = "python"
+    py_version = str(check_output([cmd, "--version"], stderr=STDOUT))
+    if " 3." in py_version:
+        return cmd
+    cmd = "python3"
+    try:
+        ok = call([cmd, "--version"])
+        if ok == 0:
+            return cmd
+    except:
+        return None
+
+
 def main():
     check_git_status()
 
@@ -278,7 +292,11 @@ def main():
 
     print("Creating archives...")
     os.chdir(gitroot)
-    ret = call(["python", "setup.py", "sdist", "bdist_wheel"])
+
+    py_cmd = check_python_command()
+    if py_cmd is None:
+        die("Error finding suitable python command")
+    ret = call([py_cmd, "setup.py", "sdist", "bdist_wheel"])
 
     if ret > 0:
         die("Error creating package")
