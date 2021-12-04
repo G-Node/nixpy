@@ -251,8 +251,9 @@ def check_python_command():
         ok = call([cmd, "--version"])
         if ok == 0:
             return cmd
-    except:
-        return None
+    except FileNotFoundError:
+        cmd = None
+    return cmd
 
 
 def main():
