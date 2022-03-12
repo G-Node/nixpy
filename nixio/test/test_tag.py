@@ -579,25 +579,52 @@ class TestTags(unittest.TestCase):
                 # +0.1 should round up (ceil) the start position
                 # +0.1 * 2 should round down (floor) the stop position and works the same for both inclusive and
                 # exclusive
-                tag.position = [pos+0.1]
-                tag.extent = [ext+0.1]
-                start = pos+1
-                stop = pos+ext+1
+                tag.position = [pos + 0.1]
+                tag.extent = [ext + 0.1]
+                start = pos + 1
+                stop = pos + ext + 1
                 np.testing.assert_array_almost_equal(tag.tagged_data(0), da[start:stop])
                 np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Exclusive), da[start:stop])
                 np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Inclusive), da[start:stop])
 
-                if pos+ext+2 < len(da):
+                if pos + ext + 2 < len(da):
                     # +0.9 should round up (ceil) the start position
                     # +0.9 * 2 should round down (floor) the stop position and works the same for both inclusive and
                     # exclusive
-                    tag.position = [pos+0.9]
-                    tag.extent = [ext+0.9]
-                    start = pos+1
-                    stop = pos+ext+2
+                    tag.position = [pos + 0.9]
+                    tag.extent = [ext + 0.9]
+                    start = pos + 1
+                    stop = pos + ext + 2
                     np.testing.assert_array_almost_equal(tag.tagged_data(0), da[start:stop])
                     np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Exclusive), da[start:stop])
                     np.testing.assert_array_almost_equal(tag.tagged_data(0, nix.SliceMode.Inclusive), da[start:stop])
+
+        time_vector = np.arange(0.0, 10., 0.001)
+        indices = np.random.rand(len(time_vector))
+        event_data = time_vector[(indices < 0.1)]
+        event_data = event_data[(event_data < 4) | (event_data > 7)]
+
+        event_da = self.block.create_data_array("event_data", "nix.events", data=event_data, unit="s")
+        event_da.append_range_dimension_using_self()
+        selection = event_da.get_slice([4.5], [1.0], nix.DataSliceMode.Data)[:]
+
+        tt = self.block.create_tag("no_event_segment", "nix.segment", 4.5)
+        tt.extent = 1.0
+        tt.references.append(event_da)
+        slice = tt.tagged_data(0)
+        self.assertFalse(slice.valid)
+
+        tt2 = self.block.create_tag("beyond data", "nix.segment", 12.0)
+        tt2.extent = 3.0
+        tt2.references.append(event_da)
+        slice = tt2.tagged_data(0)
+        self.assertFalse(slice.valid)
+
+        tt3 = self.block.create_tag("reachingbeyonddata", "nix.segment", 8.5)
+        tt3.extent = [3.0]
+        tt3.references.append(event_da)
+        slice = tt3.tagged_data(0)
+        self.assertTrue(slice.valid)
 
     def test_tagged_sampled_dim(self):
         """
