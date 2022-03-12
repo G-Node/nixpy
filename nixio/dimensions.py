@@ -693,7 +693,7 @@ class RangeDimension(Dimension):
         :raises: ValueError if invalid mode is given
         :raises: Index Error if start position is greater than end position.
         """
-        if mode is not SliceMode.Exclusive and mode is not SliceMode.Inclusive:
+        if mode not in (SliceMode.Exclusive, SliceMode.Inclusive):
             raise ValueError("Unknown SliceMode: {}".format(mode))
         if start_position > end_position:
             raise IndexError("Start position {} is greater than end position {}.".format(start_position, end_position))
