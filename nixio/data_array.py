@@ -11,6 +11,8 @@ from numbers import Number
 from enum import Enum
 import numpy as np
 
+from nixio.exceptions.exceptions import OutOfBounds
+
 from .data_view import DataView
 from .data_set import DataSet
 from .entity import Entity
@@ -360,13 +362,28 @@ class DataArray(Entity, DataSet):
     def _get_slice_bydim(self, positions, extents):
         dpos, dext = [], []
         for dim, pos, ext in zip(self.dimensions, positions, extents):
-            if dim.dimension_type in (DimensionType.Sample,
-                                      DimensionType.Range):
-                dpos.append(dim.index_of(pos, mode=IndexMode.GreaterOrEqual))
-                dext.append(dim.index_of(pos + ext) - dpos[-1])
+            if dim.dimension_type == DimensionType.Sample:
+                start_pos = dim.index_of(pos, mode=IndexMode.GreaterOrEqual)
+                extent = dim.index_of(pos + ext) - start_pos
+            elif dim.dimension_type == DimensionType.Range:
+                try:
+                    start_pos = dim.index_of(pos, mode=IndexMode.GreaterOrEqual)
+                    extent = dim.index_of(pos + ext) - start_pos
+                except IndexError:
+                    start_pos = -1
+                    extent = -1
+                except Exception as e:
+                    raise e
             elif dim.dimension_type == DimensionType.Set:
-                dpos.append(int(pos))
-                dext.append(int(ext))
+                start_pos = int(pos)
+                extent = int(ext)
+            else:
+                raise IncompatibleDimensions(f"Unknown dimension type: {dim.dimension_type}")
+
+            if extent < 0:
+                return DataView(self, None)
+            dpos.append(start_pos)
+            dext.append(extent)
         slices = tuple(slice(p, p + e) for p, e in zip(dpos, dext))
         return DataView(self, slices)
 
