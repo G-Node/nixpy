@@ -606,7 +606,6 @@ class TestTags(unittest.TestCase):
 
         event_da = self.block.create_data_array("event_data", "nix.events", data=event_data, unit="s")
         event_da.append_range_dimension_using_self()
-        selection = event_da.get_slice([4.5], [1.0], nix.DataSliceMode.Data)[:]
 
         tt = self.block.create_tag("no_event_segment", "nix.segment", 4.5)
         tt.extent = 1.0

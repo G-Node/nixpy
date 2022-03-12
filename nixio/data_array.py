@@ -11,8 +11,6 @@ from numbers import Number
 from enum import Enum
 import numpy as np
 
-from nixio.exceptions.exceptions import OutOfBounds
-
 from .data_view import DataView
 from .data_set import DataSet
 from .entity import Entity
@@ -378,7 +376,8 @@ class DataArray(Entity, DataSet):
                 start_pos = int(pos)
                 extent = int(ext)
             else:
-                raise IncompatibleDimensions(f"Unknown dimension type: {dim.dimension_type}")
+                raise IncompatibleDimensions(f"Unknown dimension type: {dim.dimension_type}",
+                                             "data_array._get_slice_by_dim")
 
             if extent < 0:
                 return DataView(self, None)
