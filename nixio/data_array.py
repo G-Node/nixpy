@@ -316,6 +316,8 @@ class DataArray(Entity, DataSet):
         ```
 
         Note: The extents are *not* the end positions but the extent of the slice!
+        In the case of regularly sampled dimensions, reaching beyond the start of end of the respective dimension will cause an exception. For irregularly sampled data no 
+        exception will be raised but the returned DataView might be invalid and empty.
 
         :param positions: Specifies the start of the data slice. List of either indices or data positions depending on the DataSliceMode.
         :type positions: list length must match dimensionality of the data.
