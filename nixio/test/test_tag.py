@@ -610,20 +610,20 @@ class TestTags(unittest.TestCase):
         tt = self.block.create_tag("no_event_segment", "nix.segment", 4.5)
         tt.extent = 1.0
         tt.references.append(event_da)
-        slice = tt.tagged_data(0)
-        self.assertFalse(slice.valid)
+        sl = tt.tagged_data(0)
+        self.assertFalse(sl.valid)
 
         tt2 = self.block.create_tag("beyond data", "nix.segment", 12.0)
         tt2.extent = 3.0
         tt2.references.append(event_da)
-        slice = tt2.tagged_data(0)
-        self.assertFalse(slice.valid)
+        sl = tt2.tagged_data(0)
+        self.assertFalse(sl.valid)
 
         tt3 = self.block.create_tag("reachingbeyonddata", "nix.segment", 8.5)
         tt3.extent = [3.0]
         tt3.references.append(event_da)
-        slice = tt3.tagged_data(0)
-        self.assertTrue(slice.valid)
+        sl = tt3.tagged_data(0)
+        self.assertTrue(sl.valid)
 
     def test_tagged_sampled_dim(self):
         """
