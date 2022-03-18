@@ -2,8 +2,8 @@ name: NIXPy tests and linting
 
 on:
   # Run one build a month at 01:00
-  schedule:
-  - cron:  '0 1 1 * *'
+  # schedule:
+  # - cron:  '0 1 1 * *'
   push:
     branches:
       - master
