@@ -316,6 +316,8 @@ class DataArray(Entity, DataSet):
         ```
 
         Note: The extents are *not* the end positions but the extent of the slice!
+        In the case of regularly sampled dimensions, reaching beyond the start of end of the respective dimension will cause an exception. For irregularly sampled data no 
+        exception will be raised but the returned DataView might be invalid and empty.
 
         :param positions: Specifies the start of the data slice. List of either indices or data positions depending on the DataSliceMode.
         :type positions: list length must match dimensionality of the data.
@@ -360,13 +362,29 @@ class DataArray(Entity, DataSet):
     def _get_slice_bydim(self, positions, extents):
         dpos, dext = [], []
         for dim, pos, ext in zip(self.dimensions, positions, extents):
-            if dim.dimension_type in (DimensionType.Sample,
-                                      DimensionType.Range):
-                dpos.append(dim.index_of(pos, mode=IndexMode.GreaterOrEqual))
-                dext.append(dim.index_of(pos + ext) - dpos[-1])
+            if dim.dimension_type == DimensionType.Sample:
+                start_pos = dim.index_of(pos, mode=IndexMode.GreaterOrEqual)
+                extent = dim.index_of(pos + ext) - start_pos
+            elif dim.dimension_type == DimensionType.Range:
+                try:
+                    start_pos = dim.index_of(pos, mode=IndexMode.GreaterOrEqual)
+                    extent = dim.index_of(pos + ext) - start_pos
+                except IndexError:
+                    start_pos = -1
+                    extent = -1
+                except Exception as e:
+                    raise e
             elif dim.dimension_type == DimensionType.Set:
-                dpos.append(int(pos))
-                dext.append(int(ext))
+                start_pos = int(pos)
+                extent = int(ext)
+            else:
+                raise IncompatibleDimensions(f"Unknown dimension type: {dim.dimension_type}",
+                                             "data_array._get_slice_by_dim")
+
+            if extent < 0:
+                return DataView(self, None)
+            dpos.append(start_pos)
+            dext.append(extent)
         slices = tuple(slice(p, p + e) for p, e in zip(dpos, dext))
         return DataView(self, slices)
 
