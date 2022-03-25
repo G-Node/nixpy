@@ -259,7 +259,7 @@ def main():
 
     newverstr = args[0]
     prepline = "Preparing new release: {}".format(newverstr)
-    banner = "="*len(prepline) + "\n" + prepline + "\n" + "="*len(prepline)
+    banner = "=" * len(prepline) + "\n" + prepline + "\n" + "=" * len(prepline)
     banner = bold_begin + banner + bold_end
     print(banner)
 
@@ -278,7 +278,7 @@ def main():
 
     print("Creating archives...")
     os.chdir(gitroot)
-    ret = call(["python", "setup.py", "sdist", "bdist_wheel"])
+    ret = call(["python3", "setup.py", "sdist", "bdist_wheel"])
 
     if ret > 0:
         die("Error creating package")

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright © 2014, German Neuroinformatics Node (G-Node)
+# Copyright © 2014 - 2022, German Neuroinformatics Node (G-Node)
 #
 # All rights reserved.
 #
@@ -260,6 +260,8 @@ class Tag(BaseTag):
 
     @position.setter
     def position(self, pos):
+        if pos is not None and not hasattr(pos, "__getitem__"):
+            pos = [pos]
         if pos is None or len(pos) == 0:
             if self._h5group.has_data("position"):
                 del self._h5group["position"]
@@ -281,6 +283,8 @@ class Tag(BaseTag):
 
     @extent.setter
     def extent(self, ext):
+        if ext is not None and not hasattr(ext, "__getitem__"):
+            ext = [ext]
         if ext is None or len(ext) == 0:
             if self._h5group.has_data("extent"):
                 del self._h5group["extent"]
@@ -313,6 +317,8 @@ class Tag(BaseTag):
                 "do not match ", extent)
 
         slices = self._calc_data_slices(ref, self.position, self.extent, stop_rule)
+        if not all(slices):
+            return DataView(ref, slices)
         if not self._slices_in_data(ref, slices):
             raise OutOfBounds("References data slice out of the extent of the "
                               "DataArray!")

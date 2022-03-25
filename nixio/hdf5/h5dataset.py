@@ -61,7 +61,7 @@ class H5DataSet(object):
             # Let's change it to IndexError
             raise IndexError(te_exc)
         if data.dtype == util.vlen_str_dtype:
-            data = np.reshape(np.array(list(map(ensure_str, data.ravel()))), data.shape)
+            data = np.reshape(np.array(list(map(ensure_str, data.ravel())), dtype=object), data.shape)
         elif data.dtype.fields:
             data = self._convert_string_cols(data)
         return data

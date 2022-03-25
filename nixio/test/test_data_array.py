@@ -13,6 +13,7 @@ import sys
 import unittest
 import numpy as np
 import nixio as nix
+from nixio.data_array import DataSliceMode
 from nixio.exceptions import IncompatibleDimensions
 from .tmp import TempDir
 
@@ -443,6 +444,21 @@ class TestDataArray(unittest.TestCase):
 
         with self.assertRaises(IncompatibleDimensions):
             da3d.get_slice((0, 0, 0), (3, 9, 40, 1))
+
+        dslice = da2d.get_slice([20, 1], [10, 1], DataSliceMode.Data)
+        self.assertFalse(dslice.valid)
+
+        time_vector = np.arange(0.0, 10., 0.001)
+        indices = np.random.rand(len(time_vector))
+
+        event_data = time_vector[(indices < 0.1)]
+        event_data = event_data[(event_data < 4) | (event_data > 7)]
+
+        event_da = self.block.create_data_array("event_data", "nix.events", data=event_data, unit="s")
+        event_da.append_range_dimension_using_self()
+        selection = event_da.get_slice([4.5], [1.0], nix.DataSliceMode.Data)
+        self.assertFalse(selection.valid)
+        np.testing.assert_almost_equal(np.array([]), selection[:])
 
     def test_dim_one_based(self):
         self.array.append_set_dimension()

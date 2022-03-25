@@ -42,11 +42,13 @@ class TestDataView(unittest.TestCase):
         da = self.file.blocks[0].create_data_array("str_2d_array", "test", dtype=nix.DataType.String, data=data)
         da.append_set_dimension()
         da.append_set_dimension()
-        
+
         dv = da.get_slice((0, 0), extents=(10, 4))
         npeq = np.testing.assert_equal
         npeq(dv.shape, da.shape)
         npeq(dv[:], data)
+        for d in dv[:]:
+            assert("numpy.str_" not in str(type(d)))
 
     def test_data_view_fancy_slicing(self):
         da = self.file.blocks[0].data_arrays[0]

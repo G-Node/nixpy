@@ -250,6 +250,8 @@ class H5Group(object):
             if name in self.group.attrs:
                 del self.group.attrs[name]
         else:
+            if isinstance(value, np.str_):
+                value = str(value)
             self.group.attrs[name] = value
 
     def get_attr(self, name):
