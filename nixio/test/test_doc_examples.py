@@ -15,6 +15,8 @@ TEST_IMAGE = "lenna.png"
 
 class TestDocumentationExamples(unittest.TestCase):
 
+    examples_path = Path("docs/source/examples")
+
     def run_script(self, script_name):
         file_path = Path.joinpath(self.examples_path, script_name)
         runpy.run_path(path_name=str(file_path), run_name="__main__")
