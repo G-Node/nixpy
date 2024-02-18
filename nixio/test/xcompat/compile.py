@@ -11,9 +11,9 @@ import os
 import platform
 from glob import glob
 
-import distutils.sysconfig
-from distutils import ccompiler
-from distutils.errors import CompileError, LinkError
+import sysconfig
+from setuptools._distutils.ccompiler import new_compiler
+from setuptools._distutils.errors import CompileError, LinkError
 
 
 WINDOWS = False
@@ -25,9 +25,9 @@ def ccomp(filenames, destination,
           library_dirs=None, include_dirs=None,
           libraries=None, compile_args=None,
           runtime_lib_dirs=None):
-    compiler = ccompiler.new_compiler()
+    compiler = new_compiler()
 
-    distutils.sysconfig.customize_compiler(compiler)
+    sysconfig.customize_compiler(compiler)
     if library_dirs:
         compiler.set_library_dirs(library_dirs)
     if include_dirs:
