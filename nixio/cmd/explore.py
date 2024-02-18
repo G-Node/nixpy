@@ -76,7 +76,8 @@ def progress(count, total, status='', bar_len=60):
     filled_len = int(percents * bar_len)
     prog_bar = '=' * filled_len + '-' * (bar_len - filled_len)
 
-    sys.stderr.write('[%s] %.2f%s ...%s\r' % (prog_bar, percents * 100, '%', status))
+    sys.stderr.write('[%s] %.2f%s ...%s\r' %
+                     (prog_bar, percents * 100, '%', status))
     sys.stderr.flush()
 
 
@@ -102,10 +103,12 @@ def assemble_files(arguments):
         else:
             candidates = sorted(glob.glob(filename))
             if len(candidates) == 0:
-                print("Error: invalid file or directory! No matches found. '{}'".format(filename))
+                print(
+                    "Error: invalid file or directory! No matches found. '{}'".format(filename))
             for candidate in candidates:
                 if os.path.isdir(candidate):
-                    candidate = os.sep.join((candidate, "*." + arguments.suffix))
+                    candidate = os.sep.join(
+                        (candidate, "*." + arguments.suffix))
                     all_files.extend(sorted(glob.glob(candidate)))
                 elif os.path.isfile(candidate):
                     all_files.append(candidate)
@@ -127,19 +130,24 @@ def disp_file_structure(nix_file, verbosity):
 
             def array_structure(data_array, verbosity):
                 dims = dimension_description(data_array, verbosity)
-                content = "\n       shape: %s, dtype: %s %s" % (data_array.shape, data_array.dtype, dims)
+                content = "\n       shape: %s, dtype: %s %s" % (
+                    data_array.shape, data_array.dtype, dims)
                 return content
 
-            content = "      Data Arrays:\n" if len(block.data_arrays) > 0 else ""
+            content = "      Data Arrays:\n" if len(
+                block.data_arrays) > 0 else ""
             for da in block.data_arrays:
-                array_struct = array_structure(da, verbosity) if verbosity > 2 else ""
-                content += "      %s [%s] --- id: %s    %s\n" % (da.name, da.type, da.id, array_struct)
+                array_struct = array_structure(
+                    da, verbosity) if verbosity > 2 else ""
+                content += "      %s [%s] --- id: %s    %s\n" % (
+                    da.name, da.type, da.id, array_struct)
             return content
 
         def group_content(block, _):
             content = "      Groups:\n" if len(block.groups) > 0 else ""
             for grp in block.groups:
-                content += "      %s [%s] -- id: %s\n" % (grp.name, grp.type, grp.id)
+                content += "      %s [%s] -- id: %s\n" % (
+                    grp.name, grp.type, grp.id)
             return content
 
         def tag_content(block, verbosity):
@@ -147,7 +155,8 @@ def disp_file_structure(nix_file, verbosity):
                 if verbosity < 3:
                     return ""
 
-                content = "      start: %s, extent: %s" % (tag.position, tag.extent)
+                content = "      start: %s, extent: %s" % (
+                    tag.position, tag.extent)
                 for ref in tag.references:
                     content += "\n       refers to -> %s" % ref.name
                 for feat in tag.features:
@@ -157,7 +166,8 @@ def disp_file_structure(nix_file, verbosity):
 
             content = "      Tags:\n"
             for tag in block.tags:
-                content += "      %s [%s] --- id: %s\n %s" % (tag.name, tag.type, tag.id, tag_details(tag, verbosity))
+                content += "      %s [%s] --- id: %s\n %s" % (
+                    tag.name, tag.type, tag.id, tag_details(tag, verbosity))
             return content
 
         def mtag_content(block, verbosity):
@@ -165,7 +175,8 @@ def disp_file_structure(nix_file, verbosity):
                 if verbosity < 3:
                     return ""
 
-                content = "      start: %s, extent: %s" % (tag.position[:], tag.extent[:])
+                content = "      start: %s, extent: %s" % (
+                    tag.position[:], tag.extent[:])
                 for ref in tag.references:
                     content += "\n       segment refers to -> %s" % ref.name
                 for feat in tag.features:
@@ -180,15 +191,18 @@ def disp_file_structure(nix_file, verbosity):
             return content
 
         def frame_content(block, _):
-            content = "      Data frames:\n" if len(block.data_frames) > 0 else ""
+            content = "      Data frames:\n" if len(
+                block.data_frames) > 0 else ""
             for df in block.data_frames:
-                content += "      %s [%s] -- id: %s\n" % (df.name, df.type, df.id)
+                content += "      %s [%s] -- id: %s\n" % (
+                    df.name, df.type, df.id)
             return content
 
         def source_content(block, _):
             content = "      Sources:\n" if len(block.groups) > 0 else ""
             for src in block.sources:
-                content += "      %s [%s] -- id: %s\n" % (src.name, src.type, src.id)
+                content += "      %s [%s] -- id: %s\n" % (
+                    src.name, src.type, src.id)
             return content
 
         content = ""
@@ -220,7 +234,8 @@ def disp_file_structure(nix_file, verbosity):
             content = ""
             sections = section.find_sections()
             prop_count = sum([len(sec) for sec in sections])
-            content += "\n     %i sub-section(s), %i properties\n" % (len(sections), prop_count)
+            content += "\n     %i sub-section(s), %i properties\n" % (
+                len(sections), prop_count)
             return content
 
         content = ""
@@ -229,7 +244,8 @@ def disp_file_structure(nix_file, verbosity):
         else:
             for section in nix_file.sections:
                 subs_props = subsections(section, verbosity)
-                content += "    %s [%s] --- id: %s%s" % (section.name, section.type, section.id, subs_props)
+                content += "    %s [%s] --- id: %s%s" % (
+                    section.name, section.type, section.id, subs_props)
         return content
 
     def file_content(nix_file, verbosity):
@@ -237,10 +253,12 @@ def disp_file_structure(nix_file, verbosity):
             verbosity = 0
         content = ""
         if verbosity < 1:
-            content += "%s\n%s" % (block_content(nix_file, verbosity), section_content(nix_file, verbosity))
+            content += "%s\n%s" % (block_content(nix_file, verbosity),
+                                   section_content(nix_file, verbosity))
         else:
             content += "  data:\n%s" % block_content(nix_file, verbosity)
-            content += "  metadata:\n%s\n" % section_content(nix_file, verbosity)
+            content += "  metadata:\n%s\n" % section_content(
+                nix_file, verbosity)
         return content
 
     print("\n%s\n\n" % file_content(nix_file, verbosity))
@@ -321,7 +339,8 @@ def disp_metadata(filename, arguments):
                         part = parts[1] if case_sensitive else parts[1].lower()
                         pname = prop.name if case_sensitive else prop.name.lower()
                         if part == pname if full_match else part in pname:
-                            print("[section: %s, type: %s, id: %s] >> " % (sec.name, sec.type, sec.id), end="")
+                            print("[section: %s, type: %s, id: %s] >> " %
+                                  (sec.name, sec.type, sec.id), end="")
                             prop.pprint()
             else:
                 sections = find_section(nf, patt, case_sensitive)
@@ -329,7 +348,8 @@ def disp_metadata(filename, arguments):
                     props = find_props(nf, patt, case_sensitive)
                     for sec in props.keys():
                         for prop in props[sec]:
-                            print("[section: %s, type: %s, id: %s] >> " % (sec.name, sec.type, sec.id), end="")
+                            print("[section: %s, type: %s, id: %s] >> " %
+                                  (sec.name, sec.type, sec.id), end="")
                             prop.pprint()
                 else:
                     for sec in sections:
@@ -454,15 +474,20 @@ def dump_twod(data, dimensions, label, unit, outfile, fmt="%.6f", end="\n\n",
     numeric_2nd_dim_ticks = isinstance(second_dim_ticks[0], (int, float))
     numeric_data = isinstance(data[0, 0], (int, float))
     data_conv_func = (lambda x: fmt % x) if numeric_data else str
-    dim_ticks_conv_func1 = (lambda x: fmt % x) if numeric_1st_dim_ticks else str
-    dim_ticks_conv_func2 = (lambda x: fmt % x) if numeric_2nd_dim_ticks else str
+    dim_ticks_conv_func1 = (lambda x: fmt %
+                            x) if numeric_1st_dim_ticks else str
+    dim_ticks_conv_func2 = (lambda x: fmt %
+                            x) if numeric_2nd_dim_ticks else str
 
-    max_tick_len = max([len(dim_ticks_conv_func1(first_dim_ticks[-1])), len(first_dim_label)])
+    max_tick_len = max(
+        [len(dim_ticks_conv_func1(first_dim_ticks[-1])), len(first_dim_label)])
     print("# data label: %s" % label, file=outfile)
     print("# data unit: %s\n" % unit, file=outfile)
-    padding = " " * (max_tick_len - (len(first_dim_label) if first_dim_unit else 0))
+    padding = " " * (max_tick_len - (len(first_dim_label)
+                     if first_dim_unit else 0))
     print("# %s%s%s" % (first_dim_label, padding, second_dim_label), file=outfile)
-    padding = " " * (max_tick_len - (len(first_dim_unit) if first_dim_unit else 0))
+    padding = " " * (max_tick_len - (len(first_dim_unit)
+                     if first_dim_unit else 0))
     print("# %s%s%s" % (first_dim_unit, padding, second_dim_unit), file=outfile)
     # first line contains 2nd dim ticks
     print(" " * max_tick_len + "   " + (" " * max_tick_len + "  ").join(map(dim_ticks_conv_func2, second_dim_ticks)),
@@ -521,7 +546,8 @@ def data_dump(filename, arguments, outfile, show_progress=False):
     entities = find_data_entity(nix_file, arguments)
     for ent in entities:
         if isinstance(ent, nix.DataArray):
-            sys.stderr.write("Dumping %s to %s...\n" % (ent.name, arguments.outfile))
+            sys.stderr.write("Dumping %s to %s...\n" %
+                             (ent.name, arguments.outfile))
             dump_data_array(ent, filename, outfile, show_progress)
             sys.stderr.write("\n")
     nix_file.close()
@@ -537,7 +563,8 @@ def data_plotter(filename, arguments):
                 plotter.plot()
                 plotter.show()
             else:
-                print("Could not find a suitable plotter for the DataArray: %s" % str(ent))
+                print(
+                    "Could not find a suitable plotter for the DataArray: %s" % str(ent))
         else:
             print("Sorry, so far I can only try to plot DataArrays.")
 
@@ -549,7 +576,8 @@ def disp_data(filename, arguments):
     entities = find_data_entity(nix_file, arguments)
     print("# File: %s" % filename)
     for ent in entities:
-        print("# entity: %s\n# type: %s\n# id: %s" % (ent.name, ent.type, ent.id))
+        print("# entity: %s\n# type: %s\n# id: %s" %
+              (ent.name, ent.type, ent.id))
         print("# created at: %s\n# last edited at: %s\n" % (str(dt.datetime.fromtimestamp(ent.created_at)),
                                                             str(dt.datetime.fromtimestamp(ent.updated_at))))
         print(ent)
@@ -574,7 +602,8 @@ def dump_worker(arguments):
     func = data_dump
     if len(arguments.outfile) > 0:
         if os.path.exists(arguments.outfile):
-            response = input("File %s already exists, are you sure to overwrite it? y/N:" % arguments.outfile)
+            response = input(
+                "File %s already exists, are you sure to overwrite it? y/N:" % arguments.outfile)
             if response.lower() != "y":
                 print("... data dump aborted.")
                 return
@@ -601,7 +630,7 @@ def add_default_file_args(parent_parser):
     parent_parser.add_argument("file", type=str, nargs="+",
                                help="Path to file (at least one)")
     parent_parser.add_argument("-s", "--suffix", type=str, default="nix", nargs="?",
-                               help=("The file suffix used for nix data files (default: %(default)s)."))
+                               help="The file suffix used for nix data files (default: %(default)s).")
 
 
 def add_default_args(parent_parser):
@@ -609,17 +638,17 @@ def add_default_args(parent_parser):
                                help=("matching of entitiy names and types is case sensitive, "
                                      "by default the case is ignored"))
     parent_parser.add_argument("-fm", "--full_match", action="store_true",
-                               help=("names and types must be full matches, by default a partial match is sufficient"))
+                               help="names and types must be full matches, by default a partial match is sufficient")
 
 
 def create_metadata_parser(parent_parser):
     meta_parser = parent_parser.add_parser("metadata", help="Filter and display metadata",
                                            aliases=["mdata"],
-                                           description=("Search for metadata items or display metadata (sub)trees."))
+                                           description="Search for metadata items or display metadata (sub)trees.")
     meta_parser.add_argument("-p", "--pattern", type=str, action="append",
                              help=METADATA_PATTERN_HELP)
     meta_parser.add_argument("-d", "--depth", type=int, default=-1,
-                             help=("maximum depth of metadata tree output, default is %(default)s, full depth"))
+                             help="maximum depth of metadata tree output, default is %(default)s, full depth")
     add_default_args(meta_parser)
     add_default_file_args(meta_parser)
     meta_parser.set_defaults(func=mdata_worker)
@@ -629,18 +658,23 @@ def create_metadata_parser(parent_parser):
 
 def create_data_parser(parent_parser):
     data_parser = parent_parser.add_parser("data",
-                                           help=("Search and display information about data entities"),
+                                           help=(
+                                               "Search and display information about data entities"),
                                            description=DATA_PARSER_HELP)
-    data_parser.add_argument("-p", "--pattern", default="", type=str, help=DATA_PATTERN_HELP)
+    data_parser.add_argument(
+        "-p", "--pattern", default="", type=str, help=DATA_PATTERN_HELP)
     add_default_args(data_parser)
     add_default_file_args(data_parser)
     data_parser.set_defaults(func=data_worker)
 
 
 def create_dump_parser(parent_parser):
-    dump_parser = parent_parser.add_parser("dump", help="Dump stored data to stdout", description=DUMP_PARSER_HELP)
-    dump_parser.add_argument("-p", "--pattern", default="", type=str, help=DUMP_PATTERN_HELP)
-    dump_parser.add_argument("-o", "--outfile", default="", type=str, help=DUMP_OUTFILE_HELP)
+    dump_parser = parent_parser.add_parser(
+        "dump", help="Dump stored data to stdout", description=DUMP_PARSER_HELP)
+    dump_parser.add_argument(
+        "-p", "--pattern", default="", type=str, help=DUMP_PATTERN_HELP)
+    dump_parser.add_argument(
+        "-o", "--outfile", default="", type=str, help=DUMP_OUTFILE_HELP)
     add_default_args(dump_parser)
     add_default_file_args(dump_parser)
     dump_parser.set_defaults(func=dump_worker)
@@ -651,7 +685,8 @@ def create_plot_parser(parent_parser):
         return
     plot_parser = parent_parser.add_parser("plot", help="Create basic plots of stored data.",
                                            description=PLOT_PARSER_HELP)
-    plot_parser.add_argument("-p", "--pattern", type=str, help=DATA_PATTERN_HELP)
+    plot_parser.add_argument(
+        "-p", "--pattern", type=str, help=DATA_PATTERN_HELP)
     add_default_args(plot_parser)
     add_default_file_args(plot_parser)
     plot_parser.set_defaults(func=plot_worker)
@@ -662,7 +697,7 @@ def create_file_parser(parent_parser):
                                            description=("Quick display of file information such as creation date, "
                                                         "file size and structure etc."))
     file_parser.add_argument("-v", "--verbosity", action="count",
-                             help=("increase output verbosity, use -v, -vv, -vvv for more verbose output"))
+                             help="increase output verbosity, use -v, -vv, -vvv for more verbose output")
     add_default_file_args(file_parser)
     file_parser.set_defaults(func=file_worker)
 

@@ -1,6 +1,7 @@
 version: 1.5.{build}
 
-image: Visual Studio 2017
+image:
+  - Visual Studio 2019
 
 environment:
 
@@ -16,17 +17,9 @@ environment:
 
 
   matrix:
-    # Python 3.6 64 bit
-    - PYTHON: "C:\\Python36-x64"
-      pyver: 3
-      bits: 64
-
-    # Python 3.7 64 bit
-    - PYTHON: "C:\\Python37-x64"
-      pyver: 3
-      bits: 64
-      RDP: "no"
-
+    - PYTHON: "C:/Python38-x64"
+    - PYTHON: "C:/Python311-x64"
+    
 init:
   - "ECHO %PYTHON% %vcvars% (%bits%)"
   - ps: $env:PATH = "$env:PYTHON;$env:PATH;C:\Program Files\7-Zip;$env:NIX_DIR\bin"
