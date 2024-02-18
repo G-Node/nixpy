@@ -87,12 +87,12 @@ enable=C0102,  # Black listed name "%s"**
        E0203,  # Access to member %r before its definition line %s**
        E0211,  # Method has no argument**
        E0213,  # Method should have "self" as first argument**
-       E0221,  # Interface resolved to %s is not a class**
-       E0222,  # Missing method %r from %s interface**
+       # E0221,  # Interface resolved to %s is not a class**
+       # E0222,  # Missing method %r from %s interface**
        E0235,  # __exit__ must accept 3 arguments: type, value, traceback**
-       E0501,  # Old: Non ascii characters found but no encoding specified (PEP 263)**
-       E0502,  # Old: Wrong encoding specified (%s)**
-       E0503,  # Old: Unknown encoding specified (%s)**
+       # E0501,  # Old: Non ascii characters found but no encoding specified (PEP 263)**
+       # E0502,  # Old: Wrong encoding specified (%s)**
+       # E0503,  # Old: Unknown encoding specified (%s)**
        E0601,  # Using variable %r before assignment**
        E0602,  # Undefined variable %r**
        E0603,  # Undefined variable name %r in __all__**
@@ -103,17 +103,17 @@ enable=C0102,  # Black listed name "%s"**
        E0710,  # Raising a new style class which doesn't inherit from BaseException**
        E0711,  # NotImplemented raised - should raise NotImplementedError**
        E0712,  # Catching an exception which doesn\'t inherit from BaseException: %s**
-       E1001,  # Use of __slots__ on an old style class**
-       E1002,  # Use of super on an old style class**
+       # E1001,  # Use of __slots__ on an old style class**
+       # E1002,  # Use of super on an old style class**
        E1003,  # Bad first argument %r given to super()**
-       E1004,  # Missing argument to super()**
+       # E1004,  # Missing argument to super()**
        # E1101,  # %s %r has no %r member**  ## RE-ENABLE AFTER CODE RESTRUCTURING
        E1102,  # %s is not callable**
        # E1103,  # %s %r has no %r member (but some types could not be inferred)**  ## RE-ENABLE AFTER CODE RESTRUCTURING
        E1111,  # Assigning to function call which doesn't return**
        E1120,  # No value passed for parameter %s in function call**
        E1121,  # Too many positional arguments for function call**
-       E1122,  # Old: Duplicate keyword argument %r in function call**
+       # E1122,  # Old: Duplicate keyword argument %r in function call**
        E1123,  # Passing unexpected keyword argument %r in function call**
        E1124,  # Parameter %r passed as both positional and keyword argument**
        E1125,  # Old: Missing mandatory keyword argument %r**
@@ -146,11 +146,11 @@ enable=C0102,  # Black listed name "%s"**
        W0234,  # iter returns non-iterator**
        W0301,  # Unnecessary semicolon**
        W0311,  # Bad indentation. Found %s %s, expected %s**
-       W0312,  # Found indentation with %ss instead of %ss**
-       W0331,  # Use of the <> operator**
+       # W0312,  # Found indentation with %ss instead of %ss**
+       # W0331,  # Use of the <> operator**
        W0402,  # Uses of a deprecated module %r**
        W0406,  # Module import itself**
-       W0512,  # Cannot decode using encoding "%s", unexpected byte at position %d**
+       # W0512,  # Cannot decode using encoding "%s", unexpected byte at position %d**
        W0601,  # Global variable %r undefined at the module level**
        W0602,  # Using global for %r but no assigment is done**
        W0611,  # Unused import %s**
@@ -159,15 +159,15 @@ enable=C0102,  # Black listed name "%s"**
        W0614,  # Unused import %s from wildcard import**
        W0621,  # Redefining name %r from outer scope (line %s)**
        W0622,  # Redefining built-in %r**
-       W0623,  # Redefining name %r from %s in exception handler**
+       # W0623,  # Redefining name %r from %s in exception handler**
        W0631,  # Using possibly undefined loop variable %r**
        W0632,  # Possible unbalanced tuple unpacking with sequence%s: …**
        W0633,  # Attempting to unpack a non-sequence%s**
-       W0701,  # Raising a string exception**
-       W0704,  # Except doesn't do anything**
-       W0710,  # Exception doesn't inherit from standard "Exception" class**
+       # W0701,  # Raising a string exception**
+       # W0704,  # Except doesn't do anything**
+       # W0710,  # Exception doesn't inherit from standard "Exception" class**
        W0711,  # Exception to catch is the result of a binary "%s" operation**
-       W0712,  # Implicit unpacking of exceptions is not supported in Python 3**
+       # W0712,  # Implicit unpacking of exceptions is not supported in Python 3**
        W1111,  # Assigning to function call which only returns None**
        W1300,  # Format string dictionary key should be a string, not %s**
        W1301,  # Unused key %r in format string dictionary**
@@ -620,5 +620,5 @@ preferred-modules=
 
 # Exceptions that will emit a warning when being caught. Defaults to
 # "BaseException, Exception".
-overgeneral-exceptions=BaseException,
-                       Exception
+overgeneral-exceptions=builtin.BaseException,
+                       builtin.Exception
