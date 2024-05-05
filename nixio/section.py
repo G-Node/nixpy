@@ -14,7 +14,6 @@ try:
     from collections.abc import Sequence, Iterable
 except ImportError:
     from collections import Sequence, Iterable
-from six import string_types
 import numpy as np
 from .container import Container, SectionContainer
 from .datatype import DataType
@@ -147,7 +146,7 @@ class Section(Entity):
             # Make sure all values are of the same data type
             single_val = vals
             if (isinstance(vals, (Sequence, Iterable)) and
-                    not isinstance(vals, string_types)):
+                    not isinstance(vals, str)):
                 single_val = vals[0]
             else:
                 # Make sure the data will always be created with an array.

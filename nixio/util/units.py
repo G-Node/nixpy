@@ -7,7 +7,6 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-from six import string_types
 import re
 try:
     from collections.abc import Sequence
@@ -125,8 +124,8 @@ def scalable(units_a, units_b):
     :rtype: bool
     """
     if (isinstance(units_a, Sequence) and isinstance(units_b, Sequence) and
-            not isinstance(units_a, string_types) and
-            not isinstance(units_b, string_types)):
+            not isinstance(units_a, str) and
+            not isinstance(units_b, str)):
         if len(units_a) != len(units_b):
             return False
         for unit_a, unit_b in zip(units_a, units_b):

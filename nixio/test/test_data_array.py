@@ -8,7 +8,6 @@
 # LICENSE file in the root of the Project.
 import os
 import time
-from six import string_types
 import sys
 import unittest
 import numpy as np
@@ -307,8 +306,8 @@ class TestDataArray(unittest.TestCase):
         self.assertRaises(IndexError, lambda: self.array.dimensions[-4])
         self.assertRaises(IndexError, lambda: self.array.dimensions[3])
 
-        assert isinstance(str(self.array.dimensions), string_types)
-        assert isinstance(repr(self.array.dimensions), string_types)
+        assert isinstance(str(self.array.dimensions), str)
+        assert isinstance(repr(self.array.dimensions), str)
 
         dims = list(self.array.dimensions)
         for i in range(3):

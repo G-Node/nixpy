@@ -13,7 +13,6 @@ except ImportError:
     from sys import maxsize as maxint
 import numpy as np
 from inspect import isclass
-from six import string_types
 try:
     from collections.abc import OrderedDict
 except ImportError:
@@ -358,8 +357,7 @@ class Block(Entity):
         if col_dict is not None:
             for nam, dt in col_dict.items():
                 if isclass(dt):
-                    if any(issubclass(dt, st) for st in string_types) \
-                            or issubclass(dt, np.string_):
+                    if issubclass(dt, str) or issubclass(dt, np.string_):
                         col_dict[nam] = util.vlen_str_dtype
                 if 'U' in str(dt) or dt == np.string_:
                     col_dict[nam] = util.vlen_str_dtype

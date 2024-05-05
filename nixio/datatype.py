@@ -7,7 +7,6 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 from numbers import Integral, Real
-from six import string_types
 
 import numpy as np
 
@@ -41,7 +40,7 @@ class DataType:
             return cls.Int64
         elif isinstance(value, Real):
             return cls.Double
-        elif isinstance(value, string_types):
+        elif isinstance(value, str):
             return cls.String
         else:
             raise ValueError("Unknown type for value {}".format(value))

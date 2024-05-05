@@ -9,7 +9,6 @@
 import warnings
 
 import numpy as np
-from six import string_types
 
 from .entity import Entity
 from .source_link_container import SourceLinkContainer
@@ -107,7 +106,7 @@ class BaseTag(Entity):
         :returns: The created feature object.
         :rtype: nixio.Feature
         """
-        if isinstance(link_type, string_types):
+        if isinstance(link_type, str):
             link_type = link_type.lower()
         link_type = LinkType(link_type)
         features = self._h5group.open_group("features")

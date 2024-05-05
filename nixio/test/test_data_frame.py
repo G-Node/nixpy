@@ -5,7 +5,6 @@ from .tmp import TempDir
 import os
 import time
 import numpy as np
-from six import string_types
 try:
     from collections.abc import OrderedDict
 except ImportError:
@@ -65,7 +64,7 @@ class TestDataFrame(unittest.TestCase):
         assert df_li.column_names == self.df1.column_names
         assert df_li.dtype == self.df1.dtype
         for i in df_li[:]:
-            self.assertIsInstance(i['id'], string_types)
+            self.assertIsInstance(i['id'], str)
             self.assertIsInstance(i['sig2'], np.int32)
 
     def test_column_name_collision(self):
