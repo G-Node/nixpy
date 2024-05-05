@@ -6,15 +6,14 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-try:
-    from sys import maxint
-except ImportError:
-    from sys import maxsize as maxint
+from sys import maxsize
 try:
     from collections.abc import Sequence, Iterable
 except ImportError:
     from collections import Sequence, Iterable
+
 import numpy as np
+
 from .container import Container, SectionContainer
 from .datatype import DataType
 from .entity import Entity
@@ -386,7 +385,7 @@ class Section(Entity):
         :rtype: list of nixio.Section
         """
         if limit is None:
-            limit = maxint
+            limit = maxsize
         return finders._find_sections(self, filtr, limit)
 
     def find_related(self, filtr=lambda _: True):

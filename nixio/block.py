@@ -7,10 +7,8 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-try:
-    from sys import maxint
-except ImportError:
-    from sys import maxsize as maxint
+from sys import maxsize
+
 import numpy as np
 from inspect import isclass
 try:
@@ -396,7 +394,7 @@ class Block(Entity):
         :rtype: list of nixio.Source
         """
         if limit is None:
-            limit = maxint
+            limit = maxsize
         return finders._find_sources(self, filtr, limit)
 
     def pprint(self, indent=2, max_length=120, extra=True, start_depth=0):

@@ -9,12 +9,9 @@
 import os
 import gc
 import numpy as np
+from sys import maxsize
 from warnings import warn
 
-try:
-    from sys import maxint
-except ImportError:
-    from sys import maxsize as maxint
 import h5py
 
 from .hdf5.h5group import H5Group
@@ -478,7 +475,7 @@ class File:
         :rtype: list of nixio.Section
         """
         if limit is None:
-            limit = maxint
+            limit = maxsize
         return finders._find_sections(self, filtr, limit)
 
     @property
