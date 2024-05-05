@@ -9,7 +9,6 @@ try:
     from collections.abc import OrderedDict
 except ImportError:
     from collections import OrderedDict
-import sys
 
 
 class TestDataFrame(unittest.TestCase):
@@ -219,11 +218,10 @@ class TestDataFrame(unittest.TestCase):
         assert tuple(self.df1.df_shape) == (10, 5)
         # create df with incorrect dimension to see if Error is raised
         arr = np.arange(1000).reshape(10, 10, 10)
-        if sys.version_info[0] == 3:
-            with self.assertRaises(ValueError):
-                self.block.create_data_frame('err', 'err',
-                                             {'name': np.int64},
-                                             data=arr)
+        with self.assertRaises(ValueError):
+            self.block.create_data_frame('err', 'err',
+                                         {'name': np.int64},
+                                         data=arr)
 
     def test_data_type(self):
         assert self.df1.dtype[4] == np.int32

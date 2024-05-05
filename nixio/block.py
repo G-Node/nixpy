@@ -15,7 +15,6 @@ try:
     from collections.abc import OrderedDict
 except ImportError:
     from collections import OrderedDict
-import sys
 
 from .util import find as finders
 from .compression import Compression
@@ -299,13 +298,6 @@ class Block(Entity):
             return self.data_frames[objid]
 
         util.check_entity_name_and_type(name, type_)
-        if (isinstance(col_dict, dict)
-                and not isinstance(col_dict, OrderedDict)
-                and sys.version_info[0] < 3):
-            raise TypeError("Cannot create a DataFrame from a dictionary "
-                            "in Python 2 as the order of keys is not "
-                            "preserved. Please use the OrderedDict class "
-                            "from the collections module instead.")
 
         if data is not None:
             shape = len(data)

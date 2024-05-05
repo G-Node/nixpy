@@ -8,7 +8,6 @@
 # LICENSE file in the root of the Project.
 import os
 import time
-import sys
 import unittest
 import numpy as np
 import nixio as nix
@@ -277,8 +276,7 @@ class TestDataArray(unittest.TestCase):
         assert da.dtype == test_data.dtype
 
         bdata = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
-        if sys.version_info[0] == 3:
-            bdata = [bytes(x, 'UTF-8') for x in bdata]
+        bdata = [bytes(x, 'UTF-8') for x in bdata]
 
         void_data = np.array(bdata, dtype='V1')
         da = self.block.create_data_array('dtype_opaque', 'b', data=void_data)
