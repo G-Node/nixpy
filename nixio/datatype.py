@@ -15,7 +15,7 @@ import numpy as np
 BOOLS = (bool, np.bool_)
 
 
-class DataType(object):
+class DataType:
     UInt8 = np.uint8
     UInt16 = np.uint16
     UInt32 = np.uint32

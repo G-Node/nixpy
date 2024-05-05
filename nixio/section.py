@@ -25,7 +25,7 @@ from . import util
 from . import exceptions
 
 
-class S(object):  # pylint: disable=invalid-name
+class S:  # pylint: disable=invalid-name
     def __init__(self, section_type, section=None):
         self.section_type = section_type
         self.section = section

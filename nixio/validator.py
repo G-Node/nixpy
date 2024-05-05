@@ -10,7 +10,7 @@ from .util import units
 from .dimension_type import DimensionType
 
 
-class ValidationError(object):
+class ValidationError:
     """
     Static class for defining validation error messages
     """
@@ -77,7 +77,7 @@ class ValidationError(object):
     NoLinkType = "link_type is not set"
 
 
-class ValidationWarning(object):
+class ValidationWarning:
     NoVersion = "version is not set"
     NoFormat = "format is not set"
     NoFileID = "file ID is not set"

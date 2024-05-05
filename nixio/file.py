@@ -54,7 +54,7 @@ def can_read(nixfile):
         return False
 
 
-class FileMode(object):
+class FileMode:
     ReadOnly = 'r'
     ReadWrite = 'a'
     Overwrite = 'w'
@@ -82,7 +82,7 @@ def make_fcpl():
     return fcpl
 
 
-class File(object):
+class File:
 
     def __init__(self, path, mode=FileMode.ReadWrite,
                  compression=Compression.Auto,

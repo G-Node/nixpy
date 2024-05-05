@@ -3,7 +3,7 @@ import shutil
 from tempfile import mkdtemp
 
 
-class TempDir(object):
+class TempDir:
 
     def __init__(self, prefix=None):
         self.path = mkdtemp(prefix=prefix)

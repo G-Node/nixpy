@@ -16,7 +16,7 @@ from ..datatype import DataType
 from .. import util
 
 
-class H5Group(object):
+class H5Group:
 
     def __init__(self, parent, name, create=False):
         self._parent = parent

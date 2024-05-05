@@ -10,7 +10,7 @@
 import nixio
 
 
-class Cont(object):
+class Cont:
     """
     Simple container for an element an a level
     """

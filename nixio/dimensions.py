@@ -64,7 +64,7 @@ class DimensionContainer(Container):
         return cls(self._parent, idx)
 
 
-class DimensionLink(object):
+class DimensionLink:
     """
     Links a Dimension to a data object (DataArray or DataFrame).
 
@@ -223,7 +223,7 @@ class DimensionLink(object):
         return self._h5group.get_attr("data_object_type")
 
 
-class Dimension(object):
+class Dimension:
 
     def __init__(self, nixfile, data_array, index):
         dimgroup = data_array._h5group.open_group("dimensions")

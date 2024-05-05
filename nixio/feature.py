@@ -14,7 +14,7 @@ from six import string_types
 from .util import util
 
 
-class Feature(object):
+class Feature:
 
     def __init__(self, nixfile, nixparent, h5group):
         util.check_entity_id(h5group.get_attr("entity_id"))
