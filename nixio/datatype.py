@@ -8,6 +8,7 @@
 # LICENSE file in the root of the Project.
 from numbers import Integral, Real
 from six import string_types
+from packaging import version
 
 import numpy as np
 
@@ -26,7 +27,10 @@ class DataType(object):
     Int64 = np.int64
     Float = np.float32
     Double = np.double
-    String = np.unicode_
+    if version.parse(np.__version__) < version.parse("2.0"):
+        String = np.unicode_
+    else:
+        String = np.str_
     Bool = np.bool_
 
     # type groups

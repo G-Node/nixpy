@@ -70,8 +70,9 @@ def plot(nixfile):
         rect = patches.Rectangle((interval, 1.05), extent, -2.1, alpha=0.5,
                                  facecolor="silver", edgecolor='k', lw=0.75, ls='--')
         ax.add_patch(rect)
+        stim_freq = mtag.feature_data(i, "stimulus frequency")[:]  # should be scalar, we will use item() to read it
         ax.text(interval + extent / 2, -1.25,
-                "%.1f %s" % (mtag.feature_data(i, "stimulus frequency")[:],
+                "%.1f %s" % (stim_freq.item(),
                              mtag.features["stimulus frequency"].data.unit), fontsize=8, ha="center")
     ax.legend((l, rect), (signal_da.name, mtag.name), loc=1, frameon=False, ncol=2)
 
