@@ -7,7 +7,6 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 from numbers import Integral, Real
-from six import string_types
 from packaging import version
 
 import numpy as np
