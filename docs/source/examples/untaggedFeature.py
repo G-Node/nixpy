@@ -15,8 +15,8 @@
 
 """
 
-import nixio
 import lif
+import nixio
 import numpy as np
 import scipy.signal as signal
 import matplotlib.pylab as plt
@@ -25,15 +25,15 @@ import matplotlib.pylab as plt
 def fake_neuron(stepsize=0.001, offset=.8):
     stimulus = np.random.randn(82000) * 2.5
 
-    b, a = signal.butter(2, 12.5, fs=1/stepsize, btype="low")
+    b, a = signal.butter(2, 12.5, fs=1 / stepsize, btype="low")
     stimulus = signal.filtfilt(b, a, stimulus[:])
     stimulus = stimulus[1000:-1000]
     s = np.hstack((np.zeros(10000), stimulus, np.zeros(10000)))
     lif_model = lif.LIF(stepsize=stepsize, offset=offset)
     time, v, spike_times = lif_model.run_stimulus(s)
 
-    stimulus_onset = 10000*stepsize
-    stimulus_duration = len(stimulus)*stepsize
+    stimulus_onset = 10000 * stepsize
+    stimulus_duration = len(stimulus) * stepsize
 
     return time, v, stimulus, stimulus_onset, stimulus_duration
 
@@ -73,7 +73,7 @@ def plot_data(tag):
     response_axis.set_ylabel(data_array.label + ((" [" + data_array.unit + "]") if data_array.unit else ""))
     response_axis.set_xlim(0, np.max(time))
     response_axis.set_ylim((1.2 * np.min(voltage), 1.2 * np.max(voltage)))
-    response_axis.barh((np.max(voltage) - np.min(voltage))/2, stimulus_duration, np.min(voltage) - np.max(voltage),
+    response_axis.barh((np.max(voltage) - np.min(voltage)) / 2, stimulus_duration, np.min(voltage) - np.max(voltage),
                        stimulus_onset, color='silver', alpha=0.5, zorder=0, label="stimulus epoch")
     response_axis.legend(fontsize=9, ncol=2, loc=9)
 

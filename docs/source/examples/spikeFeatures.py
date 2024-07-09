@@ -15,8 +15,8 @@
 
 """
 
-import nixio
 import lif
+import nixio
 import numpy as np
 import scipy.signal as signal
 import matplotlib.pylab as plt
@@ -68,7 +68,7 @@ def plot_data(tag):
     average_snippet_axis = plt.subplot2grid((2, 2), (1, 1), rowspan=1, colspan=1)
 
     response_axis.plot(time, voltage, color='dodgerblue', label=data_array.name)
-    response_axis.scatter(spike_times, np.ones(spike_times.shape)*np.max(voltage), color='red', label=tag.name)
+    response_axis.scatter(spike_times, np.ones(spike_times.shape) * np.max(voltage), color='red', label=tag.name)
     response_axis.set_xlabel(x_axis.label + ((" [" + x_axis.unit + "]") if x_axis.unit else ""))
     response_axis.set_ylabel(data_array.label + ((" [" + data_array.unit + "]") if data_array.unit else ""))
     response_axis.set_title(data_array.name)
@@ -81,7 +81,7 @@ def plot_data(tag):
     single_snippet_axis.set_ylabel(feature_data_array.label + ((" [" + feature_data_array.unit + "]") if feature_data_array.unit else ""))
     single_snippet_axis.set_title("single stimulus snippet")
     single_snippet_axis.set_xlim(np.min(snippet_time), np.max(snippet_time))
-    single_snippet_axis.set_ylim((1.2 * np.min(snippets[3,:]), 1.2 * np.max(snippets[3,:])))
+    single_snippet_axis.set_ylim((1.2 * np.min(snippets[3, :]), 1.2 * np.max(snippets[3, :])))
     single_snippet_axis.legend()
 
     mean_snippet = np.mean(snippets, axis=0)
@@ -129,7 +129,7 @@ def main():
     # save stimulus snippets in a DataArray
     snippets = block.create_data_array("spike triggered stimulus", "nix.regular_sampled.multiple_series", data=sts, label="stimulus", unit="nA")
     snippets.append_set_dimension()
-    snippets.append_sampled_dimension(stepsize, offset= -sta_offset * stepsize, label="time", unit="s")
+    snippets.append_sampled_dimension(stepsize, offset=-sta_offset * stepsize, label="time", unit="s")
 
     # set snippets as an indexed feature of the multi_tag
     multi_tag.create_feature(snippets, nixio.LinkType.Indexed)
