@@ -349,7 +349,7 @@ class Block(Entity):
                 if isclass(dt):
                     if issubclass(dt, str) or issubclass(dt, np.string_):
                         col_dict[nam] = util.vlen_str_dtype
-                if 'U' in str(dt) or dt == np.string_:
+                if 'U' in str(dt) or dt == np.bytes_:
                     col_dict[nam] = util.vlen_str_dtype
             dt_arr = list(col_dict.items())
             col_dtype = np.dtype(dt_arr)
