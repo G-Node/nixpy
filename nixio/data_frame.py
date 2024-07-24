@@ -6,7 +6,6 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-from __future__ import (absolute_import, division, print_function)
 try:
     from collections.abc import Iterable
 except ImportError:
@@ -20,7 +19,6 @@ from . import util
 from .data_set import DataSet
 from .datatype import DataType
 from .section import Section
-from six import string_types
 import csv
 
 
@@ -56,8 +54,7 @@ class DataFrame(Entity, DataSet):
             raise ValueError("Too much entries for column in this dataframe")
         if datatype is None:
             datatype = DataType.get_dtype(column[0])
-        if isclass(datatype) and any(issubclass(datatype, st)
-                                     for st in string_types):
+        if isclass(datatype) and issubclass(datatype, str):
             datatype = util.vlen_str_dtype
         dt_arr = [(n, dty) for n, dty in zip(self.column_names, self.dtype)]
         dt_arr.append((name, datatype))

@@ -13,7 +13,7 @@ except ImportError:
     from collections import Sequence, Iterable
 from enum import Enum
 from numbers import Number
-from six import string_types, ensure_str, ensure_text
+from six import ensure_str, ensure_text
 import numpy as np
 
 from .datatype import DataType
@@ -268,7 +268,7 @@ class Property(Entity):
             self.delete_values()
             return
 
-        if not isinstance(vals, (Sequence, Iterable)) or isinstance(vals, string_types):
+        if not isinstance(vals, (Sequence, Iterable)) or isinstance(vals, str):
             vals = [vals]
 
         # Make sure all values are of the same data type
@@ -294,7 +294,7 @@ class Property(Entity):
         dataset.write_data(arr, slc=np.s_[src_len: src_len + dlen])
 
     def _check_new_value_types(self, data):
-        if isinstance(data, (Sequence, Iterable)) and not isinstance(data, string_types):
+        if isinstance(data, (Sequence, Iterable)) and not isinstance(data, str):
             single_val = data[0]
         else:
             single_val = data

@@ -10,7 +10,7 @@
 from . import util
 
 
-class Entity(object):
+class Entity:
 
     def __init__(self, nixfile, nixparent, h5group):
         util.check_entity_id(h5group.get_attr("entity_id"))

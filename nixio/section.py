@@ -6,16 +6,14 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-try:
-    from sys import maxint
-except ImportError:
-    from sys import maxsize as maxint
+from sys import maxsize
 try:
     from collections.abc import Sequence, Iterable
 except ImportError:
     from collections import Sequence, Iterable
-from six import string_types
+
 import numpy as np
+
 from .container import Container, SectionContainer
 from .datatype import DataType
 from .entity import Entity
@@ -25,7 +23,7 @@ from . import util
 from . import exceptions
 
 
-class S(object):  # pylint: disable=invalid-name
+class S:  # pylint: disable=invalid-name
     def __init__(self, section_type, section=None):
         self.section_type = section_type
         self.section = section
@@ -147,7 +145,7 @@ class Section(Entity):
             # Make sure all values are of the same data type
             single_val = vals
             if (isinstance(vals, (Sequence, Iterable)) and
-                    not isinstance(vals, string_types)):
+                    not isinstance(vals, str)):
                 single_val = vals[0]
             else:
                 # Make sure the data will always be created with an array.
@@ -387,7 +385,7 @@ class Section(Entity):
         :rtype: list of nixio.Section
         """
         if limit is None:
-            limit = maxint
+            limit = maxsize
         return finders._find_sections(self, filtr, limit)
 
     def find_related(self, filtr=lambda _: True):

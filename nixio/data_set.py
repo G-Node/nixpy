@@ -9,7 +9,7 @@
 import numpy as np
 
 
-class DataSet(object):
+class DataSet:
     """
     Data IO object for DataArray.
     """

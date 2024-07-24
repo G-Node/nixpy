@@ -12,7 +12,6 @@ try:
 except ImportError:
     from collections import Iterable
 from collections import OrderedDict
-from six import string_types
 from subprocess import Popen, PIPE
 import numpy as np
 import pytest
@@ -725,7 +724,7 @@ def check_group_children_counts(group, nda, ntg, nmt):
 def compare(expected, actual):
     if (isinstance(expected, Iterable) and
             isinstance(actual, Iterable) and not
-            isinstance(expected, string_types)):
+            isinstance(expected, str)):
         assert len(expected) == len(actual), "Expected {}, got {}".format(expected, actual)
         for exp, act in zip(expected, actual):
             compare(exp, act)

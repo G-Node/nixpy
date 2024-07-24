@@ -12,7 +12,7 @@ from ..datatype import DataType
 from .. import util
 
 
-class H5DataSet(object):
+class H5DataSet:
 
     def __init__(self, parent, name, dtype=None, shape=None,
                  compression=False):

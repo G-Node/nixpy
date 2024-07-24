@@ -13,7 +13,7 @@
 import numpy as np
 
 
-class LIF(object):
+class LIF:
 
     def __init__(self, stepsize=0.0001, offset=1.6, tau_m=0.025, tau_a=0.02, da=0.0, D=3.5):
         self.stepsize = stepsize  # simulation stepsize [s]

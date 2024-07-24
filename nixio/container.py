@@ -6,7 +6,7 @@ except ImportError:
 from . import util
 
 
-class Container(object):
+class Container:
     """
     Container acts as an interface to container groups in the backend. In the
     case of HDF5, this is a group that is used as a container for other groups.

@@ -8,8 +8,6 @@
 # LICENSE file in the root of the Project.
 import os
 import time
-from six import string_types
-import sys
 import unittest
 import numpy as np
 import nixio as nix
@@ -278,8 +276,7 @@ class TestDataArray(unittest.TestCase):
         assert da.dtype == test_data.dtype
 
         bdata = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
-        if sys.version_info[0] == 3:
-            bdata = [bytes(x, 'UTF-8') for x in bdata]
+        bdata = [bytes(x, 'UTF-8') for x in bdata]
 
         void_data = np.array(bdata, dtype='V1')
         da = self.block.create_data_array('dtype_opaque', 'b', data=void_data)
@@ -307,8 +304,8 @@ class TestDataArray(unittest.TestCase):
         self.assertRaises(IndexError, lambda: self.array.dimensions[-4])
         self.assertRaises(IndexError, lambda: self.array.dimensions[3])
 
-        assert isinstance(str(self.array.dimensions), string_types)
-        assert isinstance(repr(self.array.dimensions), string_types)
+        assert isinstance(str(self.array.dimensions), str)
+        assert isinstance(repr(self.array.dimensions), str)
 
         dims = list(self.array.dimensions)
         for i in range(3):

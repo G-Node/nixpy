@@ -10,11 +10,10 @@ from .data_array import DataArray
 from .data_frame import DataFrame
 from .link_type import LinkType
 from .exceptions import UnsupportedLinkType
-from six import string_types
 from .util import util
 
 
-class Feature(object):
+class Feature:
 
     def __init__(self, nixfile, nixparent, h5group):
         util.check_entity_id(h5group.get_attr("entity_id"))
@@ -53,7 +52,7 @@ class Feature(object):
 
     @link_type.setter
     def link_type(self, link_type):
-        if isinstance(link_type, string_types):
+        if isinstance(link_type, str):
             link_type = link_type.lower()
         link_type = LinkType(link_type)
         self._h5group.set_attr("link_type", link_type.value)
