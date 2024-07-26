@@ -1,7 +1,9 @@
-import matplotlib.pyplot as plt
-import scipy.signal as signal
-import numpy as np
 import nixio
+import numpy as np
+import scipy.signal as signal
+import matplotlib.pyplot as plt
+
+import docutils
 
 interval = 0.001
 duration = 3.5
@@ -56,7 +58,10 @@ def plot(time, response):
                 arrowprops=dict(facecolor='silver', connectionstyle="arc3", arrowstyle="->"),
                 )
     # fig.savefig('../images/tag2.png')
-    plt.show()
+    if docutils.is_running_under_pytest():
+        plt.close()
+    else:
+        plt.show()
 
 
 def create_data():

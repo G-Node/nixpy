@@ -1,7 +1,9 @@
-import numpy as np
 import nixio
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+
+import docutils
 
 
 def create_example_data(nixfile):
@@ -79,8 +81,11 @@ def plot(nixfile):
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     fig.subplots_adjust(bottom=0.175, left=0.15, right=0.95, top=0.95)
-    # fig.savefig("../images/multiple_regions.png")
-    plt.show()
+    if docutils.is_running_under_pytest():
+        plt.close()
+    else:
+        # fig.savefig("../images/multiple_regions.png")
+        plt.show()
 
 
 def plot_tagged_data(nixfile):
@@ -106,8 +111,11 @@ def plot_tagged_data(nixfile):
         else:
             ax.set_yticklabels([])
     fig.subplots_adjust(left=0.15, bottom=0.2, wspace=0.5, right=0.975)
-    # fig.savefig("../images/reading_tagged_data.png")
-    plt.show()
+    if docutils.is_running_under_pytest():
+        plt.close()
+    else:
+        # fig.savefig("../images/reading_tagged_data.png")
+        plt.show()
 
 
 def main():

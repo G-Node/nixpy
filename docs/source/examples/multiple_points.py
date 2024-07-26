@@ -1,4 +1,5 @@
 import nixio
+import docutils
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -36,8 +37,11 @@ def plot(multi_tag):
     ax.spines["right"].set_visible(False)
     fig.subplots_adjust(bottom=0.175, left=0.15, right=0.95, top=0.95)
     ax.legend(loc=3, frameon=False, ncol=2)
-    # fig.savefig("../images/multiple_points.png")
-    plt.show()
+    if docutils.is_running_under_pytest():
+        plt.close()
+    else:
+        # fig.savefig("../images/multiple_points.png")
+        plt.show()
 
 
 def main():

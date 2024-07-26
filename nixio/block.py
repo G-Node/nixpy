@@ -347,9 +347,9 @@ class Block(Entity):
         if col_dict is not None:
             for nam, dt in col_dict.items():
                 if isclass(dt):
-                    if issubclass(dt, str) or issubclass(dt, np.string_):
+                    if issubclass(dt, (str, np.bytes_)):
                         col_dict[nam] = util.vlen_str_dtype
-                if 'U' in str(dt) or dt == np.string_:
+                if 'U' in str(dt) or dt == np.bytes_:
                     col_dict[nam] = util.vlen_str_dtype
             dt_arr = list(col_dict.items())
             col_dtype = np.dtype(dt_arr)

@@ -18,6 +18,8 @@ import nixio as nix
 import numpy as np
 import matplotlib.pylab as plt
 
+import docutils
+
 
 def create_data(duration=1, freq=10, stepsize=0.01):
     x = np.arange(0, duration * 2 * np.pi, stepsize)
@@ -42,8 +44,11 @@ def plot_data(data_array):
     plt.xlim(0, np.max(x))
     plt.ylim((1.1 * np.min(y), 1.1 * np.max(y)))
     plt.legend()
-    plt.savefig('multiple_time_series.png')
-    plt.show()
+    if docutils.is_running_under_pytest():
+        plt.close()
+    else:
+        plt.savefig('multiple_time_series.png')
+        plt.show()
 
 def main():
     # fake some data

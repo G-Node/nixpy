@@ -21,6 +21,8 @@ import numpy as np
 import scipy.signal as signal
 import matplotlib.pylab as plt
 
+import docutils
+
 
 def fake_neuron(stepsize=0.001, offset=.8):
     stimulus = np.random.randn(82000) * 2.5
@@ -86,8 +88,11 @@ def plot_data(tag):
 
     plt.subplots_adjust(left=0.15, top=0.875, bottom=0.1, right=0.98, hspace=0.45, wspace=0.25)
     plt.gcf().set_size_inches((5.5, 5))
-    # plt.savefig("../images/untagged_feature.png")
-    plt.show()
+    if docutils.is_running_under_pytest():
+        plt.close()
+    else:
+        # plt.savefig("../images/untagged_feature.png")
+        plt.show()
 
 
 if __name__ == '__main__':

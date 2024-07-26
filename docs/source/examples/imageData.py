@@ -29,6 +29,8 @@ import nixio
 import numpy as np
 from PIL import Image as img
 
+import docutils
+
 
 def load_image():
     image = img.open('lenna.png')
@@ -42,7 +44,8 @@ def plot_data(data_array):
     data_array.read_direct(img_data)
     img_data = np.array(img_data, dtype='uint8')
     new_img = img.fromarray(img_data)
-    new_img.show()
+    if not docutils.is_running_under_pytest():
+        new_img.show()
 
 
 if __name__ == '__main__':

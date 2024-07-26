@@ -14,13 +14,13 @@
  See https://github.com/G-node/nix/wiki for more information.
 
 """
-
-import lif
 import nixio
 import numpy as np
 import scipy.signal as signal
 import matplotlib.pylab as plt
 
+import lif
+import docutils
 
 def fake_neuron(stepsize=0.001, offset=.8, sta_offset=1000):
     stimulus = np.random.randn(102000) * 3.5
@@ -97,7 +97,10 @@ def plot_data(tag):
     plt.subplots_adjust(left=0.15, top=0.875, bottom=0.1, right=0.98, hspace=0.35, wspace=0.25)
     plt.gcf().set_size_inches((5.5, 4.5))
     # plt.savefig("../images/spike_features.png")
-    plt.show()
+    if docutils.is_running_under_pytest():
+        plt.close()
+    else:
+        plt.show()
 
 
 def main():

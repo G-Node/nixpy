@@ -29,6 +29,8 @@ import numpy as np
 from PIL import Image as img
 import matplotlib.pyplot as plt
 
+import docutils
+
 
 def load_image():
     image = img.open('lenna.png')
@@ -57,8 +59,12 @@ def plot_data(tag):
     # new_img = img.fromarray(img_data)
     plt.imshow(img_data)
     plt.gcf().set_size_inches((5.5, 5.5))
-    # plt.savefig("../images/multiple_rois.png")
-    plt.show()
+    if docutils.is_running_under_pytest():
+        plt.close()
+    else:
+        # plt.savefig("../images/multiple_rois.png")
+        plt.show()
+
 
 def plot_roi_data(tag):
     position_count = tag.positions.shape[0]
@@ -71,8 +77,11 @@ def plot_roi_data(tag):
         image = img.fromarray(roi_data)
         ax.imshow(image)
 
-    # fig.savefig('../images/retrieved_rois.png')
-    plt.show()
+    if docutils.is_running_under_pytest():
+        plt.close()
+    else:
+        # fig.savefig('../images/retrieved_rois.png')
+        plt.show()
 
 
 def main():

@@ -15,10 +15,12 @@
 
 """
 import nixio
-import lif
 import numpy as np
 import scipy.signal as signal
 import matplotlib.pyplot as plt
+
+import lif
+import docutils
 
 
 def fake_neuron(stepsize=0.001, offset=.8):
@@ -119,7 +121,10 @@ def plot_data(tag):
     plt.subplots_adjust(left=0.125, top=0.975, bottom=0.1, right=0.98, hspace=0.25, wspace=0.35)
     plt.gcf().set_size_inches((5.5, 4.5))
     # plt.savefig('../images/tagged_feature.png')
-    plt.show()
+    if docutils.is_running_under_pytest():
+        plt.close()
+    else:
+        plt.show()
 
 
 if __name__ == '__main__':

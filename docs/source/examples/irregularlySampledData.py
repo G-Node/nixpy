@@ -18,6 +18,8 @@ import nixio
 import numpy as np
 import matplotlib.pyplot as plt
 
+import docutils
+
 
 def create_data(duration, interval):
     times = np.around(np.cumsum(np.random.poisson(interval * 1000, int(1.5 * duration / interval))) / 1000., 3)
@@ -37,7 +39,10 @@ def plot_data(data_array):
     plt.legend()
     plt.xlim([0, x[-1]])
     plt.ylim(np.min(y) * 1.1, np.max(y) * 1.1)
-    plt.show()
+    if docutils.is_running_under_pytest():
+        plt.close()
+    else:
+        plt.show()
 
 
 def main():
