@@ -290,9 +290,9 @@ class H5Group:
             def change_id(_, igrp):
                 if "entity_id" in igrp.attrs:
                     id_ = util.create_id()
-                    igrp.attrs.modify("entity_id", np.string_(id_))
+                    igrp.attrs.modify("entity_id", np.bytes_(id_))
             id_ = util.create_id()
-            grp.attrs.modify("entity_id", np.string_(id_))
+            grp.attrs.modify("entity_id", np.bytes_(id_))
             grp.visititems(change_id)
         return grp
 

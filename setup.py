@@ -78,7 +78,7 @@ setup(
     tests_require=['pytest', 'scipy', 'pillow', 'matplotlib'],
     test_suite='pytest',
     setup_requires=['pytest-runner'],
-    install_requires=['numpy<2.0', 'h5py', 'six', 'enum34;python_version<"3.4"'],
+    install_requires=['numpy', 'h5py', 'six', 'enum34;python_version<"3.4"'],
     package_data={'nixio': [license_text, description_text]},
     include_package_data=True,
     zip_safe=False,

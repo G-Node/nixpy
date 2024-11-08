@@ -20,6 +20,8 @@ import lif
 import numpy as np
 import matplotlib.pylab as plt
 
+import docutils
+
 
 def fake_neuron():
     lif_model = lif.LIF(offset=1.0)
@@ -48,8 +50,11 @@ def plot_data(tag):
     ax.set_ylim((1.5 * np.min(voltage), 1.5 * np.max(voltage)))
     ax.legend()
     fig.subplots_adjust(bottom=0.175, top=0.975, right=0.975)
-    # fig.savefig("../images/spike_tagging.png")
-    plt.show()
+    if docutils.is_running_under_pytest():
+        plt.close()
+    else:
+        # fig.savefig("../images/spike_tagging.png")
+        plt.show()
 
 
 if __name__ == '__main__':

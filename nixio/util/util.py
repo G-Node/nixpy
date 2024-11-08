@@ -9,7 +9,7 @@
 import numpy as np
 
 import h5py
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4, UUID
 from ..exceptions import exceptions
 from . import names
@@ -97,7 +97,7 @@ def time_to_str(time):
     :return: string in the form "YYYYMMDDTHHMMSS", where T is the date-time separator
     :rtype: str
     """
-    dt = datetime.utcfromtimestamp(time)
+    dt = datetime.fromtimestamp(time, timezone.utc)
     return dt.strftime("%Y%m%dT%H%M%S").encode("utf-8")
 
 

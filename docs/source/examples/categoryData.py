@@ -3,6 +3,7 @@
 import nixio
 import matplotlib.pyplot as plt
 
+import docutils
 
 def create_data():
     categories = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
@@ -23,7 +24,10 @@ def plot(data_array):
     plt.bar(range(data_array.shape[0]), data_array[:], color="tab:blue")
     plt.xticks(range(data_array.shape[0]), labels=data_array.dimensions[0].labels)
     plt.ylabel("%s %s" % (data_array.label, "[%s]" % data_array.unit if data_array.unit else ""))
-    plt.show()
+    if docutils.is_running_under_pytest():
+        plt.close()
+    else:
+        plt.show()
 
 
 def main():

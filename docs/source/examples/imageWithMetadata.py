@@ -23,11 +23,13 @@
  http://en.wikipedia.org/wiki/File:Lenna.png#mediaviewer/File:Lenna.png
 
 """
-
-import nixio as nix
 import numpy as np
-from PIL import Image as img
+import nixio as nix
 import matplotlib.pyplot as plt
+
+import docutils
+
+from PIL import Image as img
 
 
 def print_metadata_table(section, ax):
@@ -73,10 +75,13 @@ def plot_data(data_array):
     img_axis.imshow(new_img)
 
     info_axis = fig.add_subplot(122)
-    print_metadata_table(data.metadata, info_axis)
+    print_metadata_table(data_array.metadata, info_axis)
     fig.subplots_adjust(left=0.075, right=0.975, bottom=0.075, top=0.975)
-    fig.savefig('image_with_metadata.png')
-    fig.show()
+    if docutils.is_running_under_pytest():
+        plt.close()
+    else:
+        fig.savefig('image_with_metadata.png')
+        fig.show()
 
 
 def add_image_information(nix_file):

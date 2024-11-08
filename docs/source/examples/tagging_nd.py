@@ -4,8 +4,8 @@ import matplotlib.table
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import matplotlib.patches as patches
-from IPython import embed
 
+import docutils
 
 def plotcubus(axis, pos, ext, color):
     xs = pos[0]
@@ -132,7 +132,11 @@ def plot_2d():
     ax.spines["top"].set_visible(False)
     ax.spines['right'].set_visible(False)
     fig.subplots_adjust(bottom=0.175, left=0.15, right=0.95, top=0.95)
-    fig.savefig("../images/2d_mtag.png")
+    if docutils.is_running_under_pytest():
+        plt.close()
+    else:
+        fig.savefig("../images/2d_mtag.png")
+        plt.show()
 
 
 def plot_3d():
@@ -181,9 +185,13 @@ def plot_3d():
     table.auto_set_font_size(False)
     table.set_fontsize(8)
     ax.text(180, 100, 5.0, "Extents DataArray") #, transform=ax.transAxes , fontsize=10)
-
     fig.subplots_adjust(bottom=0.1, left=0., right=0.95, top=0.95)
-    fig.savefig("../images/3d_mtag.png")
+
+    if docutils.is_running_under_pytest():
+        plt.close()
+    else:
+        fig.savefig("../images/3d_mtag.png")
+        plt.show()
 
 
 if __name__ == "__main__":
