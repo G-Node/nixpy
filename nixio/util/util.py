@@ -97,7 +97,6 @@ def time_to_str(time):
     :return: string in the form "YYYYMMDDTHHMMSS", where T is the date-time separator
     :rtype: str
     """
-    # dt = datetime.utcfromtimestamp(time)
     dt = datetime.fromtimestamp(time, timezone.utc)
     return dt.strftime("%Y%m%dT%H%M%S").encode("utf-8")
 

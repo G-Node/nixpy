@@ -55,7 +55,7 @@ class TestDocumentationExamples(unittest.TestCase):
     def tearDown(self):
         plt.close("all")
         plt.ioff()
-        if Path.exists(Path("TEST_IMAGE")):
+        if Path.exists(Path(TEST_IMAGE)):
             Path.unlink(Path(TEST_IMAGE), True)
 
     def test_annotations(self):
