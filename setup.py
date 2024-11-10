@@ -53,6 +53,11 @@ classifiers = [
     'Programming Language :: Python',
     'Programming Language :: Python :: 3.6',
     'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
     'Topic :: Scientific/Engineering'
 ]
 
@@ -78,7 +83,7 @@ setup(
     tests_require=['pytest', 'scipy', 'pillow', 'matplotlib'],
     test_suite='pytest',
     setup_requires=['pytest-runner'],
-    install_requires=['numpy', 'h5py', 'six', 'enum34;python_version<"3.4"'],
+    install_requires=['numpy', 'h5py'],
     package_data={'nixio': [license_text, description_text]},
     include_package_data=True,
     zip_safe=False,

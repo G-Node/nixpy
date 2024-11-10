@@ -6,10 +6,15 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-from six import ensure_str
 import numpy as np
 from ..datatype import DataType
 from .. import util
+
+def ensure_str(s):
+    if isinstance(s, bytes):
+        return s.decode()
+    else:
+        return s
 
 
 class H5DataSet:
