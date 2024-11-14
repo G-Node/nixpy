@@ -105,7 +105,7 @@ def update_info(newver):
         infodict = json.load(infofile)
 
     verstring = infodict["VERSION"]
-    newverstring = re.sub("[0-9\.a-z]+", newver, verstring)
+    newverstring = re.sub(r"[0-9\.a-z]+", newver, verstring)
 
     if newverstring == verstring:
         print("No changes required in info.json")
@@ -140,7 +140,7 @@ def update_ci_confs(newver):
         newconf = []
         for line in oldconf:
             if "NIX_BRANCH" in line:
-                line = re.sub("1\.[0-9\.]+[0-9\.a-z]+(dev){0,1}", nixbranch, line)
+                line = re.sub(r"1\.[0-9\.]+[0-9\.a-z]+(dev){0,1}", nixbranch, line)
                 line = line.replace("master", nixbranch)
             newconf.append(line)
 
@@ -168,7 +168,7 @@ def update_ci_confs(newver):
     # newconf = []
     # for line in oldconf:
     #     if "NIX_VERSION" in line:
-    #         line = re.sub("'[1-9\.a-z]+'", "'" + newver + "'", line)
+    #         line = re.sub(r"'[1-9\.a-z]+'", "'" + newver + "'", line)
     #     newconf.append(line)
 
     # diff = diff_lines(oldconf, newconf)

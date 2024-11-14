@@ -13,12 +13,17 @@ except ImportError:
     from collections import Sequence, Iterable
 from enum import Enum
 from numbers import Number
-from six import ensure_str, ensure_text
 import numpy as np
 
 from .datatype import DataType
 from .entity import Entity
 from . import util
+
+def ensure_str(s):
+    if isinstance(s, bytes):
+        return s.decode()
+    else:
+        return s
 
 
 class OdmlType(Enum):
@@ -249,7 +254,7 @@ class Property(Entity):
 
         def data_to_value(dat):
             if isinstance(dat, bytes):
-                dat = ensure_str(dat)  # py2compat
+                dat = dat.decode()
             return dat
 
         values = tuple(map(data_to_value, data))
@@ -274,7 +279,7 @@ class Property(Entity):
         # Make sure all values are of the same data type
         vtype = self._check_new_value_types(vals)
         if vtype == DataType.String:
-            vals = [ensure_text(v) for v in vals]  # py2compat
+            vals = [str(v) for v in vals]
         self._h5dataset.shape = np.shape(vals)
         data = np.array(vals, dtype=vtype)
         self._h5dataset.write_data(data)
