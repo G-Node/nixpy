@@ -35,5 +35,5 @@ except ImportError:
     html_theme = 'default'
 
 # intersphinx configuration
-intersphinx_mapping = {'http://docs.python.org/': None,
-                       'http://docs.scipy.org/doc/numpy': None}
+intersphinx_mapping = {'python': ['http://docs.python.org/', None],
+                       'scipy': ['http://docs.scipy.org/doc/numpy', None] }
