@@ -33,7 +33,7 @@ import docutils
 
 
 def load_image():
-    image = img.open('lenna.png')
+    image = img.open('boats.png')
     pix = np.array(image)
     channels = list(image.mode)
     return pix, channels

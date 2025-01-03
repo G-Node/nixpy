@@ -11,15 +11,6 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- We use the "Lenna" image in this tutorial.
-
- "Lenna" by Original full portrait: "Playmate of the Month". Playboy
- Magazine. November 1972, photographed by Dwight Hooker.This 512x512
- electronic/mechanical scan of a section of the full portrait:
- Alexander Sawchuk and two others[1] - The USC-SIPI image
- database. Via Wikipedia -
- http://en.wikipedia.org/wiki/File:Lenna.png#mediaviewer/File:Lenna.png
-
 """
 
 import nixio as nix
@@ -30,7 +21,7 @@ import docutils
 
 
 def load_image():
-    image = img.open('lenna.png')
+    image = img.open('boats.png')
     pix = np.array(image)
     channels = list(image.mode)
     return pix, channels
@@ -69,16 +60,16 @@ def main():
     block = f.create_block("block name", "nix.session")
 
     # create a 'DataArray' to take the sinewave, add some information about the signal
-    data = block.create_data_array("lenna", "nix.image.rgb", data=img_data)
+    data = block.create_data_array("boats", "nix.image.rgb", data=img_data)
     # add descriptors for width, height and channels
     data.append_sampled_dimension(1, label="height")
     data.append_sampled_dimension(1, label="width")
     data.append_set_dimension(labels=channels)
 
     # create a Tag, position and extent must be 3-D since the data is 3-D
-    position = [250, 250, 0]
-    extent = [30, 100, 3]
-    tag = block.create_tag('Region of interest', 'nix.roi', position)
+    position = [170, 50, 0]
+    extent = [240, 175, 3]
+    tag = block.create_tag('Sailing boat', 'nix.roi', position)
     tag.extent = extent
     tag.references.append(data)
 
