@@ -16,7 +16,7 @@ attribution in the code.
 
 .. literalinclude:: examples/imageData.py
     :lines: 59-64
-    :caption: Image data is just 3-D data that can be easily stored in a *DataArray*. We need to add three dimension descriptors, though (to run the example you need the :download:`example code <examples/imageData.py>` , the :download:`image <examples/lenna.png>` *imagemagick* or *xv* packages). 
+    :caption: Image data is just 3-D data that can be easily stored in a *DataArray*. We need to add three dimension descriptors, though (to run the example you need the :download:`example code <examples/imageData.py>` , the :download:`image <examples/boats.png>` *imagemagick* or *xv* packages). 
 
 .. image:: examples/lenna.png
     :alt: lenna

@@ -69,7 +69,7 @@ def plot_data(data_array):
     if docutils.is_running_under_pytest():
         plt.close()
     else:
-        fig.savefig('image_with_metadata.png')
+        fig.savefig('../images/image_with_metadata.png')
         fig.show()
 
 

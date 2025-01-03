@@ -45,7 +45,7 @@ def plot_data(tag):
     draw_rect(img_data, pos, ext)
     new_img = img.fromarray(img_data)
     if not docutils.is_running_under_pytest():
-        # new_img.save("../images/single_roi.png")
+        new_img.save("../images/single_roi.png")
         new_img.show()
 
 

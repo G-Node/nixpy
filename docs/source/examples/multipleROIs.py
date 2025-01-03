@@ -53,7 +53,7 @@ def plot_data(tag):
     if docutils.is_running_under_pytest():
         plt.close()
     else:
-        # plt.savefig("../images/multiple_rois.png")
+        plt.savefig("../images/multiple_rois.png")
         plt.show()
 
 
@@ -71,7 +71,7 @@ def plot_roi_data(tag):
     if docutils.is_running_under_pytest():
         plt.close()
     else:
-        # fig.savefig('../images/retrieved_rois.png')
+        fig.savefig('../images/retrieved_rois.png')
         plt.show()
 
 
