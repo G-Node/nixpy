@@ -13,15 +13,6 @@
 
  See https://github.com/G-node/nix/wiki for more information.
 
- We use the "Lenna" image in this tutorial.
-
- "Lenna" by Original full portrait: "Playmate of the Month". Playboy
- Magazine. November 1972, photographed by Dwight Hooker.This 512x512
- electronic/mechanical scan of a section of the full portrait:
- Alexander Sawchuk and two others[1] - The USC-SIPI image
- database. Via Wikipedia -
- http://en.wikipedia.org/wiki/File:Lenna.png#mediaviewer/File:Lenna.png
-
 """
 
 import nixio
@@ -33,7 +24,7 @@ import docutils
 
 
 def load_image():
-    image = img.open('lenna.png')
+    image = img.open('boats.png')
     pix = np.array(image)
     channels = list(image.mode)
     return pix, channels
@@ -71,7 +62,7 @@ def plot_roi_data(tag):
 
     fig = plt.figure(figsize=(5.5, 5.5))
     for p in range(position_count):
-        roi_data = tag.tagged_data(p, "lenna")[:]
+        roi_data = tag.tagged_data(p, "boats")[:]
         roi_data = np.array(roi_data, dtype='uint8')
         ax = fig.add_subplot(position_count, 1, p + 1)
         image = img.fromarray(roi_data)
@@ -96,7 +87,7 @@ def main():
 
     # create a 'DataArray' to take the sinewave, add some information about
     # the signal
-    data = block.create_data_array("lenna", "nix.image.rgb", data=img_data)
+    data = block.create_data_array("boats", "nix.image.rgb", data=img_data)
     # add descriptors for width, height and channels
     data.append_sampled_dimension(1, label="height")
     data.append_sampled_dimension(1, label="width")
@@ -105,14 +96,14 @@ def main():
     num_regions = 3
     num_dimensions = len(data.dimensions)
     roi_starts = np.zeros((num_regions, num_dimensions), dtype=int)
-    roi_starts[0, :] = [250, 245, 0]
-    roi_starts[1, :] = [250, 315, 0]
-    roi_starts[2, :] = [340, 260, 0]
+    roi_starts[0, :] = [170, 50, 0]
+    roi_starts[1, :] = [250, 310, 0]
+    roi_starts[2, :] = [120, 425, 0]
 
     roi_extents = np.zeros((num_regions, num_dimensions), dtype=int)
-    roi_extents[0, :] = [30, 45, 3]
-    roi_extents[1, :] = [30, 40, 3]
-    roi_extents[2, :] = [25, 65, 3]
+    roi_extents[0, :] = [240, 175, 3]
+    roi_extents[1, :] = [60, 135, 3]
+    roi_extents[2, :] = [170, 125, 3]
 
     # create the positions DataArray
     positions = block.create_data_array("ROI positions", "nix.positions", data=roi_starts)

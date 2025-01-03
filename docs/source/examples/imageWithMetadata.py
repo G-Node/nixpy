@@ -11,17 +11,6 @@
 
  Author: Jan Grewe <jan.grewe@g-node.org>
 
- See https://github.com/G-node/nix/wiki for more information.
-
- We use the "Lenna" image in this tutorial.
-
- "Lenna" by Original full portrait: "Playmate of the Month". Playboy
- Magazine. November 1972, photographed by Dwight Hooker.This 512x512
- electronic/mechanical scan of a section of the full portrait:
- Alexander Sawchuk and two others[1] - The USC-SIPI image
- database. Via Wikipedia -
- http://en.wikipedia.org/wiki/File:Lenna.png#mediaviewer/File:Lenna.png
-
 """
 import numpy as np
 import nixio as nix
@@ -58,7 +47,7 @@ def print_metadata_table(section, ax):
 
 
 def load_image():
-    image = img.open('lenna.png')
+    image = img.open('boats.png')
     pix = np.array(image)
     channels = list(image.mode)
     return pix, channels
@@ -86,14 +75,11 @@ def plot_data(data_array):
 
 def add_image_information(nix_file):
     section = nix_file.create_section('Image metadata', 'image_source')
-    section['Original name'] = 'Lenna'
-    section['Journal'] = 'Playboy Magazine'
-    section['Year'] = 1972
-    section['Month'] = 'November'
-    section['Author'] = 'Dwight Hooker'
-    section['Source'] = 'http://en.wikipedia.org/wiki/File:Lenna.png#mediaviewer/File:Lenna.png'
-    section['Comment'] =  '512x512 electronic/mechanical scan of a section of the full portrait: Alexander Sawchuk and two others[1] - The USC-SIPI image database.'
-    section['Model'] = 'Lena Soederberg'
+    section['Original name'] = 'Boats'
+    section['Location'] = 'Port Louis'
+    section['Year'] = 2014
+    section['Month'] = 'August'
+    section['Author'] = 'Self'
     return section
 
 
