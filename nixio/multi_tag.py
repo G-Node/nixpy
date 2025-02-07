@@ -8,6 +8,7 @@
 # LICENSE file in the root of the Project.
 import warnings
 import numpy as np
+from IPython import embed
 
 from .tag import BaseTag, SliceMode
 from .container import LinkContainer
@@ -126,11 +127,36 @@ class MultiTag(BaseTag):
         return self.tagged_data(posidx, refidx)
 
     def tagged_data(self, posidx, refidx, stop_rule=SliceMode.Exclusive):
+        """
+        Retrieve the data associated with position index `posidx` and reference index `refidx`.
+        position index is the index of the position
+        
+
+        Parameters
+        ----------
+        posidx : int
+            The index of the position.
+            
+        refidx : int
+            The index of the reference.
+            
+        stop_rule : 
+            The stop rule to be used for slicing the data. Default is SliceMode.Exclusive.
+            
+        Returns
+        -------
+        data : nixio.DataView
+            The data associated with the given position and reference indices.
+
+        """
         references = self.references
         positions = self.positions
         extents = self.extents
         if len(references) == 0:
             raise OutOfBounds("There are no references in this multitag!")
+
+        if isinstance(posidx, slice):
+            raise TypeError("Slicing is not supported for MultiTag.tagged_data!")
 
         if (posidx >= positions.data_extent[0] or
                 extents and posidx >= extents.data_extent[0]):
