@@ -6,8 +6,10 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-import os
+# import os
+import pathlib
 import gc
+from typing import Union
 import numpy as np
 from sys import maxsize
 from warnings import warn
@@ -81,7 +83,7 @@ def make_fcpl():
 
 class File:
 
-    def __init__(self, path, mode=FileMode.ReadWrite,
+    def __init__(self, path: Union[str, pathlib.Path], mode=FileMode.ReadWrite,
                  compression=Compression.Auto,
                  auto_update_timestamps=True):
         """
@@ -101,22 +103,24 @@ class File:
         except (UnicodeError, LookupError):
             pass
 
-        if not os.path.exists(path) and mode == FileMode.ReadOnly:
+        path = pathlib.Path(path)
+
+        if not path.exists() and mode == FileMode.ReadOnly:
             raise RuntimeError(
                 "Cannot open non-existent file in ReadOnly mode!"
             )
 
-        if not os.path.exists(path) or mode == FileMode.Overwrite:
+        if not path.exists or mode == FileMode.Overwrite:
             mode = FileMode.Overwrite
             h5mode = map_file_mode(mode)
-            fid = h5py.h5f.create(path, flags=h5mode, fapl=make_fapl(),
+            fid = h5py.h5f.create(str(path), flags=h5mode, fapl=make_fapl(),
                                   fcpl=make_fcpl())
             self._h5file = h5py.File(fid)
             self._root = H5Group(self._h5file, "/", create=True)
             self._create_header()
         else:
             h5mode = map_file_mode(mode)
-            fid = h5py.h5f.open(path, flags=h5mode, fapl=make_fapl())
+            fid = h5py.h5f.open(str(path), flags=h5mode, fapl=make_fapl())
             self._h5file = h5py.File(fid)
             self._root = H5Group(self._h5file, "/")
 
