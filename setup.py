@@ -80,9 +80,9 @@ setup(
     packages=packages,
     scripts=[],
     python_requires=">=3.6",
-    tests_require=['pytest', 'scipy', 'pillow', 'matplotlib'],
-    test_suite='pytest',
-    setup_requires=['pytest-runner'],
+    extras_require={
+        "test": ['pytest', 'scipy', 'pillow', 'matplotlib', 'setuptools'],
+    },
     install_requires=['numpy', 'h5py'],
     package_data={'nixio': [license_text, description_text]},
     include_package_data=True,

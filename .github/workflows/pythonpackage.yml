@@ -29,7 +29,6 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Run install
       run: |
-        pip install setuptools
         pip install .
     - name: Lint with Pylint
       run: |
@@ -38,7 +37,7 @@ jobs:
         pylint --rcfile=.pylintrc nixio
     - name: Test with pytest
       run: |
-        pip install pytest scipy pillow matplotlib
+        pip install .[test]
         # pytest will skip cross-compatibility tests since NIX isn't installed
         pytest
 
