@@ -8,7 +8,6 @@
 # LICENSE file in the root of the Project.
 import warnings
 import numpy as np
-from IPython import embed
 
 from .tag import BaseTag, SliceMode
 from .container import LinkContainer
