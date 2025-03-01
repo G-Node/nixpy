@@ -6,13 +6,14 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
-# import os
+
 import pathlib
 import gc
 from typing import Union
 import numpy as np
 from sys import maxsize
 from warnings import warn
+from IPython import embed
 
 import h5py
 
@@ -98,11 +99,6 @@ class File:
 
         :return: nixio.File object
         """
-        try:
-            path = path.encode("utf-8")
-        except (UnicodeError, LookupError):
-            pass
-
         path = pathlib.Path(path)
 
         if not path.exists() and mode == FileMode.ReadOnly:
@@ -113,14 +109,14 @@ class File:
         if not path.exists or mode == FileMode.Overwrite:
             mode = FileMode.Overwrite
             h5mode = map_file_mode(mode)
-            fid = h5py.h5f.create(str(path), flags=h5mode, fapl=make_fapl(),
+            fid = h5py.h5f.create(str(path).encode("utf-8"), flags=h5mode, fapl=make_fapl(),
                                   fcpl=make_fcpl())
             self._h5file = h5py.File(fid)
             self._root = H5Group(self._h5file, "/", create=True)
             self._create_header()
         else:
             h5mode = map_file_mode(mode)
-            fid = h5py.h5f.open(str(path), flags=h5mode, fapl=make_fapl())
+            fid = h5py.h5f.open(str(path).encode("utf-8"), flags=h5mode, fapl=make_fapl())
             self._h5file = h5py.File(fid)
             self._root = H5Group(self._h5file, "/")
 
@@ -147,6 +143,7 @@ class File:
         if backend is not None:
             warn("Backend selection is deprecated. Ignoring value.")
         return cls(path, mode, compression, auto_update_timestamps)
+
 
     def _create_header(self):
         self._set_format()
