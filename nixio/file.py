@@ -13,7 +13,6 @@ from typing import Union
 import numpy as np
 from sys import maxsize
 from warnings import warn
-from IPython import embed
 
 import h5py
 
