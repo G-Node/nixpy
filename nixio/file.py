@@ -7,25 +7,23 @@
 # modification, are permitted under the terms of the BSD License. See
 # LICENSE file in the root of the Project.
 
-import pathlib
 import gc
-from typing import Union
-import numpy as np
+import pathlib
 from sys import maxsize
+from typing import Union
 from warnings import warn
 
 import h5py
+import numpy as np
 
-from .hdf5.h5group import H5Group
+from . import util, validator
 from .block import Block
-from .section import Section
-from .container import Container, SectionContainer
-from . import util
-from .exceptions import InvalidFile, DuplicateName
-from .util import find as finders
-from . import validator
 from .compression import Compression
-
+from .container import Container, SectionContainer
+from .exceptions import DuplicateName, InvalidFile
+from .hdf5.h5group import H5Group
+from .section import Section
+from .util import find as finders
 
 FILE_FORMAT = "nix"
 HDF_FF_VERSION = (1, 2, 1)
