@@ -9,6 +9,7 @@
 import os
 import time
 import h5py
+import pathlib
 import unittest
 import numpy as np
 
@@ -327,3 +328,22 @@ class TestFileVer(unittest.TestCase):
 
         self.set_header(version=(1, 0, 0), fileid="")
         self.try_open(nix.FileMode.ReadOnly)
+
+
+class TestFilePathlib(unittest.TestCase):
+
+    def setUp(self):
+        self.tmpdir = TempDir("filetest")
+        self.testfilename = pathlib.Path(self.tmpdir.path) / "filetest.nix"
+
+    def tearDown(self):
+        self.tmpdir.cleanup()
+
+    def test_with_pathlib(self):
+        file = nix.File.open(self.testfilename, nix.FileMode.Overwrite)
+        file.close()
+
+    def test_with_unicode(self):
+        file_test = self.testfilename.parent /"👍_test.nix"
+        file = nix.File.open(file_test, nix.FileMode.Overwrite)
+        file.close()
