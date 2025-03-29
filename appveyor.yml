@@ -17,9 +17,12 @@ environment:
 
 
   matrix:
-    - PYTHON: "C:/Python38-x64"
-    - PYTHON: "C:/Python311-x64"
-    
+    # - PYTHON: "C:/Python38-x64"
+    # - PYTHON: "C:/Python311-x64"
+    - TOXENV: py39    # https://devguide.python.org/versions
+    - TOXENV: py311
+    - TOXENV: py313
+  
 init:
   - "ECHO %PYTHON% %vcvars% (%bits%)"
   - ps: $env:PATH = "$env:PYTHON;$env:PATH;C:\Program Files\7-Zip;$env:NIX_DIR\bin"
@@ -54,6 +57,7 @@ install:
   - python -m pip install certifi
   - python -m pip install -U pip wheel
   - python -m pip install numpy h5py pytest pytest-xdist scipy pillow matplotlib
+  - python -m pip install tox
   - ps: cd "$env:APPVEYOR_BUILD_FOLDER"
   - set DISTUTILS_USE_SDK="1"
   - set MSSdk="1"
@@ -65,7 +69,7 @@ test_script:
   # TODO: Force cross-compatibility tests
   # - python setup.py test --addopts "--force-compat"
   # - python setup.py test --addopts "-nauto"
-  - pytest -nauto
+  - py -m tox
 
 after_test:
   - ps: mkdir "$env:DEPLOY_DIR"
