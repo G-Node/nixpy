@@ -64,7 +64,8 @@ build_script:
 test_script:
   # TODO: Force cross-compatibility tests
   # - python setup.py test --addopts "--force-compat"
-  - python setup.py test --addopts "-nauto"
+  # - python setup.py test --addopts "-nauto"
+  - pytest -nauto
 
 after_test:
   - ps: mkdir "$env:DEPLOY_DIR"
