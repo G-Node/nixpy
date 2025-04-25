@@ -57,6 +57,10 @@ test = [
 doc = [
     "sphinx"
 ]
+all = [
+    "nixio[test]",
+    "nixio[doc]"
+]
 
 [tool.setuptools]
 include-package-data = true
