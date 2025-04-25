@@ -1,0 +1,77 @@
+[project]
+name = "nixio"
+version = "1.5.4"
+description = "Python reimplementation of NIXIO (http://g-node.github.io/nix/)"
+readme = "README.rst"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Christian Kellner" },
+    { name = "Adrian Stoewer" },
+    { name = "Andrey Sobolev" },
+    { name = "Jan Grewe" },
+    { name = "Balint Morvai" },
+    { name = "Achilleas Koutsou" }
+]
+maintainers = [
+    { name = "Christian Kellner", email = "dev@g-node.org" },
+    { name = "Adrian Stoewer", email = "dev@g-node.org" },
+    { name = "Andrey Sobolev", email = "dev@g-node.org" },
+    { name = "Jan Grewe", email = "dev@g-node.org" },
+    { name = "Balint Morvai", email = "dev@g-node.org" },
+    { name = "Achilleas Koutsou", email = "dev@g-node.org" }
+]
+requires-python = ">=3.6"
+dependencies = [
+    "numpy",
+    "h5py"
+]
+
+[build-system]
+requires = ["setuptools>=78.0.2", "wheel"]
+build-backend = "setuptools.build_meta"
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering"
+]
+
+[project.urls]
+Homepage = "https://github.com/G-Node/nixpy"
+Documentation= "https://nixpy.readthedocs.io/en/latest/install.html"
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "scipy",
+    "pillow",
+    "matplotlib"
+]
+doc = [
+    "sphinx"
+]
+
+[tool.setuptools]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = [
+    "nixio",
+    "nixio.hdf5",
+    "nixio.util",
+    "nixio.exceptions",
+    "nixio.cmd"
+]
+
+[project.scripts]
+nixio = "nixio.cmd.main:main"
+
