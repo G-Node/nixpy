@@ -1,9 +1,13 @@
+[build-system]
+requires = ["setuptools>=78.0.2", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "nixio"
 version = "1.5.4"
 description = "Python reimplementation of NIXIO (http://g-node.github.io/nix/)"
 readme = "README.rst"
-license = { file = "LICENSE" }
+license-files = ["LICENSE"]
 authors = [
     { name = "Christian Kellner" },
     { name = "Adrian Stoewer" },
@@ -20,16 +24,11 @@ maintainers = [
     { name = "Balint Morvai", email = "dev@g-node.org" },
     { name = "Achilleas Koutsou", email = "dev@g-node.org" }
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
-    "numpy >= 1.24.4",
+    "numpy >= 1.26.0",
     "h5py>= 2.0.0"
 ]
-
-[build-system]
-requires = ["setuptools>=75.3.2", "wheel"]
-build-backend = "setuptools.build_meta"
-
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python",
@@ -75,4 +74,3 @@ include = [
 
 [project.scripts]
 nixio = "nixio.cmd.main:main"
-
