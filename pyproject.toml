@@ -44,18 +44,15 @@ Homepage = "https://github.com/G-Node/nixpy"
 Documentation= "https://nixpy.readthedocs.io/en/latest/install.html"
 
 [project.optional-dependencies]
-test = [
+dev = [
+    "coveralls",
     "pytest",
-    "scipy",
+    "pytest-cov",
     "pillow",
-    "matplotlib"
-]
-doc = [
-    "sphinx"
-]
-all = [
-    "nixio[test]",
-    "nixio[doc]"
+    "matplotlib",
+    "scipy",
+    "sphinx",
+    "sphinx_rtd_theme"
 ]
 
 [tool.setuptools]
