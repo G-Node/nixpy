@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=75.3.2", "wheel"]
+requires = ["setuptools>=78.0.2", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -24,15 +24,14 @@ maintainers = [
     { name = "Balint Morvai", email = "dev@g-node.org" },
     { name = "Achilleas Koutsou", email = "dev@g-node.org" }
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
-    "numpy >= 1.24.4",
+    "numpy >= 1.26.0",
     "h5py>= 2.0.0"
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
