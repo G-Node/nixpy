@@ -19,7 +19,7 @@ jobs:
       max-parallel: 4
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12', '3.13']
 
     steps:
     - uses: actions/checkout@v2
@@ -74,7 +74,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python setup.py install
-          pip install pytest scipy pillow matplotlib setuptools
+          pip install pytest scipy pillow matplotlib setuptools h5py
       - name: Run tests
         run: |
           pytest
@@ -91,7 +91,7 @@ jobs:
       - name: Install dependencies
         run: |
           python setup.py install
-          pip install pytest coveralls scipy pillow matplotlib
+          pip install pytest coveralls scipy pillow matplotlib h5py
       - name: Create coverage
         run: |
           coverage run --source=nixio -m pytest nixio/test/
