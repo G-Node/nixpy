@@ -14,8 +14,13 @@ class DataSet:
     Data IO object for DataArray.
     """
 
-    def __array__(self):
-        return self._read_data()[:]
+    def __array__(self, dtype=None, copy=None):
+        data = self._read_data()[:]
+        if dtype is not None:
+            data = data.astype(dtype, copy=False)
+        if copy is True:
+            data = data.copy()
+        return data
 
     def __getitem__(self, index):
         return self._read_data(index)
