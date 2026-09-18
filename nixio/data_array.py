@@ -54,7 +54,7 @@ class DataArray(Entity, DataSet):
         data = np.array(super(DataArray, self)._read_data(sl))
         if not len(data.shape):
             # single value retrieval as length-1 array
-            data.shape = (1,)
+            data = np.reshape(data, (1,))
         if len(coeff) or origin:
             if not origin:
                 origin = 0.0
