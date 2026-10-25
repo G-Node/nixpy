@@ -78,11 +78,11 @@ class TestDimension(unittest.TestCase):
         self.sample_dim.sampling_interval = 1.123
         assert self.sample_dim.sampling_interval == 1.123
 
-        assert self.sample_dim.offset is None
+        assert self.sample_dim.offset == 0.0
         self.sample_dim.offset = 0.3
         assert self.sample_dim.offset == 0.3
         self.sample_dim.offset = None
-        assert self.sample_dim.offset is None
+        assert self.sample_dim.offset == 0.0
 
         self.sample_dim.sampling_interval = 2.
         self.sample_dim.offset = 3.

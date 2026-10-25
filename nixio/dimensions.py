@@ -509,6 +509,8 @@ class SampledDimension(Dimension):
 
     @offset.setter
     def offset(self, offset):
+        if offset is None:
+            offset = 0.0
         util.check_attr_type(offset, Number)
         self._h5group.set_attr("offset", offset)
 

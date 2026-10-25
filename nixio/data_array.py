@@ -97,7 +97,7 @@ class DataArray(Entity, DataSet):
         return setdim
 
     def append_sampled_dimension(self, sampling_interval, label=None,
-                                 unit=None, offset=None):
+                                 unit=None, offset=0.0):
         """
         Append a new SampledDimension to the list of existing dimension
         descriptors.
@@ -116,12 +116,11 @@ class DataArray(Entity, DataSet):
         """
         index = len(self.dimensions) + 1
         smpldim = SampledDimension.create_new(self, index, sampling_interval)
+        smpldim.offset = offset
         if label:
             smpldim.label = label
         if unit:
             smpldim.unit = unit
-        if offset:
-            smpldim.offset = offset
         if self.file.auto_update_timestamps:
             self.force_updated_at()
         return smpldim
