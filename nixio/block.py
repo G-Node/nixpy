@@ -76,8 +76,8 @@ class Block(Entity):
         if copy_from:
             if not isinstance(copy_from, MultiTag):
                 raise TypeError("Object to be copied is not a MultiTag")
-            objid = self._copy_objects(copy_from, "multi_tags", keep_copy_id, name)
-            return self.multi_tags[objid]
+            obj_name = self._copy_objects(copy_from, "multi_tags", keep_copy_id, name)
+            return self.multi_tags[obj_name]
 
         util.check_entity_name_and_type(name, type_)
         multi_tags = self._h5group.open_group("multi_tags")
@@ -140,8 +140,8 @@ class Block(Entity):
         if copy_from:
             if not isinstance(copy_from, Tag):
                 raise TypeError("Object to be copied is not a Tag")
-            objid = self._copy_objects(copy_from, "tags", keep_copy_id, name)
-            return self.tags[objid]
+            obj_name = self._copy_objects(copy_from, "tags", keep_copy_id, name)
+            return self.tags[obj_name]
 
         util.check_entity_name_and_type(name, type_)
         tags = self._h5group.open_group("tags")
@@ -227,8 +227,8 @@ class Block(Entity):
         if copy_from:
             if not isinstance(copy_from, DataArray):
                 raise TypeError("Object to be copied is not a DataArray")
-            objid = self._copy_objects(copy_from, "data_arrays", keep_copy_id, name)
-            return self.data_arrays[objid]
+            obj_name = self._copy_objects(copy_from, "data_arrays", keep_copy_id, name)
+            return self.data_arrays[obj_name]
 
         if data is None:
             if shape is None:
@@ -294,8 +294,8 @@ class Block(Entity):
         if copy_from:
             if not isinstance(copy_from, DataFrame):
                 raise TypeError("Object to be copied is not a DataFrame")
-            objid = self._copy_objects(copy_from, "data_frames", keep_copy_id, name)
-            return self.data_frames[objid]
+            obj_name = self._copy_objects(copy_from, "data_frames", keep_copy_id, name)
+            return self.data_frames[obj_name]
 
         util.check_entity_name_and_type(name, type_)
 
@@ -487,8 +487,9 @@ class Block(Entity):
             raise NameError("Name already exist. Possible solution is to "
                             "provide a new name when copying destination "
                             "is the same as the source parent")
-        obj_copy = obj._parent._h5group.copy(source=src, dest=self._h5group, name=name, cls=clsname, keep_id=keep_id)
-        return obj_copy.attrs["entity_id"]
+        obj._parent._h5group.copy(source=src, dest=self._h5group, name=name,
+                                  cls=clsname, keep_id=keep_id)
+        return name
 
     @property
     def sources(self):

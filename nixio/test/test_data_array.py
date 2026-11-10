@@ -138,7 +138,7 @@ class TestDataArray(unittest.TestCase):
         assert self.array.dtype == np.dtype(float)
         self.array.read_direct(dout)
         assert np.array_equal(data, dout)
-        dout = np.array(self.array)
+        dout = np.asarray(self.array)
         assert np.array_equal(data, dout)
         assert self.array.data_extent == data.shape
         assert self.array.data_extent == self.array.shape

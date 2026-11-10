@@ -187,11 +187,6 @@ class Section(Entity):
         if not isinstance(obj, Section):
             raise TypeError("Object to be copied is not a Section")
 
-        if obj._sec_parent:
-            src = "{}/{}".format("sections", obj.name)
-        else:
-            src = "{}/{}".format("metadata", obj.name)
-
         clsname = "sections"
         if not name:
             name = str(obj.name)
@@ -200,15 +195,16 @@ class Section(Entity):
             raise NameError("Name already exist. Possible solution is to "
                             "provide a new name when copying destination "
                             "is the same as the source parent")
-        sec = obj._parent._h5group.copy(source=src, dest=self._h5group,
-                                        name=name, cls=clsname,
-                                        keep_id=keep_id)
+
+        sec = obj._h5group.copy(source=obj._h5group.group, dest=self._h5group,
+                                name=name, cls=clsname,
+                                shallow=not children, keep_id=keep_id)
 
         if not children:
             for prop in obj.props:
                 self.sections[obj.name].create_property(copy_from=prop, keep_copy_id=keep_id)
 
-        return self.sections[sec.attrs["entity_id"]]
+        return self.sections[name]
 
     @property
     def reference(self):

@@ -279,9 +279,9 @@ class H5Group:
 
     def copy(self, source, dest, name=None, cls=None, shallow=False,
              keep_id=True):
-        grp = self.group
         dest.open_group(cls, create=True)
         dest_grp = dest.group[cls]
+        grp = self.group
         grp.copy(source=source, dest=dest_grp, name=name, shallow=shallow)
 
         grp = dest_grp[name]

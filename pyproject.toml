@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=78.0.2", "wheel"]
+requires = ["setuptools>=78.0.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -27,7 +27,8 @@ maintainers = [
 requires-python = ">=3.9"
 dependencies = [
     "numpy >= 1.26.0",
-    "h5py>= 2.0.0"
+    "h5py>= 3.8.0",
+    "packaging",
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -36,6 +37,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering"
 ]
 
@@ -52,17 +54,16 @@ dev = [
     "matplotlib",
     "scipy",
     "sphinx",
-    "sphinx_rtd_theme"
+    "sphinx_rtd_theme",
 ]
 
 [tool.setuptools]
 include-package-data = true
-zip-safe = false
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = [
-    "nixio",
+    "nixio*",
     "nixio.hdf5",
     "nixio.util",
     "nixio.exceptions",
