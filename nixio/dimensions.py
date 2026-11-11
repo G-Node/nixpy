@@ -344,10 +344,11 @@ class SampledDimension(Dimension):
         super(SampledDimension, self).__init__(nixfile, data_array, index)
 
     @classmethod
-    def create_new(cls, data_array, index, sample):
+    def create_new(cls, data_array, index, sample, offset=0.0):
         newdim = cls(data_array, index)
         newdim._set_dimension_type(DimensionType.Sample)
         newdim.sampling_interval = sample
+        newdim.offset = offset
         return newdim
 
     def position_at(self, index):
@@ -505,10 +506,13 @@ class SampledDimension(Dimension):
 
     @property
     def offset(self):
-        return self._h5group.get_attr("offset")
+        offst = self._h5group.get_attr("offset")
+        return offst if offst is not None else 0.0
 
     @offset.setter
     def offset(self, offset):
+        if offset is None:
+            offset = 0.0
         util.check_attr_type(offset, Number)
         self._h5group.set_attr("offset", offset)
 
